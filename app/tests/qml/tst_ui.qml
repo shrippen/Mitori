@@ -104,6 +104,11 @@ TestCase {
         compare(Practice.level(entry.id), 3)
         compare(picker.value, 3)
         shot("2d-sheet-rated", true)
+        // The grade's bar counts the new rating.
+        const stand = findChild(page, "gradeStand")
+        verify(stand)
+        compare(stand.counts[3], 1)
+        compare(stand.counts[0], stand.ids.length - 1)
         sheet.close()
         tryVerify(() => !sheet.opened)
         shot("2e-programme-rated")
@@ -118,8 +123,25 @@ TestCase {
         const page = push("ProgrammePage")
         wait(500)
         const sheet = findChild(page, "techniqueSheet")
-        const y = window.height - 60
-        mouseClick(window.contentItem, window.width / 3, y - window.contentItem.mapToItem(null, 0, 0).y)
+        const list = findChild(page, "programmeList")
+        // An entry row brought to the bottom edge of the list.
+        const last = page.rows.map(r => r.kind).lastIndexOf("entry")
+        list.positionViewAtIndex(last - 1, ListView.End)
+        wait(300)
+        let lowest = null, lowestY = -1
+        for (const loader of list.contentItem.children) {
+            const row = loader.item
+            if (!row || !loader.visible || !loader.modelData || loader.modelData.kind !== "entry") {
+                continue
+            }
+            const y = row.mapToItem(null, 0, 0).y
+            if (y + row.height <= window.height && y > lowestY) {
+                lowest = row
+                lowestY = y
+            }
+        }
+        verify(lowest && lowestY + lowest.height > window.height - 60, "an entry row at the bottom edge (" + lowestY + ")")
+        mouseClick(lowest, lowest.width / 3, lowest.height / 2)
         tryVerify(() => sheet.opened, 2000, "a tap near the bottom opens the sheet")
         sheet.close()
         tryVerify(() => !sheet.opened)

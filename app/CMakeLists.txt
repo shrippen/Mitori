@@ -42,6 +42,7 @@ qt_add_qml_module(mitori_app
         qml/PlayerPage.qml
         qml/SettingsPage.qml
         qml/RatingRow.qml
+        qml/GradeStand.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp

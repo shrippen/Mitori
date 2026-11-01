@@ -60,35 +60,49 @@ Kirigami.ScrollablePage {
                 }
             }
         }
-
-        KanteHintCard {
-            Layout.fillWidth: true
-            Layout.margins: Kirigami.Units.smallSpacing
-            visible: !page.hasVideo
-            tier: KanteHintCard.Tier.Blue
-            titleText: qsTr("Exam videos")
-            text: !page.hasPositions
-                  ? qsTr("There is no video for this grade.")
-                  : qsTr("The videos are on the DVDs of the Shinkiryu association. Until Mitori can load them with the DVD's code, put them into the video folder (settings).")
-
-            KanteButton {
-                visible: page.hasPositions
-                text: qsTr("Video folder")
-                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
-            }
-            KanteButton {
-                visible: page.hasPositions
-                text: qsTr("Order on shinkiryu.de")
-                onClicked: Qt.openUrlExternally("https://www.shinkiryu.de/shinkiryu/de/DVD.php")
-            }
-        }
     }
 
     ListView {
         id: list
 
+        objectName: "programmeList"
         model: page.rows
         reuseItems: true
+
+        // Scrolls with the list, so a small screen keeps room for the techniques.
+        header: ColumnLayout {
+            width: ListView.view.width
+            spacing: Kirigami.Units.smallSpacing
+
+            GradeStand {
+                objectName: "gradeStand"
+                Layout.fillWidth: true
+                Layout.margins: Kirigami.Units.smallSpacing
+                entries: page.rows
+            }
+
+            KanteHintCard {
+                Layout.fillWidth: true
+                Layout.margins: Kirigami.Units.smallSpacing
+                visible: !page.hasVideo
+                tier: KanteHintCard.Tier.Blue
+                titleText: qsTr("Exam videos")
+                text: !page.hasPositions
+                      ? qsTr("There is no video for this grade.")
+                      : qsTr("The videos are on the DVDs of the Shinkiryu association. Until Mitori can load them with the DVD's code, put them into the video folder (settings).")
+
+                KanteButton {
+                    visible: page.hasPositions
+                    text: qsTr("Video folder")
+                    onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
+                }
+                KanteButton {
+                    visible: page.hasPositions
+                    text: qsTr("Order on shinkiryu.de")
+                    onClicked: Qt.openUrlExternally("https://www.shinkiryu.de/shinkiryu/de/DVD.php")
+                }
+            }
+        }
 
         delegate: Loader {
             id: rowLoader
@@ -154,6 +168,7 @@ Kirigami.ScrollablePage {
                             visible: entryItem.entry.kind === "entry"
                             value: Practice.revision >= 0 ? Practice.level(entryItem.entry.id) : 0
                             names: Practice.levelNames
+                            color: KanteStyle.levelColor(value)     // as in the grade's bar and legend
                         }
                         KanteToolButton {
                             visible: entryItem.playable

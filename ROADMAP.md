@@ -24,8 +24,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Offen: Gesten für Helligkeit und Lautstärke (Plattform-Schicht), Tablet-Ansicht (Liste und Player auf
   einer Seite), Test auf dem Telefon.
 - Schritt 2: Einschätzen 1–4 im Technik-Blatt und im Player (Übungsprotokoll in SQLite, jede Einschätzung ein
-  Eintrag mit Zeit und Gerät), Stand als vier Punkte in der Programmliste. Offen: Stand je Grad (Leiste mit
-  Legende), Notizen mit Fotos und Sprachnotizen, Heute üben, Training, Statistik, Suche.
+  Eintrag mit Zeit und Gerät), Stand als vier Punkte in der Programmliste, Stand je Grad als Leiste mit Legende.
+  Offen: Notizen mit Fotos und Sprachnotizen, Heute üben, Training, Statistik, Suche.
 
 ## Kante-Bedarf
 
