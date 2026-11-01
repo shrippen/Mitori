@@ -124,20 +124,23 @@ TestCase {
         wait(500)
         const sheet = findChild(page, "techniqueSheet")
         const list = findChild(page, "programmeList")
-        // The lowest entry row that lies wholly in the window.
+        // An entry row brought to the bottom edge of the list.
+        const last = page.rows.map(r => r.kind).lastIndexOf("entry")
+        list.positionViewAtIndex(last - 1, ListView.End)
+        wait(300)
         let lowest = null, lowestY = -1
         for (const loader of list.contentItem.children) {
             const row = loader.item
-            if (!row || !loader.modelData || loader.modelData.kind !== "entry") {
+            if (!row || !loader.visible || !loader.modelData || loader.modelData.kind !== "entry") {
                 continue
             }
             const y = row.mapToItem(null, 0, 0).y
-            if (y + row.height < window.height - 4 && y > lowestY) {
+            if (y + row.height <= window.height && y > lowestY) {
                 lowest = row
                 lowestY = y
             }
         }
-        verify(lowest && lowestY > window.height - 200, "a row near the bottom (" + lowestY + ")")
+        verify(lowest && lowestY + lowest.height > window.height - 60, "an entry row at the bottom edge (" + lowestY + ")")
         mouseClick(lowest, lowest.width / 3, lowest.height / 2)
         tryVerify(() => sheet.opened, 2000, "a tap near the bottom opens the sheet")
         sheet.close()

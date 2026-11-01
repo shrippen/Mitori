@@ -4,7 +4,7 @@ import Kante
 import Mitori
 
 // How well a grade sits: how many of its techniques stand at each rating, as one bar with a
-// legend (strongest first), and the number of techniques.
+// legend (strongest first, then not rated).
 ColumnLayout {
     id: stand
 
