@@ -24,10 +24,12 @@ TestCase {
         window.destroy()
     }
 
-    function shot(name) {
+    // The page stack, or with `whole` the window with its overlay (dialogs, sheets).
+    function shot(name, whole) {
         wait(800)       // Kirigami slides pages in
         let done = false
-        window.pageStack.grabToImage(result => {
+        const item = whole ? window.overlay.parent : window.pageStack
+        item.grabToImage(result => {
             result.saveToFile(uiShotsDir + "/" + name + ".png")
             done = true
         })
@@ -72,9 +74,73 @@ TestCase {
         verify(sheet)
         tryVerify(() => sheet.opened)
         compare(sheet.entry.id, entry.id)
-        shot("2b-sheet")
+        shot("2b-sheet", true)
         sheet.close()
         window.pageStack.pop()
+    }
+
+    // Rating in the sheet: the list row shows the level as dots, the sheet the last rating.
+    function test_2d_rate_in_sheet() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        const entry = page.rows.find(r => r.kind === "entry")
+        compare(Practice.level(entry.id), 0)
+        page.open(entry)
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        const picker = findPicker(window.overlay, entry.id)
+        verify(picker, "the sheet has the level picker for its entry")
+        // The sheet shows its content, not only its title: the picker lies inside it, visibly.
+        wait(300)
+        verify(picker.height > 0 && picker.width > 0, "picker has a size")
+        const at = picker.mapToItem(null, 0, 0)
+        const box = sheet.background.mapToItem(null, 0, 0)
+        verify(at.y >= box.y && at.y + picker.height <= box.y + sheet.background.height,
+               "picker within the sheet (" + at.y + " + " + picker.height + " outside " + box.y + " + " + sheet.background.height + ")")
+        wait(500)       // the sheet slides in
+        mouseClick(picker, picker.width * 5 / 8, picker.height / 2)     // the third of four buttons
+        tryCompare(Practice, "revision", 1)
+        compare(Practice.level(entry.id), 3)
+        compare(picker.value, 3)
+        shot("2d-sheet-rated", true)
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        shot("2e-programme-rated")
+        window.pageStack.pop()
+    }
+
+    // A row near the bottom of the window opens its sheet too (Kirigami keeps its notification
+    // area in the overlay there; it must not swallow the taps).
+    function test_2f_tap_row_at_bottom() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        wait(500)
+        const sheet = findChild(page, "techniqueSheet")
+        const y = window.height - 60
+        mouseClick(window.contentItem, window.width / 3, y - window.contentItem.mapToItem(null, 0, 0).y)
+        tryVerify(() => sheet.opened, 2000, "a tap near the bottom opens the sheet")
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        window.pageStack.pop()
+    }
+
+    // The visible level picker of an entry (in the overlay: sheets of earlier pages may linger).
+    function findPicker(item, id) {
+        if (!item) {
+            return null
+        }
+        if (item.picked !== undefined && item.focusLevel !== undefined && item.parent.entry === id && item.visible) {
+            return item
+        }
+        for (let i = 0; i < item.children.length; i++) {
+            const found = findPicker(item.children[i], id)
+            if (found) {
+                return found
+            }
+        }
+        return null
     }
 
     // Entering the video folder in the settings: the list behind them shows the videos at once.
@@ -124,6 +190,18 @@ TestCase {
         window.height = 420
         wait(500)
         shot("6-player-landscape")
+        // A phone held sideways: the controls scroll, and Back can be reached.
+        window.width = 800
+        window.height = 360
+        wait(500)
+        const view = findChild(page, "controlsView")
+        const back = findChild(page, "backButton")
+        verify(view && back)
+        verify(back.visible)
+        view.contentY = Math.max(0, view.contentHeight - view.height)
+        wait(100)
+        const at = back.mapToItem(view, 0, 0)
+        verify(at.y >= 0 && at.y + back.height <= view.height + 1, "Back in view after scrolling (" + at.y + ", " + view.height + ")")
         window.width = 420
         window.height = 800
         window.pageStack.pop()

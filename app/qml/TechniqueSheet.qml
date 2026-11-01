@@ -3,9 +3,10 @@ import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Kante
+import Mitori
 
-// Technique sheet (clickdummy "Programm", row tapped): name, attack, kanji, and the way on to
-// the video and the comment. Rating and notes come with step 2 (ROADMAP.md).
+// Technique sheet (clickdummy "Programm", row tapped): name, attack, kanji, how well it sits
+// (rate 1–4), and the way on to the video and the comment. Notes come later in step 2.
 Kirigami.Dialog {
     id: sheet
 
@@ -21,7 +22,8 @@ Kirigami.Dialog {
     preferredWidth: Kirigami.Units.gridUnit * 24
     padding: Kirigami.Units.largeSpacing
 
-    KanteScope { target: sheet.contentItem }
+    // Not a content child: the dialog's scroll view sizes itself by its only child, the column.
+    property Item kanteScope: KanteScope { target: sheet.contentItem }
 
     ColumnLayout {
         spacing: Kirigami.Units.smallSpacing
@@ -44,6 +46,11 @@ Kirigami.Dialog {
             visible: !!sheet.entry.extra
             text: sheet.entry.extra || ""
             wrapMode: Text.Wrap
+        }
+        RatingRow {
+            Layout.fillWidth: true
+            Layout.topMargin: Kirigami.Units.largeSpacing
+            entry: sheet.entry.id || ""
         }
         RowLayout {
             Layout.topMargin: Kirigami.Units.largeSpacing

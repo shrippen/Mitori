@@ -177,93 +177,110 @@ Kirigami.Page {
             }
         }
 
-        ColumnLayout {
+        // The controls scroll when they do not fit (a phone held sideways: rating and Back).
+        Flickable {
+            id: controlsView
+
+            objectName: "controlsView"
             Layout.fillWidth: !page.landscape
             Layout.fillHeight: true             // portrait: the picture stays at the top
             Layout.preferredWidth: page.landscape ? Kirigami.Units.gridUnit * 17 : -1     // room for the tempo row
-            Layout.margins: Kirigami.Units.largeSpacing
-            spacing: Kirigami.Units.largeSpacing
+            contentHeight: controls.implicitHeight + Kirigami.Units.largeSpacing * 2
+            boundsBehavior: Flickable.StopAtBounds
+            clip: true
+            QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
 
-            QQC2.Label {
-                Layout.fillWidth: true
-                visible: !page.landscape && !!page.current.attack
-                text: page.current.attack || ""
-                color: KanteStyle.disabledTextColor
-                wrapMode: Text.Wrap
-            }
+            ColumnLayout {
+                id: controls
 
-            QQC2.Slider {
-                id: timeline
+                x: Kirigami.Units.largeSpacing
+                y: Kirigami.Units.largeSpacing
+                width: controlsView.width - Kirigami.Units.largeSpacing * 2
+                spacing: Kirigami.Units.largeSpacing
 
-                Layout.fillWidth: true
-                from: page.from
-                to: page.to > page.from ? page.to : page.from + 1
-                value: player.position
-                onMoved: player.position = value
-                Accessible.name: qsTr("Position")
-
-                KanteSliderSkin { control: timeline }
-            }
-
-            KanteTransportBar {
-                id: transport
-
-                Layout.fillWidth: true
-                Layout.preferredWidth: 0        // wraps in the column instead of widening it
-                playing: player.playing
-                looping: page.looping
-                speed: player.playbackRate
-                speedSteps: page.tempi
-                metronomeVisible: false
-                countInVisible: false
-                frameStep: true
-                positionText: page.timeText(player.position - page.from) + " / " + page.timeText(page.to - page.from)
-                rewindText: qsTr("Chapter start")
-                playText: qsTr("Play")
-                pauseText: qsTr("Pause")
-                loopText: qsTr("Loop")
-                speedText: qsTr("Tempo")
-                frameBackText: qsTr("Frame back")
-                frameOnText: qsTr("Frame on")
-                positionName: qsTr("Position")
-                accessibleName: qsTr("Playback")
-                onPlayToggled: page.togglePlay()
-                onLoopToggled: page.looping = !page.looping
-                onSpeedChangeRequested: speed => player.playbackRate = speed
-                onRewind: player.position = page.from
-                onFrameStepRequested: direction => page.step(direction)
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                visible: !page.landscape
-
-                KanteToolButton {
-                    enabled: page.index > 0
-                    icon.name: "media-skip-backward"
-                    text: qsTr("Previous technique")
-                    onClicked: page.go(-1)
-                }
-                Item {
+                QQC2.Label {
                     Layout.fillWidth: true
+                    visible: !page.landscape && !!page.current.attack
+                    text: page.current.attack || ""
+                    color: KanteStyle.disabledTextColor
+                    wrapMode: Text.Wrap
                 }
+
+                QQC2.Slider {
+                    id: timeline
+
+                    Layout.fillWidth: true
+                    from: page.from
+                    to: page.to > page.from ? page.to : page.from + 1
+                    value: player.position
+                    onMoved: player.position = value
+                    Accessible.name: qsTr("Position")
+
+                    KanteSliderSkin { control: timeline }
+                }
+
+                KanteTransportBar {
+                    id: transport
+
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 0        // wraps in the column instead of widening it
+                    playing: player.playing
+                    looping: page.looping
+                    speed: player.playbackRate
+                    speedSteps: page.tempi
+                    metronomeVisible: false
+                    countInVisible: false
+                    frameStep: true
+                    positionText: page.timeText(player.position - page.from) + " / " + page.timeText(page.to - page.from)
+                    rewindText: qsTr("Chapter start")
+                    playText: qsTr("Play")
+                    pauseText: qsTr("Pause")
+                    loopText: qsTr("Loop")
+                    speedText: qsTr("Tempo")
+                    frameBackText: qsTr("Frame back")
+                    frameOnText: qsTr("Frame on")
+                    positionName: qsTr("Position")
+                    accessibleName: qsTr("Playback")
+                    onPlayToggled: page.togglePlay()
+                    onLoopToggled: page.looping = !page.looping
+                    onSpeedChangeRequested: speed => player.playbackRate = speed
+                    onRewind: player.position = page.from
+                    onFrameStepRequested: direction => page.step(direction)
+                }
+
+                RatingRow {
+                    Layout.fillWidth: true
+                    entry: page.current.id || ""
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    visible: !page.landscape
+
+                    KanteToolButton {
+                        enabled: page.index > 0
+                        icon.name: "media-skip-backward"
+                        text: qsTr("Previous technique")
+                        onClicked: page.go(-1)
+                    }
+                    Item {
+                        Layout.fillWidth: true
+                    }
+                    KanteToolButton {
+                        enabled: page.index < page.playlist.length - 1
+                        icon.name: "media-skip-forward"
+                        text: qsTr("Next technique")
+                        onClicked: page.go(1)
+                    }
+                }
+
                 KanteToolButton {
-                    enabled: page.index < page.playlist.length - 1
-                    icon.name: "media-skip-forward"
-                    text: qsTr("Next technique")
-                    onClicked: page.go(1)
+                    objectName: "backButton"
+                    visible: page.landscape
+                    icon.name: "go-previous-view"
+                    text: qsTr("Back")
+                    onClicked: page.Kirigami.PageStack.pop()
                 }
-            }
-
-            KanteToolButton {
-                visible: page.landscape
-                icon.name: "go-previous-view"
-                text: qsTr("Back")
-                onClicked: page.Kirigami.PageStack.pop()
-            }
-
-            Item {
-                Layout.fillHeight: true
             }
         }
     }

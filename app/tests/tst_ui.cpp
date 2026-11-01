@@ -1,10 +1,13 @@
 #include <QDir>
+#include <QFile>
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuickTest>
+
+#include "practice.h"
 
 Q_IMPORT_QML_PLUGIN(MitoriPlugin)
 
@@ -20,6 +23,7 @@ public slots:
         // Every run starts from the defaults (the video folder from MITORI_VIDEOS, not from the
         // setting a test wrote last time).
         QSettings().clear();
+        QFile::remove(Practice::defaultPath());
     }
 
     void qmlEngineAvailable(QQmlEngine *engine)
