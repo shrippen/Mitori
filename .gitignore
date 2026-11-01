@@ -1,0 +1,28 @@
+# Videos des Verbands kommen nie ins Repo (auch nicht verschlüsselt)
+*.mkv
+*.mp4
+*.webm
+*.m4v
+entwuerfe/clickdummy/video/
+
+# Erzeugt
+build/
+heft/build/
+entwuerfe/clickdummy/daten.js
+dist/
+app/build*/
+.flatpak-builder/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+
+# Schlüssel und Codes der Bundles liegen außerhalb des Repos
+*.keystore
+*.jks
+bundle-geheim/
+
+*~
+*.swp
+.idea/
+.vscode/
+aqtinstall.log
