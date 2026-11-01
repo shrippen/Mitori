@@ -207,6 +207,26 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // The transport bar's keys work right after opening; Space and the arrows stay single.
+    function test_5e_keys_without_click() {
+        const page = playerAt(0)
+        page.forceActiveFocus()
+        keyClick(Qt.Key_K)
+        tryVerify(() => !page.playing)
+        keyClick(Qt.Key_Minus)
+        compare(page.rate, 0.75)
+        keyClick(Qt.Key_Space)
+        tryVerify(() => page.playing)
+        wait(300)
+        verify(page.playing, "Space toggles once")
+        keyClick(Qt.Key_K)
+        tryVerify(() => !page.playing)
+        const before = page.position
+        keyClick(Qt.Key_Right)
+        tryVerify(() => page.position >= before + page.frameMs - 5, 3000)
+        window.pageStack.pop()
+    }
+
     // The last chapter ends with the file; the loop must still start over at the chapter.
     function test_6_loop_at_end_of_file() {
         const page = playerAt(-1)

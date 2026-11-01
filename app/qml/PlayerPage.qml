@@ -35,6 +35,7 @@ Kirigami.Page {
     readonly property alias position: player.position
     readonly property alias playing: player.playing
     readonly property alias duration: player.duration
+    readonly property alias rate: player.playbackRate
 
     // The entry on screen, for the programme list to mark it when the user comes back.
     signal shown(string id)
@@ -113,6 +114,9 @@ Kirigami.Page {
         }
     }
 
+    // The bar's keys (K, L, Home, + −, , .) work as soon as the player opens, not only after a
+    // click into the bar; it lets Space and the arrows through to the handlers below.
+    Keys.forwardTo: [transport]
     Keys.onSpacePressed: page.togglePlay()
     Keys.onLeftPressed: page.step(-1)
     Keys.onRightPressed: page.step(1)
@@ -202,6 +206,8 @@ Kirigami.Page {
             }
 
             KanteTransportBar {
+                id: transport
+
                 Layout.fillWidth: true
                 Layout.preferredWidth: 0        // wraps in the column instead of widening it
                 playing: player.playing
