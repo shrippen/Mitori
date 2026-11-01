@@ -1,0 +1,28 @@
+name: Android build setup
+description: Java, the libraries Qt's host tools need, PyYAML for tools/daten.py, and the Android SDK packages for scripts/build-android.sh
+
+runs:
+  using: composite
+  steps:
+    - name: Install Java (for Gradle)
+      uses: actions/setup-java@v6
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    # Qt's host tools (qsb for Kirigami's shaders) need the GL libraries a desktop has.
+    - name: Install host libraries for Qt tools
+      shell: bash
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -y -q libegl1 libgl1 libopengl0 libxkbcommon0 libfontconfig1 python3-yaml ninja-build > /dev/null
+
+    # The runner ships an Android SDK with sdkmanager; add what the build needs.
+    - name: Install Android SDK packages
+      shell: bash
+      run: |
+        # Composite steps run with pipefail: yes ends with SIGPIPE once all licences are accepted.
+        (yes || true) | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
+        "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
+          "ndk;27.2.12479018" "platforms;android-36" "build-tools;36.0.0" > /dev/null
+        # app/CMakeLists.txt pins compile SDK 36 and build-tools 36.0.0 (the runner has newer ones too).

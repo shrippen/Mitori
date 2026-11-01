@@ -1,0 +1,190 @@
+name: Release
+
+# A tag v* reaches GitHub through the Gitea push mirror; the Gitea release (notes only) is made
+# there with tea. Here the GitHub release is created with the same notes (scripts/release-notes.sh)
+# and the files are built and attached: the signed APK, the AppImage and the Flatpak bundle
+# (agent.md, "Release rule"). Each package is checked for demo code first (scripts/check-no-demo.sh).
+#
+# Run by hand (workflow_dispatch):
+#   - without `tag`: builds everything as a test, no release (the APK is signed and checked
+#     when the keystore secrets are set);
+#   - with `tag` (e.g. v0.1.0): builds that tag and attaches the files to its existing release.
+#
+# Secrets: MITORI_KEYSTORE_B64 (the keystore, base64), MITORI_KEYSTORE_PASSWORD, MITORI_KEY_ALIAS,
+# MITORI_KEY_PASSWORD.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to attach the files to (empty: test build only)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Version
+        id: version
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          TAG=""
+          [ "$GITHUB_REF_TYPE" = "tag" ] && TAG="$GITHUB_REF_NAME"
+          [ -n "$INPUT_TAG" ] && TAG="$INPUT_TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if [ -n "$TAG" ]; then
+            echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=test" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.version.outputs.tag || github.ref }}
+
+      # The tag names the files; app/CMakeLists.txt names the app inside them. Both must agree.
+      - name: Tag matches the app version
+        if: steps.version.outputs.tag != ''
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          app=$(sed -n 's/^project(mitori VERSION \([0-9.]*\).*/\1/p' app/CMakeLists.txt)
+          [ "$app" = "$VERSION" ] || { echo "::error::tag $VERSION, app/CMakeLists.txt $app (release rule, step 1)"; exit 1; }
+
+      - name: GitHub release
+        if: steps.version.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release view "$TAG" > /dev/null 2>&1 && exit 0
+          # Fails without a section "## [X.Y.Z] — YYYY-MM-DD" or with an empty one.
+          ./scripts/release-notes.sh "$VERSION" > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" --title "Mitori $VERSION" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag
+
+  apk:
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release.outputs.tag || github.ref }}
+
+      - uses: ./.github/actions/android-setup
+
+      # A release needs the key; a test run signs only when the secrets are set.
+      - name: Keystore
+        id: keystore
+        env:
+          MITORI_KEYSTORE_B64: ${{ secrets.MITORI_KEYSTORE_B64 }}
+          IS_RELEASE: ${{ needs.release.outputs.tag != '' }}
+        run: |
+          if [ -z "$MITORI_KEYSTORE_B64" ]; then
+            [ "$IS_RELEASE" != "true" ] || { echo "::error::Secret MITORI_KEYSTORE_B64 is missing"; exit 1; }
+            echo "No keystore secret: unsigned test build."
+            exit 0
+          fi
+          echo "$MITORI_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/mitori-release.jks"
+          echo "MITORI_KEYSTORE_PATH=$RUNNER_TEMP/mitori-release.jks" >> "$GITHUB_ENV"
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build release APK
+        env:
+          MITORI_VERBOSE: 1
+          MITORI_KEYSTORE_PASSWORD: ${{ secrets.MITORI_KEYSTORE_PASSWORD }}
+          MITORI_KEY_ALIAS: ${{ secrets.MITORI_KEY_ALIAS }}
+          MITORI_KEY_PASSWORD: ${{ secrets.MITORI_KEY_PASSWORD }}
+        run: |
+          ./scripts/build-android.sh release
+          mkdir -p assets
+          mv dist/android/mitori-release.apk "assets/Mitori-${{ needs.release.outputs.version }}.apk"
+
+      - name: No demo in the APK
+        run: |
+          unzip -q assets/*.apk -d "$RUNNER_TEMP/apk"
+          scripts/check-no-demo.sh "$RUNNER_TEMP/apk"
+
+      - name: Check signature
+        if: steps.keystore.outputs.signed == 'true'
+        run: |
+          "$ANDROID_SDK_ROOT/build-tools/36.0.0/apksigner" verify --print-certs assets/*.apk
+
+      - uses: ./.github/actions/release-asset
+        with:
+          tag: ${{ needs.release.outputs.tag }}
+          name: apk
+
+  appimage:
+    needs: release
+    # The oldest supported runner: the AppImage runs where its glibc is at least this old.
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release.outputs.tag || github.ref }}
+
+      - name: Build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q ninja-build python3-yaml libgl1-mesa-dev libegl1-mesa-dev \
+            libxkbcommon-dev libxkbcommon-x11-0 libfontconfig1 libxcb-cursor0 libxcb-icccm4 libxcb-image0 \
+            libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1 libxcb-shape0 libwayland-client0 \
+            libwayland-cursor0 libwayland-egl1 libdbus-1-3 file > /dev/null
+
+      - name: Build AppImage
+        env:
+          MITORI_VERBOSE: 1
+        run: |
+          ./scripts/build-appimage.sh
+          mkdir -p assets && mv dist/appimage/*.AppImage assets/
+
+      - name: No demo in the AppImage
+        run: |
+          cd "$RUNNER_TEMP" && "$GITHUB_WORKSPACE"/assets/*.AppImage --appimage-extract > /dev/null
+          "$GITHUB_WORKSPACE/scripts/check-no-demo.sh" "$RUNNER_TEMP/squashfs-root"
+
+      - uses: ./.github/actions/release-asset
+        with:
+          tag: ${{ needs.release.outputs.tag }}
+          name: appimage
+
+  flatpak:
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release.outputs.tag || github.ref }}
+
+      - name: Install flatpak-builder
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q flatpak flatpak-builder > /dev/null
+
+      # The same script as locally (scripts/build-all.sh); also checks for demo code.
+      - name: Build Flatpak bundle
+        env:
+          MITORI_FLATPAK_WORK: ${{ runner.temp }}/flatpak
+        run: |
+          scripts/build-flatpak.sh "${{ needs.release.outputs.version }}"
+          mkdir -p assets && mv dist/flatpak/*.flatpak assets/
+
+      - uses: ./.github/actions/release-asset
+        with:
+          tag: ${{ needs.release.outputs.tag }}
+          name: flatpak

@@ -1,0 +1,118 @@
+name: Checks
+
+# The checks of every commit (the same as scripts/check.sh):
+#   data      tools/daten.py, pytest, the generated YAML up to date, CHANGELOG.md headings
+#   app       the app with its C++ tests on Linux, qmllint (reports, does not block)
+# Local only: the booklet (heft/build.sh, LuaLaTeX with the Japanese fonts) and anything with the
+# videos, which never enter the repository.
+#
+# Arch Linux container: current Qt 6 and KF6 (Kirigami) as packages, as on the developer machine.
+
+# Public mirror: Gitea pushes every branch and tag here on each commit.
+# This runs the checks and reports them back to the commit on Gitea as
+# the status "github / test", where the pull requests live. There are no
+# pull requests on GitHub, so everything runs on push.
+#
+# Needs the secret GITEA_TOKEN: a Gitea token with write access to the
+# repository (commit statuses).
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+# No concurrency group: every commit runs to the end and keeps its own
+# status, a newer push does not cancel an older run.
+
+env:
+  GITEA_STATUS: https://git.arianw.de/api/v1/repos/shrippen/Mitori/statuses/${{ github.sha }}
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+jobs:
+  test:
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    timeout-minutes: 30
+    outputs:
+      started: ${{ steps.start.outputs.t }}
+    steps:
+      # A missing status is no reason to fail the checks.
+      - id: start
+        name: Report pending to Gitea
+        run: |
+          echo "t=$(date +%s)" >> "$GITHUB_OUTPUT"
+          curl -fsS -X POST "$GITEA_STATUS" \
+            -H "Authorization: token $GITEA_TOKEN" -H "Content-Type: application/json" \
+            -d "{\"state\":\"pending\",\"context\":\"github / test\",\"description\":\"running\",\"target_url\":\"$RUN_URL\"}" \
+            || echo "::warning::Gitea status not reported"
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+
+      - name: Install Python, Qt, Kirigami, build tools
+        run: |
+          pacman -Syu --noconfirm --needed git python python-yaml python-pytest poppler poppler-data \
+            base-devel cmake ninja extra-cmake-modules qt6-declarative qt6-shadertools qt6-tools kirigami
+
+      - uses: actions/checkout@v7
+
+      # Release headings "## [X.Y.Z] — YYYY-MM-DD": a wrong one shows up here, not at the tag.
+      - name: CHANGELOG.md headings
+        run: scripts/release-notes.sh --check
+
+      - name: Programme data
+        run: python3 tools/daten.py
+
+      - name: pytest
+        run: python3 -m pytest -q tests
+
+      # daten/shinki-toho-kommentare.yaml and daten/lexikon.yaml come from the PDFs in quellen/
+      # (poppler-data: the CJK tables pdftotext needs for the Japanese column of the lexicon):
+      # a hand edit or a changed tool without a new run shows up as a diff.
+      - name: Generated data up to date
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          python3 tools/kommentare.py
+          python3 tools/lexikon.py
+          git diff --exit-code -- daten/
+
+      - name: Build the app and its C++ tests
+        run: |
+          cmake -S app -B build-app -G Ninja -DCMAKE_BUILD_TYPE=Release -DMITORI_BUILD_TESTS=ON
+          cmake --build build-app
+          QT_QPA_PLATFORM=offscreen ctest --test-dir build-app --output-on-failure
+
+      # What is off and why: scripts/qmllint.sh. Reports without blocking: the container is the
+      # latest Arch, a Qt update can bring new warning categories at any time.
+      - name: qmllint (reports, does not block)
+        continue-on-error: true
+        env:
+          MITORI_BUILD: build-app
+        run: scripts/qmllint.sh || { echo "::warning::qmllint has findings (see this step)"; exit 1; }
+
+  # Also runs when a check failed or was cancelled, so Gitea never keeps a
+  # stale "pending". Success only when all checks passed.
+  report:
+    needs: [test]
+    if: always()
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report result to Gitea
+        run: |
+          state=success
+          for r in $RESULTS; do
+            case "$r" in
+              success) ;;
+              failure) state=failure ;;
+              *) [ "$state" = failure ] || state=error ;;
+            esac
+          done
+          desc=$state
+          if [ -n "$STARTED" ]; then desc="$state in $(( ($(date +%s) - STARTED) / 60 )) min"; fi
+          curl -fsS -X POST "$GITEA_STATUS" \
+            -H "Authorization: token $GITEA_TOKEN" -H "Content-Type: application/json" \
+            -d "{\"state\":\"$state\",\"context\":\"github / test\",\"description\":\"$desc\",\"target_url\":\"$RUN_URL\"}"
+        env:
+          RESULTS: ${{ needs.test.result }}
+          STARTED: ${{ needs.test.outputs.started }}
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}

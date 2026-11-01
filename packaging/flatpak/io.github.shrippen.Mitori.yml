@@ -1,0 +1,55 @@
+# Flatpak manifest for Mitori (app/). Built locally and in .github/workflows/release.yml, which
+# attaches the .flatpak bundle to every GitHub release. Flathub comes later.
+#
+# Build: flatpak-builder --user --install --force-clean build-dir packaging/flatpak/io.github.shrippen.Mitori.yml
+# Run:   flatpak run io.github.shrippen.Mitori
+
+app-id: io.github.shrippen.Mitori
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+command: mitori
+
+finish-args:
+  - --share=network        # video bundles, calendar, WebDAV sync
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  - --socket=pulseaudio    # video sound
+
+modules:
+  # tools/daten.py (run by the build) reads daten/*.yaml; build time only.
+  - name: pyyaml
+    buildsystem: simple
+    cleanup: ['*']
+    build-commands:
+      - pip3 install --no-index --no-deps --no-build-isolation --prefix=/app .
+    sources:
+      - type: archive
+        url: https://files.pythonhosted.org/packages/source/p/pyyaml/pyyaml-6.0.3.tar.gz
+        sha256: d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f
+
+  - name: mitori
+    buildsystem: cmake-ninja
+    # The build reads daten/, tools/ and KORREKTUREN.md, so the whole repo is the source.
+    subdir: app
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+    build-options:
+      env:
+        PYTHONPATH: /app/lib/python3.13/site-packages
+    sources:
+      - type: dir
+        path: ../..
+        skip:
+          - .git
+          - dist
+          - build
+          - app/build
+          - app/build-android
+          - .flatpak-builder
+    post-install:
+      - install -Dm644 /run/build/mitori/packaging/linux/io.github.shrippen.Mitori.desktop /app/share/applications/io.github.shrippen.Mitori.desktop
+      - install -Dm644 /run/build/mitori/packaging/linux/io.github.shrippen.Mitori.metainfo.xml /app/share/metainfo/io.github.shrippen.Mitori.metainfo.xml
+      - install -Dm644 /run/build/mitori/packaging/linux/io.github.shrippen.Mitori.svg /app/share/icons/hicolor/scalable/apps/io.github.shrippen.Mitori.svg

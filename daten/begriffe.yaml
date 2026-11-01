@@ -1,0 +1,139 @@
+# Japanische Schreibweise aller Begriffe, jeder Begriff genau einmal.
+#
+# Aikido: Kanji aus den Listen unseres Sensei (quellen/aikido/Kyu-Techniken.doc,
+# quellen/aikido/Dan-Techniken.doc), gelten als gesichert. Wo die Listen einen Begriff
+# verschieden schreiben, steht hier eine Form und die Frage in KORREKTUREN.md.
+#
+# Schlüssel: der Name, wie er in den Programmdaten steht. Groß-/Kleinschreibung,
+# Bindestriche und Längenzeichen (ô, û) spielen beim Nachschlagen keine Rolle:
+# "Kiri-otoshi", "Kiriotoshi" und "kiri otoshi" finden denselben Eintrag.
+
+# Gliederung
+Kata: 型
+Ukemi: 受身
+Tachi-waza: 立技
+Suwari-waza: 座り技
+Hanmi-handachi: 半身半立
+Mae-seme: 前攻め
+Ushiro-seme: 後ろ攻め
+Sonstige Techniken: その他の技
+
+# Angriffe
+Katate-katate-dori: 片手片手取り
+Ai-hanmi: 合半身  # Dan-Liste: 愛半身, siehe A-D-01
+Gyaku-hanmi: 逆半身
+Katate-muna-dori: 片手胸取り
+Katate-kata-dori: 片手肩取り
+Ryote-katate-dori: 両手片手取り
+Morote-dori: 諸手取り
+Ryote-ryote-dori: 両手両手取り
+Ryote-muna-dori: 両手胸取り
+Mune-ude-dori: 胸腕取り
+Shomen-uchi: 正面打ち
+Yokomen-uchi: 横面打ち
+Tsuki: 突き
+Eri-dori: 襟取り
+Kubi-jime: 首締め
+Ryote-dori: 両手取り
+Ryo-kata-dori: 両肩取り
+diagonal: 斜めの攻め
+gerade: 真っ直ぐの攻め
+Futari-gake: 二人掛け
+Tanto-dori: 短刀取り
+Uchioroshi: 打ち下ろし
+Tachi-dori: 太刀取り
+
+# Kata
+Kamae-undo: 構え運動
+Tachi-suburi 1: 太刀素振り１
+Tachi-suburi 2: 太刀素振り２
+Jo-suburi 1: 杖素振り１
+Jo-suburi 2: 杖素振り２
+Tachi-kata: 太刀形
+Jo-kata: 杖形
+Tenchi: 天地
+Kogarashi: 木枯らし
+Shunpu: 春風
+
+# Ukemi
+Mae-kaiten: 前回転
+Ushiro-kaiten: 後回転
+Yoko-kaiten: 横回転
+Mae-fuse: 前伏せ
+Ushiro-hineri: 後捻り
+Yoko-suberi: 横滑り
+Mae-sasae-tobi: 前支え跳び
+Yoko-tobi: 横跳び
+Ushiro-tobi: 後跳び
+Mae-tobi: 前跳び
+
+# Techniken
+Ikkyo: 一教
+Nikyo: 二教
+Sankyo: 三教
+Yonkyo: 四教
+Gokyo: 五教
+Uchi-sankyo: 内三教
+Ryo-nikyo: 両二教
+Shiho-nage: 四方投げ
+Shiho-gaeshi: 四方投げ  # so in der Kyu-Liste, siehe A-K-04
+Irimi-nage: 入身投げ  # Dan-Liste auch 入り身投げ, siehe A-X-01
+Juji-irimi-nage: 十字入り身投げ
+Kote-gaeshi: 小手返し
+Juji-nage: 十字投げ
+Narabi-juji-nage: 並び十字投げ
+Sumi-otoshi: 隅落し  # Kyu-Liste auch 隅落とし, siehe A-X-01
+Kokyu-nage: 呼吸投げ
+Kokyu-ho: 呼吸法
+Kiri-otoshi: 切り落し  # Kyu-Liste auch 切り落とし, siehe A-X-01
+Fuki-age: 吹上げ
+Koshi-nage: 腰投げ
+Kaiten-nage: 回転投げ
+Uchi-kaiten-nage: 内回転投げ
+Soto-kaiten-nage: 外回転投げ
+Jiyu-waza: 自由技
+Tenchi-nage: 天地投げ
+Kesa-gake: 袈裟懸け  # Dan-Liste 袈裟掛け, siehe A-X-01
+Kesa-gime: 袈裟極め
+Kaji-mawashi: 梶回し
+Hiji-gaeshi: 肘返し
+Hiji-otoshi: 肘落し
+Hiji-gatame: 肘固め
+Hiji-domoe: 肘巴
+Hiji-gime-nage: 肘極め投げ
+Hiji-kime-tomoe: 肘極め巴
+Ikkyo-kote-gaeshi: 一教小手返し
+Ikkyo-shiho-nage: 一教四方投げ
+Karami-nage: 絡み投げ
+Juji-garami: 十字絡み
+Nikyo-yokodomoe: 二教横巴
+Yoko-domoe: 横巴
+Uzushio: 渦潮
+Suso-barai: 裾払い
+Kata-otoshi: 肩落し
+Maki-arashi: 巻き嵐  # Dan-Liste auch 巻嵐, siehe A-X-01
+Tenzashi: 天刺し
+Tsubasa-gaeshi: 翼返し
+Udekime-nage: 腕極め投げ
+Yonkyo-nage: 四教投げ
+Koshi-guruma: 腰車
+Tani-otoshi: 谷落し
+O-guruma: 大車
+Kote-barai: 小手払い
+Ude-guruma: 腕車
+Kubi-gatame: 首固め
+O-hineri: 大捻り
+Hiza-gime: 膝極め
+Kime-modoshi: 極め戻し
+Ten-gaeshi: 天返し
+Nuki-garami: 抜き絡み
+Jo-gaeshi: 杖返し
+
+# Shinki Toho (Grade und Kamae: shinkiryu.de; Formen: Titelkarten der Videos)
+Shoden: 初伝
+Chuden: 中伝
+Okuden: 奥伝
+Jun-Menkyo: 準免許
+Hon-Menkyo: 本免許
+Menkyo-Kaiden: 免許皆伝
+Hoshu: 法主

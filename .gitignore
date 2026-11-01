@@ -9,8 +9,10 @@ entwuerfe/clickdummy/video/
 build/
 heft/build/
 entwuerfe/clickdummy/daten.js
+entwuerfe/clickdummy/lehrgaenge.js
 dist/
 app/build*/
+build-app/
 .flatpak-builder/
 **/__pycache__/
 *.pyc

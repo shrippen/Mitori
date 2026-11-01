@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Mitori
+GenericName=Exam programme trainer
+GenericName[de]=Prüfungsprogramm-Trainer
+Comment=Exam programmes of Aikido Shinki Rengo, Daitoryu and Shinki Toho with the exam videos
+Comment[de]=Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Shinki Toho mit den Prüfungsvideos
+Exec=mitori
+Icon=io.github.shrippen.Mitori
+Categories=Education;Sports;Qt;KDE;
+Keywords=aikido;daitoryu;budo;exam;Prüfung;
+X-KDE-FormFactor=desktop;tablet;handset;

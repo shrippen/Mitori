@@ -1,0 +1,400 @@
+# Aikido Shinki Rengo: Prüfungsprogramm Kyu- und Dan-Grade.
+#
+# Quelle: quellen/aikido/Prüfungsordnung.pdf (Stand 01.01.2022). Wo die Listen mit
+# Japanisch (Kyu-/Dan-Techniken.doc) abweichen, gilt vorerst die PDF und der
+# Eintrag trägt die Nummer der offenen Frage aus KORREKTUREN.md. Kanji kommen aus
+# begriffe.yaml und stehen hier nicht.
+#
+# Aufbau (gilt für aikido.yaml und daitoryu.yaml):
+#   grade:    alle Grade der Disziplin; id wird unten als Schlüssel benutzt
+#   teile:    Kyu-Grade, Dan-Grade; je Teil die Grade in Prüfungsfolge
+#   gruppen:  Rubrik (titel), Japanisch über begriff (Schlüssel im Glossar),
+#             ohne_angriff: true (Kata, Ukemi), text: true (keine Kanji, z. B. Theorie)
+#   angriffe: angriff, zusatz (Ausführung des Angriffs), je Grad eine Liste
+#             der Techniken, frage (offene Frage zum ganzen Angriff)
+#
+# Schreibweise einer Technik:  "Technik (Zusatz) [Frage]"
+#   Ikkyo                          nur die Technik
+#   Koshi-nage (soto-tenkan)       mit Ausführung / Variante
+#   "Nikyo (2 Arten) [A-K-03]"     mit Verweis auf eine offene Frage (in Anführungszeichen,
+#                                  weil eckige Klammern und Kommas in YAML-Listen sonst stören)
+# Frage-IDs stehen in KORREKTUREN.md (Projektordner); tools/daten.py prüft, dass es sie dort gibt.
+
+kurz: aikido
+titel: Aikido Shinki Rengo
+jp: 合気道
+stand: Stand 01.01.2022 · überarbeitet 2026
+vorbemerkung: aikido-vorbemerkung.tex
+
+grade:  # abstand: Mindestwartezeit nach dem vorherigen Grad (Angabe des Nutzers, bestätigt 01.11.2026)
+  - {id: k5, name: 5. Kyu, jp: 五級}
+  - {id: k4, name: 4. Kyu, jp: 四級, abstand: 1 Jahr}
+  - {id: k3, name: 3. Kyu, jp: 三級, abstand: 1 Jahr}
+  - {id: k2, name: 2. Kyu, jp: 二級, abstand: 1 Jahr}
+  - {id: k1, name: 1. Kyu, jp: 一級, abstand: 1 Jahr}
+  - {id: d1, name: 1. Dan, jp: 初段, abstand: 1 Jahr}
+  - {id: d2, name: 2. Dan, jp: 二段, abstand: 2 Jahre}
+  - {id: d3, name: 3. Dan, jp: 三段, abstand: 3 Jahre}
+  - {id: d4, name: 4. Dan, jp: 四段, abstand: 4 Jahre}
+
+teile:
+
+  - titel: Kyu-Grade
+    grade: [k5, k4, k3, k2, k1]
+    gruppen:
+      - titel: Kata
+        begriff: Kata
+        ohne_angriff: true
+        angriffe:
+          - k5: [Kamae-undo]
+            k4: [Tachi-suburi 1]
+            k3: [Jo-suburi 1]
+            k2: [Tachi-suburi 2]
+            k1: [Jo-suburi 2]
+      - titel: Ukemi
+        begriff: Ukemi
+        ohne_angriff: true
+        angriffe:
+          - k5: [Mae-kaiten, Ushiro-kaiten, Yoko-kaiten]
+            k4: [Mae-fuse, Ushiro-hineri, Yoko-suberi]
+            k3: [Mae-sasae-tobi]
+            k2: [Yoko-tobi, Ushiro-tobi]
+            k1: [Mae-tobi (Salto)]
+      - titel: Tachi-waza · Mae-seme
+        begriff: [Tachi-waza, Mae-seme]
+        angriffe:
+          - angriff: Katate-katate-dori
+            zusatz: Ai-hanmi
+            k5: [Ikkyo, Shiho-nage]
+            k4: [Nikyo, Juji-nage, Irimi-nage, Kote-gaeshi]
+            k3: [Sankyo, Sumi-otoshi, Kokyu-nage]
+            k2: [Yonkyo, Jiyu-waza]
+            k1: [Ikkyo-kote-gaeshi, Ikkyo-shiho-nage, Koshi-nage (soto-tenkan)]
+          - angriff: Katate-katate-dori
+            zusatz: Gyaku-hanmi
+            k5: [Shiho-nage]
+            k4: ["Ikkyo (soto-irimi) [A-K-05]", Sumi-otoshi, "Kokyu-nage (ushiro / irimi) [A-K-05]"]
+            k3: [Ikkyo (atemi-uchi-tenkan / sukui), Juji-nage (uchi- + soto-tenkan), Irimi-nage (uchi-tenkan)]
+            k2: ["Nikyo (2 Arten) [A-K-03]", Kote-gaeshi, Kaiten-nage, Jiyu-waza]
+            k1: ["Sankyo (2 Arten) [A-K-03]", "Yonkyo (2 Arten) [A-K-03]", "Irimi-nage (soto-irimi, 2 Arten) [A-K-06]", Kote-gaeshi (hineri)]
+          - angriff: Katate-muna-dori
+            k5: [Ikkyo]
+            k4: [Nikyo]
+            k3: [Sankyo, Kiri-otoshi]
+            k2: [Yonkyo, Fuki-age]
+            k1: [Shiho-nage, Fuki-age (harai-te)]
+          - angriff: Katate-kata-dori
+            k5: [Ikkyo]
+            k4: [Nikyo]
+            k3: [Sankyo, Fuki-age]
+            k2: [Yonkyo, Kiri-otoshi]
+            k1: ["Shiho-nage (atemi, Ukete führen)"]
+          - angriff: Ryote-katate-dori
+            zusatz: Morote-dori
+            k5: [Ikkyo]
+            k4: [Nikyo, Juji-nage]
+            k3: [Shiho-nage, "Kokyu-nage (uchi- / soto-tenkan, mae und ushiro)"]
+            k2: [Nikyo (soto), Irimi-nage, "Kokyu-nage (soto-tenkan-makikomi, dann mit der freien Hand werfen)"]
+            k1: [Sumi-otoshi (soto-tenkan), Jiyu-waza]
+          - angriff: Ryote-ryote-dori
+            k5: ["Shiho-gaeshi [A-K-04]"]
+            k4: [Ikkyo, Juji-nage]
+            k3: [Nikyo, Shiho-nage, Kokyu-nage, Tenchi-nage]
+            k2: [Sankyo, Yonkyo, Kesa-gake]
+            k1: [Koshi-nage, Kokyu-ho]
+          - angriff: Ryote-muna-dori
+            k5: [Ikkyo]
+            k4: [Nikyo]
+            k3: [Sankyo]
+            k2: [Yonkyo]
+            k1: [Kaji-mawashi]
+          - angriff: Mune-ude-dori
+            k2: [Hiji-gaeshi]
+          - angriff: Shomen-uchi
+            k5: [Ikkyo, Irimi-nage]
+            k4: [Nikyo, Sumi-otoshi]
+            k3: [Sankyo, Yonkyo, Kote-gaeshi]
+            k2: [Uchi-sankyo, Kiri-otoshi]
+            k1: [Kokyu-nage (irimi-tenkan), Koshi-nage (soto-tenkan), Uchi-kaiten-nage (soto-tenkan)]
+          - angriff: Yokomen-uchi
+            k5: [Kiri-otoshi]
+            k4: [Ikkyo, Shiho-nage]
+            k3: [Nikyo, Irimi-nage, Kote-gaeshi]
+            k2: ["Yonkyo [A-K-07]", Juji-nage, Sumi-otoshi]
+            k1: [Uchi-sankyo, Gokyo]
+          - angriff: Tsuki
+            k5: [Ikkyo]
+            k4: [Sumi-otoshi, Fuki-age]
+            k3: [Nikyo, Irimi-nage, Kote-gaeshi]
+            k2: ["Yonkyo [A-K-08]", Shiho-nage, Kokyu-nage (soto-tenkan)]
+            k1: ["Kiri-otoshi (soto-tenkan) [A-K-09]", Uchi-kaiten-nage (soto-tenkan)]
+      - titel: Tachi-waza · Ushiro-seme
+        begriff: [Tachi-waza, Ushiro-seme]
+        angriffe:
+          - angriff: Katate-muna-dori
+            k5: [Ikkyo]
+            k4: [Nikyo]
+            k3: [Sankyo]
+            k2: [Yonkyo]
+          - angriff: Eri-dori
+            k3: [Fuki-age]
+            k2: ["Irimi-nage [A-K-14]"]
+            k1: [Kokyu-nage]
+          - angriff: Ryote-kubi-jime
+            k3: [Sumi-otoshi]
+            k1: [Irimi-nage]
+            frage: A-K-11
+          - angriff: Ryote-dori
+            k5: [Shiho-nage]
+            k4: [Ikkyo, Irimi-nage]
+            k3: [Nikyo, Kote-gaeshi, Kokyu-nage (beide Hände hoch)]
+            k2: ["Yonkyo [A-K-12]", "Kokyu-nage (2 Arten) [A-K-13]"]
+            k1: [Yonkyo, Kokyu-nage (eine Hand an die Hüfte), Juji-irimi-nage]
+          - angriff: Ryo-kata-dori
+            k4: [Ikkyo]
+            k3: [Nikyo]
+            k1: [Kokyu-nage (ushiro)]
+            frage: A-K-15
+      - titel: Suwari-waza · Mae-seme
+        begriff: [Suwari-waza, Mae-seme]
+        frage: A-K-16
+        angriffe:
+          - angriff: Katate-katate-dori
+            zusatz: diagonal
+            k5: [Ikkyo]
+            k4: [Nikyo]
+            k3: [Sankyo, Irimi-nage]
+            k2: [Kote-gaeshi]
+          - angriff: Katate-katate-dori
+            zusatz: gerade
+            k4: [Ikkyo]
+            k3: [Nikyo]
+            k1: [Kokyu-nage]
+          - angriff: Ryote-dori
+            k5: [Kokyu-ho]
+            k4: [Ikkyo]
+            k3: [Ryo-nikyo]
+          - angriff: Katate-kata-dori
+            k4: [Ikkyo]
+            k3: [Nikyo]
+          - angriff: Shomen-uchi
+            k4: [Ikkyo]
+            k3: [Nikyo]
+            k2: [Yonkyo]
+            k1: [Kiri-otoshi]
+          - angriff: Yokomen-uchi
+            k4: [Ikkyo]
+            k1: [Gokyo]
+      - titel: Suwari-waza · Ushiro-seme
+        begriff: [Suwari-waza, Ushiro-seme]
+        angriffe:
+          - angriff: Ryote-dori
+            k3: [Kokyu-nage]
+            k2: [Ikkyo, Nikyo (ura)]
+            k1: [Sankyo (ura), Yonkyo (ura)]
+      - titel: Hanmi-handachi
+        begriff: Hanmi-handachi
+        angriffe:
+          - angriff: Katate-katate-dori
+            zusatz: Gyaku-hanmi
+            k2: [Shiho-nage]
+            k1: ["Kote-gaeshi (nukite / hineri) [A-K-22]"]
+          - angriff: Ryote-dori
+            k1: [Shiho-nage]
+      - titel: Sonstige Techniken
+        begriff: Sonstige Techniken
+        angriffe:
+          - angriff: Futari-gake
+            k2: [Kokyu-nage]
+            k1: [Ryo-nikyo (uchi / soto)]
+          - angriff: Tanto-dori
+            zusatz: Uchioroshi
+            k2: [Ikkyo (irimi)]
+            k1: [Kote-gaeshi]
+          - angriff: Tanto-dori
+            zusatz: Tsuki
+            k2: [Ikkyo (tenkan)]
+            k1: [Kote-gaeshi]
+          - angriff: Tachi-dori
+            zusatz: Shomen-uchi
+            k2: [Ikkyo (irimi)]
+            k1: [Kokyu-nage]
+          - angriff: Jo-dori
+            zusatz: Tsuki
+            k2: ["Kokyu-nage (mae, omote)"]
+            k1: ["Kokyu-nage (mae, ura = nukido) [A-K-23]", Jo-gaeshi]
+            frage: A-K-25
+
+  - titel: Dan-Grade
+    grade: [d1, d2, d3, d4]
+    gruppen:
+      - titel: Kata
+        begriff: Kata
+        ohne_angriff: true
+        angriffe:
+          - d1: [Tachi-kata]
+            d2: [Jo-kata]
+            d3: [Tenchi]
+            frage: A-D-03
+      - titel: Tachi-waza · Mae-seme
+        begriff: [Tachi-waza, Mae-seme]
+        angriffe:
+          - angriff: Katate-katate-dori
+            zusatz: Ai-hanmi
+            d1: [Koshi-nage (ikkyo), Uchi-sankyo]
+            d2: [Koshi-nage (kote-hineri), Karami-nage]
+            d3: ["Nikyo-yokodomoe [A-D-04]"]
+            d4: [Uzushio]
+          - angriff: Katate-katate-dori
+            zusatz: Gyaku-hanmi
+            d1: [Kote-gaeshi (nukite), Koshi-nage (soto-tenkan), Shiho-nage (ude-gaeshi)]
+            d2: [Koshi-nage (tegatana / sukui), Suso-barai (soto-tenkan / uchi-irimi-tenkan), Kata-otoshi (tegatana)]
+            d3: [Koshi-nage (uchi-tenkan-kote-hineri), Suso-barai (uchi-tenkan-kirikaeshi)]
+            d4: [Maki-arashi]
+          - angriff: Katate-muna-dori
+            d1: [Hiji-gaeshi, Uchi-sankyo]
+            d2: [Narabi-juji-nage, Juji-garami (atemi)]
+            d3: [Yoko-domoe, Hiji-gatame]
+            frage: A-D-05
+          - angriff: Katate-kata-dori
+            d1: [Hiji-gaeshi]
+            d2: [Kesa-gake (atemi)]
+            d3: [Kesa-gime (atemi)]
+          - angriff: Ryote-katate-dori
+            zusatz: Morote-dori
+            d1: [Koshi-nage (uchi- / soto-irimi)]
+            d2: [Koshi-nage (uchi- / soto-tenkan), Suso-barai (kirikaeshi)]
+            d3: [Tenzashi]
+            d4: [Uzushio]
+          - angriff: Ryote-ryote-dori
+            d1: [Kiri-otoshi (uchi / soto), Kote-gaeshi (nukite / hineri)]
+            d2: [Kaji-mawashi, Tsubasa-gaeshi]
+            d3: [Udekime-nage]
+            d4: [Uzushio]
+          - angriff: Ryote-muna-dori
+            d1: [Koshi-nage]
+            d2: [Yoko-domoe]
+            d3: [Hiji-domoe]
+          - angriff: Shomen-uchi
+            d1: [Yonkyo-nage, Koshi-nage (uchi- / soto-irimi)]
+            d2: [Koshi-guruma, Tani-otoshi]
+            d3: [O-guruma (omote)]
+            d4: [O-guruma (ura)]
+          - angriff: Yokomen-uchi
+            d1: [Sumi-otoshi (irimi), Koshi-nage (tegatana), Kokyu-nage (tegatana)]
+            d2: ["Karami-nage [A-D-06]", Kokyu-nage (uchi-tenkan)]
+            d3: [Koshi-nage (uchi-tenkan-kote-hineri), Hiji-gaeshi]
+            d4: [O-guruma]
+          - angriff: Tsuki
+            d1: [Kokyu-nage (uchi-tenkan), Koshi-nage (soto-tenkan), Juji-nage (uchi- / soto-tenkan)]
+            d2: [Kata-otoshi, Koshi-nage (kote-hineri / sukui), Karami-nage, Soto-kaiten-nage]
+            d3: [Kote-barai (uchi-tenkan), Ude-guruma, Hiji-gatame (uchi- / soto-tenkan)]
+            d4: [Kubi-gatame, Hiji-kime-tomoe]
+      - titel: Tachi-waza · Ushiro-seme
+        begriff: [Tachi-waza, Ushiro-seme]
+        angriffe:
+          - angriff: Katate-muna-dori
+            d1: ["Kokyu-nage (mae, knien)"]
+            d2: [Karami-nage]
+            d3: [Koshi-nage (direkt)]
+            d4: [Hiji-domoe (nach hinten werfen)]
+          - angriff: Kubi-jime
+            d1: [Kokyu-nage (Kopf runter)]
+            d2: [Hiza-gime]
+          - angriff: Ryote-dori
+            d1: ["Kokyu-nage (mae, knien)", O-hineri]
+            d2: [Karami-nage, Juji-garami]
+            d3: ["Koshi-nage (ikkyo-ura) [A-D-07]"]
+            d4: ["Koshi-nage (sankyo-ura wirken lassen) [A-D-07]"]
+          - angriff: Ryo-kata-dori
+            d1: [Irimi-nage (Hände hoch)]
+            d2: [Irimi-nage (drehend zwischen die Arme des Angreifers eintreten)]
+            d3: [Shiho-nage (ganze Drehung)]
+            d4: [Koshi-nage (erst Sankyo wirken lassen)]
+      - titel: Suwari-waza · Mae-seme
+        begriff: [Suwari-waza, Mae-seme]
+        angriffe:
+          - angriff: Katate-katate-dori
+            zusatz: diagonal
+            d1: [Hiji-gatame]
+          - angriff: Katate-katate-dori
+            zusatz: gerade
+            d1: [Kote-gaeshi (hineri)]
+            d2: [Kote-gaeshi (nukite)]
+            d3: [Hiji-gime-nage (nach hinten werfen)]
+            frage: A-D-09
+          - angriff: Ryote-dori
+            d1: [Kote-gaeshi (hineri)]
+            d2: [Kote-gaeshi (nukite)]
+            d3: [Irimi-nage (nukite), Hiji-gime-nage]
+            d4: [Kime-modoshi]
+          - angriff: Shomen-uchi
+            d1: [Irimi-nage]
+            d2: [Kote-gaeshi]
+      - titel: Hanmi-handachi
+        begriff: Hanmi-handachi
+        angriffe:
+          - angriff: Katate-katate-dori
+            zusatz: Gyaku-hanmi
+            d1: [Ikkyo (uchi-tenkan)]
+            d2: [Ikkyo (soto-tenkan)]
+            d3: [Irimi-nage (uchi- und soto-tenkan)]
+            d4: ["Kime-mawashi [A-D-10]"]
+      - titel: Sonstige Techniken
+        begriff: Sonstige Techniken
+        angriffe:
+          - angriff: Alle Tori-te
+            zusatz: greifende Angriffe
+            d1: [Jiyu-waza]
+            frage: A-D-11
+          - angriff: Alle Uchi-te
+            zusatz: schlagende Angriffe
+            d2: [Jiyu-waza]
+            frage: A-D-11
+          - angriff: Jiyu-seme
+            zusatz: freier Angriff
+            d3: [Jiyu-waza]
+            frage: A-D-11
+          - angriff: Futari-gake
+            zusatz: 2 Angreifer
+            d1: [Tsubasa-gaeshi]
+            d2: [Shiho-nage]
+            d3: [Kokyu-nage (ushiro)]
+            d4: [Jiyu-waza]
+          - angriff: San'nin-gake
+            zusatz: 3 Angreifer
+            d3: [Jiyu-waza]
+            d4: [Jiyu-waza]
+            frage: A-D-11
+          - angriff: Tanto-dori
+            zusatz: Uchioroshi
+            d1: [Sumi-otoshi]
+            d2: [Irimi-nage]
+            d3: [Uchi-sankyo]
+            d4: [Koshi-nage]
+          - angriff: Tanto-dori
+            zusatz: Tsuki
+            d1: [Sumi-otoshi, Fuki-age]
+            d2: [Karami-nage]
+            d3: [Koshi-nage]
+            d4: [Kubi-gatame]
+          - angriff: Tachi-dori
+            zusatz: Shomen-uchi
+            d1: [Kote-gaeshi]
+            d2: [Irimi-nage]
+            d3: [Koshi-nage (soto-irimi)]
+            d4: [Koshi-nage (uchi-irimi)]
+          - angriff: Jo-dori
+            zusatz: Tsuki
+            d1: [Shiho-nage, Ten-gaeshi]
+            d2: [Kokyu-nage (ushiro)]
+            d3: [Hiji-gime-nage]
+            d4: [Nuki-garami]
+      - titel: Theorie
+        text: true
+        angriffe:
+          - d1: [mündliche Prüfung]
+            d2: ["Aufsatz über Aikido, mind. 1 Seite"]
+            d3: ["Aufsatz über Aikido, mind. 2 Seiten"]
+            d4: ["Aufsatz über Aikido, mind. 3 Seiten"]
+        fuss: "Aufsätze: DIN A4, Schriftgröße 12 pt, Zeilenabstand 1,5."

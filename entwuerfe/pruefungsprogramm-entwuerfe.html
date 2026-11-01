@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shinki Rengo Prüfungsprogramme · Entwürfe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400&family=PT+Sans+Narrow:wght@400;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@400;600;900&family=Noto+Sans+JP:wght@400;700&family=Yuji+Boku&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Shinki News: weißes Papier, Tusche-Grau, ein Rot. Layout: Arbeitstisch mit A4-Seiten, Text daneben. */
+  --shu:#ce171e;          /* Rot aus Logo und Überschriften der Shinki News */
+  --sumi:#1d1b1a;         /* Tusche */
+  --usuzumi:#77716c;      /* verdünnte Tusche, Nebentext */
+  --washi:#ffffff;        /* Seite */
+  --kinari:#e9e6e1;       /* Tisch / Umgebung */
+  --hai:#d9d5cf;          /* Linien */
+  --f-cond:"PT Sans Narrow","Myriad Pro Condensed","Arial Narrow",sans-serif;
+  --f-sans:"PT Sans","Myriad Pro","Segoe UI",sans-serif;
+  --f-serif:"Crimson Pro","Minion Pro",Georgia,serif;
+  --f-jp:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-jps:"Noto Sans JP","Hiragino Sans",sans-serif;
+  --f-brush:"Yuji Boku","Noto Serif JP",serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--kinari);color:var(--sumi);font:16px/1.55 var(--f-sans)}
+a{color:var(--shu)}
+:focus-visible{outline:2px solid var(--shu);outline-offset:2px}
+
+/* ---------- Rahmen der Präsentation ---------- */
+.top{background:var(--washi);border-bottom:1px solid var(--hai)}
+.top-in{max-width:1180px;margin:0 auto;padding:28px 20px 18px;display:grid;gap:10px}
+.top h1{font:700 clamp(28px,4vw,40px)/1.1 var(--f-sans);margin:0;text-wrap:balance}
+.top h1 span{color:var(--shu)}
+.top p{margin:0;max-width:72ch;color:#4a4542}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px 14px;font:700 14px var(--f-cond);text-transform:uppercase;letter-spacing:.06em;padding-top:6px}
+nav.toc a{text-decoration:none;color:var(--sumi);border-bottom:2px solid transparent}
+nav.toc a:hover{border-color:var(--shu)}
+nav.toc b{color:var(--shu);font-weight:700}
+
+main{max-width:1180px;margin:0 auto;padding:10px 20px 80px}
+section.draft{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:28px;padding:44px 0;border-bottom:1px solid var(--hai);align-items:start}
+section.draft.wide{grid-template-columns:1fr}
+.note h2{font:700 26px/1.15 var(--f-sans);margin:0 0 4px;text-wrap:balance}
+.note h2 small{display:block;font:700 13px var(--f-cond);letter-spacing:.12em;text-transform:uppercase;color:var(--shu);margin-bottom:6px}
+.note p,.note li{font-size:15px;color:#3b3734}
+.note ul{padding-left:18px;margin:8px 0}
+.note .jp{font-family:var(--f-jp)}
+.pages{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
+.cap{font:13px var(--f-sans);color:var(--usuzumi);margin-top:6px}
+
+/* ---------- Seitenmodell: A4 skaliert über Container-Einheiten ---------- */
+.a4{container-type:inline-size;width:min(100%,640px);aspect-ratio:210/297;background:var(--washi);box-shadow:0 1px 2px rgba(0,0,0,.08),0 10px 30px rgba(40,30,20,.12);position:relative;overflow:hidden}
+.a4.land{width:min(100%,900px);aspect-ratio:297/210}
+.a5{container-type:inline-size;width:min(100%,430px);aspect-ratio:148/210;background:var(--washi);box-shadow:0 1px 2px rgba(0,0,0,.08),0 10px 30px rgba(40,30,20,.12);position:relative;overflow:hidden}
+.spread{display:flex;gap:2px;flex-wrap:wrap}
+.pg{position:absolute;inset:0;padding:7cqw 7cqw 8cqw;display:flex;flex-direction:column}
+.ink{position:absolute;pointer-events:none;background-size:cover;background-repeat:no-repeat;-webkit-mask-image:radial-gradient(ellipse at 65% 40%,#000 25%,transparent 70%);mask-image:radial-gradient(ellipse at 65% 40%,#000 25%,transparent 70%)}
+
+/* gemeinsame Seitenteile im Stil der Shinki News */
+.runhead{position:absolute;top:2.2cqw;left:0;display:flex;align-items:center;gap:1.4cqw;font:400 1.35cqw var(--f-cond);letter-spacing:.04em;text-transform:uppercase}
+.runhead::before{content:"";width:4.4cqw;height:1.2cqw;background:#cfcfcf}
+.folio{position:absolute;right:5cqw;bottom:2.4cqw;display:flex;align-items:center;gap:1.4cqw;font:400 1.35cqw var(--f-sans)}
+.folio b{font:400 2cqw var(--f-sans)}
+.folio i{width:1px;height:2cqw;border-left:1px dotted #999}
+.folio::after{content:"";position:absolute;right:-1cqw;bottom:-2.4cqw;width:9cqw;height:1.2cqw;background:#cfcfcf}
+.land .runhead,.land .folio{font-size:.95cqw}
+.land .folio b{font-size:1.4cqw}
+.land .runhead::before{width:3cqw;height:.85cqw}
+
+/* Logo-Platzhalter: roter Kreis mit Pinselbogen (kein Original-Logo) */
+.mark{display:inline-grid;place-items:center;border-radius:50%;background:var(--shu);color:#fff;font-family:var(--f-brush);position:relative;line-height:1;flex:none}
+.mark::after{content:"";position:absolute;inset:-6% -10% -6% 8%;border-radius:50%;border-right:.5cqw solid var(--sumi);transform:rotate(-18deg)}
+
+/* ---------- Entwurf 1: Tusche ---------- */
+.d1 .title{display:flex;align-items:flex-end;gap:3cqw;margin-top:4cqw}
+.d1 .title h3{margin:0;font:700 8cqw/0.9 var(--f-sans);letter-spacing:-.01em}
+.d1 .title .kan{font:600 5.4cqw/1 var(--f-jp);color:var(--shu)}
+.d1 .sub{border-top:1.5px solid var(--sumi);margin-top:2cqw;padding-top:1.2cqw;display:flex;justify-content:space-between;font:700 1.9cqw var(--f-sans)}
+.d1 .sub span{font-weight:400;color:var(--usuzumi)}
+.d1 .cols{columns:2;column-gap:5cqw;margin-top:2.6cqw;flex:1;min-height:0}
+.d1 h4{break-after:avoid;margin:0 0 .8cqw;font:700 2.1cqw var(--f-sans);color:var(--shu);display:flex;gap:1.2cqw;align-items:baseline}
+.d1 h4 span{font:400 1.6cqw var(--f-jp);color:var(--usuzumi)}
+.d1 .grp{margin-bottom:1.8cqw}
+.d1 .row{display:grid;grid-template-columns:44% 1fr;gap:1.4cqw;padding:.5cqw 0;border-top:1px solid var(--hai);break-inside:avoid}
+.d1 .atk{font:600 1.6cqw/1.15 var(--f-serif)}
+.d1 .atk small{display:block;font:400 1.2cqw/1.3 var(--f-jp);color:var(--usuzumi)}
+.d1 .tq small{font:400 1.2cqw var(--f-jp);color:var(--usuzumi);margin-left:1cqw}
+.d1 .tq{font:400 1.6cqw/1.25 var(--f-serif)}
+.d1 .tq div+div{margin-top:.25cqw}
+.d1 .tq em{font-style:italic;color:var(--usuzumi);font-size:1.45cqw}
+.flag{display:inline-block;width:1.5cqw;height:1.5cqw;border-radius:50%;background:var(--shu);color:#fff;font:700 1cqw/1.5cqw var(--f-sans);text-align:center;vertical-align:.3cqw;margin-left:.5cqw}
+.d1 .foot{font:400 1.25cqw var(--f-sans);color:var(--usuzumi);border-top:1px solid var(--hai);padding-top:1cqw}
+
+/* ---------- Entwurf 2: Matrix (quer) ---------- */
+.d2 .band{position:absolute;left:0;right:0;top:0;height:10cqw;background:linear-gradient(100deg,#0c0c0c 0%,#232323 55%,#3a3a3a 100%);color:#fff;padding:3.4cqw 5cqw 0;display:flex;align-items:flex-end;justify-content:space-between}
+.d2 .band h3{margin:0 0 1.4cqw;font:700 3cqw/1 var(--f-sans);border-bottom:.25cqw solid #fff;padding-bottom:.8cqw}
+.d2 .band h3 span{font:400 1.6cqw var(--f-sans);display:block;margin-top:.8cqw;border:0}
+.d2 .band .kan{font:600 3.8cqw/1 var(--f-jp);opacity:.9;margin-bottom:1.4cqw}
+.d2 table{position:absolute;top:11.5cqw;left:4cqw;right:4cqw;border-collapse:collapse;font-family:var(--f-serif);table-layout:fixed;width:92cqw}
+.d2 th,.d2 td{text-align:left;vertical-align:top;padding:.3cqw .6cqw;border-bottom:1px solid var(--hai)}
+.d2 thead th{font:700 1.2cqw var(--f-sans);border-bottom:.3cqw solid var(--shu);padding-bottom:.6cqw}
+.d2 thead th span{font:400 1.05cqw var(--f-jp);color:var(--shu);margin-left:.5cqw}
+.d2 tbody th{font:600 .88cqw/1.1 var(--f-serif);width:15cqw}
+.d2 tbody th small{display:block;font:400 .74cqw var(--f-jp);color:var(--usuzumi)}
+.d2 td{font:400 .8cqw/1.1 var(--f-serif)}
+.d2 td div{display:flex;justify-content:space-between;gap:.4cqw}
+.d2 td div+div{margin-top:.1cqw}
+.d2 td small{font:400 .66cqw var(--f-jp);color:var(--usuzumi);white-space:nowrap}
+.d2 td em{display:block;font-size:.68cqw;line-height:1.05;color:var(--usuzumi)}
+.d2 tbody tr:nth-child(even){background:#faf8f6}
+.d2 .flag{width:1.05cqw;height:1.05cqw;font-size:.7cqw;line-height:1.05cqw;vertical-align:.15cqw;margin-left:.3cqw}
+.d2 .legend{position:absolute;left:4cqw;bottom:1.8cqw;font:400 .95cqw var(--f-sans);color:var(--usuzumi);display:flex;gap:2cqw;align-items:center}
+
+/* ---------- Entwurf 3: Gradheft A5 ---------- */
+.d3 .cover{position:absolute;inset:0;background:radial-gradient(120% 80% at 30% 20%,#2c2c2c,#070707 70%);color:#fff;padding:9cqw;display:flex;flex-direction:column;justify-content:space-between}
+.d3 .cover .disc{font:700 2.6cqw var(--f-cond);letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+.d3 .cover h3{margin:0;font:700 19cqw/0.85 var(--f-sans);border-bottom:.5cqw solid #fff;padding-bottom:3cqw}
+.d3 .cover .kan{font:900 13cqw/1 var(--f-jp);color:var(--shu)}
+.d3 .cover p{font:400 2.6cqw/1.4 var(--f-sans);opacity:.85;margin:0}
+.d3 .list{position:absolute;inset:0;padding:6cqw 6cqw 8cqw}
+.d3 .list h4{margin:1.8cqw 0 .4cqw;font:700 2.5cqw var(--f-sans);color:var(--shu);display:flex;justify-content:space-between;align-items:baseline}
+.d3 .list h4 span{font:400 2cqw var(--f-jp);color:var(--usuzumi)}
+.d3 .it{display:grid;grid-template-columns:1fr auto auto;gap:1.6cqw;align-items:center;padding:.4cqw 0;border-top:1px solid var(--hai)}
+.d3 .it .n{font:600 2.05cqw/1.2 var(--f-serif)}
+.d3 .it .n small{font:400 1.55cqw var(--f-jp);color:var(--usuzumi);margin-left:.8cqw}
+.d3 .it .n em{display:block;font:italic 400 1.5cqw/1.15 var(--f-serif);color:var(--usuzumi)}
+.d3 .boxes{display:flex;gap:.7cqw}
+.d3 .boxes i{width:2.2cqw;height:2.2cqw;border:1px solid #9a948e}
+.d3 .vid{font:700 1.7cqw var(--f-sans);color:var(--shu);white-space:nowrap;font-variant-numeric:tabular-nums}
+.d3 .vid::before{content:"▶ "}
+.d3 .qr{position:absolute;right:6cqw;bottom:3.4cqw;display:flex;gap:1.6cqw;align-items:center;font:400 1.5cqw/1.3 var(--f-sans);color:var(--usuzumi)}
+.d3 .qr canvas{width:9cqw;height:9cqw;image-rendering:pixelated}
+
+/* ---------- Entwurf 4: Makimono ---------- */
+.d4 .side{position:absolute;top:0;bottom:0;left:0;width:17cqw;background:var(--shu);color:#fff;display:flex;flex-direction:column;align-items:center;padding:7cqw 0 6cqw;justify-content:space-between}
+.d4 .side .v{writing-mode:vertical-rl;font:600 5.2cqw/1.15 var(--f-jp);letter-spacing:.3em}
+.d4 .side .v2{writing-mode:vertical-rl;font:400 1.6cqw var(--f-cond);letter-spacing:.3em;text-transform:uppercase;opacity:.9}
+.d4 .body{position:absolute;top:0;bottom:0;left:17cqw;right:0;padding:8cqw 6cqw 8cqw 7cqw}
+.d4 .hanko{position:absolute;right:6cqw;top:6cqw;width:12cqw;height:12cqw;border:.5cqw solid var(--shu);color:var(--shu);display:grid;place-items:center;font:900 4.3cqw/1 var(--f-jp);writing-mode:vertical-rl;transform:rotate(4deg);border-radius:1cqw;opacity:.92}
+.d4 h3{margin:0;font:400 2cqw var(--f-cond);letter-spacing:.2em;text-transform:uppercase;color:var(--usuzumi)}
+.d4 h3 b{display:block;font:700 6cqw/1.05 var(--f-serif);letter-spacing:0;text-transform:none;color:var(--sumi);margin-top:1cqw}
+.d4 .sec{margin-top:3.4cqw}
+.d4 .sec h4{margin:0 0 1.6cqw;display:flex;align-items:baseline;gap:2cqw;font:600 2.8cqw var(--f-jp);color:var(--shu)}
+.d4 .sec h4 span{font:400 1.6cqw var(--f-cond);letter-spacing:.14em;text-transform:uppercase;color:var(--usuzumi)}
+.d4 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2.2cqw 2cqw}
+.d4 .cell{border-top:1px solid var(--sumi);padding-top:1.2cqw}
+.d4 .cell .a{font:400 1.25cqw/1.35 var(--f-jp);color:var(--usuzumi);min-height:3.4cqw}
+.d4 .cell .a ruby rt{font-size:.75cqw}
+.d4 .cell .t{font:600 2.6cqw/1.5 var(--f-jp);margin-top:.3cqw}
+.d4 .cell .t ruby rt{font:400 1cqw var(--f-jps);color:var(--usuzumi);letter-spacing:.05em}
+.d4 .cell .r{font:italic 400 1.55cqw var(--f-serif);color:#4a4542}
+.d4 .cell .t+.t{margin-top:-.4cqw}
+
+/* ---------- Entwurf 5: Technik-Landkarte ---------- */
+.d5 .pg{padding:6.5cqw 4cqw 5cqw}
+.d5 h3{margin:0;font:700 3.2cqw/1 var(--f-sans)}
+.d5 h3 span{color:var(--shu)}
+.d5 .lead{font:400 1.1cqw/1.35 var(--f-serif);color:#4a4542;margin:.6cqw 0 .6cqw;max-width:80cqw}
+.d5 table{border-collapse:separate;border-spacing:.25cqw;width:100%;table-layout:fixed}
+.d5 th{font:600 .95cqw/1.1 var(--f-serif);text-align:left;vertical-align:bottom;padding:.2cqw .3cqw}
+.d5 thead th{height:6.6cqw;padding:0}
+.d5 thead th div{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;font:600 .95cqw var(--f-serif);padding:.3cqw}
+.d5 thead th div small{font:400 .8cqw var(--f-jp);color:var(--usuzumi);margin-top:.5cqw}
+.d5 tbody th{width:16cqw;white-space:nowrap;font-size:.82cqw}
+.d5 tbody th small{font:400 .72cqw var(--f-jp);color:var(--usuzumi);margin-left:.6cqw}
+.d5 td{height:1.32cqw;padding:0;text-align:center;font:700 .8cqw var(--f-sans);background:#f4f2ef;color:#fff;border-radius:.2cqw}
+.d5 td.g5{background:#f3c7c6;color:var(--sumi)}
+.d5 td.g4{background:#e8918f;color:var(--sumi)}
+.d5 td.g3{background:#dc5a57}
+.d5 td.g2{background:#ce171e}
+.d5 td.g1{background:#7d0a0f}
+.d5 .key{display:flex;gap:1.6cqw;align-items:center;font:400 .9cqw var(--f-sans);color:var(--usuzumi);margin-top:.8cqw}
+.d5 .key i{display:inline-block;width:2.2cqw;height:1.5cqw;border-radius:.2cqw;vertical-align:middle;margin-right:.5cqw}
+
+/* ---------- Shinki Toho Seiten ---------- */
+.st h3{margin:3.5cqw 0 0;font:700 5.6cqw/1 var(--f-sans)}
+.st h3 + .kan{font:600 2.8cqw var(--f-jp);color:var(--shu);margin-top:1cqw}
+.st .ladder{margin-top:3cqw;display:grid;gap:0}
+.st .rung{display:grid;grid-template-columns:15cqw 1fr 11cqw;gap:2cqw;align-items:baseline;padding:1.05cqw 0;border-top:1px solid var(--hai)}
+.st .rung b{font:600 2.4cqw var(--f-jp);color:var(--shu)}
+.st .rung b small{display:block;font:700 1.55cqw var(--f-sans);color:var(--sumi)}
+.st .rung div{font:400 1.7cqw/1.35 var(--f-serif)}
+.st .rung div em{color:var(--usuzumi)}
+.st .rung span{font:400 1.45cqw var(--f-sans);color:var(--sumi);text-align:right;position:relative;font-variant-numeric:tabular-nums}
+.st h4{margin:3cqw 0 1cqw;font:700 2.1cqw var(--f-sans);color:var(--shu)}
+.st .two{display:grid;grid-template-columns:1.1fr 1fr;gap:4cqw}
+.st ol{margin:0;padding:0;list-style:none;columns:2;column-gap:2cqw}
+.st ol li{display:flex;gap:.8cqw;font:400 1.42cqw/1.6 var(--f-serif);break-inside:avoid}
+.st ol li b{width:2.2cqw;text-align:right;font:400 1.2cqw/1.9 var(--f-sans);color:var(--usuzumi);font-variant-numeric:tabular-nums}
+.st ol li span{font:400 1.25cqw/1.75 var(--f-jp);color:var(--usuzumi);margin-left:auto}
+.st .sb p{margin:0 0 1.2cqw;font:400 1.5cqw/1.35 var(--f-serif)}
+.st .sb p b{font:600 1.6cqw var(--f-serif);display:block}
+.st .small{font:400 1.35cqw/1.45 var(--f-serif);color:#4a4542}
+.st table{width:100%;border-collapse:collapse;margin-top:1cqw}
+.st th,.st td{text-align:left;padding:.42cqw .5cqw;border-bottom:1px solid var(--hai);vertical-align:baseline}
+.st thead th{font:700 1.1cqw var(--f-sans);border-bottom:.25cqw solid var(--shu)}
+.st td{font:400 1.2cqw/1.2 var(--f-serif);font-variant-numeric:tabular-nums}
+.st td.n{color:var(--usuzumi);font-family:var(--f-sans);width:3cqw;text-align:right}
+.st td.j{font:400 1.15cqw var(--f-jp);color:#3a3532}
+.st tr.lv td{border-top:.2cqw solid var(--sumi)}
+.st tr.lv td.lvl{font:700 1.05cqw var(--f-sans);color:var(--shu);text-transform:uppercase;letter-spacing:.08em;padding-top:.8cqw}
+
+/* ---------- Korrekturliste ---------- */
+.fixes{overflow-x:auto;background:var(--washi);border:1px solid var(--hai)}
+.fixes table{border-collapse:collapse;width:100%;min-width:860px;font-size:14px}
+.fixes th,.fixes td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--hai)}
+.fixes thead th{font:700 12px var(--f-cond);letter-spacing:.1em;text-transform:uppercase;background:#f6f4f1;position:sticky;top:0}
+.fixes td:nth-child(3),.fixes td:nth-child(4){font-family:var(--f-serif);font-size:15px}
+.fixes .jp{font-family:var(--f-jp)}
+.fixes tr.cat td{background:var(--sumi);color:#fff;font:700 13px var(--f-cond);letter-spacing:.12em;text-transform:uppercase}
+.pill{display:inline-block;font:700 11px var(--f-cond);letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.pill.ok{background:#e4efe4;color:#2d5b2f}
+.pill.ask{background:#fbe3e2;color:#9d0d12}
+.pill.style{background:#ecebe8;color:#4b4642}
+.summary{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0 18px}
+.summary div{background:var(--washi);border:1px solid var(--hai);padding:10px 14px;min-width:150px}
+.summary b{display:block;font:700 26px var(--f-sans);font-variant-numeric:tabular-nums}
+.summary span{font-size:13px;color:var(--usuzumi)}
+
+@media (max-width:820px){section.draft{grid-template-columns:1fr}}
+@media print{body{background:#fff}.top,.note,.cap,nav{display:none}.a4,.a5{box-shadow:none;break-after:page}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <h1>Prüfungsprogramme <span>neu gesetzt</span>: fünf Entwürfe</h1>
+  <p>Aikido, Daitoryu und Shinki Toho im Gestus der Shinki News: weißes Papier, Tuschelavierung, ein Rot. Jeder Entwurf zeigt echte Programminhalte, bereinigt und mit japanischen Namen. Rote Punkte <span class="flag" style="width:14px;height:14px;font-size:9px;line-height:14px">1</span> markieren Stellen, an denen sich die Quellen widersprechen; die Liste unten sagt, was zu klären ist.</p>
+  <nav class="toc" aria-label="Inhalt">
+    <a href="#tusche"><b>1</b> Tusche</a><a href="#matrix"><b>2</b> Matrix</a><a href="#gradheft"><b>3</b> Gradheft</a><a href="#makimono"><b>4</b> Makimono</a><a href="#landkarte"><b>5</b> Technik-Landkarte</a><a href="#shinkitoho">Shinki Toho</a><a href="#korrekturen">Korrekturen</a><a href="#quellen">Quellen &amp; Regeln</a>
+  </nav>
+</div></header>
+
+<main>
+
+<section class="draft" id="tusche">
+  <div class="note">
+    <h2><small>Entwurf 1 · A4 hoch</small>Tusche</h2>
+    <p>Am nächsten an der Shinki News: grauer Kopfbalken, Pinsel-Lavierung in der Ecke, rote Rubriken, Seitenfuß mit Rubrik und Seitenzahl. Ein Grad pro Seite, zweispaltig, Japanisch klein unter jedem Namen.</p>
+    <ul><li>Gut für: das offizielle Heft, alle drei Disziplinen gleich gesetzt.</li><li>Grenze: höhere Grade brauchen zwei Seiten.</li></ul>
+  </div>
+  <div><div class="pages"><div class="a4 d1" id="p-d1"></div></div><div class="cap">Aikido 5. Kyu, vollständig. Zeile „Ryote-ryote-dori“ mit Rückfrage zum Kanji.</div></div>
+</section>
+
+<section class="draft" id="matrix">
+  <div class="note">
+    <h2><small>Entwurf 2 · A4 quer</small>Matrix</h2>
+    <p>Die vertraute Tabelle Angriff × Grad, aber lesbar: dunkler Kopf wie die Rubrikseiten der News, Kanji rechtsbündig neben jeder Technik, Zusätze kursiv, Zebrastreifen. Strittige Zellen tragen eine Nummer aus der Korrekturliste.</p>
+    <ul><li>Gut für: Prüferinnen und Prüfer, Stichproben über alle Kyu-Grade.</li><li>Ersetzt die bisherige PDF ohne Umgewöhnung.</li></ul>
+  </div>
+  <div><div class="pages"><div class="a4 land d2" id="p-d2"></div></div><div class="cap">Aikido Kyu-Grade, Tachi-waza Mae-seme (Seite 1 von 3).</div></div>
+</section>
+
+<section class="draft" id="gradheft">
+  <div class="note">
+    <h2><small>Entwurf 3 · A5-Heft</small>Gradheft</h2>
+    <p>Ein kleines Heft je Grad für die Gi-Tasche: dunkle Titelseite wie die Rubrikseiten der News, innen eine Übungsliste mit Kästchen zum Abhaken und dem Zeitpunkt im Prüfungsvideo. Ein QR-Code führt direkt zur Stelle in der App.</p>
+    <ul><li>Gut für: Schülerinnen und Schüler vor der Prüfung.</li><li>Verbindet Papier und App (Teil b).</li></ul>
+    <p>Die Kanji für Daitoryu fehlen in allen Vorlagen. Sie sind hier ein <b>Vorschlag</b> und müssen von einem Lehrer bestätigt werden.</p>
+  </div>
+  <div><div class="spread" id="p-d3"></div><div class="cap">Daitoryu 5. Kyu. Zeitpunkte aus den Kapitelmarken des Videos „Daitoryu 5. Kyu“.</div></div>
+</section>
+
+<section class="draft" id="makimono">
+  <div class="note">
+    <h2><small>Entwurf 4 · A4 hoch</small>Makimono</h2>
+    <p>Japanisch zuerst: senkrechte Schrift im roten Band, Kanji groß mit Lesehilfe (Furigana), Umschrift kursiv darunter, ein Siegelstempel für den Grad. Viel Weißraum, wenig Linien.</p>
+    <ul><li>Gut für: Urkunde, Aushang im Dojo, Lernen der Schriftzeichen.</li><li>Grenze: für lange Dan-Listen zu luftig.</li></ul>
+  </div>
+  <div><div class="pages"><div class="a4 d4" id="p-d4"></div></div><div class="cap">Aikido 5. Kyu als Aushang.</div></div>
+</section>
+
+<section class="draft" id="landkarte">
+  <div class="note">
+    <h2><small>Entwurf 5 · A4 quer / Poster</small>Technik-Landkarte</h2>
+    <p>Die Tabelle von der anderen Seite gelesen: Zeilen sind Techniken, Spalten Angriffe, die Zahl sagt, ab welchem Kyu die Kombination geprüft wird. So sieht man auf einen Blick, wo Ikkyo überall vorkommt und welche Lücken das Programm hat.</p>
+    <ul><li>Gut für: Training planen („heute alles mit Kote-gaeshi“).</li><li>Wird automatisch aus denselben Daten erzeugt wie Entwurf 2.</li></ul>
+  </div>
+  <div><div class="pages"><div class="a4 land d5" id="p-d5"></div></div><div class="cap">Aikido Kyu-Grade, Tachi-waza Mae-seme. Je dunkler, desto später im Programm.</div></div>
+</section>
+
+<section class="draft" id="shinkitoho">
+  <div class="note">
+    <h2><small>Neu zusammengestellt</small>Shinki Toho</h2>
+    <p>Für Shinki Toho gab es bisher kein Prüfungsprogramm in einem Dokument. Hier sind zusammengeführt: die Grade samt Zulassung (shinkiryu.de), die Kamae-Übung mit 26 Stellungen, die drei Suburi und die 43 Ô-dachi-Formen mit Kamae, Treffern und Zanshin.</p>
+    <p>Die <span class="jp">Kanji</span> für die Formen 1 bis 21 stammen von den Titelkarten der Videos „Shoden“ und „Chuden“; für 22 bis 43 gibt es noch keine Quelle.</p>
+    <p>Gesetzt in Entwurf 1. Andere Entwürfe gehen genauso.</p>
+  </div>
+  <div><div class="pages" id="p-st"></div></div>
+</section>
+
+<section class="draft wide" id="korrekturen">
+  <div class="note">
+    <h2><small>Teil II</small>Korrekturen und offene Fragen</h2>
+    <p>Abgeglichen wurden: Aikido-Prüfungsordnung (PDF, Stand 01.01.2022) mit den Listen mit Japanisch (Kyu-/Dan-Techniken.doc), die Daitoryu-Programme (2008) mit den Einblendungen in den Videos, und die Shinki-Toho-Tabelle (2010) mit den Technischen Kommentaren und den Videos. „Sicher“ heißt Tippfehler oder eindeutiger Fehler; „klären“ braucht eine Entscheidung der Prüfungskommission.</p>
+  </div>
+  <div class="summary" id="fix-sum"></div>
+  <div class="fixes"><table><thead><tr><th>#</th><th>Wo</th><th>Bisher</th><th>Vorschlag</th><th>Begründung</th><th>Status</th></tr></thead><tbody id="fix-body"></tbody></table></div>
+</section>
+
+<section class="draft wide" id="quellen">
+  <div class="note">
+    <h2><small>Teil III</small>Japanische Namen: Quellen und Schreibregeln</h2>
+    <ul>
+      <li><b>Aikido:</b> Kanji aus den Listen mit Japanisch, korrigiert wo falsch (siehe Liste). Kana-Lesungen im Entwurf 4 ergänzt.</li>
+      <li><b>Daitoryu:</b> keine Vorlage mit Kanji. Die Kanji im Entwurf 3 folgen der üblichen Schreibung (一ヶ条極め抑え, 合気落し …) und sind ungeprüft.</li>
+      <li><b>Shinki Toho:</b> Grade und Kamae aus den PDFs von shinkiryu.de, Formen 1–21 von den Videotitelkarten.</li>
+      <li><b>Vorschlag Umschrift:</b> je Disziplin eine Regel. Aikido ohne Längenzeichen wie bisher (Kokyu-nage), Daitoryu und Shinki Toho mit Zirkumflex wie in deren Vorlagen (Ikkajô, Honshô). Bindestrich zwischen Wortteilen immer (Kiri-otoshi, Fuki-age, Kokyu-ho), kleine Anfangsbuchstaben nach dem Bindestrich (Jiyu-waza).</li>
+      <li><b>Kanji-Regel:</b> Okurigana einheitlich in der längeren Form (切り落とし, 隅落とし, 袈裟懸け), Shinki Toho behält 斬り落し aus den Kommentaren als eigenes Fachwort.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ===== Daten (eine Quelle für alle Entwürfe; später als JSON im Repo) ===== */
+const J = {"Ikkyo":"一教","Nikyo":"二教","Sankyo":"三教","Yonkyo":"四教","Gokyo":"五教","Shiho-nage":"四方投げ","Shiho-gaeshi":"四方返し","Irimi-nage":"入身投げ","Kote-gaeshi":"小手返し","Juji-nage":"十字投げ","Sumi-otoshi":"隅落とし","Kokyu-nage":"呼吸投げ","Kokyu-ho":"呼吸法","Kiri-otoshi":"切り落とし","Fuki-age":"吹き上げ","Koshi-nage":"腰投げ","Kaiten-nage":"回転投げ","Uchi-kaiten-nage":"内回転投げ","Jiyu-waza":"自由技","Tenchi-nage":"天地投げ","Kesa-gake":"袈裟懸け","Kaji-mawashi":"梶回し","Hiji-gaeshi":"肘返し","Uchi-sankyo":"内三教","Ikkyo-kote-gaeshi":"一教小手返し","Ikkyo-shiho-nage":"一教四方投げ","Kamae-undo":"構え運動","Mae-kaiten":"前回転","Ushiro-kaiten":"後回転","Yoko-kaiten":"横回転"};
+const KANA = {"一教":"いっきょう","四方投げ":"しほうなげ","四方返し":"しほうがえし","入身投げ":"いりみなげ","切り落とし":"きりおとし","呼吸法":"こきゅうほう","構え運動":"かまえうんどう","前回転":"まえかいてん","後回転":"うしろかいてん","横回転":"よこかいてん"};
+const GR = {5:"五級",4:"四級",3:"三級",2:"二級",1:"一級"};
+
+/* Eintrag: "Name~Zusatz~!Rückfrage-Nr" */
+const MAE = [
+ ["Katate-katate-dori","片手片手取り","Ai-hanmi","合半身",{5:["Ikkyo","Shiho-nage"],4:["Nikyo","Juji-nage","Irimi-nage","Kote-gaeshi"],3:["Sankyo","Sumi-otoshi","Kokyu-nage"],2:["Yonkyo","Jiyu-waza"],1:["Ikkyo-kote-gaeshi","Ikkyo-shiho-nage","Koshi-nage~soto-tenkan"]}],
+ ["Katate-katate-dori","片手片手取り","Gyaku-hanmi","逆半身",{5:["Shiho-nage"],4:["Ikkyo~soto-irimi~!6","Sumi-otoshi","Kokyu-nage~ushiro / irimi~!6"],3:["Ikkyo~atemi-uchi-tenkan / sukui","Juji-nage~uchi- + soto-tenkan","Irimi-nage~uchi-tenkan"],2:["Nikyo~2 Arten~!5","Kote-gaeshi","Kaiten-nage","Jiyu-waza"],1:["Sankyo~2 Arten~!5","Yonkyo~2 Arten~!5","Irimi-nage~soto-irimi, 2 Arten","Kote-gaeshi~hineri"]}],
+ ["Katate-muna-dori","片手胸取り","","",{5:["Ikkyo"],4:["Nikyo"],3:["Sankyo","Kiri-otoshi"],2:["Yonkyo","Fuki-age"],1:["Shiho-nage","Fuki-age~harai-te"]}],
+ ["Katate-kata-dori","片手肩取り","","",{5:["Ikkyo"],4:["Nikyo"],3:["Sankyo","Fuki-age"],2:["Yonkyo","Kiri-otoshi"],1:["Shiho-nage~atemi, Ukete führen"]}],
+ ["Ryote-katate-dori","両手片手取り","Morote-dori","諸手取り",{5:["Ikkyo"],4:["Nikyo","Juji-nage"],3:["Shiho-nage","Kokyu-nage~uchi-/soto-tenkan, mae und ushiro"],2:["Nikyo~soto","Irimi-nage","Kokyu-nage~soto-tenkan-makikomi, mit der freien Hand werfen"],1:["Sumi-otoshi~soto-tenkan","Jiyu-waza"]}],
+ ["Ryote-ryote-dori","両手両手取り","","",{5:["Shiho-gaeshi~~!4"],4:["Ikkyo","Juji-nage"],3:["Nikyo","Shiho-nage","Kokyu-nage","Tenchi-nage"],2:["Sankyo","Yonkyo","Kesa-gake"],1:["Koshi-nage","Kokyu-ho"]}],
+ ["Ryote-muna-dori","両手胸取り","","",{5:["Ikkyo"],4:["Nikyo"],3:["Sankyo"],2:["Yonkyo"],1:["Kaji-mawashi"]}],
+ ["Mune-ude-dori","胸腕取り","","",{2:["Hiji-gaeshi"],1:["Kiri-otoshi~~!9"]}],
+ ["Shomen-uchi","正面打ち","","",{5:["Ikkyo","Irimi-nage"],4:["Nikyo","Sumi-otoshi"],3:["Sankyo","Yonkyo","Kote-gaeshi"],2:["Uchi-sankyo","Kiri-otoshi"],1:["Kokyu-nage~irimi-tenkan","Koshi-nage~soto-tenkan","Uchi-kaiten-nage~soto-tenkan"]}],
+ ["Yokomen-uchi","横面打ち","","",{5:["Kiri-otoshi"],4:["Ikkyo","Shiho-nage"],3:["Nikyo","Irimi-nage","Kote-gaeshi"],2:["Sankyo~~!7","Yonkyo","Juji-nage","Sumi-otoshi"],1:["Uchi-sankyo","Gokyo"]}],
+ ["Tsuki","突き","","",{5:["Ikkyo"],4:["Sumi-otoshi","Fuki-age"],3:["Nikyo","Irimi-nage","Kote-gaeshi"],2:["Sankyo~~!7","Yonkyo","Shiho-nage","Kokyu-nage~soto-tenkan"],1:["Uchi-sankyo~uchi-tenkan, dann soto-tenkan~!8","Kiri-otoshi~soto-tenkan","Uchi-kaiten-nage~soto-tenkan"]}]
+];
+
+/* Aikido 5. Kyu komplett */
+const K5 = [
+ {g:"Kata",gj:"型",rows:[["Kata","型","",["Kamae-undo"]]]},
+ {g:"Ukemi",gj:"受身",rows:[["Ukemi","受身","",["Mae-kaiten","Ushiro-kaiten","Yoko-kaiten"]]]},
+ {g:"Tachi-waza · Mae-seme",gj:"立技 前攻め",rows:MAE.filter(r=>r[4][5]).map(r=>[r[0]+(r[2]?" ("+r[2]+")":""),r[1]+(r[3]?"（"+r[3]+"）":""),"",r[4][5]])},
+ {g:"Tachi-waza · Ushiro-seme",gj:"立技 後ろ攻め",rows:[["Katate-muna-dori","片手胸取り","",["Ikkyo"]],["Ryote-dori","両手取り","",["Shiho-nage"]]]},
+ {g:"Suwari-waza · Mae-seme",gj:"座り技 前攻め",rows:[["Katate-katate-dori (diagonal)","片手片手取り（斜め）","",["Ikkyo"]],["Ryote-dori","両手取り","",["Kokyu-ho"]]]}
+];
+
+/* Daitoryu 5. Kyu mit Kapitelstart im Video (Sekunden) */
+const DT5 = [
+ {g:"Ukemi",gj:"受身",it:[["Mae-kaiten","前回転","",8],["Ushiro-kaiten","後回転","",17],["Yoko-kaiten","横回転","",26.6]]},
+ {g:"Tachiai · Torite",gj:"立合 取手",it:[["Ikkajô-kime-osae","一ヶ条極め抑え","Uchite-dori",41.8],["Aiki-otoshi","合気落し","Uchite-dori",68.5],["Aiki-otoshi","合気落し","Sotote-dori",80.8],["Ikkajô-kime-osae","一ヶ条極め抑え","Sotote-dori",89.6],["Yonkajô-kime-nage","四ヶ条極め投げ","Ryôte-katate-dori",115.8],["Aiki-otoshi","合気落し","Ryôte-dori, vom Stand",130.8],["Ikkajô-kime-osae","一ヶ条極め抑え","Ryôte-dori",143.2]]},
+ {g:"Tachiai · Uchite",gj:"立合 打手",it:[["Ikkajô-kime-osae","一ヶ条極め抑え","Shômen-uchi · Irimi-uke / Uke-nagashi",178],["Aiki-otoshi","合気落し","Yokomen-uchi",224.5],["Ikkajô-kime-osae","一ヶ条極め抑え","Tsuki · Jôdan-zuki",249.4]]},
+ {g:"Tachiai · Ushiro-seme",gj:"立合 後ろ攻め",it:[["Sankajô-ushiro-gime","三ヶ条後ろ極め","Sotote-dori von hinten",279.3]]},
+ {g:"Zatori",gj:"座取",it:[["Aiki-age-nage","合気上げ投げ","Ryôte-dori",312.7],["Ikkajô-kime-osae","一ヶ条極め抑え","Ryôte-dori",332],["Ikkajô-kime-osae","一ヶ条極め抑え","Shômen-uchi",368],["Yoko-nage","横投げ","Yokomen-uchi",null]]},
+ {g:"Tantô-dori",gj:"短刀取り",it:[["Ikkajô-kime-osae","一ヶ条極め抑え","Uchi-oroshi",null],["Kote-gaeshi","小手返し","Tsuki",null]]}
+];
+
+/* Shinki Toho */
+const ST_GRADES = [
+ ["初伝","Shoden","Erste Überlieferung","Rei-ho, Suburi, Kiriotoshi, Kamae; Ô-dachi 1–11","ab 16 J., 2 J. Training"],
+ ["中伝","Chûden","Mittlere Überlieferung","Ô-dachi 1–21","+2 Jahre"],
+ ["奥伝","Okuden","Vertiefte Überlieferung","Ô-dachi 1–32","+3 Jahre"],
+ ["準免許","Jun-Menkyo","Vor-Diplom","Ô-dachi 1–43","+3 Jahre"],
+ ["本免許","Hon-Menkyo","Diplom","Ô-dachi 43, Ko-dachi 5, Tantô 5 <em>(alle gegen Ô-dachi)</em>","+4 Jahre"],
+ ["免許皆伝","Menkyo-Kaiden","Volle Überlieferung","dazu Mutô 12 <em>(je 4 gegen Ô-dachi, Ko-dachi, Tantô)</em>","+5 Jahre"],
+ ["法主","Hôshu","Haupt der Schule","",""]
+];
+const KAMAE = [["Rei","礼"],["Battô","抜刀"],["Seigan","正眼"],["Ura-seigan","裏正眼"],["In","陰"],["Yô","陽"],["Hidari-katate-jôdan","左片手上段"],["Migi-jôdan","右上段"],["Gedan","下段"],["Waki","脇"],["Onken","隠剣"],["Seigan","正眼"],["Ura-waki","裏脇"],["Chûdan-kasumi","中段霞"],["Jôdan-kasumi","上段霞"],["Tsuki (rechts vorn)","突"],["Hongaku","本覚"],["Chûdan-ura-gasumi","中段裏霞"],["Jôdan-ura-gasumi","上段裏霞"],["Tsuki (links vorn)","突"],["Suriage","摺上"],["Shômen-uchi","正面打"],["Hiraki-dachi","開太刀"],["Kesa-gake","袈裟懸"],["Nôtô","納刀"],["Rei","礼"]];
+/* Nr, Name, Kanji, U-Kamae, S-Kamae, Treffer, Zanshin, Rückfrage */
+const ODACHI = [
+ [1,"Ippon-me · Hitotsu-gachi","一本目 一つ勝ち","In","Seigan","Hidari-gote","Gedan"],
+ [2,"Nihon-me · Age-uke","二本目 上げ受け","Seigan","Gedan","Migi-gote","Jôdan"],
+ [3,"Sanbon-me · Uchikomi-inashi","三本目 打ち込みいなし","In","Seigan","Migi-gote","Jôdan"],
+ [4,"Yonhon-me · Kasumi-fûji","四本目 霞封じ","Gedan-kasumi","Gedan","Migi-gote","Gedan"],
+ [5,"Gohon-me · Tsukikomi Seigan-yaburi","五本目 付き込み正眼破り","Seigan","Wakigamae","Migi-gote","Jôdan","35"],
+ [6,"Roku-ban · Futatsu-gachi","六番 二つ勝ち","In","Seigan","Hidari / Migi-gote","Jôdan"],
+ [7,"Nana-ban · Intô","七番 陰刀","In","Seigan","Hidari / Hidari-gote","In"],
+ [8,"Hachi-ban · Gedan no Uchiotoshi","八番 下段の打ち落とし","Seigan","Gedan","Hidari-gote","Gedan"],
+ [9,"Kyû-ban · Norimi","九番 乗り身","In","Seigan","Migi / Hidari-gote","In","37"],
+ [10,"Jû-ban · Norimi Hitotsu-gachi","十番 乗り身一つ勝ち","In","Seigan","Migi-gote","Gedan"],
+ [11,"Jûichi-ban · Gedan no Tsuke Chû-seigan","十一番 下段の付け中正眼","Seigan","Gedan","Migi / Hidari-gote","Gedan"],
+ [12,"Jûni-ban · Orimi","十二番 折身","Seigan","Wakigamae","Mizo'ochi / Migi-gote","In"],
+ [13,"Jûsan-ban · Suriage","十三番 摺り上げ","Migi-jôdan","Seigan","Migi / Hidari-gote","Gedan"],
+ [14,"Jûyon-ban · Wakigamae no Uchiotoshi","十四番 脇構えの打ち落とし","Seigan","Wakigamae","Migi-gote","Gedan"],
+ [15,"Jûgo-ban · Honshô","十五番 本生","Gedan","Seigan","Hidari-gote","Gedan"],
+ [16,"Jûroku-ban · Jôdan-gasumi","十六番 上段霞","Jôdan-gasumi","Gedan","Mizo'ochi","Sasage-dachi","37"],
+ [17,"Jûnana-ban · Kobushi no Harai","十七番 拳の払い","Seigan","Gedan","Hidari / Hidari-gote","In"],
+ [18,"Jûhachi-ban · Uki","十八番 浮き","Gedan","Seigan","Hidari-gote","Gedan"],
+ [19,"Jûkyû-ban · Kirikaeshi","十九番 切り返し","In","Seigan","Migi-gote","Hidari-jôdan"],
+ [20,"Nijû-ban · Sayû no Harai","二十番 左右の払い","In","Seigan","Nodo / Migi-gote","Gedan"],
+ [21,"Nijûichi-ban · Gyaku no Harai","二十一番 逆の払い","Yô","Seigan","Hidari-gote / Dô","Migi Harai-dachi","37"],
+ [22,"Nijûni-ban · Chishô","","Gedan","Jizuri-gedan","Migi-gote von unten","Yô"],
+ [23,"Nijûsan-ban · Chishô no Ai-gedan","","Gedan","Gedan","Mizo'ochi","Gedan"],
+ [24,"Nijûyon-ban · Seigan-barai","","In","Seigan","Hidari-gote","Chûdan-gasumi"],
+ [25,"Nijûgo-ban · Maki-gasumi","","Chûdan-gasumi","Gedan","Hidari / Migi-gote","Gedan"],
+ [26,"Nijûroku-ban · Maki-kaeshi","","Hidari-jôdan","Seigan","Hidari-gote / Mizo'ochi / Hidari-gote","Gedan"],
+ [27,"Nijûnana-ban · Hikimi no Hongaku","","Seigan","Gedan","Dô","Hongaku"],
+ [28,"Nijûhachi-ban · Ai-gedan Kesa-gawashi","","Gedan","Gedan","Hidari-gote","Chûdan-ura-gasumi"],
+ [29,"Nijûkyû-ban · Hotsu","","In","Gedan","Mizo'ochi / Dô","Jôdan-ura-gasumi"],
+ [30,"Sanjû-ban · Uragiri","","Seigan","Gedan","Men","Hidari-jôdan katate"],
+ [31,"Sanjûichi-ban · Kasumi-nagashi","","Seigan","Gedan","Migi-gote","Jôdan-gasumi"],
+ [32,"Sanjûni-ban · Haya-kirikaeshi","","In","Seigan","Migi-dô","Hongaku"],
+ [33,"Sanjûsan-ban · Junpi","","In","Seigan","Hidari-gote","Gedan"],
+ [34,"Sanjûyon-ban · Nuke-junpi","","In","Seigan","Dô / Migi-gote","Hiraki-dachi"],
+ [35,"Sanjûgo-ban · Tsumari","","In","Seigan","Nodo","Gedan"],
+ [36,"Sanjûroku-ban · Jûji-kuzushi","","Seigan","Gedan","Migi / Hidari-gote","Gedan"],
+ [37,"Sanjûnana-ban · Renzoku Kiriotoshi Shin","","In","Seigan","Migi-gote","Gedan"],
+ [38,"Sanjûhachi-ban · Renzoku Kiriotoshi Gyô","","In","Seigan","Migi-gote","Gedan"],
+ [39,"Sanjûkyû-ban · Renzoku Kiriotoshi Sô","","In","Seigan","Men / Men","Jôdan"],
+ [40,"Yonjû-ban · Yorimi","","In","Seigan","Migi-gote","Gedan"],
+ [41,"Yonjûichi-ban · Koshimi","","In","Seigan","Ushiro-kubi","Yô"],
+ [42,"Yonjûni-ban · Aiba","","In","Gedan","Migi / Hidari-gote","Gedan"],
+ [43,"Yonjûsan-ban · Hari-aiba","","In","Gedan","Nodo","Chûdan-gasumi"]
+];
+
+/* Korrekturliste: [Kategorie] oder [Wo, Bisher, Vorschlag, Begründung, Status ok|ask|style] */
+const FIX = [
+ ["Aikido · Kyu"],
+ ["Kata, 2. Kyu","'I'achi-Suburi 2","Tachi-suburi 2","Tippfehler in PDF und Liste.","ok"],
+ ["Ai-hanmi 5. Kyu; Gyaku-hanmi 3. Kyu","lkkyo","Ikkyo","Kleines L statt großem I.","ok"],
+ ["Liste Dan, Kopf Ai-hanmi","<span class=jp>愛半身</span>","<span class=jp>合半身</span>","Ai heißt hier „zusammen“ (合), nicht „Liebe“ (愛). Kyu-Liste schreibt es richtig.","ok"],
+ ["Ryote-ryote-dori, 5. Kyu","Shiho-gaeshi <span class=jp>四方投げ</span>","Shiho-gaeshi <span class=jp>四方返し</span>","Name und Kanji passen nicht zusammen. Shiho-nage folgt erst im 3. Kyu, also stimmt vermutlich der Name.","ask"],
+ ["Gyaku-hanmi: Nikyo 2. Kyu, Sankyo und Yonkyo 1. Kyu","PDF: 2 Arten","Liste: 4 Arten (<span class=jp>四種類</span>)","Quellen widersprechen sich.","ask"],
+ ["Gyaku-hanmi, 4. Kyu","Ikkyo (soto-irimi); Kokyu-nage (ushiro/irimi)","Liste: soto-irimi / soto-tenkan; Kokyu-nage (irimi)","Quellen widersprechen sich.","ask"],
+ ["Yokomen-uchi und Tsuki, 2. Kyu","PDF ohne Sankyo","Sankyo ergänzen","Liste führt Sankyo; ohne es springt die Reihe von Nikyo (3. Kyu) zu Yonkyo.","ask"],
+ ["Tsuki, 1. Kyu","PDF ohne Uchi-sankyo","Uchi-sankyo (uchi-tenkan, dann soto-tenkan)","Nur in der Liste. Dort verrutscht der Zusatz „soto-tenkan“ von Kiri-otoshi.","ask"],
+ ["Mune-ude-dori, 1. Kyu","PDF: leer","Liste: Kiri-otoshi","Nur in der Liste.","ask"],
+ ["Ushiro-seme: Kubi-jime","PDF: Ryote-kubi-jime, 3./1. Kyu","Liste: Kubi-jime, dazu Ikkyo im 2. Kyu","Name und Umfang abweichend.","ask"],
+ ["Ushiro-seme Ryote-dori, 2. Kyu","PDF: Yonkyo (wie im 1. Kyu)","Sankyo","Yonkyo stünde doppelt; Liste nennt Sankyo.","ask"],
+ ["Ushiro-seme Ryote-dori, 2. Kyu","Kokyu-nage <span class=jp>呼吸法</span>","Kokyu-nage <span class=jp>呼吸投げ</span>","Kanji gehört zu Kokyu-ho. PDF sagt „2 Arten“, Liste „eine Hand hoch“: klären.","ask"],
+ ["Ushiro-seme Ryo-kata-dori, 2. Kyu","PDF: leer","Liste: Sankyo, Yonkyo","Nur in der Liste.","ask"],
+ ["Suwari-waza, alle Angriffe","PDF: Ikkyo–Yonkyo lückenhaft","Liste: Reihen vollständig (z. B. Shomen-uchi 2. Kyu Sankyo + Yonkyo)","Größte inhaltliche Abweichung. Kommission muss die gültige Fassung festlegen.","ask"],
+ ["Suwari-waza Katate-kata-dori","<span class=jp>片手片手取り</span>","<span class=jp>片手肩取り</span>","Falsches Kanji in der Liste.","ok"],
+ ["Suwari-waza Shomen-uchi, 4. Kyu","Ikkyo ohne Kanji","<span class=jp>一教</span>","Lücke.","ok"],
+ ["Hanmi-handachi, 1. Kyu","PDF: Kote-gaeshi (nukite / hineri)","Liste: nukite / kaeshi","„hineri“ passt zum Dan-Programm; Liste vermutlich falsch.","ask"],
+ ["Jo-dori, 1. Kyu","Kokyu-nage, mae (ura = nukido)","?","„nukido“ ist unklar. Liste: „mae (ura)“.","ask"],
+ ["Tanto-dori, Liste","leere Zeile Yokomen-uchi","entfernen","Kein Inhalt in keinem Grad.","ok"],
+ ["ganzes Programm","Fukiage / Fuki-age, Kiriotoshi / Kiri-otoshi, Kokyuho / Kokyu-ho, Jiyu-Waza / Jiyu-waza","Fuki-age, Kiri-otoshi, Kokyu-ho, Jiyu-waza","Eine Schreibweise.","style"],
+ ["ganzes Programm","<span class=jp>切り落し / 切り落とし, 隅落し / 隅落とし, 袈裟掛け / 袈裟懸け</span>","<span class=jp>切り落とし, 隅落とし, 袈裟懸け</span>","Eine Okurigana-Regel.","style"],
+ ["Aikido · Dan"],
+ ["mehrere Stellen","irmi, Irmi-nage, Kokyu-nago, Gyuaku-Hanmi, Uchi-'Te","irimi, Irimi-nage, Kokyu-nage, Gyaku-hanmi, Uchi-te","Tippfehler.","ok"],
+ ["Kata 4./5. Dan","PDF: 4. Dan leer","Liste: Kogarashi <span class=jp>木枯らし</span>, Shunpu <span class=jp>春風</span> (unvollendet)","Aufnehmen oder bewusst weglassen.","ask"],
+ ["Ai-hanmi 3. Dan; Katate-muna-dori 4. Dan; Yokomen-uchi 2. Dan","PDF ohne","Liste: Hiji-otoshi; Maki-arashi; Kata-otoshi","Nur in der Liste.","ask"],
+ ["Ushiro Ryote-dori 3./4. Dan; Ryo-kata-dori 4. Dan","PDF: (Ikkyo-ura), (Sankyo-ura wirken lassen), (wie oben)","Liste: Standard; –; erst Sankyo wirken lassen","Zusätze vereinheitlichen.","ask"],
+ ["Liste Dan","fehlt: Jiyu-waza, San'nin-gake, Theorie","ergänzen","Steht nur in der PDF.","ok"],
+ ["Kanji","<span class=jp>巻き嵐 / 巻嵐</span>","<span class=jp>巻き嵐</span>","Einheitlich.","style"],
+ ["Daitoryu"],
+ ["Dan, Kaeshi-waza 3. Dan","Shihôgage","Shihônage","Tippfehler.","ok"],
+ ["Kyu, Ushiro Sotote-dori 5. Kyu","Sankajo-Ushiro-gime","Sankajô-ushiro-gime","Längenzeichen fehlt; das Video schreibt es richtig.","ok"],
+ ["Kyu und Dan","Ryote / Ryôte, Shomen / Shômen, Jo / Jô, Ryo- / Ryô-","immer mit Zirkumflex","Eine Umschrift.","style"],
+ ["Kyu","Uchi-te-dori, Ryôte-katate-dori","Video: Uchite-dori, Morote-dori","Programm und Video gleich benennen, sonst findet die Suche in der App nichts.","style"],
+ ["Dan","Einträge ohne Spiegelstrich (Hiji-gatame, Gasshô-nage, Aiki-nage …)","Format vereinheitlichen","Satzfehler.","style"],
+ ["ganzes Programm","keine japanischen Schriftzeichen","Kanji ergänzen","Vorschlag in Entwurf 3; von einem Lehrer bestätigen lassen.","ask"],
+ ["Video 5. Kyu","Zatori Yokomen-uchi (Yoko-nage), Tantô-dori","kein eigenes Kapitel gefunden","Prüfen, ob sie fehlen oder in einem anderen Kapitel stecken.","ask"],
+ ["Shinki Toho"],
+ ["Nr. 5, Treffer","Tabelle: Migi-gote","Kommentare: Hidari-gote","Quellen widersprechen sich.","ask"],
+ ["Nr. 5, Kanji","<span class=jp>付き込み</span> (Video)","<span class=jp>突き込み</span>?","Die Form beginnt mit einem Stich (tsuki). Klären, ob 付き bewusst gewählt ist.","ask"],
+ ["Nr. 9, 16, 21: Zanshin","Tabelle 2010: In; Sasage-dachi; Migi Harai-dachi","Kommentare: Gedan; Gedan; Migi Kiriharai","Quellen widersprechen sich.","ask"],
+ ["Umschrift","Into / Intô / Intou, Juichi / Jûichi, Kasumi fûji / Kasumi-fuji, Honshô / Honshou","Intô, Jûichi, Kasumi-fûji, Honshô","Eine Umschrift für Tabelle, Kommentare und Video.","style"],
+ ["Kamae-Übung","Seigan als Nr. 3 und Nr. 12","als Ablauf kennzeichnen","Kein Fehler: die Übung ist eine Folge, keine Liste.","style"]
+];
+
+/* ===== Helfer ===== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s);
+function parse(e){ const [n,z,f] = e.split("~"); return {n, z:z||"", f:(f||"").replace("!","")}; }
+const fl = f => f ? `<span class="flag">${f}</span>` : "";
+const runhead = t => `<div class="runhead">${t}</div>`;
+const folio = (r,n) => `<div class="folio">${r}<i></i><b>${n}</b></div>`;
+const fmtT = s => s==null ? "–" : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+
+/* Tuschelavierung: zufällige, weiche Pinselflecken auf Canvas */
+function inkWash(w,h,seed,dense){
+  let x = seed; const rnd = () => (x = (x*16807)%2147483647)/2147483647;
+  const c = document.createElement("canvas"); c.width=w; c.height=h; const g = c.getContext("2d");
+  g.filter = "blur(10px)";
+  for(let i=0;i<(dense||70);i++){
+    const cx = w*(.35+rnd()*.7), cy = h*(rnd()*.75), r = 20+rnd()*120;
+    g.fillStyle = `rgba(30,28,26,${.008+rnd()*.028})`;
+    g.beginPath(); g.ellipse(cx,cy,r*(1.6+rnd()*2),r*.5,-.6+rnd()*.4,0,Math.PI*2); g.fill();
+  }
+  g.filter = "blur(1.5px)";
+  for(let i=0;i<140;i++){
+    const cx = w*(.45+rnd()*.6), cy = h*rnd()*.7;
+    g.strokeStyle = `rgba(30,28,26,${.02+rnd()*.045})`; g.lineWidth = .5+rnd()*2.5;
+    g.beginPath(); g.moveTo(cx,cy); g.bezierCurveTo(cx+40*rnd(),cy-30*rnd(),cx+120*rnd(),cy+20*rnd(),cx+200*rnd(),cy-40*rnd()); g.stroke();
+  }
+  return c.toDataURL("image/png");
+}
+
+/* ===== Entwurf 1: Tusche ===== */
+function d1(){
+  const ink = inkWash(700,500,7);
+  const grp = K5.map(G => `<div class="grp"><h4>${G.g}<span>${G.gj}</span></h4>${
+    G.rows.map(([a,aj,,list]) => `<div class="row"><div class="atk">${a}<small>${aj}</small></div><div class="tq">${
+      list.map(e => { const p = parse(e); return `<div>${p.n}${fl(p.f)}${p.z?` <em>${p.z}</em>`:""}<small>${p.n==="Shiho-gaeshi"?"四方返し":(J[p.n]||"")}</small></div>`; }).join("")
+    }</div></div>`).join("")}</div>`).join("");
+  $("#p-d1").innerHTML = `
+    <div class="ink" style="top:-6%;right:-18%;width:75%;height:34%;background-image:url(${ink})"></div>
+    ${runhead("Aikido Shinki Rengo · Prüfungsprogramm")}
+    <div class="pg">
+      <div style="display:flex;align-items:center;gap:2cqw;margin-top:2cqw"><span class="mark" style="width:7cqw;height:7cqw;font-size:2.6cqw">神氣</span><span style="font:400 3.4cqw var(--f-cond);letter-spacing:.02em">AIKIDO SHINKI RENGO</span></div>
+      <div class="title"><h3>5. Kyu</h3><span class="kan">五級</span></div>
+      <div class="sub">Prüfungsprogramm Kyu-Grade<span>Stand 01.01.2022 · überarbeitet 2026</span></div>
+      <div class="cols">${grp}</div>
+      <div class="foot"><span class="flag">4</span> Kanji in der Vorlage 四方投げ (Shiho-nage); hier 四方返し, bitte bestätigen. · Höhere Grade setzen die Techniken der niedrigeren voraus.</div>
+    </div>
+    ${folio("Kyu-Programm","05")}`;
+}
+
+/* ===== Entwurf 2: Matrix ===== */
+function d2(){
+  const head = `<tr><th style="width:15cqw">Angriff</th>${[5,4,3,2,1].map(g=>`<th>${g}. Kyu<span>${GR[g]}</span></th>`).join("")}</tr>`;
+  const body = MAE.map(([a,aj,b,bj,G]) => `<tr><th>${a}${b?`<br><span style="font-weight:400">(${b})</span>`:""}<small>${aj}${bj?"・"+bj:""}</small></th>${
+    [5,4,3,2,1].map(g => `<td>${(G[g]||[]).map(e=>{const p=parse(e);return `<div><span>${p.n}${fl(p.f)}${p.z?`<em>${p.z}</em>`:""}</span><small>${p.n==="Shiho-gaeshi"?"四方返し":(J[p.n]||"")}</small></div>`;}).join("")}</td>`).join("")}</tr>`).join("");
+  $("#p-d2").innerHTML = `
+    <div class="band"><h3>Tachi-waza · Mae-seme<span>Aikido Shinki Rengo · Programm für Kyu-Grade</span></h3><div class="kan">立技 前攻め</div></div>
+    <table><thead>${head}</thead><tbody>${body}</tbody></table>
+    <div class="legend"><span><span class="flag">5</span> Rückfrage, siehe Korrekturliste</span><span><em style="font-family:var(--f-serif)">kursiv</em> Ausführung / Variante</span><span>Stand 01.01.2022 · überarbeitet 2026</span></div>
+    ${folio("Kyu-Programm","02")}`;
+}
+
+/* ===== Entwurf 3: Gradheft ===== */
+function qr(canvas, seed){
+  /* Platzhalter-Muster mit QR-Suchmarken; im echten Heft ein echter QR-Code auf die App-Adresse */
+  const n=25, g=canvas.getContext("2d"); canvas.width=canvas.height=n; let x=seed;
+  const rnd=()=>(x=(x*48271)%2147483647)/2147483647;
+  g.fillStyle="#fff"; g.fillRect(0,0,n,n); g.fillStyle="#1d1b1a";
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++) if(rnd()<.45) g.fillRect(i,j,1,1);
+  const fp=(a,b)=>{g.fillStyle="#1d1b1a";g.fillRect(a,b,7,7);g.fillStyle="#fff";g.fillRect(a+1,b+1,5,5);g.fillStyle="#1d1b1a";g.fillRect(a+2,b+2,3,3);};
+  g.fillStyle="#fff";g.fillRect(0,0,8,8);g.fillRect(n-8,0,8,8);g.fillRect(0,n-8,8,8);
+  fp(0,0);fp(n-7,0);fp(0,n-7);
+}
+function d3(){
+  const list = DT5.map(G => `<h4>${G.g}<span>${G.gj}</span></h4>${G.it.map(([n,j,a,t]) =>
+    `<div class="it"><div class="n">${n}<small>${j}</small>${a?`<em>${a}</em>`:""}</div><span class="vid">${fmtT(t)}</span><span class="boxes"><i></i><i></i><i></i><i></i></span></div>`).join("")}`).join("");
+  $("#p-d3").innerHTML = `
+    <div class="a5 d3"><div class="cover">
+      <div><div style="display:flex;align-items:center;gap:3cqw"><span class="mark" style="width:11cqw;height:11cqw;font-size:4cqw">神氣</span><span class="disc">Daitoryu Aiki Jujutsu<br>Bokuyokan Europa</span></div></div>
+      <div><h3>5. Kyu</h3><div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:3cqw"><span class="kan">五級</span><p style="text-align:right">Übungsheft<br>Prüfungsprogramm 2008<br>überarbeitet 2026</p></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:3cqw"><p>Name ______________<br><br>Prüfung am __________</p><div class="qr" style="position:static;color:#fff;opacity:.9"><span style="text-align:right">Alle Techniken<br>mit Video in der App</span><canvas id="qr1"></canvas></div></div>
+    </div></div>
+    <div class="a5 d3"><div class="list">
+      ${runhead("Daitoryu · 5. Kyu")}
+      <div style="display:flex;justify-content:space-between;font:700 1.5cqw var(--f-cond);letter-spacing:.1em;text-transform:uppercase;color:var(--usuzumi)"><span>Technik</span><span>Video&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Geübt</span></div>
+      ${list}
+    </div>${folio("Gradheft","03")}</div>`;
+  qr($("#qr1"), 11);
+}
+
+/* ===== Entwurf 4: Makimono ===== */
+function ruby(kan){
+  const k = KANA[kan]; return k ? `<ruby>${kan}<rt>${k}</rt></ruby>` : kan;
+}
+function d4(){
+  const secs = [
+    ["型・受身","Kata · Ukemi",[["","",["Kamae-undo"]],["","",["Mae-kaiten"]],["","",["Ushiro-kaiten"]],["","",["Yoko-kaiten"]]]],
+    ["立技","Tachi-waza · Mae-seme",MAE.filter(r=>r[4][5]).map(r=>[r[1]+(r[3]?"・"+r[3]:""),r[0]+(r[2]?" · "+r[2]:""),r[4][5]])],
+    ["後ろ攻め・座り技","Ushiro-seme · Suwari-waza",[["後ろ 片手胸取り","Ushiro katate-muna-dori",["Ikkyo"]],["後ろ 両手取り","Ushiro ryote-dori",["Shiho-nage"]],["座り技 片手片手取り","Suwari katate-katate-dori",["Ikkyo"]],["座り技 両手取り","Suwari ryote-dori",["Kokyu-ho"]]]]
+  ];
+  const html = secs.map(([jt,rt,cells]) => `<div class="sec"><h4>${jt}<span>${rt}</span></h4><div class="grid">${
+    cells.map(([aj,ar,list]) => `<div class="cell">${aj?`<div class="a">${aj}</div>`:""}${list.map(e=>{const p=parse(e);const kan=p.n==="Shiho-gaeshi"?"四方返し":J[p.n];return `<div class="t">${ruby(kan)}${fl(p.f)}</div><div class="r">${p.n}</div>`;}).join("")}</div>`).join("")
+  }</div></div>`).join("");
+  $("#p-d4").innerHTML = `
+    <div class="side"><span class="mark" style="width:10cqw;height:10cqw;font-size:3.6cqw;background:#fff;color:var(--shu)">神氣</span><div class="v">合気道 審査技</div><div class="v2">Aikido Shinki Rengo</div></div>
+    <div class="body"><div class="hanko">五級</div>
+      <h3>Prüfungsprogramm<b>5. Kyu</b></h3>
+      ${html}
+    </div>`;
+}
+
+/* ===== Entwurf 5: Technik-Landkarte ===== */
+function d5(){
+  const cols = MAE.map(r => ({a:r[0]+(r[2]?" ("+r[2]+")":""), j:r[1]+(r[3]?"・"+r[3]:""), g:r[4]}));
+  const map = {}; const order = [];
+  cols.forEach((c,ci) => [5,4,3,2,1].forEach(g => (c.g[g]||[]).forEach(e => {
+    const n = parse(e).n; if(!map[n]){ map[n] = {}; order.push(n); }
+    (map[n][ci] = map[n][ci] || []).push(g);
+  })));
+  const firstG = n => Math.max(...Object.values(map[n]).flat());
+  order.sort((a,b) => firstG(b)-firstG(a));
+  const head = `<tr><th></th>${cols.map(c=>`<th><div>${c.a}</div></th>`).join("")}<th><div>Summe</div></th></tr>`;
+  const body = order.map(n => `<tr><th>${n}<small>${n==="Shiho-gaeshi"?"四方返し":(J[n]||"")}</small></th>${
+    cols.map((c,ci) => { const g = map[n][ci]; if(!g) return "<td></td>"; const m = Math.max(...g); return `<td class="g${m}">${[...new Set(g)].join("·")}</td>`; }).join("")
+  }<td style="background:none;color:var(--usuzumi);font-weight:400">${Object.keys(map[n]).length}</td></tr>`).join("");
+  $("#p-d5").innerHTML = `${runhead("Aikido Shinki Rengo · Technik-Landkarte")}
+    <div class="pg"><h3>Wo kommt welche Technik vor? <span>技の地図</span></h3>
+    <p class="lead">Kyu-Grade, Tachi-waza Mae-seme. Die Zahl nennt den Kyu-Grad, in dem die Kombination aus Angriff (Spalte) und Technik (Zeile) geprüft wird; zwei Zahlen bedeuten zwei Varianten. Leere Felder kommen in den Kyu-Graden nicht vor.</p>
+    <table><thead>${head}</thead><tbody>${body}</tbody></table>
+    <div class="key">Kyu-Grad: <span><i style="background:#f3c7c6"></i>5. Kyu</span><span><i style="background:#e8918f"></i>4. Kyu</span><span><i style="background:#dc5a57"></i>3. Kyu</span><span><i style="background:#ce171e"></i>2. Kyu</span><span><i style="background:#7d0a0f"></i>1. Kyu</span><span>· Summe = Zahl der Angriffe mit dieser Technik</span></div></div>
+    ${folio("Technik-Landkarte","06")}`;
+}
+
+/* ===== Shinki Toho ===== */
+function st(){
+  const ink = inkWash(700,500,23,90);
+  const lad = ST_GRADES.map(([k,r,d,c,t]) => `<div class="rung"><b>${k}<small>${r}</small></b><div>${d}${c?`<br><em>${c}</em>`:""}</div><span>${t}</span></div>`).join("");
+  const kam = KAMAE.map(([r,k],i) => `<li><b>${i+1}</b>${r}<span>${k}</span></li>`).join("");
+  const p1 = `<div class="a4 d1 st">
+    <div class="ink" style="top:-6%;right:-18%;width:75%;height:34%;background-image:url(${ink})"></div>
+    ${runhead("Itto-den Shinki Toho · Prüfungsprogramm")}
+    <div class="pg">
+      <div style="display:flex;align-items:center;gap:2cqw;margin-top:2cqw"><span class="mark" style="width:7cqw;height:7cqw;font-size:2.6cqw">神氣</span><span style="font:400 3.4cqw var(--f-cond)">ITTO-DEN SHINKI TOHO</span></div>
+      <h3>Grade &amp; Programm</h3><div class="kan">一刀伝 神氣刀法 位階</div>
+      <div class="ladder">${lad}</div>
+      <p class="small" style="margin-top:1.4cqw">Zulassung: Mindestalter 16 für Shoden, ein Jahr Mitglied im Shinkiryu-Verband. Prüfungen in der Regel auf Shinki-Toho-Lehrgängen. Abstände gelten bei mindestens einem Training pro Woche. Prüfer: der Hôshu; mit seinem Einverständnis Jun-Menkyo bis Shoden, Hon-Menkyo bis Chûden, Menkyo-Kaiden bis Okuden.</p>
+      <div class="two">
+        <div><h4>Kamae-Übung · 構</h4><ol>${kam}</ol></div>
+        <div class="sb"><h4>Suburi · 素振り</h4>
+          <p><b>Shômen-uchioroshi</b>Frontales Abwärtsschlagen aus parallelem Stand, Füße bleiben am Platz.</p>
+          <p><b>Shômen-uchikomi</b>Frontales Hineinschlagen mit Schritt, im Wechsel aus In und Yô.</p>
+          <p><b>Te no uchi</b>Schnitt auf den Unterarm; mae (vorne, aus den Handgelenken) und oku (hinten, schräg).</p>
+          <h4>Kiriotoshi · 斬り落し</h4>
+          <p>Grundübung in drei Stufen: Shin <span style="font-family:var(--f-jp)">真</span> bis Mizo'ochi, Gyô <span style="font-family:var(--f-jp)">行</span> bis zum Hals, Sô <span style="font-family:var(--f-jp)">草</span> auf den Kopf.</p>
+        </div>
+      </div>
+    </div>${folio("Shinki Toho","01")}</div>`;
+  const lv = {1:"Shoden 初伝",12:"Chûden 中伝",22:"Okuden 奥伝",33:"Jun-Menkyo 準免許"};
+  const rows = ODACHI.map(([n,r,k,u,s,t,z,f]) =>
+    `${lv[n]?`<tr class="lv"><td></td><td class="lvl" colspan="6">${lv[n]}</td></tr>`:""}<tr><td class="n">${n}</td><td>${r}${fl(f)}</td><td class="j">${k||"<span style='color:#bbb'>–</span>"}</td><td>${u}</td><td>${s}</td><td>${t}</td><td>${z}</td></tr>`).join("");
+  const p2 = `<div class="a4 d1 st">${runhead("Itto-den Shinki Toho · Ô-dachi")}
+    <div class="pg" style="padding-top:6cqw">
+      <h3 style="margin-top:0;font-size:4cqw">Ô-dachi tai Ô-dachi <span style="font:600 2.6cqw var(--f-jp);color:var(--shu)">大太刀</span></h3>
+      <table><thead><tr><th></th><th>Form</th><th>日本語</th><th>Uchidachi</th><th>Shidachi</th><th>Treffer</th><th>Zanshin</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>${folio("Shinki Toho","02")}</div>`;
+  $("#p-st").innerHTML = p1 + p2;
+  $("#p-st").querySelectorAll(".st table td").forEach(td => td.style.fontSize = "1.02cqw");
+}
+
+/* ===== Korrekturliste ===== */
+function fixes(){
+  let n = 0; const cnt = {ok:0,ask:0,style:0};
+  const lbl = {ok:"sicher",ask:"klären",style:"Schreibweise"};
+  $("#fix-body").innerHTML = FIX.map(r => {
+    if(r.length===1) return `<tr class="cat"><td colspan="6">${r[0]}</td></tr>`;
+    n++; cnt[r[4]]++;
+    return `<tr><td>${n}</td><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td><span class="pill ${r[4]}">${lbl[r[4]]}</span></td></tr>`;
+  }).join("");
+  $("#fix-sum").innerHTML = `<div><b>${n}</b><span>Befunde</span></div><div><b>${cnt.ok}</b><span>sicher korrigiert</span></div><div><b>${cnt.ask}</b><span>für die Kommission</span></div><div><b>${cnt.style}</b><span>Schreibweise</span></div>`;
+}
+
+d1(); d2(); d3(); d4(); d5(); st(); fixes();
+</script>
+</body>
+</html>
