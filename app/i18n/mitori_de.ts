@@ -10,6 +10,14 @@
     </message>
 </context>
 <context>
+    <name>GradeStand</name>
+    <message>
+        <location filename="../qml/GradeStand.qml" line="27"/>
+        <source>Rating of the grade</source>
+        <translation>Stand des Grades</translation>
+    </message>
+</context>
+<context>
     <name>KanteAudioMeter</name>
     <message>
         <location filename="../qml/Kante/KanteAudioMeter.qml" line="146"/>
@@ -185,32 +193,32 @@
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="69"/>
+        <location filename="../qml/ProgrammePage.qml" line="76"/>
         <source>Exam videos</source>
         <translation>Prüfungsvideos</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="71"/>
+        <location filename="../qml/ProgrammePage.qml" line="78"/>
         <source>There is no video for this grade.</source>
         <translation>Zu diesem Grad gibt es kein Video.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="72"/>
+        <location filename="../qml/ProgrammePage.qml" line="79"/>
         <source>The videos are on the DVDs of the Shinkiryu association. Until Mitori can load them with the DVD&apos;s code, put them into the video folder (settings).</source>
         <translation>Die Videos gibt es als DVD beim Shinkiryu-Verband. Bis Mitori sie mit dem Code der DVD laden kann, gehören sie in den Videoordner (Einstellungen).</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="76"/>
+        <location filename="../qml/ProgrammePage.qml" line="83"/>
         <source>Video folder</source>
         <translation>Videoordner</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="81"/>
+        <location filename="../qml/ProgrammePage.qml" line="88"/>
         <source>Order on shinkiryu.de</source>
         <translation>Auf shinkiryu.de bestellen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="161"/>
+        <location filename="../qml/ProgrammePage.qml" line="170"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>

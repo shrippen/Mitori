@@ -61,6 +61,13 @@ Kirigami.ScrollablePage {
             }
         }
 
+        GradeStand {
+            objectName: "gradeStand"
+            Layout.fillWidth: true
+            Layout.margins: Kirigami.Units.smallSpacing
+            entries: page.rows
+        }
+
         KanteHintCard {
             Layout.fillWidth: true
             Layout.margins: Kirigami.Units.smallSpacing
@@ -87,6 +94,7 @@ Kirigami.ScrollablePage {
     ListView {
         id: list
 
+        objectName: "programmeList"
         model: page.rows
         reuseItems: true
 
@@ -154,6 +162,7 @@ Kirigami.ScrollablePage {
                             visible: entryItem.entry.kind === "entry"
                             value: Practice.revision >= 0 ? Practice.level(entryItem.entry.id) : 0
                             names: Practice.levelNames
+                            color: KanteStyle.focusColor     // the hue of the grade's bar
                         }
                         KanteToolButton {
                             visible: entryItem.playable
