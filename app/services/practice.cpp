@@ -23,10 +23,11 @@ void Practice::load(const QString &path)
 {
     QDir().mkpath(QFileInfo(path).absolutePath());
     if (!m_log->open(path)) {
-        m_error = m_log->errorString();
+        m_error = tr("The practice log could not be opened: %1").arg(m_log->errorString());
         qWarning("Practice: %s", qPrintable(m_error));
         return;
     }
+    m_open = true;
     m_latest = m_log->latest();
 }
 
@@ -51,18 +52,26 @@ QStringList Practice::levelNames() const
     return {tr("not rated"), tr("seen"), tr("with help"), tr("sure"), tr("exam-ready")};
 }
 
-void Practice::rate(const QString &entry, int level)
+bool Practice::rate(const QString &entry, int level)
 {
-    if (!m_error.isEmpty()) {
-        return;
+    if (!m_open || entry.isEmpty() || level < 1 || level > 4) {
+        return false;
     }
     const PracticeLog::Rating r = m_log->add(entry, level, QDateTime::currentDateTimeUtc(), deviceId());
     if (r.uid.isEmpty()) {
-        return;
+        m_error = tr("The rating could not be saved: %1").arg(m_log->errorString());
+        qWarning("Practice: %s", qPrintable(m_error));
+        emit errorChanged();
+        return false;
     }
     m_latest.insert(entry, r);
     ++m_revision;
     emit changed();
+    if (!m_error.isEmpty()) {
+        m_error.clear();
+        emit errorChanged();
+    }
+    return true;
 }
 
 int Practice::level(const QString &entry) const

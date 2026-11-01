@@ -22,7 +22,8 @@ Kirigami.Dialog {
     preferredWidth: Kirigami.Units.gridUnit * 24
     padding: Kirigami.Units.largeSpacing
 
-    KanteScope { target: sheet.contentItem }
+    // Not a content child: the dialog's scroll view sizes itself by its only child, the column.
+    property Item kanteScope: KanteScope { target: sheet.contentItem }
 
     ColumnLayout {
         spacing: Kirigami.Units.smallSpacing

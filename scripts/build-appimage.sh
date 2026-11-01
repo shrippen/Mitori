@@ -99,7 +99,8 @@ for d in "$QT/plugins"/*; do
 done
 ln -s "$QT/plugins/sqldrivers/libqsqlite.so" "$PLUGINS/sqldrivers/"
 cat > "$TOOLS/qmake" <<QMAKE
-#!/bin/sh
+#!/usr/bin/env bash
+set -o pipefail     # a failing qmake fails the wrapper too
 "$QT/bin/qmake" "\$@" | sed 's|^QT_INSTALL_PLUGINS:.*|QT_INSTALL_PLUGINS:$PLUGINS|'
 QMAKE
 chmod +x "$TOOLS/qmake"

@@ -70,63 +70,63 @@
 <context>
     <name>PlayerPage</name>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="203"/>
-        <location filename="../qml/PlayerPage.qml" line="228"/>
+        <location filename="../qml/PlayerPage.qml" line="217"/>
+        <location filename="../qml/PlayerPage.qml" line="242"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="249"/>
+        <location filename="../qml/PlayerPage.qml" line="263"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="226"/>
+        <location filename="../qml/PlayerPage.qml" line="240"/>
         <source>Frame back</source>
         <translation>Bild zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="223"/>
+        <location filename="../qml/PlayerPage.qml" line="237"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="222"/>
+        <location filename="../qml/PlayerPage.qml" line="236"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="221"/>
+        <location filename="../qml/PlayerPage.qml" line="235"/>
         <source>Chapter start</source>
         <translation>Kapitelanfang</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="227"/>
+        <location filename="../qml/PlayerPage.qml" line="241"/>
         <source>Frame on</source>
         <translation>Bild vor</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="229"/>
+        <location filename="../qml/PlayerPage.qml" line="243"/>
         <source>Playback</source>
         <translation>Wiedergabe</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="258"/>
+        <location filename="../qml/PlayerPage.qml" line="272"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="224"/>
+        <location filename="../qml/PlayerPage.qml" line="238"/>
         <source>Loop</source>
         <translation>Schleife</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="225"/>
+        <location filename="../qml/PlayerPage.qml" line="239"/>
         <source>Tempo</source>
         <translation>Tempo</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="266"/>
+        <location filename="../qml/PlayerPage.qml" line="281"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
@@ -134,29 +134,39 @@
 <context>
     <name>Practice</name>
     <message>
-        <location filename="../services/practice.cpp" line="51"/>
+        <location filename="../services/practice.cpp" line="26"/>
+        <source>The practice log could not be opened: %1</source>
+        <translation>Das Übungsprotokoll lässt sich nicht öffnen: %1</translation>
+    </message>
+    <message>
+        <location filename="../services/practice.cpp" line="52"/>
         <source>not rated</source>
         <translation>offen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="51"/>
+        <location filename="../services/practice.cpp" line="52"/>
         <source>seen</source>
         <translation>gesehen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="51"/>
+        <location filename="../services/practice.cpp" line="52"/>
         <source>with help</source>
         <translation>mit Hilfe</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="51"/>
+        <location filename="../services/practice.cpp" line="52"/>
         <source>sure</source>
         <translation>sicher</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="51"/>
+        <location filename="../services/practice.cpp" line="52"/>
         <source>exam-ready</source>
         <translation>prüfungsreif</translation>
+    </message>
+    <message>
+        <location filename="../services/practice.cpp" line="62"/>
+        <source>The rating could not be saved: %1</source>
+        <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
 </context>
 <context>
@@ -210,7 +220,7 @@
         <translation>Wie sitzt die Technik? Noch nicht eingeschätzt.</translation>
     </message>
     <message>
-        <location filename="../qml/RatingRow.qml" line="32"/>
+        <location filename="../qml/RatingRow.qml" line="39"/>
         <source>Rating</source>
         <translation>Einschätzung</translation>
     </message>
@@ -251,7 +261,12 @@
         <translation>Programmdaten fehlen</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="44"/>
+        <location filename="../qml/StartPage.qml" line="38"/>
+        <source>Ratings are not saved</source>
+        <translation>Einschätzungen werden nicht gespeichert</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="52"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
@@ -259,12 +274,12 @@
 <context>
     <name>TechniqueSheet</name>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="62"/>
+        <location filename="../qml/TechniqueSheet.qml" line="63"/>
         <source>Watch video</source>
         <translation>Video ansehen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="68"/>
+        <location filename="../qml/TechniqueSheet.qml" line="69"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>

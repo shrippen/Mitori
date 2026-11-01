@@ -46,6 +46,7 @@ KanteKeyboard 1.0 KanteKeyboard.qml
 KanteKeycap 1.0 KanteKeycap.qml
 KanteKpi 1.0 KanteKpi.qml
 KanteLamp 1.0 KanteLamp.qml
+KanteLegend 1.0 KanteLegend.qml
 KanteLevelDots 1.0 KanteLevelDots.qml
 KanteLevelMeter 1.0 KanteLevelMeter.qml
 KanteLevelPicker 1.0 KanteLevelPicker.qml

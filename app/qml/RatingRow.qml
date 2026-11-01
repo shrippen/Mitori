@@ -24,6 +24,13 @@ ColumnLayout {
         color: KanteStyle.mutedTextColor
         wrapMode: Text.Wrap
     }
+    QQC2.Label {
+        Layout.fillWidth: true
+        visible: Practice.errorString !== ""
+        text: Practice.errorString
+        color: KanteStyle.negativeTextColor
+        wrapMode: Text.Wrap
+    }
     KanteLevelPicker {
         Layout.fillWidth: true
         value: rating.level

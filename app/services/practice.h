@@ -17,7 +17,8 @@ class Practice : public QObject
     QML_ELEMENT
     QML_SINGLETON
     Q_PROPERTY(int revision READ revision NOTIFY changed)
-    Q_PROPERTY(QString errorString READ errorString CONSTANT)
+    // Why the log could not be opened or the last rating not saved; empty when all is well.
+    Q_PROPERTY(QString errorString READ errorString NOTIFY errorChanged)
     // Words per level: [none, seen, with help, sure, ready for the exam] (translated).
     Q_PROPERTY(QStringList levelNames READ levelNames CONSTANT)
 
@@ -32,7 +33,8 @@ public:
     QStringList levelNames() const;
 
     // A new rating of an entry now (1..4); a rating of the same level again counts as practice.
-    Q_INVOKABLE void rate(const QString &entry, int level);
+    // False (and errorString set) when it could not be saved.
+    Q_INVOKABLE bool rate(const QString &entry, int level);
     // The latest level of an entry, 0 if never rated.
     Q_INVOKABLE int level(const QString &entry) const;
     // When the entry was rated last (local time), or an invalid date.
@@ -46,6 +48,7 @@ public:
 
 signals:
     void changed();
+    void errorChanged();
 
 private:
     void load(const QString &path);
@@ -53,5 +56,6 @@ private:
     std::unique_ptr<PracticeLog> m_log;
     QHash<QString, PracticeLog::Rating> m_latest;
     QString m_error;
+    bool m_open = false;
     int m_revision = 0;
 };

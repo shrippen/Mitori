@@ -28,9 +28,9 @@ public:
     bool open(const QString &path);
     QString errorString() const { return m_error; }
 
-    // Adds a rating; returns it with its new uid, or an empty uid on failure.
+    // Adds a rating; returns it with its new uid, or an empty uid on failure (errorString()).
     Rating add(const QString &entry, int level, const QDateTime &at, const QString &device);
-    // The latest rating of every entry (for lists).
+    // The latest rating of every entry (for lists); entries with a level outside 1..4 are skipped.
     QHash<QString, Rating> latest() const;
     // All ratings of one entry, oldest first.
     QList<Rating> history(const QString &entry) const;

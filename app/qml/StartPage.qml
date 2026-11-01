@@ -31,6 +31,14 @@ Kirigami.ScrollablePage {
             explanation: Programme.errorString
         }
 
+        KanteHintCard {
+            Layout.fillWidth: true
+            visible: Practice.errorString !== ""
+            tier: KanteHintCard.Tier.Red
+            titleText: qsTr("Ratings are not saved")
+            text: Practice.errorString
+        }
+
         KanteOptionTile {
             id: programmeTile
 

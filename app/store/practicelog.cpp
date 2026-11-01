@@ -87,6 +87,7 @@ PracticeLog::Rating PracticeLog::add(const QString &entry, int level, const QDat
     q.addBindValue(at.toMSecsSinceEpoch());
     q.addBindValue(device);
     if (!q.exec()) {
+        m_error = q.lastError().text();
         return r;
     }
     r = {uid, entry, level, at.toUTC(), device};
@@ -101,7 +102,10 @@ QHash<QString, PracticeLog::Rating> PracticeLog::latest() const
     q.exec(QStringLiteral("SELECT uid, entry, level, at, device FROM ratings ORDER BY at, rowid"));
     while (q.next()) {
         const Rating r = rating(q);
-        result.insert(r.entry, r);
+        // Only levels 1..4 count (a merged or edited log may carry others).
+        if (r.level >= 1 && r.level <= 4) {
+            result.insert(r.entry, r);
+        }
     }
     return result;
 }
@@ -114,7 +118,10 @@ QList<PracticeLog::Rating> PracticeLog::history(const QString &entry) const
     q.addBindValue(entry);
     q.exec();
     while (q.next()) {
-        result << rating(q);
+        const Rating r = rating(q);
+        if (r.level >= 1 && r.level <= 4) {
+            result << r;
+        }
     }
     return result;
 }
