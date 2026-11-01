@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     QGuiApplication::setOrganizationDomain(QStringLiteral("shrippen.github.io"));
     QGuiApplication::setDesktopFileName(QStringLiteral("io.github.shrippen.Mitori"));
 
-    // German from i18n/mitori_de.ts; any other language keeps the English of the code.
+    // The first of the user's languages with a catalog (de, en); otherwise the English of the code.
     QTranslator translator;
     if (translator.load(QLocale(), QStringLiteral("mitori"), QStringLiteral("_"), QStringLiteral(":/i18n"))) {
         QCoreApplication::installTranslator(&translator);

@@ -20,4 +20,4 @@ for step in "${steps[@]}"; do
         *) echo "unknown step: $step" >&2; exit 2 ;;
     esac
 done
-ls -la dist/*/
+if [ -d dist ]; then ls -la dist/*/; fi
