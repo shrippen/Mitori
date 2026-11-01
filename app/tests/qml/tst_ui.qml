@@ -62,12 +62,34 @@ TestCase {
         window.pageStack.pop()
     }
 
+    function test_2b_sheet() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        const entry = page.rows.find(r => r.kind === "entry" && r.attack)
+        page.open(entry)
+        const sheet = findChild(page, "techniqueSheet")
+        verify(sheet)
+        tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, entry.id)
+        shot("2b-sheet")
+        sheet.close()
+        window.pageStack.pop()
+    }
+
     function test_3_comment() {
         const entry = Programme.entry("shinkitoho/odachi/1")
         verify(entry.comment)
         const page = push("CommentPage", { entry: entry })
         compare(page.title, entry.comment.titel)
         shot("4-comment")
+        window.pageStack.pop()
+    }
+
+    function test_3b_settings() {
+        const page = push("SettingsPage")
+        compare(page.title, "Settings")
+        shot("4b-settings")
         window.pageStack.pop()
     }
 
@@ -87,6 +109,21 @@ TestCase {
         shot("6-player-landscape")
         window.width = 420
         window.height = 800
+        window.pageStack.pop()
+    }
+
+    // The last chapter ends with the file; a player at the end of the file no longer seeks back,
+    // so the loop must turn before it (review of PR 3).
+    function test_5_loop_turns_before_end_of_file() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const page = push("PlayerPage", { playlist: rows, index: rows.length - 1 })
+        tryVerify(() => page.duration > 0, 10000)
+        verify(page.to >= page.duration - 50, "the last chapter should end with the file")
+        verify(page.end < page.duration - 100)
+        verify(page.end > page.to - 1000)
         window.pageStack.pop()
     }
 }

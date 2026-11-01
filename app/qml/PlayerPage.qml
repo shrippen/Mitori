@@ -19,6 +19,9 @@ Kirigami.Page {
     readonly property string video: current.video ? current.video.video : ""
     readonly property real from: current.video ? current.video.von * 1000 : 0
     readonly property real to: current.video ? current.video.bis * 1000 : 0
+    // Where the loop turns: the chapter end, but never the end of the file (the last chapter of a
+    // video ends with it, and a player at the end of the file no longer seeks back).
+    readonly property real end: player.duration > 0 ? Math.min(to, player.duration - 250) : to
     readonly property var crop: Videos.crop(video)
     readonly property bool landscape: width > height
     readonly property var tempi: [0.25, 0.5, 0.75, 1]
@@ -28,6 +31,7 @@ Kirigami.Page {
     // For the UI test: where the video stands (ms) and whether it plays.
     readonly property alias position: player.position
     readonly property alias playing: player.playing
+    readonly property alias duration: player.duration
 
     // The entry on screen, for the programme list to mark it when the user comes back.
     signal shown(string id)
@@ -48,6 +52,16 @@ Kirigami.Page {
     function restart() {
         player.position = from
         player.play()
+    }
+    // Play from the chapter start when the video stands at (or after) the chapter end.
+    function togglePlay() {
+        if (player.playing) {
+            player.pause()
+        } else if (player.position >= end - frameMs || player.mediaStatus === MediaPlayer.EndOfMedia) {
+            restart()
+        } else {
+            player.play()
+        }
     }
     function step(direction) {
         player.pause()
@@ -82,7 +96,7 @@ Kirigami.Page {
             }
         }
         onPositionChanged: {
-            if (page.to <= 0 || player.position < page.to) {
+            if (page.to <= 0 || player.position < page.end) {
                 return
             }
             if (page.looping) {
@@ -93,7 +107,7 @@ Kirigami.Page {
         }
     }
 
-    Keys.onSpacePressed: player.playing ? player.pause() : player.play()
+    Keys.onSpacePressed: page.togglePlay()
     Keys.onLeftPressed: page.step(-1)
     Keys.onRightPressed: page.step(1)
 
@@ -148,7 +162,7 @@ Kirigami.Page {
             }
 
             TapHandler {
-                onTapped: player.playing ? player.pause() : player.play()
+                onTapped: page.togglePlay()
                 onDoubleTapped: (eventPoint, button) => page.jump(eventPoint.position.x < stage.width / 2 ? -page.jumpMs : page.jumpMs)
             }
         }
@@ -184,7 +198,7 @@ Kirigami.Page {
             QQC2.Label {
                 Layout.fillWidth: true
                 text: page.timeText(player.position - page.from) + " / " + page.timeText(page.to - page.from)
-                font.family: "monospace"
+                font.family: KanteStyle.monoFamily
                 horizontalAlignment: Text.AlignHCenter
             }
 
@@ -210,7 +224,7 @@ Kirigami.Page {
                     icon.name: player.playing ? "media-playback-pause" : "media-playback-start"
                     text: player.playing ? qsTr("Pause") : qsTr("Play")
                     display: QQC2.AbstractButton.IconOnly
-                    onClicked: player.playing ? player.pause() : player.play()
+                    onClicked: page.togglePlay()
                 }
                 KanteToolButton {
                     icon.name: "go-next"

@@ -33,11 +33,11 @@ Kirigami.Dialog {
             color: KanteStyle.disabledTextColor
             wrapMode: Text.Wrap
         }
-        QQC2.Label {
+        KanteHeading {
             Layout.fillWidth: true
             visible: !!sheet.entry.jp
+            level: 2
             text: sheet.entry.jp || ""
-            font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.4
         }
         QQC2.Label {
             Layout.fillWidth: true

@@ -69,8 +69,13 @@ Kirigami.ScrollablePage {
             titleText: qsTr("Exam videos")
             text: !page.hasPositions
                   ? qsTr("There is no video for this grade.")
-                  : qsTr("The videos are on the DVDs of the Shinkiryu association. With the code that comes with a DVD, Mitori loads them onto the device.")
+                  : qsTr("The videos are on the DVDs of the Shinkiryu association. Until Mitori can load them with the DVD's code, put them into the video folder (settings).")
 
+            KanteButton {
+                visible: page.hasPositions
+                text: qsTr("Video folder")
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
+            }
             KanteButton {
                 visible: page.hasPositions
                 text: qsTr("Order on shinkiryu.de")
@@ -157,6 +162,7 @@ Kirigami.ScrollablePage {
     TechniqueSheet {
         id: sheet
 
+        objectName: "techniqueSheet"
         onPlayRequested: entry => page.play(entry)
         onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
     }
@@ -176,6 +182,7 @@ Kirigami.ScrollablePage {
         const playlist = page.rows.filter(r => page.playable(r))
         const player = page.Kirigami.PageStack.push(Qt.resolvedUrl("PlayerPage.qml"),
                                                     { playlist: playlist, index: playlist.findIndex(r => r.id === entry.id) }) as PlayerPage
+        page.lastId = entry.id
         player.shown.connect(id => page.lastId = id)
     }
 

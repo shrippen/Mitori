@@ -20,7 +20,6 @@ Kirigami.ScrollablePage {
             Layout.maximumWidth: Kirigami.Units.gridUnit * 36
             text: page.entry.comment ? page.entry.comment.text : ""
             wrapMode: Text.Wrap
-            lineHeight: 1.25
         }
         QQC2.Label {
             Layout.fillWidth: true
