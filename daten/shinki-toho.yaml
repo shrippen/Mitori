@@ -10,6 +10,7 @@
 
 kurz: shinkitoho
 titel: Itto-den Shinki Toho
+kurzname: Shinki Toho  # App: Umschalter der Sparten
 jp: 一刀伝 神氣刀法
 stand: Stand 2026
 
@@ -67,6 +68,13 @@ zulassung:
   - "Prüfungen grundsätzlich auf Shinki-Toho-Lehrgängen; Ausnahmen mit Zustimmung des Hôshu, dann mindestens 10 Trainingsstunden beim Hôshu im Jahr davor (die Hälfte davon bei Helmut Theobald möglich)."
   - Mindestabstände gelten bei mindestens einem Training pro Woche.
   - "Grade prüft und verleiht der Hôshu. Mit seinem Einverständnis prüfen Jun-Menkyo bis Shoden, Hon-Menkyo bis Chûden, Menkyo-Kaiden bis Okuden; Bedingung: mindestens 10 Stunden Training beim Hôshu im Jahr."
+
+# Überschriften der Abschnitte (App; das Heft setzt sie in heft/lua/mitori-heft.lua).
+abschnitte:
+  suburi: {name: Suburi, kanji: 素振り}
+  kamae: {name: Kamae-Übung, kanji: 構}
+  odachi: {name: Ô-dachi, kanji: 大太刀}
+  kumidachi: {name: Kumidachi, kanji: 組太刀, text: "Übungsformen zu zweit: Rollen, Rei-ho, Ansage"}
 
 # Kamae-Übung: ein Ablauf, daher kommt Seigan zweimal vor.
 kamae:

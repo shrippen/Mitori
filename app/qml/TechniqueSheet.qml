@@ -1,0 +1,70 @@
+import QtQuick
+import QtQuick.Controls as QQC2
+import QtQuick.Layouts
+import org.kde.kirigami as Kirigami
+import Kante
+
+// Technique sheet (clickdummy "Programm", row tapped): name, attack, kanji, and the way on to
+// the video and the comment. Rating and notes come with step 2 (ROADMAP.md).
+Kirigami.Dialog {
+    id: sheet
+
+    property var entry: ({})
+    property bool playable: false
+    readonly property bool hasVideo: playable && !!entry.video
+    readonly property bool hasComment: !!entry.comment
+
+    signal playRequested(var entry)
+    signal commentRequested(var entry)
+
+    title: entry.title || ""
+    preferredWidth: Kirigami.Units.gridUnit * 24
+    padding: Kirigami.Units.largeSpacing
+
+    KanteScope { target: sheet.contentItem }
+
+    ColumnLayout {
+        spacing: Kirigami.Units.smallSpacing
+
+        QQC2.Label {
+            Layout.fillWidth: true
+            visible: !!sheet.entry.attack
+            text: sheet.entry.attack || ""
+            color: KanteStyle.disabledTextColor
+            wrapMode: Text.Wrap
+        }
+        QQC2.Label {
+            Layout.fillWidth: true
+            visible: !!sheet.entry.jp
+            text: sheet.entry.jp || ""
+            font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.4
+        }
+        QQC2.Label {
+            Layout.fillWidth: true
+            visible: !!sheet.entry.extra
+            text: sheet.entry.extra || ""
+            wrapMode: Text.Wrap
+        }
+        RowLayout {
+            Layout.topMargin: Kirigami.Units.largeSpacing
+            spacing: Kirigami.Units.smallSpacing
+
+            KanteButton {
+                visible: sheet.hasVideo
+                emphasis: KanteButton.Emphasis.Primary
+                icon.name: "media-playback-start"
+                text: qsTr("Watch video")
+                onClicked: sheet.playRequested(sheet.entry)
+            }
+            KanteButton {
+                visible: sheet.hasComment
+                icon.name: "documentinfo"
+                text: qsTr("Comment")
+                onClicked: {
+                    sheet.close()
+                    sheet.commentRequested(sheet.entry)
+                }
+            }
+        }
+    }
+}

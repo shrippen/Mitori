@@ -1,0 +1,22 @@
+[Icon Theme]
+Name=Breeze (Mitori subset)
+Comment=The Breeze icons Mitori uses (scripts/sync-icons.sh), LGPL-3.0, from KDE's breeze-icons
+Directories=actions/16,actions/22,status/22
+
+[actions/16]
+Size=16
+Type=Scalable
+MinSize=8
+MaxSize=512
+
+[actions/22]
+Size=22
+Type=Scalable
+MinSize=8
+MaxSize=512
+
+[status/22]
+Size=22
+Type=Scalable
+MinSize=8
+MaxSize=512

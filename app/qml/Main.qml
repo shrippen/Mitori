@@ -16,5 +16,8 @@ Kirigami.ApplicationWindow {
     }
     KanteScope { target: root.contentItem }
 
+    // One page at a time, also in landscape: the tablet gets its own page with list and player
+    // (app-entscheidungen.md, "Tablet quer"), not Kirigami's columns.
+    pageStack.columnView.columnResizeMode: Kirigami.ColumnView.SingleColumn
     pageStack.initialPage: StartPage {}
 }

@@ -11,13 +11,19 @@ public:
     static constexpr int kFormat = 1;  // FORMAT in tools/daten.py
     static constexpr auto kResource = ":/daten/mitori-daten.json";
 
+    // The catalog in the app's resources, loaded once and shared by the services.
+    static const Catalog &bundled();
+
     bool load(const QString &path);
     QVariantList disciplines() const { return m_disciplines; }
+    // Per video key ("aikido/k5"): datei (path in the video folder), beschnitt {hoehe, y, h, verhaeltnis}.
+    QVariantMap videos() const { return m_videos; }
     QString errorString() const { return m_error; }
 
 private:
     bool fail(const QString &error);
 
     QVariantList m_disciplines;
+    QVariantMap m_videos;
     QString m_error;
 };

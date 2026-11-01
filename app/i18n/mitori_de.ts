@@ -2,6 +2,14 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de" sourcelanguage="en">
 <context>
+    <name>CommentPage</name>
+    <message>
+        <location filename="../qml/CommentPage.qml" line="27"/>
+        <source>Source: shinkiryu.de, Itto-den Shinki Toho</source>
+        <translation>Quelle: shinkiryu.de, Itto-den Shinki Toho</translation>
+    </message>
+</context>
+<context>
     <name>KanteAudioMeter</name>
     <message>
         <location filename="../qml/Kante/KanteAudioMeter.qml" line="146"/>
@@ -60,19 +68,138 @@
     </message>
 </context>
 <context>
-    <name>StartPage</name>
-    <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="21"/>
-        <source>%n grades</source>
-        <translation>
-            <numerusform>%n Grad</numerusform>
-            <numerusform>%n Grade</numerusform>
-        </translation>
+    <name>PlayerPage</name>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="179"/>
+        <source>Position</source>
+        <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="29"/>
+        <location filename="../qml/PlayerPage.qml" line="199"/>
+        <source>Previous technique</source>
+        <translation>Vorige Technik</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="205"/>
+        <source>Frame back</source>
+        <translation>Bild zurück</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="211"/>
+        <source>Pause</source>
+        <translation>Pause</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="211"/>
+        <source>Play</source>
+        <translation>Abspielen</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="217"/>
+        <source>Frame on</source>
+        <translation>Bild vor</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="225"/>
+        <source>Next technique</source>
+        <translation>Nächste Technik</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="233"/>
+        <source>Loop</source>
+        <translation>Schleife</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="244"/>
+        <source>Tempo</source>
+        <translation>Tempo</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="250"/>
+        <source>Back</source>
+        <translation>Zurück</translation>
+    </message>
+</context>
+<context>
+    <name>ProgrammePage</name>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="24"/>
+        <source>Programme</source>
+        <translation>Programm</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="68"/>
+        <source>Exam videos</source>
+        <translation>Prüfungsvideos</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="70"/>
+        <source>There is no video for this grade.</source>
+        <translation>Zu diesem Grad gibt es kein Video.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="71"/>
+        <source>The videos are on the DVDs of the Shinkiryu association. With the code that comes with a DVD, Mitori loads them onto the device.</source>
+        <translation>Die Videos gibt es als DVD beim Shinkiryu-Verband. Mit dem beiliegenden Code lädt Mitori sie aufs Gerät.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="75"/>
+        <source>Order on shinkiryu.de</source>
+        <translation>Auf shinkiryu.de bestellen</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="148"/>
+        <source>Play</source>
+        <translation>Abspielen</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPage</name>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="12"/>
+        <source>Settings</source>
+        <translation>Einstellungen</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="18"/>
+        <source>Video folder:</source>
+        <translation>Videoordner:</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="28"/>
+        <source>Folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</source>
+        <translation>Ordner und Namen wie auf den DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</translation>
+    </message>
+</context>
+<context>
+    <name>StartPage</name>
+    <message>
+        <location filename="../qml/StartPage.qml" line="17"/>
+        <source>Settings</source>
+        <translation>Einstellungen</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="30"/>
         <source>Programme data missing</source>
         <translation>Programmdaten fehlen</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="44"/>
+        <source>Programme</source>
+        <translation>Programm</translation>
+    </message>
+</context>
+<context>
+    <name>TechniqueSheet</name>
+    <message>
+        <location filename="../qml/TechniqueSheet.qml" line="56"/>
+        <source>Watch video</source>
+        <translation>Video ansehen</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueSheet.qml" line="62"/>
+        <source>Comment</source>
+        <translation>Kommentar</translation>
     </message>
 </context>
 </TS>

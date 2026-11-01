@@ -8,13 +8,15 @@ Eingabe (daten/):
   shinki-toho.yaml             Grade, Kamae, Suburi, Ô-dachi-Formen
   shinki-toho-kommentare.yaml  Kommentare von shinkiryu.de (erzeugt von tools/kommentare.py)
   lexikon.yaml                 Aiki-Budo-Lexikon Japanisch–Deutsch (erzeugt von tools/lexikon.py)
+  videos.yaml                  Videostelle je Technik (erzeugt von tools/kapitel.py, von Hand geprüft)
   begriffe.yaml                Kanji (Aikido, Shinki Toho), gesichert
   daitoryu-begriffe.yaml       Kanji-Bausteine Daitoryu, ungeprüft
   ../KORREKTUREN.md            offene Fragen; jede Frage-ID der Daten muss dort stehen
 
 Ausgabe (build/daten/):
   <disziplin>.lua              für das Heft (heft/lua/mitori-heft.lua), Kanji schon eingesetzt
-  mitori-daten.json            für die App: jede Technik einzeln mit fester ID
+  mitori-daten.json            für die App: jede Technik einzeln mit fester ID, Videostellen,
+                               je Video Datei (relativ zum Videoordner) und Beschnitt
   fehlende-kanji.txt           Namen, zu denen es kein Kanji gibt
 
 Bricht mit Exit-Code 1 ab, wenn die Daten Fehler haben (unbekannter Grad, unbekannte
@@ -193,7 +195,7 @@ def programm(art, ids, gloss):
                         })
                     if liste:
                         h_a["techniken"][gid] = liste
-    app = {"id": art, "titel": d["titel"], "untertitel": d.get("untertitel"), "jp": d.get("jp"),
+    app = {"id": art, "titel": d["titel"], "kurzname": d["kurzname"], "untertitel": d.get("untertitel"), "jp": d.get("jp"),
            "stand": d.get("stand"), "kanji_vorschlag": vorschlag, "grade": d["grade"],
            "teile": [{"titel": t["titel"], "grade": t["grade"]} for t in d["teile"]],
            "gruppen": app_gruppen, "techniken": app_techniken}
@@ -227,9 +229,9 @@ def shinki_toho(ids):
     k = yaml.safe_load((DATEN / "shinki-toho-kommentare.yaml").read_text(encoding="utf-8"))
     app["kommentare_quelle"] = k["quelle"]
     app["kiriotoshi"]["kommentar"] = k["kiriotoshi"]
-    app["kumidachi"] = {"id": "shinkitoho/kumidachi", "name": "Kumidachi", "kanji": "組太刀",
-                        "text": "Übungsformen zu zweit: Rollen, Rei-ho, Ansage",
-                        "kommentar": {"titel": "Kumidachi · Übungsformen zu zweit", "text": k["kumidachi"]}}
+    kumi = d["abschnitte"]["kumidachi"]
+    app["kumidachi"] = dict(kumi, id="shinkitoho/kumidachi",
+                            kommentar={"titel": f"{kumi['name']} · {kumi['text'].split(':')[0]}", "text": k["kumidachi"]})
     for s, ks in zip(app["suburi"], k["suburi"], strict=True):
         s["kommentar"] = {"titel": ks["titel"], "text": ks["text"]}
     for kk in k["kamae"]:
@@ -260,6 +262,33 @@ def lua(wert, tiefe=0):
     return "{\n" + "".join(teile) + "  " * tiefe + "}"
 
 
+def videostellen(disziplinen):
+    """Hängt an jeden Eintrag mit Kapitel in daten/videos.yaml seine Videostelle (video, von, bis)."""
+    datei = DATEN / "videos.yaml"
+    if not datei.exists():
+        return 0, {}
+    eintraege = {}
+    for d in disziplinen:
+        for e in d.get("techniken", []):
+            eintraege[e["id"]] = e
+        for art in ("kamae", "suburi", "odachi"):
+            for e in d.get(art, []):
+                eintraege[e["id"]] = e
+        if "kiriotoshi" in d:
+            eintraege[d["kiriotoshi"]["id"]] = d["kiriotoshi"]
+    gesetzt = 0
+    alle = yaml.safe_load(datei.read_text(encoding="utf-8")) or {}
+    for video, inhalt in alle.items():
+        for k in inhalt["kapitel"]:
+            ziel = eintraege.get(k["id"])
+            if ziel is None:
+                melde(f"videos.yaml {video}: unbekannte ID {k['id']}")
+            elif not k.get("fehlt"):
+                ziel["video"] = {"video": video, "von": k["von"], "bis": k["bis"]}
+                gesetzt += 1
+    return gesetzt, {v: {"datei": i["datei"], "beschnitt": i["beschnitt"]} for v, i in alle.items()}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--ausgabe", default=str(WURZEL / "build" / "daten"))
@@ -281,7 +310,8 @@ def main():
         "-- erzeugt von tools/daten.py aus daten/shinki-toho.yaml, nicht von Hand bearbeiten\nreturn "
         + lua(st_heft) + "\n", encoding="utf-8")
 
-    app = {"format": FORMAT, "disziplinen": disziplinen,
+    mit_video, videos = videostellen(disziplinen)
+    app = {"format": FORMAT, "disziplinen": disziplinen, "videos": videos,
            "glossar": {k: v for k, v in yaml.safe_load((DATEN / "begriffe.yaml").read_text(encoding="utf-8")).items()},
            "lexikon": yaml.safe_load((DATEN / "lexikon.yaml").read_text(encoding="utf-8"))}
     (ausgabe / "mitori-daten.json").write_text(json.dumps(app, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
@@ -291,7 +321,7 @@ def main():
 
     techniken = sum(len(d.get("techniken", [])) for d in disziplinen)
     print(f"daten: {techniken} Techniken, {len(st_app['odachi'])} Ô-dachi-Formen, "
-          f"{len(fehlend)} Namen ohne Kanji → {ausgabe}")
+          f"{mit_video} mit Videostelle, {len(fehlend)} Namen ohne Kanji → {ausgabe}")
     if fehler:
         print("\n".join(["Fehler in den Daten:"] + [f"  {f}" for f in fehler]), file=sys.stderr)
         sys.exit(1)
