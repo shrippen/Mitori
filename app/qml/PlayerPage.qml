@@ -7,8 +7,8 @@ import Kante
 import Mitori
 
 // Player (clickdummy "Player" and "Querformat"): the technique's chapter of the exam video,
-// without the black bars, in a loop by default; four tempi (sound off below 1×), single frames,
-// double tap left/right = 2 s back/on. Landscape: the controls in a column on the right.
+// without the black bars, in a loop by default; Kante's transport bar with four tempi (sound off
+// below 100 %) and single frames; double tap left/right = 2 s back/on. Landscape: the controls in a column on the right.
 // Brightness and volume gestures come with the platform layer (ROADMAP.md).
 Kirigami.Page {
     id: page
@@ -175,8 +175,8 @@ Kirigami.Page {
 
         ColumnLayout {
             Layout.fillWidth: !page.landscape
-            Layout.fillHeight: page.landscape
-            Layout.preferredWidth: page.landscape ? Kirigami.Units.gridUnit * 14 : -1
+            Layout.fillHeight: true             // portrait: the picture stays at the top
+            Layout.preferredWidth: page.landscape ? Kirigami.Units.gridUnit * 17 : -1     // room for the tempo row
             Layout.margins: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.largeSpacing
 
@@ -201,67 +201,52 @@ Kirigami.Page {
                 KanteSliderSkin { control: timeline }
             }
 
-            QQC2.Label {
+            KanteTransportBar {
                 Layout.fillWidth: true
-                text: page.timeText(player.position - page.from) + " / " + page.timeText(page.to - page.from)
-                font.family: KanteStyle.monoFamily
-                horizontalAlignment: Text.AlignHCenter
+                Layout.preferredWidth: 0        // wraps in the column instead of widening it
+                playing: player.playing
+                looping: page.looping
+                speed: player.playbackRate
+                speedSteps: page.tempi
+                metronomeVisible: false
+                countInVisible: false
+                frameStep: true
+                positionText: page.timeText(player.position - page.from) + " / " + page.timeText(page.to - page.from)
+                rewindText: qsTr("Chapter start")
+                playText: qsTr("Play")
+                pauseText: qsTr("Pause")
+                loopText: qsTr("Loop")
+                speedText: qsTr("Tempo")
+                frameBackText: qsTr("Frame back")
+                frameOnText: qsTr("Frame on")
+                positionName: qsTr("Position")
+                accessibleName: qsTr("Playback")
+                onPlayToggled: page.togglePlay()
+                onLoopToggled: page.looping = !page.looping
+                onSpeedChangeRequested: speed => player.playbackRate = speed
+                onRewind: player.position = page.from
+                onFrameStepRequested: direction => page.step(direction)
             }
 
-            Flow {
+            RowLayout {
                 Layout.fillWidth: true
-                spacing: Kirigami.Units.smallSpacing
+                visible: !page.landscape
 
                 KanteToolButton {
-                    visible: !page.landscape
                     enabled: page.index > 0
                     icon.name: "media-skip-backward"
                     text: qsTr("Previous technique")
-                    display: QQC2.AbstractButton.IconOnly
                     onClicked: page.go(-1)
                 }
-                KanteToolButton {
-                    icon.name: "go-previous"
-                    text: qsTr("Frame back")
-                    display: QQC2.AbstractButton.IconOnly
-                    onClicked: page.step(-1)
+                Item {
+                    Layout.fillWidth: true
                 }
                 KanteToolButton {
-                    icon.name: player.playing ? "media-playback-pause" : "media-playback-start"
-                    text: player.playing ? qsTr("Pause") : qsTr("Play")
-                    display: QQC2.AbstractButton.IconOnly
-                    onClicked: page.togglePlay()
-                }
-                KanteToolButton {
-                    icon.name: "go-next"
-                    text: qsTr("Frame on")
-                    display: QQC2.AbstractButton.IconOnly
-                    onClicked: page.step(1)
-                }
-                KanteToolButton {
-                    visible: !page.landscape
                     enabled: page.index < page.playlist.length - 1
                     icon.name: "media-skip-forward"
                     text: qsTr("Next technique")
-                    display: QQC2.AbstractButton.IconOnly
                     onClicked: page.go(1)
                 }
-                KanteToolButton {
-                    checkable: true
-                    checked: page.looping
-                    icon.name: "media-playlist-repeat"
-                    text: qsTr("Loop")
-                    display: QQC2.AbstractButton.IconOnly
-                    onToggled: page.looping = checked
-                }
-            }
-
-            KanteSegmented {
-                Layout.fillWidth: true
-                model: page.tempi.map(t => t.toLocaleString(Qt.locale(), "f", 2).replace(/0+$/, "").replace(/[.,]$/, "") + "×")
-                currentIndex: page.tempi.indexOf(player.playbackRate)
-                onActivated: index => player.playbackRate = page.tempi[index]
-                Accessible.name: qsTr("Tempo")
             }
 
             KanteToolButton {

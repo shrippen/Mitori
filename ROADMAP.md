@@ -27,10 +27,6 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
 ## Kante-Bedarf
 
 Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutzt:
-- Menü-Kachel mit Zeichen statt Icon (Startmenü: 技 稽 試 …); jetzt `KanteOptionTile` ohne Auswahl, die
-  Bildschirmleser als Optionsfeld ansagen.
-- Wiedergabe-Leiste ohne Metronom/Einzähler mit festen Tempi (0,25 / 0,5 / 0,75 / 1) und Einzelbild;
-  jetzt einzelne `KanteToolButton` und `KanteSegmented`.
 - Stand als vier Punkte (Schritt 2).
 
 ## Querschnitt
