@@ -70,52 +70,63 @@
 <context>
     <name>PlayerPage</name>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="198"/>
+        <location filename="../qml/PlayerPage.qml" line="199"/>
+        <location filename="../qml/PlayerPage.qml" line="221"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="218"/>
+        <location filename="../qml/PlayerPage.qml" line="237"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="224"/>
+        <location filename="../qml/PlayerPage.qml" line="219"/>
         <source>Frame back</source>
         <translation>Bild zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="230"/>
+        <location filename="../qml/PlayerPage.qml" line="216"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="230"/>
+        <location filename="../qml/PlayerPage.qml" line="215"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="236"/>
+        <location filename="../qml/PlayerPage.qml" line="214"/>
+        <source>Chapter start</source>
+        <translation>Kapitelanfang</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="220"/>
         <source>Frame on</source>
         <translation>Bild vor</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="244"/>
+        <location filename="../qml/PlayerPage.qml" line="222"/>
+        <source>Playback</source>
+        <translation>Wiedergabe</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="246"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="252"/>
+        <location filename="../qml/PlayerPage.qml" line="217"/>
         <source>Loop</source>
         <translation>Schleife</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="263"/>
+        <location filename="../qml/PlayerPage.qml" line="218"/>
         <source>Tempo</source>
         <translation>Tempo</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="269"/>
+        <location filename="../qml/PlayerPage.qml" line="254"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>

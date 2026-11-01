@@ -40,7 +40,7 @@ Kirigami.ScrollablePage {
             visible: Programme.errorString === ""
             checkable: false
             autoExclusive: false
-            icon.name: "view-list-details"
+            glyph: "技"
             text: qsTr("Programme")
             hint: current.title + " · " + current.grade
             onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ProgrammePage.qml"))
