@@ -1,0 +1,424 @@
+# Daitoryu Aiki Jujutsu Bokuyokan Europa: Prüfungsprogramm Kyu- und Dan-Grade.
+#
+# Quellen: quellen/daitoryu/Daitoryu_Prüfungsordnung_Kyu-Grade.pdf und
+# quellen/daitoryu/Daitoryu_Prüfungsordnung_Dan-Grade.pdf (beide 01. April 2008).
+# Schreibweise der Einträge wie in aikido.yaml. Angriffsnamen wie in den Videos
+# (Uchite-dori, Sotote-dori), Längenzeichen einheitlich mit Zirkumflex.
+#
+# Kanji: Die Vorlagen enthalten keine. tools/daten.py setzt sie aus den Bestandteilen
+# in daitoryu-begriffe.yaml zusammen; sie gelten als ungeprüft (D-X-01).
+
+kurz: daitoryu
+titel: Daitoryu Aiki Jujutsu
+untertitel: Bokuyokan Europa
+jp: 大東流合気柔術
+stand: Stand 01.04.2008 · überarbeitet 2026
+begriffe: daitoryu-begriffe.yaml
+
+grade:  # abstand: Mindestwartezeit nach dem vorherigen Grad (Angabe des Nutzers, bestätigt 01.11.2026)
+  - {id: k5, name: 5. Kyu, jp: 五級}
+  - {id: k4, name: 4. Kyu, jp: 四級, abstand: 1 Jahr}
+  - {id: k3, name: 3. Kyu, jp: 三級, abstand: 1 Jahr}
+  - {id: k2, name: 2. Kyu, jp: 二級, abstand: 1 Jahr}
+  - {id: k1, name: 1. Kyu, jp: 一級, abstand: 1 Jahr}
+  - {id: d1, name: 1. Dan, jp: 初段, abstand: 1 Jahr}
+  - {id: d2, name: 2. Dan, jp: 二段, abstand: 2 Jahre}
+  - {id: d3, name: 3. Dan, jp: 三段, abstand: 3 Jahre}
+  - {id: ok, name: Okugi 3. Dan, kurzname: Okugi, jp: 奥技, abstand: 4 Jahre}
+
+teile:
+
+  - titel: Kyu-Grade
+    grade: [k5, k4, k3, k2, k1]
+    gruppen:
+      - titel: Ukemi
+        begriff: Ukemi
+        ohne_angriff: true
+        angriffe:
+          - k5: [Mae-kaiten, Ushiro-kaiten, Yoko-kaiten]
+            k4: [Mae-fuse, Ushiro-hineri, Yoko-suberi]
+            k3: [Mae-sasae-tobi]
+            k2: [Yoko-tobi, Ushiro-tobi]
+            k1: [Mae-tobi (Salto)]
+      - titel: Tachiai · Mae-seme · Torite
+        begriff: [Tachiai, Torite]
+        angriffe:
+          - angriff: Uchite-dori
+            zusatz: Katate-dori diagonal
+            k5: [Ikkajô-kime-osae, Aiki-otoshi]
+            k4: [Aiki-age-aiki-sage, Kata-otoshi]
+            k3: [Awase-otoshi, Nikajô-kime-osae]
+            k2: [Uchikote-otoshi, Maki-arashi]
+            k1: [Tekubi-gime-otoshi, Makikomi-yoko-nage]
+          - angriff: Sotote-dori
+            zusatz: Katate-dori gerade
+            k5: [Aiki-otoshi, Ikkajô-kime-osae]
+            k4: [Shihô-nage, Nikajô-kime-osae]
+            k3: [Hiki-otoshi, Yonkajô-kime-osae, Aiki-otoshi]
+            k2: [Aiki-nage, Tekubi-gime-nage, Yonkajô-kime-osae]
+            k1: [Kata-otoshi, Kime-modoshi]
+          - angriff: Katate-muna-dori
+            k3: [Ude-gatame]
+          - angriff: Katate-kata-dori
+            k2: [Tekubi-gime]
+            k1: [Tekubi-gime-kiri-otoshi]
+          - angriff: Morote-dori
+            zusatz: Ryôte-katate-dori
+            k5: [Yonkajô-kime-nage]
+            k4: [Kata-otoshi]
+            k3: [Shihô-nage, Aiki-nage]
+            k2: [Nikajô-kime-osae]
+            k1: [Soto-nikajô-kime-aiki-nage, Yobi-modoshi]
+          - angriff: Ryôte-dori
+            k5: [Aiki-otoshi (vom Stand), Ikkajô-kime-osae]
+            k4: [Shihô-gaeshi, Jûji-yari]
+            k3: [Tenchi-nage, Kote-gaeshi]
+            k2: [Jûji-kiri-otoshi, Shihô-nage]
+            k1: [Ryô-kata-gime, Aiki-otoshi]
+          - angriff: Ryôte-muna-dori
+            k3: [Kataude-shibori-kime-nage]
+            k1: [Kakae-jime-nage]
+          - angriff: Ryôkata-dori
+            k2: [Ryô-tekubi-gime-yoko-nage]
+            k1: [Soto-gake]
+          - angriff: Mune-ude-dori
+            zusatz: Mune-suso-dori
+            k2: [Hiji-gaeshi-otoshi]
+          - angriff: Ryôte-kubi-jime
+            k3: [Hiji-otoshi]
+      - titel: Tachiai · Mae-seme · Uchite
+        begriff: [Tachiai, Uchite]
+        angriffe:
+          - angriff: Shômen-uchi
+            k5: [Ikkajô-kime-osae (Irimi-uke / Uke-nagashi = sukui)]
+            k4: [Nikajô-kime-osae]
+            k3: [Sankajô-kime-osae, Sankajô-kime-nage]
+            k2: [Yonkajô-kime-osae]
+            k1: [Karami-nage, Yonkajô-kime-nage]
+          - angriff: Sotote-dori-shômen-uchi
+            k3: [Ikkajô-kime-osae]
+          - angriff: Muna-dori-shômen-uchi
+            k1: [Jûji-garami-nage (Jûji-uke)]
+          - angriff: Yokomen-uchi
+            k5: [Aiki-otoshi]
+            k4: [Shihô-nage]
+            k3: [Uchi-sankajô-kime-osae, Hô-daoshi]
+            k2: [Karimata-hiji-otoshi]
+            k1: [Gokajô-kime-osae]
+          - angriff: Tsuki
+            k5: [Ikkajô-kime-osae (Jôdan-zuki)]
+            k4: [Hiji-otoshi]
+            k3: [Ude-gime-nage]
+            k2: [Kote-otoshi (sukui-age-uchi = upper cut), Haimen-ude-gatame-otoshi]
+            k1: [Karami-nage]
+      - titel: Tachiai · Ushiro-seme · Torite
+        begriff: [Tachiai, Ushiro-seme]
+        angriffe:
+          - angriff: Sotote-dori
+            zusatz: "von hinten, gleiche Seite"
+            k5: [Sankajô-ushiro-gime]
+            k3: [Ude-gatame-otoshi]
+            k2: [Hiji-awase-otoshi]
+          - angriff: Kata-dori
+            zusatz: "tagai-te, gegenüberliegende Hand"
+            k3: [Sankajô-kime-osae / -nage]
+          - angriff: Eri-dori
+            k2: [Fuki-age]
+          - angriff: Ryôte-katate-dori
+            k3: [Sankajô-kime-osae]
+          - angriff: Ryôte-dori
+            k4: [Nikajô-kime-osae]
+            k3: [Aiki-nage]
+            k2: [Sankajô-kime-osae, Haimen-ude-gatame-otoshi]
+            k1: [Aiki-nage, Kote-gaeshi]
+          - angriff: Ryôkata-dori
+            k3: [Ikkajô-kime-osae]
+      - titel: Zatori · Mae-seme
+        begriff: [Zatori, Mae-seme]
+        angriffe:
+          - angriff: Uchite-dori
+            zusatz: Katate-dori diagonal
+            k2: [Irimi-nage]
+            k1: [Irimi-kubi-gatame]
+          - angriff: Sotote-dori
+            zusatz: Katate-dori gerade
+            k3: [Yonkajô-kime-osae]
+          - angriff: Katate-muna-dori
+            k4: [Kote-gaeshi]
+            k3: [Gokajô-kime-osae]
+            k2: [Nikajô-kime-osae]
+          - angriff: Katate-kata-dori
+            k3: [Hiji-otoshi]
+          - angriff: Ryôte-dori
+            k5: [Aiki-age-nage, Ikkajô-kime-osae]
+            k4: [Gasshô-nage]
+            k3: [Shibori-nage, Tekô-awase-hiza-basami]
+            k2: [Kote-gaeshi, Nikajô-ryôte-kime-nage]
+            k1: [Muna-jûji-nage]
+          - angriff: Ryôte-muna-dori
+            k4: [Ude-gaeshi]
+            k2: [Kaji-mawashi]
+            k1: [Kakae-jime-nage]
+          - angriff: Ryôte-kubi-jime
+            k1: [Niô-daoshi]
+          - angriff: Shômen-uchi
+            k5: [Ikkajô-kime-osae]
+            k3: [Sankajô-kime-osae]
+          - angriff: Muna-dori-shômen-uchi
+            k1: [Jûji-garami]
+          - angriff: Yokomen-uchi
+            k5: ["Yoko-nage [D-K-02]"]
+            k4: [Fuki-age]
+            k3: [Hiji-gime-shihô-nage]
+            k2: [Kôbe-gaeshi]
+            k1: [Tekubi-gime]
+          - angriff: Muna-dori-yokomen-uchi
+            k1: [Jûji-garami (Jûji-uke)]
+          - angriff: Morote-yokomen-uchi
+            k2: [Aiki-nage]
+          - angriff: Tsuki
+            k3: [Hiki-otoshi]
+            k2: [Kote-gaeshi]
+            k1: [Ude-gatame]
+      - titel: Zatori · Yoko-seme
+        begriff: [Zatori, Yoko-seme]
+        angriffe:
+          - angriff: Tekô-osae
+            k2: [Nikajô-kime-osae]
+          - angriff: Kote-osae
+            k1: [Nikajô-kime-osae]
+      - titel: Hanza-handachi · Mae-seme
+        begriff: [Hanza-handachi, Mae-seme]
+        angriffe:
+          - angriff: Sotote-dori
+            zusatz: Gyaku-hanmi
+            k3: [Sankajô-kime-osae]
+            k2: [Shihô-nage]
+          - angriff: Ryôte-dori
+            k1: [Shihô-nage (mit Aiki-age)]
+          - angriff: Tsuki
+            k2: [Kote-gaeshi]
+      - titel: Hanza-handachi · Ushiro-seme
+        begriff: [Hanza-handachi, Ushiro-seme]
+        angriffe:
+          - angriff: Ryôte-dori
+            k3: [Aiki-nage]
+            k1: [Shihô-nage]
+          - angriff: Eri-dori
+            k2: [Hiji-otoshi]
+      - titel: Sonstige Techniken
+        begriff: Sonstige Techniken
+        angriffe:
+          - angriff: Tantô-dori
+            zusatz: Uchioroshi
+            k3: [Ikkajô-kime-osae]
+            k2: [Nikajô-kime-osae]
+          - angriff: Tantô-dori
+            zusatz: Yokomen-uchi
+            k2: [Sankajô-kime-osae]
+            k1: [Gokajô-kime-osae]
+          - angriff: Tantô-dori
+            zusatz: Tsuki
+            k3: [Kote-gaeshi]
+            k1: [Yonkajô-kime-osae]
+
+  - titel: Dan-Grade
+    grade: [d1, d2, d3, ok]
+    gruppen:
+      - titel: Tachiai · Mae-seme · Torite
+        begriff: [Tachiai, Torite]
+        angriffe:
+          - angriff: Uchite-dori
+            zusatz: Katate-dori diagonal
+            d1: [Hiji-gime-ippon-zeoi]
+            d2: [Kuguri-jûji-nage]
+          - angriff: Sotote-dori
+            zusatz: Katate-dori gerade
+            d1: [Shihô-otoshi, Hiji-gime-ippon-zeoi]
+            d2: [Kote-gaeshi, Okuri-dashi]
+            d3: [Tekubi-gime-otoshi, Shihô-kakae-nage]
+            ok: [Tekubi-gime-nage]
+          - angriff: Katate-muna-dori
+            d1: [Hiji-gaeshi]
+            d2: [Ushiro-ude-gime-kubi-jime]
+          - angriff: Katate-kata-dori
+            d1: [Hako-gime]
+            d2: [Kata-yari]
+          - angriff: Morote-dori
+            zusatz: Ryôte-katate-dori
+            d1: [Aiki-nage (mae)]
+            d2: [Hiji-gime-nage]
+            d3: [Kataire-guruma]
+            ok: [Kubi-kakae-nage, Ude-kakae-nage]
+          - angriff: Ryôte-dori
+            d1: [Tekubi-gime-nage, "Muna-jûji-nage [D-D-03]"]
+            d2: [Tekô-awase, Kime-modoshi]
+            d3: [Tsubasa-gaeshi, Hiza-aiki-nage]
+            ok: [Ryô-nikajô-tomoe-nage]
+          - angriff: Ryôte-muna-dori
+            zusatz: Ryô-eri-jime
+            d1: [Koshi-guruma, Tekubi-gime-yoko-nage]
+            d2: [Seori, Yobi-modoshi]
+            d3: [Yoko-domoe, Kaji-mawashi]
+            ok: [Ryôude-shibori-kime-nage]
+          - angriff: Ryôte-ryôkata-dori
+            d1: ["Mune-jûji-nage [D-D-03]"]
+            d2: [Kata-aiki-nage]
+      - titel: Tachiai · Mae-seme · Uchite
+        begriff: [Tachiai, Uchite]
+        angriffe:
+          - angriff: Shômen-uchi
+            d1: [Hiza-ori]
+            d2: [Hiji-gime-ippon-zeoi]
+            d3: [Tekubi-gime-o-guruma]
+            ok: [Maki-otoshi]
+          - angriff: Kata-dori-shômen-uchi
+            d1: [Kesa-gake]
+            d2: [Kesa-gime]
+          - angriff: Muna-dori-shômen-uchi
+            d2: [Karami-nage]
+            ok: [O-guruma]
+          - angriff: Yokomen-uchi
+            d1: [Kaeshi-koshi-nage, Ude-kakae-nage]
+            d2: [Hiji-gime-ippon-zeoi]
+            d3: [Hiji-garami-yoko-domoe, Koshi-guruma]
+            ok: [Hiji-gime-otoshi, Kata-guruma]
+          - angriff: Tsuki
+            d1: [Kata-otoshi (Jôdan-zuki), Waki-basami-kata-otoshi]
+            d2: [Tekubi-gime-otoshi, Kakae-otoshi]
+            d3: [Ude-gatame, Ude-gatame-nage]
+            ok: [Karami-hiji-gatame-nage, Hiji-gime-nage]
+      - titel: Tachiai · Mae-seme · Keri
+        begriff: [Tachiai, Keri]
+        angriffe:
+          - angriff: Mae-geri
+            d1: [Kakae-nage]
+            d2: [Ashi-gatame]
+      - titel: Tachiai · Ushiro-seme
+        begriff: [Tachiai, Ushiro-seme]
+        angriffe:
+          - angriff: Sotote-dori
+            zusatz: "von hinten, gleiche Seite"
+            d1: [Hiji-gatame]
+            d2: [O-guruma]
+            ok: [Hiji-gime-nage]
+          - angriff: Katate-kata-dori
+            zusatz: "von hinten, gleiche Seite"
+            d3: [Nikajô-kime-osae]
+          - angriff: Eri-dori
+            d1: [Hiji-otoshi]
+          - angriff: Ryôte-dori
+            d1: [Hineri-nage, Ude-garami]
+            d2: [Tai-azuke]
+            d3: [Aiki-nage]
+            ok: [Koshi-nage (uchi + soto)]
+          - angriff: Ryôkata-dori
+            d1: [Ashi-kakae-otoshi]
+            d2: [Kata-aiki-nage]
+            d3: [Kakae-goshi]
+          - angriff: Hagai-jime
+            d1: [Aiki-nage]
+      - titel: Zatori · Mae-seme
+        begriff: [Zatori, Mae-seme]
+        angriffe:
+          - angriff: Uchite-dori
+            zusatz: Katate-dori diagonal
+            d1: [Hiji-gime-ippon-zeoi]
+          - angriff: Sotote-dori
+            zusatz: Katate-dori gerade
+            d1: [Soto-nikajô-kime-osae]
+            d2: [Hineri-otoshi]
+            d3: [Tekubi-gime-modoshi]
+          - angriff: Katate-muna-dori
+            d2: [Kubi-gatame]
+          - angriff: Ryôte-dori
+            d1: [Tekubi-gime-nage]
+            d2: [Kashiwade-soto-gime-nage]
+            d3: [Gasshô-nage]
+            ok: [Kakae-gime-nage]
+          - angriff: Ryôte-muna-dori
+            d1: [Kubi-hineri]
+          - angriff: Shômen-uchi
+            d1: [Kiri-otoshi]
+            d2: [Nodo-gime]
+          - angriff: Muna-dori-shômen-uchi
+            d3: [Jûji-garami]
+          - angriff: Hizadate-shômen-uchi
+            ok: [Hiza-giri]
+          - angriff: Ryô-yokomen-uchi
+            d1: [Aiki-nage]
+          - angriff: Tsuki
+            d1: [Kubi-gime]
+            d2: [Yoko-otoshi (Jôdan-zuki)]
+            ok: [Hiji-otoshi-yoko-nage]
+      - titel: Hanza-handachi · Mae-seme
+        begriff: [Hanza-handachi, Mae-seme]
+        angriffe:
+          - angriff: Sotote-dori
+            zusatz: Gyaku-hanmi
+            d1: [Kime-mawashi-otoshi]
+          - angriff: Ryôte-dori
+            d1: [Tsubasa-gaeshi (Ushiro-aiki-nage)]
+          - angriff: Katate-kata-dori
+            d3: [Aiki-nage]
+          - angriff: Ryôkata-dori
+            d1: [Aiki-nage]
+          - angriff: Shômen-uchi
+            d2: [Ashi-gatame]
+          - angriff: Tsuki
+            d1: [Hiji-otoshi]
+      - titel: Hanza-handachi · Ushiro-seme
+        begriff: [Hanza-handachi, Ushiro-seme]
+        angriffe:
+          - angriff: Katate-maeeri-dori
+            d2: [Seoi-nage]
+          - angriff: Ryôte-dori
+            d1: [Aiki-nage]
+            d3: [Ude-gime-aiki-nage]
+          - angriff: Ryôkata-dori
+            ok: [Aiki-nage]
+      - titel: Futari-gake · 2 Angreifer
+        begriff: Futari-gake
+        angriffe:
+          - angriff: Ryô-uchite-dori
+            d1: [Ryô-nikajô-gime]
+            d2: [Sayû-kôsa-nage]
+            d3: ["Ryô-yonkajô-gime (-nage) [D-D-07]"]
+          - angriff: Ryô-sotote-dori
+            d1: [Ryô-nikajô-gime]
+            ok: [Ude-garami]
+          - angriff: Uchite-kata-dori
+            zusatz: beide von vorne
+            d1: [Karami-otoshi]
+            d2: [Ryô-hiji-gaeshi]
+          - angriff: Ryô-morote-dori
+            zusatz: beide von vorne
+            d1: [Aiki-otoshi]
+            d2: [Hiki-aiki-nage]
+            d3: [Ryô-irimi-nage]
+            ok: [Aiki-kôhô-otoshi]
+      - titel: San'nin-gake · 3 Angreifer
+        begriff: San'nin-gake
+        angriffe:
+          - angriff: Ryô-uchite-kata-dori + Ryôte-muna-dori
+            ok: [Karami-otoshi]
+      - titel: Waffen
+        begriff: Waffen
+        angriffe:
+          - angriff: Tachi-dori
+            zusatz: Shômen-uchi
+            d1: [Ikkajô-kime-osae]
+          - angriff: Jô-dori
+            zusatz: Tsuki
+            d1: [Jô-gaeshi-zuki]
+            d2: [Hikikomi-nodo-zuki]
+            d3: [Kata-gime-nage, Ura-irimi-nodo-zuki]
+            ok: [Yobi-modoshi]
+      - titel: Kaeshi-waza
+        begriff: Kaeshi-waza
+        text: true
+        angriffe:
+          - d1: [Tsuki – Kote-gaeshi – Ikkajô-kime-osae]
+            d2: [Tsuki – Kote-gaeshi – Kote-gaeshi]
+            d3: ["Tsuki – Shihôgage – Shihô-nage [D-D-01]"]
+            ok: [Tsuki – Shihô-nage – Hiji-gime-seoi-nage]

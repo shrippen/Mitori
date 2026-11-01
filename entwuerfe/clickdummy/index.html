@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mitori · Clickdummy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=PT+Sans+Narrow:wght@400;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Seite: Telefon links, Notizen zur Ansicht rechts. Nur Theme Shinki (Rot #CE171E, Tuschelavierung). */
+:root{
+  --ground:#ebe8e4; --paper:#fff; --ink:#1f1c1a; --muted:#6e6863; --line:#dcd7d0; --accent:#ce171e;
+  --f-ui:"PT Sans","Segoe UI",sans-serif; --f-cond:"PT Sans Narrow","Arial Narrow",sans-serif;
+  --f-serif:"Crimson Pro",Georgia,serif; --f-jp:"Noto Serif JP","Hiragino Mincho ProN",serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--f-ui);min-height:100vh}
+.stage{display:flex;gap:36px;align-items:flex-start;justify-content:center;padding:28px 20px;flex-wrap:wrap}
+.phone{width:380px;height:800px;border-radius:40px;background:#111;padding:10px;box-shadow:0 18px 40px rgba(30,20,10,.25);flex:none}
+
+/* ===== App, Theme Shinki ===== */
+.scr{--bg:#fff;--bg2:#faf9f7;--fg:#1d1b1a;--fg2:#77716c;--line2:#e6e2dd;--pri:#ce171e;--chip:#f3f1ee;
+  --r0:#e9e6e2;--r1:#f3c7c6;--r2:#e8918f;--r3:#dc5a57;--r4:#ce171e;
+  width:100%;height:100%;border-radius:31px;overflow:hidden;position:relative;display:flex;flex-direction:column;
+  background:var(--bg);color:var(--fg);font:14px/1.35 var(--f-ui)}
+.scr .ink{position:absolute;right:-60px;top:-40px;width:300px;height:220px;pointer-events:none;opacity:.6;filter:blur(2px);
+  background:radial-gradient(60% 40% at 60% 40%,rgba(0,0,0,.10),transparent 70%),radial-gradient(40% 25% at 30% 60%,rgba(0,0,0,.07),transparent 70%),radial-gradient(30% 20% at 80% 75%,rgba(0,0,0,.06),transparent 70%)}
+.sbar{display:flex;justify-content:space-between;padding:10px 22px 4px;font:600 12px var(--f-ui);color:var(--fg);position:relative;z-index:2}
+.body{flex:1;overflow-y:auto;position:relative;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.hd{padding:6px 18px 10px;position:relative;z-index:1;display:flex;align-items:center;gap:10px}
+.hd .grow{flex:1;min-width:0}
+.hd .k{font:700 11px var(--f-cond);letter-spacing:.1em;text-transform:uppercase;color:var(--pri)}
+.hd h1{margin:0;font:700 22px/1.15 var(--f-ui)}
+.hd h1 .jp{font:400 15px var(--f-jp);color:var(--fg2);margin-left:4px}
+.logo{width:40px;height:40px;background:var(--pri);color:#fff;display:grid;place-items:center;font:600 15px/1 var(--f-jp);flex:none}
+.iconbtn{width:38px;height:38px;display:grid;place-items:center;border:0;background:none;color:var(--fg);font-size:19px;cursor:pointer;border-radius:50%}
+.iconbtn:hover{background:var(--chip)}
+.backbtn{border:0;background:none;padding:0;font:700 11px var(--f-cond);letter-spacing:.1em;text-transform:uppercase;color:var(--pri);cursor:pointer}
+button{font:inherit;color:inherit}
+.jp{font-family:var(--f-jp)}
+
+/* Menü Variante 1: Kacheln */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 16px 18px;position:relative;z-index:1}
+.tile{border:1px solid var(--line2);background:var(--bg);padding:14px 14px 13px;display:grid;gap:3px;align-content:start;text-align:left;cursor:pointer;min-height:104px}
+.tile:hover{border-color:var(--pri)}
+.tile .ic{font:600 22px/1 var(--f-jp);color:var(--pri);margin-bottom:6px}
+.tile b{font:700 16px var(--f-ui)}
+.tile span{font-size:12.5px;color:var(--fg2)}
+.tile.big{grid-column:1/-1;min-height:150px;background:var(--bg2)}
+.tile.big .ic{font-size:34px}
+.tile.big b{font-size:21px}
+.tile .bar{margin-top:8px}
+
+/* Programm */
+.seg{display:flex;margin:0 16px;border:1px solid var(--line2)}
+.seg button{flex:1;border:0;background:var(--bg);padding:9px 4px;font:700 13px var(--f-ui);cursor:pointer;color:var(--fg2)}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button.on{background:var(--pri);color:#fff}
+.grades{display:flex;gap:6px;overflow-x:auto;padding:12px 16px 4px;scrollbar-width:none}
+.grades::-webkit-scrollbar{display:none}
+.gchip{flex:none;border:1px solid var(--line2);background:var(--bg);padding:6px 11px 5px;text-align:left;cursor:pointer;display:grid;gap:1px;min-width:68px}
+.gchip b{font:700 13px var(--f-ui);white-space:nowrap}
+.gchip span{font:11px var(--f-ui);color:var(--fg2);font-variant-numeric:tabular-nums}
+.gchip.on{border-color:var(--pri);box-shadow:inset 0 -3px 0 var(--pri)}
+.prog{margin:10px 16px 2px;border:1px solid var(--line2);padding:10px 12px;display:grid;gap:6px}
+.prog .row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--fg2)}
+.prog .row b{color:var(--fg);font-variant-numeric:tabular-nums}
+.bar{display:flex;height:8px;background:var(--r0);gap:1px}
+.bar i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:3px 10px;font-size:11px;color:var(--fg2)}
+.legend i{display:inline-block;width:9px;height:9px;margin-right:4px;vertical-align:-1px}
+.novid{margin:10px 16px 0;padding:9px 12px;background:var(--chip);font-size:12.5px;color:var(--fg2);display:flex;gap:10px;align-items:center}
+.novid b{color:var(--pri);white-space:nowrap;cursor:pointer}
+.novid.buy{display:grid;gap:8px;background:var(--bg2);border:1px solid var(--line2);border-left:3px solid var(--pri)}
+.novid.buy .t{display:block;color:var(--fg);font-size:14px;margin-bottom:2px;cursor:default}
+.novid .acts{display:flex;gap:16px;flex-wrap:wrap}
+.novid a{color:var(--pri);font-weight:700;text-decoration:none}
+.list{padding:2px 0 24px}
+.gh{padding:16px 16px 5px;font:700 11.5px var(--f-cond);letter-spacing:.1em;text-transform:uppercase;color:var(--pri);display:flex;gap:8px;align-items:baseline;border-bottom:1px solid var(--line2)}
+.gh .jp{font:400 12px var(--f-jp);letter-spacing:0;text-transform:none;color:var(--fg2)}
+.ah{padding:9px 16px 3px;font:700 13px var(--f-ui);color:var(--fg);display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.ah small{font:400 12px var(--f-ui);color:var(--fg2)}
+.ah .jp{font-size:11.5px;color:var(--fg2);font-weight:400}
+.li{display:grid;grid-template-columns:1fr auto 38px;gap:8px;align-items:center;padding:8px 10px 8px 16px;cursor:pointer;border-bottom:1px solid var(--bg2)}
+.li:hover{background:var(--bg2)}
+.li .n{font:600 16px/1.2 var(--f-serif)}
+.li .n small{display:block;font:12px/1.35 var(--f-ui);color:var(--fg2);margin-top:2px}
+.li .n .nr{color:var(--pri);margin-right:6px}
+.dots{display:flex;gap:3px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--r0)}
+.dots i.f{background:var(--pri)}
+.play{width:34px;height:34px;border-radius:50%;background:var(--pri);color:#fff;border:0;display:grid;place-items:center;font-size:12px;cursor:pointer}
+.li.info{background:var(--bg2)}
+.play.ghost{background:none;color:var(--pri);font-size:20px}
+.komm h3{font:700 12px var(--f-cond);letter-spacing:.1em;text-transform:uppercase;color:var(--pri);margin:20px 0 0}
+.komm p.ls{white-space:pre-line}
+.textrow{padding:8px 16px;font:15px/1.4 var(--f-serif);color:var(--fg)}
+.infocard{margin:12px 16px;border:1px solid var(--line2);padding:12px;font-size:13px;color:var(--fg2)}
+.infocard b{color:var(--fg)}
+
+/* Bottom Sheet */
+.dim{position:absolute;inset:0;background:rgba(20,15,10,.38);z-index:20;display:flex;align-items:flex-end}
+.sheet{background:var(--bg);width:100%;padding:8px 18px 22px;display:grid;gap:12px;box-shadow:0 -6px 24px rgba(0,0,0,.18)}
+.sheet .grab{width:40px;height:4px;background:var(--line2);border-radius:2px;justify-self:center}
+.sheet .k{font:700 11px var(--f-cond);letter-spacing:.1em;text-transform:uppercase;color:var(--pri)}
+.sheet h2{margin:0;font:600 25px/1.1 var(--f-serif)}
+.sheet h2 .jp{display:block;font:400 16px var(--f-jp);color:var(--fg2);margin-top:3px}
+.sheet .meta{font-size:12.5px;color:var(--fg2)}
+.sheet .hint{font-size:12.5px;color:var(--fg2);background:var(--chip);padding:8px 11px}
+.sheet .hint b,.sheet .hint a{color:var(--pri);cursor:pointer;font-weight:700;text-decoration:none}
+.rate{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.rate button{border:1px solid var(--line2);background:var(--bg);padding:8px 2px 6px;cursor:pointer;display:grid;gap:1px;justify-items:center;font-size:11px;color:var(--fg2)}
+.rate button b{font:700 17px var(--f-ui);color:var(--fg)}
+.rate button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.rate button.on b{color:#fff}
+.btn{display:block;width:100%;border:0;background:var(--pri);color:#fff;padding:13px;font:700 15px var(--f-ui);cursor:pointer;text-align:center}
+.btn.ghost{background:var(--bg);color:var(--fg);border:1px solid var(--line2)}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btns .btn:only-child{grid-column:1/-1}
+.lastnote{background:var(--bg2);padding:9px 11px;font:14px/1.4 var(--f-serif)}
+.lastnote span{display:block;font:11px var(--f-ui);color:var(--fg2);margin-bottom:2px}
+
+/* Kommentar */
+.komm{padding:4px 18px 30px;position:relative;z-index:1}
+.komm h2{margin:4px 0 2px;font:600 22px/1.15 var(--f-serif)}
+.komm .jp{color:var(--fg2);font-size:14px}
+.komm p{font:16px/1.5 var(--f-serif);margin:12px 0;hyphens:auto}
+.komm p.fn{font:13px/1.45 var(--f-ui);color:var(--fg2);border-left:2px solid var(--line2);padding-left:10px}
+.komm .src{font-size:11.5px;color:var(--fg2);border-top:1px solid var(--line2);padding-top:10px;margin-top:18px}
+
+/* Player */
+.pl{display:flex;flex-direction:column;flex:1;min-height:0}
+.vid{position:relative;background:#111;flex:none;overflow:hidden;touch-action:none;user-select:none}
+.vid video{position:absolute;left:0;width:100%;display:block;object-fit:fill;background:#111}
+.vid .fake{position:absolute;inset:0;background:linear-gradient(#3a3a3a 0 62%,#555 62%);display:grid;place-items:center}
+.vid .fake::before,.vid .fake::after{content:"";position:absolute;bottom:22%;width:16px;height:58px;background:#ddd;border-radius:8px 8px 3px 3px}
+.vid .fake::before{left:42%}.vid .fake::after{left:54%;height:46px;transform:rotate(-12deg)}
+.vid .fake::before,.vid .fake::after{pointer-events:none}
+.vid .fake span{position:absolute;top:8px;left:10px;font:12px var(--f-ui);color:#bbb}
+.vid .spd{position:absolute;top:8px;right:10px;background:rgba(0,0,0,.55);color:#fff;font:700 12px var(--f-ui);padding:2px 7px}
+.vid .bk{position:absolute;bottom:8px;left:8px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;border:0;cursor:pointer;font-size:16px}
+.gest{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);color:#fff;padding:8px 12px;display:none;align-items:center;gap:8px;font:700 12px var(--f-ui);z-index:3}
+.gest.on{display:flex}
+.gest i{width:70px;height:5px;background:rgba(255,255,255,.3);position:relative;display:block}
+.gest b{position:absolute;left:0;top:0;bottom:0;background:#fff}
+.rip{position:absolute;top:0;bottom:0;width:40%;display:none;align-items:center;justify-content:center;color:#fff;font:700 14px var(--f-ui);background:radial-gradient(closest-side,rgba(255,255,255,.22),transparent);z-index:2;pointer-events:none}
+.rip.on{display:flex}.rip.li{left:0}.rip.re{right:0}
+.vid .fs{position:absolute;bottom:8px;right:8px;width:30px;height:30px;background:rgba(0,0,0,.45);color:#fff;border:0;cursor:pointer;font-size:14px}
+.ptitle{padding:10px 16px 4px;display:flex;gap:8px;align-items:flex-start}
+.ptitle .grow{flex:1;min-width:0}
+.ptitle .k{font:700 11px var(--f-cond);letter-spacing:.1em;text-transform:uppercase;color:var(--pri)}
+.ptitle h2{margin:0;font:600 21px/1.15 var(--f-serif)}
+.ptitle h2 .jp{font:400 13px var(--f-jp);color:var(--fg2);margin-left:4px}
+.scrub{padding:4px 16px 0}
+.scrub .track{height:22px;position:relative;cursor:pointer;display:flex;align-items:center}
+.scrub .track::before{content:"";position:absolute;left:0;right:0;height:4px;background:var(--line2)}
+.scrub .track i{position:absolute;left:0;height:4px;background:var(--pri)}
+.scrub .track b{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--pri);margin-left:-7px}
+.scrub .times{display:flex;justify-content:space-between;font:11px var(--f-ui);color:var(--fg2);font-variant-numeric:tabular-nums}
+.ctrl{display:flex;justify-content:space-around;align-items:center;padding:6px 10px}
+.ctrl button{border:0;background:none;cursor:pointer;font-size:13px;color:var(--fg);padding:8px 6px;display:grid;justify-items:center;gap:0}
+.ctrl button small{font-size:10px;color:var(--fg2)}
+.ctrl .pp{width:52px;height:52px;border-radius:50%;background:var(--pri);color:#fff;font-size:18px;display:grid;place-items:center}
+.speeds{display:grid;grid-template-columns:auto repeat(4,1fr);gap:4px;padding:2px 16px;align-items:center}
+.speeds span{font:700 10.5px var(--f-cond);letter-spacing:.08em;text-transform:uppercase;color:var(--fg2);padding-right:4px}
+.speeds button,.toggles button{border:1px solid var(--line2);background:var(--bg);padding:6px 0;font:700 12.5px var(--f-ui);cursor:pointer;color:var(--fg2)}
+.speeds button.on{background:var(--fg);color:#fff;border-color:var(--fg)}
+.toggles{display:flex;gap:4px;padding:6px 16px 0}
+.toggles button{flex:1;padding:6px 4px;font-size:11.5px}
+.toggles button.on{border-color:var(--pri);color:var(--pri)}
+.prate{margin:10px 16px 0;border:1px solid var(--line2);padding:10px 12px;display:grid;gap:8px}
+.prate .q{font-size:12.5px;color:var(--fg2)}
+.qnote{margin:8px 16px 16px;display:flex;gap:6px}
+.qnote input{flex:1;border:1px solid var(--line2);padding:9px 10px;font:15px var(--f-serif);background:var(--bg2);min-width:0}
+.qnote button{border:0;background:var(--pri);color:#fff;padding:0 14px;font:700 13px var(--f-ui);cursor:pointer}
+.saved{margin:0 16px 14px;font-size:12px;color:var(--fg2)}
+.saved b{font:15px/1.35 var(--f-serif);color:var(--fg);display:block}
+
+/* Querformat */
+.phone.quer{width:820px;height:400px}
+.qb{flex:1;display:flex;background:#000;position:relative;min-height:0}
+.qname{position:absolute;top:10px;left:14px;color:#fff;font:600 16px var(--f-serif);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:2;pointer-events:none}
+.qname small{font:12px var(--f-ui);opacity:.85;margin-left:4px}
+.qb button{border:0;background:none;color:#fff;cursor:pointer;font-size:15px;padding:6px 9px;display:grid;justify-items:center}
+.qb .pp{width:40px;height:40px;border-radius:50%;background:var(--pri);display:grid;place-items:center;padding:0}
+.qb .tx{font:700 12px var(--f-ui);border:1px solid rgba(255,255,255,.45);padding:4px 8px;min-width:44px}
+.qb .tx.on{background:#fff;color:#000}
+.qt{font:11px var(--f-ui);color:#ddd;font-variant-numeric:tabular-nums}
+.qtrk{height:16px;position:relative;cursor:pointer;display:flex;align-items:center}
+.qtrk::before{content:"";position:absolute;left:0;right:0;height:3px;background:rgba(255,255,255,.3)}
+.qtrk i{position:absolute;left:0;height:3px;background:var(--pri)}
+.qtrk b{position:absolute;width:11px;height:11px;border-radius:50%;background:var(--pri);margin-left:-5px}
+.qb .vid{flex:none;width:calc(100% - 62px);max-height:100%;align-self:center}
+.qb .qtrk{position:absolute;left:12px;right:12px;bottom:4px;z-index:4}
+.qb .qtb{position:absolute;right:14px;bottom:20px;z-index:4}
+.qrail{width:62px;background:#141210;display:flex;flex-direction:column;justify-content:space-around;align-items:center;padding:8px 0}
+.qrail button small{font-size:9px;color:#aaa}
+
+/* Zurück zur Liste: zuletzt geöffnete Technik kurz markieren */
+.li.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%,30%{background:color-mix(in srgb,var(--pri) 14%,var(--bg))}100%{background:transparent}}
+
+/* Tablet quer (am Mattenrand) */
+.phone.tablet{width:1180px;height:760px;border-radius:30px;padding:14px}
+.tab{border-radius:18px}
+.tab .tiles{grid-template-columns:repeat(4,1fr);gap:14px;padding:8px 28px 28px}
+.tab .tile{min-height:150px}
+.tab .tile.big{grid-column:span 2;grid-row:span 2}
+.tab .hd{padding:10px 28px 14px}
+.split{flex:1;display:flex;min-height:0}
+.lpane{flex:0 0 420px;border-right:1px solid var(--line2)}
+.rpane{flex:1;background:var(--bg2)}
+.sheet.inline{background:none;box-shadow:none;padding:28px 36px;max-width:640px}
+.sheet.inline h2{font-size:32px}
+.li.sel{background:color-mix(in srgb,var(--pri) 9%,var(--bg));box-shadow:inset 3px 0 0 var(--pri)}
+.tpl{background:var(--bg)}
+.tpl .vid{width:100%}
+.tbelow{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line2);padding-top:4px}
+.tbelow .prate{margin-top:4px}
+.trow{display:flex;align-items:center;gap:12px;padding:0 6px 10px}
+.trow .ctrl{flex:1}
+.tset{flex:0 0 330px;display:grid;gap:6px}
+.tset .speeds,.tset .toggles{padding:0}
+.tab .qrail{width:84px}
+.tab .qb .vid{width:calc(100% - 84px)}
+.tab .qb button{font-size:18px}
+.tab .qb .pp{width:52px;height:52px}
+.tab .qname{font-size:20px}
+.tab .komm{max-width:700px;margin:0 auto;padding:10px 28px 40px}
+.tab .komm p{font-size:18px}
+.tab .ph{max-width:600px}
+
+.qbands{flex:1;display:flex;flex-direction:column;background:#000;color:#fff;min-height:0}
+.qbands .vid{width:100%}
+.qtop,.qbot{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 24px}
+.qtop{flex-direction:row;align-items:center;gap:14px}
+.qtop .grow{flex:1}
+.qtop .k{font:700 12px var(--f-cond);letter-spacing:.1em;text-transform:uppercase;color:#e8918f}
+.qtop h2{margin:0;font:600 26px/1.15 var(--f-serif)}
+.qtop h2 small{font:15px var(--f-ui);color:#bbb}
+.qtop h2 .jp{font:400 17px var(--f-jp);color:#aaa}
+.qbands button{border:0;background:none;color:#fff;cursor:pointer;font-size:20px;padding:6px 12px;display:grid;justify-items:center}
+.qbands button small{font-size:10px;color:#aaa}
+.qbands .pp{width:56px;height:56px;border-radius:50%;background:var(--pri);display:grid;place-items:center;padding:0}
+.qbands .tx{font:700 14px var(--f-ui);border:1px solid rgba(255,255,255,.45);padding:6px 12px;margin-left:8px}
+.qbands .tx.on{background:#fff;color:#000}
+.qbot .qtrk{margin-bottom:4px}
+.qrow2{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.qrow2 .mid{display:flex;gap:18px;align-items:center}
+.qrow2 .rt{display:flex;justify-content:flex-end}
+.qbands .qt{font-size:13px}
+
+/* Platzhalter */
+.ph{padding:30px 22px;display:grid;gap:10px;color:var(--fg2);position:relative;z-index:1}
+.ph .big{font:600 54px/1 var(--f-jp);color:var(--pri)}
+.ph b{color:var(--fg);font-size:17px}
+
+/* ===== Notizen rechts ===== */
+.notes{width:min(560px,100%);display:grid;gap:14px}
+.notes .card{background:var(--paper);border:1px solid var(--line);padding:16px 18px}
+.notes h2{margin:0 0 4px;font:700 22px var(--f-ui)}
+.notes h3{margin:0 0 8px;font:700 12px var(--f-cond);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.notes p{margin:0 0 6px}
+.notes ol,.notes ul{margin:0;padding-left:20px}
+.notes li{margin:5px 0}
+.notes li em{color:var(--muted);font-style:normal;font-size:13.5px;display:block}
+.notes .done li{color:var(--muted)}
+.notes .done li b{color:var(--ink);font-weight:400}
+.eyebrow{font:700 12px var(--f-cond);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.views{display:flex;flex-wrap:wrap;gap:6px}
+.views button{border:1px solid var(--line);background:var(--paper);padding:5px 10px;font:700 13px var(--f-ui);cursor:pointer}
+.views button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.views button.todo{color:var(--muted);font-weight:400}
+.opts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="phone"><div class="scr" id="scr"></div></div>
+  <div class="notes" id="notes"></div>
+</div>
+
+<script src="daten.js"></script>
+<script>
+/* Clickdummy: Daten echt (daten.js aus build/daten/mitori-daten.json), Übungsstände und Termine Beispielwerte. */
+const D = window.MITORI;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const RATING = ["offen","gesehen","mit Hilfe","sicher","prüfungsreif"];
+
+/* ---------- Zustand (im Browser gemerkt) ---------- */
+const S = Object.assign({
+  disc: "aikido", grade: { aikido: "k5", daitoryu: "k5", shinkitoho: "shoden" },
+  ratings: null, notes: {}, bundles: "alle", stack: [["menu"]], device: "phone", sel: {},
+  player: { speed: 1, loop: true, sound: true, awake: true, hell: 1, laut: 0.8 }
+}, JSON.parse(localStorage.getItem("mitori-dummy") || "{}"));
+S.player = Object.assign({ hell: 1, laut: 0.8 }, S.player);
+const save = () => localStorage.setItem("mitori-dummy", JSON.stringify(S));
+
+/* Beispielstände: 5. Kyu weit, 4. Kyu angefangen, Rest offen; fest je Id, damit es beim Neuladen gleich bleibt */
+function hash(s){ let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) / 4294967296; }
+if (!S.ratings) {
+  S.ratings = {};
+  for (const d of D.disziplinen) for (const t of (d.techniken || [])) {
+    const r = hash(t.id);
+    if (d.id === "aikido" && t.grad === "k5") S.ratings[t.id] = r < .35 ? 4 : r < .65 ? 3 : r < .85 ? 2 : 1;
+    else if (d.id === "aikido" && t.grad === "k4") S.ratings[t.id] = r < .15 ? 3 : r < .4 ? 2 : r < .6 ? 1 : 0;
+    else if (d.id === "daitoryu" && t.grad === "k5") S.ratings[t.id] = r < .3 ? 2 : r < .6 ? 1 : 0;
+  }
+  for (let n = 1; n <= 11; n++) S.ratings["shinkitoho/odachi/" + n] = n <= 4 ? 3 : n <= 7 ? 2 : n <= 9 ? 1 : 0;
+  for (let n = 1; n <= 10; n++) S.ratings["shinkitoho/kamae/" + n] = n <= 6 ? 3 : 2;
+}
+
+/* Welche Videos vorhanden sind (Szenario rechts umschaltbar) */
+const VIDEO = { aikido: ["k5","k4","k3","k2","k1","d1","d2","d3"], daitoryu: ["k5","k4","k3","k2","k1","d1","d2","d3","ok"], shinkitoho: ["shoden","chuden"] };
+const hasVideo = (disc, grade) => !entferntFuer(disc, grade) && (S.bundles === "alle" ? VIDEO[disc].includes(grade) : S.bundles === "aikido-kyu" ? disc === "aikido" && ["k5","k4","k3","k2","k1"].includes(grade) : false);
+
+/* Echte Videostelle nur für Aikido 5. Kyu: Kapitel des Videos per Texterkennung den Techniken zugeordnet
+   (Kapitel 1, 6, 19, 22 sind Vorspann und Zwischentitel). Datei: video/aikido-k5.mp4, H.264-Kopie von Aikido/Kyu 5.mkv. */
+const K5_KAPITEL = [[8.08,207],[207,235.72],[235.72,264.84],[264.84,296.2],[302.32,343.64],[343.64,367],[367,390.36],[390.36,438.76],[438.76,488.6],[488.6,615.12],[615.12,638.08],[638.08,687.08],[687.08,732.24],[732.24,750.16],[750.16,772.4],[772.4,814.4],[820.52,881.16],[881.16,927.96],[934.08,988.72],[988.72,1008.8]];
+
+const T = () => S.device === "tablet"; // Tablet dauerhaft quer am Mattenrand
+const disc = id => D.disziplinen.find(d => (d.id || d.kurz) === id);
+const rating = id => S.ratings[id] || 0;
+
+/* ---------- Navigation ---------- */
+/* Scrollpositionen je Ebene des Stapels: zurück zur Liste zeigt sie dort, wo sie war */
+let SCROLL = {};
+function merkScroll(){ const m = SCROLL[S.stack.length] = {}; document.querySelectorAll("#scr [data-scroll]").forEach(el => m[el.dataset.scroll] = el.scrollTop); }
+function go(...route){ merkScroll(); if (route[0] === "player") S.last = route[1]; S.stack.push(route); delete SCROLL[S.stack.length]; save(); render(); }
+function back(){ if (S.stack.length > 1) { delete SCROLL[S.stack.length]; S.stack.pop(); } save(); render(true); }
+function neuListe(){ delete SCROLL[S.stack.length]; }
+
+/* ---------- Bausteine ---------- */
+const sbar = () => { const t = new Date(); return `<div class="sbar"><span>${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}</span><span>▮▮▮ 82 %</span></div>`; };
+const dots = n => `<span class="dots" title="${RATING[n]}">${[1,2,3,4].map(i => `<i class="${i <= n ? "f" : ""}"></i>`).join("")}</span>`;
+const backHd = (label, title, jp, right = "") => `<div class="hd"><div class="grow"><button class="backbtn" onclick="back()">‹ ${esc(label)}</button><h1>${esc(title)}${jp ? ` <span class="jp">${esc(jp)}</span>` : ""}</h1></div>${right}</div>`;
+function stackBar(ids){
+  const n = [0,0,0,0,0]; ids.forEach(id => n[rating(id)]++);
+  const tot = ids.length || 1;
+  return `<div class="bar" role="img" aria-label="Stand">${[4,3,2,1].map(r => n[r] ? `<i style="width:${n[r]/tot*100}%;background:var(--r${r})" title="${n[r]} ${RATING[r]}"></i>` : "").join("")}</div>`;
+}
+const legend = () => `<div class="legend">${[4,3,2,1,0].map(r => `<span><i style="background:var(--r${r})"></i>${RATING[r]}</span>`).join("")}</div>`;
+const fmt = s => { s = Math.max(0, s); return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")},${Math.floor(s * 10 % 10)}`; };
+const today = () => new Date().toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "numeric" });
+
+/* ---------- Programm-Einträge ----------
+   Jeder Grad zeigt nur seinen eigenen Stoff. Ein Eintrag: id, Titel, Kanji, Unterzeile, Grad, Kommentar. */
+function eintraege(discId, g){
+  const d = disc(discId);
+  if (discId === "shinkitoho") {
+    const i = d.grade.findIndex(x => x.id === g), cur = d.grade[i];
+    const out = [];
+    if (g === "shoden") {
+      d.suburi.forEach(s => out.push({ id: s.id, gruppe: "Suburi|素振り", title: s.name, jp: s.kanji, sub: s.text, grade: g, komm: s.kommentar }));
+      const k = d.kiriotoshi;
+      out.push({ id: k.id, gruppe: "Kiriotoshi|" + k.kanji, title: k.name, sub: k.text, grade: g, komm: { titel: "Grundübung: Kiriotoshi", text: k.kommentar } });
+      d.kamae.forEach((k, n) => out.push({ id: k.id, gruppe: "Kamae|構", nr: n + 1, title: k.name, jp: k.kanji, grade: g, komm: k.kommentar }));
+    }
+    if (cur && cur.bis) {
+      const kd = d.kumidachi;
+      out.push({ id: kd.id, gruppe: `Ô-dachi|大太刀`, info: true, title: kd.name, jp: kd.kanji, sub: kd.text, grade: g, komm: kd.kommentar });
+      const von = i > 0 && d.grade[i-1].bis ? d.grade[i-1].bis + 1 : 1;
+      d.odachi.filter(f => f.nr >= von && f.nr <= cur.bis).forEach(f => out.push({ id: f.id, gruppe: `Ô-dachi|大太刀`, gtitel: `Ô-dachi ${von}–${cur.bis}`, nr: f.nr, title: f.name, jp: f.kanji,
+        sub: [f.uchidachi && "Uchidachi " + f.uchidachi, f.shidachi && "Shidachi " + f.shidachi, f.treffer && "Treffer " + f.treffer].filter(Boolean).join(" · "),
+        meta: `Ô-dachi · Uchidachi ${f.uchidachi} · Shidachi ${f.shidachi}`, grade: g, komm: f.kommentar }));
+    }
+    return out;
+  }
+  const art = Object.fromEntries(d.gruppen.map(x => [x.id, x]));
+  const gname = d.grade.find(x => x.id === g).name;
+  const out = [];
+  for (const grp of d.gruppen) for (const t of d.techniken) {
+    if (t.gruppe !== grp.id || t.grad !== g) continue;
+    out.push({ id: t.id, gruppe: `${grp.titel}|${grp.jp}`, text: grp.art === "text", angriff: t.angriff, title: t.name, extra: t.zusatz, jp: t.jp, grade: g,
+      meta: [t.angriff && (t.angriff.name + (t.angriff.zusatz ? " · " + t.angriff.zusatz : "")), gname].filter(Boolean).join(" · ") });
+  }
+  return out;
+}
+const uebbar = es => es.filter(e => !e.text && !e.info);
+function findEintrag(id){
+  for (const d of D.disziplinen) for (const g of d.grade) {
+    const id_ = d.id || d.kurz, e = eintraege(id_, g.id).find(x => x.id === id);
+    if (e) return Object.assign({ disc: id_ }, e);
+  }
+}
+
+/* ---------- Ansichten ---------- */
+const V = {};
+
+V.menu = () => {
+  const h = new Date().getHours();
+  const gruss = h < 11 ? "Guten Morgen" : h < 18 ? "Guten Tag" : "Guten Abend";
+  const d = disc(S.disc), g = S.grade[S.disc];
+  const gname = (d.grade.find(x => x.id === g) || {}).name;
+  const ids = uebbar(eintraege(S.disc, g)).map(e => e.id);
+  const reif = ids.filter(id => rating(id) === 4).length;
+  return `${sbar()}<div class="body"><div class="ink"></div>
+   <div class="hd"><span class="logo">神氣</span><div class="grow"><div class="k">Mitori 見取り</div><h1>${gruss}</h1></div><button class="iconbtn" title="Einstellungen" onclick="go('einst')">⚙</button></div>
+   ${hinweise()}
+   <div class="tiles">
+    <button class="tile big" onclick="go('programm')"><span class="ic">技</span><b>Programm</b><span>${esc(d.titel.replace(" Shinki Rengo",""))} · ${esc(gname)} · ${reif} von ${ids.length} prüfungsreif</span>${stackBar(ids)}</button>
+    <button class="tile" onclick="go('heute')"><span class="ic">稽</span><b>Heute</b><span>${faellig().length} fällig · ${esc(DISC.find(x => x[0] === S.heuteSp)[1])}</span></button>
+    <button class="tile" onclick="go('pruefung')"><span class="ic">試</span><b>Prüfungsmodus</b><span>Probe ${esc(gname)}</span></button>
+    <button class="tile" onclick="go('statistik')"><span class="ic">記</span><b>Statistik</b><span>${tage30()} Übungstage in 30 Tagen</span></button>
+    <button class="tile" onclick="go('lehrgaenge')"><span class="ic">講</span><b>Lehrgänge</b><span>${naechsterLehrgang()}</span></button>
+    <button class="tile" onclick="go('karte')"><span class="ic">図</span><b>Landkarte</b><span>Angriff × Technik</span></button>
+    <button class="tile" onclick="go('glossar')"><span class="ic">辞</span><b>Glossar</b><span>Kanji · Aussprache</span></button>
+   </div></div>`;
+};
+
+V.programm = () => {
+  const d = disc(S.disc), g = S.grade[S.disc];
+  const segs = [["aikido","Aikido"],["daitoryu","Daitoryu"],["shinkitoho","Shinki Toho"]];
+  const chips = d.grade.filter(x => x.id !== "hoshu").map(x => {
+    const ids = uebbar(eintraege(S.disc, x.id)).map(e => e.id), reif = ids.filter(id => rating(id) === 4).length;
+    return `<button class="gchip ${x.id === g ? "on" : ""}" onclick="S.grade[S.disc]='${x.id}';neuListe();save();render()"><b>${esc(x.name)}</b><span>${ids.length ? `${reif} / ${ids.length}` : "–"}</span></button>`;
+  }).join("");
+  const es = eintraege(S.disc, g), ids = uebbar(es).map(e => e.id);
+  const reif = ids.filter(id => rating(id) === 4).length;
+  const vid = hasVideo(S.disc, g);
+  if (T()) return programmTablet(d, g, segs, chips, es, ids, reif, vid);
+  return `${sbar()}<div class="body" data-scroll="liste"><div class="ink"></div>
+   ${backHd("Menü", "Programm", "技", `<button class="iconbtn" title="Alle Notizen" onclick="go('allenotizen')">✎</button><button class="iconbtn" title="Suche" onclick="go('glossar')">⌕</button>`)}
+   <div class="seg">${segs.map(([id,t]) => `<button class="${id === S.disc ? "on" : ""}" onclick="S.disc='${id}';neuListe();save();render()">${t}</button>`).join("")}</div>
+   <div class="grades">${chips}</div>
+   ${ids.length ? `<div class="prog"><div class="row"><span>Prüfungsreif</span><b>${reif} / ${ids.length}</b></div>${stackBar(ids)}${legend()}</div>` : ""}
+   ${vid ? "" : noVideo(S.disc, g)}
+   ${S.disc === "shinkitoho" ? shinkiInfo(d, g) : ""}
+   <div class="list">${liste(es, vid)}</div>
+  </div>`;
+};
+
+/* Hinweis, wenn ein Video fehlt: gibt es keins, oder ist es nur nicht gekauft/geladen? */
+const KAUF = "https://www.shinkiryu.de/shinkiryu/de/DVD.php";
+function noVideo(discId, g){
+  if (!VIDEO[discId].includes(g)) return `<div class="novid"><span>Zu diesem Grad gibt es kein Video.</span></div>`;
+  return `<div class="novid buy"><span><b class="t">Prüfungsvideos</b>Die Videos gibt es als DVD beim Shinkiryu-Verband. Mit dem beiliegenden Code lädt Mitori sie aufs Gerät.</span>
+    <span class="acts"><a href="${KAUF}" target="_blank" rel="noopener">Auf shinkiryu.de bestellen ›</a><b onclick="go('code')">Code eingeben ›</b></span></div>`;
+}
+
+function shinkiInfo(d, g){
+  const cur = d.grade.find(x => x.id === g);
+  return `<div class="infocard"><b>${esc(cur.name)} <span class="jp">${esc(cur.jp)}</span></b> · ${esc(cur.bedeutung || "")}<br>${esc(cur.inhalt || "")}${cur.abstand ? `<br>Mindestabstand: ${esc(cur.abstand)}` : ""}</div>`;
+}
+
+function liste(es, vid){
+  let out = "", lastG = null, lastA = null;
+  for (const e of es) {
+    if (e.gruppe !== lastG) { const [t0, j] = e.gruppe.split("|"), t = e.gtitel || es.find(x => x.gruppe === e.gruppe && x.gtitel)?.gtitel || t0; out += `<div class="gh">${esc(t)}<span class="jp">${esc(j)}</span></div>`; lastG = e.gruppe; lastA = null; }
+    if (e.text) { out += `<div class="textrow">${esc(e.title)}</div>`; continue; }
+    if (e.info) { out += `<div class="li info" onclick="go('kommentar','${e.id}')"><div class="n">${esc(e.title)} <span class="jp" style="font-size:13px;color:var(--fg2)">${esc(e.jp)}</span><small>${esc(e.sub)}</small></div><span></span><span class="play ghost">›</span></div>`; continue; }
+    const a = e.angriff ? `${e.angriff.name}|${e.angriff.zusatz || ""}` : null;
+    if (a && a !== lastA) out += `<div class="ah">${esc(e.angriff.name)}${e.angriff.zusatz ? ` <small>${esc(e.angriff.zusatz)}</small>` : ""} <span class="jp">${esc(e.angriff.jp || "")}</span></div>`;
+    lastA = a;
+    const sel = T() && e.id === selId();
+    out += `<div class="li${sel ? " sel" : ""}" data-id="${e.id}" onclick="${T() ? `waehle('${e.id}')` : `sheet('${e.id}')`}"><div class="n">${e.nr ? `<span class="nr">${e.nr}</span>` : ""}${esc(e.title)}${e.extra ? ` <small>${esc(e.extra)}</small>` : ""}${e.jp ? `<small class="jp">${esc(e.jp)}</small>` : ""}${e.sub ? `<small>${esc(e.sub)}</small>` : ""}</div>${dots(rating(e.id))}${vid ? `<button class="play" title="Video" onclick="event.stopPropagation();${T() ? `waehle('${e.id}')` : `go('player','${e.id}')`}">▶</button>` : "<span></span>"}</div>`;
+  }
+  return out;
+}
+
+/* Technik-Blatt: Halt zwischen Liste und Player */
+function closeSheet(){ const el = $("#scr .dim"); if (el) el.remove(); }
+function blatt(id, inline){
+  const e = findEintrag(id); if (!e) return "";
+  const r = rating(id), vid = hasVideo(e.disc, e.grade), n = (S.notes[id] || []).length + (r ? 2 : 0);
+  const neu = inline ? `render()` : `closeSheet();render();sheet('${id}')`;
+  return `<div><div class="k">${esc(e.meta || e.gruppe.split("|")[0])}</div><h2>${e.nr ? e.nr + " · " : ""}${esc(e.title)}${e.extra ? ` <small style="font-size:15px;color:var(--fg2)">${esc(e.extra)}</small>` : ""}${e.jp ? `<span class="jp">${esc(e.jp)}</span>` : ""}</h2></div>
+    <div><div class="meta" style="margin-bottom:6px">Wie sitzt die Technik? ${r ? `Zuletzt: ${RATING[r]}, Do 29.10.` : "Noch nicht eingeschätzt."}</div>
+    <div class="rate">${[1,2,3,4].map(k => `<button class="${k === r ? "on" : ""}" onclick="S.ratings['${id}']=${k};save();${neu}"><b>${k}</b>${RATING[k]}</button>`).join("")}</div></div>
+    ${r ? `<div class="lastnote"><span>Letzte Notiz · Do 29.10.</span>${e.disc === "shinkitoho" ? "Kissaki bleibt in der Mitte, nicht zu früh ausholen." : "Hüfte früher drehen, Arm bleibt vor dem Kopf."}</div>` : ""}
+    ${vid ? "" : `<div class="hint">${VIDEO[e.disc].includes(e.grade) ? `Video nicht geladen. <a href="${KAUF}" target="_blank" rel="noopener">DVD auf shinkiryu.de ›</a> · <b onclick="closeSheet();go('code')">Code eingeben ›</b>` : "Zu diesem Grad gibt es kein Video."}</div>`}
+    <div class="btns">${vid ? `<button class="btn" onclick="closeSheet();go('player','${id}')">▶ Video</button>` : ""}<button class="btn ghost" onclick="closeSheet();go('notizen','${id}')">Notizen (${n})</button>${e.komm ? `<button class="btn ghost" style="grid-column:1/-1" onclick="closeSheet();go('kommentar','${id}')">Kommentar · shinkiryu.de</button>` : ""}</div>`;
+}
+function sheet(id){
+  const el = document.createElement("div");
+  el.className = "dim"; el.onclick = ev => { if (ev.target === el) el.remove(); };
+  el.innerHTML = `<div class="sheet"><div class="grab"></div>${blatt(id, false)}</div>`;
+  $("#scr").appendChild(el);
+}
+
+/* Tablet: Liste links, Player klein der gewählten Technik rechts (eine Seite); ohne Video das Blatt */
+const selKey = () => S.disc + "/" + S.grade[S.disc];
+function selId(){ const ids = uebbar(eintraege(S.disc, S.grade[S.disc])).map(e => e.id); return ids.includes(S.sel[selKey()]) ? S.sel[selKey()] : ids[0]; }
+function waehle(id){ S.sel[selKey()] = id; S.last = id; save(); render(); zeigeSel(); }
+function zeigeSel(){ const el = $("#scr .li.sel"); if (!el) return; const box = el.closest("[data-scroll]"), r = el.getBoundingClientRect(), b = box.getBoundingClientRect(); if (r.top < b.top + 40 || r.bottom > b.bottom) el.scrollIntoView({ block: "center" }); }
+function programmTablet(d, g, segs, chips, es, ids, reif, vid){
+  const id = selId();
+  return `${sbar()}<div class="split">
+   <div class="lpane body" data-scroll="liste"><div class="ink"></div>
+    ${backHd("Menü", "Programm", "技", `<button class="iconbtn" title="Alle Notizen" onclick="go('allenotizen')">✎</button><button class="iconbtn" title="Suche" onclick="go('glossar')">⌕</button>`)}
+    <div class="seg">${segs.map(([x,tt]) => `<button class="${x === S.disc ? "on" : ""}" onclick="S.disc='${x}';neuListe();save();render()">${tt}</button>`).join("")}</div>
+    <div class="grades">${chips}</div>
+    ${ids.length ? `<div class="prog"><div class="row"><span>Prüfungsreif</span><b>${reif} / ${ids.length}</b></div>${stackBar(ids)}${legend()}</div>` : ""}
+    ${vid ? "" : noVideo(S.disc, g)}
+    ${S.disc === "shinkitoho" ? shinkiInfo(d, g) : ""}
+    <div class="list">${liste(es, vid)}</div>
+   </div>
+   ${!id ? `<div class="rpane"></div>` : vid ? playerPane(id) : `<div class="rpane body" data-scroll="blatt"><div class="sheet inline">${blatt(id, true)}</div></div>`}
+  </div>`;
+}
+
+/* Kommentar von shinkiryu.de */
+V.kommentar = id => {
+  const e = findEintrag(id), q = disc("shinkitoho").kommentare_quelle;
+  const ps = e.komm.text.split("\n\n").map(p => p.startsWith("## ") ? `<h3>${esc(p.slice(3))}</h3>` : `<p class="${p.startsWith("*") ? "fn" : p.includes("\n") ? "ls" : ""}">${esc(p)}</p>`).join("");
+  return `${sbar()}<div class="body" data-scroll="komm"><div class="ink"></div>${backHd("Zurück", "Kommentar", "解説")}
+   <div class="komm"><div class="hd" style="padding:0"><div class="k">${esc(e.gruppe.split("|")[0])}</div></div><h2>${esc(e.komm.titel)}</h2>${e.jp ? `<div class="jp">${esc(e.jp)}</div>` : ""}
+   ${ps}<div class="src">Quelle: ${esc(q.titel)}, Stand der PDF-Dateien von der Website. In der App mitgeliefert, damit es auch ohne Netz auf der Matte geht.</div></div></div>`;
+};
+
+/* Player */
+let PL = null; // laufender Zustand: Eintrag, Abschnitt im Video, Timer für den Platzhalter
+
+/* Zuschnitt für die Auslieferung: Schwarz oben und unten mit den eingebrannten Titeln fällt weg (die App zeigt
+   Angriff und Technik selbst). Gemessen über den Zeilen-Median aller Videos; Shinki Toho hat keine Balken. */
+const CROP = { aikido: { h: 478, y: 64, ch: 372, dar: 768 / 372 }, daitoryu: { h: 464, y: 50, ch: 374, dar: 768 / 374 }, shinkitoho: { dar: 16 / 9 } };
+
+function plSetup(id){
+  const e = findEintrag(id), grad = uebbar(eintraege(e.disc, e.grade));
+  /* im Training ist die Playliste der heutigen Techniken die Reihenfolge, sonst der Grad */
+  const es = inSess() && S.sess.ids.includes(id) ? S.sess.ids.map(findEintrag) : grad, i = es.findIndex(x => x.id === id);
+  const k5 = e.disc === "aikido" && e.grade === "k5";
+  const [von, bis] = k5 ? K5_KAPITEL[grad.findIndex(x => x.id === id)] : [0, 30 + hash(id) * 40];
+  PL = { id, i, es, von, bis, echt: k5, t: von, playing: true };
+  return { e, es, i, k5, von, bis };
+}
+function videoBox(e, k5, von, extra = ""){
+  const c = CROP[e.disc], p = S.player;
+  const vstyle = c.h ? `height:${c.h / c.ch * 100}%;top:-${c.y / c.ch * 100}%` : "height:100%;top:0";
+  return `<div class="vid" id="vid" style="aspect-ratio:${c.dar}">${k5 ? `<video id="v" playsinline muted preload="auto" style="${vstyle}" src="video/aikido-k5.mp4#t=${von}"></video>` : `<div class="fake"><span>Platzhalter: echte Videostelle nur im Aikido 5. Kyu</span></div>`}
+     ${p.speed < 1 ? `<span class="spd">${String(p.speed).replace(".", ",")}×</span>` : ""}${extra}<div class="gest" id="gest"></div><div class="rip" id="rip"></div></div>`;
+}
+const spdTxt = s => String(s).replace(".", ",") + "×";
+
+V.player = id => {
+  if (T() && !inSess()) { const e = findEintrag(id); S.disc = e.disc; S.grade[e.disc] = e.grade; S.sel[selKey()] = id; S.stack[S.stack.length - 1] = ["programm"]; save(); return V.programm(); }
+  const { e, es, i, k5, von, bis } = plSetup(id);
+  const p = S.player, r = rating(id), notes = S.notes[id] || [];
+  return `${sbar()}<div class="body pl">
+   ${videoBox(e, k5, von, `<button class="bk" onclick="back()" title="Zurück">‹</button><button class="fs" title="Querformat" onclick="${inSess() ? `go('quer','${id}')` : `S.stack[S.stack.length-1]=['quer','${id}'];save();render()`}">⤢</button>`)}
+   <div class="ptitle"><div class="grow"><div class="k">${esc(e.meta || e.gruppe.split("|")[0])} · ${i + 1} / ${es.length}</div><h2>${e.nr ? e.nr + " · " : ""}${esc(e.title)}${e.extra ? ` <small style="font-size:13px;color:var(--fg2)">${esc(e.extra)}</small>` : ""}<span class="jp">${esc(e.jp || "")}</span></h2></div>${dots(r)}</div>
+   <div class="scrub"><div class="track" id="trk" onclick="seekTrack(event)"><i id="trkI"></i><b id="trkB"></b></div><div class="times"><span id="tNow">0:00,0</span><span>${p.loop ? "Schleife" : "einmal"}</span><span>${fmt(bis - von)}</span></div></div>
+   <div class="ctrl">
+    <button onclick="nachbar(-1)" ${i ? "" : "disabled style='opacity:.3'"}>⏮<small>vorige</small></button>
+    <button onclick="frame(-1)">◀︎<small>1 Bild</small></button>
+    <button class="pp" id="pp" onclick="togglePlay()">❚❚</button>
+    <button onclick="frame(1)">▶︎<small>1 Bild</small></button>
+    <button onclick="nachbar(1)" ${i < es.length - 1 ? "" : "disabled style='opacity:.3'"}>⏭<small>nächste</small></button>
+   </div>
+   <div class="speeds"><span>Tempo</span>${[0.25, 0.5, 0.75, 1].map(s => `<button class="${p.speed === s ? "on" : ""}" onclick="setSpeed(${s})">${String(s).replace(".", ",")}${s === 1 ? "×" : ""}</button>`).join("")}</div>
+   <div class="toggles">
+    <button class="${p.loop ? "on" : ""}" onclick="S.player.loop=!S.player.loop;save();keep()">↻ Schleife</button>
+    <button class="${p.sound && p.speed === 1 ? "on" : ""}" onclick="S.player.sound=!S.player.sound;save();keep()" title="In Zeitlupe immer stumm">${p.sound && p.speed === 1 ? "🔊" : "🔇"} Ton</button>
+    <button class="${p.awake ? "on" : ""}" onclick="S.player.awake=!S.player.awake;save();keep()">☀ Bildschirm an</button>
+   </div>
+   <div class="prate"><div class="q">Wie sitzt ${esc(e.title)}? ${r ? `Zuletzt ${RATING[r]}.` : ""}</div><div class="rate">${[1,2,3,4].map(k => `<button class="${k === r ? "on" : ""}" onclick="${inSess() ? `sessRate('${id}',${k})` : `S.ratings['${id}']=${k};save();keep()`}"><b>${k}</b>${RATING[k]}</button>`).join("")}</div></div>
+   <div class="qnote"><input id="qn" placeholder="Notiz für heute, ${today()} …" onkeydown="if(event.key==='Enter')addNote()"><button onclick="addNote()">+</button></div>
+   ${notes.length ? `<div class="saved">Heute notiert<b>${notes.map(n => esc(n.text || n)).join("<br>")}</b></div>` : ""}
+   ${inSess() ? sessListe() : ""}
+  </div>`;
+};
+
+/* Tablet „Player klein“ rechts neben der Liste: Video, Steuerung, Einschätzen, Notiz, Kommentar */
+function playerPane(id){
+  const { e, es, i, k5, von, bis } = plSetup(id);
+  const p = S.player, r = rating(id), notes = S.notes[id] || [];
+  return `<div class="rpane body tpl" data-scroll="pr">
+    ${videoBox(e, k5, von, `<div class="qname">${e.nr ? e.nr + " · " : ""}${esc(e.title)}</div><button class="fs" title="Player groß" onclick="go('quer','${id}')">⤢</button>`)}
+    <div class="scrub"><div class="track" id="trk" onclick="seekTrack(event)"><i id="trkI"></i><b id="trkB"></b></div><div class="times"><span id="tNow">0:00,0</span><span>${p.loop ? "Schleife" : "einmal"}</span><span>${fmt(bis - von)}</span></div></div>
+    <div class="trow">
+     <div class="ctrl">
+      <button onclick="nachbar(-1)" ${i ? "" : "disabled style='opacity:.3'"}>⏮<small>vorige</small></button>
+      <button onclick="frame(-1)">◀︎<small>1 Bild</small></button>
+      <button class="pp" id="pp" onclick="togglePlay()">❚❚</button>
+      <button onclick="frame(1)">▶︎<small>1 Bild</small></button>
+      <button onclick="nachbar(1)" ${i < es.length - 1 ? "" : "disabled style='opacity:.3'"}>⏭<small>nächste</small></button>
+     </div>
+     <div class="tset">
+      <div class="speeds"><span>Tempo</span>${[0.25, 0.5, 0.75, 1].map(s => `<button class="${p.speed === s ? "on" : ""}" onclick="setSpeed(${s})">${String(s).replace(".", ",")}${s === 1 ? "×" : ""}</button>`).join("")}</div>
+      <div class="toggles">
+       <button class="${p.loop ? "on" : ""}" onclick="S.player.loop=!S.player.loop;save();keep()">↻ Schleife</button>
+       <button class="${p.sound && p.speed === 1 ? "on" : ""}" onclick="S.player.sound=!S.player.sound;save();keep()">${p.sound && p.speed === 1 ? "🔊" : "🔇"} Ton</button>
+       <button class="${p.awake ? "on" : ""}" onclick="S.player.awake=!S.player.awake;save();keep()">☀ Bildschirm an</button>
+      </div>
+     </div>
+    </div>
+    <div class="tbelow">
+     <div class="tcol">
+      <div class="ptitle"><div class="grow"><div class="k">${esc(e.meta || e.gruppe.split("|")[0])} · ${i + 1} / ${es.length}</div><h2>${e.nr ? e.nr + " · " : ""}${esc(e.title)}${e.extra ? ` <small style="font-size:13px;color:var(--fg2)">${esc(e.extra)}</small>` : ""}<span class="jp">${esc(e.jp || "")}</span></h2></div></div>
+      <div class="prate"><div class="q">Wie sitzt ${esc(e.title)}? ${r ? `Zuletzt ${RATING[r]}.` : ""}</div><div class="rate">${[1,2,3,4].map(k => `<button class="${k === r ? "on" : ""}" onclick="${inSess() ? `sessRate('${id}',${k})` : `S.ratings['${id}']=${k};save();keep()`}"><b>${k}</b>${RATING[k]}</button>`).join("")}</div></div>
+     </div>
+     <div class="tcol">
+      <div class="qnote"><input id="qn" placeholder="Notiz für heute, ${today()} …" onkeydown="if(event.key==='Enter')addNote()"><button onclick="addNote()">+</button></div>
+      ${notes.length ? `<div class="saved">Heute notiert<b>${notes.map(n => esc(n.text || n)).join("<br>")}</b></div>` : ""}
+      ${r ? `<div class="lastnote" style="margin:0 16px 10px"><span>Letzte Notiz · Do 29.10.</span>${e.disc === "shinkitoho" ? "Kissaki bleibt in der Mitte, nicht zu früh ausholen." : "Hüfte früher drehen, Arm bleibt vor dem Kopf."}</div>` : ""}
+      ${e.komm ? `<div style="padding:0 16px 10px"><button class="btn ghost" onclick="go('kommentar','${id}')">Kommentar · shinkiryu.de</button></div>` : ""}
+     </div>
+    </div>
+  </div>`;
+}
+const findGrad = e => (disc(e.disc).grade.find(x => x.id === e.grade) || {}).name;
+
+/* Querformat (Telefon quer, auf dem Tablet „Player groß“): Video so groß wie möglich, rechts eine schmale Spalte
+   mit der knappen Steuerung, Technikname dauerhaft oben links. */
+V.quer = id => {
+  const { e, k5, von } = plSetup(id);
+  const p = S.player;
+  const name = `${e.nr ? e.nr + " · " : ""}${esc(e.title)}${e.angriff ? ` <small>${esc(e.angriff.name)}</small>` : ""}`;
+  const track = `<div class="qtrk" id="trk" onclick="seekTrack(event)"><i id="trkI"></i><b id="trkB"></b></div>`;
+  const hoch = T() || S.stack.at(-2)?.[0] === "session" ? "back()" : `S.stack[S.stack.length-1]=['player','${id}'];save();render()`;
+  /* Bleibt über und unter dem Video genug Platz (Tablet 16:10, Video breiter), kommen Titel und Steuerung dorthin */
+  const sc = $("#scr"), frei = sc.clientHeight - sc.clientWidth / CROP[e.disc].dar;
+  if (frei >= 120) return `<div class="qbands">
+    <div class="qtop"><button onclick="${hoch}" title="Zurück">⤡</button><div class="grow"><div class="k">${esc(e.meta || e.gruppe.split("|")[0])}</div><h2>${e.nr ? e.nr + " · " : ""}${esc(e.title)}${e.extra ? ` <small>${esc(e.extra)}</small>` : ""} <span class="jp">${esc(e.jp || "")}</span></h2></div></div>
+    ${videoBox(e, k5, von)}
+    <div class="qbot">${track}<div class="qrow2">
+      <span class="qt" id="tNow">0:00,0</span>
+      <div class="mid"><button onclick="frame(-1)">◀︎<small>1 Bild</small></button><button class="pp" id="pp" onclick="togglePlay()">❚❚</button><button onclick="frame(1)">▶︎<small>1 Bild</small></button></div>
+      <div class="rt"><button class="tx" onclick="cycleSpeed()">${spdTxt(p.speed)}</button><button class="tx ${p.loop ? "on" : ""}" onclick="S.player.loop=!S.player.loop;save();keep()">↻ Schleife</button></div>
+    </div></div></div>`;
+  return `<div class="qb">${videoBox(e, k5, von, `<div class="qname">${name}</div>${track}<span class="qt qtb" id="tNow">0:00,0</span>`)}
+    <div class="qrail">
+      <button onclick="${hoch}" title="Hochformat">⤡</button>
+      <button onclick="frame(-1)">◀︎<small>Bild</small></button>
+      <button class="pp" id="pp" onclick="togglePlay()">❚❚</button>
+      <button onclick="frame(1)">▶︎<small>Bild</small></button>
+      <button class="tx" onclick="cycleSpeed()">${spdTxt(p.speed)}</button>
+      <button class="tx ${p.loop ? "on" : ""}" onclick="S.player.loop=!S.player.loop;save();keep()">↻</button>
+    </div></div>`;
+};
+
+/* Player-Logik: echtes Video im 5. Kyu, sonst läuft nur die Zeitleiste */
+function vEl(){ return document.getElementById("v"); }
+function startPlayer(){
+  const v = vEl(), p = S.player;
+  if (PL.timer) clearInterval(PL.timer);
+  if (v) {
+    v.playbackRate = p.speed; v.muted = !(p.sound && p.speed === 1); v.volume = p.laut;
+    const los = () => { v.currentTime = PL.t; if (PL.playing) v.play().catch(() => {}); };
+    if (v.readyState >= 1) los(); else v.addEventListener("loadedmetadata", los, { once: true });
+    v.addEventListener("error", () => { v.outerHTML = `<div class="fake"><span>Video lässt sich hier nicht abspielen</span></div>`; PL.echt = false; });
+  }
+  gesten($("#vid"));
+  hell();
+  PL.timer = setInterval(tick, 100);
+}
+function tick(){
+  if (!PL || !document.getElementById("trk")) { clearInterval(PL && PL.timer); return; }
+  const v = vEl();
+  if (PL.echt && v && v.readyState >= 1) {
+    if (v.currentTime < PL.von - 0.5) v.currentTime = PL.t; // Sprung an die Stelle noch nicht angekommen
+    else PL.t = v.currentTime;
+  }
+  else if (PL.playing) PL.t += 0.1 * S.player.speed;
+  if (PL.t >= PL.bis) {
+    if (S.player.loop) { PL.t = PL.von; if (v) v.currentTime = PL.von; }
+    else { PL.t = PL.bis; PL.playing = false; if (v) v.pause(); }
+  }
+  const f = (PL.t - PL.von) / (PL.bis - PL.von) * 100;
+  $("#trkI").style.width = f + "%"; $("#trkB").style.left = f + "%";
+  $("#tNow").textContent = fmt(PL.t - PL.von) + (S.stack.at(-1)[0] === "quer" ? " / " + fmt(PL.bis - PL.von) : "");
+  $("#pp").textContent = PL.playing ? "❚❚" : "▶";
+}
+function seek(t){ PL.t = Math.min(PL.bis, Math.max(PL.von, t)); const v = vEl(); if (v) v.currentTime = PL.t; tick(); }
+function togglePlay(){ PL.playing = !PL.playing; const v = vEl(); if (v) PL.playing ? v.play() : v.pause(); }
+function frame(dir){ PL.playing = false; const v = vEl(); if (v) v.pause(); seek(PL.t + dir * 0.04); }
+function seekTrack(ev){ const r = ev.currentTarget.getBoundingClientRect(); seek(PL.von + (ev.clientX - r.left) / r.width * (PL.bis - PL.von)); }
+function setSpeed(s){ S.player.speed = s; save(); keep(); }
+function cycleSpeed(){ const l = [0.25, 0.5, 0.75, 1]; setSpeed(l[(l.indexOf(S.player.speed) + 1) % l.length]); }
+function nachbar(dir){ const n = PL.es[PL.i + dir]; if (!n) return; if (S.stack.at(-1)[0] === "session") { S.sess.i = PL.i + dir; save(); return render(); } if (S.stack.at(-1)[0] === "programm") return waehle(n.id); S.last = n.id; S.stack[S.stack.length - 1] = [S.stack.at(-1)[0], n.id]; save(); render(); }
+/* neu zeichnen, Stelle und Abspielzustand behalten */
+function keep(){ const t = PL.t, pl = PL.playing; render(); PL.t = t; PL.playing = pl; const v = vEl(); if (v && v.readyState >= 1) v.currentTime = t; }
+function addNote(){ const x = $("#qn").value.trim(); if (!x) return; (S.notes[PL.id] = S.notes[PL.id] || []).push(x); save(); keep(); }
+
+/* Gesten auf dem Video: Doppeltipp links/rechts = 2 s zurück/vor; Wischen hoch/runter links = Helligkeit, rechts = Lautstärke */
+function hell(){ $("#scr").style.filter = `brightness(${0.35 + 0.65 * S.player.hell})`; }
+function gesten(el){
+  if (!el) return;
+  let st = null, lastTap = 0, timer = null;
+  const zeige = (icon, wert) => { const g = $("#gest"); g.innerHTML = `<span>${icon}</span><i><b style="width:${wert * 100}%"></b></i><span>${Math.round(wert * 100)} %</span>`; g.classList.add("on"); clearTimeout(timer); timer = setTimeout(() => g.classList.remove("on"), 700); };
+  el.onpointerdown = ev => { if (ev.target.closest("button,.qtrk")) return; st = { x: ev.clientX, y: ev.clientY, r: el.getBoundingClientRect(), mode: null }; el.setPointerCapture(ev.pointerId); };
+  el.onpointermove = ev => {
+    if (!st) return;
+    const dy = ev.clientY - st.y;
+    if (!st.mode && Math.abs(dy) > 10) { st.mode = ev.clientX - st.r.left < st.r.width / 2 ? "hell" : "laut"; st.v0 = S.player[st.mode]; }
+    if (!st.mode) return;
+    const w = Math.min(1, Math.max(0, st.v0 - dy / (st.r.height * 0.8)));
+    S.player[st.mode] = w;
+    if (st.mode === "hell") { hell(); zeige("☀", w); } else { const v = vEl(); if (v) v.volume = w; zeige(w ? "🔊" : "🔇", w); }
+  };
+  el.onpointerup = ev => {
+    if (!st) return;
+    if (st.mode) save();
+    else {
+      const now = Date.now(), rechts = ev.clientX - st.r.left > st.r.width / 2;
+      if (now - lastTap < 320) {
+        seek(PL.t + (rechts ? 2 : -2)); lastTap = 0;
+        const r = $("#rip"); r.className = "rip on " + (rechts ? "re" : "li"); r.textContent = rechts ? "2 s ››" : "‹‹ 2 s";
+        setTimeout(() => r.classList.remove("on"), 500);
+      } else lastTap = now;
+    }
+    st = null;
+  };
+}
+
+V.todo = name => `${sbar()}<div class="body"><div class="ink"></div>${backHd("Zurück", name, "")}<div class="ph"><span class="big">後</span><b>${esc(name)}</b><span>Kommt in einer der nächsten Runden als eigener Clickdummy.</span></div></div>`;
+
+/* ---------- Notizen rechts: je Ansicht Zweck, Fragen und Entschiedenes ---------- */
+const NOTES = {
+  menu: {
+    titel: "Startmenü · Variante 1",
+    zweck: "Kacheln, die große Programm-Kachel zeigt Sparte, Grad und Stand des zuletzt gewählten Grades. Zahnrad oben rechts für Einstellungen. Hinweise auf neue App- oder Videoversion und eine vorgemerkte Prüfung stehen über den Kacheln.",
+    fragen: [],
+    entschieden: ["Reihenfolge und Auswahl der Kacheln so.", "Einstellungen als Zahnrad.", "Programm-Kachel zeigt die zuletzt gewählte Sparte."]
+  },
+  programm: {
+    titel: "Programm",
+    zweck: "Disziplin oben, Grade als Leiste mit Stand je Grad, darunter die Techniken nach Gruppe und Angriff wie im Heft. Tippen auf eine Zeile öffnet das Technik-Blatt (einschätzen, letzte Notiz, Video, bei Shinki Toho der Kommentar); ▶ springt direkt ins Video.",
+    fragen: [],
+    entschieden: [
+      "Ein Grad zeigt nur seinen eigenen Stoff; kein Umschalter „alles bis hier“. Der Prüfungsmodus würfelt 2–3 Techniken aus früheren Graden dazu.",
+      "Zeile antippen öffnet zuerst das Blatt.",
+      "Stand als vier Punkte.",
+      "Shinki Toho: Kamae mit eigenem Stand und Video.",
+      "Grade ohne Video normal zeigen, nur ▶ ausblenden und oben darauf hinweisen.",
+      "Zurück aus dem Player zeigt die Liste an der vorherigen Stelle; die zuletzt angesehene Technik leuchtet kurz auf (auch wenn im Player weitergeschaltet wurde).",
+      "Shinki Toho: Knopf „Kommentar“ im Blatt mit den Texten von shinkiryu.de (Kamae, Suburi, Kiriotoshi, Ô-dachi 1–43)."
+    ]
+  },
+  kommentar: {
+    titel: "Kommentar (Shinki Toho)",
+    zweck: "Der technische Kommentar zur Form aus den PDFs von shinkiryu.de, als lesbarer Text mit Fußnoten. tools/kommentare.py liest die PDFs, tools/daten.py hängt die Texte an die Formen. Über den Ô-dachi steht die Kumidachi-Einleitung (Rollen, Rei-ho, Ansage) als eigener Eintrag.",
+    fragen: [],
+    entschieden: ["Texte werden mit der App ausgeliefert, wie jetzt (geht offline).", "Kumidachi-Einleitung als eigener Eintrag über den Ô-dachi."]
+  },
+  player: {
+    titel: "Player",
+    zweck: "Spielt nur die Stelle der Technik. Tempo 0,25–1×, in Zeitlupe stumm, Einzelbild vor/zurück hält an, vorige/nächste Technik im selben Grad, darunter einschätzen und Notiz für heute. Das Video ist so beschnitten, wie es ausgeliefert wird: ohne Schwarz oben und unten. Im Aikido 5. Kyu läuft das echte Video; sonst ein Platzhalter. Gesten aufs Video ausprobieren: Doppelklick links/rechts, mit gedrückter Maus hoch/runter ziehen links bzw. rechts.",
+    fragen: [],
+    entschieden: [
+      "Schleife ist Standard.",
+      "Einschätzen und Notiz direkt im Player.",
+      "Doppeltipp links/rechts: 2 s zurück/vor.",
+      "Wischen hoch/runter: linke Hälfte Helligkeit, rechte Hälfte Lautstärke.",
+      "Vier Tempi reichen.",
+      "Videos werden für die Auslieferung beschnitten (Schwarz oben und unten weg, die Titel darin zeigt die App selbst): Aikido 720×372 ab Zeile 64, Daitoryu 720×374 ab Zeile 50, Shinki Toho ohne Balken."
+    ]
+  },
+  quer: {
+    titel: "Player im Querformat",
+    zweck: "Telefon quer bzw. auf dem Tablet „Player groß“. Das beschnittene Video füllt die Fläche fast ganz (Aikido/Daitoryu etwa 2,06 : 1), rechts eine schmale Spalte mit Hochformat bzw. zurück, Einzelbild, Pause, Tempo (tippen schaltet weiter) und Schleife; Zeitleiste unten im Bild. Bleiben über und unter dem Video mindestens 120 px frei (Tablet 16:10 mit Aikido/Daitoryu), stehen Titel oben und Steuerung unten im freien Platz statt in der Spalte. Gesten wie im Hochformat.",
+    fragen: [],
+    entschieden: ["Entwurf B: schmale Spalte rechts, Bild bleibt frei.", "Keine vorige/nächste Technik im Querformat.", "Technikname dauerhaft oben links.", "Freier Platz über/unter dem Video wird für Titel und Steuerung genutzt."]
+  },
+  tablet: {
+    titel: "Tablet quer · am Mattenrand",
+    zweck: "Das Tablet steht dauerhaft quer. Startmenü als breites Kachelraster. Programm und Player klein sind eine Seite: links die Liste, rechts Video, Steuerung, Einschätzen, Notiz und Kommentar der gewählten Technik; Tippen auf eine Zeile spielt sie. Ohne Video steht rechts das Blatt. ⤢ öffnet Player groß; dort stehen Titel und Steuerung im freien Platz über und unter dem Video. Kommentar als Lesespalte.",
+    fragen: [],
+    entschieden: ["Programm und Player klein auf einer Seite.", "Kein eigener Mattenmodus.", "Player groß nutzt freien Platz über/unter dem Video für Titel und Steuerung; reicht er nicht (Telefon quer), bleibt die Spalte rechts."]
+  },
+  todo: { titel: "Noch nicht gebaut", zweck: "Diese Ansicht folgt in einer späteren Runde.", fragen: [] }
+};
+const ORDER = [["menu","Startmenü",1],["programm","Programm",1],["player","Player",1],["quer","Querformat",1],["kommentar","Kommentar",1],["notizen","Notizen",0],["heute","Heute üben",0],["pruefung","Prüfungsmodus",0],["statistik","Statistik",0],["lehrgang","Lehrgänge",0],["karte","Landkarte",0],["glossar","Glossar & Suche",0],["einst","Einstellungen · Videos · Sicherung",0]];
+const START = { menu: [["menu"]], programm: [["menu"],["programm"]],
+  player: [["menu"],["programm"],["player","aikido/kyu-grade/tachi-waza-mae-seme/katate-katate-dori-ai-hanmi/k5/ikkyo-1"]],
+  quer: [["menu"],["programm"],["quer","aikido/kyu-grade/tachi-waza-mae-seme/katate-katate-dori-ai-hanmi/k5/ikkyo-1"]],
+  kommentar: [["menu"],["programm"],["kommentar","shinkitoho/kumidachi"]] };
+
+function renderNotes(){
+  const cur = S.stack[S.stack.length - 1][0], n = NOTES[cur] || NOTES.todo, tb = NOTES.tablet;
+  $("#notes").innerHTML = `
+   <div class="card"><div class="eyebrow">Mitori · Clickdummy · Theme Shinki</div><h2>${esc(n.titel)}</h2><p>${esc(n.zweck)}</p></div>
+   ${T() ? `<div class="card"><h3>${esc(tb.titel)}</h3><p>${esc(tb.zweck)}</p><ul>${tb.entschieden.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+   ${n.fragen.length ? `<div class="card"><h3>Fragen an dich</h3><ol>${n.fragen.map(([q, e]) => `<li>${esc(q)}${e ? `<em>${esc(e)}</em>` : ""}</li>`).join("")}</ol></div>` : ""}
+   ${n.entschieden ? `<div class="card done"><h3>Entschieden</h3><ul>${n.entschieden.map(x => `<li><b>${esc(x)}</b></li>`).join("")}</ul></div>` : ""}
+   <div class="card"><h3>Gerät</h3><div class="opts">${[["phone","Telefon hochkant"],["tablet","Tablet quer"]].map(([v, x]) => `<label><input type="radio" name="dev" ${S.device === v ? "checked" : ""} onchange="S.device='${v}';SCROLL={};save();render()">${x}</label>`).join("")}</div></div>
+   <div class="card"><h3>Ansichten</h3><div class="views">${ORDER.map(([id, t, ok]) => `<button class="${id === cur ? "on" : ""} ${ok ? "" : "todo"}" ${ok ? `onclick="S.stack=JSON.parse(JSON.stringify(START['${id}']));SCROLL={};save();render()"` : "disabled"}>${T() && id === "player" ? "Programm + Player" : T() && id === "quer" ? "Player groß" : t}</button>`).join("")}</div></div>
+   <div class="card"><h3>Szenario</h3><div class="opts">${[["alle","alle Bundles geladen"],["aikido-kyu","nur Aikido Kyu"],["keine","keine Videos"]].map(([v, t]) => `<label><input type="radio" name="b" ${S.bundles === v ? "checked" : ""} onchange="S.bundles='${v}';save();render()">${t}</label>`).join("")}</div>
+   <p style="margin-top:10px;font-size:13px;color:var(--muted)">Programmdaten echt (aus <code>daten/*.yaml</code>), Übungsstände und Termine Beispielwerte. Einschätzungen und Notizen bleiben im Browser; <a href="#" onclick="localStorage.removeItem('mitori-dummy');location.reload();return false">zurücksetzen</a>.</p></div>`;
+}
+
+/* #programm oder #player in der Adresse öffnet die Ansicht direkt, ?tablet bzw. ?telefon wählt das Gerät */
+if (location.search.includes("tablet")) S.device = "tablet";
+if (location.search.includes("telefon")) S.device = "phone";
+if (location.hash.length > 1 && START[location.hash.slice(1)]) S.stack = JSON.parse(JSON.stringify(START[location.hash.slice(1)]));
+
+function render(zurueck){
+  if (!zurueck) merkScroll();
+  if (PL && PL.timer) clearInterval(PL.timer);
+  const v = vEl(); if (v) v.pause();
+  const [name, ...args] = S.stack[S.stack.length - 1];
+  $(".phone").className = "phone" + (T() ? " tablet" : name === "quer" ? " quer" : "");
+  $("#scr").classList.toggle("tab", T());
+  $("#scr").style.filter = "";
+  $("#scr").innerHTML = (V[name] || V.todo)(...args);
+  const m = SCROLL[S.stack.length] || {};
+  document.querySelectorAll("#scr [data-scroll]").forEach(el => { if (m[el.dataset.scroll] != null) el.scrollTop = m[el.dataset.scroll]; });
+  const last = zurueck && S.last && $(`#scr .li[data-id="${CSS.escape(S.last)}"]`);
+  if (last) { const box = last.closest("[data-scroll]"), r = last.getBoundingClientRect(), b = box.getBoundingClientRect();
+    if (r.top < b.top + 40 || r.bottom > b.bottom) last.scrollIntoView({ block: "center" }); // im Player weitergeschaltet
+    last.classList.add("flash"); }
+  if (document.getElementById("trk")) startPlayer();
+  renderNotes();
+}
+</script>
+<script src="lehrgaenge.js"></script>
+<script src="ansichten.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.shrippen.Mitori</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Mitori</name>
+  <summary>Exam programmes of Aikido Shinki Rengo, Daitoryu and Shinki Toho</summary>
+  <summary xml:lang="de">Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Shinki Toho</summary>
+  <description>
+    <p>Tap a technique and the place in the exam video plays: slow motion, loop, rate how well you know it, take notes, practise for the exam.</p>
+    <p xml:lang="de">Technik antippen, die Stelle im Prüfungsvideo läuft: Zeitlupe, Schleife, einschätzen, Notizen, für die Prüfung üben.</p>
+  </description>
+  <launchable type="desktop-id">io.github.shrippen.Mitori.desktop</launchable>
+  <url type="homepage">https://shrippen.github.io/Mitori/</url>
+  <url type="vcs-browser">https://github.com/shrippen/Mitori</url>
+  <developer id="io.github.shrippen">
+    <name>shrippen</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <recommends>
+    <control>touch</control>
+  </recommends>
+  <releases>
+  </releases>
+</component>

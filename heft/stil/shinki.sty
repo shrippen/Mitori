@@ -1,0 +1,265 @@
+% shinki.sty: Satz des Prüfungsprogramms im Stil der Shinki News.
+%
+% Design: Das Heft ist ein Verbandsdokument und folgt dem Erscheinungsbild der
+% Shinki News (Shinki_News_No45_de.pdf): Rot aus Logo und Rubriken, graue
+% Kopf- und Fußbalken, Tuschelavierung, Serifenschrift für Namen, serifenlose
+% für Rubriken. Darum hier nicht Kante (siehe CLAUDE.md, „nicht anwendbar“);
+% die Farben stehen nur an dieser Stelle.
+%
+% Die Inhalte setzt lua/mitori-heft.lua mit den Makros unten, aus den Daten, die
+% tools/daten.py nach build/daten/ schreibt. Satz mit LuaLaTeX.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{shinki}[2026/11/01 Mitori-Heft]
+
+\newif\ifentwurf
+\DeclareOption{entwurf}{\entwurftrue}
+\ifdefined\mitorientwurf\entwurftrue\fi
+\ProcessOptions\relax
+
+\RequirePackage{fontspec}
+\RequirePackage[table]{xcolor}
+\RequirePackage{graphicx,eso-pic,multicol,longtable,array,tabularx,enumitem,tikz,needspace}
+\RequirePackage[hidelinks]{hyperref}
+\RequirePackage[a4paper,left=18mm,right=18mm,top=27mm,bottom=24mm]{geometry}
+
+% Farben -------------------------------------------------------------------
+\definecolor{shu}{HTML}{CE171E}      % Rot aus Logo und Überschriften der News
+\definecolor{sumi}{HTML}{1D1B1A}     % Tusche
+\definecolor{usuzumi}{HTML}{77716C}  % verdünnte Tusche, Nebentext
+\definecolor{usuzumiv}{HTML}{A49E98} % Kanji-Vorschlag (ungeprüft)
+\definecolor{hai}{HTML}{D9D5CF}      % Linien
+\definecolor{balken}{HTML}{CFCFCF}   % Kopf- und Fußbalken
+\definecolor{band}{HTML}{1A1A1A}     % dunkles Band der Rubrikseiten
+\definecolor{stufe1}{HTML}{F3C7C6}   % Landkarte: früh im Programm
+\definecolor{stufe2}{HTML}{E8918F}
+\definecolor{stufe3}{HTML}{DC5A57}
+\definecolor{stufe4}{HTML}{CE171E}
+\definecolor{stufe5}{HTML}{7D0A0F}   % spät im Programm
+
+% Schriften ----------------------------------------------------------------
+\setmainfont{Cochineal}[Extension=.otf, UprightFont=*-Roman, BoldFont=*-Bold,
+  ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic, Numbers=Lining]
+\setsansfont{PTSans}[Path=schriften/, Extension=.ttf, UprightFont=*-Regular,
+  BoldFont=*-Bold, ItalicFont=*-Italic]
+\newfontfamily\schmal{PTSansNarrow}[Path=schriften/, Extension=.ttf,
+  UprightFont=*-Regular, BoldFont=*-Bold]
+\newfontfamily\schmalgesperrt{PTSansNarrow}[Path=schriften/, Extension=.ttf,
+  UprightFont=*-Regular, BoldFont=*-Bold, LetterSpace=6]
+\newfontfamily\jpschrift{Noto Serif CJK JP}[BoldFont={Noto Serif CJK JP Bold}]
+
+\newcommand\jp[1]{{\jpschrift #1}}
+\newcommand\jpv[1]{{\jpschrift\color{usuzumiv}#1}}
+\newcommand\keinkanji{{\color{hai}–}}
+\color{sumi}
+\setlength\parindent{0pt}
+\setlength\parskip{0pt}
+\pagestyle{empty}
+
+% Fragen-Marker ------------------------------------------------------------
+\newcommand\frage[1]{\ifentwurf\leavevmode\,\raisebox{.35ex}{\setlength\fboxsep{.6pt}%
+  \colorbox{shu}{\color{white}\schmal\bfseries\fontsize{5.2}{5.2}\selectfont\,#1\,}}\fi}
+
+% Seitenformat -------------------------------------------------------------
+\makeatletter
+\newcommand\mitori@format[6]{\clearpage
+  \global\pagewidth=#1\global\pageheight=#2%
+  \global\paperwidth=#1\global\paperheight=#2%
+  \global\textwidth=\dimexpr#1-#3-#3\relax
+  \global\textheight=\dimexpr#2-#4-#5\relax
+  \global\hsize\textwidth\global\linewidth\textwidth\global\columnwidth\textwidth
+  \global\vsize\textheight\global\@colht\textheight\global\@colroom\textheight
+  \global\oddsidemargin=\dimexpr#3-1in\relax\global\evensidemargin\oddsidemargin
+  \global\topmargin=\dimexpr#4-1in-\headheight-\headsep\relax
+  \global\def\mitori@quer{#6}}
+\newcommand\hochformat{\mitori@format{210mm}{297mm}{18mm}{27mm}{24mm}{0}}
+\newcommand\querformat{\mitori@format{297mm}{210mm}{14mm}{30mm}{17mm}{1}}
+\def\mitori@quer{0}
+
+% Kopf- und Fußbalken (jede Seite außer Titel) --------------------------------
+\newcommand\rubrikkopf{}
+\newcommand\rubrikfuss{}
+\newcommand\setzerubrik[2]{\gdef\rubrikkopf{#1}\gdef\rubrikfuss{#2}\mitori@inhalt}
+% Eintrag ins Inhaltsverzeichnis für die nächste Seite, die Lua setzt
+\newcommand\mitori@naechster{}
+\newcommand\inhalt[1]{\gdef\mitori@naechster{#1}}
+\newcommand\mitori@inhalt{\ifx\mitori@naechster\@empty\else
+  \addcontentsline{toc}{subsection}{\mitori@naechster}\global\let\mitori@naechster\@empty\fi}
+\AddToShipoutPictureFG{%
+  \ifx\rubrikkopf\@empty\else
+    \AtPageUpperLeft{%
+      \put(0,\LenToUnit{-12.5mm}){\color{balken}\rule{14mm}{3.4mm}}%
+      \put(\LenToUnit{17mm},\LenToUnit{-12mm}){\schmalgesperrt\fontsize{7.5}{8}\selectfont
+        \color{sumi}\MakeUppercase{\rubrikkopf}}}%
+    \AtPageLowerLeft{%
+      \put(\LenToUnit{\paperwidth-26mm},0){\color{balken}\rule{26mm}{3.4mm}}%
+      \put(\LenToUnit{\paperwidth-14mm},\LenToUnit{8mm}){\llap{\sffamily\color{sumi}%
+        \fontsize{7.5}{8}\selectfont\rubrikfuss\hspace{3mm}%
+        {\color{usuzumi}\rule[-1.5mm]{.3pt}{5.5mm}}\hspace{3mm}%
+        \fontsize{12}{12}\selectfont\two@digits{\value{page}}}}}%
+  \fi}
+% Teil-Seite: dunkle Rubrikseite wie in den News
+\newcommand\teil[3]{\hochformat\setzerubrik{}{}\phantomsection\addcontentsline{toc}{section}{#1}%
+  \AddToShipoutPictureBG*{\AtPageLowerLeft{\begin{tikzpicture}
+    \shade[top color=black,bottom color=black!78] (0,0) rectangle (\paperwidth,\paperheight);\end{tikzpicture}}}%
+  \color{white}\vspace*{20mm}%
+  \includegraphics[height=24mm]{grafik/shinki-logo.pdf}\par\vspace{60mm}%
+  {\jpschrift\fontsize{40}{44}\selectfont #2}\par\vspace{8mm}%
+  {\sffamily\bfseries\fontsize{30}{34}\selectfont #1}\par\vspace{3mm}%
+  {\color{white}\rule{.5\linewidth}{1pt}}\par\vspace{3mm}%
+  {\sffamily\fontsize{12}{15}\selectfont #3}\par\color{sumi}\clearpage}
+% Textseite (Vorbemerkung, Hinweise)
+\newcommand\textseite[3]{\hochformat\setzerubrik{#1}{#2}\addcontentsline{toc}{subsection}{#3}%
+  {\sffamily\bfseries\fontsize{20}{24}\selectfont #3}\par\vspace{2mm}{\color{shu}\rule{30mm}{1.2pt}}\par\vspace{6mm}}
+
+% Tusche-Ecke rechts oben, nur auf der aktuellen Seite
+\newcommand\tuscheecke{\AddToShipoutPictureBG*{\AtPageUpperLeft{%
+  \put(\LenToUnit{\paperwidth},0){\makebox[0pt][r]{\raisebox{-\height}{%
+    \includegraphics[height=.36\paperheight]{grafik/tusche.jpg}}}}}}}
+\makeatother
+
+% Logo mit Disziplin -----------------------------------------------------------
+\newcommand\logozeile[2]{%
+  \begingroup\raisebox{-.32\height}{\includegraphics[height=13mm]{grafik/shinki-logo.pdf}}%
+  \hspace{4mm}{\schmal\fontsize{17}{17}\selectfont\MakeUppercase{#1}}%
+  \if\relax\detokenize{#2}\relax\else\hspace{3mm}{\schmal\fontsize{11}{11}\selectfont\color{usuzumi}#2}\fi
+  \endgroup\par}
+
+% ===== Ansicht 1: Tusche ======================================================
+% \tuscheseite{Disziplin}{Untertitel}{Grad}{Kanji}{Programmzeile}{Stand}{Fußrubrik}
+\newcommand\tuscheseite[7]{\hochformat\setzerubrik{#1 · Prüfungsprogramm}{#7}%
+  \tuscheecke
+  \vspace*{-2mm}\logozeile{#1}{#2}\vspace{5mm}%
+  {\sffamily\bfseries\fontsize{34}{32}\selectfont #3}\hspace{5mm}%
+  {\jpschrift\bfseries\fontsize{24}{24}\selectfont\color{shu}#4}\par
+  \vspace{2.5mm}{\color{sumi}\rule{\linewidth}{1pt}}\par\vspace{1.4mm}%
+  {\sffamily\fontsize{9}{11}\selectfont\textbf{#5}\hfill{\color{usuzumi}#6}}\par
+  \vspace{5mm}}
+% \tuscheende[1]: mit Hinweis auf Kanji-Vorschläge (Daitoryu); [2]: ohne Grad-Hinweis (Shinki Toho)
+\newcommand\tuscheende[1][0]{\par
+  \AddToShipoutPictureFG*{\AtPageLowerLeft{\put(\LenToUnit{18mm},\LenToUnit{15.5mm}){\parbox[b]{\dimexpr\paperwidth-36mm-34mm\relax}{%
+    {\color{hai}\rule{\linewidth}{.4pt}}\par\vspace{.6mm}
+    \sffamily\fontsize{7}{9}\selectfont\color{usuzumi}\ifnum#1<2 Höhere Grade setzen die Techniken der niedrigeren voraus.\fi
+     \ifnum#1=1 \quad Japanisch in hellem Grau: Vorschlag, noch nicht bestätigt.\fi
+     \ifentwurf\quad\frage{X}\ Rückfrage, siehe KORREKTUREN.md.\fi}}}}\clearpage}
+
+\newenvironment{tuschespalten}{\setlength\columnsep{8mm}\begin{multicols}{2}\raggedcolumns}{\end{multicols}}
+
+% Gruppe: rote Rubrik mit Kanji
+\newcommand\tgruppe[2]{\par\addvspace{4mm}%
+  {\sffamily\bfseries\fontsize{10.5}{12}\selectfont\color{shu}#1\hspace{2.5mm}%
+   {\mdseries\fontsize{8.5}{10}\selectfont\color{usuzumi}#2}}\par\nobreak\vspace{1.4mm}\nobreak}
+% Angriff: Name, Zusatz, Frage, Kanji
+\newcommand\angriff[4]{{\bfseries #1}#3\if\relax\detokenize{#2}\relax\else\\{\fontsize{8.5}{10}\selectfont(#2)}\fi
+  \if\relax\detokenize{#4}\relax\else\\{\fontsize{7.5}{10}\selectfont\color{usuzumi}#4}\fi}
+% Technik: Name (mit Frage), Zusatz, Kanji
+\newcommand\ttech[3]{\par\hangindent=3mm #1\if\relax\detokenize{#2}\relax\else\ {\itshape\color{usuzumi}\fontsize{8.5}{10}\selectfont#2}\fi
+  \if\relax\detokenize{#3}\relax\else\hspace{2mm}{\fontsize{7.5}{10}\selectfont\color{usuzumi}#3}\fi}
+% Zeilen als ein Kasten: Umbruch nur zwischen Zeilen, nie nach der Rubrik
+\newcommand\tzeile[2]{\par\vbox{\hsize\linewidth{\color{hai}\hrule height .4pt}\vspace{1.1mm}%
+  \noindent\begin{minipage}[t]{.42\linewidth}\raggedright\fontsize{9.5}{11.2}\selectfont#1\end{minipage}\hfill
+  \begin{minipage}[t]{.55\linewidth}\raggedright\fontsize{9.5}{11.2}\selectfont#2\end{minipage}\par
+  \vspace{1.3mm}}}
+\newcommand\tzeilevoll[1]{\par\vbox{\hsize\linewidth{\color{hai}\hrule height .4pt}\vspace{1.1mm}%
+  \noindent\begin{minipage}[t]{\linewidth}\raggedright\fontsize{9.5}{11.2}\selectfont#1\end{minipage}\par
+  \vspace{1.3mm}}}
+\newcommand\tfuss[1]{\par\vspace{.5mm}{\sffamily\fontsize{7}{8.5}\selectfont\color{usuzumi}#1}\par}
+
+% ===== Ansicht 2: Matrix ======================================================
+\newcolumntype{M}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newlength\mangriff \newlength\mspalte \newlength\stspalte
+\setlength\stspalte{30mm}
+% dunkles Band über die ganze Breite
+\newcommand\band[3]{\AddToShipoutPictureBG*{\AtPageUpperLeft{\put(0,\LenToUnit{-44mm}){%
+  \begin{tikzpicture}\shade[left color=black,right color=black!72] (0,0) rectangle (\paperwidth,28mm);\end{tikzpicture}}}}%
+  \vspace*{-6mm}%
+  \begin{minipage}[b]{.7\linewidth}\color{white}\sffamily
+    {\bfseries\fontsize{17}{19}\selectfont #1}\par\vspace{.8mm}{\color{white}\rule{.62\linewidth}{.8pt}}\par\vspace{.6mm}
+    {\fontsize{8.5}{10}\selectfont #2}\end{minipage}\hfill
+  {\color{white}\jpschrift\fontsize{20}{20}\selectfont #3}\par\vspace{9mm}}
+% \matrixanfang{Disziplin}{Teil}{Kanji}{Gradzahl}{Fußrubrik}
+\newcommand\matrixanfang[5]{\querformat\setzerubrik{#1 · Matrix}{#5}%
+  \band{#2}{#1}{#3}%
+  \setlength\mangriff{40mm}\setlength\tabcolsep{1.6mm}\renewcommand\arraystretch{1}%
+  \ifnum#4>0 \setlength\mspalte{\dimexpr(\linewidth-\mangriff-#4\tabcolsep*2)/#4\relax}\fi
+  \setlength\LTpre{0pt}\setlength\LTpost{2mm}%
+  \arrayrulecolor{hai}\fontsize{7.8}{9.2}\selectfont}
+\newcommand\mkopf[2]{{\sffamily\bfseries\fontsize{9}{10}\selectfont #1}\if\relax\detokenize{#2}\relax\else\hspace{1.5mm}{\jpschrift\fontsize{8}{10}\selectfont\color{shu}#2}\fi}
+\newcommand\mkopfende{\\[-1mm]\noalign{\color{shu}\hrule height 1.1pt\vspace{.6mm}}}
+\newcommand\mzeilenende{\\\hline}
+\newcommand\mgruppe[3]{\multicolumn{#1}{@{}l}{\rule{0pt}{4.6mm}\sffamily\bfseries\fontsize{9.5}{11}\selectfont\color{shu}#2\hspace{2mm}{\mdseries\fontsize{8}{10}\selectfont\color{usuzumi}#3}}\\\hline}
+\newcommand\mfuss[2]{\multicolumn{#1}{@{}l}{\sffamily\fontsize{7}{9}\selectfont\color{usuzumi}#2}\\}
+% Technik in der Matrix: Name links, Kanji rechtsbündig, Zusatz darunter
+\newcommand\mtech[3]{\par\leavevmode#1\unskip\nobreak\hfil\penalty50\hskip.8em\hbox{}\nobreak\hfil
+  {\fontsize{6.6}{8}\selectfont\color{usuzumi}#3}{\parfillskip=0pt\par}%
+  \if\relax\detokenize{#2}\relax\else{\itshape\fontsize{6.8}{7.8}\selectfont\color{usuzumi}#2\par}\fi}
+% \matrixende{Stand}{Vorschlag 1/0}
+\newcommand\matrixende[2]{\par\vfill{\sffamily\fontsize{7}{9}\selectfont\color{usuzumi}%
+  \ifentwurf\frage{X} Rückfrage, siehe KORREKTUREN.md\quad·\quad\fi
+  \textit{kursiv}: Ausführung oder Variante\quad·\quad
+  \ifnum#2=1 Japanisch in Grau: Vorschlag, noch nicht bestätigt\quad·\quad\fi #1\par}\clearpage}
+
+% Shinki Toho: Kopf und Stufenzeile der Gesamttabelle
+\newcommand\stmkopf{\mkopf{}{}&\mkopf{Form}{}&\mkopf{}{日本語}&\mkopf{Uchidachi}{}&\mkopf{Shidachi}{}&\mkopf{Treffer}{}&\mkopf{Zanshin}{}\mkopfende}
+\newcommand\stmstufe[3]{\multicolumn{7}{@{}l}{\rule{0pt}{4.6mm}\sffamily\bfseries\fontsize{9.5}{11}\selectfont\color{shu}#1\hspace{2mm}{\jpschrift\mdseries\fontsize{8}{10}\selectfont\color{usuzumi}#2}\hspace{3mm}{\mdseries\fontsize{7.5}{9}\selectfont\color{usuzumi}#3}}\\\hline}
+
+% ===== Ansicht 5: Landkarte ===================================================
+\newlength\lspalte \newlength\ltechbreite
+\newcolumntype{T}{>{\raggedright\arraybackslash}p{\ltechbreite}}
+\newcolumntype{Z}{>{\centering\arraybackslash}p{\lspalte}}
+\newcolumntype{S}{>{\centering\arraybackslash}p{9mm}}
+% \landkarteanfang{Disziplin}{Gruppe}{Kanji}{Spaltenzahl}{Fußrubrik}{Zeilen}
+% Mehrere Karten teilen sich eine Seite; neue Querformatseite nur aus dem Hochformat
+% #6 = Zahl der Zeilen; passt die Karte nicht mehr ganz auf die Seite, beginnt sie oben
+\newlength\lbedarf
+\newcommand\landkarteanfang[6]{\ifnum\csname mitori@quer\endcsname=0 \querformat\else
+  \setlength\lbedarf{\dimexpr 62mm+#6\dimexpr 4.4mm\relax\relax}\ifdim\lbedarf>\textheight\setlength\lbedarf{\textheight}\fi
+  \par\needspace{\lbedarf}\addvspace{9mm}\fi
+  \setzerubrik{#1 · Technik-Landkarte}{#5}%
+  {\sffamily\bfseries\fontsize{17}{19}\selectfont Wo kommt welche Technik vor?\hspace{3mm}{\jpschrift\color{shu}技の地図}}\par
+  \vspace{1mm}{\sffamily\fontsize{10}{12}\selectfont #2\hspace{2mm}{\color{usuzumi}#3}}\par\vspace{2mm}%
+  \setlength\tabcolsep{.9mm}\setlength\ltechbreite{52mm}%
+  \setlength\lspalte{\dimexpr(\linewidth-\ltechbreite-9mm-#4\tabcolsep*2-4\tabcolsep)/#4\relax}%
+  \ifdim\lspalte>15mm\setlength\lspalte{15mm}\fi
+  \setlength\LTpre{0pt}\setlength\LTpost{0pt}\setlength\LTleft{0pt}\setlength\LTright{0pt plus 1fill}%
+  \arrayrulecolor{hai}\renewcommand\arraystretch{1.12}\fontsize{8}{9.4}\selectfont}
+\newcommand\lkopf[1]{\hfill\rotatebox{90}{\schmal\fontsize{8}{9}\selectfont #1\hspace{.5mm}}\hfill\hbox{}}
+\newcommand\lecke[1]{{\sffamily\fontsize{7}{8}\selectfont\color{usuzumi}#1}}
+\newcommand\lkopfende{\\[-.5mm]\noalign{\color{shu}\hrule height 1.1pt}}
+\newcommand\lzeilenende{\\\hline}
+\newcommand\ltech[2]{#1\if\relax\detokenize{#2}\relax\else\hfill{\fontsize{6.8}{8}\selectfont\color{usuzumi}#2}\fi}
+\newcommand\lzelle[2]{\cellcolor{stufe#1}\ifnum#1>3 \color{white}\fi\sffamily\bfseries\fontsize{7.5}{9}\selectfont#2}
+\newcommand\lsumme[1]{{\sffamily\color{usuzumi}#1}}
+\newcommand\lschluessel[3]{\hspace{3mm}{\color{stufe#1}\rule[-.4mm]{3.2mm}{3.2mm}}\,#3}
+% \landkarteende{Kyu/Dan/…}{Legende}{Hinweis}
+\newcommand\landkarteende[3]{\par\nobreak\vspace{1mm}\nobreak{\sffamily\fontsize{7.5}{9.5}\selectfont\color{usuzumi}%
+  \textbf{Farbe = erster Grad in der Zelle:}#2\par\vspace{.6mm}
+  Die Zahlen nennen die Grade, in denen die Kombination aus Angriff (Spalte) und Technik (Zeile) geprüft wird;
+  Summe = Zahl der Angriffe mit dieser Technik. Leere Felder kommen im Programm nicht vor.
+  \if\relax\detokenize{#3}\relax\else\ #3\fi\par}}
+
+% ===== Shinki Toho ============================================================
+\newenvironment{stleiter}{\par\renewcommand\arraystretch{1.25}\arrayrulecolor{hai}%
+  \tabularx{\linewidth}{@{}>{\raggedright}p{38mm}X>{\raggedleft\arraybackslash}p{32mm}@{}}}%
+  {\hline\endtabularx\par}
+\newcommand\stsprosse[5]{\hline{\sffamily\bfseries\fontsize{10}{12}\selectfont #1}\hspace{2mm}{\jpschrift\color{shu}#2}\newline
+  {\fontsize{8}{10}\selectfont\color{usuzumi}#3}&\fontsize{9.5}{11.5}\selectfont #4&{\sffamily\fontsize{8}{10}\selectfont\color{usuzumi}#5}\\}
+\newcommand\stzulassung[1]{\par\vspace{3mm}{\sffamily\bfseries\fontsize{10.5}{12}\selectfont\color{shu}Zulassung}\par\vspace{1mm}
+  \begin{itemize}[leftmargin=4mm,itemsep=.4mm,topsep=0pt,label={\color{shu}·}]\fontsize{9}{11}\selectfont #1\end{itemize}\vspace{2mm}}
+\newcommand\stkamaeliste[1]{\par{\fontsize{9}{11.2}\selectfont #1}\par}
+\newcommand\stkamae[3]{\makebox[6mm][r]{\sffamily\fontsize{7.5}{9}\selectfont\color{usuzumi}#1}\hspace{2mm}#2\hfill{\jpschrift\fontsize{8}{10}\selectfont\color{usuzumi}#3}\par}
+\newcommand\stuebung[3]{\par\vspace{.6mm}\if\relax\detokenize{#1}\relax\else{\bfseries\fontsize{9.5}{11}\selectfont #1}\hspace{2mm}{\fontsize{8}{10}\selectfont\color{usuzumi}#2}\par\fi
+  {\fontsize{9}{11}\selectfont #3}\par\vspace{1mm}}
+% Ô-dachi-Formen auf Tusche-Seiten
+\newenvironment{stformen}{\par\setlength\tabcolsep{1.2mm}\arrayrulecolor{hai}\renewcommand\arraystretch{1.15}%
+  \setlength\LTpre{0pt}\setlength\LTleft{0pt}\setlength\LTright{0pt}\fontsize{8.6}{10.4}\selectfont
+  \begin{longtable}{@{}r M{45mm} M{30mm} M{19mm} M{19mm} M{20mm} M{18mm}@{}}
+  \mkopf{}{}&\mkopf{Form}{}&\mkopf{}{日本語}&\mkopf{Uchidachi}{}&\mkopf{Shidachi}{}&\mkopf{Treffer}{}&\mkopf{Zanshin}{}\mkopfende\endhead}
+  {\end{longtable}}
+\newcommand\stform[7]{{\sffamily\color{usuzumi}#1}&{\bfseries #2}&{\fontsize{8}{10}\selectfont #3}&#4&#5&#6&#7\\\hline}
+\newcommand\stfussnote[1]{\par\vspace{1mm}{\sffamily\fontsize{7}{9}\selectfont\color{usuzumi}#1}\par}
+
+% Von Lua gesetzte Teile: \ansicht{tusche-aikido-1} usw. (Liste in lua/mitori-heft.lua)
+\directlua{mitori = dofile("lua/mitori-heft.lua")}
+\newcommand\ansicht[1]{\directlua{mitori.ansicht("\luaescapestring{#1}")}}
+
+\endinput

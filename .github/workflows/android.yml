@@ -1,0 +1,54 @@
+name: Android APK
+
+# A debug APK of every push to main, as a workflow artifact for testing on a device.
+# Publishes nothing; release APKs come from release.yml.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'daten/**'
+      - 'tools/daten.py'
+      - 'scripts/build-android.sh'
+      - 'scripts/build-kf6-android.sh'
+      - '.github/actions/android-setup/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+# A newer push to main replaces the older APK build instead of queueing behind it.
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    # GitHub only: Gitea Actions would also read .github/workflows.
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/android-setup
+
+      # Qt and KF6 change only with their versions in the scripts.
+      - name: Cache Qt and KF6
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Qt
+            ~/kf6-android
+          key: android-${{ hashFiles('scripts/build-android.sh', 'scripts/build-kf6-android.sh') }}
+
+      - name: Build APK
+        env:
+          MITORI_VERBOSE: 1
+        run: ./scripts/build-android.sh debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: mitori-debug
+          path: dist/android/mitori-debug.apk
+          if-no-files-found: error
+          retention-days: 7

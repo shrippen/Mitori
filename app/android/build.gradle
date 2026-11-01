@@ -1,0 +1,118 @@
+// Override for the file androiddeployqt would otherwise generate (this directory is
+// QT_ANDROID_PACKAGE_SOURCE_DIR, see app/CMakeLists.txt) — kept in sync with that template
+// (Qt 6.11: <Qt>/android_arm64_v8a/src/android/templates/build.gradle), plus a release
+// signingConfig so `assembleRelease` can produce a signed APK/AAB in CI.
+//
+// Signing reads four Gradle properties (RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD,
+// RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD). scripts/build-android.sh writes them into
+// gradle.properties from the MITORI_KEYSTORE_PATH, MITORI_KEYSTORE_PASSWORD, MITORI_KEY_ALIAS and
+// MITORI_KEY_PASSWORD environment variables when set (CI: the MITORI_KEYSTORE_* secrets, agent.md
+// "Release rule"). Without them, `release` builds are unsigned.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        //noinspection AndroidGradlePluginVersion
+        classpath 'com.android.tools.build:gradle:9.0.0'
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+apply plugin: qtGradlePluginType
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    //noinspection GradleDependency
+    implementation 'androidx.core:core:1.17.0'
+}
+
+def hasReleaseSigning = project.hasProperty('RELEASE_STORE_FILE')
+
+android {
+    // androidBuildToolsVersion, androidCompileSdkVersion, qtAndroidDir, qtGradlePluginType etc.
+    // come from gradle.properties, which androiddeployqt writes.
+    namespace = androidPackageName
+    compileSdkVersion androidCompileSdkVersion
+    buildToolsVersion androidBuildToolsVersion
+    ndkVersion = androidNdkVersion
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = [qtAndroidDir + '/src', 'src', 'java']
+            kotlin.srcDirs = [qtAndroidDir + '/src', 'src', 'kotlin']
+            aidl.srcDirs = [qtAndroidDir + '/src', 'src', 'aidl']
+            res.srcDirs = [qtAndroidDir + '/res', 'res']
+            resources.srcDirs = ['resources']
+            renderscript.srcDirs = ['src']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
+       }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.incremental = true
+        options.compilerArgs += ['-Xlint:all']
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lintOptions {
+        abortOnError = false
+    }
+
+    aaptOptions {
+        // Do not compress Qt binary resources file
+        noCompress 'rcc'
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = legacyPackaging.toBoolean()
+        }
+    }
+
+    defaultConfig {
+        resConfig "en"
+        minSdkVersion qtMinSdkVersion
+        targetSdkVersion qtTargetSdkVersion
+        ndk.abiFilters = qtTargetAbiList.split(",")
+        manifestPlaceholders = [appLabel: "Mitori"]
+    }
+
+    if (hasReleaseSigning) {
+        signingConfigs {
+            release {
+                storeFile file(RELEASE_STORE_FILE)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS
+                keyPassword RELEASE_KEY_PASSWORD
+            }
+        }
+    }
+
+    buildTypes {
+        // Debug builds get their own application id and name, so a dev build installs next to the
+        // released app (separate data, separate icon) instead of replacing it.
+        debug {
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+            manifestPlaceholders = [appLabel: "Mitori Dev"]
+        }
+        release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
