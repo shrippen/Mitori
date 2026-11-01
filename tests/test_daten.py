@@ -61,8 +61,15 @@ def test_shinki_toho_kommentare(daten):
 
 
 def test_uebersetzungen_vollstaendig():
-    """Every text of the app has its German translation (app/i18n/*.ts)."""
+    """Every text of the app is in the German catalog and translated there (app/i18n/*.ts)."""
+    import re
     import xml.etree.ElementTree as ET
+    de = WURZEL / "app" / "i18n" / "mitori_de.ts"
+    im_katalog = {m.findtext("source") for m in ET.parse(de).iter("message")}
+    im_code = {t for qml in (WURZEL / "app" / "qml").rglob("*.qml")
+               for t in re.findall(r'qsTr\("((?:[^"\\]|\\.)*)"', qml.read_text(encoding="utf-8"))}
+    neu = sorted(im_code - im_katalog)
+    assert not neu, f"not in mitori_de.ts (cmake --build <dir> --target update_translations): {neu}"
     for ts in (WURZEL / "app" / "i18n").glob("*.ts"):
         offen = [m.findtext("source") for m in ET.parse(ts).iter("message")
                  if m.find("translation").get("type") == "unfinished"

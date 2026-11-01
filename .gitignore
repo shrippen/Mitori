@@ -3,7 +3,8 @@
 *.mp4
 *.webm
 *.m4v
-entwuerfe/clickdummy/video/
+# Link auf ../Mitori Videos/Arbeitskopien (kein Ordner, darum ohne Schrägstrich)
+entwuerfe/clickdummy/video
 
 # Erzeugt
 build/
