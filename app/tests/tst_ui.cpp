@@ -1,6 +1,7 @@
 #include <QDir>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QSettings>
 #include <QStandardPaths>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuickTest>
@@ -16,6 +17,9 @@ public slots:
     {
         QCoreApplication::setApplicationName(QStringLiteral("mitori-ui-test"));
         QStandardPaths::setTestModeEnabled(true);
+        // Every run starts from the defaults (the video folder from MITORI_VIDEOS, not from the
+        // setting a test wrote last time).
+        QSettings().clear();
     }
 
     void qmlEngineAvailable(QQmlEngine *engine)

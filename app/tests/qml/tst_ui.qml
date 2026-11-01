@@ -77,6 +77,23 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Entering the video folder in the settings: the list behind them shows the videos at once.
+    function test_2c_folder_change() {
+        const real = Videos.folder
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        Videos.folder = uiShotsDir
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        verify(!page.hasVideo)
+        Videos.folder = real
+        verify(page.hasVideo, "the list follows the folder")
+        window.pageStack.pop()
+    }
+
     function test_3_comment() {
         const entry = Programme.entry("shinkitoho/odachi/1")
         verify(entry.comment)
@@ -149,6 +166,44 @@ TestCase {
         tryVerify(() => page.position >= page.from && page.position < page.to, 5000)
         wait(800)
         verify(page.position >= page.from, "still in the new chapter")
+        window.pageStack.pop()
+    }
+
+    // ▶ in the list opens the player; the list marks the entry the player showed last.
+    function test_5c_list_marks_last_shown() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const list = push("ProgrammePage")
+        if (!list.hasVideo) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const playable = list.rows.filter(r => list.playable(r))
+        list.play(playable[1])
+        tryVerify(() => window.pageStack.currentItem !== list && window.pageStack.currentItem.playlist !== undefined)
+        const player = window.pageStack.currentItem
+        compare(list.lastId, playable[1].id)
+        player.go(1)
+        compare(list.lastId, playable[2].id)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === list)
+        window.pageStack.pop()
+    }
+
+    // Next technique in another video (Shoden: the suburi, then the forms): its own chapter too.
+    function test_5d_next_technique_other_file() {
+        const rows = Programme.entries("shinkitoho", "shoden").filter(r => r.kind === "entry" && r.video)
+        const at = rows.findIndex((r, i) => i > 0 && r.video.video !== rows[i - 1].video.video)
+        verify(at > 0)
+        if (!Videos.available(rows[at - 1].video.video) || !Videos.available(rows[at].video.video)) {
+            skip("no video for Shinki Toho Shoden (set MITORI_VIDEOS)")
+        }
+        const page = push("PlayerPage", { playlist: rows, index: at - 1 })
+        tryVerify(() => page.playing && page.position > page.from + 500, 10000)
+        page.go(1)
+        compare(page.video, rows[at].video.video)
+        tryVerify(() => page.playing && page.position >= page.from && page.position < page.to, 10000)
+        wait(800)
+        verify(page.position >= page.from && page.position < page.to, "in the chapter of the new file")
         window.pageStack.pop()
     }
 

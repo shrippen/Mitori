@@ -180,13 +180,17 @@ Kirigami.ScrollablePage {
     function play(entry) {
         sheet.close()
         const playlist = page.rows.filter(r => page.playable(r))
-        const player = page.Kirigami.PageStack.push(Qt.resolvedUrl("PlayerPage.qml"),
-                                                    { playlist: playlist, index: playlist.findIndex(r => r.id === entry.id) }) as PlayerPage
+        // The window's page stack returns the new page (the attached PageStack.push returns nothing).
+        const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
+        const player = window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), {
+            playlist: playlist, index: playlist.findIndex(r => r.id === entry.id)
+        }) as PlayerPage
         page.lastId = entry.id
         player.shown.connect(id => page.lastId = id)
     }
 
+    // Reads Videos.folder so that bindings calling it follow a new folder from the settings.
     function playable(row) {
-        return row.kind === "entry" && !!row.video && Videos.available(row.video.video)
+        return Videos.folder !== undefined && row.kind === "entry" && !!row.video && Videos.available(row.video.video)
     }
 }
