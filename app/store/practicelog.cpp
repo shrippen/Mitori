@@ -1,5 +1,6 @@
 #include "practicelog.h"
 
+#include <QCoreApplication>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -54,7 +55,7 @@ bool PracticeLog::migrate()
     q.exec(QStringLiteral("PRAGMA user_version"));
     const int version = q.next() ? q.value(0).toInt() : 0;
     if (version > schemaVersion) {
-        m_error = QStringLiteral("practice log from a newer Mitori (schema %1)").arg(version);
+        m_error = QCoreApplication::translate("PracticeLog", "it comes from a newer Mitori (schema %1); update Mitori").arg(version);
         return false;
     }
     if (version < 1) {

@@ -170,6 +170,14 @@
     </message>
 </context>
 <context>
+    <name>PracticeLog</name>
+    <message>
+        <location filename="../store/practicelog.cpp" line="58"/>
+        <source>it comes from a newer Mitori (schema %1); update Mitori</source>
+        <translation>es stammt aus einer neueren Mitori-Version (Schema %1); bitte Mitori aktualisieren</translation>
+    </message>
+</context>
+<context>
     <name>ProgrammePage</name>
     <message>
         <location filename="../qml/ProgrammePage.qml" line="25"/>

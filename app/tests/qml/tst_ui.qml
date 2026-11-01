@@ -101,7 +101,6 @@ TestCase {
         wait(500)       // the sheet slides in
         mouseClick(picker, picker.width * 5 / 8, picker.height / 2)     // the third of four buttons
         tryCompare(Practice, "revision", 1)
-        console.log("dbg rated", page.rows.filter(r => Practice.level(r.id) > 0).map(r => r.id + "=" + Practice.level(r.id)).join(","), picker.parent.entry)
         compare(Practice.level(entry.id), 3)
         compare(picker.value, 3)
         shot("2d-sheet-rated", true)
@@ -111,7 +110,6 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // The visible level picker of an entry (in the overlay: sheets of earlier pages may linger).
     // A row near the bottom of the window opens its sheet too (Kirigami keeps its notification
     // area in the overlay there; it must not swallow the taps).
     function test_2f_tap_row_at_bottom() {
@@ -128,6 +126,7 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // The visible level picker of an entry (in the overlay: sheets of earlier pages may linger).
     function findPicker(item, id) {
         if (!item) {
             return null
