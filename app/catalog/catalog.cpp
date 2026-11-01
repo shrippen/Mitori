@@ -5,12 +5,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-Catalog::Catalog(QObject *parent)
-    : QObject(parent)
-{
-    load(QString::fromLatin1(kResource));
-}
-
 bool Catalog::load(const QString &path)
 {
     m_disciplines.clear();
@@ -24,19 +18,21 @@ bool Catalog::load(const QString &path)
         return fail(QStringLiteral("%1: %2").arg(path, parseError.errorString()));
     }
     const QJsonObject root = doc.object();
-    if (root.value(QLatin1String("format")).toInt() != kFormat) {
-        return fail(QStringLiteral("%1: format %2, expected %3")
-                        .arg(path).arg(root.value(QLatin1String("format")).toInt()).arg(kFormat));
+    const int format = root.value(QLatin1String("format")).toInt();
+    if (format != kFormat) {
+        return fail(QStringLiteral("%1: format %2, expected %3").arg(path).arg(format).arg(kFormat));
     }
-    m_disciplines = root.value(QLatin1String("disziplinen")).toArray().toVariantList();
+    const QJsonArray disciplines = root.value(QLatin1String("disziplinen")).toArray();
+    if (disciplines.isEmpty()) {
+        return fail(QStringLiteral("%1: no disciplines").arg(path));
+    }
+    m_disciplines = disciplines.toVariantList();
     m_error.clear();
-    emit loaded();
     return true;
 }
 
 bool Catalog::fail(const QString &error)
 {
     m_error = error;
-    emit loaded();
     return false;
 }

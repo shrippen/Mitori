@@ -89,6 +89,11 @@ platform/       eine Implementierung je Plattform (Bildschirm wach, Helligkeit, 
 - Texte der App deutsch und englisch, nur über Übersetzungskataloge.
 - Demo-Modus nur zum Erstellen von Screenshots (Build-Option `MITORI_DEMO`, aus), nie in einer Auslieferung.
 - `scripts/check.sh` vor jedem Commit (Daten, Release-Notes, Tests, Build, qmllint).
+- **Lokal bauen geht vor Warten auf die CI:** `scripts/build-all.sh [check|apk|appimage|flatpak]` baut alles, was die
+  CI baut, nach `dist/`; eine Änderung an Build oder Paketen wird lokal gebaut und gestartet (APK per `adb` auf ein
+  angeschlossenes Telefon, `.dev`-ID), bevor sie gepusht wird. Die CI läuft zusätzlich bei jedem Push.
+- Texte: Englisch im Code (`qsTr`), Deutsch in `app/i18n/mitori_de.ts` (`--target update_translations`); ein Test
+  prüft, dass keine Übersetzung fehlt.
 
 ## Gelernte Fehler
 - LuaLaTeX: `require` findet keine lokalen Module, der Renderer lädt per `dofile`.

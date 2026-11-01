@@ -53,6 +53,15 @@ jobs:
         with:
           ref: ${{ steps.version.outputs.tag || github.ref }}
 
+      # The tag names the files; app/CMakeLists.txt names the app inside them. Both must agree.
+      - name: Tag matches the app version
+        if: steps.version.outputs.tag != ''
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          app=$(sed -n 's/^project(mitori VERSION \([0-9.]*\).*/\1/p' app/CMakeLists.txt)
+          [ "$app" = "$VERSION" ] || { echo "::error::tag $VERSION, app/CMakeLists.txt $app (release rule, step 1)"; exit 1; }
+
       - name: GitHub release
         if: steps.version.outputs.tag != ''
         env:
@@ -166,17 +175,14 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q flatpak flatpak-builder > /dev/null
-          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
-      # The same manifest as for local builds; runtime and SDK come from Flathub.
+      # The same script as locally (scripts/build-all.sh); also checks for demo code.
       - name: Build Flatpak bundle
+        env:
+          MITORI_FLATPAK_WORK: ${{ runner.temp }}/flatpak
         run: |
-          flatpak-builder --user --install-deps-from=flathub --disable-rofiles-fuse --force-clean \
-            --repo="$RUNNER_TEMP/repo" "$RUNNER_TEMP/build" packaging/flatpak/io.github.shrippen.Mitori.yml
-          scripts/check-no-demo.sh "$RUNNER_TEMP/build/files"
-          mkdir -p assets
-          flatpak build-bundle "$RUNNER_TEMP/repo" "assets/Mitori-${{ needs.release.outputs.version }}-x86_64.flatpak" \
-            io.github.shrippen.Mitori --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo
+          scripts/build-flatpak.sh "${{ needs.release.outputs.version }}"
+          mkdir -p assets && mv dist/flatpak/*.flatpak assets/
 
       - uses: ./.github/actions/release-asset
         with:

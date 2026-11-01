@@ -58,3 +58,13 @@ def test_shinki_toho_kommentare(daten):
     st = daten["disziplinen"][2]
     assert all(k.get("kommentar") for k in st["kamae"])
     assert all(o.get("kommentar") for o in st["odachi"])
+
+
+def test_uebersetzungen_vollstaendig():
+    """Every text of the app has its German translation (app/i18n/*.ts)."""
+    import xml.etree.ElementTree as ET
+    for ts in (WURZEL / "app" / "i18n").glob("*.ts"):
+        offen = [m.findtext("source") for m in ET.parse(ts).iter("message")
+                 if m.find("translation").get("type") == "unfinished"
+                 or not "".join(m.find("translation").itertext()).strip()]
+        assert not offen, f"{ts.name}: {offen}"

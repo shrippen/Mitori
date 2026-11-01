@@ -75,6 +75,12 @@ for tool in linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86
     curl -sSfL "https://github.com/$tool" -o "$TOOLS/$(basename "$tool")"
 done
 chmod +x "$TOOLS"/*.AppImage
+# Unpacked and started directly: no FUSE needed (CI containers), and AppImageLauncher's binfmt
+# hook on a desktop cannot get between linuxdeploy and its Qt plugin.
+for tool in linuxdeploy linuxdeploy-plugin-qt; do
+    (cd "$TOOLS" && "./$tool-x86_64.AppImage" --appimage-extract > /dev/null && mv squashfs-root "$tool.d")
+    ln -s "$tool.d/AppRun" "$TOOLS/$tool"
+done
 info "Bundling the AppImage..."
 # linuxdeploy-plugin-qt deploys Wayland's EGL client integration only for the pre-6.10 plugin
 # name; without it Qt Quick can't create an OpenGL context on Wayland and shows nothing.
@@ -83,7 +89,6 @@ cp "$QT/plugins/wayland-graphics-integration-client/libqt-plugin-wayland-egl.so"
     "$APPDIR/usr/plugins/wayland-graphics-integration-client/"
 (
     cd "$WORK"
-    export APPIMAGE_EXTRACT_AND_RUN=1   # no FUSE needed (CI containers)
     export PATH="$TOOLS:$QT/bin:$PATH"
     export QMAKE="$QT/bin/qmake"
     export LD_LIBRARY_PATH="$LIBDIR:$QT/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
@@ -93,12 +98,12 @@ cp "$QT/plugins/wayland-graphics-integration-client/libqt-plugin-wayland-egl.so"
     export EXTRA_PLATFORM_PLUGINS="libqwayland.so"   # Qt 6.10+: one Wayland plugin
     export EXTRA_QT_MODULES="svg"
     export LINUXDEPLOY_OUTPUT_VERSION="$VERSION"
-    "$TOOLS/linuxdeploy-x86_64.AppImage" --appdir "$APPDIR" --plugin qt \
+    "$TOOLS/linuxdeploy" --appdir "$APPDIR" --plugin qt \
         -d "$APPDIR/usr/share/applications/io.github.shrippen.Mitori.desktop" \
         -i "$APPDIR/usr/share/icons/hicolor/256x256/apps/io.github.shrippen.Mitori.png" 2>&1 | show 15
     # Qt's own translations: the app ships its own catalogs.
     rm -rf "$APPDIR/usr/translations"
-    "$TOOLS/linuxdeploy-x86_64.AppImage" --appdir "$APPDIR" --output appimage 2>&1 | show 15
+    "$TOOLS/linuxdeploy" --appdir "$APPDIR" --output appimage 2>&1 | show 15
 )
 mkdir -p "$ROOT/dist/appimage"
 OUT="$ROOT/dist/appimage/Mitori-$VERSION-$ARCH.AppImage"

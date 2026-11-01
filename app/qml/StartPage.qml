@@ -10,7 +10,7 @@ Kirigami.ScrollablePage {
     title: "Mitori 見取り"
 
     ListView {
-        model: Catalog.disciplines
+        model: Programme.disciplines
 
         delegate: KanteListRow {
             required property var modelData
@@ -24,10 +24,10 @@ Kirigami.ScrollablePage {
         Kirigami.PlaceholderMessage {
             anchors.centerIn: parent
             width: parent.width - Kirigami.Units.gridUnit * 4
-            visible: Catalog.errorString !== ""
+            visible: Programme.errorString !== ""
             icon.name: "data-error"
             text: qsTr("Programme data missing")
-            explanation: Catalog.errorString
+            explanation: Programme.errorString
         }
     }
 }

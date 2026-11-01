@@ -41,6 +41,19 @@ private slots:
         QVERIFY(!catalog.load(path));
         QVERIFY(catalog.disciplines().isEmpty());
     }
+
+    void noDisciplinesFails()
+    {
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("daten.json"));
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(R"({"format": 1})");
+        file.close();
+        Catalog catalog;
+        QVERIFY(!catalog.load(path));
+        QVERIFY(!catalog.errorString().isEmpty());
+    }
 };
 
 QTEST_GUILESS_MAIN(TstCatalog)

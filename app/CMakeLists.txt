@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick QuickControls2)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick QuickControls2 LinguistTools)
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 find_package(KF6 REQUIRED COMPONENTS Kirigami)
@@ -38,6 +38,16 @@ qt_add_qml_module(mitori
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
+        services/programme.h
+        services/programme.cpp
+)
+
+# Texts: English in the code, German in i18n/mitori_de.ts (update: cmake --build <dir> --target
+# update_translations). The .qm files go into the resources under :/i18n.
+qt_add_translations(mitori
+    TS_FILES i18n/mitori_de.ts
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -no-obsolete
 )
 
 qt_add_resources(mitori "daten"
@@ -55,7 +65,7 @@ qt_add_resources(mitori "kante"
 )
 
 # The generated type registration includes the headers by name.
-target_include_directories(mitori PRIVATE catalog)
+target_include_directories(mitori PRIVATE catalog services)
 target_link_libraries(mitori PRIVATE Qt6::Quick Qt6::QuickControls2 KF6::Kirigami)
 # The QML import scan links static plugins; a shared Qt needs none, and Kirigami's plugin
 # targets are not exported (one warning per plugin). Android keeps it for androiddeployqt.
@@ -82,15 +92,17 @@ if(ANDROID)
         QT_ANDROID_SDK_BUILD_TOOLS_REVISION "36.0.0"
     )
     # Kirigami's QML plugin needs libomp.so from the NDK.
-    file(GLOB LIBOMP_CANDIDATES "${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/*/lib/linux/aarch64/libomp.so")
+    file(GLOB LIBOMP_CANDIDATES "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/*/lib/linux/aarch64/libomp.so")
     if(LIBOMP_CANDIDATES)
         list(GET LIBOMP_CANDIDATES 0 LIBOMP_PATH)
         set_target_properties(mitori PROPERTIES QT_ANDROID_EXTRA_LIBS "${LIBOMP_PATH}")
+    else()
+        message(FATAL_ERROR "libomp.so not found in the NDK (${ANDROID_NDK}); Kirigami cannot load without it")
     endif()
     # Kirigami's QML plugins: <prefix>/lib/cmake/KF6Kirigami -> <prefix>/lib/qml.
     get_filename_component(KF6_QML_DIR "${KF6Kirigami_DIR}/../../qml" ABSOLUTE)
     if(IS_DIRECTORY "${KF6_QML_DIR}")
-        set_target_properties(mitori PROPERTIES _qt_native_qml_import_paths "${KF6_QML_DIR}")
+        set_property(TARGET mitori APPEND PROPERTY QT_QML_IMPORT_PATH "${KF6_QML_DIR}")
     endif()
 endif()
 
@@ -110,4 +122,5 @@ endif()
 install(TARGETS mitori
     BUNDLE DESTINATION .
     RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
 )
