@@ -19,6 +19,8 @@ class Practice : public QObject
     Q_PROPERTY(int revision READ revision NOTIFY changed)
     // Why the log could not be opened or the last rating not saved; empty when all is well.
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorChanged)
+    // Days until a technique of level 1..4 is due again (settings, "Heute üben").
+    Q_PROPERTY(QVariantList intervals READ intervals WRITE setIntervals NOTIFY intervalsChanged)
     // Words per level: [none, seen, with help, sure, ready for the exam] (translated).
     Q_PROPERTY(QStringList levelNames READ levelNames CONSTANT)
 
@@ -41,6 +43,14 @@ public:
     Q_INVOKABLE QDateTime lastRated(const QString &entry) const;
     // How many of the entries stand at each level: [none, 1, 2, 3, 4].
     Q_INVOKABLE QVariantList counts(const QStringList &entries) const;
+    // Whether the entry was rated today (practised).
+    Q_INVOKABLE bool ratedToday(const QString &entry) const;
+    // Today's practice from candidate rows (Programme.practiceEntries: id, current, …): the due
+    // ones in order (Schedule::due), each row with `level` and `days` added.
+    Q_INVOKABLE QVariantList due(const QVariantList &candidates) const;
+
+    QVariantList intervals() const;
+    void setIntervals(const QVariantList &intervals);
 
     static QString defaultPath();
     // This device's id for the log (made once, kept in the settings).
@@ -49,6 +59,7 @@ public:
 signals:
     void changed();
     void errorChanged();
+    void intervalsChanged();
 
 private:
     void load(const QString &path);

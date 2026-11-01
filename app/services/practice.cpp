@@ -1,5 +1,7 @@
 #include "practice.h"
 
+#include "schedule.h"
+
 #include <QDir>
 #include <QSettings>
 #include <QStandardPaths>
@@ -92,4 +94,60 @@ QVariantList Practice::counts(const QStringList &entries) const
         ++n[level(e)];
     }
     return {n[0], n[1], n[2], n[3], n[4]};
+}
+
+bool Practice::ratedToday(const QString &entry) const
+{
+    const QDateTime last = lastRated(entry);
+    return last.isValid() && last.date() == QDate::currentDate();
+}
+
+QVariantList Practice::intervals() const
+{
+    const QVariantList stored = QSettings().value(QStringLiteral("practice/intervals")).toList();
+    if (stored.size() == 4) {
+        return stored;
+    }
+    QVariantList result;
+    for (int days : Schedule::defaultIntervals()) {
+        result << days;
+    }
+    return result;
+}
+
+void Practice::setIntervals(const QVariantList &intervals)
+{
+    if (intervals.size() != 4 || intervals == this->intervals()) {
+        return;
+    }
+    QVariantList clean;
+    for (const QVariant &v : intervals) {
+        clean << qBound(1, v.toInt(), 365);
+    }
+    QSettings().setValue(QStringLiteral("practice/intervals"), clean);
+    emit intervalsChanged();
+}
+
+QVariantList Practice::due(const QVariantList &candidates) const
+{
+    QList<Schedule::Candidate> list;
+    QHash<QString, QVariantMap> rows;
+    for (const QVariant &c : candidates) {
+        const QVariantMap row = c.toMap();
+        const QString id = row.value(QStringLiteral("id")).toString();
+        list << Schedule::Candidate{id, row.value(QStringLiteral("current")).toBool()};
+        rows.insert(id, row);
+    }
+    QList<int> days;
+    for (const QVariant &v : intervals()) {
+        days << v.toInt();
+    }
+    QVariantList result;
+    for (const Schedule::Due &d : Schedule::due(list, m_latest, QDate::currentDate(), days)) {
+        QVariantMap row = rows.value(d.id);
+        row[QStringLiteral("level")] = d.level;
+        row[QStringLiteral("days")] = d.days;
+        result << row;
+    }
+    return result;
 }

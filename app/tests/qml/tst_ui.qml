@@ -327,6 +327,46 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Today's practice: two new techniques of the current grade; rating one brings the next.
+    function test_7_today() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("TodayPage")
+        compare(page.discipline, "aikido")
+        compare(page.due.length, 2)
+        verify(page.due.every(r => r.level === 0 && r.current))
+        const first = page.due[0].id
+        verify(!Practice.ratedToday(first))
+        Practice.rate(first, 2)
+        compare(page.due.length, 2, "the next new one comes")
+        verify(page.due.every(r => r.id !== first), "practised today: not due")
+        compare(findChild(page, "dueCount").value, "2")
+        shot("7-today")
+        window.pageStack.pop()
+    }
+
+    // Training plays today's due techniques; a rating moves on to the next open one.
+    function test_7b_training() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const today = push("TodayPage")
+        const playable = today.due.filter(r => !!r.video && Videos.available(r.video.video))
+        if (playable.length < 2) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        today.startTraining()
+        tryVerify(() => window.pageStack.currentItem.training === true)
+        const player = window.pageStack.currentItem
+        compare(player.index, 0)
+        const picker = findPicker(player, player.current.id)
+        verify(picker)
+        picker.picked(3)
+        compare(player.index, 1, "rating moves on")
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === today)
+        window.pageStack.pop()
+    }
+
     // The last chapter ends with the file; the loop must still start over at the chapter.
     function test_6_loop_at_end_of_file() {
         const page = playerAt(-1)

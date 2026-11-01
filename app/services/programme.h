@@ -40,6 +40,10 @@ public:
     //   "info"      id, title, jp, text, comment   an introduction with a comment only (Kumidachi)
     //   "text"      id, title            a theory item of the exam (essay, oral exam): no video, no rating
     Q_INVOKABLE QVariantList entries(const QString &discipline, const QString &grade) const;
+    // What today's practice draws from: the entry rows of every grade up to the one chosen in the
+    // discipline, in programme order, each with `current` (part of the chosen grade) and
+    // `gradeName`.
+    Q_INVOKABLE QVariantList practiceEntries(const QString &discipline) const;
     // One entry by id (the same map as in entries()), or an empty map.
     Q_INVOKABLE QVariantMap entry(const QString &id) const;
 

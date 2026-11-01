@@ -53,6 +53,22 @@ Kirigami.ScrollablePage {
             hint: current.title + " · " + current.grade
             onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ProgrammePage.qml"))
         }
+
+        KanteOptionTile {
+            objectName: "todayTile"
+
+            readonly property int due: Practice.revision >= 0 && Practice.intervals.length === 4
+                                       ? Practice.due(Programme.practiceEntries(Programme.discipline)).length : 0
+
+            Layout.fillWidth: true
+            visible: Programme.errorString === ""
+            checkable: false
+            autoExclusive: false
+            glyph: "稽"
+            text: qsTr("Practice today")
+            hint: due > 0 ? qsTr("%n due", "", due) : qsTr("all practised")
+            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("TodayPage.qml"))
+        }
     }
 
     // Title of a discipline and the name of its chosen grade.

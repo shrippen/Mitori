@@ -47,6 +47,21 @@ private slots:
         QSettings().clear();
     }
 
+    // Today's practice draws from every grade up to the chosen one; only the chosen is current.
+    void practiceEntriesUpToTheChosenGrade()
+    {
+        programme.setGrade(QStringLiteral("aikido"), QStringLiteral("k4"));
+        const QVariantList rows = programme.practiceEntries(QStringLiteral("aikido"));
+        const int k5 = count(programme.entries(QStringLiteral("aikido"), QStringLiteral("k5")), QStringLiteral("entry"));
+        const int k4 = count(programme.entries(QStringLiteral("aikido"), QStringLiteral("k4")), QStringLiteral("entry"));
+        QCOMPARE(rows.size(), k5 + k4);
+        QVERIFY(!rows.first().toMap().value(QStringLiteral("current")).toBool());
+        QVERIFY(rows.last().toMap().value(QStringLiteral("current")).toBool());
+        QCOMPARE(rows.last().toMap().value(QStringLiteral("gradeName")).toString(), QStringLiteral("4. Kyu"));
+        programme.setGrade(QStringLiteral("aikido"), QStringLiteral("k5"));
+        QCOMPARE(programme.practiceEntries(QStringLiteral("aikido")).size(), k5);
+    }
+
     void selectionIsKept()
     {
         QCOMPARE(programme.discipline(), QStringLiteral("aikido"));

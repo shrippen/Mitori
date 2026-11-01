@@ -13,6 +13,9 @@ ColumnLayout {
     readonly property int level: Practice.revision >= 0 ? Practice.level(entry) : 0
     readonly property date last: Practice.revision >= 0 ? Practice.lastRated(entry) : new Date(NaN)
 
+    // A rating was saved (the player's training moves on).
+    signal rated(int level)
+
     spacing: KanteStyle.unit(6)
 
     QQC2.Label {
@@ -35,7 +38,11 @@ ColumnLayout {
         Layout.fillWidth: true
         value: rating.level
         names: Practice.levelNames
-        onPicked: level => Practice.rate(rating.entry, level)
+        onPicked: level => {
+            if (Practice.rate(rating.entry, level)) {
+                rating.rated(level)
+            }
+        }
         Accessible.name: qsTr("Rating")
     }
 }

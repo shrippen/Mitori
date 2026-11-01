@@ -28,6 +28,9 @@ Kirigami.Page {
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
     readonly property int jumpMs: 2000      // double tap
     property bool looping: true
+    // Training (today's practice): rating a technique moves on to the next one not yet
+    // practised today.
+    property bool training: false
     // Start at the chapter once per loaded file: the FFmpeg backend reports LoadedMedia again
     // after every seek, and restarting there would undo each step, jump and timeline move.
     property bool startPending: true
@@ -74,6 +77,15 @@ Kirigami.Page {
     }
     function jump(ms) {
         player.position = Math.max(from, Math.min(to, player.position + ms))
+    }
+    // Training: the next technique after this one not practised today, else stay.
+    function nextOpen() {
+        for (let i = index + 1; i < playlist.length; ++i) {
+            if (!Practice.ratedToday(playlist[i].id)) {
+                index = i
+                return
+            }
+        }
     }
     function go(direction) {
         const next = index + direction
@@ -251,6 +263,7 @@ Kirigami.Page {
                 RatingRow {
                     Layout.fillWidth: true
                     entry: page.current.id || ""
+                    onRated: if (page.training) page.nextOpen()
                 }
 
                 RowLayout {

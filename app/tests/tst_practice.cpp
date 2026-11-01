@@ -171,6 +171,35 @@ private slots:
         QCOMPARE(again.level(QStringLiteral("b")), 1);
     }
 
+    void dueAndIntervals()
+    {
+        QTemporaryDir dir;
+        Practice practice(dir.filePath(QStringLiteral("mitori.sqlite")));
+        QSignalSpy spy(&practice, &Practice::intervalsChanged);
+        QCOMPARE(practice.intervals(), (QVariantList{2, 4, 14, 35}));
+        practice.setIntervals({1, 0, 500, 7});
+        QCOMPARE(spy.count(), 1);
+        QCOMPARE(practice.intervals(), (QVariantList{1, 1, 365, 7}));
+        practice.setIntervals({1, 2});
+        QCOMPARE(spy.count(), 1);
+
+        // Rated today: practised, not due; two new ones of the current grade.
+        practice.rate(QStringLiteral("a"), 1);
+        QVERIFY(practice.ratedToday(QStringLiteral("a")));
+        QVERIFY(!practice.ratedToday(QStringLiteral("b")));
+        const QVariantList candidates{
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("a")}, {QStringLiteral("current"), true}},
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("b")}, {QStringLiteral("current"), true}, {QStringLiteral("title"), QStringLiteral("B")}},
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("c")}, {QStringLiteral("current"), false}},
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("d")}, {QStringLiteral("current"), true}}};
+        const QVariantList due = practice.due(candidates);
+        QCOMPARE(due.size(), 2);
+        QCOMPARE(due.first().toMap().value(QStringLiteral("id")).toString(), QStringLiteral("b"));
+        QCOMPARE(due.first().toMap().value(QStringLiteral("title")).toString(), QStringLiteral("B"));
+        QCOMPARE(due.first().toMap().value(QStringLiteral("level")).toInt(), 0);
+        practice.setIntervals({2, 4, 14, 35});
+    }
+
     void deviceIdStays()
     {
         const QString id = Practice::deviceId();

@@ -103,6 +103,29 @@ QVariantList Programme::grades(const QString &disciplineId) const
     return result;
 }
 
+QVariantList Programme::practiceEntries(const QString &disciplineId) const
+{
+    QVariantList result;
+    const QString chosen = grade(disciplineId);
+    for (const QVariant &g : grades(disciplineId)) {
+        const QVariantMap gradeMap = g.toMap();
+        const QString id = gradeMap.value(QStringLiteral("id")).toString();
+        for (const QVariant &e : entries(disciplineId, id)) {
+            QVariantMap row = e.toMap();
+            if (row.value(QStringLiteral("kind")) != QLatin1String("entry")) {
+                continue;
+            }
+            row[QStringLiteral("current")] = id == chosen;
+            row[QStringLiteral("gradeName")] = gradeMap.value(QStringLiteral("name"));
+            result << row;
+        }
+        if (id == chosen) {
+            break;
+        }
+    }
+    return result;
+}
+
 QVariantList Programme::entries(const QString &disciplineId, const QString &grade) const
 {
     const QVariantMap d = findDiscipline(disciplineId);
