@@ -140,9 +140,23 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Next technique in the same video: plays the new chapter, not the old one from its start.
+    function test_5b_next_technique() {
+        const page = playerAt(0)
+        const firstTo = page.to
+        page.go(1)
+        tryVerify(() => page.from === firstTo, 2000)
+        tryVerify(() => page.position >= page.from && page.position < page.to, 5000)
+        wait(800)
+        verify(page.position >= page.from, "still in the new chapter")
+        window.pageStack.pop()
+    }
+
     // The last chapter ends with the file; the loop must still start over at the chapter.
     function test_6_loop_at_end_of_file() {
         const page = playerAt(-1)
+        // The turning point keeps clear of the end of the file, where the player stops for good.
+        verify(page.end <= page.duration - 250)
         page.jump(page.to - page.position - 3000)
         tryVerify(() => page.position > page.to - 2500, 5000)
         tryVerify(() => page.position < page.from + 3000, 8000)

@@ -45,8 +45,9 @@ Kirigami.Page {
 
     onCurrentChanged: {
         shown(current.id)
+        // After the bindings of the new entry (from, to): onCurrentChanged runs before them.
         if (player.source.toString() === Videos.source(video).toString() && !startPending) {
-            page.restart()
+            Qt.callLater(page.restart)
         }
     }
     Component.onCompleted: shown(current.id)
