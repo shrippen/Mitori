@@ -17,6 +17,7 @@ finish-args:
   - --socket=wayland
   - --device=dri
   - --socket=pulseaudio    # video sound
+  - --filesystem=xdg-videos:ro   # the video folder (settings) under ~/Videos until the bundles come
 
 modules:
   # tools/daten.py (run by the build) reads daten/*.yaml; build time only.

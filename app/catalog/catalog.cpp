@@ -5,9 +5,20 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+const Catalog &Catalog::bundled()
+{
+    static const Catalog catalog = [] {
+        Catalog c;
+        c.load(QString::fromLatin1(kResource));
+        return c;
+    }();
+    return catalog;
+}
+
 bool Catalog::load(const QString &path)
 {
     m_disciplines.clear();
+    m_videos.clear();
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
         return fail(QStringLiteral("%1: %2").arg(path, file.errorString()));
@@ -27,6 +38,7 @@ bool Catalog::load(const QString &path)
         return fail(QStringLiteral("%1: no disciplines").arg(path));
     }
     m_disciplines = disciplines.toVariantList();
+    m_videos = root.value(QLatin1String("videos")).toObject().toVariantMap();
     m_error.clear();
     return true;
 }

@@ -26,12 +26,12 @@ show() { if [ -n "${MITORI_VERBOSE:-}" ]; then cat; else tail -"$1"; fi; }
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
-# ── 1. Qt (with ShaderTools, which Kirigami needs) ──
-if [ ! -d "$QT/lib/cmake/Qt6ShaderTools" ]; then
+# ── 1. Qt (with ShaderTools for Kirigami and Multimedia for the player) ──
+if [ ! -d "$QT/lib/cmake/Qt6ShaderTools" ] || [ ! -d "$QT/lib/cmake/Qt6Multimedia" ]; then
     info "Installing Qt $QT_VER (aqtinstall)..."
     pip install --user --break-system-packages aqtinstall 2>/dev/null || pip install --user aqtinstall
     export PATH="$HOME/.local/bin:$PATH"
-    aqt install-qt linux desktop "$QT_VER" linux_gcc_64 -m qtshadertools -O "$HOME/Qt" 2>&1 | show 3
+    aqt install-qt linux desktop "$QT_VER" linux_gcc_64 -m qtshadertools qtmultimedia -O "$HOME/Qt" 2>&1 | show 3
 fi
 
 # ── 2. KF6 into $PREFIX ──

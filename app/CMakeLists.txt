@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick QuickControls2 LinguistTools)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Multimedia LinguistTools)
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 find_package(KF6 REQUIRED COMPONENTS Kirigami)
@@ -28,48 +28,67 @@ add_custom_command(
     VERBATIM
 )
 
-qt_add_executable(mitori main.cpp)
-
-qt_add_qml_module(mitori
+# The app's QML module, services and resources as a static library: the app and the UI test
+# (tests/tst_ui.cpp) link the same.
+qt_add_library(mitori_app STATIC)
+qt_add_qml_module(mitori_app
     URI Mitori
     QML_FILES
         qml/Main.qml
         qml/StartPage.qml
+        qml/ProgrammePage.qml
+        qml/TechniqueSheet.qml
+        qml/CommentPage.qml
+        qml/PlayerPage.qml
+        qml/SettingsPage.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
         services/programme.h
         services/programme.cpp
+        services/videos.h
+        services/videos.cpp
 )
 
 # Texts: English in the code, German in i18n/mitori_de.ts (update: cmake --build <dir> --target
 # update_translations). The .qm files go into the resources under :/i18n. mitori_en.ts holds only
 # the English plural forms; it also makes English win where it comes before German in the
 # user's languages.
-qt_add_translations(mitori
+qt_add_translations(mitori_app
     TS_FILES i18n/mitori_de.ts
     PLURALS_TS_FILE i18n/mitori_en.ts
     RESOURCE_PREFIX /i18n
     LUPDATE_OPTIONS -no-obsolete
 )
 
-qt_add_resources(mitori "daten"
+qt_add_resources(mitori_app "daten"
     PREFIX "/daten"
     BASE ${MITORI_DATEN_DIR}
     FILES ${MITORI_DATEN_JSON}
 )
 
+# Icons for platforms without an icon theme (scripts/sync-icons.sh).
+file(GLOB_RECURSE ICON_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS icons/*)
+qt_add_resources(mitori_app "icons"
+    PREFIX "/icons"
+    BASE icons
+    FILES ${ICON_FILES}
+)
+
 # Kante (scripts/sync-kante.sh) as the QML module "Kante" in the resources.
 file(GLOB_RECURSE KANTE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS qml/Kante/*)
-qt_add_resources(mitori "kante"
+qt_add_resources(mitori_app "kante"
     PREFIX "/qt/qml/Kante"
     BASE qml/Kante
     FILES ${KANTE_FILES}
 )
 
 # The generated type registration includes the headers by name.
-target_include_directories(mitori PRIVATE catalog services)
-target_link_libraries(mitori PRIVATE Qt6::Quick Qt6::QuickControls2 KF6::Kirigami)
+target_include_directories(mitori_app PUBLIC catalog services)
+target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia KF6::Kirigami)
+
+qt_add_executable(mitori main.cpp)
+target_link_libraries(mitori PRIVATE mitori_app mitori_appplugin)
 # The QML import scan links static plugins; a shared Qt needs none, and Kirigami's plugin
 # targets are not exported (one warning per plugin). Android keeps it for androiddeployqt.
 if(NOT ANDROID)
@@ -120,6 +139,26 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_dependencies(tst_catalog mitori)
     set_target_properties(tst_catalog PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME catalog COMMAND tst_catalog)
+
+    qt_add_executable(tst_programme tests/tst_programme.cpp services/programme.cpp services/programme.h
+        catalog/catalog.cpp catalog/catalog.h)
+    target_include_directories(tst_programme PRIVATE catalog services)
+    target_compile_definitions(tst_programme PRIVATE MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
+    target_link_libraries(tst_programme PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
+    set_target_properties(tst_programme PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_dependencies(tst_programme mitori)
+    add_test(NAME programme COMMAND tst_programme)
+
+    # The pages with Kirigami and Kante, offscreen; screenshots into <build>/ui-shots. Plays a video
+    # only with MITORI_VIDEOS (the videos are not in the repository).
+    find_package(Qt6 REQUIRED COMPONENTS QuickTest)
+    qt_add_executable(tst_ui tests/tst_ui.cpp)
+    target_link_libraries(tst_ui PRIVATE mitori_app mitori_appplugin Qt6::QuickTest)
+    target_compile_definitions(tst_ui PRIVATE QUICK_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/qml"
+        UI_SHOTS_DIR="${CMAKE_BINARY_DIR}/ui-shots")
+    set_target_properties(tst_ui PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME ui COMMAND tst_ui)
+    set_tests_properties(ui PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material")
 endif()
 
 install(TARGETS mitori

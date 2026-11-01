@@ -13,10 +13,25 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
 | 4 · Bundles und Termine | `tools/bundle.py` (Beschnitt, Verschlüsselung, Manifest), Code-Eingabe und QR, Download; Lehrgänge aus ICS, Meine Grade, Wartezeiten, Lehrgangsnotizbuch, Sicherung (Export, Auto Backup, WebDAV-Abgleich) | ein Bundle per Code auf einem fremden Telefon geladen |
 | 5 · Release | Demo-Modus mit Studio-Weber-Daten, Update-Check, Screenshots, Landing Page `docs/`, GitHub-Release | v1.0.0 auf GitHub und der Landing Page |
 
-## Stand Schritt 0
+## Stand
 
-- Daten aller drei Sparten in `daten/`, geprüft von `tools/daten.py`; Heft baut (`heft/build.sh`).
-- Kapitel zugeordnet: nur Aikido 5. Kyu (Probe für den Clickdummy). Offen: alle übrigen Videos.
+- Schritt 0: Daten aller drei Sparten in `daten/`, geprüft von `tools/daten.py`; Heft baut (`heft/build.sh`).
+  Videostellen aller Videos per `tools/kapitel.py` in `daten/videos.yaml`; offen: die Einträge mit
+  `pruefen: true` gegenlesen, die 26 Kamae einzeln schneiden (das Video zeigt die Übung am Stück),
+  Abweichungen Video ↔ Daten in `KORREKTUREN.md` (V-…) klären.
+- Schritt 1: Startmenü (Kachel Programm), Programm (Sparte, Grad, Liste), Technik-Blatt, Kommentar,
+  Player (Schleife, vier Tempi, Einzelbild, Doppeltipp, Querformat), Videos aus einem lokalen Ordner.
+  Offen: Gesten für Helligkeit und Lautstärke (Plattform-Schicht), Tablet-Ansicht (Liste und Player auf
+  einer Seite), Test auf dem Telefon.
+
+## Kante-Bedarf
+
+Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutzt:
+- Menü-Kachel mit Zeichen statt Icon (Startmenü: 技 稽 試 …); jetzt `KanteOptionTile` ohne Auswahl, die
+  Bildschirmleser als Optionsfeld ansagen.
+- Wiedergabe-Leiste ohne Metronom/Einzähler mit festen Tempi (0,25 / 0,5 / 0,75 / 1) und Einzelbild;
+  jetzt einzelne `KanteToolButton` und `KanteSegmented`.
+- Stand als vier Punkte (Schritt 2).
 
 ## Querschnitt
 

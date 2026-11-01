@@ -92,8 +92,15 @@ platform/       eine Implementierung je Plattform (Bildschirm wach, Helligkeit, 
 - **Lokal bauen geht vor Warten auf die CI:** `scripts/build-all.sh [check|apk|appimage|flatpak]` baut alles, was die
   CI baut, nach `dist/`; eine Änderung an Build oder Paketen wird lokal gebaut und gestartet (APK per `adb` auf ein
   angeschlossenes Telefon, `.dev`-ID), bevor sie gepusht wird. Die CI läuft zusätzlich bei jedem Push.
+- Icons: nur Breeze-Namen; ein neuer Name kommt in `scripts/sync-icons.sh` (Android und AppImage haben kein
+  Icon-Theme, die App bringt die verwendeten mit).
+- Videostellen: `tools/kapitel.py` liest die Kapitel der Videos (`../Mitori Videos`) nach `daten/videos.yaml`;
+  Einträge mit `pruefen: true` sind von Hand zu prüfen. Die CI kann das nicht (keine Videos im Repo).
+- Oberflächentest `app/tests/qml/tst_ui.qml` (ctest `ui`): lädt jede Seite offscreen und legt Bilder nach
+  `<build>/ui-shots`; mit `MITORI_VIDEOS` spielt er auch ein Video. Neue Seiten bekommen dort einen Fall.
 - Texte: Englisch im Code (`qsTr`), Deutsch in `app/i18n/mitori_de.ts` (`--target update_translations`); ein Test
-  prüft, dass keine Übersetzung fehlt.
+  prüft, dass keine Übersetzung fehlt. `mitori_en.ts` hält nur englische Pluralformen (und lässt Englisch vor Deutsch
+  gewinnen, wenn es in den Spracheinstellungen vorne steht).
 
 ## Gelernte Fehler
 - LuaLaTeX: `require` findet keine lokalen Module, der Renderer lädt per `dofile`.

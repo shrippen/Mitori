@@ -123,6 +123,29 @@ die Übersichtstabelle der Kommentare (OK S. 2–3) ab; OT und der Fließtext zu
 |---|---|---|---|---|---|
 | D-X-01 | DK, DD | keine Kanji | Vorschläge aus `daten/daitoryu-begriffe.lua`, im Heft hellgrau | müssen von einem Lehrer bestätigt werden; ohne Vorschlag: Karimata, Hô-daoshi, Seori (Liste: `build/fehlende-kanji.txt`) | klären |
 
+## Videos (Kapitel ↔ Techniken)
+
+Aus `tools/kapitel.py` (Titel im Video per Texterkennung, `daten/videos.yaml`), am 01.11.2026 an den
+Bildern gegengelesen. Stimmt das Video mit den Daten nicht überein, steht hier, was das Video zeigt.
+Die App spielt bis zur Klärung das zugeordnete Kapitel (Eintrag mit `pruefen: true`).
+
+| ID | Video, Eintrag in den Daten | Das Video zeigt | Vorschlag | Begründung | Status |
+|---|---|---|---|---|---|
+| V-01 | Aikido 1.–3. Dan, Jiyu-waza (Alle Tori-te, Alle Uchi-te, Jiyu-seme, San'nin-gake) | Kapitel ohne Titel; nach 8 s „Futari-gake (zwei Angreifer) · Tsubasa-gaeshi“ bzw. „· Shiho-nage“ | Stelle von Hand setzen | Jiyu-waza hat im Video keinen Titel | klären |
+| V-02 | Aikido 1. Kyu Ryote-katate-dori · Jiyu-waza; 2. Kyu Katate-katate-dori · Jiyu-waza (2×), Katate-muna-dori · Fuki-age | kein passendes Kapitel gefunden | im Video suchen | fehlt oder ohne Titel | klären |
+| V-03 | Daitoryu 1. Kyu Ryôkata-dori · Soto-gake; Ryôte-kubi-jime · Niô-daoshi | „Shômen-uchi · Karami-nage“ (Titel erst nach 8 s); „Ryôte-kubi-jime · Aiki-nage“ | Daten oder Zuordnung prüfen | Name im Video anders | klären |
+| V-04 | Daitoryu 2. Kyu Tsuki/Ryôte-dori · Haimen-ude-gatame-otoshi, Tekô-osae · Nikajô-kime-osae, Tsuki · Kote-gaeshi | Kapitel mit spätem Titel: „Sotote-dori · Hiji-awase-otoshi“, „Uchite-dori · Irimi-nage“, „Sotote-dori · Shihô-nage“, „Eri-dori · Hiji-otoshi“ | Reihenfolge im Video mit DK vergleichen | Video folgt hier nicht der Liste | klären |
+| V-05 | Daitoryu 2. Kyu Tantô-dori · Nikajô-kime-osae, Sankajô-kime-osae | „Uchioroshi · Sankajo-Ushiro-gime“, „Yokomen-uchi · Sankajo-Ushiro-gime“ | Daten prüfen | Angriff und Technik anders benannt | klären |
+| V-06 | Daitoryu 3. Kyu Sotote-dori · Ude-gatame-otoshi; Tantô-dori · Kote-gaeshi | „Sotote-dori · Sankajô-ushiro-kime-nage“; „Tsuki · Kote-otoshi“ | Daten prüfen | Name im Video anders | klären |
+| V-07 | Daitoryu 4. Kyu Yokomen-uchi · Fuki-age | „Yokomen-uchi · Hô-daoshi“ | Daten prüfen | Name im Video anders | klären |
+| V-08 | Daitoryu 1. Dan Ryôte-muna-dori · Koshi-guruma; Ryôte-ryôkata-dori · Mune-jûji-nage; Ryôte-dori · Ude-garami; Ryô-morote-dori · Aiki-otoshi | „Ryôte-Muna-dori / Ryô-eri-jime · Koshi-nage“; „Ryôkata-dori · Jûji-garami-nage“; „Ryôte-dori · Karami-nage“; „Ryô-Morote-dori · Aiki-nage“ | Daten prüfen | Namen im Video anders | klären |
+| V-09 | Daitoryu 2. Dan Tsuki · Yoko-otoshi; Jô-dori · Hikikomi-nodo-zuki | „Tsuki (Jôdan) · Hiji-otoshi“; Angriff „Tsuki“ | Daten prüfen | Name bzw. Angriff im Video anders | klären |
+| V-10 | Daitoryu 3. Dan Jô-dori · Kata-gime-nage, Ura-irimi-nodo-zuki | Angriff „Tsuki“, „Kata-gime“, „Ura-irimi-tenkan-Nodo-zuki“ | Daten prüfen | Angriff im Video anders | klären |
+| V-11 | Daitoryu Okugi Tsuki · Hiji-gime-nage; Ryôte-dori · Kakae-gime-nage; Ryô-morote-dori · Aiki-kôhô-otoshi | „Sotote-dori · Hiji-gime-nage“ (spät); „Ryôte-dori · Juji-Tekubi-gime-modoshi“; „Ryô-Morote-dori · Nikajô-kime-osae“ | Daten prüfen | Namen im Video anders | klären |
+| V-12 | Daitoryu ohne Kapitel: 1. Kyu Muna-dori-shômen-uchi · Jûji-garami; 3. Kyu Sotote-dori · Yonkajô-kime-osae, Ryôte-muna-dori · Kataude-shibori-kime-nage; 5. Kyu Yokomen-uchi · Yoko-nage; 1. Dan Tsuki · Kata-otoshi, Ryô-yokomen-uchi · Aiki-nage; 2. Dan Ryôte-dori · Tai-azuke; 3. Dan Tsuki · Ude-gatame | kein passendes Kapitel | im Video suchen | fehlt im Video oder anders benannt | klären |
+| V-13 | Shinki Toho, 26 Kamae | die Kamae-Übung am Stück (Video Suburi, Kapitel 5–7) | Stellen je Kamae von Hand setzen | ein Kapitel für alle | klären |
+| V-14 | Shinki Toho, Kiriotoshi | in keinem der drei Videos | ohne Video lassen | kein Kapitel | sicher |
+
 ## Shinki Toho
 
 | ID | Dokument und Stelle | Bisher | Vorschlag | Begründung | Status |

@@ -1,9 +1,13 @@
 #include <QDir>
 #include <QGuiApplication>
+#include <QIcon>
 #include <QLocale>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 #include <QTranslator>
+#include <QtQml/QQmlExtensionPlugin>
+
+Q_IMPORT_QML_PLUGIN(MitoriPlugin)
 
 // Kirigami's own style (qqc2-desktop-style) where it is installed, as on Plasma; an AppImage
 // or Android has only Material.
@@ -26,6 +30,13 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationName(QStringLiteral("Mitori"));
     QGuiApplication::setOrganizationDomain(QStringLiteral("shrippen.github.io"));
     QGuiApplication::setDesktopFileName(QStringLiteral("io.github.shrippen.Mitori"));
+    // The bundled Breeze subset (scripts/sync-icons.sh): the theme where there is none
+    // (Android, AppImage), else the fallback behind the system theme.
+    QIcon::setThemeSearchPaths(QIcon::themeSearchPaths() << QStringLiteral(":/icons"));
+    QIcon::setFallbackThemeName(QStringLiteral("breeze-mitori"));
+    if (QIcon::themeName().isEmpty() || QIcon::themeName() == QLatin1String("hicolor")) {
+        QIcon::setThemeName(QStringLiteral("breeze-mitori"));
+    }
 
     // The first of the user's languages with a catalog (de, en); otherwise the English of the code.
     QTranslator translator;
