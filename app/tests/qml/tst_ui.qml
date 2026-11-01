@@ -77,6 +77,44 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Rating in the sheet: the list row shows the level as dots, the sheet the last rating.
+    function test_2d_rate_in_sheet() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        const entry = page.rows.find(r => r.kind === "entry")
+        compare(Practice.level(entry.id), 0)
+        page.open(entry)
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        const picker = findPicker(sheet.contentItem)
+        verify(picker, "the sheet has the level picker")
+        picker.picked(3)
+        compare(Practice.level(entry.id), 3)
+        compare(picker.value, 3)
+        shot("2d-sheet-rated")
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        shot("2e-programme-rated")
+        window.pageStack.pop()
+    }
+
+    function findPicker(item) {
+        if (!item) {
+            return null
+        }
+        if (item.picked !== undefined && item.focusLevel !== undefined) {
+            return item
+        }
+        for (let i = 0; i < item.children.length; i++) {
+            const found = findPicker(item.children[i])
+            if (found) {
+                return found
+            }
+        }
+        return null
+    }
+
     // Entering the video folder in the settings: the list behind them shows the videos at once.
     function test_2c_folder_change() {
         const real = Videos.folder

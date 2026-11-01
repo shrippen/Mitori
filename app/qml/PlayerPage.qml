@@ -234,6 +234,11 @@ Kirigami.Page {
                 onFrameStepRequested: direction => page.step(direction)
             }
 
+            RatingRow {
+                Layout.fillWidth: true
+                entry: page.current.id || ""
+            }
+
             RowLayout {
                 Layout.fillWidth: true
                 visible: !page.landscape

@@ -147,12 +147,21 @@ Kirigami.ScrollablePage {
                     subtitle: [entry.jp, entry.nr ? entry.extra : (entry.kind === "info" ? entry.text : "")].filter(x => x).join(" · ")
                     selected: entry.id === page.lastId
                     onClicked: page.open(entry)
-                    trailing: KanteToolButton {
-                        visible: entryItem.playable
-                        icon.name: "media-playback-start"
-                        text: qsTr("Play")
-                        display: QQC2.AbstractButton.IconOnly
-                        onClicked: page.play(entryItem.entry)
+                    trailing: RowLayout {
+                        spacing: Kirigami.Units.smallSpacing
+
+                        KanteLevelDots {
+                            visible: entryItem.entry.kind === "entry"
+                            value: Practice.revision >= 0 ? Practice.level(entryItem.entry.id) : 0
+                            names: Practice.levelNames
+                        }
+                        KanteToolButton {
+                            visible: entryItem.playable
+                            icon.name: "media-playback-start"
+                            text: qsTr("Play")
+                            display: QQC2.AbstractButton.IconOnly
+                            onClicked: page.play(entryItem.entry)
+                        }
                     }
                 }
             }

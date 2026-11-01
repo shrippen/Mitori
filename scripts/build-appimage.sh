@@ -80,6 +80,8 @@ chmod +x "$TOOLS"/*.AppImage
 for tool in linuxdeploy linuxdeploy-plugin-qt; do
     (cd "$TOOLS" && "./$tool-x86_64.AppImage" --appimage-extract > /dev/null && mv squashfs-root "$tool.d")
     ln -s "$tool.d/AppRun" "$TOOLS/$tool"
+    # linuxdeploy also looks for plugins named *.AppImage on PATH; only the unpacked one may answer.
+    rm "$TOOLS/$tool-x86_64.AppImage"
 done
 info "Bundling the AppImage..."
 # linuxdeploy-plugin-qt deploys Wayland's EGL client integration only for the pre-6.10 plugin
@@ -87,10 +89,24 @@ info "Bundling the AppImage..."
 mkdir -p "$APPDIR/usr/plugins/wayland-graphics-integration-client"
 cp "$QT/plugins/wayland-graphics-integration-client/libqt-plugin-wayland-egl.so" \
     "$APPDIR/usr/plugins/wayland-graphics-integration-client/"
+# linuxdeploy-plugin-qt bundles every SQL driver of the Qt installation, and the MySQL, PostgreSQL
+# … drivers need client libraries that are not there. Mitori uses SQLite only: a qmake that names
+# a plugin folder with just that driver (the other plugin folders linked through).
+PLUGINS="$WORK/qt-plugins"
+rm -rf "$PLUGINS"; mkdir -p "$PLUGINS/sqldrivers"
+for d in "$QT/plugins"/*; do
+    [ "$(basename "$d")" = sqldrivers ] || ln -s "$d" "$PLUGINS/"
+done
+ln -s "$QT/plugins/sqldrivers/libqsqlite.so" "$PLUGINS/sqldrivers/"
+cat > "$TOOLS/qmake" <<QMAKE
+#!/bin/sh
+"$QT/bin/qmake" "\$@" | sed 's|^QT_INSTALL_PLUGINS:.*|QT_INSTALL_PLUGINS:$PLUGINS|'
+QMAKE
+chmod +x "$TOOLS/qmake"
 (
     cd "$WORK"
     export PATH="$TOOLS:$QT/bin:$PATH"
-    export QMAKE="$QT/bin/qmake"
+    export QMAKE="$TOOLS/qmake"
     export LD_LIBRARY_PATH="$LIBDIR:$QT/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
     export QML_SOURCES_PATHS="$ROOT/app/qml"
     export NO_STRIP=1   # linuxdeploy's strip is too old for current distros' libraries (.relr.dyn)

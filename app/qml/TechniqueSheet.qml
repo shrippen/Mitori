@@ -3,9 +3,10 @@ import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Kante
+import Mitori
 
-// Technique sheet (clickdummy "Programm", row tapped): name, attack, kanji, and the way on to
-// the video and the comment. Rating and notes come with step 2 (ROADMAP.md).
+// Technique sheet (clickdummy "Programm", row tapped): name, attack, kanji, how well it sits
+// (rate 1–4), and the way on to the video and the comment. Notes come later in step 2.
 Kirigami.Dialog {
     id: sheet
 
@@ -44,6 +45,11 @@ Kirigami.Dialog {
             visible: !!sheet.entry.extra
             text: sheet.entry.extra || ""
             wrapMode: Text.Wrap
+        }
+        RatingRow {
+            Layout.fillWidth: true
+            Layout.topMargin: Kirigami.Units.largeSpacing
+            entry: sheet.entry.id || ""
         }
         RowLayout {
             Layout.topMargin: Kirigami.Units.largeSpacing

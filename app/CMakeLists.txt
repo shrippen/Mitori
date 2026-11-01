@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Multimedia LinguistTools)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Multimedia Sql LinguistTools)
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 find_package(KF6 REQUIRED COMPONENTS Kirigami)
@@ -41,6 +41,7 @@ qt_add_qml_module(mitori_app
         qml/CommentPage.qml
         qml/PlayerPage.qml
         qml/SettingsPage.qml
+        qml/RatingRow.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -48,6 +49,10 @@ qt_add_qml_module(mitori_app
         services/programme.cpp
         services/videos.h
         services/videos.cpp
+        services/practice.h
+        services/practice.cpp
+        store/practicelog.h
+        store/practicelog.cpp
 )
 
 # Texts: English in the code, German in i18n/mitori_de.ts (update: cmake --build <dir> --target
@@ -84,8 +89,8 @@ qt_add_resources(mitori_app "kante"
 )
 
 # The generated type registration includes the headers by name.
-target_include_directories(mitori_app PUBLIC catalog services)
-target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia KF6::Kirigami)
+target_include_directories(mitori_app PUBLIC catalog services store)
+target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql KF6::Kirigami)
 
 qt_add_executable(mitori main.cpp)
 target_link_libraries(mitori PRIVATE mitori_app mitori_appplugin)
@@ -148,6 +153,13 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     set_target_properties(tst_programme PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_dependencies(tst_programme mitori)
     add_test(NAME programme COMMAND tst_programme)
+
+    qt_add_executable(tst_practice tests/tst_practice.cpp services/practice.cpp services/practice.h
+        store/practicelog.cpp store/practicelog.h)
+    target_include_directories(tst_practice PRIVATE services store)
+    target_link_libraries(tst_practice PRIVATE Qt6::Core Qt6::Qml Qt6::Sql Qt6::Test)
+    set_target_properties(tst_practice PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME practice COMMAND tst_practice)
 
     # The pages with Kirigami and Kante, offscreen; screenshots into <build>/ui-shots. Plays a video
     # only with MITORI_VIDEOS (the videos are not in the repository).
