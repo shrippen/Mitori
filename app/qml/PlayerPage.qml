@@ -28,6 +28,9 @@ Kirigami.Page {
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
     readonly property int jumpMs: 2000      // double tap
     property bool looping: true
+    // Start at the chapter once per loaded file: the FFmpeg backend reports LoadedMedia again
+    // after every seek, and restarting there would undo each step, jump and timeline move.
+    property bool startPending: true
     // For the UI test: where the video stands (ms) and whether it plays.
     readonly property alias position: player.position
     readonly property alias playing: player.playing
@@ -42,7 +45,7 @@ Kirigami.Page {
 
     onCurrentChanged: {
         shown(current.id)
-        if (player.source.toString() === Videos.source(video).toString() && player.mediaStatus !== MediaPlayer.LoadingMedia) {
+        if (player.source.toString() === Videos.source(video).toString() && !startPending) {
             page.restart()
         }
     }
@@ -90,8 +93,10 @@ Kirigami.Page {
             muted: player.playbackRate < 1
         }
         playbackRate: 1
+        onSourceChanged: page.startPending = true
         onMediaStatusChanged: {
-            if (player.mediaStatus === MediaPlayer.LoadedMedia) {
+            if (player.mediaStatus === MediaPlayer.LoadedMedia && page.startPending) {
+                page.startPending = false
                 page.restart()
             }
         }

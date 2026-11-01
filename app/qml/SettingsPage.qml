@@ -25,7 +25,8 @@ Kirigami.ScrollablePage {
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             wrapMode: Text.Wrap
             color: KanteStyle.disabledTextColor
-            text: qsTr("Folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv … The Flatpak can read folders under ~/Videos only.")
+            text: qsTr("Folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …")
+                  + (Videos.sandboxed ? " " + qsTr("The Flatpak can read folders under ~/Videos only.") : "")
         }
     }
 }

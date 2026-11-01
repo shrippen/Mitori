@@ -112,18 +112,41 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // The last chapter ends with the file; a player at the end of the file no longer seeks back,
-    // so the loop must turn before it (review of PR 3).
-    function test_5_loop_turns_before_end_of_file() {
+    function playerAt(index) {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
         if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
             skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
         }
-        const page = push("PlayerPage", { playlist: rows, index: rows.length - 1 })
-        tryVerify(() => page.duration > 0, 10000)
-        verify(page.to >= page.duration - 50, "the last chapter should end with the file")
-        verify(page.end < page.duration - 100)
-        verify(page.end > page.to - 1000)
+        const page = push("PlayerPage", { playlist: rows, index: index < 0 ? rows.length + index : index })
+        tryVerify(() => page.playing && page.position > page.from + 500, 10000)
+        return page
+    }
+
+    // Steps and jumps stay where they land (the backend reports "loaded" after every seek).
+    function test_5_step_and_jump_stay() {
+        const page = playerAt(0)
+        page.togglePlay()
+        tryVerify(() => !page.playing)
+        const before = page.position
+        page.step(1)
+        tryVerify(() => page.position >= before + page.frameMs - 5, 3000)
+        wait(500)
+        verify(!page.playing)
+        verify(page.position > page.from + 400)
+        page.jump(3000)
+        tryVerify(() => page.position > before + 2500, 3000)
+        wait(500)
+        verify(page.position > before + 2500)
+        window.pageStack.pop()
+    }
+
+    // The last chapter ends with the file; the loop must still start over at the chapter.
+    function test_6_loop_at_end_of_file() {
+        const page = playerAt(-1)
+        page.jump(page.to - page.position - 3000)
+        tryVerify(() => page.position > page.to - 2500, 5000)
+        tryVerify(() => page.position < page.from + 3000, 8000)
+        verify(page.playing)
         window.pageStack.pop()
     }
 }

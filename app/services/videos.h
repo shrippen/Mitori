@@ -17,6 +17,8 @@ class Videos : public QObject
     QML_ELEMENT
     QML_SINGLETON
     Q_PROPERTY(QString folder READ folder WRITE setFolder NOTIFY folderChanged)
+    // Inside a Flatpak sandbox, which reads only ~/Videos (packaging/flatpak).
+    Q_PROPERTY(bool sandboxed READ sandboxed CONSTANT)
 
 public:
     explicit Videos(QObject *parent = nullptr);
@@ -24,6 +26,7 @@ public:
 
     QString folder() const { return m_folder; }
     void setFolder(const QString &folder);
+    bool sandboxed() const { return qEnvironmentVariableIsSet("FLATPAK_ID"); }
 
     // Whether the file of a video key ("aikido/k5") is on the device.
     Q_INVOKABLE bool available(const QString &video) const;

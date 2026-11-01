@@ -70,52 +70,52 @@
 <context>
     <name>PlayerPage</name>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="191"/>
+        <location filename="../qml/PlayerPage.qml" line="198"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="211"/>
+        <location filename="../qml/PlayerPage.qml" line="218"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="217"/>
+        <location filename="../qml/PlayerPage.qml" line="224"/>
         <source>Frame back</source>
         <translation>Bild zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="223"/>
+        <location filename="../qml/PlayerPage.qml" line="230"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="223"/>
+        <location filename="../qml/PlayerPage.qml" line="230"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="229"/>
+        <location filename="../qml/PlayerPage.qml" line="236"/>
         <source>Frame on</source>
         <translation>Bild vor</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="237"/>
+        <location filename="../qml/PlayerPage.qml" line="244"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="245"/>
+        <location filename="../qml/PlayerPage.qml" line="252"/>
         <source>Loop</source>
         <translation>Schleife</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="256"/>
+        <location filename="../qml/PlayerPage.qml" line="263"/>
         <source>Tempo</source>
         <translation>Tempo</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="262"/>
+        <location filename="../qml/PlayerPage.qml" line="269"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
@@ -172,8 +172,13 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="28"/>
-        <source>Folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv … The Flatpak can read folders under ~/Videos only.</source>
-        <translation>Ordner und Namen wie auf den DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv … Das Flatpak liest nur Ordner unter ~/Videos.</translation>
+        <source>Folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</source>
+        <translation>Ordner und Namen wie auf den DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="29"/>
+        <source>The Flatpak can read folders under ~/Videos only.</source>
+        <translation>Das Flatpak liest nur Ordner unter ~/Videos.</translation>
     </message>
 </context>
 <context>
