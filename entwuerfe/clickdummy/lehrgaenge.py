@@ -12,6 +12,7 @@ URL = "https://cal.arianw.de/dav/calendars/shinki/Lehrgaenge?export"
 def felder(ics):
     ics = re.sub(r"\r?\n[ \t]", "", ics)  # gefaltete Zeilen
     for block in re.findall(r"BEGIN:VEVENT(.*?)END:VEVENT", ics, re.S):
+        block = re.sub(r"BEGIN:VALARM.*?END:VALARM", "", block, flags=re.S)  # die Erinnerung hat eine eigene DESCRIPTION
         f = {}
         for z in block.strip().splitlines():
             k, _, v = z.partition(":")

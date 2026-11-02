@@ -32,13 +32,16 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
 
 ## Lehrgänge (Schritt 4)
 
-- **In den Kalender:** jeder Lehrgang lässt sich in den Kalender des Geräts eintragen (Titel, Zeit, Ort,
+- **In den Kalender:** jeder Lehrgang aus dem Kalender lässt sich in den Kalender des Geräts eintragen (Titel, Zeit, Ort,
   Beschreibung; Plattform-Schicht: Android über einen Kalender-Intent, Plasma als ICS-Datei an die
   Kalender-App).
-- **Ausschreibung:** steht in der Beschreibung des ICS-Eintrags eine Zeile „Ausschreibung: URL“, zeigt die
-  Seite einen Knopf, der die offizielle Lehrgangsausschreibung öffnet; ohne diese Zeile kein Knopf. Die
-  Beschreibung kommt als Text (`DESCRIPTION`) und teils zusätzlich als HTML (`ALTREP`); gesucht wird im Text,
-  übernommen werden nur `http(s)`-Links. Heute (02.11.2026) hat noch kein Termin im Kalender diese Zeile.
+- **Ausschreibung:** steht in der Beschreibung des ICS-Eintrags eine Zeile „Ausschreibung: URL“, zeigt der
+  Kopf des Notizbuchs (wo auch „In den Kalender“ sitzt) einen Knopf, der die offizielle
+  Lehrgangsausschreibung öffnet; ohne diese Zeile kein Knopf. Stand 02.11.2026 tragen 4 von 24 Terminen die Zeile.
+  Beim Lesen: Zeilen erst entfalten (CRLF + Leerzeichen), Escapes (`\n`, `\,`) auflösen, die URL endet am
+  Zeilenende und wird nicht umkodiert (sie enthält `&` und `%2F`). Gesucht wird im Text der `DESCRIPTION`, nicht
+  im HTML des `ALTREP` (dort `&amp;`), und nur die des Termins: eine Erinnerung (`VALARM`) hat eine eigene
+  `DESCRIPTION` („Mozilla Standardbeschreibung“). Übernommen werden nur `http(s)`-Links.
 
 ## Kante-Bedarf
 
