@@ -667,6 +667,13 @@ TestCase {
         verify(forms.visible)
         compare(forms.perRow, 8)
         compare(forms.rowCount, 3)
+        // The forms fill the width: the last of a row ends at the right edge.
+        const fills = () => {
+            const last = forms.cellAt(0, forms.perRow - 1)
+            const right = last.mapToItem(forms, last.width, 0).x
+            return right <= forms.width + 0.5 && right > forms.width - forms.cellSide / 2
+        }
+        tryVerify(fills, 2000, "the forms fill the width")
         compare(forms.entryOf(1, 3).label, "12")
         verify(forms.isEmpty(2, 7), "after the last form")
         verify(Practice.rate("shinkitoho/odachi/12", 2))
@@ -685,6 +692,7 @@ TestCase {
         window.height = 800
         tryCompare(forms, "perRow", 11)
         compare(forms.entryOf(1, 0).label, "12")
+        tryVerify(fills, 2000, "the forms fill the tablet's width")
         page.discipline = "daitoryu"
         page.grade = Programme.grades("daitoryu").slice(-1)[0].id
         verify(page.matrix)
@@ -1058,10 +1066,10 @@ TestCase {
         const chart = findChild(stats, "examChart")
         verify(chart.visible)
         compare(chart.values.length, 1)
-        fuzzyCompare(chart.values[0] + 1, sum / n, 0.001)
+        fuzzyCompare(chart.values[0], sum / n, 0.001)
         compare(chart.gridLines, 4)
-        compare(chart.format(0), "1")
-        compare(chart.format(3), "4")
+        compare(chart.format(1), "1")
+        compare(chart.format(4), "4")
         chart.hoverIndex = 0
         verify(chart.partNames[0].indexOf("4. Kyu") >= 0 && chart.partNames[0].indexOf(String(n)) >= 0, chart.partNames[0])
         wait(1000)
@@ -1076,7 +1084,8 @@ TestCase {
         verify(Practice.saveRound("daitoryu", "k5", [{ id: "exam-test-entry", level: 1 }]))
         verify(chart.visible)
         compare(chart.values.length, 1)
-        verify(chart.values[0] > 0, "a bar at average 1")
+        compare(chart.values[0], 1)
+        verify(chart.barHeight(0) >= KanteStyle.unit(3), "a bar at average 1: " + chart.barHeight(0))
         compare(chart.format(chart.values[0]), "1")
         stats.discipline = "aikido"
         window.pageStack.pop()

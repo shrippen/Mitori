@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls as QQC2
+import QtQuick.Window
 import "."
 
 /**
@@ -47,7 +48,13 @@ import "."
  * (longer ones elide, the full name in a tooltip); `columnLabelsVertical` turns the column
  * labels upright, reading upwards from the cells, so long names allow narrow columns;
  * `columnLabelMaxLength` caps their length (they elide, the full name in a tooltip), and
- * `columnTips` gives a column label a tooltip of its own.
+ * `columnTips` gives a column label a tooltip of its own. `rowLabelFont` sets the row labels'
+ * font (e.g. KanteStyle.smallFont, so long names read on a phone).
+ *
+ * A fixed number of columns that fills the width (1.64, Mitori's form grid): `fillWidth` makes
+ * the cells square and as large as the room beside the row labels allows, `cellSize` at least
+ * (a text wider than that widens its column; without a width set from outside, the legend's
+ * width counts).
  *
  *            ┌ upright column labels, starting on one line above the cells
  *   Ikkyo    [3] [ ] [1] ◂━━ scroll bar ━━▸
@@ -55,8 +62,8 @@ import "."
  *
  * Level of a value: round((value - min) / (max - min) × 4), 0 to 4 as
  * KanteStyle.levelColor(level, 4); all values alike on the scale are level 0. Level 0 is the
- * sunken ground with a rule frame (apart from the page ground and a gap); a cell without data
- * is the page ground with a rule frame and `emptyText`. A cell with label "" still says its value
+ * sunken ground with a frame in the frame colour, as the legend keys (apart from the page ground
+ * and a gap); a cell without data is the page ground with that frame and `emptyText`. A cell with label "" still says its value
  * (the word of its level in `legendLabels`, else the number) to screen readers. The number takes the ink that reads best on
  * its fill (inkOf); where none reaches 4.5:1 (the middle of the scale), it sits on a small
  * plate of the ground. The focus ring is two lines: the focus colour outside the cell, against
@@ -94,8 +101,15 @@ FocusScope {
     /** Legend entry for cells without data; "" leaves it out. */
     property string noDataText: "Keine Daten"
     property bool interactive: true
-    /** Smallest side of a cell; a cell grows to fit its text. */
+    /** Smallest side of a cell; a cell grows to fit its text (and with `fillWidth` to fill the width). */
     property real cellSize: KanteStyle.unit(30)
+    /**
+     * The columns fill the grid's width (1.64): square cells as wide as the width allows,
+     * `cellSize` at least (Mitori's form grid: 8 a row on a phone, 11 on a tablet).
+     */
+    property bool fillWidth: false
+    /** Font of the row labels (1.64); default the small mono label font of the column labels. */
+    property font rowLabelFont: labelFont
     property real spacing: KanteStyle.unit(3)
     /** The cells scroll sideways under the row labels when the grid is narrower than they are. */
     property bool scrollable: true
@@ -168,8 +182,16 @@ FocusScope {
     readonly property real minContrast: 4.5
     readonly property font labelFont: KanteStyle.monoFont(KanteStyle.labelFont().pointSize * 0.85, false)
     readonly property font valueFont: KanteStyle.monoFont(KanteStyle.labelFont().pointSize, false)
+    /** Side of a cell with `fillWidth`: the room beside the row labels shared by the columns; 0 without. */
+    readonly property real fillSide: fillWidth && columnCount > 0
+        ? Math.floor((width - labelWidth - spacing - Math.max(0, columnCount - 1) * spacing - 2 * ringRoom) / columnCount)
+        : 0
+    /** Height of a row of cells: `cellSize`, or the fill side when that is larger. */
+    readonly property real cellSide: Math.max(cellSize, fillSide)
+    /** Width of a cell: the natural width, or the fill side when that is larger. */
+    readonly property real cellWidth: Math.max(naturalCellWidth, cellSide)
     // Cells as wide as the widest text (and the widest column label lying flat).
-    readonly property real cellWidth: {
+    readonly property real naturalCellWidth: {
         let w = cellSize
         for (let r = 0; showValues && r < rowCount; r++) {
             for (let c = 0; c < columnCount; c++) {
@@ -189,8 +211,10 @@ FocusScope {
     readonly property real naturalLabelWidth: {
         // The title as drawn (capitals and letter spacing of the label font), not its bare advance.
         let w = rowTitle !== "" ? rowTitleProbe.implicitWidth : 0
+        // Measured anew when the row label font changes.
+        void rowLabelMetrics.font
         for (let r = 0; r < rowLabels.length; r++) {
-            w = Math.max(w, labelMetrics.advanceWidth(String(rowLabels[r])))
+            w = Math.max(w, rowLabelMetrics.advanceWidth(String(rowLabels[r])))
         }
         return Math.ceil(w)
     }
@@ -217,6 +241,8 @@ FocusScope {
     readonly property real ringRoom: KanteStyle.lineWidth
     /** Width of all cells (with the ring's room on both sides). */
     readonly property real cellsWidth: columnCount * cellWidth + Math.max(0, columnCount - 1) * spacing + 2 * ringRoom
+    /** The same at the natural cell width; the grid's implicit width (the fill follows the width). */
+    readonly property real naturalCellsWidth: columnCount * naturalCellWidth + Math.max(0, columnCount - 1) * spacing + 2 * ringRoom
     /** True while the cells scroll under the row labels. */
     readonly property bool scrolling: view.contentWidth > view.width + 0.5
     /** The legend's entries as KanteLegend takes them ({color, text}). */
@@ -414,17 +440,55 @@ FocusScope {
         return null
     }
 
-    /** Keeps the current cell inside the grid and on a focusable cell, so a cell holds the focus. */
-    function clampCurrent() {
-        currentRow = Math.max(0, Math.min(rowCount - 1, currentRow))
-        currentColumn = Math.max(0, Math.min(columnCount - 1, currentColumn))
-        if (!focusable(currentRow, currentColumn)) {
-            const first = endOf(-1, false)
-            if (first) {
-                currentRow = first[0]
-                currentColumn = first[1]
+    /**
+     * The focusable cell nearest to (r, c) as [row, column], null if none: (r, c) itself, else
+     * the nearest in the same row, else in the same column, else the nearest by rows plus
+     * columns. Of two alike, the one further on (right, below) first.
+     */
+    function nearestOf(r, c) {
+        if (focusable(r, c)) {
+            return [r, c]
+        }
+        for (let d = 1; d < columnCount; d++) {
+            if (focusable(r, c + d)) {
+                return [r, c + d]
+            }
+            if (focusable(r, c - d)) {
+                return [r, c - d]
             }
         }
+        for (let d = 1; d < rowCount; d++) {
+            if (focusable(r + d, c)) {
+                return [r + d, c]
+            }
+            if (focusable(r - d, c)) {
+                return [r - d, c]
+            }
+        }
+        // Backwards, so that of two alike the one further on (below, right) wins.
+        let best = null
+        let bestDistance = Infinity
+        for (let rr = rowCount - 1; rr >= 0; rr--) {
+            for (let cc = columnCount - 1; cc >= 0; cc--) {
+                const distance = Math.abs(rr - r) + Math.abs(cc - c)
+                if (distance < bestDistance && focusable(rr, cc)) {
+                    best = [rr, cc]
+                    bestDistance = distance
+                }
+            }
+        }
+        return best
+    }
+    /**
+     * Keeps the current cell inside the grid and on a focusable cell, so a cell holds the focus:
+     * the nearest drawn cell, so the focus stays where it was and the view does not jump.
+     */
+    function clampCurrent() {
+        const r = Math.max(0, Math.min(rowCount - 1, currentRow))
+        const c = Math.max(0, Math.min(columnCount - 1, currentColumn))
+        const to = nearestOf(r, c) || [r, c]
+        currentRow = to[0]
+        currentColumn = to[1]
     }
     onRowCountChanged: clampCurrent()
     onColumnCountChanged: clampCurrent()
@@ -432,11 +496,13 @@ FocusScope {
     onShowEmptyChanged: clampCurrent()
     // The app may set the current cell onto a gap while a cell has the focus: settle it on a
     // drawn cell once the change is done (not at once: a cell taking the focus sets the row,
-    // then the column, and the step between may be a gap).
+    // then the column, and the step between may be a gap). Only with the focus in the grid:
+    // without it, the app may set the row now and the column later, and the focus settles the
+    // cell when it comes (focusCurrent).
     onCurrentRowChanged: Qt.callLater(settleCurrent)
     onCurrentColumnChanged: Qt.callLater(settleCurrent)
     function settleCurrent() {
-        if (!focusable(currentRow, currentColumn)) {
+        if (activeFocus && !focusable(currentRow, currentColumn)) {
             focusCurrent()
         }
     }
@@ -490,12 +556,14 @@ FocusScope {
         }
     }
 
-    implicitWidth: Math.max(labelWidth + spacing + cellsWidth, legend ? legendNaturalWidth : 0)
+    implicitWidth: Math.max(labelWidth + spacing + naturalCellsWidth, legend ? legendNaturalWidth : 0)
     implicitHeight: body.implicitHeight
 
     // A focus scope in the Tab chain: Tab enters at the current cell, the next Tab leaves.
-    // No Tab stop when every cell is a gap.
-    activeFocusOnTab: interactive && hasFocusable
+    // No Tab stop when every cell is a gap. While the scope itself holds the focus (its cell
+    // turned into a gap), it stays in the chain until the focus leaves: Qt does not take an
+    // active focus item out of it, and Tab from outside the chain would run backwards.
+    activeFocusOnTab: (interactive && hasFocusable) || (activeFocus && Window.activeFocusItem === grid)
 
     Accessible.role: Accessible.Table
     Accessible.name: accessibleName
@@ -503,6 +571,10 @@ FocusScope {
     FontMetrics {
         id: labelMetrics
         font: grid.labelFont
+    }
+    FontMetrics {
+        id: rowLabelMetrics
+        font: grid.rowLabelFont
     }
     FontMetrics {
         id: titleMetrics
@@ -571,12 +643,12 @@ FocusScope {
                         required property int index
                         objectName: "kanteHeatRowLabel"
                         width: grid.labelWidth
-                        height: grid.cellSize
+                        height: grid.cellSide
                         verticalAlignment: Text.AlignVCenter
                         elide: Text.ElideRight
                         text: index < grid.rowLabels.length ? String(grid.rowLabels[index]) : ""
                         color: KanteStyle.mutedTextColor
-                        font: grid.labelFont
+                        font: grid.rowLabelFont
                         Accessible.ignored: true
 
                         // The full name where the label is cut.
@@ -692,7 +764,7 @@ FocusScope {
 
                                         objectName: "kanteHeatCell"
                                         width: grid.cellWidth
-                                        height: grid.cellSize
+                                        height: grid.cellSide
                                         focus: current && shown
 
                                         Accessible.role: Accessible.Cell
@@ -721,9 +793,10 @@ FocusScope {
                                                 objectName: "kanteHeatFill"
                                                 anchors.fill: parent
                                                 color: cell.level < 0 ? "transparent" : KanteStyle.levelColor(cell.level, 4)
-                                                // No data and level 0 framed: level 0 stays apart from the ground and a gap.
+                                                // No data and level 0 framed in the frame colour, as the
+                                                // legend keys: level 0 stays apart from the ground and a gap.
                                                 border.width: cell.level <= 0 ? KanteStyle.borderWidth : 0
-                                                border.color: KanteStyle.ruleColor
+                                                border.color: KanteStyle.frameColor
                                             }
                                             // The number in its best ink; where no ink reaches 4.5:1 on the
                                             // fill (the middle of the scale), on a plate of the ground.
