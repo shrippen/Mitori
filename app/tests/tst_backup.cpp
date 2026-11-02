@@ -225,6 +225,83 @@ private slots:
         tabletBackup.discard();
     }
 
+    // Back and forth: A takes B's notebook of the same event into its own; B writes on in its
+    // notebook, then reads A's backup. Every entry ends up in the one notebook left.
+    void notebookBackAndForth()
+    {
+        const Device a = device(u"hin-a"_s);
+        const Device b = device(u"hin-b"_s);
+        CourseBook::Course c;
+        c.calendarUid = u"ev-9"_s;
+        c.title = u"Herbst"_s;
+        c.first = c.last = QDate(2026, 10, 3);
+        QString courseA;
+        QString courseB;
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            courseA = book.addCourse(c, at(7), u"a"_s).uid;
+        }
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            courseB = book.addCourse(c, at(8), u"b"_s).uid;
+            QVERIFY(!book.addEntry(courseB, u"e1"_s, at(9), u"b"_s).uid.isEmpty());
+        }
+        Backup backupA(a.practice, a.courses, a.media, a.work);
+        Backup backupB(b.practice, b.courses, b.media, b.work);
+        const QString fromB = m_dir.filePath(u"von-b.zip"_s);
+        QVERIFY(backupB.save(QUrl::fromLocalFile(fromB)));
+        QVERIFY(!backupA.inspect(QUrl::fromLocalFile(fromB)).isEmpty());
+        QVERIFY(backupA.restore());
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            QVERIFY(!book.addEntry(courseB, u"e2"_s, at(10), u"b"_s).uid.isEmpty());
+        }
+        const QString fromA = m_dir.filePath(u"von-a.zip"_s);
+        QVERIFY(backupA.save(QUrl::fromLocalFile(fromA)));
+        QVERIFY(!backupB.inspect(QUrl::fromLocalFile(fromA)).isEmpty());
+        QVERIFY(backupB.restore());
+
+        CourseBook book;
+        QVERIFY(book.open(b.courses));
+        QCOMPARE(book.courses().size(), 1);
+        QStringList texts;
+        for (const CourseBook::Entry &e : book.entries(courseA)) {
+            texts << e.text;
+        }
+        QCOMPARE(texts, (QStringList{u"e1"_s, u"e2"_s}));
+    }
+
+    // A photo whose note was deleted after the backup does not come back from it.
+    void deletedMediaStays()
+    {
+        const Device d = device(u"medien-weg"_s);
+        MediaStore media(d.media);
+        QVERIFY(media.adopt(u"x.jpg"_s, "jpeg"));
+        QString uid;
+        {
+            PracticeLog log;
+            QVERIFY(log.open(d.practice));
+            uid = log.addNote(u"aikido/k5/a"_s, {}, at(9), u"d"_s, u"x.jpg"_s).uid;
+        }
+        Backup backup(d.practice, d.courses, d.media, d.work);
+        const QString zip = m_dir.filePath(u"medien-weg.zip"_s);
+        QVERIFY(backup.save(QUrl::fromLocalFile(zip)));
+        {
+            PracticeLog log;
+            QVERIFY(log.open(d.practice));
+            QVERIFY(log.deleteNote(uid, at(10)));
+        }
+        QVERIFY(media.remove(u"x.jpg"_s));
+
+        const QVariantMap summary = backup.inspect(QUrl::fromLocalFile(zip));
+        QCOMPARE(summary.value(u"media"_s).toInt(), 0);
+        QVERIFY(backup.restore());
+        QVERIFY(!media.has(u"x.jpg"_s));
+    }
+
     // A file that is no backup, and one of a newer format, are refused with a reason.
     void refused()
     {

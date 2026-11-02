@@ -73,6 +73,21 @@ bool TableMerge::run(QSqlDatabase &db, const QString &otherPath, const QList<Tab
         ok = ok && mergeTable(db, t, result, error);
     }
     ok = ok && (!after || after(db, error));
+
+    // The media the merged rows name: only those come from the backup (a deleted note's photo not).
+    for (const Table &t : tables) {
+        if (!ok || t.media.isEmpty()) {
+            continue;
+        }
+        QSqlQuery m(db);
+        ok = m.exec(QStringLiteral("SELECT %1 FROM main.%2 WHERE deleted = 0 AND %1 <> ''").arg(t.media, t.name));
+        if (!ok) {
+            *error = m.lastError().text();
+        }
+        while (m.next()) {
+            result->media << m.value(0).toString();
+        }
+    }
     if (ok && mode == Mode::Apply) {
         ok = db.commit();
         if (!ok) {

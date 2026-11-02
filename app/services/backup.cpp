@@ -11,6 +11,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QSet>
 #include <QStandardPaths>
 
 namespace {
@@ -163,7 +164,7 @@ void Backup::discard()
 }
 
 // Both databases of the archive as files, migrated to this app's schema, then merged into the
-// device's (Preview rolls back). Media first on Apply: a merged note finds its file.
+// device's (Preview rolls back), then the media files the merged rows name.
 bool Backup::merge(Step step, QVariantMap *summary)
 {
     QFile file(QDir(m_work).filePath(kInspected));
@@ -187,9 +188,25 @@ bool Backup::merge(Step step, QVariantMap *summary)
         }
     }
 
+    const TableMerge::Mode mode = step == Step::Apply ? TableMerge::Mode::Apply : TableMerge::Mode::Preview;
+    PracticeLog log;
+    CourseBook book;
+    TableMerge::Result fromLog;
+    TableMerge::Result fromBook;
+    if (!log.open(m_practice) || !log.merge(practice, mode, &fromLog)) {
+        return setError(tr("The backup could not be restored: %1").arg(log.errorString()));
+    }
+    if (!book.open(m_courses) || !book.merge(courses, mode, &fromBook)) {
+        return setError(tr("The backup could not be restored: %1").arg(book.errorString()));
+    }
+
+    // The media files the merged rows name and this device lacks; after the rows on Apply (a
+    // failed file leaves its note with the hint "not on this device").
+    const QStringList named = fromLog.media + fromBook.media;
+    const QSet<QString> wanted(named.cbegin(), named.cend());
     int media = 0;
     for (const QString &name : archive.media()) {
-        if (m_media.has(name)) {
+        if (!wanted.contains(name) || m_media.has(name)) {
             continue;
         }
         ++media;
@@ -203,18 +220,6 @@ bool Backup::merge(Step step, QVariantMap *summary)
         if (!m_media.adopt(name, data)) {
             return setError(tr("The backup could not be restored: %1").arg(tr("%1 could not be saved").arg(name)));
         }
-    }
-
-    const TableMerge::Mode mode = step == Step::Apply ? TableMerge::Mode::Apply : TableMerge::Mode::Preview;
-    PracticeLog log;
-    CourseBook book;
-    TableMerge::Result fromLog;
-    TableMerge::Result fromBook;
-    if (!log.open(m_practice) || !log.merge(practice, mode, &fromLog)) {
-        return setError(tr("The backup could not be restored: %1").arg(log.errorString()));
-    }
-    if (!book.open(m_courses) || !book.merge(courses, mode, &fromBook)) {
-        return setError(tr("The backup could not be restored: %1").arg(book.errorString()));
     }
     if (step == Step::Apply) {
         for (const QString &name : fromLog.orphans + fromBook.orphans) {

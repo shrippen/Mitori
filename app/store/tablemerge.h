@@ -30,6 +30,7 @@ struct Result {
     QHash<QString, int> added;          // {table: rows}
     QHash<QString, int> changed;
     QStringList orphans;                // media files of this copy that no row names any more
+    QStringList media;                  // media files the rows name after the merge (not deleted)
 };
 
 // Attaches `otherPath` (a file of the same schema), merges, runs `after` in the same transaction

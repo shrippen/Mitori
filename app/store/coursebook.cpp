@@ -492,6 +492,14 @@ bool joinDoubles(QSqlDatabase &db, QString *error)
                        "  JOIN courses l ON l.uid = d.loser WHERE l.exam_discipline <> '')").arg(now),
         QStringLiteral("UPDATE courses SET deleted = 1, changed = %1 WHERE uid IN (SELECT loser FROM temp.doubles)").arg(now),
         QStringLiteral("DROP TABLE temp.doubles"),
+        // Entries written on another device into a notebook joined here earlier: to the one left.
+        // (Deleting a notebook deletes its entries, so a live entry there came from a merge.)
+        QStringLiteral("UPDATE entries SET course = (SELECT w.uid FROM courses l JOIN courses w"
+                       "  ON w.calendar_uid = l.calendar_uid AND w.deleted = 0"
+                       "  WHERE l.uid = entries.course ORDER BY w.created, w.uid LIMIT 1), changed = %1"
+                       " WHERE deleted = 0 AND course IN (SELECT l.uid FROM courses l WHERE l.deleted = 1"
+                       "  AND l.calendar_uid <> '' AND EXISTS (SELECT 1 FROM courses w"
+                       "  WHERE w.deleted = 0 AND w.calendar_uid = l.calendar_uid))").arg(now),
         // One passed grade twice: the newer row stays.
         QStringLiteral("UPDATE grades SET deleted = 1, changed = %1 WHERE deleted = 0 AND EXISTS (SELECT 1 FROM grades g"
                        " WHERE g.deleted = 0 AND g.discipline = grades.discipline AND g.grade = grades.grade"
