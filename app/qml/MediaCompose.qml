@@ -10,7 +10,8 @@ import Mitori
 
 // Photo and voice note beside a note field (clickdummy: 📷 🎤): a photo from the camera or a
 // picture file, or a voice note recorded here. Each gives `attached(name)` (Media); the page
-// saves the note with the field's text. Camera and microphone ask for permission first.
+// saves the note with the field's text. Camera and microphone ask for permission first; a
+// refused permission or an unreadable picture says so in a toast.
 //
 //   [📷] [🎤]                   idle
 //   ● 0:12  [Stop] [Cancel]     recording
@@ -88,6 +89,9 @@ RowLayout {
 
     function takePhoto() {
         if (cameraPermission.status !== Qt.PermissionStatus.Granted) {
+            if (cameraPermission.status === Qt.PermissionStatus.Denied) {
+                compose.tell(qsTr("Mitori may not use the camera. Allow it in the system settings."))
+            }
             cameraPermission.request()
             return
         }
@@ -96,6 +100,9 @@ RowLayout {
 
     function record() {
         if (microphonePermission.status !== Qt.PermissionStatus.Granted) {
+            if (microphonePermission.status === Qt.PermissionStatus.Denied) {
+                compose.tell(qsTr("Mitori may not use the microphone. Allow it in the system settings."))
+            }
             microphonePermission.request()
             return
         }
@@ -104,6 +111,32 @@ RowLayout {
         recorder.cancelled = false
         recorder.outputLocation = voice.url
         recorder.record()
+    }
+
+    // A picked file: in as a photo, or a message (not a picture Qt can read).
+    function importPicture(url) {
+        const name = Media.importPhoto(url)
+        if (name === "") {
+            compose.tell(qsTr("This file could not be read as a picture."))
+            return
+        }
+        compose.attached(name)
+    }
+
+    function tell(text) {
+        problem.text = text
+        problem.show()
+    }
+
+    KanteToast {
+        id: problem
+
+        objectName: "mediaProblem"
+        parent: QQC2.Overlay.overlay
+        anchors.right: parent ? parent.right : undefined
+        anchors.bottom: parent ? parent.bottom : undefined
+        anchors.margins: Kirigami.Units.largeSpacing
+        kind: KanteToast.Kind.Warn
     }
 
     CameraPermission {
@@ -129,14 +162,9 @@ RowLayout {
         id: pictureDialog
 
         title: qsTr("Choose a picture")
-        nameFilters: [qsTr("Pictures (*.jpg *.jpeg *.png *.webp *.heic)")]
+        nameFilters: [qsTr("Pictures (*.jpg *.jpeg *.png *.webp)")]
         currentFolder: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
-        onAccepted: {
-            const name = Media.importPhoto(selectedFile)
-            if (name !== "") {
-                compose.attached(name)
-            }
-        }
+        onAccepted: compose.importPicture(selectedFile)
     }
 
     // AAC in MP4: small, and played by every platform's player.

@@ -95,9 +95,13 @@ Kirigami.Dialog {
             entry: sheet.entry.id || ""
         }
         QQC2.Label {
+            objectName: "sheetLastNote"
             Layout.fillWidth: true
-            visible: !!sheet.lastNote.text
-            text: qsTr("Last note: %1").arg(sheet.lastNote.text || "")
+            // A photo or voice note without text is named as such.
+            readonly property string shown: (sheet.lastNote.text || (Media.kind(sheet.lastNote.media || "") === Media.Kind.Photo ? qsTr("Photo")
+                               : Media.kind(sheet.lastNote.media || "") === Media.Kind.Voice ? qsTr("Voice note") : ""))
+            visible: shown !== ""
+            text: qsTr("Last note: %1").arg(shown)
             color: KanteStyle.mutedTextColor
             wrapMode: Text.Wrap
             maximumLineCount: 3

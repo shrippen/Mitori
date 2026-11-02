@@ -1879,8 +1879,6 @@ TestCase {
         return found
     }
 
-    // A note begun in the player belongs to the technique it was typed for, also when the player
-    // moves on before it is added (training moves on after a rating).
     // Photos and voice notes: a picked picture becomes a note with the text typed so far, shown
     // in the notes, the notebook and All notes; a voice note plays; the camera page says when
     // there is no camera (offscreen). Deleting a note deletes its file.
@@ -1899,6 +1897,11 @@ TestCase {
         const media = findChild(page.footer, "addPhoto").parent
         media.attached(name)
         tryVerify(() => Practice.notes(entry.id).some(n => n.media === name))
+        // A file that is no picture says so (and makes no note).
+        const before = Practice.notes(entry.id).length
+        media.importPicture("file://" + testMediaDir + "/README.md")
+        tryVerify(() => findChild(media, "mediaProblem").shown, 2000, "a message for an unreadable picture")
+        compare(Practice.notes(entry.id).length, before)
         compare(compose.text, "", "the text went with the photo")
         tryVerify(() => findChildren(page, "notePhoto").some(i => i.visible && i.status === Image.Ready), 3000)
         shot("8f-note-photo")
@@ -1936,6 +1939,20 @@ TestCase {
         verify(Practice.changeNote(voiceNote.uid, ""), "a voice note needs no text")
         window.pageStack.pop()
 
+        // The sheet's "last note" names a voice note without text as such.
+        Programme.discipline = "aikido"         // earlier cases leave another one chosen
+        Programme.setGrade("aikido", "k4")
+        const programme = push("ProgrammePage")
+        programme.open(programme.rows.find(r => r.id === entry.id))
+        const sheet = findChild(programme, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        const last = findChild(sheet.contentItem, "sheetLastNote")
+        verify(last.visible, "a voice note is a last note too")
+        compare(last.text, qsTr("Last note: %1").arg(qsTr("Voice note")))
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        window.pageStack.pop()
+
         // A notebook entry with a photo.
         const course = Courses.create("Fotolehrgang", "2026-05-01", "", "", "")
         const book = push("CoursePage", { uid: course })
@@ -1947,6 +1964,8 @@ TestCase {
         verify(Courses.remove(course))
     }
 
+    // A note begun in the player belongs to the technique it was typed for, also when the player
+    // moves on before it is added (training moves on after a rating).
     function test_8b_note_draft_stays_with_its_technique() {
         const page = playerAt(1)
         const first = page.current.id

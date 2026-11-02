@@ -44,8 +44,11 @@ ColumnLayout {
 
     QQC2.Label {
         Layout.fillWidth: true
-        visible: !!noteRow.last.text
-        text: qsTr("Last note: %1").arg(noteRow.last.text || "")
+        // A photo or voice note without text is named as such.
+        readonly property string shown: (noteRow.last.text || (Media.kind(noteRow.last.media || "") === Media.Kind.Photo ? qsTr("Photo")
+                               : Media.kind(noteRow.last.media || "") === Media.Kind.Voice ? qsTr("Voice note") : ""))
+        visible: shown !== ""
+        text: qsTr("Last note: %1").arg(shown)
         color: KanteStyle.mutedTextColor
         wrapMode: Text.Wrap
         maximumLineCount: 3

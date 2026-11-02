@@ -2,4 +2,6 @@
 <!-- Android 11 and older: as data_extraction_rules.xml, Auto Backup without the video bundles. -->
 <full-backup-content>
     <exclude domain="file" path="bundles/" />
+    <!-- Photos and voice notes: they would soon pass the 25 MB limit (see data_extraction_rules.xml). -->
+    <exclude domain="file" path="medien/" />
 </full-backup-content>
