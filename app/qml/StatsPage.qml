@@ -34,7 +34,8 @@ Kirigami.ScrollablePage {
     }
     property string discipline: Programme.discipline
 
-    // Techniques on a day as a level of the calendar: 1–2, 3–5, 6–9, 10 and more.
+    // Techniques on a day as a level of the calendar: 1–2, 3–5, 6–9, 10 and more (finer than the
+    // clickdummy's 1–4 … 13+: a session rates a handful of techniques).
     readonly property var bounds: [1, 3, 6, 10]
     function levelOf(count) {
         return page.bounds.filter(b => count >= b).length
@@ -94,18 +95,23 @@ Kirigami.ScrollablePage {
                     }
                     return l
                 }
+                // Every day shown says what it was, also a day without practice.
                 tips: {
                     const t = {}
-                    for (const d in page.perDay) {
-                        t[d] = qsTr("%n technique(s)", "", page.perDay[d])
+                    for (let i = 0; i < 26 * 7; i++) {
+                        const day = new Date(page.todayDate.getFullYear(), page.todayDate.getMonth(), page.todayDate.getDate() - i, 12)
+                        const key = isoDay(day)
+                        t[key] = page.perDay[key] ? qsTr("%n technique(s)", "", page.perDay[key]) : qsTr("no practice")
                     }
                     return t
                 }
+                Accessible.name: qsTr("Practice days")
             }
         }
         KanteLegend {
             Layout.fillWidth: true
-            model: [{ color: KanteStyle.levelColor(1), text: qsTr("1–2 techniques") },
+            model: [{ color: KanteStyle.levelColor(0), text: qsTr("no practice") },
+                    { color: KanteStyle.levelColor(1), text: qsTr("1–2 techniques") },
                     { color: KanteStyle.levelColor(2), text: "3–5" },
                     { color: KanteStyle.levelColor(3), text: "6–9" },
                     { color: KanteStyle.levelColor(4), text: qsTr("10 and more") }]
@@ -131,11 +137,22 @@ Kirigami.ScrollablePage {
 
                 Layout.fillWidth: true
                 spacing: KanteStyle.unit(4)
-                visible: stand.visible
+                visible: stand.ids.length > 0
 
-                QQC2.Label {
-                    text: gradeItem.modelData.name
-                    font.bold: true
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    QQC2.Label {
+                        Layout.fillWidth: true
+                        text: gradeItem.modelData.name
+                        font.bold: true
+                    }
+                    // The figures without hovering (touch): exam-ready of all techniques.
+                    QQC2.Label {
+                        objectName: "gradeFigure"
+                        text: qsTr("%1 of %2 exam-ready").arg(stand.counts[4]).arg(stand.ids.length)
+                        color: KanteStyle.mutedTextColor
+                    }
                 }
                 GradeStand {
                     id: stand
@@ -143,6 +160,7 @@ Kirigami.ScrollablePage {
                     objectName: "statsGradeStand"
                     Layout.fillWidth: true
                     entries: gradeItem.rows
+                    name: gradeItem.modelData.name
                     legend: false
                 }
             }

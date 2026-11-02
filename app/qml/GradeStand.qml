@@ -10,6 +10,7 @@ ColumnLayout {
 
     required property var entries      // the grade's rows (Programme.entries)
     property bool legend: true          // off where one legend serves several bars
+    property string name: ""            // the grade's name, for screen readers among several bars
     readonly property var ids: entries.filter(r => r.kind === "entry").map(r => r.id)
     readonly property var counts: Practice.revision >= 0 ? Practice.counts(ids) : [0, 0, 0, 0, 0]
     // Levels 4 … 1, then not rated: the order of the bar and the legend.
@@ -25,7 +26,7 @@ ColumnLayout {
             color: KanteStyle.levelColor(l),
             text: stand.counts[l] + " " + Practice.levelNames[l]
         }))
-        Accessible.name: qsTr("Rating of the grade")
+        Accessible.name: stand.name ? qsTr("Rating of %1").arg(stand.name) : qsTr("Rating of the grade")
     }
     KanteLegend {
         Layout.fillWidth: true
