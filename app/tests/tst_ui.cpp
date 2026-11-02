@@ -15,6 +15,7 @@
 
 #include "courses.h"
 #include "bundleshelf.h"
+#include "mediastore.h"
 #include "practice.h"
 
 Q_IMPORT_QML_PLUGIN(MitoriPlugin)
@@ -64,6 +65,10 @@ public slots:
         qputenv("MITORI_COURSES_CALENDAR", QUrl::fromLocalFile(calendar.fileName()).toString().toUtf8());
         // Video bundles from the test data (tools/bundle.py), as a local package folder: never the network.
         QDir(BundleShelf::defaultRoot()).removeRecursively();
+        // A voice note on the device for the notes' player (a recorder needs a microphone).
+        QDir(MediaStore::defaultRoot()).removeRecursively();
+        QDir().mkpath(MediaStore::defaultRoot());
+        QFile::copy(QStringLiteral(TEST_MEDIA_DIR "/stimme.m4a"), MediaStore::shared().path(QStringLiteral("test-stimme.m4a")));
         const QString packages = QStringLiteral(UI_DATA_DIR "/packages");
         QDir().mkpath(packages + QStringLiteral("/mitori-test-bundle/1"));
         QFile::remove(packages + QStringLiteral("/mitori-test-bundle/1/test.mvb"));
@@ -85,6 +90,7 @@ public slots:
         QIcon::setThemeName(QStringLiteral("breeze-mitori"));
         QDir().mkpath(QStringLiteral(UI_SHOTS_DIR));
         engine->rootContext()->setContextProperty(QStringLiteral("uiShotsDir"), QStringLiteral(UI_SHOTS_DIR));
+        engine->rootContext()->setContextProperty(QStringLiteral("testMediaDir"), QStringLiteral(TEST_MEDIA_DIR));
     }
 };
 

@@ -38,7 +38,7 @@ Kirigami.Dialog {
         Kirigami.Action {
             icon.name: "document-save"
             text: qsTr("Save")
-            enabled: area.text.trim() !== ""
+            enabled: area.text.trim() !== "" || !!editor.note.media      // a photo needs no text
             onTriggered: {
                 if (editor.save(editor.note.uid, area.text)) {
                     editor.close()

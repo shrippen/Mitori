@@ -32,7 +32,22 @@ PracticeLog::Note note(const QSqlQuery &q)
     n.changed = QDateTime::fromMSecsSinceEpoch(q.value(4).toLongLong(), QTimeZone::UTC);
     n.device = q.value(5).toString();
     n.deleted = q.value(6).toBool();
+    n.media = q.value(7).toString();
     return n;
+}
+
+
+// Whether a table has a column (a step that adds one runs again on a file set back by hand or a
+// test, as the steps with IF NOT EXISTS do).
+bool hasColumn(QSqlQuery &q, const QString &table, const QString &column)
+{
+    q.exec(QStringLiteral("PRAGMA table_info(%1)").arg(table));
+    while (q.next()) {
+        if (q.value(1).toString() == column) {
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace
@@ -108,6 +123,16 @@ bool PracticeLog::migrate()
                             " device TEXT NOT NULL)"))
             && q.exec(QStringLiteral("CREATE INDEX IF NOT EXISTS exam_rounds_discipline ON exam_rounds (discipline, at)"))
             && q.exec(QStringLiteral("PRAGMA user_version = 4"));
+        if (!ok) {
+            m_error = q.lastError().text();
+            return false;
+        }
+    }
+    // 5: a photo or voice note on a note (the file's name in the media folder, "" for none).
+    if (version < 5) {
+        const bool ok = (hasColumn(q, QStringLiteral("notes"), QStringLiteral("media"))
+                         || q.exec(QStringLiteral("ALTER TABLE notes ADD COLUMN media TEXT NOT NULL DEFAULT ''")))
+            && q.exec(QStringLiteral("PRAGMA user_version = 5"));
         if (!ok) {
             m_error = q.lastError().text();
             return false;
@@ -233,44 +258,53 @@ QList<PracticeLog::Rating> PracticeLog::history(const QString &entry) const
     return result;
 }
 
-PracticeLog::Note PracticeLog::addNote(const QString &entry, const QString &text, const QDateTime &at, const QString &device)
+PracticeLog::Note PracticeLog::addNote(const QString &entry, const QString &text, const QDateTime &at, const QString &device,
+                                       const QString &media)
 {
     Note n;
-    if (entry.isEmpty() || text.trimmed().isEmpty()) {
+    if (entry.isEmpty() || (text.trimmed().isEmpty() && media.isEmpty())) {
         return n;
     }
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare(QStringLiteral("INSERT INTO notes (uid, entry, text, created, changed, device) VALUES (?, ?, ?, ?, ?, ?)"));
+    q.prepare(QStringLiteral("INSERT INTO notes (uid, entry, text, created, changed, device, media) VALUES (?, ?, ?, ?, ?, ?, ?)"));
     const QString uid = QUuid::createUuid().toString(QUuid::WithoutBraces);
     q.addBindValue(uid);
     q.addBindValue(entry);
-    q.addBindValue(text.trimmed());
+    q.addBindValue(text.trimmed().isNull() ? QString(QLatin1String("")) : text.trimmed());
     q.addBindValue(at.toMSecsSinceEpoch());
     q.addBindValue(at.toMSecsSinceEpoch());
     q.addBindValue(device);
+    q.addBindValue(media.isNull() ? QString(QLatin1String("")) : media);
     if (!q.exec()) {
         m_error = q.lastError().text();
         return n;
     }
-    n = {uid, entry, text.trimmed(), at.toUTC(), at.toUTC(), device, false};
+    n = {uid, entry, text.trimmed(), at.toUTC(), at.toUTC(), device, false, media};
     return n;
 }
 
+// A note with a photo or voice note may lose its text, one without may not.
 bool PracticeLog::changeNote(const QString &uid, const QString &text, const QDateTime &at)
 {
-    if (text.trimmed().isEmpty()) {
-        return false;
-    }
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare(QStringLiteral("UPDATE notes SET text = ?, changed = ? WHERE uid = ? AND deleted = 0"));
+    q.prepare(QStringLiteral("UPDATE notes SET text = ?, changed = ? WHERE uid = ? AND deleted = 0 AND (? <> '' OR media <> '')"));
     q.addBindValue(text.trimmed());
     q.addBindValue(at.toMSecsSinceEpoch());
     q.addBindValue(uid);
+    q.addBindValue(text.trimmed());
     if (!q.exec()) {
         m_error = q.lastError().text();
         return false;
     }
     return q.numRowsAffected() == 1;
+}
+
+QString PracticeLog::noteMedia(const QString &uid) const
+{
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("SELECT media FROM notes WHERE uid = ?"));
+    q.addBindValue(uid);
+    return q.exec() && q.next() ? q.value(0).toString() : QString();
 }
 
 bool PracticeLog::deleteNote(const QString &uid, const QDateTime &at)
@@ -290,7 +324,7 @@ QList<PracticeLog::Note> PracticeLog::notes(const QString &entry) const
 {
     QList<Note> result;
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare(QStringLiteral("SELECT uid, entry, text, created, changed, device, deleted FROM notes"
+    q.prepare(QStringLiteral("SELECT uid, entry, text, created, changed, device, deleted, media FROM notes"
                              " WHERE entry = ? AND deleted = 0 ORDER BY created, rowid"));
     q.addBindValue(entry);
     q.exec();
@@ -304,7 +338,7 @@ QList<PracticeLog::Note> PracticeLog::allNotes() const
 {
     QList<Note> result;
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.exec(QStringLiteral("SELECT uid, entry, text, created, changed, device, deleted FROM notes"
+    q.exec(QStringLiteral("SELECT uid, entry, text, created, changed, device, deleted, media FROM notes"
                           " WHERE deleted = 0 ORDER BY created DESC, rowid DESC"));
     while (q.next()) {
         result << note(q);
@@ -316,7 +350,7 @@ QHash<QString, PracticeLog::Note> PracticeLog::lastNotes() const
 {
     QHash<QString, Note> result;
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.exec(QStringLiteral("SELECT uid, entry, text, created, changed, device, deleted FROM notes"
+    q.exec(QStringLiteral("SELECT uid, entry, text, created, changed, device, deleted, media FROM notes"
                           " WHERE deleted = 0 ORDER BY created, rowid"));
     while (q.next()) {
         const Note n = note(q);

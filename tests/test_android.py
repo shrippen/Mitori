@@ -13,6 +13,10 @@ def test_internet_permission():
     rights = {p.get(ANDROID) for p in root.iter("uses-permission")}
     assert "android.permission.INTERNET" in rights
     assert "android.permission.ACCESS_NETWORK_STATE" in rights      # Wi-Fi only downloads
+    assert {"android.permission.CAMERA", "android.permission.RECORD_AUDIO"} <= rights   # photos, voice notes
+    # Not required: the app installs on devices without a camera or microphone.
+    features = {f.get(ANDROID): f.get("{http://schemas.android.com/apk/res/android}required") for f in root.iter("uses-feature")}
+    assert features.get("android.hardware.camera") == "false" and features.get("android.hardware.microphone") == "false"
 
 
 RES = MANIFEST.parent / "res" / "xml"
@@ -31,3 +35,15 @@ def test_backup_without_bundles():
             scope = root if section is None else root.find(section)
             excluded = {(e.get("domain"), e.get("path")) for e in scope.iter("exclude")}
             assert ("file", "bundles/") in excluded, (name, section)
+
+
+def test_cloud_backup_without_media():
+    """Photos and voice notes (files/medien/) stay out of the cloud backup: past 25 MB Android backs
+    up nothing, the practice log and the notes neither. A device transfer takes them along."""
+    rules = ET.parse(RES / "data_extraction_rules.xml").getroot()
+    cloud = {(e.get("domain"), e.get("path")) for e in rules.find("cloud-backup").iter("exclude")}
+    transfer = {(e.get("domain"), e.get("path")) for e in rules.find("device-transfer").iter("exclude")}
+    assert ("file", "medien/") in cloud
+    assert ("file", "medien/") not in transfer
+    old = {(e.get("domain"), e.get("path")) for e in ET.parse(RES / "backup_rules.xml").getroot().iter("exclude")}
+    assert ("file", "medien/") in old

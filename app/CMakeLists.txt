@@ -71,6 +71,9 @@ qt_add_qml_module(mitori_app
         qml/VideosPage.qml
         qml/GradesPage.qml
         qml/grades.js
+        qml/MediaView.qml
+        qml/MediaCompose.qml
+        qml/CameraPage.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -114,6 +117,10 @@ qt_add_qml_module(mitori_app
         services/keyedlistmodel.cpp
         services/allnotes.h
         services/allnotes.cpp
+        store/mediastore.h
+        store/mediastore.cpp
+        services/media.h
+        services/media.cpp
 )
 
 # Texts: English in the code, German in i18n/mitori_de.ts (update: cmake --build <dir> --target
@@ -254,10 +261,10 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME glossary COMMAND tst_glossary)
 
     qt_add_executable(tst_practice tests/tst_practice.cpp services/practice.cpp services/practice.h
-        store/practicelog.cpp store/practicelog.h store/schedule.cpp store/schedule.h)
+        store/practicelog.cpp store/practicelog.h store/schedule.cpp store/schedule.h store/mediastore.cpp store/mediastore.h)
     target_include_directories(tst_practice PRIVATE services store)
     target_compile_definitions(tst_practice PRIVATE TEST_DATA_DIR="${CMAKE_BINARY_DIR}/test-data/practice")
-    target_link_libraries(tst_practice PRIVATE Qt6::Core Qt6::Qml Qt6::Sql Qt6::Test)
+    target_link_libraries(tst_practice PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Test)
     set_target_properties(tst_practice PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME practice COMMAND tst_practice)
 
@@ -272,13 +279,23 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
         services/courses.cpp services/courses.h services/programme.cpp services/programme.h
         store/practicelog.cpp store/practicelog.h store/schedule.cpp store/schedule.h
         store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
-        platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h)
+        platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h store/mediastore.cpp store/mediastore.h)
     target_include_directories(tst_allnotes PRIVATE catalog services store platform)
     target_compile_definitions(tst_allnotes PRIVATE MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
     target_link_libraries(tst_allnotes PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Test)
     set_target_properties(tst_allnotes PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_dependencies(tst_allnotes mitori)
     add_test(NAME allnotes COMMAND tst_allnotes)
+
+    qt_add_executable(tst_media tests/tst_media.cpp store/mediastore.cpp store/mediastore.h
+        services/practice.cpp services/practice.h store/practicelog.cpp store/practicelog.h
+        store/schedule.cpp store/schedule.h services/courses.cpp services/courses.h
+        store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
+        platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h)
+    target_include_directories(tst_media PRIVATE catalog services store platform)
+    target_link_libraries(tst_media PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Test)
+    set_target_properties(tst_media PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME media COMMAND tst_media)
 
     qt_add_executable(tst_keyedlistmodel tests/tst_keyedlistmodel.cpp services/keyedlistmodel.cpp services/keyedlistmodel.h)
     target_include_directories(tst_keyedlistmodel PRIVATE services)
@@ -295,7 +312,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
 
     qt_add_executable(tst_courses tests/tst_courses.cpp services/courses.cpp services/courses.h
         store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
-        platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h)
+        platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h store/mediastore.cpp store/mediastore.h)
     target_include_directories(tst_courses PRIVATE catalog services store platform)
     target_compile_definitions(tst_courses PRIVATE TEST_ICS="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/lehrgaenge.ics"
         MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
@@ -332,7 +349,8 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     target_link_libraries(tst_ui PRIVATE mitori_app mitori_appplugin Qt6::QuickTest)
     target_compile_definitions(tst_ui PRIVATE QUICK_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/qml"
         UI_SHOTS_DIR="${CMAKE_BINARY_DIR}/ui-shots" UI_DATA_DIR="${CMAKE_BINARY_DIR}/ui-data"
-        TEST_BUNDLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/bundle")
+        TEST_BUNDLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/bundle"
+        TEST_MEDIA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/media")
     set_target_properties(tst_ui PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME ui COMMAND tst_ui)
     set_tests_properties(ui PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material")

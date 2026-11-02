@@ -67,6 +67,7 @@ CourseBook::Entry entry(const QSqlQuery &q)
     e.changed = utc(q.value(4));
     e.device = q.value(5).toString();
     e.deleted = q.value(6).toBool();
+    e.media = q.value(7).toString();
     return e;
 }
 
@@ -74,6 +75,19 @@ CourseBook::Entry entry(const QSqlQuery &q)
 QVariant bound(const QString &s)
 {
     return s.isNull() ? QVariant(QString(QLatin1String(""))) : QVariant(s);
+}
+
+// Whether a table has a column (a step that adds one runs again on a file set back by hand or a
+// test, as the steps with IF NOT EXISTS do).
+bool hasColumn(QSqlQuery &q, const QString &table, const QString &column)
+{
+    q.exec(QStringLiteral("PRAGMA table_info(%1)").arg(table));
+    while (q.next()) {
+        if (q.value(1).toString() == column) {
+            return true;
+        }
+    }
+    return false;
 }
 
 QString newUid()
@@ -151,6 +165,17 @@ bool CourseBook::migrate()
         if (!ok) {
             m_error = q.lastError().text();
             db.rollback();
+            return false;
+        }
+    }
+
+    // 3: a photo or voice note on an entry (the file's name in the media folder, "" for none).
+    if (version < 3) {
+        const bool ok = (hasColumn(q, QStringLiteral("entries"), QStringLiteral("media"))
+                         || q.exec(QStringLiteral("ALTER TABLE entries ADD COLUMN media TEXT NOT NULL DEFAULT ''")))
+            && q.exec(QStringLiteral("PRAGMA user_version = 3"));
+        if (!ok) {
+            m_error = q.lastError().text();
             return false;
         }
     }
@@ -311,19 +336,20 @@ QList<CourseBook::Grade> CourseBook::grades() const
     return result;
 }
 
-CourseBook::Entry CourseBook::addEntry(const QString &courseUid, const QString &text, const QDateTime &at, const QString &device)
+CourseBook::Entry CourseBook::addEntry(const QString &courseUid, const QString &text, const QDateTime &at, const QString &device,
+                                      const QString &media)
 {
     m_error.clear();
-    Entry e{newUid(), courseUid, text.trimmed(), at.toUTC(), at.toUTC(), device, false};
-    if (e.text.isEmpty() || courseUid.isEmpty()) {
+    Entry e{newUid(), courseUid, text.trimmed(), at.toUTC(), at.toUTC(), device, false, media};
+    if ((e.text.isEmpty() && media.isEmpty()) || courseUid.isEmpty()) {
         m_error = QCoreApplication::translate("CourseBook", "an entry needs a text and a course");
         return {};
     }
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare(QStringLiteral("INSERT INTO entries (uid, course, text, created, changed, device, deleted)"
-                             " VALUES (?, ?, ?, ?, ?, ?, 0)"));
-    for (const QVariant &v : {QVariant(e.uid), QVariant(e.course), QVariant(e.text), QVariant(e.created.toMSecsSinceEpoch()),
-                              QVariant(e.changed.toMSecsSinceEpoch()), bound(device)}) {
+    q.prepare(QStringLiteral("INSERT INTO entries (uid, course, text, created, changed, device, deleted, media)"
+                             " VALUES (?, ?, ?, ?, ?, ?, 0, ?)"));
+    for (const QVariant &v : {QVariant(e.uid), QVariant(e.course), bound(e.text), QVariant(e.created.toMSecsSinceEpoch()),
+                              QVariant(e.changed.toMSecsSinceEpoch()), bound(device), bound(media)}) {
         q.addBindValue(v);
     }
     if (!q.exec()) {
@@ -333,23 +359,42 @@ CourseBook::Entry CourseBook::addEntry(const QString &courseUid, const QString &
     return e;
 }
 
+// An entry with a photo or voice note may lose its text, one without may not.
 bool CourseBook::changeEntry(const QString &uid, const QString &text, const QDateTime &at)
 {
     m_error.clear();
-    if (text.trimmed().isEmpty()) {
-        m_error = QCoreApplication::translate("CourseBook", "an entry needs a text and a course");
-        return false;
-    }
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare(QStringLiteral("UPDATE entries SET text = ?, changed = ? WHERE uid = ? AND deleted = 0"));
+    q.prepare(QStringLiteral("UPDATE entries SET text = ?, changed = ? WHERE uid = ? AND deleted = 0 AND (? <> '' OR media <> '')"));
     q.addBindValue(text.trimmed());
     q.addBindValue(at.toUTC().toMSecsSinceEpoch());
     q.addBindValue(uid);
+    q.addBindValue(text.trimmed());
     if (!q.exec()) {
         m_error = q.lastError().text();
         return false;
     }
     return q.numRowsAffected() == 1;
+}
+
+QString CourseBook::entryMedia(const QString &uid) const
+{
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("SELECT media FROM entries WHERE uid = ?"));
+    q.addBindValue(uid);
+    return q.exec() && q.next() ? q.value(0).toString() : QString();
+}
+
+QStringList CourseBook::courseMedia(const QString &course) const
+{
+    QStringList result;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("SELECT media FROM entries WHERE course = ? AND media <> ''"));
+    q.addBindValue(course);
+    q.exec();
+    while (q.next()) {
+        result << q.value(0).toString();
+    }
+    return result;
 }
 
 bool CourseBook::deleteEntry(const QString &uid, const QDateTime &at)
@@ -376,7 +421,7 @@ QList<CourseBook::Entry> CourseBook::entries(const QString &courseUid) const
 {
     QList<Entry> result;
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare(QStringLiteral("SELECT uid, course, text, created, changed, device, deleted FROM entries"
+    q.prepare(QStringLiteral("SELECT uid, course, text, created, changed, device, deleted, media FROM entries"
                              " WHERE course = ? AND deleted = 0 ORDER BY created, rowid"));
     q.addBindValue(courseUid);
     q.exec();
@@ -390,7 +435,7 @@ QList<CourseBook::Entry> CourseBook::allEntries() const
 {
     QList<Entry> result;
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.exec(QStringLiteral("SELECT e.uid, e.course, e.text, e.created, e.changed, e.device, e.deleted FROM entries e"
+    q.exec(QStringLiteral("SELECT e.uid, e.course, e.text, e.created, e.changed, e.device, e.deleted, e.media FROM entries e"
                           " JOIN courses c ON c.uid = e.course WHERE e.deleted = 0 AND c.deleted = 0"
                           " ORDER BY e.created DESC, e.rowid DESC"));
     while (q.next()) {

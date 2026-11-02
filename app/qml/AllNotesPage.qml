@@ -224,7 +224,8 @@ Kirigami.Page {
                     }
                     QQC2.Label {
                         Layout.fillWidth: true
-                        text: noteItem.row.text
+                        text: noteItem.row.text || (Media.kind(noteItem.row.media || "") === Media.Kind.Photo ? qsTr("Photo")
+                                                    : Media.kind(noteItem.row.media || "") === Media.Kind.Voice ? qsTr("Voice note") : "")
                         wrapMode: Text.Wrap
                         padding: Kirigami.Units.smallSpacing
                         background: Rectangle {
@@ -232,6 +233,12 @@ Kirigami.Page {
                             border.width: noteItem.current ? KanteStyle.borderWidth : 0
                             border.color: KanteStyle.focusColor
                         }
+                    }
+
+                    MediaView {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Kirigami.Units.smallSpacing
+                        media: noteItem.row.media || ""
                     }
 
                     TapHandler {

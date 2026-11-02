@@ -73,7 +73,8 @@ public:
     // {uid, entry, text, created, changed}.
     Q_INVOKABLE QVariantList searchNotes(const QString &query, int limit = 50) const;
     // Add, change or delete a note; false (and errorString set) when it could not be saved.
-    Q_INVOKABLE bool addNote(const QString &entry, const QString &text);
+    // Text, a photo or voice note (its name from Media), or both.
+    Q_INVOKABLE bool addNote(const QString &entry, const QString &text, const QString &media = {});
     Q_INVOKABLE bool changeNote(const QString &uid, const QString &text);
     Q_INVOKABLE bool deleteNote(const QString &uid);
 

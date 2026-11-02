@@ -5,6 +5,9 @@
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="file" path="bundles/" />
+        <!-- Photos and voice notes: a few hundred KB each would soon pass the 25 MB limit and
+             stop the backup of the practice log and the notes. A device transfer takes them. -->
+        <exclude domain="file" path="medien/" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="file" path="bundles/" />

@@ -5,6 +5,7 @@
 #include <QHash>
 #include <QList>
 #include <QString>
+#include <QStringList>
 
 // Course notebooks and the user's grades in SQLite (a file of their own next to the practice log):
 // a notebook per course with its entries, each with a time stamp and the device it came from, so that devices can later
@@ -14,7 +15,7 @@
 //   courses   uid, calendar_uid (the ICS event's, "" for one of the user's own), title, first,
 //             last, place, teacher, info, announcement, created, changed, device, deleted,
 //             exam_discipline, exam_grade (an exam planned there, "" for none; schema 2)
-//   entries   uid, course, text, created, changed, device, deleted
+//   entries   uid, course, text, created, changed, device, deleted, media (schema 3)
 //   grades    uid, discipline, grade, day, place, created, changed, device, deleted (schema 2)
 class CourseBook
 {
@@ -45,6 +46,7 @@ public:
         QDateTime changed;      // UTC
         QString device;
         bool deleted = false;
+        QString media;          // a photo or voice note: its file in the media folder, or ""
     };
 
     // A grade the user passed (Meine Grade): discipline and grade ids of the catalog.
@@ -80,7 +82,12 @@ public:
     bool planExam(const QString &uid, const QString &discipline, const QString &grade, const QDateTime &at);
 
     // Entries of a notebook: add one (an empty uid on failure), change or delete one by uid.
-    Entry addEntry(const QString &course, const QString &text, const QDateTime &at, const QString &device);
+    // Text, a media file (MediaStore), or both.
+    Entry addEntry(const QString &course, const QString &text, const QDateTime &at, const QString &device,
+                   const QString &media = {});
+    // The media file of an entry, and of every entry of a notebook (also deleted ones).
+    QString entryMedia(const QString &uid) const;
+    QStringList courseMedia(const QString &course) const;
     bool changeEntry(const QString &uid, const QString &text, const QDateTime &at);
     bool deleteEntry(const QString &uid, const QDateTime &at);
     // The entries of a notebook that are not deleted, oldest first.
@@ -97,7 +104,7 @@ public:
     // Every passed grade that is not deleted, the latest day first.
     QList<Grade> grades() const;
 
-    static constexpr int schemaVersion = 2;
+    static constexpr int schemaVersion = 3;
 
 private:
     bool migrate();

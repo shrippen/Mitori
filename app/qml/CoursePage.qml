@@ -296,36 +296,50 @@ Kirigami.ScrollablePage {
                 Repeater {
                     model: dayBlock.modelData.entries
 
-                    QQC2.Label {
+                    ColumnLayout {
                         id: entryItem
 
                         required property var modelData
 
-                        objectName: "courseEntry"
                         Layout.fillWidth: true
-                        text: modelData.created.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) + "  " + modelData.text
-                        wrapMode: Text.Wrap
-                        padding: Kirigami.Units.smallSpacing
-                        activeFocusOnTab: true
-                        background: Rectangle {
-                            color: KanteStyle.cardColor
-                            border.width: entryItem.activeFocus ? KanteStyle.borderWidth : 0
-                            border.color: KanteStyle.focusColor
-                        }
-                        Accessible.role: Accessible.Button
-                        Accessible.name: modelData.text
-                        Accessible.description: qsTr("Change or delete")
-                        Accessible.onPressAction: editor.edit(modelData)
-                        Keys.onReturnPressed: editor.edit(modelData)
-                        Keys.onEnterPressed: editor.edit(modelData)
+                        spacing: Kirigami.Units.smallSpacing
 
-                        TapHandler {
-                            acceptedButtons: Qt.LeftButton
-                            onLongPressed: editor.edit(entryItem.modelData)
+                        QQC2.Label {
+                            id: entryItemLabel
+
+                            // The note, also for tests that find the label.
+                            readonly property var modelData: entryItem.modelData
+
+                            objectName: "courseEntry"
+                            Layout.fillWidth: true
+                            text: entryItem.modelData.created.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) + "  " + (entryItem.modelData.text || page.mediaWord(entryItem.modelData.media))
+                            wrapMode: Text.Wrap
+                            padding: Kirigami.Units.smallSpacing
+                            activeFocusOnTab: true
+                            background: Rectangle {
+                                color: KanteStyle.cardColor
+                                border.width: entryItemLabel.activeFocus ? KanteStyle.borderWidth : 0
+                                border.color: KanteStyle.focusColor
+                            }
+                            Accessible.role: Accessible.Button
+                            Accessible.name: entryItem.modelData.text || page.mediaWord(entryItem.modelData.media)
+                            Accessible.description: qsTr("Change or delete")
+                            Accessible.onPressAction: editor.edit(entryItem.modelData)
+                            Keys.onReturnPressed: editor.edit(entryItem.modelData)
+                            Keys.onEnterPressed: editor.edit(entryItem.modelData)
+
+                            TapHandler {
+                                acceptedButtons: Qt.LeftButton
+                                onLongPressed: editor.edit(entryItem.modelData)
+                            }
+                            TapHandler {
+                                acceptedButtons: Qt.RightButton
+                                onTapped: editor.edit(entryItem.modelData)
+                            }
                         }
-                        TapHandler {
-                            acceptedButtons: Qt.RightButton
-                            onTapped: editor.edit(entryItem.modelData)
+                        MediaView {
+                            Layout.fillWidth: true
+                            media: entryItem.modelData.media || ""
                         }
                     }
                 }
@@ -346,6 +360,18 @@ Kirigami.ScrollablePage {
                 Accessible.name: qsTr("New entry")
                 onAccepted: page.add()
             }
+            // A photo or voice note becomes an entry at once, with the text typed so far.
+            MediaCompose {
+                objectName: "courseMedia"
+                stackPage: page
+                onAttached: name => {
+                    if (Courses.addEntry(page.uid, compose.text, name)) {
+                        compose.clear()
+                    } else {
+                        Media.discard(name)
+                    }
+                }
+            }
             KanteButton {
                 emphasis: KanteButton.Emphasis.Primary
                 enabled: compose.text.trim() !== ""
@@ -354,6 +380,12 @@ Kirigami.ScrollablePage {
                 onClicked: page.add()
             }
         }
+    }
+
+    // A note without text says what it holds.
+    function mediaWord(name) {
+        const kind = Media.kind(name || "")
+        return kind === Media.Kind.Photo ? qsTr("Photo") : kind === Media.Kind.Voice ? qsTr("Voice note") : ""
     }
 
     NoteEditor {

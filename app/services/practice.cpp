@@ -1,5 +1,7 @@
 #include "practice.h"
 
+#include "mediastore.h"
+
 #include "device.h"
 #include "searchkey.h"
 #include "schedule.h"
@@ -201,7 +203,8 @@ QVariantMap noteMap(const PracticeLog::Note &n)
     return {{QStringLiteral("uid"), n.uid},
             {QStringLiteral("text"), n.text},
             {QStringLiteral("created"), n.created.toLocalTime()},
-            {QStringLiteral("changed"), n.changed.toLocalTime()}};
+            {QStringLiteral("changed"), n.changed.toLocalTime()},
+            {QStringLiteral("media"), n.media}};
 }
 
 } // namespace
@@ -279,12 +282,12 @@ void Practice::noteSaved(bool ok)
     }
 }
 
-bool Practice::addNote(const QString &entry, const QString &text)
+bool Practice::addNote(const QString &entry, const QString &text, const QString &media)
 {
-    if (!m_open || entry.isEmpty() || text.trimmed().isEmpty()) {
+    if (!m_open || entry.isEmpty() || (text.trimmed().isEmpty() && media.isEmpty())) {
         return false;
     }
-    const PracticeLog::Note n = m_log->addNote(entry, text, QDateTime::currentDateTimeUtc(), deviceId());
+    const PracticeLog::Note n = m_log->addNote(entry, text, QDateTime::currentDateTimeUtc(), deviceId(), media);
     if (!n.uid.isEmpty()) {
         m_lastNotes.insert(entry, n);
     }
@@ -294,7 +297,7 @@ bool Practice::addNote(const QString &entry, const QString &text)
 
 bool Practice::changeNote(const QString &uid, const QString &text)
 {
-    if (!m_open || text.trimmed().isEmpty()) {
+    if (!m_open || (text.trimmed().isEmpty() && m_log->noteMedia(uid).isEmpty())) {
         return false;
     }
     const bool ok = m_log->changeNote(uid, text, QDateTime::currentDateTimeUtc());
@@ -312,6 +315,7 @@ bool Practice::deleteNote(const QString &uid)
     }
     const bool ok = m_log->deleteNote(uid, QDateTime::currentDateTimeUtc());
     if (ok) {
+        MediaStore::shared().remove(m_log->noteMedia(uid));     // the note stays as a mark, its file goes
         m_lastNotes = m_log->lastNotes();
     }
     noteSaved(ok);

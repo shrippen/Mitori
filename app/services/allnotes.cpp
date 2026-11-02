@@ -158,7 +158,7 @@ void AllNotes::collect()
                                  {QStringLiteral("text"), n.text}, {QStringLiteral("created"), n.created},
                                  {QStringLiteral("changed"), n.changed}, {QStringLiteral("day"), dayOf(n.created)},
                                  {QStringLiteral("title"), t.title}, {QStringLiteral("discipline"), t.discipline},
-                                 {QStringLiteral("entry"), n.entry}};
+                                 {QStringLiteral("entry"), n.entry}, {QStringLiteral("media"), n.media}};
             continue;
         }
         const CourseBook::Entry &e = entries.at(j++);
@@ -166,7 +166,7 @@ void AllNotes::collect()
                              {QStringLiteral("text"), e.text}, {QStringLiteral("created"), e.created},
                              {QStringLiteral("changed"), e.changed}, {QStringLiteral("day"), dayOf(e.created)},
                              {QStringLiteral("title"), titles.value(e.course)}, {QStringLiteral("discipline"), QString()},
-                             {QStringLiteral("course"), e.course}};
+                             {QStringLiteral("course"), e.course}, {QStringLiteral("media"), e.media}};
     }
 }
 
