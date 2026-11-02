@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
 
@@ -198,6 +199,9 @@ TestCase {
         // Kante's ground, not the platform's (ScrollablePage does not inherit the theme).
         verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor),
                page.background.color + " is not " + KanteStyle.backgroundColor)
+        // and the scope reaches the page's controls: Kante's text colour, not the platform's.
+        verify(Qt.colorEqual(page.Kirigami.Theme.textColor, KanteStyle.textColor),
+               page.Kirigami.Theme.textColor + " is not " + KanteStyle.textColor)
         shot("4b-settings")
         window.pageStack.pop()
     }
@@ -211,6 +215,7 @@ TestCase {
         tryVerify(() => page.playing, 10000)
         tryVerify(() => page.position >= page.from && page.position < page.to, 10000)
         wait(1500)
+        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor), "Kante's ground")
         shot("5-player")
         window.width = 900
         window.height = 420

@@ -45,6 +45,8 @@ Kirigami.Page {
 
     title: current.title || ""
     padding: 0
+    // Kante's page ground (the window's scope gives Page the dialog colour).
+    background: Rectangle { color: KanteStyle.backgroundColor }
     globalToolBarStyle: landscape ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
 
     onCurrentChanged: {
