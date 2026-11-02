@@ -140,6 +140,7 @@ private slots:
             QVERIFY(!book.addEntry(uid, u"vom Telefon"_s, at(9), u"telefon"_s).uid.isEmpty());
             CourseBook::Grade g{{}, u"aikido"_s, u"k5"_s, QDate(2026, 7, 4), u"Mainz"_s};
             QVERIFY(!book.addGrade(g, at(9), u"telefon"_s).uid.isEmpty());
+            QVERIFY(book.setStart(u"shinkitoho"_s, QDate(2024, 9, 1), at(9), u"telefon"_s));
         }
         QString tabletCourse;
         {
@@ -215,6 +216,7 @@ private slots:
         const QList<CourseBook::Grade> grades = book.grades();
         QCOMPARE(grades.size(), 1);
         QCOMPARE(grades.first().place, u"Bonn"_s);              // the newer row
+        QCOMPARE(book.starts().value(u"shinkitoho"_s), QDate(2024, 9, 1));
 
         // Again: nothing more to do.
         const QVariantMap again = tabletBackup.inspect(QUrl::fromLocalFile(zip));

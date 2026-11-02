@@ -75,6 +75,7 @@ qt_add_qml_module(mitori_app
         qml/MediaCompose.qml
         qml/CameraPage.qml
         qml/ConflictsPage.qml
+        qml/YearsPage.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp

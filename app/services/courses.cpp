@@ -445,27 +445,26 @@ QVariantMap Courses::waiting(const QString &discipline, const QString &grade, co
         return {};
     }
     QVariantMap result{{QStringLiteral("years"), it->years}};
-    if (it->fromStart) {
-        result.insert(QStringLiteral("state"), QVariant::fromValue(Wait::FromStart));
-        return result;
-    }
-    if (it == list.cbegin() || it->years == 0) {
+    if (!it->fromStart && (it == list.cbegin() || it->years == 0)) {
         result.insert(QStringLiteral("state"), QVariant::fromValue(Wait::First));
         return result;
     }
 
-    const Step &previous = *(it - 1);
-    result.insert(QStringLiteral("previous"), previous.name);
+    // From the previous grade, or from the start of training (Shinki Toho Shoden).
     QDate passed;
-    if (m_open) {
-        for (const CourseBook::Grade &g : m_book->grades()) {
+    if (it->fromStart) {
+        passed = m_open ? m_book->starts().value(discipline) : QDate();
+    } else {
+        const Step &previous = *(it - 1);
+        result.insert(QStringLiteral("previous"), previous.name);
+        for (const CourseBook::Grade &g : m_open ? m_book->grades() : QList<CourseBook::Grade>()) {
             if (g.discipline == discipline && g.grade == previous.id) {
                 passed = g.day;
             }
         }
     }
     if (!passed.isValid()) {
-        result.insert(QStringLiteral("state"), QVariant::fromValue(Wait::Unknown));
+        result.insert(QStringLiteral("state"), QVariant::fromValue(it->fromStart ? Wait::FromStart : Wait::Unknown));
         return result;
     }
 
@@ -475,6 +474,28 @@ QVariantMap Courses::waiting(const QString &discipline, const QString &grade, co
     const Wait state = !exam.isValid() ? Wait::Earliest : exam >= earliest ? Wait::Fits : Wait::TooEarly;
     result.insert(QStringLiteral("state"), QVariant::fromValue(state));
     return result;
+}
+
+QString Courses::trainingStart(const QString &discipline) const
+{
+    const QDate day = m_open ? m_book->starts().value(discipline) : QDate();
+    return day.isValid() ? day.toString(Qt::ISODate) : QString();
+}
+
+bool Courses::setTrainingStart(const QString &discipline, const QString &day)
+{
+    const QDate date = QDate::fromString(day, Qt::ISODate);
+    if (!m_open || !m_steps.contains(discipline) || (!day.isEmpty() && !date.isValid())) {
+        return false;
+    }
+    return saved(m_book->setStart(discipline, date, QDateTime::currentDateTimeUtc(), deviceId()),
+                 tr("The start of training could not be saved: %1"));
+}
+
+bool Courses::countsFromStart(const QString &discipline) const
+{
+    const QList<Step> list = steps(discipline);
+    return std::any_of(list.cbegin(), list.cend(), [](const Step &s) { return s.fromStart; });
 }
 
 bool Courses::planExam(const QString &uid, const QString &discipline, const QString &grade)

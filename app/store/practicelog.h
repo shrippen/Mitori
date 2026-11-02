@@ -63,7 +63,10 @@ public:
     QHash<QString, QDate> firstRated() const;
     // How many entries were rated on each local day from `from` (UTC) on; an entry rated several
     // times on a day counts once (statistics: practice days).
-    QHash<QDate, int> practisedPerDay(const QDateTime &from) const;
+    // `prefix` keeps a discipline's entries only ("aikido/").
+    QHash<QDate, int> practisedPerDay(const QDateTime &from, const QString &prefix = {}) const;
+    // The first rating's time (UTC), or invalid without one.
+    QDateTime firstRating() const;
     // All ratings of one entry, oldest first.
     QList<Rating> history(const QString &entry) const;
 

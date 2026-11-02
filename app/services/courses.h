@@ -98,9 +98,14 @@ public:
     Q_INVOKABLE QVariantList ladder(const QString &discipline) const;
     // The grade after the highest one passed (the first without any), or "" after the last.
     Q_INVOKABLE QString nextGrade(const QString &discipline) const;
-    // The waiting time before a grade: {state (Wait), years, previous (name), earliest ("YYYY-MM-DD"
-    // or "")}; `day` ("YYYY-MM-DD", optional) is the planned exam day it is checked against.
+    // The waiting time before a grade: {state (Wait), years, previous (name; for a time from the start
+    // of training ""), earliest ("YYYY-MM-DD" or "")}; `day` ("YYYY-MM-DD", optional) is the planned exam day it is checked against.
     Q_INVOKABLE QVariantMap waiting(const QString &discipline, const QString &grade, const QString &day = {}) const;
+    // When training began in a discipline ("YYYY-MM-DD", "" unknown), and setting it ("" removes);
+    // whether a grade's waiting time there counts from it (Shinki Toho Shoden).
+    Q_INVOKABLE QString trainingStart(const QString &discipline) const;
+    Q_INVOKABLE bool setTrainingStart(const QString &discipline, const QString &day);
+    Q_INVOKABLE bool countsFromStart(const QString &discipline) const;
 
     // Plans an exam on a notebook's course; an empty grade removes it.
     Q_INVOKABLE bool planExam(const QString &uid, const QString &discipline, const QString &grade);

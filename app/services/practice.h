@@ -55,6 +55,10 @@ public:
     // How many techniques were practised on each of the last `days` days up to today:
     // {"YYYY-MM-DD": count}, days without practice left out.
     Q_INVOKABLE QVariantMap practisedPerDay(int days) const;
+    // The same for a calendar year, of one discipline ("" all): {"2025-03-08": 7, …}.
+    Q_INVOKABLE QVariantMap practisedInYear(int year, const QString &discipline) const;
+    // The year of the first rating (this year without one): where "all years" begin.
+    Q_INVOKABLE int firstYear() const;
     // Whether the entry was rated today (practised).
     Q_INVOKABLE bool ratedToday(const QString &entry) const;
     // Today's practice from candidate rows (Programme.practiceEntries: id, current, …): the due

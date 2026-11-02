@@ -229,17 +229,17 @@
         <translation>sie stammt aus einem neueren Mitori (Schema %1); Mitori aktualisieren</translation>
     </message>
     <message>
-        <location filename="../store/coursebook.cpp" line="189"/>
+        <location filename="../store/coursebook.cpp" line="239"/>
         <source>a course needs a title and a first day</source>
         <translation>ein Lehrgang braucht einen Titel und einen ersten Tag</translation>
     </message>
     <message>
-        <location filename="../store/coursebook.cpp" line="284"/>
+        <location filename="../store/coursebook.cpp" line="334"/>
         <source>a grade needs a discipline, a grade and a day</source>
         <translation>ein Grad braucht Sparte, Grad und Tag</translation>
     </message>
     <message>
-        <location filename="../store/coursebook.cpp" line="345"/>
+        <location filename="../store/coursebook.cpp" line="395"/>
         <source>an entry needs a text and a course</source>
         <translation>ein Eintrag braucht einen Text und einen Lehrgang</translation>
     </message>
@@ -591,12 +591,17 @@
         <translation>Der Grad konnte nicht gelöscht werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="487"/>
+        <location filename="../services/courses.cpp" line="492"/>
+        <source>The start of training could not be saved: %1</source>
+        <translation>Der Trainingsbeginn ließ sich nicht speichern: %1</translation>
+    </message>
+    <message>
+        <location filename="../services/courses.cpp" line="508"/>
         <source>The exam could not be planned: %1</source>
         <translation>Die Prüfung konnte nicht vorgemerkt werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="553"/>
+        <location filename="../services/courses.cpp" line="574"/>
         <source>The notebook could not be exported: %1</source>
         <translation>Das Notizbuch konnte nicht exportiert werden: %1</translation>
     </message>
@@ -882,104 +887,123 @@
 <context>
     <name>GradesPage</name>
     <message>
-        <location filename="../qml/GradesPage.qml" line="30"/>
+        <location filename="../qml/GradesPage.qml" line="31"/>
         <source>My grades</source>
         <translation>Meine Grade</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="67"/>
+        <location filename="../qml/GradesPage.qml" line="68"/>
         <source>last %1</source>
         <translation>zuletzt %1</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="67"/>
+        <location filename="../qml/GradesPage.qml" line="68"/>
         <source>no grade yet</source>
         <translation>noch kein Grad</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="85"/>
+        <location filename="../qml/GradesPage.qml" line="86"/>
         <source>Remove %1</source>
         <translation>%1 entfernen</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="101"/>
+        <location filename="../qml/GradesPage.qml" line="125"/>
         <source>Next: %1</source>
         <translation>Nächster: %1</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="103"/>
+        <location filename="../qml/GradesPage.qml" line="127"/>
         <source>planned: %1, %2</source>
         <translation>vorgemerkt: %1, %2</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="123"/>
+        <location filename="../qml/GradesPage.qml" line="147"/>
         <source>Grade</source>
         <translation>Grad</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="129"/>
+        <location filename="../qml/GradesPage.qml" line="104"/>
+        <location filename="../qml/GradesPage.qml" line="153"/>
         <source>yyyy-MM-dd</source>
         <comment>date format</comment>
         <translation>dd.MM.yyyy</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="130"/>
+        <location filename="../qml/GradesPage.qml" line="100"/>
+        <source>Training since:</source>
+        <translation>Training seit:</translation>
+    </message>
+    <message>
+        <location filename="../qml/GradesPage.qml" line="105"/>
+        <location filename="../qml/GradesPage.qml" line="154"/>
         <source>MO</source>
         <translation>MO</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="130"/>
+        <location filename="../qml/GradesPage.qml" line="105"/>
+        <location filename="../qml/GradesPage.qml" line="154"/>
         <source>TU</source>
         <translation>DI</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="130"/>
+        <location filename="../qml/GradesPage.qml" line="105"/>
+        <location filename="../qml/GradesPage.qml" line="154"/>
         <source>WE</source>
         <translation>MI</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="130"/>
+        <location filename="../qml/GradesPage.qml" line="105"/>
+        <location filename="../qml/GradesPage.qml" line="154"/>
         <source>TH</source>
         <translation>DO</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="130"/>
+        <location filename="../qml/GradesPage.qml" line="105"/>
+        <location filename="../qml/GradesPage.qml" line="154"/>
         <source>FR</source>
         <translation>FR</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="130"/>
+        <location filename="../qml/GradesPage.qml" line="105"/>
+        <location filename="../qml/GradesPage.qml" line="154"/>
         <source>SA</source>
         <translation>SA</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="130"/>
+        <location filename="../qml/GradesPage.qml" line="105"/>
+        <location filename="../qml/GradesPage.qml" line="154"/>
         <source>SU</source>
         <translation>SO</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="131"/>
+        <location filename="../qml/GradesPage.qml" line="106"/>
+        <location filename="../qml/GradesPage.qml" line="155"/>
         <source>Today</source>
         <translation>Heute</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="133"/>
+        <location filename="../qml/GradesPage.qml" line="111"/>
+        <source>Start of training</source>
+        <translation>Trainingsbeginn</translation>
+    </message>
+    <message>
+        <location filename="../qml/GradesPage.qml" line="157"/>
         <source>Day of the exam</source>
         <translation>Tag der Prüfung</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="139"/>
-        <location filename="../qml/GradesPage.qml" line="140"/>
+        <location filename="../qml/GradesPage.qml" line="163"/>
+        <location filename="../qml/GradesPage.qml" line="164"/>
         <source>Place</source>
         <translation>Ort</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="145"/>
+        <location filename="../qml/GradesPage.qml" line="169"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="160"/>
+        <location filename="../qml/GradesPage.qml" line="184"/>
         <source>The ground for waiting times and the hints before an exam. The same grade again corrects its day and place.</source>
         <translation>Grundlage für Wartezeiten und die Hinweise vor einer Prüfung. Derselbe Grad noch einmal berichtigt Tag und Ort.</translation>
     </message>
@@ -1414,17 +1438,17 @@
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="285"/>
+        <location filename="../services/practice.cpp" line="309"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="350"/>
+        <location filename="../services/practice.cpp" line="374"/>
         <source>Not every point of the exam round is rated.</source>
         <translation>Nicht jeder Punkt der Prüfungsrunde ist eingeschätzt.</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="371"/>
+        <location filename="../services/practice.cpp" line="395"/>
         <source>The exam round could not be saved: %1</source>
         <translation>Die Prüfungsrunde konnte nicht gespeichert werden: %1</translation>
     </message>
@@ -1437,12 +1461,12 @@
         <translation>es stammt aus einer neueren Mitori-Version (Schema %1); bitte Mitori aktualisieren</translation>
     </message>
     <message>
-        <location filename="../store/practicelog.cpp" line="366"/>
+        <location filename="../store/practicelog.cpp" line="377"/>
         <source>the round is incomplete</source>
         <translation>die Runde ist unvollständig</translation>
     </message>
     <message>
-        <location filename="../store/practicelog.cpp" line="381"/>
+        <location filename="../store/practicelog.cpp" line="392"/>
         <source>a rating is invalid (&quot;%1&quot;)</source>
         <translation>eine Einschätzung ist ungültig („%1“)</translation>
     </message>
@@ -1978,39 +2002,39 @@
 <context>
     <name>StatsPage</name>
     <message>
-        <location filename="../qml/StatsPage.qml" line="56"/>
+        <location filename="../qml/StatsPage.qml" line="60"/>
         <source>Statistics</source>
         <translation>Statistik</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="62"/>
+        <location filename="../qml/StatsPage.qml" line="66"/>
         <source>Last 30 days</source>
         <translation>Letzte 30 Tage</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="71"/>
+        <location filename="../qml/StatsPage.qml" line="75"/>
         <source>practice days</source>
         <translation>Übungstage</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="76"/>
+        <location filename="../qml/StatsPage.qml" line="80"/>
         <source>techniques practised</source>
         <translation>Techniken geübt</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="81"/>
+        <location filename="../qml/StatsPage.qml" line="85"/>
         <source>A technique counts once on each day it is rated.</source>
         <translation>Eine Technik zählt an jedem Tag, an dem sie eingeschätzt wird, einmal.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="88"/>
-        <location filename="../qml/StatsPage.qml" line="120"/>
+        <location filename="../qml/StatsPage.qml" line="92"/>
+        <location filename="../qml/StatsPage.qml" line="124"/>
         <source>Practice days</source>
         <translation>Übungstage</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StatsPage.qml" line="46"/>
-        <location filename="../qml/StatsPage.qml" line="116"/>
+        <location filename="../qml/StatsPage.qml" line="50"/>
+        <location filename="../qml/StatsPage.qml" line="120"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n Technik</numerusform>
@@ -2018,66 +2042,91 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="46"/>
+        <location filename="../qml/StatsPage.qml" line="50"/>
         <source>average</source>
         <translation>Schnitt</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="116"/>
-        <location filename="../qml/StatsPage.qml" line="125"/>
+        <location filename="../qml/StatsPage.qml" line="120"/>
+        <location filename="../qml/StatsPage.qml" line="136"/>
         <source>no practice</source>
         <translation>kein Training</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="126"/>
+        <location filename="../qml/StatsPage.qml" line="131"/>
+        <source>All years …</source>
+        <translation>Alle Jahre …</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="137"/>
         <source>1–2 techniques</source>
         <translation>1–2 Techniken</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="129"/>
+        <location filename="../qml/StatsPage.qml" line="140"/>
         <source>10 and more</source>
         <translation>10 und mehr</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="133"/>
+        <location filename="../qml/StatsPage.qml" line="144"/>
         <source>Rating by grade</source>
         <translation>Stand je Grad</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="165"/>
+        <location filename="../qml/StatsPage.qml" line="176"/>
         <source>%1 of %2 exam-ready</source>
         <translation>%1 von %2 prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="189"/>
+        <location filename="../qml/StatsPage.qml" line="200"/>
         <source>Exam mode · average per round</source>
         <translation>Prüfungsmodus · Schnitt je Runde</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="199"/>
+        <location filename="../qml/StatsPage.qml" line="210"/>
         <source>M/d</source>
         <comment>date under a bar</comment>
         <translation>d.M.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="204"/>
+        <location filename="../qml/StatsPage.qml" line="215"/>
         <source>Average</source>
         <translation>Schnitt</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="208"/>
+        <location filename="../qml/StatsPage.qml" line="219"/>
         <source>Exam mode, average per round</source>
         <translation>Prüfungsmodus, Schnitt je Runde</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="219"/>
+        <location filename="../qml/StatsPage.qml" line="230"/>
         <source>Vertical: average of the ratings (1 %1 … 4 %2). Horizontal: date of the round.</source>
         <translation>Senkrecht: Durchschnitt der Einschätzungen (1 %1 … 4 %2). Waagerecht: Datum der Runde.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="221"/>
+        <location filename="../qml/StatsPage.qml" line="232"/>
         <source>No round in the exam mode yet.</source>
         <translation>Noch keine Runde im Prüfungsmodus.</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="240"/>
+        <source>My grades</source>
+        <translation>Meine Grade</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="257"/>
+        <source>No grade entered yet.</source>
+        <translation>Noch kein Grad eingetragen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="258"/>
+        <source>Planned: %1, %2 in %3</source>
+        <translation>Vorgemerkt: %1, %2 in %3</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="268"/>
+        <source>Edit my grades …</source>
+        <translation>Meine Grade bearbeiten …</translation>
     </message>
 </context>
 <context>
@@ -2091,12 +2140,12 @@
 <context>
     <name>Sync</name>
     <message>
-        <location filename="../services/sync.cpp" line="112"/>
+        <location filename="../services/sync.cpp" line="127"/>
         <source>Enter the server, user and app password first.</source>
         <translation>Zuerst Server, Benutzer und App-Passwort eintragen.</translation>
     </message>
     <message>
-        <location filename="../services/sync.cpp" line="149"/>
+        <location filename="../services/sync.cpp" line="169"/>
         <source>The sync failed: %1</source>
         <translation>Der Abgleich ist fehlgeschlagen: %1</translation>
     </message>
@@ -2488,6 +2537,61 @@
     </message>
 </context>
 <context>
+    <name>YearsPage</name>
+    <message>
+        <location filename="../qml/YearsPage.qml" line="43"/>
+        <source>All years</source>
+        <translation>Alle Jahre</translation>
+    </message>
+    <message>
+        <location filename="../qml/YearsPage.qml" line="51"/>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <location filename="../qml/YearsPage.qml" line="57"/>
+        <source>no practice</source>
+        <translation>kein Training</translation>
+    </message>
+    <message>
+        <location filename="../qml/YearsPage.qml" line="58"/>
+        <source>1–2 techniques</source>
+        <translation>1–2 Techniken</translation>
+    </message>
+    <message>
+        <location filename="../qml/YearsPage.qml" line="61"/>
+        <source>10 and more</source>
+        <translation>10 und mehr</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/YearsPage.qml" line="90"/>
+        <source>%n practice day(s)</source>
+        <translation>
+            <numerusform>%n Übungstag</numerusform>
+            <numerusform>%n Übungstage</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/YearsPage.qml" line="91"/>
+        <location filename="../qml/YearsPage.qml" line="125"/>
+        <source>%n technique(s)</source>
+        <translation>
+            <numerusform>%n Technik</numerusform>
+            <numerusform>%n Techniken</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/YearsPage.qml" line="129"/>
+        <source>Practice days %1</source>
+        <translation>Übungstage %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/YearsPage.qml" line="137"/>
+        <source>Columns: weeks, rows: weekdays. A technique counts once on each day it is rated.</source>
+        <translation>Spalten: Wochen, Zeilen: Wochentage. Eine Technik zählt einmal an jedem Tag, an dem sie eingeschätzt wird.</translation>
+    </message>
+</context>
+<context>
     <name>ZipReader</name>
     <message>
         <location filename="../store/zipreader.cpp" line="32"/>
@@ -2514,20 +2618,20 @@
 <context>
     <name>grades</name>
     <message>
-        <location filename="../qml/grades.js" line="23"/>
+        <location filename="../qml/grades.js" line="24"/>
         <source>first grade, no waiting time</source>
         <translation>erster Grad, keine Wartezeit</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/grades.js" line="25"/>
-        <source>%n year(s) after the start of training</source>
+        <location filename="../qml/grades.js" line="26"/>
+        <source>%n year(s) after the start of training: enter it</source>
         <translation>
-            <numerusform>%n Jahr nach Trainingsbeginn</numerusform>
-            <numerusform>%n Jahre nach Trainingsbeginn</numerusform>
+            <numerusform>%n Jahr nach Trainingsbeginn: eintragen</numerusform>
+            <numerusform>%n Jahre nach Trainingsbeginn: eintragen</numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/grades.js" line="27"/>
+        <location filename="../qml/grades.js" line="28"/>
         <source>%n year(s) after %1: enter that grade</source>
         <translation>
             <numerusform>%n Jahr nach %1: diesen Grad eintragen</numerusform>
@@ -2535,22 +2639,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/grades.js" line="29"/>
+        <location filename="../qml/grades.js" line="30"/>
         <source>from %1</source>
         <translation>frühestens %1</translation>
     </message>
     <message>
-        <location filename="../qml/grades.js" line="31"/>
+        <location filename="../qml/grades.js" line="32"/>
         <source>fits (from %1)</source>
         <translation>passt (frühestens %1)</translation>
     </message>
     <message>
-        <location filename="../qml/grades.js" line="33"/>
+        <location filename="../qml/grades.js" line="34"/>
         <source>too early: from %1</source>
         <translation>zu früh: frühestens %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/grades.js" line="46"/>
+        <location filename="../qml/grades.js" line="47"/>
         <source>Exam %1 in %n day(s)</source>
         <translation>
             <numerusform>Prüfung %1 in %n Tag</numerusform>
@@ -2558,7 +2662,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/grades.js" line="46"/>
+        <location filename="../qml/grades.js" line="47"/>
         <source>Exam %1 today</source>
         <translation>Prüfung %1 heute</translation>
     </message>

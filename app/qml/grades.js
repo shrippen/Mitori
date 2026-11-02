@@ -16,13 +16,14 @@ function shortDate(iso) {
 }
 
 // "from 08.03.26", "fits (from 08.03.26)", "too early: from 08.03.26",
-// "1 year after 5. Kyu: enter that grade", "2 years after the start of training", "first grade".
+// "1 year after 5. Kyu: enter that grade", "2 years after the start of training: enter it",
+// "first grade".
 function waitText(w) {
     switch (w.state) {
     case kFirst:
         return qsTr("first grade, no waiting time")
     case kFromStart:
-        return qsTr("%n year(s) after the start of training", "", w.years)
+        return qsTr("%n year(s) after the start of training: enter it", "", w.years)
     case kUnknown:
         return qsTr("%n year(s) after %1: enter that grade", "", w.years).arg(w.previous)
     case kEarliest:

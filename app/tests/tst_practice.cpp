@@ -68,6 +68,17 @@ private slots:
         const QVariantMap map = practice.practisedPerDay(30);
         QCOMPARE(map.size(), 1);
         QCOMPARE(map.value(QDate::currentDate().toString(Qt::ISODate)).toInt(), 2);
+
+        // A discipline's entries only ("aikido/"), and a calendar year (All years).
+        QCOMPARE(log.practisedPerDay(t.addDays(-30), QStringLiteral("a")).value(t.toLocalTime().date()), 1);
+        QCOMPARE(log.firstRating(), t.addDays(-40));
+        practice.rate(QStringLiteral("aikido/k5/x"), 3);
+        const int year = QDate::currentDate().year();
+        QCOMPARE(practice.practisedInYear(year, QStringLiteral("aikido")).size(), 1);
+        QCOMPARE(practice.practisedInYear(year, QStringLiteral("aikido")).first().toInt(), 1);
+        QCOMPARE(practice.practisedInYear(year, {}).first().toInt(), 3);
+        QVERIFY(practice.practisedInYear(year - 1, {}).isEmpty());
+        QCOMPARE(practice.firstYear(), year);
     }
 
     // The same time stamp twice: the later insert wins (two taps within a millisecond).
