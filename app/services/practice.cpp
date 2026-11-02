@@ -98,6 +98,15 @@ int Practice::level(const QString &entry) const
     return m_latest.value(entry).level;
 }
 
+int Practice::bestLevel(const QStringList &entries) const
+{
+    int best = 0;
+    for (const QString &e : entries) {
+        best = std::max(best, level(e));
+    }
+    return best;
+}
+
 QDateTime Practice::lastRated(const QString &entry) const
 {
     const auto it = m_latest.constFind(entry);

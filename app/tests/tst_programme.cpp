@@ -1,5 +1,7 @@
+#include <QFile>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QTemporaryDir>
 #include <QTest>
 
 #include "programme.h"
@@ -27,6 +29,39 @@ QStringList ids(const QVariantList &rows)
     return result;
 }
 
+// A small discipline for the technique map: a kata without attack, one group title in kyu and dan
+// grades, a variant of a combination in a later grade, an attack with and without addition, theory.
+const char *const kMapCatalog = R"({"format": 1, "disziplinen": [{"id": "test", "kurzname": "Test",
+  "grade": [{"id": "k5", "name": "5. Kyu"}, {"id": "k4", "name": "4. Kyu"}, {"id": "d1", "name": "1. Dan"}],
+  "gruppen": [{"id": "kyu/kata", "titel": "Kata", "art": "ohne_angriff"},
+              {"id": "kyu/tachi", "titel": "Tachi-waza", "jp": "立技", "art": "angriffe"},
+              {"id": "dan/tachi", "titel": "Tachi-waza", "jp": "立技", "art": "angriffe"},
+              {"id": "dan/theorie", "titel": "Theorie", "art": "text"}],
+  "techniken": [
+    {"id": "kamae", "gruppe": "kyu/kata", "grad": "k5", "angriff": null, "name": "Kamae"},
+    {"id": "ikkyo-kd", "gruppe": "kyu/tachi", "grad": "k5", "name": "Ikkyo", "jp": "一教",
+     "angriff": {"name": "Katate-dori", "zusatz": null, "jp": "片手取り"}},
+    {"id": "irimi-kd", "gruppe": "kyu/tachi", "grad": "k5", "name": "Irimi-nage",
+     "angriff": {"name": "Katate-dori", "zusatz": null}},
+    {"id": "ikkyo-kd-ai", "gruppe": "kyu/tachi", "grad": "k5", "name": "Ikkyo",
+     "angriff": {"name": "Katate-dori", "zusatz": "Ai-hanmi"}},
+    {"id": "ikkyo-kd-ura", "gruppe": "kyu/tachi", "grad": "k4", "name": "Ikkyo", "zusatz": "ura",
+     "angriff": {"name": "Katate-dori", "zusatz": null}},
+    {"id": "kote-ts", "gruppe": "kyu/tachi", "grad": "k4", "name": "Kote-gaeshi",
+     "angriff": {"name": "Tsuki", "zusatz": null}},
+    {"id": "irimi-ts", "gruppe": "dan/tachi", "grad": "d1", "name": "Irimi-nage",
+     "angriff": {"name": "Tsuki", "zusatz": null}},
+    {"id": "essay", "gruppe": "dan/theorie", "grad": "d1", "name": "Essay",
+     "angriff": {"name": "Schrift", "zusatz": null}}]}]})";
+
+QVariantMap at(const QVariant &v, int i) { return v.toList().value(i).toMap(); }
+
+// The cell of a map grid at a row and column.
+QVariantMap cell(const QVariantMap &grid, int row, int column)
+{
+    return at(at(grid.value(QStringLiteral("rows")), row).value(QStringLiteral("cells")), column);
+}
+
 } // namespace
 
 class TstProgramme : public QObject
@@ -44,7 +79,6 @@ class TstProgramme : public QObject
 private slots:
     void initTestCase()
     {
-        QStandardPaths::setTestModeEnabled(true);
         QSettings().clear();
     }
 
@@ -204,11 +238,35 @@ private slots:
     void shinkiTohoGradesShowTheirOwnForms()
     {
         const QVariantList shoden = programme.entries(QStringLiteral("shinkitoho"), QStringLiteral("shoden"));
-        QCOMPARE(count(shoden, QStringLiteral("entry")), 3 + 1 + 26 + 11);
+        QCOMPARE(count(shoden, QStringLiteral("entry")), 3 + 1 + 1 + 11);
         QCOMPARE(count(shoden, QStringLiteral("info")), 1);
         const QStringList chuden = ids(programme.entries(QStringLiteral("shinkitoho"), QStringLiteral("chuden")));
         QCOMPARE(chuden.size(), 10);
         QCOMPARE(chuden.first(), QStringLiteral("shinkitoho/odachi/12"));
+    }
+
+    // The Kamae exercise is one entry (one flow); its 26 positions are its steps, Seigan twice.
+    void kamaeIsOneEntry()
+    {
+        const QStringList shoden = ids(programme.entries(QStringLiteral("shinkitoho"), QStringLiteral("shoden")));
+        QCOMPARE(shoden.filter(QStringLiteral("shinkitoho/kamae")), QStringList{QStringLiteral("shinkitoho/kamae")});
+        const QVariantMap kamae = programme.entry(QStringLiteral("shinkitoho/kamae"));
+        QCOMPARE(kamae.value(QStringLiteral("title")).toString(), QStringLiteral("Kamae-Übung"));
+        QCOMPARE(kamae.value(QStringLiteral("jp")).toString(), QStringLiteral("構"));
+        QVERIFY(kamae.value(QStringLiteral("video")).isValid());
+        QVERIFY(kamae.value(QStringLiteral("comment")).isValid());
+        const QVariantList steps = kamae.value(QStringLiteral("steps")).toList();
+        QCOMPARE(steps.size(), 26);
+        QCOMPARE(steps.first().toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Rei"));
+        QCOMPARE(steps.at(2).toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Seigan"));
+        QCOMPARE(steps.at(11).toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Seigan"));
+        QCOMPARE(steps.at(2).toMap().value(QStringLiteral("jp")).toString(), QStringLiteral("正眼"));
+        QVERIFY(programme.entry(QStringLiteral("shinkitoho/kamae/1")).isEmpty());
+        QVERIFY(programme.entry(QStringLiteral("shinkitoho/odachi/1")).value(QStringLiteral("steps")).toList().isEmpty());
+        // Today's practice and the search hold it once; a position finds it.
+        QCOMPARE(ids(programme.practiceEntries(QStringLiteral("shinkitoho"))).count(QStringLiteral("shinkitoho/kamae")), 1);
+        QVERIFY(ids(programme.search(QStringLiteral("jodan ura gasumi"))).contains(QStringLiteral("shinkitoho/kamae")));
+        QVERIFY(ids(programme.search(QStringLiteral("開太刀"))).contains(QStringLiteral("shinkitoho/kamae")));
     }
 
     void gradesWithoutMaterialAreLeftOut()
@@ -219,6 +277,79 @@ private slots:
             QVERIFY(g.toMap().value(QStringLiteral("count")).toInt() > 0);
         }
         QCOMPARE(grades, (QStringList{QStringLiteral("shoden"), QStringLiteral("chuden"), QStringLiteral("okuden"), QStringLiteral("junmenkyo")}));
+    }
+
+    // The technique map up to a grade: one grid per group title, rows techniques, columns attacks
+    // (with addition) in order of appearance, a cell with every entry of its combination.
+    void techniqueMapUpToAGrade()
+    {
+        QTemporaryDir dir;
+        QFile file(dir.filePath(QStringLiteral("map.json")));
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(kMapCatalog);
+        file.close();
+        Catalog catalog;
+        QVERIFY2(catalog.load(file.fileName()), qPrintable(catalog.errorString()));
+        const Programme p(catalog);
+
+        QVariantList map = p.techniqueMap(QStringLiteral("test"), QStringLiteral("k4"));
+        QCOMPARE(map.size(), 1);                                // the kata has no attack
+        QVariantMap grid = map.first().toMap();
+        QCOMPARE(grid.value(QStringLiteral("kind")).toString(), QStringLiteral("matrix"));
+        QCOMPARE(grid.value(QStringLiteral("title")).toString(), QStringLiteral("Tachi-waza"));
+        QCOMPARE(grid.value(QStringLiteral("jp")).toString(), QStringLiteral("立技"));
+
+        QStringList columns;
+        for (const QVariant &c : grid.value(QStringLiteral("columns")).toList()) {
+            columns << c.toMap().value(QStringLiteral("title")).toString() + QLatin1Char('/') + c.toMap().value(QStringLiteral("extra")).toString();
+        }
+        QCOMPARE(columns, (QStringList{QStringLiteral("Katate-dori/"), QStringLiteral("Katate-dori/Ai-hanmi"), QStringLiteral("Tsuki/")}));
+        QStringList rows;
+        for (const QVariant &r : grid.value(QStringLiteral("rows")).toList()) {
+            rows << r.toMap().value(QStringLiteral("title")).toString();
+            QCOMPARE(r.toMap().value(QStringLiteral("cells")).toList().size(), columns.size());
+        }
+        QCOMPARE(rows, (QStringList{QStringLiteral("Ikkyo"), QStringLiteral("Irimi-nage"), QStringLiteral("Kote-gaeshi")}));
+        QCOMPARE(at(grid.value(QStringLiteral("rows")), 0).value(QStringLiteral("jp")).toString(), QStringLiteral("一教"));
+
+        // Ikkyo against Katate-dori: k5, its variant ura from k4 in the same cell; the first opens.
+        const QVariantMap ikkyo = cell(grid, 0, 0);
+        QCOMPARE(ikkyo.value(QStringLiteral("ids")).toStringList(), (QStringList{QStringLiteral("ikkyo-kd"), QStringLiteral("ikkyo-kd-ura")}));
+        QCOMPARE(ikkyo.value(QStringLiteral("gradeName")).toString(), QStringLiteral("5. Kyu"));
+        QCOMPARE(ikkyo.value(QStringLiteral("entry")).toMap().value(QStringLiteral("id")).toString(), QStringLiteral("ikkyo-kd"));
+        QCOMPARE(cell(grid, 0, 1).value(QStringLiteral("ids")).toStringList(), QStringList{QStringLiteral("ikkyo-kd-ai")});
+        QVERIFY(cell(grid, 0, 2).isEmpty());
+        QVERIFY(cell(grid, 1, 2).isEmpty());                    // Irimi-nage against Tsuki: 1. Dan
+        QCOMPARE(cell(grid, 2, 2).value(QStringLiteral("gradeName")).toString(), QStringLiteral("4. Kyu"));
+
+        // Up to 1. Dan: the dan group of the same title joins the grid; theory stays out.
+        map = p.techniqueMap(QStringLiteral("test"), QStringLiteral("d1"));
+        QCOMPARE(map.size(), 1);
+        grid = map.first().toMap();
+        QCOMPARE(grid.value(QStringLiteral("rows")).toList().size(), 3);
+        QCOMPARE(cell(grid, 1, 2).value(QStringLiteral("ids")).toStringList(), QStringList{QStringLiteral("irimi-ts")});
+        QCOMPARE(cell(grid, 1, 2).value(QStringLiteral("gradeName")).toString(), QStringLiteral("1. Dan"));
+
+        // Only 5. Kyu: no Tsuki yet.
+        grid = p.techniqueMap(QStringLiteral("test"), QStringLiteral("k5")).first().toMap();
+        QCOMPARE(grid.value(QStringLiteral("columns")).toList().size(), 2);
+        QCOMPARE(grid.value(QStringLiteral("rows")).toList().size(), 2);
+    }
+
+    // Shinki Toho: the Ô-dachi forms up to a grade, numbered, each with the grade it comes in.
+    void techniqueMapShinkiToho()
+    {
+        const QVariantList map = programme.techniqueMap(QStringLiteral("shinkitoho"), QStringLiteral("chuden"));
+        QCOMPARE(map.size(), 1);
+        const QVariantMap grid = map.first().toMap();
+        QCOMPARE(grid.value(QStringLiteral("kind")).toString(), QStringLiteral("forms"));
+        QCOMPARE(grid.value(QStringLiteral("title")).toString(), QStringLiteral("Ô-dachi 1–21"));
+        const QVariantList cells = grid.value(QStringLiteral("cells")).toList();
+        QCOMPARE(cells.size(), 21);
+        QCOMPARE(at(cells, 0).value(QStringLiteral("entry")).toMap().value(QStringLiteral("nr")).toInt(), 1);
+        QCOMPARE(at(cells, 0).value(QStringLiteral("gradeName")).toString(), QStringLiteral("Shoden"));
+        QCOMPARE(at(cells, 11).value(QStringLiteral("ids")).toStringList(), QStringList{QStringLiteral("shinkitoho/odachi/12")});
+        QCOMPARE(at(cells, 11).value(QStringLiteral("gradeName")).toString(), QStringLiteral("Chûden"));
     }
 
     void entryById()
@@ -232,6 +363,10 @@ private slots:
 
 int main(int argc, char *argv[])
 {
+    // Settings in the build directory (not ~/.qttest, which every build and review running at the
+    // same time would share and overwrite).
+    qputenv("XDG_CONFIG_HOME", TEST_DATA_DIR "/config");
+    qputenv("XDG_DATA_HOME", TEST_DATA_DIR "/data");
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName(QStringLiteral("mitori-test"));
     TstProgramme test;

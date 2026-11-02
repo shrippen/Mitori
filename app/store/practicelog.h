@@ -87,10 +87,11 @@ public:
     SavedRound addRound(const ExamRound &round, const QList<Rating> &ratings);
     QList<ExamRound> rounds(const QString &discipline, int limit) const;
 
-    static constexpr int schemaVersion = 3;
+    static constexpr int schemaVersion = 4;
 
 private:
     bool migrate();
+    bool mergeKamae();
 
     QString m_connection;
     QString m_error;

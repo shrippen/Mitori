@@ -205,6 +205,12 @@ def programm(art, ids, gloss):
 
 # --- Shinki Toho -------------------------------------------------------------
 
+def positionen(indizes):
+    """Nummern der Kamae-Positionen (wie im Blatt und im Heft, ab 1) eines Kommentars: [1, 2] → "2–3"."""
+    erste, letzte = indizes[0] + 1, indizes[-1] + 1
+    return str(erste) if erste == letzte else f"{erste}–{letzte}"
+
+
 def shinki_toho(ids):
     d = yaml.safe_load((DATEN / "shinki-toho.yaml").read_text(encoding="utf-8"))
     for g in d["grade"]:
@@ -222,7 +228,9 @@ def shinki_toho(ids):
                      for f in d["odachi"]]
     for f in app["odachi"]:
         f.pop("frage", None)
-    app["kamae"] = [dict(k, id=f"shinkitoho/kamae/{i}") for i, k in enumerate(d["kamae"], 1)]
+    # Die Kamae-Übung ist ein Ablauf: ein Eintrag, die Positionen sind seine Beschreibung.
+    kamae = d["abschnitte"]["kamae"]
+    app["kamae"] = {"id": "shinkitoho/kamae", "name": kamae["name"], "kanji": kamae["kanji"], "positionen": d["kamae"]}
     app["suburi"] = [dict(s, id=f"shinkitoho/suburi/{i}") for i, s in enumerate(d["suburi"], 1)]
     app["kiriotoshi"] = dict(d["kiriotoshi"], id="shinkitoho/kiriotoshi")
 
@@ -235,9 +243,8 @@ def shinki_toho(ids):
                             kommentar={"titel": f"{kumi['name']} · {kumi['text'].split(':')[0]}", "text": k["kumidachi"]})
     for s, ks in zip(app["suburi"], k["suburi"], strict=True):
         s["kommentar"] = {"titel": ks["titel"], "text": ks["text"]}
-    for kk in k["kamae"]:
-        for i in kk["kamae"]:
-            app["kamae"][i]["kommentar"] = {"titel": f"{kk['nr']}. {kk['titel']}", "text": kk["text"]}
+    app["kamae"]["kommentar"] = {"titel": kamae["name"],
+                                 "text": "\n\n".join(f"{positionen(kk['kamae'])}. {kk['titel']}\n{kk['text']}" for kk in k["kamae"])}
     for f, kf in zip(app["odachi"], k["odachi"], strict=True):
         f["kommentar"] = {"titel": f"{kf['nr']}. {kf['titel']}", "text": kf["text"]}
     return d, app
@@ -420,11 +427,12 @@ def videostellen(disziplinen):
     for d in disziplinen:
         for e in d.get("techniken", []):
             eintraege[e["id"]] = e
-        for art in ("kamae", "suburi", "odachi"):
+        for art in ("suburi", "odachi"):
             for e in d.get(art, []):
                 eintraege[e["id"]] = e
-        if "kiriotoshi" in d:
-            eintraege[d["kiriotoshi"]["id"]] = d["kiriotoshi"]
+        for art in ("kamae", "kiriotoshi"):
+            if art in d:
+                eintraege[d[art]["id"]] = d[art]
     gesetzt = 0
     alle = yaml.safe_load(datei.read_text(encoding="utf-8")) or {}
     for video, inhalt in alle.items():

@@ -6,6 +6,7 @@
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTimeZone>
 
 #include "practice.h"
 #include "practicelog.h"
@@ -17,7 +18,6 @@ class TstPractice : public QObject
 private slots:
     void initTestCase()
     {
-        QStandardPaths::setTestModeEnabled(true);
         QSettings().clear();
     }
 
@@ -194,6 +194,9 @@ private slots:
             QVERIFY(practice.lastRated(QStringLiteral("a")).secsTo(QDateTime::currentDateTime()) < 5);
             const QVariantList n = practice.counts({QStringLiteral("a"), QStringLiteral("b"), QStringLiteral("c"), QStringLiteral("d")});
             QCOMPARE(n, (QVariantList{2, 1, 0, 1, 0}));
+            // A place on the technique map: the best of its entries.
+            QCOMPARE(practice.bestLevel({QStringLiteral("b"), QStringLiteral("a"), QStringLiteral("c")}), 3);
+            QCOMPARE(practice.bestLevel({QStringLiteral("c")}), 0);
             QCOMPARE(practice.levelNames().size(), 5);
         }
         Practice again(path);
@@ -302,6 +305,54 @@ private slots:
         QVERIFY(practice.deleteNote(uid));
         QVERIFY(practice.lastNote(QStringLiteral("e")).isEmpty());
         QCOMPARE(spy.count(), 3);
+    }
+
+    // A log of schema 2 with the 26 Kamae entries of before: one entry now, the weakest rating
+    // of each day (the newest on a tie) and every note on it; other entries stay as they were.
+    void migratesKamaeToOneEntry()
+    {
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("log.sqlite"));
+        const QDateTime day1 = QDateTime(QDate(2026, 10, 30), QTime(12, 0), QTimeZone::UTC);
+        const QDateTime day2 = day1.addDays(1);
+        {
+            PracticeLog log;
+            QVERIFY(log.open(path));
+            log.add(QStringLiteral("shinkitoho/kamae/3"), 1, day1, QStringLiteral("phone"));
+            log.add(QStringLiteral("shinkitoho/kamae/1"), 2, day1.addSecs(60), QStringLiteral("phone"));
+            log.add(QStringLiteral("shinkitoho/kamae/2"), 3, day1.addSecs(120), QStringLiteral("phone"));
+            log.add(QStringLiteral("shinkitoho/kamae/12"), 1, day2, QStringLiteral("phone"));
+            log.add(QStringLiteral("shinkitoho/kamae/26"), 1, day2.addSecs(60), QStringLiteral("tablet"));
+            log.add(QStringLiteral("shinkitoho/kiriotoshi"), 4, day2, QStringLiteral("phone"));
+            log.addNote(QStringLiteral("shinkitoho/kamae/5"), QStringLiteral("In: Spitze höher"), day1, QStringLiteral("phone"));
+            log.addNote(QStringLiteral("shinkitoho/kamae/17"), QStringLiteral("Hongaku ruhig"), day2, QStringLiteral("phone"));
+        }
+        {
+            QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("v2"));
+            db.setDatabaseName(path);
+            QVERIFY(db.open());
+            QVERIFY(QSqlQuery(db).exec(QStringLiteral("PRAGMA user_version = 2")));
+            // A level outside 1..4 (written by hand or a broken sync) never wins the day.
+            QVERIFY(QSqlQuery(db).exec(QStringLiteral("INSERT INTO ratings VALUES ('bad', 'shinkitoho/kamae/4', 0, %1, 'phone')")
+                                           .arg(day1.addSecs(180).toMSecsSinceEpoch())));
+            db.close();
+        }
+        QSqlDatabase::removeDatabase(QStringLiteral("v2"));
+
+        PracticeLog log;
+        QVERIFY2(log.open(path), qPrintable(log.errorString()));
+        const QString kamae = QStringLiteral("shinkitoho/kamae");
+        const auto history = log.history(kamae);
+        QCOMPARE(history.size(), 2);
+        QCOMPARE(history.at(0).level, 1);
+        QCOMPARE(history.at(0).at, day1);
+        QCOMPARE(history.at(1).level, 1);
+        QCOMPARE(history.at(1).device, QStringLiteral("tablet"));
+        QCOMPARE(log.latest().size(), 2);
+        QCOMPARE(log.latest().value(QStringLiteral("shinkitoho/kiriotoshi")).level, 4);
+        QCOMPARE(log.notes(kamae).size(), 2);
+        QCOMPARE(log.notes(kamae).last().text, QStringLiteral("Hongaku ruhig"));
+        QVERIFY(log.notes(QStringLiteral("shinkitoho/kamae/5")).isEmpty());
     }
 
     void searchNotes()
@@ -440,14 +491,14 @@ private slots:
         QCOMPARE(again.level(QStringLiteral("a")), 0);
         QVERIFY(again.rounds(QStringLiteral("aikido"), 8).isEmpty());
     }
-
+    // A log of schema 3 (ratings, notes, the Kamae as one entry) gets the table of exam rounds.
     // A log of schema 2 (ratings, notes) gets the table of exam rounds.
     void migratesFromSchemaTwo()
     {
         QTemporaryDir dir;
         const QString path = dir.filePath(QStringLiteral("log.sqlite"));
         {
-            QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("v2"));
+            QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("v3"));
             db.setDatabaseName(path);
             QVERIFY(db.open());
             QSqlQuery q(db);
@@ -458,10 +509,10 @@ private slots:
                                           " deleted INTEGER NOT NULL DEFAULT 0)")));
             QVERIFY(q.exec(QStringLiteral("INSERT INTO ratings VALUES ('x', 'e', 3, %1, 'd')").arg(QDateTime::currentMSecsSinceEpoch())));
             QVERIFY(q.exec(QStringLiteral("INSERT INTO notes VALUES ('n', 'e', 'Hüfte', %1, %1, 'd', 0)").arg(QDateTime::currentMSecsSinceEpoch())));
-            QVERIFY(q.exec(QStringLiteral("PRAGMA user_version = 2")));
+            QVERIFY(q.exec(QStringLiteral("PRAGMA user_version = 3")));
             db.close();
         }
-        QSqlDatabase::removeDatabase(QStringLiteral("v2"));
+        QSqlDatabase::removeDatabase(QStringLiteral("v3"));
         {
             Practice practice(path);
             QCOMPARE(practice.errorString(), QString());
@@ -471,7 +522,7 @@ private slots:
             QVERIFY(practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), results));
             QCOMPARE(practice.rounds(QStringLiteral("aikido"), 8).size(), 1);
         }
-        // Opened again: schema 3 stays, nothing is migrated twice, everything is there.
+        // Opened again: schema 4 stays, nothing is migrated twice, everything is there.
         Practice again(path);
         QCOMPARE(again.errorString(), QString());
         QCOMPARE(again.level(QStringLiteral("e")), 4);
@@ -487,5 +538,15 @@ private slots:
     }
 };
 
-QTEST_GUILESS_MAIN(TstPractice)
+int main(int argc, char *argv[])
+{
+    // Settings and data in the build directory (not ~/.qttest, which every build and review
+    // running at the same time would share and overwrite).
+    qputenv("XDG_CONFIG_HOME", TEST_DATA_DIR "/config");
+    qputenv("XDG_DATA_HOME", TEST_DATA_DIR "/data");
+    QCoreApplication app(argc, argv);
+    QCoreApplication::setApplicationName(QStringLiteral("mitori-practice-test"));
+    TstPractice test;
+    return QTest::qExec(&test, argc, argv);
+}
 #include "tst_practice.moc"

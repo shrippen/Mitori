@@ -13,7 +13,6 @@ namespace {
 constexpr std::array kCounts{8, 12, 15};
 
 const QString kShinkiToho = QStringLiteral("shinkitoho");
-const QString kShoden = QStringLiteral("shoden");
 const QString kOdachiPrefix = QStringLiteral("shinkitoho/odachi/");
 
 QString text(const QVariantMap &map, const char *key)
@@ -152,30 +151,8 @@ QVariantList Exam::material(const QString &discipline, const QString &gradeId) c
     const bool shinkiToho = discipline == kShinkiToho;
     QVariantList result;
 
-    // Shinki Toho's Shoden: the Kamae exercise as one point (heading and kanji from the data),
-    // its rating sets every Kamae.
-    if (shinkiToho && gradeId == kShoden) {
-        QVariantMap section;
-        QStringList kamae;
-        for (const QVariant &d : m_programme.disciplines()) {
-            const QVariantMap map = d.toMap();
-            if (text(map, "id") != kShinkiToho) {
-                continue;
-            }
-            section = map.value(QStringLiteral("abschnitte")).toMap().value(QStringLiteral("kamae")).toMap();
-            for (const QVariant &k : map.value(QStringLiteral("kamae")).toList()) {
-                kamae << text(k.toMap(), "id");
-            }
-        }
-        QVariantMap row{{QStringLiteral("id"), QString::fromLatin1(kKamaeId)},
-                        {QStringLiteral("title"), text(section, "name")},
-                        {QStringLiteral("jp"), text(section, "kanji")}};
-        QVariantMap p = point(row, text(section, "name"), grade);
-        p[QStringLiteral("ids")] = kamae;
-        result << p;
-    }
-
-    // The grade's entries under their headings; Shinki Toho only its forms.
+    // The grade's entries under their headings; Shinki Toho only the Kamae exercise (Shoden, as
+    // one point) and its forms.
     QString group;
     for (const QVariant &r : m_programme.entries(discipline, gradeId)) {
         const QVariantMap row = r.toMap();
@@ -187,7 +164,7 @@ QVariantList Exam::material(const QString &discipline, const QString &gradeId) c
         if (kind != QLatin1String("entry")) {
             continue;
         }
-        if (shinkiToho && !text(row, "id").startsWith(kOdachiPrefix)) {
+        if (shinkiToho && text(row, "id") != QLatin1String(kKamaeId) && !text(row, "id").startsWith(kOdachiPrefix)) {
             continue;
         }
         result << point(row, group, grade);

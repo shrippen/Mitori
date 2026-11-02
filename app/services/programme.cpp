@@ -14,7 +14,20 @@ QVariantMap row(const QString &kind, const QString &title, const QString &jp)
     return {{QStringLiteral("kind"), kind}, {QStringLiteral("title"), title}, {QStringLiteral("jp"), jp}};
 }
 
-// An entry row from a technique, kamae, suburi or form of the catalog.
+QString name(const QVariantMap &item) { return item.value(QStringLiteral("name")).toString(); }
+QString kanji(const QVariantMap &item) { return item.value(QStringLiteral("kanji")).toString(); }
+
+// The positions of a sequence (the Kamae exercise) as {title, jp}, in order; none for others.
+QVariantList steps(const QVariantMap &item)
+{
+    QVariantList result;
+    for (const QVariant &p : item.value(QStringLiteral("positionen")).toList()) {
+        result << row(QStringLiteral("step"), name(p.toMap()), kanji(p.toMap()));
+    }
+    return result;
+}
+
+// An entry row from a technique, the kamae exercise, suburi or form of the catalog.
 QVariantMap entryRow(const QVariantMap &item, const QString &title, const QString &jp)
 {
     QVariantMap r = row(QStringLiteral("entry"), title, jp);
@@ -23,11 +36,84 @@ QVariantMap entryRow(const QVariantMap &item, const QString &title, const QStrin
     r[QStringLiteral("nr")] = item.value(QStringLiteral("nr"));
     r[QStringLiteral("video")] = item.value(QStringLiteral("video"));
     r[QStringLiteral("comment")] = item.value(QStringLiteral("kommentar"));
+    r[QStringLiteral("steps")] = steps(item);
     return r;
 }
 
-QString name(const QVariantMap &item) { return item.value(QStringLiteral("name")).toString(); }
-QString kanji(const QVariantMap &item) { return item.value(QStringLiteral("kanji")).toString(); }
+// A place on the technique map: every entry there, the first one's row and grade.
+struct MapCell
+{
+    QStringList ids;
+    QVariantMap entry;
+    QString gradeName;
+
+    QVariantMap toMap() const
+    {
+        return {{QStringLiteral("ids"), ids}, {QStringLiteral("entry"), entry}, {QStringLiteral("gradeName"), gradeName}};
+    }
+};
+
+// One grid of the technique map while it is collected: techniques (rows) by name and attacks
+// (columns) by name and addition, each in order of appearance.
+//
+//               Katate-dori  Shomen-uchi …     columns: "Katate-dori|Gyaku-hanmi" …
+//   Ikkyo          [k5]         [k4]
+//   Irimi-nage     [k5]          —             — : no entry, an empty cell
+struct MapGrid
+{
+    QString title;
+    QString jp;
+    QStringList columns;
+    QVariantList columnInfo;
+    QStringList rows;
+    QStringList rowJp;
+    QHash<QString, MapCell> cells;      // by "row\ncolumn"
+
+    void add(const QVariantMap &entry, const QString &gradeName)
+    {
+        const QString attack = entry.value(QStringLiteral("attack")).toString();
+        const QString extra = entry.value(QStringLiteral("attackExtra")).toString();
+        const QString column = attack + QLatin1Char('|') + extra;
+        if (!columns.contains(column)) {
+            columns << column;
+            columnInfo << QVariantMap{{QStringLiteral("title"), attack},
+                                      {QStringLiteral("extra"), extra},
+                                      {QStringLiteral("jp"), entry.value(QStringLiteral("attackJp"))}};
+        }
+
+        const QString technique = entry.value(QStringLiteral("title")).toString();
+        if (!rows.contains(technique)) {
+            rows << technique;
+            rowJp << entry.value(QStringLiteral("jp")).toString();
+        }
+
+        // The first entry stands for the place (its sheet opens); later ones are variants or
+        // the same in a higher grade.
+        MapCell &cell = cells[technique + QLatin1Char('\n') + column];
+        if (cell.ids.isEmpty()) {
+            cell.entry = entry;
+            cell.gradeName = gradeName;
+        }
+        cell.ids << entry.value(QStringLiteral("id")).toString();
+    }
+
+    QVariantMap toMap() const
+    {
+        QVariantList rowList;
+        for (qsizetype r = 0; r < rows.size(); ++r) {
+            QVariantList rowCells;
+            for (const QString &column : columns) {
+                const auto it = cells.constFind(rows.at(r) + QLatin1Char('\n') + column);
+                rowCells << (it == cells.cend() ? QVariantMap() : it->toMap());
+            }
+            rowList << QVariantMap{{QStringLiteral("title"), rows.at(r)},
+                                   {QStringLiteral("jp"), rowJp.at(r)},
+                                   {QStringLiteral("cells"), rowCells}};
+        }
+        return {{QStringLiteral("kind"), QStringLiteral("matrix")}, {QStringLiteral("title"), title},
+                {QStringLiteral("jp"), jp}, {QStringLiteral("columns"), columnInfo}, {QStringLiteral("rows"), rowList}};
+    }
+};
 
 } // namespace
 
@@ -205,10 +291,10 @@ QVariantList Programme::shinkiTohoEntries(const QVariantMap &d, const QString &g
         const QVariantMap kiriotoshi = d.value(QStringLiteral("kiriotoshi")).toMap();
         result << row(QStringLiteral("group"), name(kiriotoshi), kanji(kiriotoshi));
         result << entryRow(kiriotoshi, name(kiriotoshi), kanji(kiriotoshi));
+        // One entry: the positions are practised and shown in one flow.
+        const QVariantMap kamae = d.value(QStringLiteral("kamae")).toMap();
         result << section(QStringLiteral("kamae"));
-        for (const QVariant &k : d.value(QStringLiteral("kamae")).toList()) {
-            result << entryRow(k.toMap(), name(k.toMap()), kanji(k.toMap()));
-        }
+        result << entryRow(kamae, name(kamae), kanji(kamae));
     }
     if (to == 0) {
         return result;
@@ -270,7 +356,12 @@ QVariantList Programme::search(const QString &query, int limit) const
                                          row.value(QStringLiteral("attackExtra")).toString(),
                                          row.value(QStringLiteral("attackJp")).toString(),
                                          group};
-                if (!SearchText(fields.join(u' ')).matches(words)) {
+                // The Kamae exercise is found by its positions too (Seigan, Hongaku …).
+                QStringList stepFields;
+                for (const QVariant &step : row.value(QStringLiteral("steps")).toList()) {
+                    stepFields << step.toMap().value(QStringLiteral("title")).toString() << step.toMap().value(QStringLiteral("jp")).toString();
+                }
+                if (!SearchText((fields + stepFields).join(u' ')).matches(words)) {
                     continue;
                 }
                 seen.insert(id);
@@ -311,4 +402,87 @@ QVariantMap Programme::entry(const QString &id) const
         }
     }
     return m_entryIndex.value(id);
+}
+
+QVariantList Programme::techniqueMap(const QString &disciplineId, const QString &grade) const
+{
+    if (disciplineId == QLatin1String("shinkitoho")) {
+        return formMap(grade);
+    }
+
+    // Every technique with an attack of each grade up to the chosen one, in programme order,
+    // into the grid of its group's title.
+    QList<MapGrid> grids;
+    QHash<QString, qsizetype> gridByTitle;
+    for (const QVariant &g : grades(disciplineId)) {
+        const QVariantMap gradeMap = g.toMap();
+        const QString gradeId = gradeMap.value(QStringLiteral("id")).toString();
+        QVariantMap group;
+        for (const QVariant &e : entries(disciplineId, gradeId)) {
+            const QVariantMap row = e.toMap();
+            const QString kind = row.value(QStringLiteral("kind")).toString();
+            if (kind == QLatin1String("group")) {
+                group = row;
+                continue;
+            }
+            if (kind != QLatin1String("entry") || row.value(QStringLiteral("attack")).toString().isEmpty()) {
+                continue;
+            }
+
+            const QString title = group.value(QStringLiteral("title")).toString();
+            if (!gridByTitle.contains(title)) {
+                gridByTitle.insert(title, grids.size());
+                grids.append(MapGrid{title, group.value(QStringLiteral("jp")).toString(), {}, {}, {}, {}, {}});
+            }
+            grids[gridByTitle.value(title)].add(row, gradeMap.value(QStringLiteral("name")).toString());
+        }
+        if (gradeId == grade) {
+            break;
+        }
+    }
+
+    QVariantList result;
+    for (const MapGrid &grid : grids) {
+        result << grid.toMap();
+    }
+    return result;
+}
+
+QVariantList Programme::formMap(const QString &grade) const
+{
+    const QString disciplineId = QStringLiteral("shinkitoho");
+    const QVariantMap d = findDiscipline(disciplineId);
+    QSet<QString> forms;
+    for (const QVariant &o : d.value(QStringLiteral("odachi")).toList()) {
+        forms.insert(o.toMap().value(QStringLiteral("id")).toString());
+    }
+
+    // The Ô-dachi forms of each grade up to the chosen one, in order.
+    QVariantList cells;
+    for (const QVariant &g : grades(disciplineId)) {
+        const QVariantMap gradeMap = g.toMap();
+        const QString gradeId = gradeMap.value(QStringLiteral("id")).toString();
+        for (const QVariant &e : entries(disciplineId, gradeId)) {
+            const QVariantMap row = e.toMap();
+            const QString id = row.value(QStringLiteral("id")).toString();
+            if (row.value(QStringLiteral("kind")) != QLatin1String("entry") || !forms.contains(id)) {
+                continue;
+            }
+            cells << MapCell{{id}, row, gradeMap.value(QStringLiteral("name")).toString()}.toMap();
+        }
+        if (gradeId == grade) {
+            break;
+        }
+    }
+    if (cells.isEmpty()) {
+        return {};
+    }
+
+    const QVariantMap section = d.value(QStringLiteral("abschnitte")).toMap().value(QStringLiteral("odachi")).toMap();
+    const int last = cells.last().toMap().value(QStringLiteral("entry")).toMap().value(QStringLiteral("nr")).toInt();
+    const QVariantMap grid{{QStringLiteral("kind"), QStringLiteral("forms")},
+                           {QStringLiteral("title"), QStringLiteral("%1 1–%2").arg(name(section)).arg(last)},
+                           {QStringLiteral("jp"), kanji(section)},
+                           {QStringLiteral("cells"), cells}};
+    return {grid};
 }

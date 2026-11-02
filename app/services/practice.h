@@ -46,6 +46,8 @@ public:
     Q_INVOKABLE bool rate(const QString &entry, int level);
     // The latest level of an entry, 0 if never rated.
     Q_INVOKABLE int level(const QString &entry) const;
+    // The highest level among entries (a place on the technique map with variants), 0 if none rated.
+    Q_INVOKABLE int bestLevel(const QStringList &entries) const;
     // When the entry was rated last (local time), or an invalid date.
     Q_INVOKABLE QDateTime lastRated(const QString &entry) const;
     // How many of the entries stand at each level: [none, 1, 2, 3, 4].

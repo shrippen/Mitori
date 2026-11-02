@@ -91,6 +91,88 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Shinki Toho Shoden: the Kamae exercise is one row; its sheet lists the 26 positions.
+    function test_2g_kamae_sheet() {
+        failOnWarning(/ReferenceError|TypeError/)
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        const page = push("ProgrammePage")
+        const kamae = page.rows.filter(r => r.kind === "entry" && r.id.startsWith("shinkitoho/kamae"))
+        compare(kamae.length, 1)
+        compare(kamae[0].id, "shinkitoho/kamae")
+        page.open(kamae[0])
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        compare(sheet.steps.length, 26)
+        const list = findChild(sheet.contentItem, "sheetSteps")
+        tryCompare(list, "count", 26)
+        const steps = findChildren(list, "step")
+        compare(steps[2].modelData.title, "Seigan")
+        compare(steps[11].modelData.title, "Seigan")
+        shot("2g-sheet-kamae", true)
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        // A technique without positions shows none.
+        page.open(page.rows.find(r => r.kind === "entry" && r.id.startsWith("shinkitoho/odachi/")))
+        tryVerify(() => sheet.opened)
+        compare(sheet.steps.length, 0)
+        verify(!findChild(sheet.contentItem, "sheetSteps").visible)
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        window.pageStack.pop()
+    }
+
+    // A small phone: the Kamae sheet is taller than the window; the keys scroll it.
+    function test_2h_sheet_keys() {
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        window.width = 360
+        window.height = 640
+        const page = push("ProgrammePage")
+        page.open(page.rows.find(r => r.id === "shinkitoho/kamae"))
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        wait(500)
+        const flick = sheet.flickable
+        verify(flick && flick.contentHeight > flick.height, "taller than the window")
+        compare(flick.contentY, 0)
+        keyClick(Qt.Key_Down)
+        tryVerify(() => flick.contentY > 0, 1000, "Down scrolls")
+        const down = flick.contentY
+        keyClick(Qt.Key_PageDown)
+        tryVerify(() => flick.contentY > down, 1000, "Page Down scrolls")
+        keyClick(Qt.Key_End)
+        tryVerify(() => Math.abs(flick.contentY - (flick.contentHeight - flick.height)) < 2, 1000, "End to the last position")
+        keyClick(Qt.Key_Home)
+        tryCompare(flick, "contentY", 0)
+        // With the focus on Close in the header (outside the content) too.
+        const close = findCloseButton(sheet.header)
+        verify(close, "the header's close button")
+        close.forceActiveFocus()
+        verify(close.activeFocus)
+        keyClick(Qt.Key_PageDown)
+        tryVerify(() => flick.contentY > 0, 1000, "Page Down scrolls from Close")
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        window.pageStack.pop()
+    }
+
+    function findCloseButton(item) {
+        if (!item) {
+            return null
+        }
+        if (item.icon !== undefined && item.icon.name.startsWith("window-close") && item.visible) {
+            return item
+        }
+        for (let i = 0; i < item.children.length; i++) {
+            const found = findCloseButton(item.children[i])
+            if (found) {
+                return found
+            }
+        }
+        return null
+    }
+
     // Rating in the sheet: the list row shows the level as dots, the sheet the last rating.
     function test_2d_rate_in_sheet() {
         Programme.discipline = "aikido"
@@ -498,6 +580,116 @@ TestCase {
         tryVerify(() => sheet.opened, 2000)
         sheet.close()
         tryVerify(() => !sheet.opened)
+        window.pageStack.pop()
+    }
+
+    // Technique map: from the start menu, a grid per group with empty places, a place coloured by
+    // its level and opening its sheet, the keys moving on; Shinki Toho as numbered forms.
+    function test_9k_map() {
+        failOnWarning(/ReferenceError|TypeError/)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k4")
+        tryCompare(window.pageStack, "depth", 1)
+        wait(500)       // Kirigami slides the last page out
+        const tile = findChild(window.pageStack.items[0], "mapTile")
+        verify(tile && tile.visible)
+        mouseClick(tile)
+        tryCompare(window.pageStack, "depth", 2)
+        const page = window.pageStack.currentItem
+        tryVerify(() => page.title === qsTr("Technique map"))
+        wait(500)       // Kirigami slides the page in
+        compare(page.grade, "k4")
+        verify(page.matrix)
+        compare(findChildren(page, "gradeChip").length, Programme.grades("aikido").length)
+
+        // Techniques × attacks (KanteHeatGrid); combinations not in the programme are gaps.
+        const heat = findChild(page, "techniqueMatrix")
+        compare(heat.rowCount, page.shown.rows.length)
+        compare(heat.columnCount, page.shown.columns.length)
+        let gap = null, target = null
+        for (let r = 0; r < heat.rowCount; r++) {
+            for (let c = 0; c < heat.columnCount; c++) {
+                if (heat.isEmpty(r, c))
+                    gap = gap || { r: r, c: c }
+                else if (!target && heat.valueOf(r, c) === 0)
+                    target = { r: r, c: c }
+            }
+        }
+        verify(gap, "combinations not in the programme stay empty")
+        verify(!heat.cellAt(gap.r, gap.c).shown)
+        verify(target)
+
+        // A rating colours the place; its tip names technique, attack, grade and level.
+        const data = page.shown.rows[target.r].cells[target.c]
+        verify(Practice.rate(data.ids[0], 4))
+        const cell = heat.cellAt(target.r, target.c)
+        tryCompare(cell, "level", 4)
+        compare(heat.entryOf(target.r, target.c).label, "4")
+        const tip = heat.tipOf(target.r, target.c)
+        verify(tip.indexOf(data.gradeName) > 0, tip)
+        verify(tip.indexOf(Practice.levelNames[4]) > 0, tip)
+        shot("11-map-aikido")
+
+        // A tap opens the technique sheet.
+        const sheet = findChild(page, "techniqueSheet")
+        mouseClick(cell)
+        tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, data.entry.id)
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+
+        // The keys: Right moves to the next place of the row (over gaps), Enter opens it.
+        cell.forceActiveFocus(Qt.TabFocusReason)
+        let next = target.c + 1
+        while (next < heat.columnCount && heat.isEmpty(target.r, next))
+            next++
+        keyClick(Qt.Key_Right)
+        if (next < heat.columnCount)
+            compare(heat.currentColumn, next)
+        keyClick(Qt.Key_Return)
+        tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, page.shown.rows[heat.currentRow].cells[heat.currentColumn].entry.id)
+        sheet.close()
+        tryVerify(() => !sheet.visible)       // a closing sheet still takes the taps
+
+        // Groups apart: another chip, another grid.
+        const chips = findChildren(page, "groupChip")
+        verify(chips.length > 1)
+        page.flickable.contentY = 0
+        mouseClick(chips[1])
+        compare(page.shown.title, chips[1].text)
+
+        // Shinki Toho: the Ô-dachi forms up to Chûden, eight to a row on the phone.
+        page.discipline = "shinkitoho"
+        page.grade = "chuden"
+        verify(!page.matrix)
+        const forms = findChild(page, "formGrid")
+        verify(forms.visible)
+        compare(forms.perRow, 8)
+        compare(forms.rowCount, 3)
+        compare(forms.entryOf(1, 3).label, "12")
+        verify(forms.isEmpty(2, 7), "after the last form")
+        verify(Practice.rate("shinkitoho/odachi/12", 2))
+        const form = forms.cellAt(1, 3)
+        tryCompare(form, "level", 2)
+        waitForRendering(forms)       // the page lays out the forms in the next frame
+        mouseClick(form)
+        tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, "shinkitoho/odachi/12")
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+        shot("11-map-shinkitoho")
+
+        // Tablet in landscape: bigger places, more forms per row.
+        window.width = 1280
+        window.height = 800
+        tryCompare(forms, "perRow", 11)
+        compare(forms.entryOf(1, 0).label, "12")
+        page.discipline = "daitoryu"
+        page.grade = Programme.grades("daitoryu").slice(-1)[0].id
+        verify(page.matrix)
+        compare(heat.cellSize, KanteStyle.unit(34))
+        shot("11-map-tablet")
         window.pageStack.pop()
     }
 
@@ -911,7 +1103,7 @@ TestCase {
         const round = window.pageStack.currentItem
         compare(round.points.length, 12)
         compare(round.points[0].id, "shinkitoho/kamae")
-        compare(round.points[0].ids.length, 26)
+        compare(round.points[0].ids, ["shinkitoho/kamae"])
         verify(round.points.every(p => !p.sample))
         const board = findChild(round, "examBoard")
         verify(!findChild(board, "boardAttack").visible)
@@ -985,6 +1177,71 @@ TestCase {
         compare(window.pageStack.depth, depth)
         compare(Practice.rounds("aikido", 8).length, before)
         window.pageStack.pop()
+    }
+
+    // The Kamae player: its 26 positions come last, so "Done" and Back stay where they are for a
+    // technique without positions (phone upright: Done in view without scrolling), and a large
+    // tablet keeps the picture as large.
+    function test_9y_kamae_player() {
+        failOnWarning(/ReferenceError|TypeError/)
+        const kamae = Programme.entry("shinkitoho/kamae")
+        const suburi = Programme.entry("shinkitoho/suburi/1")
+        if (!kamae.video || !Videos.available(kamae.video.video)) {
+            skip("no video for the Kamae exercise (set MITORI_VIDEOS)")
+        }
+        verify(Practice.rate(kamae.id, 2))      // rated today: the training is done at once
+        verify(Practice.rate(suburi.id, 2))
+        // [width, height, training, the item that must be in view]
+        for (const c of [[420, 800, true, "trainingDone"], [915, 412, false, "backButton"], [915, 412, true, "trainingDone"]]) {
+            window.width = c[0]
+            window.height = c[1]
+            const at = entry => {
+                const page = push("PlayerPage", { playlist: [entry], index: 0, training: c[2] })
+                tryVerify(() => page.trainingDone === c[2])
+                wait(500)
+                const view = findChild(page, "controlsView")
+                compare(view.contentY, 0)
+                const item = findChild(page, c[3])
+                verify(item.visible, c[3])
+                const y = item.mapToItem(view, 0, 0).y
+                const result = { y: y, bottom: y + item.height, height: view.height, steps: findChild(page, "stepList").count }
+                window.pageStack.pop()
+                return result
+            }
+            const k = at(kamae)
+            const s = at(suburi)
+            compare(k.steps, 26)
+            compare(s.steps, 0)
+            verify(Math.abs(k.y - s.y) < 1, c[3] + " at " + c + ": " + k.y + " with the positions, " + s.y + " without")
+            // Upright the done card fits; sideways the column is short anyway (what fits depends
+            // on the rating and the notes shown), the positions only must not push Back further.
+            if (c[0] < c[1]) {
+                verify(k.bottom <= k.height, c[3] + " in view at " + c + " (" + k.bottom + " of " + k.height + ")")
+            }
+        }
+        // A large tablet beside the list: the picture as large as for a technique without positions.
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        window.width = 1920
+        window.height = 1080
+        const programme = push("ProgrammePage")
+        tryVerify(() => programme.split)
+        const pane = findChild(programme, "playerPane")
+        programme.open(programme.rows.find(r => r.id === suburi.id))
+        tryCompare(pane.item.current, "id", suburi.id, 3000)
+        const stage = findChild(pane.item, "stage")
+        wait(300)
+        const without = stage.height
+        verify(without > stage.width / stage.ratio / 2 + 1, "more than half the picture: " + without)
+        programme.open(programme.rows.find(r => r.id === kamae.id))
+        tryCompare(pane.item.current, "id", kamae.id, 3000)
+        tryCompare(findChild(pane.item, "stepList"), "count", 26)
+        wait(300)       // laid out with the positions
+        verify(Math.abs(stage.height - without) < 1, "picture " + stage.width + "×" + stage.height + ", without positions " + without)
+        window.width = 420
+        window.height = 800
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
     }
 
     function test_9z_stats() {
@@ -1117,6 +1374,36 @@ TestCase {
         wait(500)
         verify(!pane.item.playing, "no sound under the comment page")
         window.pageStack.pop()
+        window.width = 420
+        window.height = 800
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
+    }
+
+    // Tablet: the Kamae exercise plays beside the list, with its 26 positions under the player.
+    function test_2u_tablet_kamae() {
+        failOnWarning(/ReferenceError|TypeError/)
+        const kamae = Programme.entry("shinkitoho/kamae")
+        if (!kamae.video || !Videos.available(kamae.video.video)) {
+            skip("no video for the Kamae exercise (set MITORI_VIDEOS)")
+        }
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        window.width = 1280
+        window.height = 800
+        const page = push("ProgrammePage")
+        tryVerify(() => page.split)
+        page.open(page.rows.find(r => r.id === "shinkitoho/kamae"))
+        const pane = findChild(page, "playerPane")
+        tryCompare(pane.item.current, "id", "shinkitoho/kamae", 3000)
+        const list = findChild(pane.item, "stepList")
+        verify(list && list.visible, "the positions beside the player")
+        tryCompare(list, "count", 26)
+        shot("2u-tablet-kamae")
+        // A form has none.
+        page.open(page.playlist.find(r => r.id.startsWith("shinkitoho/odachi/")))
+        tryVerify(() => pane.item.current.id.startsWith("shinkitoho/odachi/"), 3000)
+        verify(!findChild(pane.item, "stepList").visible)
         window.width = 420
         window.height = 800
         window.pageStack.pop()

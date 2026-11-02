@@ -97,18 +97,54 @@ bool PracticeLog::migrate()
             return false;
         }
     }
-    if (version < 3) {
+    if (version < 3 && !mergeKamae()) {
+        return false;
+    }
+    if (version < 4) {
         const bool ok = q.exec(QStringLiteral(
                             "CREATE TABLE IF NOT EXISTS exam_rounds ("
                             " uid TEXT PRIMARY KEY, at INTEGER NOT NULL, discipline TEXT NOT NULL,"
                             " grade TEXT NOT NULL, count INTEGER NOT NULL, average REAL NOT NULL,"
                             " device TEXT NOT NULL)"))
             && q.exec(QStringLiteral("CREATE INDEX IF NOT EXISTS exam_rounds_discipline ON exam_rounds (discipline, at)"))
-            && q.exec(QStringLiteral("PRAGMA user_version = 3"));
+            && q.exec(QStringLiteral("PRAGMA user_version = 4"));
         if (!ok) {
             m_error = q.lastError().text();
             return false;
         }
+    }
+    return true;
+}
+
+// Schema 3: the Kamae exercise of Shinki Toho was 26 entries (shinkitoho/kamae/1 … /26) and is
+// one now (shinkitoho/kamae), practised in one flow. Of its old ratings the weakest of each
+// local day stays (the newest on a tie; a level outside 1..4 never wins): a weak position makes
+// the whole exercise due again sooner. The history keeps one rating a day; the notes move along.
+bool PracticeLog::mergeKamae()
+{
+    QSqlDatabase db = QSqlDatabase::database(m_connection);
+    QSqlQuery q(db);
+    if (!db.transaction()) {
+        m_error = db.lastError().text();
+        return false;
+    }
+    const bool ok = q.exec(QStringLiteral(
+                        "DELETE FROM ratings WHERE entry GLOB 'shinkitoho/kamae/*' AND rowid NOT IN ("
+                        " SELECT rowid FROM (SELECT rowid, ROW_NUMBER() OVER ("
+                        "  PARTITION BY date(at / 1000, 'unixepoch', 'localtime') ORDER BY (level BETWEEN 1 AND 4) DESC, level ASC, at DESC) AS n"
+                        "  FROM ratings WHERE entry GLOB 'shinkitoho/kamae/*') WHERE n = 1)"))
+        && q.exec(QStringLiteral("UPDATE ratings SET entry = 'shinkitoho/kamae' WHERE entry GLOB 'shinkitoho/kamae/*'"))
+        && q.exec(QStringLiteral("UPDATE notes SET entry = 'shinkitoho/kamae' WHERE entry GLOB 'shinkitoho/kamae/*'"))
+        && q.exec(QStringLiteral("PRAGMA user_version = 3"));
+    if (!ok) {
+        m_error = q.lastError().text();
+        db.rollback();
+        return false;
+    }
+    if (!db.commit()) {
+        m_error = db.lastError().text();
+        db.rollback();
+        return false;
     }
     return true;
 }

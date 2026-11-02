@@ -37,7 +37,8 @@ public:
     // Rows of a grade in programme order. Each row has `kind`:
     //   "group"     title, jp            a heading (Kata, Tachi-waza · Mae-seme, Kamae, Ô-dachi …)
     //   "attack"    title, extra, jp     the attack the techniques below answer
-    //   "entry"     id, title, extra, jp, nr, video {video, von, bis} or none, comment {titel, text} or none
+    //   "entry"     id, title, extra, jp, nr, video {video, von, bis} or none, comment {titel, text} or none,
+    //               steps [{title, jp}]: the positions of a sequence (Kamae exercise), else empty
     //   "info"      id, title, jp, text, comment   an introduction with a comment only (Kumidachi)
     //   "text"      id, title            a theory item of the exam (essay, oral exam): no video, no rating
     Q_INVOKABLE QVariantList entries(const QString &discipline, const QString &grade) const;
@@ -45,13 +46,24 @@ public:
     // discipline, in programme order, each with `current` (part of the chosen grade) and
     // `gradeName`.
     Q_INVOKABLE QVariantList practiceEntries(const QString &discipline) const;
-    // Techniques whose name, attack, Japanese, additions or group contain every word of `query`
+    // Techniques whose name, attack, Japanese, additions, group or steps contain every word of `query`
     // (see SearchText), across all disciplines and grades in programme order (at most `limit`).
     // Each row as in entries(), with `discipline`, `disciplineName`, `grade`, `gradeName` and
     // `groupName` (Tachi-waza · Mae-seme …).
     Q_INVOKABLE QVariantList search(const QString &query, int limit = 50) const;
     // One entry by id (the same map as in entries()), or an empty map.
     Q_INVOKABLE QVariantMap entry(const QString &id) const;
+    // The technique map (clickdummy "Landkarte") of every grade up to `grade`: a grid per group
+    // with attacks, in programme order; groups of the same title (kyu and dan grades) are one.
+    // Each grid: kind "matrix", title, jp,
+    //   columns  [{title, extra, jp}]  the attacks (with addition), in order of appearance
+    //   rows     [{title, jp, cells}]  the techniques by name, in order of appearance; one cell
+    //            per column: {} where the technique does not answer the attack, else
+    //            {ids, entry, gradeName}: every entry of the combination (variants, a later
+    //            grade), the first one's row (as in entries()) and grade.
+    // Shinki Toho: one grid, kind "forms", title "Ô-dachi 1–N", jp, cells [{ids, entry, gradeName}]
+    // one per form.
+    Q_INVOKABLE QVariantList techniqueMap(const QString &discipline, const QString &grade) const;
 
 signals:
     void selectionChanged();
@@ -59,6 +71,7 @@ signals:
 private:
     QVariantMap findDiscipline(const QString &id) const;
     QVariantList shinkiTohoEntries(const QVariantMap &discipline, const QString &grade) const;
+    QVariantList formMap(const QString &grade) const;
 
     Catalog m_catalog;
     mutable QHash<QString, QVariantMap> m_entryIndex;

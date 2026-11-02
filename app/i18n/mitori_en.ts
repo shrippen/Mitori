@@ -66,6 +66,17 @@
     </message>
 </context>
 <context>
+    <name>TechniqueMapPage</name>
+    <message numerus="yes">
+        <location filename="../qml/TechniqueMapPage.qml" line="193"/>
+        <source>%n entries</source>
+        <translation>
+            <numerusform>%n entry</numerusform>
+            <numerusform>%n entries</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>TodayPage</name>
     <message numerus="yes">
         <location filename="../qml/TodayPage.qml" line="40"/>

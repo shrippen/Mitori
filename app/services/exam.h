@@ -36,7 +36,7 @@ public:
 
     static constexpr int kMinSamples = 2;
     static constexpr int kMaxSamples = 5;
-    // The Kamae of Shinki Toho's Shoden as one point.
+    // The Kamae exercise of Shinki Toho's Shoden (one entry, one point).
     static constexpr auto kKamaeId = "shinkitoho/kamae";
 
     explicit Exam(QObject *parent = nullptr);

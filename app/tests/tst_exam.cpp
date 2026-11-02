@@ -69,7 +69,7 @@ private slots:
         QVERIFY(exam.material(aikido, QStringLiteral("nope")).isEmpty());
     }
 
-    // Shinki Toho: Shoden asks the Kamae as one point (it sets every Kamae) and Ô-dachi 1–11,
+    // Shinki Toho: Shoden asks the Kamae exercise as one point and Ô-dachi 1–11,
     // Chûden only its forms 12–21; Suburi and Kiriotoshi are not asked.
     void shinkiTohoMaterial()
     {
@@ -78,9 +78,7 @@ private slots:
         QCOMPARE(shoden.size(), 12);
         QCOMPARE(field(shoden.first(), "id"), QString::fromLatin1(Exam::kKamaeId));
         QCOMPARE(field(shoden.first(), "jp"), QStringLiteral("構"));
-        const QStringList kamae = shoden.first().toMap().value(QStringLiteral("ids")).toStringList();
-        QCOMPARE(kamae.size(), 26);
-        QCOMPARE(kamae.first(), QStringLiteral("shinkitoho/kamae/1"));
+        QCOMPARE(shoden.first().toMap().value(QStringLiteral("ids")).toStringList(), QStringList{QString::fromLatin1(Exam::kKamaeId)});
         QCOMPARE(field(shoden.at(1), "id"), QStringLiteral("shinkitoho/odachi/1"));
         QCOMPARE(field(shoden.last(), "id"), QStringLiteral("shinkitoho/odachi/11"));
 

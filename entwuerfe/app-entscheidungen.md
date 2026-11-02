@@ -38,7 +38,9 @@ Syncthing entfällt als eigener Weg (geht über den Export-Ordner).
   2–3 Techniken aus früheren Graden dazu.
 - Zeile antippen öffnet zuerst das Technik-Blatt (einschätzen, letzte Notiz, Video, Notizen).
 - Stand als vier Punkte.
-- Shinki Toho: Kamae mit eigenem Stand und Video (Ids `shinkitoho/kamae/<n>`, ebenso Suburi und Kiriotoshi).
+- Shinki Toho: die Kamae-Übung ist eine Technik mit eigenem Stand und Video (Id `shinkitoho/kamae`; Owner
+  02.11.2026: 26 Positionen in einem Fluss, ein Punkt), die Positionen stehen als Beschreibung im Blatt. Ebenso
+  Suburi und Kiriotoshi mit eigenem Stand und Video.
 - Grade ohne Video normal zeigen; nur ▶ ausblenden und darauf hinweisen.
 - Shinki Toho: im Blatt der Knopf „Kommentar“ mit den Texten von shinkiryu.de (Odachi Kommentare,
   Kamae Kommentare, Suburi). `tools/kommentare.py` liest die PDFs nach `daten/shinki-toho-kommentare.yaml`,

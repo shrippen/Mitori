@@ -17,8 +17,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
 
 - Schritt 0: Daten aller drei Sparten in `daten/`, geprüft von `tools/daten.py`; Heft baut (`heft/build.sh`).
   Videostellen aller Videos per `tools/kapitel.py` in `daten/videos.yaml`; offen: die Einträge mit
-  `pruefen: true` gegenlesen, die 26 Kamae einzeln schneiden (das Video zeigt die Übung am Stück),
-  Abweichungen Video ↔ Daten in `KORREKTUREN.md` (V-…) klären.
+  `pruefen: true` gegenlesen, Abweichungen Video ↔ Daten in `KORREKTUREN.md` (V-…) klären.
 - Schritt 1: Startmenü (Kachel Programm), Programm (Sparte, Grad, Liste), Technik-Blatt, Kommentar,
   Player (Schleife, vier Tempi, Einzelbild, Doppeltipp, Querformat), Videos aus einem lokalen Ordner.
   Offen: Gesten für Helligkeit und Lautstärke (Plattform-Schicht), Test auf dem Telefon. Tablet quer: Startmenü als
@@ -54,7 +53,17 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   und einer japanischen Stimme (speech-dispatcher). Nicht: AppImage (ohne qtspeech gebaut), Flatpak (die
   KDE-Runtime hat nur das Test-Plugin). Offen: Aussprache auf dem Telefon prüfen, qtspeech für AppImage und
   Flatpak, A–Z-Sprungleiste, Lesungen ohne lange Vokale (Umschrift ohne ô, „aikido“ → あいきど), in der Suche
+<<<<<<< HEAD
   Kommentare und Lehrgänge. Noch nicht begonnen: Landkarte.
+=======
+  Kommentare und Lehrgänge. Noch nicht begonnen: Prüfungsmodus.
+- Schritt 3: Technik-Landkarte (Kachel 図 im Startmenü): Sparte, „bis“ Grad (anfangs der des Programms), je Gruppe
+  ein Raster Technik × Angriff über alle Grade bis dahin (Gruppen gleichen Titels aus Kyu- und Dan-Graden zusammen),
+  jeder Platz in der Farbe seiner besten Stufe, leer, wo die Kombination nicht vorkommt; Shinki Toho als nummerierte
+  Ô-dachi-Formen. Tippen öffnet das Technik-Blatt, Überfahren zeigt Technik, Angriff, Grad und Stand; Tab erreicht
+  einen Platz je Raster, die Pfeiltasten wandern weiter. Breite Raster scrollen waagerecht, die Technik-Namen bleiben
+  stehen. Raster: `KanteHeatGrid` (Kante 1.63, dafür ergänzt).
+>>>>>>> origin/main
 
 ## Lehrgänge (Schritt 4)
 
