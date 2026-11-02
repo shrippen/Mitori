@@ -12,7 +12,7 @@
 <context>
     <name>GradeStand</name>
     <message>
-        <location filename="../qml/GradeStand.qml" line="27"/>
+        <location filename="../qml/GradeStand.qml" line="28"/>
         <source>Rating of the grade</source>
         <translation>Stand des Grades</translation>
     </message>
@@ -97,27 +97,27 @@
 <context>
     <name>NoteRow</name>
     <message>
-        <location filename="../qml/NoteRow.qml" line="35"/>
+        <location filename="../qml/NoteRow.qml" line="48"/>
         <source>Last note: %1</source>
         <translation>Letzte Notiz: %1</translation>
     </message>
     <message>
-        <location filename="../qml/NoteRow.qml" line="49"/>
+        <location filename="../qml/NoteRow.qml" line="62"/>
         <source>Note for today …</source>
         <translation>Notiz für heute …</translation>
     </message>
     <message>
-        <location filename="../qml/NoteRow.qml" line="50"/>
+        <location filename="../qml/NoteRow.qml" line="63"/>
         <source>New note</source>
         <translation>Neue Notiz</translation>
     </message>
     <message>
-        <location filename="../qml/NoteRow.qml" line="65"/>
+        <location filename="../qml/NoteRow.qml" line="86"/>
         <source>Add note</source>
         <translation>Notiz hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/NoteRow.qml" line="71"/>
+        <location filename="../qml/NoteRow.qml" line="92"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
@@ -168,74 +168,74 @@
 <context>
     <name>PlayerPage</name>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="234"/>
-        <location filename="../qml/PlayerPage.qml" line="259"/>
+        <location filename="../qml/PlayerPage.qml" line="246"/>
+        <location filename="../qml/PlayerPage.qml" line="271"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="307"/>
+        <location filename="../qml/PlayerPage.qml" line="319"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="257"/>
+        <location filename="../qml/PlayerPage.qml" line="269"/>
         <source>Frame back</source>
         <translation>Bild zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="254"/>
+        <location filename="../qml/PlayerPage.qml" line="266"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="253"/>
+        <location filename="../qml/PlayerPage.qml" line="265"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="252"/>
+        <location filename="../qml/PlayerPage.qml" line="264"/>
         <source>Chapter start</source>
         <translation>Kapitelanfang</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="258"/>
+        <location filename="../qml/PlayerPage.qml" line="270"/>
         <source>Frame on</source>
         <translation>Bild vor</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="260"/>
+        <location filename="../qml/PlayerPage.qml" line="272"/>
         <source>Playback</source>
         <translation>Wiedergabe</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="291"/>
+        <location filename="../qml/PlayerPage.qml" line="303"/>
         <source>Done</source>
         <translation>Geschafft</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="292"/>
+        <location filename="../qml/PlayerPage.qml" line="304"/>
         <source>Every technique of today&apos;s training is practised.</source>
         <translation>Alle Techniken des heutigen Trainings sind geübt.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="316"/>
+        <location filename="../qml/PlayerPage.qml" line="328"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="255"/>
+        <location filename="../qml/PlayerPage.qml" line="267"/>
         <source>Loop</source>
         <translation>Schleife</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="256"/>
+        <location filename="../qml/PlayerPage.qml" line="268"/>
         <source>Tempo</source>
         <translation>Tempo</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="295"/>
-        <location filename="../qml/PlayerPage.qml" line="325"/>
+        <location filename="../qml/PlayerPage.qml" line="307"/>
+        <location filename="../qml/PlayerPage.qml" line="337"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
@@ -278,7 +278,7 @@
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="207"/>
+        <location filename="../services/practice.cpp" line="223"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
@@ -286,7 +286,7 @@
 <context>
     <name>PracticeLog</name>
     <message>
-        <location filename="../store/practicelog.cpp" line="71"/>
+        <location filename="../store/practicelog.cpp" line="72"/>
         <source>it comes from a newer Mitori (schema %1); update Mitori</source>
         <translation>es stammt aus einer neueren Mitori-Version (Schema %1); bitte Mitori aktualisieren</translation>
     </message>
@@ -409,6 +409,75 @@
         <location filename="../qml/StartPage.qml" line="74"/>
         <source>all practised</source>
         <translation>alles geübt</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="89"/>
+        <source>Statistics</source>
+        <translation>Statistik</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/StartPage.qml" line="90"/>
+        <source>%n practice day(s) in 30 days</source>
+        <translation>
+            <numerusform>%n Übungstag in 30 Tagen</numerusform>
+            <numerusform>%n Übungstage in 30 Tagen</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>StatsPage</name>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="43"/>
+        <source>Statistics</source>
+        <translation>Statistik</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="49"/>
+        <source>Last 30 days</source>
+        <translation>Letzte 30 Tage</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="58"/>
+        <source>practice days</source>
+        <translation>Übungstage</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="63"/>
+        <source>techniques practised</source>
+        <translation>Techniken geübt</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="68"/>
+        <source>A technique counts once on each day it is rated.</source>
+        <translation>Eine Technik zählt an jedem Tag, an dem sie eingeschätzt wird, einmal.</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="75"/>
+        <source>Practice days</source>
+        <translation>Übungstage</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/StatsPage.qml" line="100"/>
+        <source>%n technique(s)</source>
+        <translation>
+            <numerusform>%n Technik</numerusform>
+            <numerusform>%n Techniken</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="108"/>
+        <source>1–2 techniques</source>
+        <translation>1–2 Techniken</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="111"/>
+        <source>10 and more</source>
+        <translation>10 und mehr</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="115"/>
+        <source>Rating by grade</source>
+        <translation>Stand je Grad</translation>
     </message>
 </context>
 <context>

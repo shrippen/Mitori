@@ -74,6 +74,22 @@ Kirigami.ScrollablePage {
             hint: due > 0 ? qsTr("%n due", "", due) : qsTr("all practised")
             onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("TodayPage.qml"))
         }
+
+        KanteOptionTile {
+            objectName: "statsTile"
+
+            readonly property int days: Practice.revision >= 0 && Practice.today.getTime() > 0
+                                        ? Object.keys(Practice.practisedPerDay(30)).length : 0
+
+            Layout.fillWidth: true
+            visible: Programme.errorString === ""
+            checkable: false
+            autoExclusive: false
+            glyph: "記"
+            text: qsTr("Statistics")
+            hint: qsTr("%n practice day(s) in 30 days", "", days)
+            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("StatsPage.qml"))
+        }
     }
 
     // Title of a discipline and the name of its chosen grade.
