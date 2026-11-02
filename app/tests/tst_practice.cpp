@@ -330,6 +330,9 @@ private slots:
             db.setDatabaseName(path);
             QVERIFY(db.open());
             QVERIFY(QSqlQuery(db).exec(QStringLiteral("PRAGMA user_version = 2")));
+            // A level outside 1..4 (written by hand or a broken sync) never wins the day.
+            QVERIFY(QSqlQuery(db).exec(QStringLiteral("INSERT INTO ratings VALUES ('bad', 'shinkitoho/kamae/4', 0, %1, 'phone')")
+                                           .arg(day1.addSecs(180).toMSecsSinceEpoch())));
             db.close();
         }
         QSqlDatabase::removeDatabase(QStringLiteral("v2"));

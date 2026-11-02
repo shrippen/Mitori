@@ -32,26 +32,30 @@ Kirigami.Dialog {
     property Item kanteScope: KanteScope { target: sheet.contentItem }
 
     // Up/Down, Page Up/Down, Home and End scroll a sheet taller than the window (the Kamae
-    // exercise on a phone); the mouse wheel does already.
+    // exercise on a phone); the mouse wheel does already. From the content and from the header
+    // (Close may hold the focus).
     function scrollKey(event) {
         const f = sheet.flickable
-        const end = f ? Math.max(0, f.contentHeight - f.height) : 0
-        let y = 0
-        if (!f) {
-            return
-        } else if (event.key === Qt.Key_Up || event.key === Qt.Key_Down) {
-            y = f.contentY + (event.key === Qt.Key_Down ? 1 : -1) * Kirigami.Units.gridUnit * 2
-        } else if (event.key === Qt.Key_PageUp || event.key === Qt.Key_PageDown) {
-            y = f.contentY + (event.key === Qt.Key_PageDown ? 1 : -1) * f.height * 0.9
-        } else if (event.key === Qt.Key_Home) {
-            y = 0
-        } else if (event.key === Qt.Key_End) {
-            y = end
-        } else {
+        const line = Kirigami.Units.gridUnit * 2
+        const step = {
+            [Qt.Key_Up]: -line, [Qt.Key_Down]: line,
+            [Qt.Key_PageUp]: f ? -f.height * 0.9 : 0, [Qt.Key_PageDown]: f ? f.height * 0.9 : 0,
+            [Qt.Key_Home]: -Infinity, [Qt.Key_End]: Infinity
+        }[event.key]
+        if (!f || step === undefined) {
             return
         }
-        f.contentY = Math.max(0, Math.min(end, y))
+        f.contentY = Math.max(0, Math.min(Math.max(0, f.contentHeight - f.height), f.contentY + step))
         event.accepted = true
+    }
+
+    // Kirigami's header, with the keys above.
+    header: Kirigami.DialogHeader {
+        dialog: sheet
+        contentItem: Kirigami.DialogHeaderTopContent {
+            dialog: sheet
+        }
+        Keys.onPressed: event => sheet.scrollKey(event)
     }
 
     // The popup itself holds the focus when it opens; the column takes it for the keys.

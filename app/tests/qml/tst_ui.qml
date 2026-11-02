@@ -145,9 +145,32 @@ TestCase {
         tryVerify(() => Math.abs(flick.contentY - (flick.contentHeight - flick.height)) < 2, 1000, "End to the last position")
         keyClick(Qt.Key_Home)
         tryCompare(flick, "contentY", 0)
+        // With the focus on Close in the header (outside the content) too.
+        const close = findCloseButton(sheet.header)
+        verify(close, "the header's close button")
+        close.forceActiveFocus()
+        verify(close.activeFocus)
+        keyClick(Qt.Key_PageDown)
+        tryVerify(() => flick.contentY > 0, 1000, "Page Down scrolls from Close")
         sheet.close()
         tryVerify(() => !sheet.opened)
         window.pageStack.pop()
+    }
+
+    function findCloseButton(item) {
+        if (!item) {
+            return null
+        }
+        if (item.icon !== undefined && item.icon.name.startsWith("window-close") && item.visible) {
+            return item
+        }
+        for (let i = 0; i < item.children.length; i++) {
+            const found = findCloseButton(item.children[i])
+            if (found) {
+                return found
+            }
+        }
+        return null
     }
 
     // Rating in the sheet: the list row shows the level as dots, the sheet the last rating.
@@ -837,6 +860,71 @@ TestCase {
         compare(again.filter, "daitoryu")
         again.filter = ""
         window.pageStack.pop()
+    }
+
+    // The Kamae player: its 26 positions come last, so "Done" and Back stay where they are for a
+    // technique without positions (phone upright: Done in view without scrolling), and a large
+    // tablet keeps the picture as large.
+    function test_9y_kamae_player() {
+        failOnWarning(/ReferenceError|TypeError/)
+        const kamae = Programme.entry("shinkitoho/kamae")
+        const suburi = Programme.entry("shinkitoho/suburi/1")
+        if (!kamae.video || !Videos.available(kamae.video.video)) {
+            skip("no video for the Kamae exercise (set MITORI_VIDEOS)")
+        }
+        verify(Practice.rate(kamae.id, 2))      // rated today: the training is done at once
+        verify(Practice.rate(suburi.id, 2))
+        // [width, height, training, the item that must be in view]
+        for (const c of [[420, 800, true, "trainingDone"], [915, 412, false, "backButton"], [915, 412, true, "trainingDone"]]) {
+            window.width = c[0]
+            window.height = c[1]
+            const at = entry => {
+                const page = push("PlayerPage", { playlist: [entry], index: 0, training: c[2] })
+                tryVerify(() => page.trainingDone === c[2])
+                wait(500)
+                const view = findChild(page, "controlsView")
+                compare(view.contentY, 0)
+                const item = findChild(page, c[3])
+                verify(item.visible, c[3])
+                const y = item.mapToItem(view, 0, 0).y
+                const result = { y: y, bottom: y + item.height, height: view.height, steps: findChild(page, "stepList").count }
+                window.pageStack.pop()
+                return result
+            }
+            const k = at(kamae)
+            const s = at(suburi)
+            compare(k.steps, 26)
+            compare(s.steps, 0)
+            verify(Math.abs(k.y - s.y) < 1, c[3] + " at " + c + ": " + k.y + " with the positions, " + s.y + " without")
+            // Upright the done card fits; sideways the column is short anyway (what fits depends
+            // on the rating and the notes shown), the positions only must not push Back further.
+            if (c[0] < c[1]) {
+                verify(k.bottom <= k.height, c[3] + " in view at " + c + " (" + k.bottom + " of " + k.height + ")")
+            }
+        }
+        // A large tablet beside the list: the picture as large as for a technique without positions.
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        window.width = 1920
+        window.height = 1080
+        const programme = push("ProgrammePage")
+        tryVerify(() => programme.split)
+        const pane = findChild(programme, "playerPane")
+        programme.open(programme.rows.find(r => r.id === suburi.id))
+        tryCompare(pane.item.current, "id", suburi.id, 3000)
+        const stage = findChild(pane.item, "stage")
+        wait(300)
+        const without = stage.height
+        verify(without > stage.width / stage.ratio / 2 + 1, "more than half the picture: " + without)
+        programme.open(programme.rows.find(r => r.id === kamae.id))
+        tryCompare(pane.item.current, "id", kamae.id, 3000)
+        tryCompare(findChild(pane.item, "stepList"), "count", 26)
+        wait(300)       // laid out with the positions
+        verify(Math.abs(stage.height - without) < 1, "picture " + stage.width + "×" + stage.height + ", without positions " + without)
+        window.width = 420
+        window.height = 800
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
     }
 
     function test_9z_stats() {
