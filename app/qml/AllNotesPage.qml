@@ -11,11 +11,10 @@ import Mitori
 // All notes (clickdummy "Alle Notizen"): the notes on every technique by day, newest first, with
 // a filter per discipline. A tap opens the technique's notes, press and hold changes or deletes
 // a note. Course notebooks join with the courses (ROADMAP.md, step 4).
-Kirigami.ScrollablePage {
+Kirigami.Page {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
+    // Kante's colours and page ground (the scope's background role is the dialog colour).
     property Item kanteScope: KanteScope { target: page }
     background: Rectangle { color: KanteStyle.backgroundColor }
 
@@ -65,32 +64,6 @@ Kirigami.ScrollablePage {
 
     title: qsTr("All notes")
 
-    // The filter above the list (Tab reaches the chips, then the list).
-    header: Flow {
-        padding: Kirigami.Units.smallSpacing
-        spacing: Kirigami.Units.smallSpacing
-
-        Repeater {
-            id: chips
-
-            model: [{ id: "", name: qsTr("All") }].concat(Programme.disciplines.map(d => ({ id: d.id, name: d.kurzname })))
-
-            KanteChip {
-                required property var modelData
-                required property int index
-
-                objectName: "filter_" + (modelData.id || "all")
-                // The page's header comes after the list in the item tree: from the last chip, Tab
-                // goes on to the list (not to the window's toolbar), Shift+Tab comes back.
-                KeyNavigation.tab: index === chips.count - 1 ? list : null
-                text: modelData.name
-                checkable: true
-                checked: page.filter === modelData.id
-                onClicked: page.filter = modelData.id
-            }
-        }
-    }
-
     // A section's day ("YYYY-MM-DD"); Practice.today only makes the names follow a new day.
     function dayName(iso) {
         const d = iso.split("-").map(Number)
@@ -117,132 +90,168 @@ Kirigami.ScrollablePage {
         return [page.gradeNames[e.discipline + "/" + e.grade], (e.nr ? e.nr + " · " : "") + e.title, e.attack].filter(x => x).join(" · ")
     }
 
-    // A virtual list (years of notes): the day as its section.
-    ListView {
-        id: list
+    padding: 0
 
-        objectName: "notesList"
-        model: notesModel
-        spacing: Kirigami.Units.smallSpacing
-        // The keyboard moves through every note (Up, Down), Enter opens, the menu key edits; the
-        // list follows the current note.
-        activeFocusOnTab: true
-        KeyNavigation.backtab: chips.count > 0 ? chips.itemAt(chips.count - 1) : null
-        keyNavigationEnabled: true
-        currentIndex: -1
-        onCurrentIndexChanged: {
-            if (activeFocus && currentIndex >= 0) {
-                positionViewAtIndex(currentIndex, ListView.Contain)
-            }
-        }
-        // Coming in with Tab: the first note in view, not one far away.
-        onActiveFocusChanged: {
-            if (activeFocus && (currentIndex < 0 || currentIndex < firstShown() || currentIndex > lastShown())) {
-                currentIndex = firstShown()
-            }
-        }
-        // The first and last note in view (a day's heading or the gap between notes is no note).
-        function firstShown() {
-            for (let y = contentY; y < contentY + height; y += Kirigami.Units.smallSpacing) {
-                const i = indexAt(width / 2, y)
-                if (i >= 0) {
-                    return i
+    // The filter, then the list: in this order also for Tab.
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 0
+
+        Flow {
+            Layout.fillWidth: true
+            padding: Kirigami.Units.smallSpacing
+            leftPadding: Kirigami.Units.largeSpacing
+            rightPadding: Kirigami.Units.largeSpacing
+            spacing: Kirigami.Units.smallSpacing
+
+            Repeater {
+                model: [{ id: "", name: qsTr("All") }].concat(Programme.disciplines.map(d => ({ id: d.id, name: d.kurzname })))
+
+                KanteChip {
+                    required property var modelData
+
+                    objectName: "filter_" + (modelData.id || "all")
+                    text: modelData.name
+                    checkable: true
+                    checked: page.filter === modelData.id
+                    onClicked: page.filter = modelData.id
                 }
             }
-            return count > 0 ? 0 : -1
         }
-        function lastShown() {
-            for (let y = contentY + height - 1; y > contentY; y -= Kirigami.Units.smallSpacing) {
-                const i = indexAt(width / 2, y)
-                if (i >= 0) {
-                    return i
+
+        QQC2.ScrollView {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.leftMargin: Kirigami.Units.largeSpacing
+            Layout.rightMargin: Kirigami.Units.largeSpacing
+
+            // A virtual list (years of notes): the day as its section.
+            ListView {
+                id: list
+
+                objectName: "notesList"
+                model: notesModel
+                spacing: Kirigami.Units.smallSpacing
+                // The keyboard moves through every note (Up, Down), Enter opens, the menu key edits; the
+                // list follows the current note.
+                activeFocusOnTab: true
+                keyNavigationEnabled: true
+                currentIndex: -1
+                onCurrentIndexChanged: {
+                    if (activeFocus && currentIndex >= 0) {
+                        positionViewAtIndex(currentIndex, ListView.Contain)
+                    }
                 }
-            }
-            return firstShown()
-        }
-        Keys.onReturnPressed: page.openCurrent(false)
-        Keys.onEnterPressed: page.openCurrent(false)
-        Keys.onMenuPressed: page.openCurrent(true)
-        Keys.onPressed: event => {
-            const page_ = Math.max(1, lastShown() - firstShown())
-            if (event.key === Qt.Key_PageDown) {
-                currentIndex = Math.min(count - 1, currentIndex + page_)
-            } else if (event.key === Qt.Key_PageUp) {
-                currentIndex = Math.max(0, currentIndex - page_)
-            } else if (event.key === Qt.Key_Home) {
-                currentIndex = 0
-            } else if (event.key === Qt.Key_End) {
-                currentIndex = count - 1
-            } else {
-                return
-            }
-            event.accepted = true
-        }
-        section.property: "day"
-        section.delegate: KanteSectionLabel {
-            required property string section
-            Accessible.role: Accessible.Heading
-            width: ListView.view.width
-            topPadding: Kirigami.Units.largeSpacing
-            text: page.dayName(section)
-        }
-
-        header: QQC2.Label {
-            objectName: "count"
-            width: ListView.view.width
-            bottomPadding: Kirigami.Units.largeSpacing
-            text: page.shown.length > 0
-                  ? qsTr("%n note(s). Tap one to open its technique, press and hold to change or delete it.", "", page.shown.length)
-                  : page.filter !== "" && page.all.length > 0 ? qsTr("No notes in this discipline.")
-                  : qsTr("No notes yet. Notes are written on a technique or in the player.")
-            color: KanteStyle.mutedTextColor
-            wrapMode: Text.Wrap
-        }
-
-        delegate: ColumnLayout {
-            id: noteItem
-
-            required property var row
-            required property int index
-
-            objectName: "note"
-
-            width: ListView.view.width
-            spacing: 0
-            readonly property bool current: ListView.isCurrentItem && ListView.view.activeFocus
-            Accessible.role: Accessible.Button
-            Accessible.name: page.techniqueName(row.technique) + ": " + row.text
-            Accessible.description: qsTr("Opens the technique's notes; press and hold or the menu key to change or delete")
-            Accessible.onPressAction: page.open(row)
-
-            QQC2.Label {
-                Layout.fillWidth: true
-                text: page.techniqueName(noteItem.row.technique)
-                color: KanteStyle.mutedTextColor
-                font: KanteStyle.smallFont
-                elide: Text.ElideRight
-                leftPadding: Kirigami.Units.smallSpacing
-            }
-            QQC2.Label {
-                Layout.fillWidth: true
-                text: noteItem.row.text
-                wrapMode: Text.Wrap
-                padding: Kirigami.Units.smallSpacing
-                background: Rectangle {
-                    color: KanteStyle.cardColor
-                    border.width: noteItem.current ? KanteStyle.borderWidth : 0
-                    border.color: KanteStyle.focusColor
+                // Coming in with Tab: the first note in view, not one far away.
+                onActiveFocusChanged: {
+                    if (activeFocus && (currentIndex < 0 || currentIndex < firstShown() || currentIndex > lastShown())) {
+                        currentIndex = firstShown()
+                    }
                 }
-            }
+                // The first and last note in view (a day's heading or the gap between notes is no note).
+                function firstShown() {
+                    for (let y = contentY; y < contentY + height; y += Kirigami.Units.smallSpacing) {
+                        const i = indexAt(width / 2, y)
+                        if (i >= 0) {
+                            return i
+                        }
+                    }
+                    return count > 0 ? 0 : -1
+                }
+                function lastShown() {
+                    for (let y = contentY + height - 1; y > contentY; y -= Kirigami.Units.smallSpacing) {
+                        const i = indexAt(width / 2, y)
+                        if (i >= 0) {
+                            return i
+                        }
+                    }
+                    return firstShown()
+                }
+                Keys.onReturnPressed: page.openCurrent(false)
+                Keys.onEnterPressed: page.openCurrent(false)
+                Keys.onMenuPressed: page.openCurrent(true)
+                Keys.onPressed: event => {
+                    const page_ = Math.max(1, lastShown() - firstShown())
+                    if (event.key === Qt.Key_PageDown) {
+                        currentIndex = Math.min(count - 1, currentIndex + page_)
+                    } else if (event.key === Qt.Key_PageUp) {
+                        currentIndex = Math.max(0, currentIndex - page_)
+                    } else if (event.key === Qt.Key_Home) {
+                        currentIndex = 0
+                    } else if (event.key === Qt.Key_End) {
+                        currentIndex = count - 1
+                    } else {
+                        return
+                    }
+                    event.accepted = true
+                }
+                section.property: "day"
+                section.delegate: KanteSectionLabel {
+                    required property string section
+                    Accessible.role: Accessible.Heading
+                    width: ListView.view.width
+                    topPadding: Kirigami.Units.largeSpacing
+                    text: page.dayName(section)
+                }
 
-            TapHandler {
-                acceptedButtons: Qt.LeftButton
-                onTapped: page.open(noteItem.row)
-                onLongPressed: editor.edit(noteItem.row)
-            }
-            TapHandler {
-                acceptedButtons: Qt.RightButton
-                onTapped: editor.edit(noteItem.row)
+                header: QQC2.Label {
+                    objectName: "count"
+                    width: ListView.view.width
+                    bottomPadding: Kirigami.Units.largeSpacing
+                    text: page.shown.length > 0
+                          ? qsTr("%n note(s). Tap one to open its technique, press and hold to change or delete it.", "", page.shown.length)
+                          : page.filter !== "" && page.all.length > 0 ? qsTr("No notes in this discipline.")
+                          : qsTr("No notes yet. Notes are written on a technique or in the player.")
+                    color: KanteStyle.mutedTextColor
+                    wrapMode: Text.Wrap
+                }
+
+                delegate: ColumnLayout {
+                    id: noteItem
+
+                    required property var row
+                    required property int index
+
+                    objectName: "note"
+
+                    width: ListView.view.width
+                    spacing: 0
+                    readonly property bool current: ListView.isCurrentItem && ListView.view.activeFocus
+                    Accessible.role: Accessible.Button
+                    Accessible.name: page.techniqueName(row.technique) + ": " + row.text
+                    Accessible.description: qsTr("Opens the technique's notes; press and hold or the menu key to change or delete")
+                    Accessible.onPressAction: page.open(row)
+
+                    QQC2.Label {
+                        Layout.fillWidth: true
+                        text: page.techniqueName(noteItem.row.technique)
+                        color: KanteStyle.mutedTextColor
+                        font: KanteStyle.smallFont
+                        elide: Text.ElideRight
+                        leftPadding: Kirigami.Units.smallSpacing
+                    }
+                    QQC2.Label {
+                        Layout.fillWidth: true
+                        text: noteItem.row.text
+                        wrapMode: Text.Wrap
+                        padding: Kirigami.Units.smallSpacing
+                        background: Rectangle {
+                            color: KanteStyle.cardColor
+                            border.width: noteItem.current ? KanteStyle.borderWidth : 0
+                            border.color: KanteStyle.focusColor
+                        }
+                    }
+
+                    TapHandler {
+                        acceptedButtons: Qt.LeftButton
+                        onTapped: page.open(noteItem.row)
+                        onLongPressed: editor.edit(noteItem.row)
+                    }
+                    TapHandler {
+                        acceptedButtons: Qt.RightButton
+                        onTapped: editor.edit(noteItem.row)
+                    }
+                }
             }
         }
     }

@@ -4,43 +4,43 @@
 <context>
     <name>AllNotesPage</name>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="66"/>
+        <location filename="../qml/AllNotesPage.qml" line="65"/>
         <source>All notes</source>
         <translation>Alle Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="99"/>
+        <location filename="../qml/AllNotesPage.qml" line="72"/>
         <source>Today</source>
         <translation>Heute</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="115"/>
-        <location filename="../qml/AllNotesPage.qml" line="267"/>
+        <location filename="../qml/AllNotesPage.qml" line="88"/>
+        <location filename="../qml/AllNotesPage.qml" line="276"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="76"/>
+        <location filename="../qml/AllNotesPage.qml" line="108"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="196"/>
+        <location filename="../qml/AllNotesPage.qml" line="203"/>
         <source>No notes in this discipline.</source>
         <translation>Keine Notizen in dieser Sparte.</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="197"/>
+        <location filename="../qml/AllNotesPage.qml" line="204"/>
         <source>No notes yet. Notes are written on a technique or in the player.</source>
         <translation>Noch keine Notizen. Notizen schreibst du zu einer Technik oder im Player.</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="215"/>
+        <location filename="../qml/AllNotesPage.qml" line="222"/>
         <source>Opens the technique&apos;s notes; press and hold or the menu key to change or delete</source>
         <translation>Öffnet die Notizen der Technik; lang drücken oder Menütaste zum Ändern oder Löschen</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/AllNotesPage.qml" line="195"/>
+        <location filename="../qml/AllNotesPage.qml" line="202"/>
         <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
         <translation>
             <numerusform>%n Notiz. Tippen öffnet die Technik, lang drücken ändert oder löscht die Notiz.</numerusform>

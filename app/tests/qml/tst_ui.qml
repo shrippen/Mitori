@@ -554,13 +554,24 @@ TestCase {
         // Tab: through the filter to the list, on a note in view (not the first one far above).
         mouseClick(findChild(page, "filter_all"))
         const chips = Programme.disciplines.length + 1
-        for (let i = 0; i <= chips && !list.activeFocus; i++)
+        for (let i = 0; i <= chips + 2 && !list.activeFocus; i++)       // Back first if the page has the focus
             keyClick(Qt.Key_Tab)
         verify(list.activeFocus, "Tab reaches the list after the filter")
         keyClick(Qt.Key_Backtab)
         compare(window.activeFocusItem, findChild(page, "filter_" + Programme.disciplines[chips - 2].id), "Shift+Tab goes back to the filter")
         keyClick(Qt.Key_Tab)
         verify(list.activeFocus)
+        // A whole round of Tab: the toolbar (Back), every chip and the list, each once.
+        const round = []
+        for (let i = 0; i < 30; i++) {
+            keyClick(Qt.Key_Tab)
+            if (list.activeFocus)
+                break
+            round.push(String(window.activeFocusItem))
+        }
+        verify(list.activeFocus, "back at the list: " + round.join(" > "))
+        verify(round.some(t => t.indexOf("NavButton") >= 0), "Tab reaches Back: " + round.join(" > "))
+        compare(round.filter(t => t.indexOf("filter_") >= 0).length, chips, round.join(" > "))
         const cur = list.itemAtIndex(list.currentIndex)
         verify(cur && cur.y + cur.height > list.contentY && cur.y < list.contentY + list.height,
                "the current note is in view (" + list.currentIndex + ")")
