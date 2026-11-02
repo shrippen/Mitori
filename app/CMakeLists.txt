@@ -12,6 +12,10 @@ find_package(KF6 REQUIRED COMPONENTS Kirigami)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 # Pronunciation in the glossary; without the module the speaker buttons stay hidden.
 find_package(Qt6 6.8 QUIET COMPONENTS TextToSpeech)
+# The screen's brightness over Solid (platform/devicelevels) on Linux.
+if(NOT ANDROID)
+    find_package(Qt6 6.8 REQUIRED COMPONENTS DBus)
+endif()
 
 qt_standard_project_setup(REQUIRES 6.8)
 # Module output in <build>/qml: scripts/qmllint.sh finds the Mitori module there.
@@ -94,6 +98,10 @@ qt_add_qml_module(mitori_app
         services/courses.cpp
         platform/devicecalendar.h
         platform/devicecalendar.cpp
+        platform/devicelevels.h
+        platform/devicelevels.cpp
+        services/levels.h
+        services/levels.cpp
         store/bundlecrypto.h
         store/bundlecrypto.cpp
         store/bundleshelf.h
@@ -146,6 +154,9 @@ set_target_properties(monocypher PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # The generated type registration includes the headers by name.
 target_include_directories(mitori_app PUBLIC catalog services store player platform)
 target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql Qt6::Network Qt6::Concurrent KF6::Kirigami monocypher)
+if(NOT ANDROID)
+    target_link_libraries(mitori_app PUBLIC Qt6::DBus)
+endif()
 if(TARGET Qt6::TextToSpeech)
     target_link_libraries(mitori_app PUBLIC Qt6::TextToSpeech)
     target_compile_definitions(mitori_app PRIVATE MITORI_SPEECH)
@@ -287,6 +298,13 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     target_link_libraries(tst_bundles PRIVATE Qt6::Core Qt6::Qml Qt6::Network Qt6::Concurrent Qt6::Test monocypher)
     set_target_properties(tst_bundles PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME bundles COMMAND tst_bundles)
+
+    qt_add_executable(tst_levels tests/tst_levels.cpp services/levels.cpp services/levels.h
+        platform/devicelevels.cpp platform/devicelevels.h)
+    target_include_directories(tst_levels PRIVATE services platform)
+    target_link_libraries(tst_levels PRIVATE Qt6::Core Qt6::Qml Qt6::DBus Qt6::Test)
+    set_target_properties(tst_levels PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME levels COMMAND tst_levels)
 
     # The pages with Kirigami and Kante, offscreen; screenshots into <build>/ui-shots. Plays a video
     # only with MITORI_VIDEOS (the videos are not in the repository).

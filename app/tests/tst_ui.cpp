@@ -59,6 +59,8 @@ public slots:
                            + "\r\nDTEND;VALUE=DATE:" + day(42) + "\r\nLOCATION:Pforzheim\r\nEND:VEVENT\r\n"
                            "END:VCALENDAR\r\n");
         }
+        // Brightness and volume in memory: no test dims the screen (platform/devicelevels).
+        qputenv("MITORI_DEVICE_LEVELS", "memory");
         qputenv("MITORI_COURSES_CALENDAR", QUrl::fromLocalFile(calendar.fileName()).toString().toUtf8());
         // Video bundles from the test data (tools/bundle.py), as a local package folder: never the network.
         QDir(BundleShelf::defaultRoot()).removeRecursively();

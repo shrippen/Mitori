@@ -17,6 +17,7 @@ finish-args:
   - --socket=wayland
   - --device=dri
   - --socket=pulseaudio    # video sound
+  - --talk-name=org.kde.Solid.PowerManagement   # screen brightness (player gesture)
   - --filesystem=xdg-videos:ro   # the video folder (settings) under ~/Videos until the bundles come
 
 modules:
