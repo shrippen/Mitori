@@ -43,6 +43,33 @@ private slots:
         QCOMPARE(history.first().level, 2);
     }
 
+    // How many techniques were practised (rated) on each local day: each technique once a day.
+    void practisedPerDay()
+    {
+        QTemporaryDir dir;
+        PracticeLog log;
+        QVERIFY(log.open(dir.filePath(QStringLiteral("log.sqlite"))));
+        const QDateTime t = QDateTime(QDate(2026, 11, 1), QTime(12, 0), QTimeZone::UTC);
+        log.add(QStringLiteral("a"), 2, t, QStringLiteral("phone"));
+        log.add(QStringLiteral("a"), 3, t.addSecs(60), QStringLiteral("phone"));    // the same technique again
+        log.add(QStringLiteral("b"), 1, t.addSecs(120), QStringLiteral("phone"));
+        log.add(QStringLiteral("a"), 4, t.addDays(3), QStringLiteral("phone"));
+        log.add(QStringLiteral("c"), 4, t.addDays(-40), QStringLiteral("phone"));   // before the range
+        const QHash<QDate, int> days = log.practisedPerDay(t.addDays(-30));
+        QCOMPARE(days.size(), 2);
+        QCOMPARE(days.value(t.toLocalTime().date()), 2);
+        QCOMPARE(days.value(t.addDays(3).toLocalTime().date()), 1);
+
+        // The service: {"YYYY-MM-DD": count} for the last days up to today.
+        Practice practice(dir.filePath(QStringLiteral("mitori.sqlite")));
+        practice.rate(QStringLiteral("a"), 2);
+        practice.rate(QStringLiteral("b"), 2);
+        practice.rate(QStringLiteral("b"), 3);
+        const QVariantMap map = practice.practisedPerDay(30);
+        QCOMPARE(map.size(), 1);
+        QCOMPARE(map.value(QDate::currentDate().toString(Qt::ISODate)).toInt(), 2);
+    }
+
     // The same time stamp twice: the later insert wins (two taps within a millisecond).
     void sameTimeLaterWins()
     {

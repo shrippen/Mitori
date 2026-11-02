@@ -9,6 +9,7 @@ ColumnLayout {
     id: stand
 
     required property var entries      // the grade's rows (Programme.entries)
+    property bool legend: true          // off where one legend serves several bars
     readonly property var ids: entries.filter(r => r.kind === "entry").map(r => r.id)
     readonly property var counts: Practice.revision >= 0 ? Practice.counts(ids) : [0, 0, 0, 0, 0]
     // Levels 4 … 1, then not rated: the order of the bar and the legend.
@@ -28,6 +29,7 @@ ColumnLayout {
     }
     KanteLegend {
         Layout.fillWidth: true
+        visible: stand.legend
         model: stand.order.concat([0]).map(l => ({
             color: KanteStyle.levelColor(l),
             value: stand.counts[l],

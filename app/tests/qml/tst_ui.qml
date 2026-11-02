@@ -491,6 +491,26 @@ TestCase {
         window.pageStack.pop()
     }
 
+    function test_9z_stats() {
+        // A rating today makes today a practice day (Shinki Toho: the other cases leave it alone;
+        // the cases run in name order, this one last).
+        const grade = Programme.grades("shinkitoho")[0].id
+        const first = Programme.entries("shinkitoho", grade).find(r => r.kind === "entry")
+        verify(Practice.rate(first.id, 2))
+        const page = push("StatsPage")
+        compare(page.last30.days, 1)
+        verify(page.last30.techniques >= 1)
+        compare(findChild(page, "practiceDays").value, "1")
+        const heat = findChild(page, "practiceHeatmap")
+        verify(heat.weeks >= 4 && heat.weeks <= 26)
+        const today = heat.isoDay(new Date())
+        verify(heat.levels[today] >= 1, "today coloured")
+        verify(heat.tipOf(new Date()).indexOf(String(page.perDay[today])) >= 0, heat.tipOf(new Date()))
+        verify(findChildren(page, "statsGradeStand").length > 3, "a bar per grade")
+        shot("10-stats")
+        window.pageStack.pop()
+    }
+
     function findChildren(item, name) {
         let found = []
         if (item.objectName === name) {

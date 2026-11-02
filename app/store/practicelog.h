@@ -46,6 +46,9 @@ public:
     QHash<QString, Rating> latest() const;
     // The local day each entry was rated first (its history begins: it was new that day).
     QHash<QString, QDate> firstRated() const;
+    // How many entries were rated on each local day from `from` (UTC) on; an entry rated several
+    // times on a day counts once (statistics: practice days).
+    QHash<QDate, int> practisedPerDay(const QDateTime &from) const;
     // All ratings of one entry, oldest first.
     QList<Rating> history(const QString &entry) const;
 

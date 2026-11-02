@@ -11,6 +11,25 @@
             <numerusform>%n due</numerusform>
         </translation>
     </message>
+    <message numerus="yes">
+        <location filename="../qml/StartPage.qml" line="96"/>
+        <source>%n practice day(s) in 30 days</source>
+        <translation>
+            <numerusform>%n practice day in 30 days</numerusform>
+            <numerusform>%n practice days in 30 days</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>StatsPage</name>
+    <message numerus="yes">
+        <location filename="../qml/StatsPage.qml" line="100"/>
+        <source>%n technique(s)</source>
+        <translation>
+            <numerusform>%n technique</numerusform>
+            <numerusform>%n techniques</numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>TodayPage</name>
