@@ -44,6 +44,9 @@ qt_add_qml_module(mitori_app
         qml/RatingRow.qml
         qml/GradeStand.qml
         qml/TodayPage.qml
+        qml/NotesPage.qml
+        qml/NoteEditor.qml
+        qml/NoteRow.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp

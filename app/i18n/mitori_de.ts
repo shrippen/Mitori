@@ -76,6 +76,91 @@
     </message>
 </context>
 <context>
+    <name>NoteEditor</name>
+    <message>
+        <location filename="../qml/NoteEditor.qml" line="22"/>
+        <location filename="../qml/NoteEditor.qml" line="55"/>
+        <source>Note</source>
+        <translation>Notiz</translation>
+    </message>
+    <message>
+        <location filename="../qml/NoteEditor.qml" line="29"/>
+        <source>Delete</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <location filename="../qml/NoteEditor.qml" line="38"/>
+        <source>Save</source>
+        <translation>Speichern</translation>
+    </message>
+</context>
+<context>
+    <name>NoteRow</name>
+    <message>
+        <location filename="../qml/NoteRow.qml" line="21"/>
+        <source>Last note: %1</source>
+        <translation>Letzte Notiz: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/NoteRow.qml" line="35"/>
+        <source>Note for today …</source>
+        <translation>Notiz für heute …</translation>
+    </message>
+    <message>
+        <location filename="../qml/NoteRow.qml" line="36"/>
+        <source>New note</source>
+        <translation>Neue Notiz</translation>
+    </message>
+    <message>
+        <location filename="../qml/NoteRow.qml" line="48"/>
+        <source>Add note</source>
+        <translation>Notiz hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="../qml/NoteRow.qml" line="54"/>
+        <source>Notes</source>
+        <translation>Notizen</translation>
+    </message>
+</context>
+<context>
+    <name>NotesPage</name>
+    <message>
+        <location filename="../qml/NotesPage.qml" line="38"/>
+        <source>Notes</source>
+        <translation>Notizen</translation>
+    </message>
+    <message>
+        <location filename="../qml/NotesPage.qml" line="43"/>
+        <source>Today</source>
+        <translation>Heute</translation>
+    </message>
+    <message>
+        <location filename="../qml/NotesPage.qml" line="88"/>
+        <source>No notes on this technique yet.</source>
+        <translation>Noch keine Notizen zu dieser Technik.</translation>
+    </message>
+    <message>
+        <location filename="../qml/NotesPage.qml" line="140"/>
+        <source>Press and hold a note to change or delete it.</source>
+        <translation>Lang drücken: Notiz bearbeiten oder löschen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/NotesPage.qml" line="155"/>
+        <source>Note for today …</source>
+        <translation>Notiz für heute …</translation>
+    </message>
+    <message>
+        <location filename="../qml/NotesPage.qml" line="156"/>
+        <source>New note</source>
+        <translation>Neue Notiz</translation>
+    </message>
+    <message>
+        <location filename="../qml/NotesPage.qml" line="163"/>
+        <source>Add</source>
+        <translation>Hinzufügen</translation>
+    </message>
+</context>
+<context>
     <name>PlayerPage</name>
     <message>
         <location filename="../qml/PlayerPage.qml" line="232"/>
@@ -84,7 +169,7 @@
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="293"/>
+        <location filename="../qml/PlayerPage.qml" line="299"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
@@ -119,17 +204,17 @@
         <translation>Wiedergabe</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="277"/>
+        <location filename="../qml/PlayerPage.qml" line="283"/>
         <source>Done</source>
         <translation>Geschafft</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="278"/>
+        <location filename="../qml/PlayerPage.qml" line="284"/>
         <source>Every technique of today&apos;s training is practised.</source>
         <translation>Alle Techniken des heutigen Trainings sind geübt.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="302"/>
+        <location filename="../qml/PlayerPage.qml" line="308"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>
@@ -144,8 +229,8 @@
         <translation>Tempo</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="281"/>
-        <location filename="../qml/PlayerPage.qml" line="311"/>
+        <location filename="../qml/PlayerPage.qml" line="287"/>
+        <location filename="../qml/PlayerPage.qml" line="317"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
@@ -158,40 +243,45 @@
         <translation>Das Übungsprotokoll lässt sich nicht öffnen: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="64"/>
+        <location filename="../services/practice.cpp" line="65"/>
         <source>not rated</source>
         <translation>offen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="64"/>
+        <location filename="../services/practice.cpp" line="65"/>
         <source>seen</source>
         <translation>gesehen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="64"/>
+        <location filename="../services/practice.cpp" line="65"/>
         <source>with help</source>
         <translation>mit Hilfe</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="64"/>
+        <location filename="../services/practice.cpp" line="65"/>
         <source>sure</source>
         <translation>sicher</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="64"/>
+        <location filename="../services/practice.cpp" line="65"/>
         <source>exam-ready</source>
         <translation>prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="74"/>
+        <location filename="../services/practice.cpp" line="75"/>
         <source>The rating could not be saved: %1</source>
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
+    </message>
+    <message>
+        <location filename="../services/practice.cpp" line="207"/>
+        <source>The note could not be saved: %1</source>
+        <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
 </context>
 <context>
     <name>PracticeLog</name>
     <message>
-        <location filename="../store/practicelog.cpp" line="58"/>
+        <location filename="../store/practicelog.cpp" line="71"/>
         <source>it comes from a newer Mitori (schema %1); update Mitori</source>
         <translation>es stammt aus einer neueren Mitori-Version (Schema %1); bitte Mitori aktualisieren</translation>
     </message>
@@ -319,12 +409,22 @@
 <context>
     <name>TechniqueSheet</name>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="63"/>
+        <location filename="../qml/TechniqueSheet.qml" line="60"/>
+        <source>Last note: %1</source>
+        <translation>Letzte Notiz: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueSheet.qml" line="74"/>
         <source>Watch video</source>
         <translation>Video ansehen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="69"/>
+        <location filename="../qml/TechniqueSheet.qml" line="79"/>
+        <source>Notes</source>
+        <translation>Notizen</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueSheet.qml" line="88"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>

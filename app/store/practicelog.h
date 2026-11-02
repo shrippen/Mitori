@@ -19,6 +19,18 @@ public:
         QString device;
     };
 
+    // A note on a technique. Changes and deletions keep the uid and set `changed`, so devices can
+    // be merged note by note later; a deleted note stays as a mark (`deleted`).
+    struct Note {
+        QString uid;
+        QString entry;
+        QString text;
+        QDateTime created;      // UTC
+        QDateTime changed;      // UTC
+        QString device;
+        bool deleted = false;
+    };
+
     PracticeLog();
     ~PracticeLog();
     PracticeLog(const PracticeLog &) = delete;
@@ -37,7 +49,16 @@ public:
     // All ratings of one entry, oldest first.
     QList<Rating> history(const QString &entry) const;
 
-    static constexpr int schemaVersion = 1;
+    // Notes: add one (an empty uid on failure), change or delete one by uid (false on failure).
+    Note addNote(const QString &entry, const QString &text, const QDateTime &at, const QString &device);
+    bool changeNote(const QString &uid, const QString &text, const QDateTime &at);
+    bool deleteNote(const QString &uid, const QDateTime &at);
+    // The notes of one entry that are not deleted, oldest first.
+    QList<Note> notes(const QString &entry) const;
+    // The newest note of every entry that has one.
+    QHash<QString, Note> lastNotes() const;
+
+    static constexpr int schemaVersion = 2;
 
 private:
     bool migrate();

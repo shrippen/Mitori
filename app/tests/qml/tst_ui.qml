@@ -400,6 +400,37 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Notes: add one for today from the field, change it and delete it (press and hold).
+    function test_8_notes() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        const page = push("NotesPage", { entry: entry })
+        compare(page.notes.length, 0)
+        const compose = findChild(page, "compose")
+        compose.text = "Hüfte früher drehen"
+        compose.accepted()                              // Enter in the field
+        compare(page.notes.length, 1)
+        compare(compose.text, "")
+        compare(Practice.lastNote(entry.id).text, "Hüfte früher drehen")
+        compare(page.days.length, 1)
+        Practice.addNote(entry.id, "Blick beim Partner")
+        compare(page.days[0].notes.length, 2)
+        shot("8-notes")
+        const note = findChild(page, "note")
+        verify(note)
+        mousePress(note, 20, note.height / 2)
+        wait(1000)
+        mouseRelease(note, 20, note.height / 2)
+        const editor = findChild(page, "noteEditor")
+        tryVerify(() => editor.opened, 2000, "press and hold opens the editor")
+        compare(editor.note.uid, page.notes[0].uid)
+        editor.close()
+        verify(Practice.changeNote(page.notes[0].uid, "Hüfte viel früher drehen"))
+        compare(page.notes[0].text, "Hüfte viel früher drehen")
+        verify(Practice.deleteNote(page.notes[1].uid))
+        compare(page.notes.length, 1)
+        window.pageStack.pop()
+    }
+
     // The last chapter ends with the file; the loop must still start over at the chapter.
     function test_6_loop_at_end_of_file() {
         const page = playerAt(-1)

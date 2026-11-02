@@ -6,7 +6,7 @@ import Kante
 import Mitori
 
 // Technique sheet (clickdummy "Programm", row tapped): name, attack, kanji, how well it sits
-// (rate 1–4), and the way on to the video and the comment. Notes come later in step 2.
+// (rate 1–4), the last note, and the way on to the video, the notes and the comment.
 Kirigami.Dialog {
     id: sheet
 
@@ -17,6 +17,8 @@ Kirigami.Dialog {
 
     signal playRequested(var entry)
     signal commentRequested(var entry)
+    signal notesRequested(var entry)
+    readonly property var lastNote: Practice.notesRevision >= 0 && entry.id ? Practice.lastNote(entry.id) : ({})
 
     title: entry.title || ""
     preferredWidth: Kirigami.Units.gridUnit * 24
@@ -52,6 +54,15 @@ Kirigami.Dialog {
             Layout.topMargin: Kirigami.Units.largeSpacing
             entry: sheet.entry.id || ""
         }
+        QQC2.Label {
+            Layout.fillWidth: true
+            visible: !!sheet.lastNote.text
+            text: qsTr("Last note: %1").arg(sheet.lastNote.text || "")
+            color: KanteStyle.mutedTextColor
+            wrapMode: Text.Wrap
+            maximumLineCount: 3
+            elide: Text.ElideRight
+        }
         RowLayout {
             Layout.topMargin: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.smallSpacing
@@ -62,6 +73,14 @@ Kirigami.Dialog {
                 icon.name: "media-playback-start"
                 text: qsTr("Watch video")
                 onClicked: sheet.playRequested(sheet.entry)
+            }
+            KanteButton {
+                icon.name: "view-pim-notes"
+                text: qsTr("Notes")
+                onClicked: {
+                    sheet.close()
+                    sheet.notesRequested(sheet.entry)
+                }
             }
             KanteButton {
                 visible: sheet.hasComment

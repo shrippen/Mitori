@@ -41,6 +41,7 @@ void Practice::load(const QString &path)
     m_open = true;
     m_latest = m_log->latest();
     m_first = m_log->firstRated();
+    m_lastNotes = m_log->lastNotes();
 }
 
 QString Practice::defaultPath()
@@ -168,4 +169,85 @@ QVariantList Practice::due(const QVariantList &candidates) const
         result << row;
     }
     return result;
+}
+
+namespace {
+
+QVariantMap noteMap(const PracticeLog::Note &n)
+{
+    return {{QStringLiteral("uid"), n.uid},
+            {QStringLiteral("text"), n.text},
+            {QStringLiteral("created"), n.created.toLocalTime()},
+            {QStringLiteral("changed"), n.changed.toLocalTime()}};
+}
+
+} // namespace
+
+QVariantList Practice::notes(const QString &entry) const
+{
+    QVariantList result;
+    if (!m_open) {
+        return result;
+    }
+    for (const PracticeLog::Note &n : m_log->notes(entry)) {
+        result << noteMap(n);
+    }
+    return result;
+}
+
+QVariantMap Practice::lastNote(const QString &entry) const
+{
+    const auto it = m_lastNotes.constFind(entry);
+    return it == m_lastNotes.constEnd() ? QVariantMap() : noteMap(*it);
+}
+
+void Practice::noteSaved(bool ok)
+{
+    if (!ok) {
+        m_error = tr("The note could not be saved: %1").arg(m_log->errorString());
+        qWarning("Practice: %s", qPrintable(m_error));
+        emit errorChanged();
+        return;
+    }
+    ++m_notesRevision;
+    emit notesChanged();
+}
+
+bool Practice::addNote(const QString &entry, const QString &text)
+{
+    if (!m_open || entry.isEmpty() || text.trimmed().isEmpty()) {
+        return false;
+    }
+    const PracticeLog::Note n = m_log->addNote(entry, text, QDateTime::currentDateTimeUtc(), deviceId());
+    if (!n.uid.isEmpty()) {
+        m_lastNotes.insert(entry, n);
+    }
+    noteSaved(!n.uid.isEmpty());
+    return !n.uid.isEmpty();
+}
+
+bool Practice::changeNote(const QString &uid, const QString &text)
+{
+    if (!m_open || text.trimmed().isEmpty()) {
+        return false;
+    }
+    const bool ok = m_log->changeNote(uid, text, QDateTime::currentDateTimeUtc());
+    if (ok) {
+        m_lastNotes = m_log->lastNotes();
+    }
+    noteSaved(ok);
+    return ok;
+}
+
+bool Practice::deleteNote(const QString &uid)
+{
+    if (!m_open) {
+        return false;
+    }
+    const bool ok = m_log->deleteNote(uid, QDateTime::currentDateTimeUtc());
+    if (ok) {
+        m_lastNotes = m_log->lastNotes();
+    }
+    noteSaved(ok);
+    return ok;
 }

@@ -271,6 +271,12 @@ Kirigami.Page {
                     onRated: if (page.training) page.nextOpen()
                 }
 
+                NoteRow {
+                    Layout.fillWidth: true
+                    entry: page.current
+                    onNotesRequested: page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: page.current })
+                }
+
                 KanteHintCard {
                     objectName: "trainingDone"
                     Layout.fillWidth: true
