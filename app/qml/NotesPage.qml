@@ -204,6 +204,7 @@ Kirigami.ScrollablePage {
             }
             // A photo or voice note becomes a note at once, with the text typed so far.
             MediaCompose {
+                objectName: "noteMedia"
                 stackPage: page
                 onAttached: name => {
                     if (Practice.addNote(page.entry.id, compose.text, name)) {

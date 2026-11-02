@@ -30,6 +30,8 @@ public:
 
     Q_INVOKABLE QUrl url(const QString &name) const;
     Q_INVOKABLE Kind kind(const QString &name) const;
+    // Whether the file is on this device (a cloud backup leaves the media out).
+    Q_INVOKABLE bool exists(const QString &name) const;
     Q_INVOKABLE QString importPhoto(const QUrl &source);
     // Where the camera page saves its picture (the cache), and taking it in: imported, the
     // camera's file removed.

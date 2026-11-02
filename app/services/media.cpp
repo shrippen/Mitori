@@ -32,6 +32,12 @@ Media::Kind Media::kind(const QString &name) const
     }
 }
 
+bool Media::exists(const QString &name) const
+{
+    const QString p = m_store->path(name);
+    return !p.isEmpty() && QFile::exists(p);
+}
+
 QString Media::importPhoto(const QUrl &source)
 {
     return m_store->importPhoto(source);

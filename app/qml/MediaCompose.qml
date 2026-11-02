@@ -15,7 +15,7 @@ import Mitori
 //
 //   [📷] [🎤]                   idle
 //   ● 0:12  [Stop] [Cancel]     recording
-RowLayout {
+Item {
     id: compose
 
     // A photo or voice note is ready: its name in the media folder.
@@ -26,72 +26,82 @@ RowLayout {
     // The camera page goes on this page's stack.
     property Item stackPage: null
 
-    spacing: Kirigami.Units.smallSpacing
+    implicitWidth: row.implicitWidth
+    implicitHeight: row.implicitHeight
 
-    KanteToolButton {
-        objectName: "addPhoto"
-        visible: !compose.recording
-        icon.name: "camera-photo"
-        text: qsTr("Photo")
-        display: QQC2.AbstractButton.IconOnly
-        onClicked: photoMenu.open()
+    RowLayout {
+        id: row
 
-        QQC2.Menu {
-            id: photoMenu
+        anchors.fill: parent
+        spacing: Kirigami.Units.smallSpacing
 
-            QQC2.MenuItem {
-                objectName: "takePhoto"
-                icon.name: "camera-photo"
-                text: qsTr("Take a photo")
-                onTriggered: compose.takePhoto()
-            }
-            QQC2.MenuItem {
-                objectName: "choosePicture"
-                icon.name: "insert-image"
-                text: qsTr("Choose a picture …")
-                onTriggered: pictureDialog.open()
+        KanteToolButton {
+            objectName: "addPhoto"
+            visible: !compose.recording
+            icon.name: "camera-photo"
+            text: qsTr("Photo")
+            display: QQC2.AbstractButton.IconOnly
+            onClicked: photoMenu.open()
+
+            QQC2.Menu {
+                id: photoMenu
+
+                QQC2.MenuItem {
+                    objectName: "takePhoto"
+                    icon.name: "camera-photo"
+                    text: qsTr("Take a photo")
+                    onTriggered: compose.takePhoto()
+                }
+                QQC2.MenuItem {
+                    objectName: "choosePicture"
+                    icon.name: "insert-image"
+                    text: qsTr("Choose a picture …")
+                    onTriggered: pictureDialog.open()
+                }
             }
         }
-    }
-    KanteToolButton {
-        objectName: "recordVoice"
-        visible: !compose.recording
-        icon.name: "audio-input-microphone"
-        text: qsTr("Voice note")
-        display: QQC2.AbstractButton.IconOnly
-        onClicked: compose.record()
-    }
-
-    // While recording: time, Stop (keeps it), Cancel.
-    QQC2.Label {
-        objectName: "recordingTime"
-        visible: compose.recording
-        text: "● " + Math.floor(recorder.duration / 60000) + ":" + String(Math.floor(recorder.duration / 1000) % 60).padStart(2, "0")
-        color: KanteStyle.negativeTextColor
-        Accessible.name: qsTr("Recording")
-    }
-    KanteButton {
-        objectName: "stopRecording"
-        visible: compose.recording
-        icon.name: "media-playback-stop"
-        text: qsTr("Stop")
-        onClicked: recorder.stop()
-    }
-    KanteButton {
-        objectName: "cancelRecording"
-        visible: compose.recording
-        text: qsTr("Cancel")
-        onClicked: {
-            recorder.cancelled = true
-            recorder.stop()
+        KanteToolButton {
+            objectName: "recordVoice"
+            visible: !compose.recording
+            icon.name: "audio-input-microphone"
+            text: qsTr("Voice note")
+            display: QQC2.AbstractButton.IconOnly
+            onClicked: compose.record()
         }
+
+        // While recording: time, Stop (keeps it), Cancel.
+        QQC2.Label {
+            objectName: "recordingTime"
+            visible: compose.recording
+            text: "● " + Math.floor(recorder.duration / 60000) + ":" + String(Math.floor(recorder.duration / 1000) % 60).padStart(2, "0")
+            color: KanteStyle.negativeTextColor
+            Accessible.name: qsTr("Recording")
+        }
+        KanteButton {
+            objectName: "stopRecording"
+            visible: compose.recording
+            icon.name: "media-playback-stop"
+            text: qsTr("Stop")
+            onClicked: recorder.stop()
+        }
+        KanteButton {
+            objectName: "cancelRecording"
+            visible: compose.recording
+            text: qsTr("Cancel")
+            onClicked: {
+                recorder.cancelled = true
+                recorder.stop()
+            }
+        }
+
     }
 
     function takePhoto() {
         if (cameraPermission.status !== Qt.PermissionStatus.Granted) {
-            if (cameraPermission.status === Qt.PermissionStatus.Denied) {
+            if (cameraPermission.status === Qt.PermissionStatus.Denied && compose.cameraAsked) {
                 compose.tell(qsTr("Mitori may not use the camera. Allow it in the system settings."))
             }
+            compose.cameraAsked = true
             cameraPermission.request()
             return
         }
@@ -100,9 +110,10 @@ RowLayout {
 
     function record() {
         if (microphonePermission.status !== Qt.PermissionStatus.Granted) {
-            if (microphonePermission.status === Qt.PermissionStatus.Denied) {
+            if (microphonePermission.status === Qt.PermissionStatus.Denied && compose.microphoneAsked) {
                 compose.tell(qsTr("Mitori may not use the microphone. Allow it in the system settings."))
             }
+            compose.microphoneAsked = true
             microphonePermission.request()
             return
         }
@@ -128,9 +139,8 @@ RowLayout {
         problem.show()
     }
 
-    KanteToast {
-        id: problem
-
+    // On the window's overlay, bottom right.
+    property KanteToast problem: KanteToast {
         objectName: "mediaProblem"
         parent: QQC2.Overlay.overlay
         anchors.right: parent ? parent.right : undefined
@@ -138,6 +148,10 @@ RowLayout {
         anchors.margins: Kirigami.Units.largeSpacing
         kind: KanteToast.Kind.Warn
     }
+    // Asked once already this time: a refusal now is a lasting one (Android asks no more).
+    property bool cameraAsked: false
+    property bool microphoneAsked: false
+
 
     CameraPermission {
         id: cameraPermission
