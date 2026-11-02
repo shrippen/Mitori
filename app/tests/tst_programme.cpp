@@ -44,7 +44,6 @@ class TstProgramme : public QObject
 private slots:
     void initTestCase()
     {
-        QStandardPaths::setTestModeEnabled(true);
         QSettings().clear();
     }
 
@@ -232,6 +231,10 @@ private slots:
 
 int main(int argc, char *argv[])
 {
+    // Settings in the build directory (not ~/.qttest, which every build and review running at the
+    // same time would share and overwrite).
+    qputenv("XDG_CONFIG_HOME", TEST_DATA_DIR "/config");
+    qputenv("XDG_DATA_HOME", TEST_DATA_DIR "/data");
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName(QStringLiteral("mitori-test"));
     TstProgramme test;
