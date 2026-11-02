@@ -1412,7 +1412,7 @@ TestCase {
         Programme.discipline = "aikido"
     }
 
-    // Tablet in landscape: the start menu as a grid of four, the tiles in one row.
+    // Tablet in landscape: the start menu as a grid of four; the fifth tile starts a second row.
     function test_1b_start_tablet() {
         const start = window.pageStack.items[0]
         window.width = 1280
