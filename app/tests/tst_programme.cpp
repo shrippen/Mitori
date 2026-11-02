@@ -62,6 +62,37 @@ private slots:
         QCOMPARE(programme.practiceEntries(QStringLiteral("aikido")).size(), k5);
     }
 
+    // Search across disciplines: every word must match; case, accents and hyphens do not matter.
+    void searchFindsTechniques()
+    {
+        const QVariantList ikkyo = programme.search(QStringLiteral("ikkyo"));
+        QVERIFY(ikkyo.size() > 5);
+        const QVariantMap first = ikkyo.first().toMap();
+        QCOMPARE(first.value(QStringLiteral("discipline")).toString(), QStringLiteral("aikido"));
+        QVERIFY(!first.value(QStringLiteral("gradeName")).toString().isEmpty());
+        QVERIFY(!first.value(QStringLiteral("disciplineName")).toString().isEmpty());
+        QVERIFY(!first.value(QStringLiteral("groupName")).toString().isEmpty());
+        // Two words narrow it down; the order of the words does not matter.
+        const QVariantList narrow = programme.search(QStringLiteral("shomen IKKYO"));
+        QVERIFY(!narrow.isEmpty() && narrow.size() < ikkyo.size());
+        QCOMPARE(programme.search(QStringLiteral("ikkyo shomen")).size(), narrow.size());
+        // Hyphens and accents: "shiho nage" finds Shiho-nage, "kote gaeshi" Kote-gaeshi.
+        QVERIFY(!programme.search(QStringLiteral("shiho nage")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("KOTE-GAESHI")).isEmpty());
+        // Japanese.
+        QVERIFY(!programme.search(QStringLiteral("一教")).isEmpty());
+        // No duplicates, a limit, nothing for blanks.
+        QStringList seen;
+        for (const QVariant &r : ikkyo) {
+            const QString id = r.toMap().value(QStringLiteral("id")).toString();
+            QVERIFY(!seen.contains(id));
+            seen << id;
+        }
+        QCOMPARE(programme.search(QStringLiteral("ikkyo"), 3).size(), 3);
+        QVERIFY(programme.search(QStringLiteral("   ")).isEmpty());
+        QVERIFY(programme.search(QStringLiteral("zzzzqqq")).isEmpty());
+    }
+
     void selectionIsKept()
     {
         QCOMPARE(programme.discipline(), QStringLiteral("aikido"));

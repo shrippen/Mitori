@@ -441,6 +441,30 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Search: techniques across disciplines and own notes; a result opens the sheet.
+    function test_9_search() {
+        Practice.addNote(Programme.entries("aikido", "k5").find(r => r.kind === "entry").id, "Kreis größer machen")
+        const page = push("SearchPage")
+        const field = findChild(page, "searchField")
+        field.text = "ikkyo shomen"
+        tryVerify(() => page.techniques.length > 0, 2000)
+        verify(page.techniques.every(r => r.discipline !== undefined))
+        compare(page.notes.length, 0)
+        field.text = "kreis grosser"                    // größer without umlaut and ß
+        tryVerify(() => page.query === "kreis grosser", 2000)
+        compare(page.notes.length, 1)
+        field.text = "ikkyo"
+        tryVerify(() => page.query === "ikkyo", 2000)
+        shot("9-search")
+        const result = findChild(page, "techniqueResult")
+        mouseClick(result, result.width / 3, result.height / 2)
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened, 2000)
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        window.pageStack.pop()
+    }
+
     function findChildren(item, name) {
         let found = []
         if (item.objectName === name) {
@@ -474,9 +498,10 @@ TestCase {
     // With the note field focused, the controls scroll it into view when the window shrinks
     // (the on-screen keyboard opens after the focus).
     function test_8c_note_field_above_keyboard() {
+        const page = playerAt(0)                       // skips without videos, before the window changes
         window.width = 800
         window.height = 360
-        const page = playerAt(0)
+        wait(300)
         const view = findChild(page, "controlsView")
         const field = findChild(page, "noteField")
         field.forceActiveFocus()

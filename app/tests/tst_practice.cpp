@@ -277,6 +277,27 @@ private slots:
         QCOMPARE(spy.count(), 3);
     }
 
+    void searchNotes()
+    {
+        QTemporaryDir dir;
+        Practice practice(dir.filePath(QStringLiteral("mitori.sqlite")));
+        practice.addNote(QStringLiteral("a"), QStringLiteral("Hüfte früher drehen"));
+        practice.addNote(QStringLiteral("b"), QStringLiteral("Blick beim Partner, Hüfte tief"));
+        practice.addNote(QStringLiteral("c"), QStringLiteral("Kreis größer"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("hufte")).size(), 2);       // without the umlaut
+        const QVariantList both = practice.searchNotes(QStringLiteral("HÜFTE blick"));
+        QCOMPARE(both.size(), 1);
+        QCOMPARE(both.first().toMap().value(QStringLiteral("entry")).toString(), QStringLiteral("b"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("hüfte")).first().toMap().value(QStringLiteral("entry")).toString(),
+                 QStringLiteral("b"));                                         // newest first
+        const QString uid = practice.notes(QStringLiteral("c")).first().toMap().value(QStringLiteral("uid")).toString();
+        practice.deleteNote(uid);
+        QVERIFY(practice.searchNotes(QStringLiteral("kreis")).isEmpty());
+        practice.addNote(QStringLiteral("d"), QStringLiteral("Fuß nach außen"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("fuss aussen")).size(), 1);   // ß as ss
+        QVERIFY(practice.searchNotes(QStringLiteral(" ")).isEmpty());
+    }
+
     void deviceIdStays()
     {
         const QString id = Practice::deviceId();

@@ -18,6 +18,12 @@ Kirigami.ScrollablePage {
 
     actions: [
         Kirigami.Action {
+            icon.name: "search"
+            text: qsTr("Search")
+            displayHint: Kirigami.DisplayHint.IconOnly
+            onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("SearchPage.qml"))
+        },
+        Kirigami.Action {
             icon.name: "configure"
             text: qsTr("Settings")
             displayHint: Kirigami.DisplayHint.IconOnly

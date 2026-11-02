@@ -1,6 +1,11 @@
 #include "programme.h"
 
+#include "searchkey.h"
+
+#include <QSet>
 #include <QSettings>
+
+#include <algorithm>
 
 namespace {
 
@@ -228,6 +233,56 @@ QVariantList Programme::shinkiTohoEntries(const QVariantMap &d, const QString &g
                                                                       form.value(QStringLiteral("shidachi")).toString(),
                                                                       form.value(QStringLiteral("treffer")).toString());
         result << r;
+    }
+    return result;
+}
+
+QVariantList Programme::search(const QString &query, int limit) const
+{
+    QVariantList result;
+    const QStringList words = searchKey(query).split(u' ', Qt::SkipEmptyParts);
+    if (words.isEmpty()) {
+        return result;
+    }
+    QSet<QString> seen;
+    for (const QVariant &d : m_catalog.disciplines()) {
+        const QVariantMap discipline = d.toMap();
+        const QString disciplineId = discipline.value(QStringLiteral("id")).toString();
+        for (const QVariant &g : grades(disciplineId)) {
+            const QVariantMap grade = g.toMap();
+            QString group;
+            for (const QVariant &e : entries(disciplineId, grade.value(QStringLiteral("id")).toString())) {
+                QVariantMap row = e.toMap();
+                if (row.value(QStringLiteral("kind")) == QLatin1String("group")) {
+                    group = row.value(QStringLiteral("title")).toString();
+                    continue;
+                }
+                const QString id = row.value(QStringLiteral("id")).toString();
+                if (row.value(QStringLiteral("kind")) != QLatin1String("entry") || seen.contains(id)) {
+                    continue;
+                }
+                const QString haystack = searchKey(QStringList{row.value(QStringLiteral("title")).toString(),
+                                                               row.value(QStringLiteral("attack")).toString(),
+                                                               row.value(QStringLiteral("jp")).toString(),
+                                                               row.value(QStringLiteral("extra")).toString()}
+                                                       .join(u' '));
+                const bool all = std::all_of(words.cbegin(), words.cend(),
+                                             [&haystack](const QString &w) { return haystack.contains(w); });
+                if (!all) {
+                    continue;
+                }
+                seen.insert(id);
+                row[QStringLiteral("discipline")] = disciplineId;
+                row[QStringLiteral("disciplineName")] = discipline.value(QStringLiteral("kurzname"));
+                row[QStringLiteral("grade")] = grade.value(QStringLiteral("id"));
+                row[QStringLiteral("gradeName")] = grade.value(QStringLiteral("name"));
+                row[QStringLiteral("groupName")] = group;
+                result << row;
+                if (result.size() >= limit) {
+                    return result;
+                }
+            }
+        }
     }
     return result;
 }

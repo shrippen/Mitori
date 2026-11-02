@@ -44,6 +44,11 @@ public:
     // discipline, in programme order, each with `current` (part of the chosen grade) and
     // `gradeName`.
     Q_INVOKABLE QVariantList practiceEntries(const QString &discipline) const;
+    // Techniques whose name, attack, Japanese or addition contain every word of `query`, across
+    // all disciplines and grades in programme order (at most `limit`). Case, accents (Ô) and
+    // hyphens do not matter. Each row as in entries(), with `discipline`, `disciplineName`,
+    // `grade`, `gradeName` and `groupName` (Tachi-waza · Mae-seme …).
+    Q_INVOKABLE QVariantList search(const QString &query, int limit = 50) const;
     // One entry by id (the same map as in entries()), or an empty map.
     Q_INVOKABLE QVariantMap entry(const QString &id) const;
 

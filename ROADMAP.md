@@ -28,7 +28,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Heute üben (Wiederholen nach Plan, Abstände je Stufe einstellbar, Kachel im Startmenü) und Training (Playliste der
   fälligen Techniken, Einschätzen schaltet weiter). Notizen je Technik (Text; nach Tagen, lang drücken zum
   Bearbeiten/Löschen, letzte Notiz im Blatt, Eingabe im Player). Offen: Fotos und Sprachnotizen an Notizen
-  (Plattform-Schicht), „Alle Notizen“, Statistik, Suche.
+  (Plattform-Schicht), „Alle Notizen“, Statistik. Suche (Techniken aller Sparten und Grade, eigene Notizen;
+  Groß/klein, Akzente, ß und Bindestriche egal) über die Lupe im Startmenü.
 
 ## Kante-Bedarf
 
