@@ -174,18 +174,8 @@ bool Backup::merge(Step step, QVariantMap *summary)
     }
     const QString practice = QDir(m_work).filePath(kCopyPrefix + BackupArchive::kPractice);
     const QString courses = QDir(m_work).filePath(kCopyPrefix + BackupArchive::kCourses);
-    if (!archive.extract(BackupArchive::kPractice, practice) || !archive.extract(BackupArchive::kCourses, courses)) {
+    if (!archive.unpack(practice, courses)) {
         return setError(tr("The backup could not be read: %1").arg(archive.errorString()));
-    }
-    {
-        PracticeLog log;
-        CourseBook book;
-        if (!log.open(practice)) {
-            return setError(tr("The backup could not be read: %1").arg(log.errorString()));
-        }
-        if (!book.open(courses)) {
-            return setError(tr("The backup could not be read: %1").arg(book.errorString()));
-        }
     }
 
     const TableMerge::Mode mode = step == Step::Apply ? TableMerge::Mode::Apply : TableMerge::Mode::Preview;

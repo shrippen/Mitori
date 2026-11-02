@@ -106,13 +106,17 @@ public:
     // Every passed grade that is not deleted, the latest day first.
     QList<Grade> grades() const;
 
+    // Every entry's `changed` by uid, deleted ones too (the sync's base versions).
+    QHash<QString, QDateTime> entryVersions() const;
+
     // The whole book as one new file (a backup), consistent while the app writes; false when it
     // exists or could not be written.
     bool snapshot(const QString &path);
     // Merges another book (a backup, opened and migrated before) row by row (TableMerge). Two
     // notebooks of one calendar event become one (the older keeps the entries of both), two rows
     // of one passed grade the newer.
-    bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result);
+    bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result,
+               const TableMerge::Watch &watch = {});
 
     static constexpr int schemaVersion = 3;
 

@@ -455,6 +455,17 @@ QHash<QString, int> CourseBook::entryCounts() const
     return result;
 }
 
+QHash<QString, QDateTime> CourseBook::entryVersions() const
+{
+    QHash<QString, QDateTime> versions;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.exec(QStringLiteral("SELECT uid, changed FROM entries"));
+    while (q.next()) {
+        versions.insert(q.value(0).toString(), QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC));
+    }
+    return versions;
+}
+
 bool CourseBook::snapshot(const QString &path)
 {
     m_error.clear();
@@ -523,7 +534,8 @@ bool joinDoubles(QSqlDatabase &db, QString *error)
 
 } // namespace
 
-bool CourseBook::merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result)
+bool CourseBook::merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result,
+                   const TableMerge::Watch &watch)
 {
     using namespace Qt::StringLiterals;
     using TableMerge::Kind;
@@ -535,7 +547,7 @@ bool CourseBook::merge(const QString &otherPath, TableMerge::Mode mode, TableMer
          Kind::Editable, {}},
         {QStringLiteral("entries"),
          {u"uid"_s, u"course"_s, u"text"_s, u"created"_s, u"changed"_s, u"device"_s, u"deleted"_s, u"media"_s},
-         Kind::Editable, u"media"_s},
+         Kind::Editable, u"media"_s, u"text"_s, u"course"_s},
         {QStringLiteral("grades"),
          {u"uid"_s, u"discipline"_s, u"grade"_s, u"day"_s, u"place"_s, u"created"_s, u"changed"_s, u"device"_s,
           u"deleted"_s},
@@ -543,5 +555,5 @@ bool CourseBook::merge(const QString &otherPath, TableMerge::Mode mode, TableMer
     };
     m_error.clear();
     QSqlDatabase db = QSqlDatabase::database(m_connection);
-    return TableMerge::run(db, otherPath, tables, mode, result, &m_error, joinDoubles);
+    return TableMerge::run(db, otherPath, tables, mode, result, &m_error, joinDoubles, watch);
 }

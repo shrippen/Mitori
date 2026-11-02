@@ -87,7 +87,16 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Notizbücher, Einträge und Grade per uid, das neuere `changed` gewinnt, Löschmarken eingeschlossen; zwei Notizbücher
   eines Termins werden eins, ein Grad doppelt der neuere. Vorher zeigt ein Dialog, was neu und was geändert ist.
   DVD-Codes und Inhaltsschlüssel bleiben draußen. Android Auto Backup sichert die Datenbanken ohne Medien.
-  Offen: WebDAV/Nextcloud-Abgleich mit Konflikten (Clickdummy „Telefon / Tablet / Beide behalten“).
+  Offen: Die Vorschau zählt Einträge, die das Zusammenführen gleich wieder löscht (Notizbuch woanders gelöscht);
+  ein als Dublette gelöschtes Notizbuch kann nach einer späteren Löschung durch den Nutzer wiederkommen (selten).
+- Schritt 4: Abgleich über WebDAV / Nextcloud (Einstellungen → Abgleich zwischen Geräten): jedes Gerät legt seine
+  Daten ohne Medien als `geraete/<id>.zip` in den Ordner, Fotos und Sprachnotizen einzeln unter `medien/`
+  (`store/webdav`, `services/syncjob`, `services/sync`). Abgleichen führt die Archive der anderen Geräte zusammen
+  (wie die Sicherung), holt die genannten Medien und legt das eigene Archiv ab; beim Start, einmal am Tag und auf
+  Wunsch nach jeder Änderung. Konflikt nur, wenn dieselbe Notiz oder derselbe Eintrag seit dem letzten Abgleich auf
+  zwei Geräten geändert wurde: bleibt bis zur Wahl (dieses Gerät, das andere, beide behalten; `ConflictsPage`).
+  Konto, App-Passwort und Sync-Id in `sync/`, von Android Auto Backup und Geräteumzug ausgenommen.
+  Offen: Test gegen eine echte Nextcloud.
 - Schritt 4: Video-Bundles (Einstellungen → „Videos und DVD-Codes“, Hinweis im Programm „Code eingeben“): das öffentliche
   Manifest (Gitea-Paket `mitori-manifest`) listet die Bundles; der Code einer DVD (20 Zeichen, Prüfzeichen) schaltet
   eins frei, Mitori lädt, prüft (SHA-256, Blöcke mit Tag) und entschlüsselt seine Videos aufs Gerät

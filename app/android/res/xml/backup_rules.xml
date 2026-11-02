@@ -5,4 +5,6 @@
     <!-- Photos and voice notes: they would soon pass the 25 MB limit (see data_extraction_rules.xml).
          On Android 9–11 this also holds for a device transfer: there the media stay behind. -->
     <exclude domain="file" path="medien/" />
+    <!-- The sync's account (app password) and id: a restored or copied device makes its own. -->
+    <exclude domain="file" path="sync/" />
 </full-backup-content>

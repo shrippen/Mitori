@@ -75,7 +75,15 @@
 <context>
     <name>SettingsPage</name>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="136"/>
+        <location filename="../qml/SettingsPage.qml" line="197"/>
+        <source>%n conflict(s): solve …</source>
+        <translation>
+            <numerusform>%n conflict: solve …</numerusform>
+            <numerusform>%n conflicts: solve …</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/SettingsPage.qml" line="249"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n new</numerusform>
@@ -83,7 +91,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="139"/>
+        <location filename="../qml/SettingsPage.qml" line="252"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n changed</numerusform>
@@ -91,7 +99,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="146"/>
+        <location filename="../qml/SettingsPage.qml" line="259"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>

@@ -308,6 +308,26 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Sync: switched on it shows the account; without one "Sync now" says what is missing. The
+    // conflicts page without conflicts says so.
+    function test_3d_sync() {
+        const page = push("SettingsPage")
+        verify(!findChild(page, "syncServer").visible)
+        Sync.enabled = true
+        tryVerify(() => findChild(page, "syncServer").visible)
+        compare(findChild(page, "syncState").text, "Not synced yet.")
+        verify(!Sync.syncNow())
+        verify(findChild(page, "syncState").text.indexOf("server") >= 0, findChild(page, "syncState").text)
+        shot("4d-sync")
+        Sync.enabled = false
+        window.pageStack.pop()
+
+        const conflicts = push("ConflictsPage")
+        compare(conflicts.title, "Conflicts")
+        verify(findChild(conflicts, "noConflicts").visible)
+        window.pageStack.pop()
+    }
+
     // Backup: saved, read back on the same device it changes nothing; merging says so.
     function test_3c_backup() {
         const page = push("SettingsPage")

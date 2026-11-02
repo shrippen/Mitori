@@ -8,7 +8,8 @@ import Kante
 import Mitori
 
 // Settings: the video bundles (codes of the DVDs), a folder with exam videos of one's own, and
-// the backup (save everything as a file, read one back: it is merged, see Backup).
+// the backup (save everything as a file, read one back: it is merged, see Backup), and the sync
+// between devices over WebDAV / Nextcloud (Sync).
 Kirigami.ScrollablePage {
     id: page
 
@@ -89,6 +90,118 @@ Kirigami.ScrollablePage {
             color: KanteStyle.negativeTextColor
             wrapMode: Text.Wrap
         }
+
+        // Sync over WebDAV / Nextcloud (Sync): account, state, devices, conflicts.
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: qsTr("Sync between devices")
+        }
+        KanteSwitch {
+            objectName: "syncEnabled"
+            Kirigami.FormData.label: qsTr("WebDAV / Nextcloud:")
+            text: qsTr("Sync")
+            checked: Sync.enabled
+            onToggled: Sync.enabled = checked
+        }
+        KanteTextField {
+            id: serverField
+
+            objectName: "syncServer"
+            Kirigami.FormData.label: qsTr("Folder on the server:")
+            Layout.fillWidth: true
+            visible: Sync.enabled
+            text: Sync.server
+            placeholderText: "https://cloud.example.org/remote.php/dav/files/ich/Mitori/"
+            inputMethodHints: Qt.ImhUrlCharactersOnly | Qt.ImhNoAutoUppercase
+            onEditingFinished: page.saveAccount()
+        }
+        KanteTextField {
+            id: userField
+
+            Kirigami.FormData.label: qsTr("User:")
+            Layout.fillWidth: true
+            visible: Sync.enabled
+            text: Sync.user
+            inputMethodHints: Qt.ImhNoAutoUppercase
+            onEditingFinished: page.saveAccount()
+        }
+        KanteTextField {
+            id: passwordField
+
+            Kirigami.FormData.label: qsTr("App password:")
+            Layout.fillWidth: true
+            visible: Sync.enabled
+            echoMode: TextInput.Password
+            placeholderText: Sync.hasPassword ? qsTr("saved") : ""
+            onEditingFinished: page.saveAccount()
+        }
+        KanteTextField {
+            id: nameField
+
+            Kirigami.FormData.label: qsTr("This device:")
+            Layout.fillWidth: true
+            visible: Sync.enabled
+            text: Sync.deviceName
+            onEditingFinished: page.saveAccount()
+        }
+        KanteSwitch {
+            visible: Sync.enabled
+            text: qsTr("Sync after every change")
+            checked: Sync.automatic
+            onToggled: Sync.automatic = checked
+        }
+        QQC2.Label {
+            Layout.fillWidth: true
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 30
+            visible: Sync.enabled
+            wrapMode: Text.Wrap
+            color: KanteStyle.disabledTextColor
+            text: qsTr("Otherwise when Mitori starts and once a day. Every rating and note is an entry of its own with a time; changes from several devices are merged. Mitori asks only when the same note was changed on two devices.")
+        }
+        KanteButton {
+            objectName: "syncNow"
+            visible: Sync.enabled
+            enabled: !Sync.busy
+            icon.name: "view-refresh"
+            text: Sync.busy ? qsTr("Syncing …") : qsTr("Sync now")
+            onClicked: {
+                page.saveAccount()
+                Sync.syncNow()
+            }
+        }
+        QQC2.Label {
+            objectName: "syncState"
+            Layout.fillWidth: true
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 30
+            visible: Sync.enabled
+            wrapMode: Text.Wrap
+            color: Sync.errorString !== "" ? KanteStyle.negativeTextColor : KanteStyle.textColor
+            text: Sync.errorString !== "" ? Sync.errorString
+                  : Sync.lastSync.getTime() > 0 ? qsTr("Last synced: %1").arg(Sync.lastSync.toLocaleString(Qt.locale(), Locale.ShortFormat))
+                  : qsTr("Not synced yet.")
+        }
+        Repeater {
+            model: Sync.enabled ? Sync.devices : []
+
+            QQC2.Label {
+                required property var modelData
+
+                text: qsTr("%1: %2").arg(modelData.name || qsTr("Device")).arg(modelData.synced.toLocaleString(Qt.locale(), Locale.ShortFormat))
+                color: KanteStyle.disabledTextColor
+            }
+        }
+        KanteButton {
+            objectName: "syncConflicts"
+            visible: Sync.enabled && Sync.conflicts.length > 0
+            icon.name: "dialog-warning"
+            text: qsTr("%n conflict(s): solve …", "", Sync.conflicts.length)
+            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ConflictsPage.qml"))
+        }
+    }
+
+    function saveAccount() {
+        Sync.setAccount(serverField.text, userField.text, passwordField.text, nameField.text)
+        passwordField.text = ""
     }
 
     // What the last step did ("" for nothing yet), and what the read backup would change.
