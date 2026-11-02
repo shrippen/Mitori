@@ -4,7 +4,7 @@
 <context>
     <name>StartPage</name>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="80"/>
+        <location filename="../qml/StartPage.qml" line="93"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n due</numerusform>
@@ -12,7 +12,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="96"/>
+        <location filename="../qml/StartPage.qml" line="110"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>
