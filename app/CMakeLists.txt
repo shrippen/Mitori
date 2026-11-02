@@ -65,6 +65,8 @@ qt_add_qml_module(mitori_app
         qml/CourseNewPage.qml
         qml/coursedays.js
         qml/VideosPage.qml
+        qml/GradesPage.qml
+        qml/grades.js
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -267,11 +269,13 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
 
     qt_add_executable(tst_courses tests/tst_courses.cpp services/courses.cpp services/courses.h
         store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
-        platform/devicecalendar.cpp platform/devicecalendar.h)
-    target_include_directories(tst_courses PRIVATE services store platform)
-    target_compile_definitions(tst_courses PRIVATE TEST_ICS="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/lehrgaenge.ics")
+        platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h)
+    target_include_directories(tst_courses PRIVATE catalog services store platform)
+    target_compile_definitions(tst_courses PRIVATE TEST_ICS="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/lehrgaenge.ics"
+        MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
     target_link_libraries(tst_courses PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Test)
     set_target_properties(tst_courses PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_dependencies(tst_courses mitori)
     add_test(NAME courses COMMAND tst_courses)
     qt_add_executable(tst_bundlecrypto tests/tst_bundlecrypto.cpp store/bundlecrypto.cpp store/bundlecrypto.h)
     target_include_directories(tst_bundlecrypto PRIVATE store)

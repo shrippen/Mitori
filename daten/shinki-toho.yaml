@@ -61,6 +61,7 @@ grade:
     name: Hôshu
     jp: 法主
     bedeutung: Haupt der Schule
+    pruefbar: false  # kein Prüfungsgrad (Meine Grade, Wartezeiten)
 
 zulassung:
   - "Mindestalter für Shoden: 16 Jahre."

@@ -42,7 +42,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Ô-dachi 1–11, höhere Grade ihre Formen. Runde als Tafel (Gruppe, Angriff, Technik; Shinki
   Toho nur Technik), Weiter mit Leertaste/Enter, Tablet größer. Am Ende jede Technik 1–4 einschätzen; Übernehmen
   setzt den Stand (Übungsprotokoll) und speichert die Runde (SQLite, Schema 4), die Statistik zeigt den Schnitt
-  der letzten 8 Runden je Sparte. Offen: Hinweis auf eine vorgemerkte Prüfung (mit Schritt 4, Lehrgänge).
+  der letzten 8 Runden je Sparte; eine vorgemerkte Prüfung steht oben, ihr Grad ist einen Tipp entfernt.
 - Schritt 3: Glossar (Kachel 辞 im Startmenü, auch die Lupe): ohne Eingabe A–Z mit Kanji und Übersetzung, mit
   Eingabe vor Techniken und Notizen (auch deutsche Wörter; gleiche Normalisierung wie die Suche). Daten: Aiki-Budo-
   Lexikon plus die Begriffe aus `daten/begriffe.yaml`, die es nicht hat (Schreibweise in Klammern und oo wie o
@@ -67,7 +67,13 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   über den Kalender-Intent, sonst als ICS-Datei an die Kalender-App), „Ausschreibung“ (aus der Zeile
   „Ausschreibung: URL“), Einträge nach Tagen (lang drücken: ändern, löschen), Notizbuch löschen. Gespeichert in
   `lehrgaenge.sqlite` (`store/coursebook`, eigenes Schema), jede Zeile mit Zeit und Gerät für den Abgleich. Offen:
-  Meine Grade, Prüfung vormerken, Wartezeiten, Fotos und Sprachnotizen, Export, Lehrgangsnotizen in „Alle Notizen“.
+  Fotos und Sprachnotizen, Export, Lehrgangsnotizen in „Alle Notizen“.
+- Schritt 4: Meine Grade (in Lehrgänge oben): je Sparte die abgelegten Grade mit Tag und Ort, der nächste Grad mit
+  Wartezeit (`wartezeit` aus `abstand` der Programmdaten; Shinki Toho Shoden ab Trainingsbeginn, ohne Datum).
+  Im Notizbuch eines kommenden Lehrgangs „Prüfung hier ablegen …“ (Sparte, Grad, Wartezeit gegen den ersten Tag);
+  Lehrgänge zeigen die geplanten Prüfungen, die Kachel 講, Heute üben und der Prüfungsmodus die nächste.
+  `lehrgaenge.sqlite` Schema 2 (Tabelle `grades`, Spalten `exam_*` an `courses`). Offen: „Meine Grade“ in der
+  Statistik, Trainingsbeginn für Shinki Toho.
 - Schritt 4: Video-Bundles (Einstellungen → „Videos und DVD-Codes“, Hinweis im Programm „Code eingeben“): das öffentliche
   Manifest (Gitea-Paket `mitori-manifest`) listet die Bundles; der Code einer DVD (20 Zeichen, Prüfzeichen) schaltet
   eins frei, Mitori lädt, prüft (SHA-256, Blöcke mit Tag) und entschlüsselt seine Videos aufs Gerät

@@ -7,11 +7,14 @@ import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
 import "coursedays.js" as CourseDays
+import "grades.js" as Grades
 
 // A course's notebook (clickdummy "Lehrgang"): the course (days, place, teacher), "In the
 // calendar" and the official announcement where the calendar names one, then the entries by
 // day; a field at the foot adds one. Press and hold an entry (or Enter on it) to change or
 // delete it. Notes stay on the device; export comes with photos and voice notes.
+// On a course that has not ended an exam can be planned (discipline and grade), with its
+// waiting time checked against the course's first day.
 Kirigami.ScrollablePage {
     id: page
 
@@ -49,6 +52,20 @@ Kirigami.ScrollablePage {
             onTriggered: removeDialog.open()
         }
     ]
+
+    readonly property bool coming: !!course.last && CourseDays.fromToday(course.last) >= 0
+    readonly property bool planned: !!course.examGrade
+    // The exam being chosen: the planned one, else the programme's discipline and its next grade.
+    property bool choosing: false
+    property string examDiscipline: ""
+    property string examGrade: ""
+    readonly property var examLadder: Courses.revision >= 0 && examDiscipline !== "" ? Courses.ladder(examDiscipline) : []
+
+    function choose() {
+        page.examDiscipline = page.course.examDiscipline || Programme.discipline
+        page.examGrade = page.course.examGrade || Courses.nextGrade(page.examDiscipline)
+        page.choosing = true
+    }
 
     function add() {
         if (Courses.addEntry(page.uid, compose.text)) {
@@ -115,6 +132,133 @@ Kirigami.ScrollablePage {
                     text: qsTr("No calendar app could be opened.")
                     color: KanteStyle.neutralTextColor
                     wrapMode: Text.Wrap
+                }
+            }
+        }
+
+        // The exam on this course: planned (with its waiting time) or "Plan an exam here …".
+        ColumnLayout {
+            objectName: "examBlock"
+            Layout.fillWidth: true
+            visible: page.planned || page.coming
+            spacing: Kirigami.Units.smallSpacing
+
+            RowLayout {
+                Layout.fillWidth: true
+                visible: page.planned && !page.choosing
+
+                KanteChip {
+                    objectName: "examChip"
+                    text: qsTr("Exam %1").arg(page.course.examName || "")
+                    checkable: true
+                    checked: true
+                    interactive: false
+                }
+                QQC2.Label {
+                    objectName: "examWait"
+                    Layout.fillWidth: true
+                    readonly property var wait: Courses.revision >= 0 && page.planned
+                                                ? Courses.waiting(page.course.examDiscipline, page.course.examGrade, page.course.first) : ({})
+                    text: Grades.waitText(wait)
+                    color: Grades.tooEarly(wait) ? KanteStyle.neutralTextColor : KanteStyle.mutedTextColor
+                    wrapMode: Text.Wrap
+                }
+                KanteButton {
+                    objectName: "changeExam"
+                    visible: page.coming
+                    text: qsTr("Change")
+                    onClicked: page.choose()
+                }
+            }
+            KanteButton {
+                objectName: "planExam"
+                visible: !page.planned && page.coming && !page.choosing
+                icon.name: "view-calendar"
+                text: qsTr("Plan an exam here …")
+                onClicked: page.choose()
+            }
+
+            // Choosing: discipline, grade (the next one marked), its waiting time.
+            QQC2.Control {
+                Layout.fillWidth: true
+                visible: page.choosing
+                padding: Kirigami.Units.largeSpacing
+                background: KanteCard {}
+
+                contentItem: ColumnLayout {
+                    spacing: Kirigami.Units.smallSpacing
+
+                    KanteHeading {
+                        Layout.fillWidth: true
+                        level: 3
+                        text: qsTr("Plan an exam here")
+                    }
+                    KanteSegmented {
+                        Layout.fillWidth: true
+                        model: Programme.disciplines.map(d => d.kurzname)
+                        currentIndex: Programme.disciplines.findIndex(d => d.id === page.examDiscipline)
+                        onActivated: index => {
+                            page.examDiscipline = Programme.disciplines[index].id
+                            page.examGrade = Courses.nextGrade(page.examDiscipline)
+                        }
+                        Accessible.name: qsTr("Discipline")
+                    }
+                    Flow {
+                        Layout.fillWidth: true
+                        spacing: Kirigami.Units.smallSpacing
+
+                        Repeater {
+                            model: page.examLadder
+
+                            KanteChip {
+                                required property var modelData
+                                readonly property bool next: modelData.id === Courses.nextGrade(page.examDiscipline)
+
+                                objectName: "examGrade_" + modelData.id
+                                text: modelData.name + (next ? " · " + qsTr("next") : modelData.passed ? " · " + qsTr("passed") : "")
+                                checkable: true
+                                checked: modelData.id === page.examGrade
+                                onClicked: page.examGrade = modelData.id
+                            }
+                        }
+                    }
+                    QQC2.Label {
+                        objectName: "choiceWait"
+                        Layout.fillWidth: true
+                        readonly property var wait: page.examGrade !== "" ? Courses.waiting(page.examDiscipline, page.examGrade, page.course.first) : ({})
+                        text: page.examGrade !== "" ? qsTr("Waiting time: %1").arg(Grades.waitText(wait)) : qsTr("All grades passed.")
+                        color: Grades.tooEarly(wait) ? KanteStyle.neutralTextColor : KanteStyle.mutedTextColor
+                        wrapMode: Text.Wrap
+                    }
+                    Flow {
+                        Layout.fillWidth: true
+                        spacing: Kirigami.Units.smallSpacing
+
+                        KanteButton {
+                            objectName: "examPlan"
+                            emphasis: KanteButton.Emphasis.Primary
+                            enabled: page.examGrade !== ""
+                            text: qsTr("Plan")
+                            onClicked: {
+                                if (Courses.planExam(page.uid, page.examDiscipline, page.examGrade)) {
+                                    page.choosing = false
+                                }
+                            }
+                        }
+                        KanteButton {
+                            objectName: "examNone"
+                            text: qsTr("No exam")
+                            onClicked: {
+                                if (Courses.planExam(page.uid, "", "")) {
+                                    page.choosing = false
+                                }
+                            }
+                        }
+                        KanteButton {
+                            text: qsTr("Cancel")
+                            onClicked: page.choosing = false
+                        }
+                    }
                 }
             }
         }

@@ -6,11 +6,16 @@ import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
+import "coursedays.js" as CourseDays
+import "grades.js" as Grades
 
 // Courses (clickdummy "Lehrgänge"): the coming dates of the association's course calendar and
 // the user's notebooks. A date opens its notebook (made on first use); "New course" makes one
-// without a calendar event (a private training, a guest teacher).
+// without a calendar event (a private training, a guest teacher). On top "My grades" and the
+// exams planned on coming courses, with their waiting times.
 //
+//   段 My grades                         Aikido 4. Kyu · Daitoryu 5. Kyu            ›
+//   PLANNED EXAMS   Aikido 3. Kyu  Bonn, 12.06.26          fits (from 09.03.26)
 //   NEXT DATES · course calendar        loaded from the network, kept for offline use
 //   [ 6 ] Daitoryu Aiki Jujutsu         place · 6.–7.6.2026 · teacher       in 12 days
 //    Jun                                                                     3 notes
@@ -25,6 +30,22 @@ Kirigami.ScrollablePage {
 
     readonly property var upcoming: Courses.upcoming
     readonly property var notebooks: Courses.revision >= 0 ? Courses.notebooks : []
+    // Exams on courses that have not ended, the next first.
+    readonly property var planned: notebooks.filter(n => n.examGrade && CourseDays.fromToday(n.last) >= 0)
+                                            .sort((a, b) => a.first.localeCompare(b.first))
+    // The highest grade passed per discipline: "Aikido 4. Kyu · Daitoryu 5. Kyu".
+    readonly property string gradesText: {
+        const grades = Courses.revision >= 0 ? Courses.grades : []
+        const parts = []
+        for (const d of Programme.disciplines) {
+            const ladder = Courses.ladder(d.id)
+            const passed = ladder.filter(g => g.passed)
+            if (passed.length > 0) {
+                parts.push(d.kurzname + " " + passed[passed.length - 1].name)
+            }
+        }
+        return grades.length > 0 ? parts.join(" · ") : qsTr("none entered yet")
+    }
 
     title: qsTr("Courses")
 
@@ -63,8 +84,41 @@ Kirigami.ScrollablePage {
             wrapMode: Text.Wrap
         }
 
+        KanteListRow {
+            objectName: "myGrades"
+            Layout.fillWidth: true
+            leadingText: "段"
+            text: qsTr("My grades")
+            subtitle: page.gradesText
+            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("GradesPage.qml"))
+        }
+
         KanteSectionLabel {
             Layout.fillWidth: true
+            Layout.topMargin: Kirigami.Units.largeSpacing
+            visible: page.planned.length > 0
+            rule: true
+            text: qsTr("Planned exams")
+        }
+        Repeater {
+            model: page.planned
+
+            KanteListRow {
+                required property var modelData
+                readonly property var wait: Courses.waiting(modelData.examDiscipline, modelData.examGrade, modelData.first)
+
+                objectName: "plannedRow"
+                Layout.fillWidth: true
+                text: modelData.examName
+                subtitle: (modelData.place || modelData.title) + ", " + Grades.shortDate(modelData.first)
+                meta: Grades.waitText(wait)
+                onClicked: page.open(modelData.uid)
+            }
+        }
+
+        KanteSectionLabel {
+            Layout.fillWidth: true
+            Layout.topMargin: Kirigami.Units.largeSpacing
             rule: true
             text: qsTr("Next dates")
         }

@@ -155,3 +155,24 @@ def test_uebersetzungen_vollstaendig():
                  if m.find("translation").get("type") == "unfinished"
                  or not "".join(m.find("translation").itertext()).strip()]
         assert not offen, f"{ts.name}: {offen}"
+
+
+# Waiting times (Meine Grade): every grade one can take has `wartezeit` {jahre, nach} from its
+# `abstand`: "nach" is "grad" (the previous grade) or "beginn" (the start of training).
+WARTEZEITEN = {
+    "aikido": [None, 1, 1, 1, 1, 1, 2, 3, 4],
+    "daitoryu": [None, 1, 1, 1, 1, 1, 2, 3, 4],
+    "shinkitoho": [2, 2, 3, 3, 4, 5],
+}
+
+
+def test_wartezeiten(daten):
+    for d in daten["disziplinen"]:
+        pruefbar = [g for g in d["grade"] if g.get("pruefbar", True)]
+        jahre = [g["wartezeit"]["jahre"] if g.get("wartezeit") else None for g in pruefbar]
+        assert jahre == WARTEZEITEN[d["id"]], d["id"]
+        nach = [g["wartezeit"]["nach"] for g in pruefbar if g.get("wartezeit")]
+        erwartet = ["beginn"] + ["grad"] * 5 if d["id"] == "shinkitoho" else ["grad"] * 8
+        assert nach == erwartet, d["id"]
+    hoshu = [g for g in daten["disziplinen"][2]["grade"] if g["id"] == "hoshu"]
+    assert hoshu and hoshu[0]["pruefbar"] is False

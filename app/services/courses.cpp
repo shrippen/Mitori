@@ -11,6 +11,7 @@
 #include <QNetworkRequest>
 #include <QRegularExpression>
 #include <QSaveFile>
+#include <QSet>
 #include <QStandardPaths>
 
 namespace {
@@ -26,7 +27,9 @@ QString dataDir()
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 }
 
-QVariantMap courseMap(const CourseBook::Course &c, int entries)
+} // namespace
+
+QVariantMap Courses::courseMap(const CourseBook::Course &c, int entries) const
 {
     return {{QStringLiteral("uid"), c.uid},
             {QStringLiteral("calendarUid"), c.calendarUid},
@@ -37,25 +40,44 @@ QVariantMap courseMap(const CourseBook::Course &c, int entries)
             {QStringLiteral("teacher"), c.teacher},
             {QStringLiteral("info"), c.info},
             {QStringLiteral("announcement"), c.announcement},
-            {QStringLiteral("entries"), entries}};
+            {QStringLiteral("entries"), entries},
+            {QStringLiteral("examDiscipline"), c.examDiscipline},
+            {QStringLiteral("examGrade"), c.examGrade},
+            {QStringLiteral("examName"), examName(c.examDiscipline, c.examGrade)}};
 }
-
-} // namespace
 
 // MITORI_COURSES_CALENDAR: another source (tests: a local file).
 Courses::Courses(QObject *parent)
     : Courses(defaultPath(),
               qEnvironmentVariableIsSet("MITORI_COURSES_CALENDAR") ? QUrl(qEnvironmentVariable("MITORI_COURSES_CALENDAR")) : kCalendar,
-              dataDir() + QStringLiteral("/lehrgaenge.ics"), parent)
+              dataDir() + QStringLiteral("/lehrgaenge.ics"), Catalog::bundled(), parent)
 {
 }
 
-Courses::Courses(const QString &path, const QUrl &calendar, const QString &cache, QObject *parent)
+Courses::Courses(const QString &path, const QUrl &calendar, const QString &cache, const Catalog &catalog, QObject *parent)
     : QObject(parent)
     , m_book(std::make_unique<CourseBook>())
     , m_source(calendar)
     , m_cache(cache)
 {
+    // The grades one can take, with their waiting times (`wartezeit`, tools/daten.py).
+    for (const QVariant &dv : catalog.disciplines()) {
+        const QVariantMap d = dv.toMap();
+        const QString id = d.value(QStringLiteral("id")).toString();
+        m_disciplineNames.insert(id, d.value(QStringLiteral("kurzname")).toString());
+        QList<Step> &list = m_steps[id];
+        for (const QVariant &gv : d.value(QStringLiteral("grade")).toList()) {
+            const QVariantMap g = gv.toMap();
+            if (!g.value(QStringLiteral("pruefbar"), true).toBool()) {
+                continue;
+            }
+            const QVariantMap wait = g.value(QStringLiteral("wartezeit")).toMap();
+            list << Step{g.value(QStringLiteral("id")).toString(), g.value(QStringLiteral("name")).toString(),
+                         wait.value(QStringLiteral("jahre")).toInt(),
+                         wait.value(QStringLiteral("nach")).toString() == QLatin1String("beginn")};
+        }
+    }
+
     QDir().mkpath(QFileInfo(path).absolutePath());
     m_open = m_book->open(path);
     if (!m_open) {
@@ -286,6 +308,171 @@ bool Courses::changeEntry(const QString &uid, const QString &text)
 bool Courses::deleteEntry(const QString &uid)
 {
     return m_open && saved(m_book->deleteEntry(uid, QDateTime::currentDateTimeUtc()), tr("The entry could not be deleted: %1"));
+}
+
+QList<Courses::Step> Courses::steps(const QString &discipline) const
+{
+    return m_steps.value(discipline);
+}
+
+QString Courses::gradeName(const QString &discipline, const QString &grade) const
+{
+    for (const Step &s : steps(discipline)) {
+        if (s.id == grade) {
+            return s.name;
+        }
+    }
+    return {};
+}
+
+// "Aikido 4. Kyu", or "" without an exam.
+QString Courses::examName(const QString &discipline, const QString &grade) const
+{
+    const QString name = gradeName(discipline, grade);
+    return name.isEmpty() ? QString() : m_disciplineNames.value(discipline) + QLatin1Char(' ') + name;
+}
+
+QVariantList Courses::grades() const
+{
+    QVariantList result;
+    if (!m_open) {
+        return result;
+    }
+    for (const CourseBook::Grade &g : m_book->grades()) {
+        result << QVariantMap{{QStringLiteral("uid"), g.uid},
+                              {QStringLiteral("discipline"), g.discipline},
+                              {QStringLiteral("grade"), g.grade},
+                              {QStringLiteral("name"), gradeName(g.discipline, g.grade)},
+                              {QStringLiteral("day"), g.day.toString(Qt::ISODate)},
+                              {QStringLiteral("place"), g.place}};
+    }
+    return result;
+}
+
+bool Courses::addGrade(const QString &discipline, const QString &grade, const QString &day, const QString &place)
+{
+    const QDate date = QDate::fromString(day, Qt::ISODate);
+    if (!m_open || gradeName(discipline, grade).isEmpty() || !date.isValid()) {
+        return false;
+    }
+    const CourseBook::Grade g = m_book->addGrade({QString(), discipline, grade, date, place}, QDateTime::currentDateTimeUtc(), deviceId());
+    return saved(!g.uid.isEmpty(), tr("The grade could not be saved: %1"));
+}
+
+bool Courses::removeGrade(const QString &uid)
+{
+    return m_open && saved(m_book->deleteGrade(uid, QDateTime::currentDateTimeUtc()), tr("The grade could not be deleted: %1"));
+}
+
+QVariantList Courses::ladder(const QString &discipline) const
+{
+    QSet<QString> passed;
+    if (m_open) {
+        for (const CourseBook::Grade &g : m_book->grades()) {
+            if (g.discipline == discipline) {
+                passed.insert(g.grade);
+            }
+        }
+    }
+    QVariantList result;
+    for (const Step &s : steps(discipline)) {
+        result << QVariantMap{{QStringLiteral("id"), s.id}, {QStringLiteral("name"), s.name},
+                              {QStringLiteral("passed"), passed.contains(s.id)}};
+    }
+    return result;
+}
+
+// The one after the highest passed: 5. Kyu, 3. Kyu entered → 2. Kyu.
+QString Courses::nextGrade(const QString &discipline) const
+{
+    const QVariantList list = ladder(discipline);
+    int highest = -1;
+    for (int i = 0; i < list.size(); ++i) {
+        if (list.at(i).toMap().value(QStringLiteral("passed")).toBool()) {
+            highest = i;
+        }
+    }
+    return highest + 1 < list.size() ? list.at(highest + 1).toMap().value(QStringLiteral("id")).toString() : QString();
+}
+
+// 4. Kyu, 1 year after 5. Kyu (passed 2025-03-08): earliest 2026-03-08.
+QVariantMap Courses::waiting(const QString &discipline, const QString &grade, const QString &day) const
+{
+    const QList<Step> list = steps(discipline);
+    const auto it = std::find_if(list.cbegin(), list.cend(), [&](const Step &s) { return s.id == grade; });
+    if (it == list.cend()) {
+        return {};
+    }
+    QVariantMap result{{QStringLiteral("years"), it->years}};
+    if (it->fromStart) {
+        result.insert(QStringLiteral("state"), QVariant::fromValue(Wait::FromStart));
+        return result;
+    }
+    if (it == list.cbegin() || it->years == 0) {
+        result.insert(QStringLiteral("state"), QVariant::fromValue(Wait::First));
+        return result;
+    }
+
+    const Step &previous = *(it - 1);
+    result.insert(QStringLiteral("previous"), previous.name);
+    QDate passed;
+    if (m_open) {
+        for (const CourseBook::Grade &g : m_book->grades()) {
+            if (g.discipline == discipline && g.grade == previous.id) {
+                passed = g.day;
+            }
+        }
+    }
+    if (!passed.isValid()) {
+        result.insert(QStringLiteral("state"), QVariant::fromValue(Wait::Unknown));
+        return result;
+    }
+
+    const QDate earliest = passed.addYears(it->years);
+    result.insert(QStringLiteral("earliest"), earliest.toString(Qt::ISODate));
+    const QDate exam = QDate::fromString(day, Qt::ISODate);
+    const Wait state = !exam.isValid() ? Wait::Earliest : exam >= earliest ? Wait::Fits : Wait::TooEarly;
+    result.insert(QStringLiteral("state"), QVariant::fromValue(state));
+    return result;
+}
+
+bool Courses::planExam(const QString &uid, const QString &discipline, const QString &grade)
+{
+    const bool none = grade.isEmpty();
+    if (!m_open || (!none && gradeName(discipline, grade).isEmpty())) {
+        return false;
+    }
+    return saved(m_book->planExam(uid, none ? QString() : discipline, grade, QDateTime::currentDateTimeUtc()),
+                 tr("The exam could not be planned: %1"));
+}
+
+QVariantMap Courses::nextExam(const QString &discipline) const
+{
+    if (!m_open) {
+        return {};
+    }
+    const QDate today = QDate::currentDate();
+    const CourseBook::Course *best = nullptr;
+    const QList<CourseBook::Course> list = m_book->courses();
+    for (const CourseBook::Course &c : list) {
+        if (c.examGrade.isEmpty() || c.last < today || (!discipline.isEmpty() && c.examDiscipline != discipline)) {
+            continue;
+        }
+        if (!best || c.first < best->first) {
+            best = &c;
+        }
+    }
+    if (!best) {
+        return {};
+    }
+    return {{QStringLiteral("course"), best->uid},
+            {QStringLiteral("title"), best->title},
+            {QStringLiteral("place"), best->place},
+            {QStringLiteral("first"), best->first.toString(Qt::ISODate)},
+            {QStringLiteral("discipline"), best->examDiscipline},
+            {QStringLiteral("grade"), best->examGrade},
+            {QStringLiteral("name"), examName(best->examDiscipline, best->examGrade)},
+            {QStringLiteral("days"), std::max<qint64>(0, today.daysTo(best->first))}};
 }
 
 bool Courses::addToDeviceCalendar(const QString &uid)

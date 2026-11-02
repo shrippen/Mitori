@@ -700,6 +700,70 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // My grades and a planned exam: a passed grade sets the next one and its waiting time; an
+    // exam planned on a coming course shows in the start menu, today's practice and the exam mode.
+    function test_9o_grades() {
+        failOnWarning(/ReferenceError|TypeError|Binding loop/)
+        // grades.js names the states by number.
+        compare([Courses.Wait.First, Courses.Wait.FromStart, Courses.Wait.Unknown, Courses.Wait.Earliest,
+                 Courses.Wait.Fits, Courses.Wait.TooEarly], [0, 1, 2, 3, 4, 5])
+        const page = push("GradesPage")
+        tryVerify(() => findChildren(page, "addGrade").length === 3)
+        const aikido = findChild(page, "grades_aikido")
+        verify(findChild(aikido, "nextGrade").text.indexOf(qsTr("Next: %1").arg("5. Kyu")) === 0)
+        findChild(aikido, "gradeDay").date = new Date(Date.now() - 400 * 86400000)
+        findChild(aikido, "gradePlace").text = "Mainz"
+        wait(800)       // Kirigami slides the page in (disabled meanwhile)
+        mouseClick(findChild(aikido, "addGrade"))
+        tryVerify(() => Courses.grades.length === 1)
+        tryVerify(() => findChildren(aikido, "passedRow").length === 1)
+        compare(findChild(aikido, "gradePlace").text, "")
+        const next = findChild(aikido, "nextGrade").text
+        verify(next.indexOf(qsTr("Next: %1").arg("4. Kyu")) === 0, next)
+        compare(findChild(aikido, "gradeBox").currentIndex, 1, "the next grade is offered")
+        shot("16-grades")
+        window.pageStack.pop()
+
+        // An exam on the coming Daitoryu course (in 12 days): 4. Kyu fits (a year after 5. Kyu).
+        const uid = Courses.notebookFor("ui-daito")
+        const book = push("CoursePage", { uid: uid })
+        verify(findChild(book, "planExam").visible)
+        wait(800)
+        mouseClick(findChild(book, "planExam"))
+        book.examDiscipline = "aikido"
+        book.examGrade = Courses.nextGrade("aikido")
+        tryVerify(() => findChild(book, "examGrade_k4") && findChild(book, "examGrade_k4").checked)
+        verify(findChild(book, "examGrade_k4").text.indexOf(qsTr("next")) > 0)
+        verify(findChild(book, "examGrade_k5").text.indexOf(qsTr("passed")) > 0)
+        verify(findChild(book, "choiceWait").text.indexOf(qsTr("fits (from %1)").split("%1")[0]) > 0, findChild(book, "choiceWait").text)
+        shot("16b-course-exam-choose")
+        mouseClick(findChild(book, "examPlan"))
+        tryVerify(() => findChild(book, "examChip").visible)
+        compare(findChild(book, "examChip").text, qsTr("Exam %1").arg("Aikido 4. Kyu"))
+        shot("16c-course-exam")
+        window.pageStack.pop()
+
+        const start = window.pageStack.items[0]
+        tryVerify(() => findChild(start, "coursesTile").hint === qsTr("Exam %1 in %n day(s)", "", 12).arg("Aikido 4. Kyu"))
+        Programme.discipline = "aikido"
+        const today = push("TodayPage")
+        verify(findChild(today, "plannedHint").visible)
+        window.pageStack.pop()
+        Programme.setGrade("aikido", "k5")
+        const exam = push("ExamPage")
+        verify(findChild(exam, "plannedHint").visible)
+        verify(findChild(exam, "toExamGrade").visible)
+        wait(800)
+        mouseClick(findChild(exam, "toExamGrade"))
+        tryCompare(exam, "grade", "k4")
+        verify(!findChild(exam, "toExamGrade").visible)
+        window.pageStack.pop()
+
+        // Back as before for the other cases.
+        verify(Courses.planExam(uid, "", ""))
+        verify(Courses.removeGrade(Courses.grades[0].uid))
+    }
+
     // Technique map: from the start menu, a grid per group with empty places, a place coloured by
     // its level and opening its sheet, the keys moving on; Shinki Toho as numbered forms.
     function test_9k_map() {
