@@ -332,6 +332,8 @@ private slots:
         QCOMPARE(tablet.conflicts().size(), 1);
 
         change(b.practice, uid, u"Tablet-neu"_s);
+        // The page shows the text as it is now, the one a choice keeps or drops.
+        QCOMPARE(tablet.conflicts().first().toMap().value(u"mine"_s).toString(), u"Tablet-neu"_s);
         QVERIFY(tablet.resolve(0, Sync::Choice::Both));
         QCOMPARE(texts(b.practice), (QStringList{u"Tablet-neu"_s, u"Telefon-Text"_s}));
     }

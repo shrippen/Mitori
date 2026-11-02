@@ -96,6 +96,6 @@ private:
     QTimer m_daily;
     QString m_error;
     bool m_busy = false;
-    bool m_merging = false;
-    bool m_again = false;       // asked for while one ran     // while merged() runs: the services reading anew are no change
+    bool m_merging = false;     // while merged() runs: the services reading anew are no change
+    bool m_again = false;       // asked for while one ran
 };

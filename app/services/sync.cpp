@@ -202,9 +202,21 @@ QVariantList Sync::devices() const
 
 QVariantList Sync::conflicts() const
 {
+    const QList<TableMerge::Conflict> open = m_account.conflicts();
+    if (open.isEmpty()) {
+        return {};
+    }
+
+    // "Mine" as the row is now: changed again after the sync, that is what a choice keeps or drops.
+    PracticeLog log;
+    CourseBook book;
+    const bool readable = log.open(m_practice) && book.open(m_courses);
     QVariantList list;
     int index = 0;
-    for (const TableMerge::Conflict &c : m_account.conflicts()) {
+    for (TableMerge::Conflict c : open) {
+        if (readable) {
+            c.mine = c.table == kNotes ? currentText(log.notes(c.parent), c) : currentText(book.entries(c.parent), c);
+        }
         list << QVariantMap{{QStringLiteral("index"), index++},
                             {QStringLiteral("kind"), c.table == kNotes ? QStringLiteral("note") : QStringLiteral("entry")},
                             {QStringLiteral("parent"), c.parent},
