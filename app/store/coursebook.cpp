@@ -177,9 +177,26 @@ CourseBook::Course CourseBook::courseForEvent(const QString &calendarUid) const
     return q.exec() && q.next() ? course(q) : Course();
 }
 
+// The notebook and its entries, in one step: the entries go as marks too (sync).
 bool CourseBook::deleteCourse(const QString &uid, const QDateTime &at)
 {
-    return mark(QStringLiteral("courses"), uid, at);
+    QSqlDatabase db = QSqlDatabase::database(m_connection);
+    if (!db.transaction()) {
+        m_error = db.lastError().text();
+        return false;
+    }
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral("UPDATE entries SET deleted = 1, changed = ? WHERE course = ? AND deleted = 0"));
+    q.addBindValue(at.toUTC().toMSecsSinceEpoch());
+    q.addBindValue(uid);
+    if (!q.exec() || !mark(QStringLiteral("courses"), uid, at)) {
+        if (m_error.isEmpty()) {
+            m_error = q.lastError().text();
+        }
+        db.rollback();
+        return false;
+    }
+    return db.commit();
 }
 
 CourseBook::Entry CourseBook::addEntry(const QString &courseUid, const QString &text, const QDateTime &at, const QString &device)

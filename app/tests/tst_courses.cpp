@@ -103,6 +103,9 @@ private slots:
         QCOMPARE(book.entryCounts().value(list.first().uid), 1);
         QVERIFY(book.deleteCourse(list.first().uid, at.addSecs(5)));
         QVERIFY(book.courses().isEmpty());
+        // Its entries go with it, as marks (a later sync must not bring them back).
+        QVERIFY(book.entries(list.first().uid).isEmpty());
+        QVERIFY(book.entryCounts().isEmpty());
     }
 
     // A newer schema is not opened (it would be changed under a newer Mitori).
@@ -235,6 +238,17 @@ private slots:
         QCOMPARE(back.first().title, e.title);
         QCOMPARE(back.first().last, e.last);
         QCOMPARE(back.first().description, e.description);
+    }
+
+    // A course of one's own goes to the device's calendar with the notebook's uid (RFC 5545 needs one).
+    void ownCourseHasUid()
+    {
+        const auto c = made(u"uid"_s);
+        const QString uid = c->create(u"Training"_s, u"2026-11-07"_s, {}, {}, {});
+        QCOMPARE(c->deviceEvent(uid).uid, uid);
+        const QString fromEvent = c->notebookFor(u"later"_s);
+        QCOMPARE(c->deviceEvent(fromEvent).uid, u"later"_s);
+        QVERIFY(DeviceCalendar::ics(c->deviceEvent(uid)).contains("UID:" + uid.toLatin1() + "\r\n"));
     }
 
     void teacher()

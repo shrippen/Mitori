@@ -591,8 +591,6 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // Technique map: from the start menu, a grid per group with empty places, a place coloured by
-    // its level and opening its sheet, the keys moving on; Shinki Toho as numbered forms.
     // Courses: the coming dates from the calendar (a local file in this test), a date's notebook
     // with an entry, a course of one's own, deleting a notebook.
     function test_9m_courses() {
@@ -662,6 +660,8 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Technique map: from the start menu, a grid per group with empty places, a place coloured by
+    // its level and opening its sheet, the keys moving on; Shinki Toho as numbered forms.
     function test_9k_map() {
         failOnWarning(/ReferenceError|TypeError/)
         Programme.discipline = "aikido"

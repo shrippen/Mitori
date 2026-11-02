@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "coursebook.h"
+#include "devicecalendar.h"
 #include "icsreader.h"
 
 class QNetworkAccessManager;
@@ -75,6 +76,8 @@ public:
 
     // The course into the device's calendar app (platform/devicecalendar); false without one.
     Q_INVOKABLE bool addToDeviceCalendar(const QString &uid);
+    // The event it hands over (tests).
+    DeviceCalendar::Event deviceEvent(const QString &uid) const;
 
     // The teacher from a description's first line "mit …" ("mit M. D. Nakajima Shihan").
     static QString teacherOf(const QString &description);

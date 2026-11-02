@@ -290,14 +290,22 @@ bool Courses::deleteEntry(const QString &uid)
 
 bool Courses::addToDeviceCalendar(const QString &uid)
 {
+    const DeviceCalendar::Event e = deviceEvent(uid);
+    return !e.title.isEmpty() && DeviceCalendar::add(e);
+}
+
+DeviceCalendar::Event Courses::deviceEvent(const QString &uid) const
+{
     const QVariantMap c = notebook(uid);
     if (c.isEmpty()) {
-        return false;
+        return {};
     }
-    return DeviceCalendar::add({c.value(QStringLiteral("calendarUid")).toString(), c.value(QStringLiteral("title")).toString(),
+    // The calendar event's uid, else the notebook's (a course of one's own): RFC 5545 needs one.
+    const QString eventUid = c.value(QStringLiteral("calendarUid")).toString();
+    return DeviceCalendar::Event{eventUid.isEmpty() ? uid : eventUid, c.value(QStringLiteral("title")).toString(),
                                 QDate::fromString(c.value(QStringLiteral("first")).toString(), Qt::ISODate),
                                 QDate::fromString(c.value(QStringLiteral("last")).toString(), Qt::ISODate),
-                                c.value(QStringLiteral("place")).toString(), c.value(QStringLiteral("info")).toString()});
+                                c.value(QStringLiteral("place")).toString(), c.value(QStringLiteral("info")).toString()};
 }
 
 // After a change: the new revision, or the error with what went wrong ("%1" the store's text).
