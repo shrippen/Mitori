@@ -370,6 +370,84 @@ private slots:
         QVERIFY(all.first().toMap().value(QStringLiteral("created")).toDateTime().isValid());
     }
 
+    // An exam round: every point's rating goes into the log (a point may stand for several
+    // entries), the round is kept with its average; a round with a point unrated is refused whole.
+    void examRoundSaved()
+    {
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("mitori.sqlite"));
+        {
+            Practice practice(path);
+            const QVariantList unrated{QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("a")}}, {QStringLiteral("level"), 3}},
+                                       QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("b")}}, {QStringLiteral("level"), 0}}};
+            QVERIFY(!practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), unrated));
+            QCOMPARE(practice.level(QStringLiteral("a")), 0);
+            QVERIFY(practice.rounds(QStringLiteral("aikido"), 8).isEmpty());
+
+            const QVariantList results{QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("a")}}, {QStringLiteral("level"), 3}},
+                                       QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("k1"), QStringLiteral("k2")}}, {QStringLiteral("level"), 2}}};
+            QSignalSpy spy(&practice, &Practice::changed);
+            QVERIFY(practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), results));
+            QVERIFY(spy.count() >= 1);
+            QCOMPARE(practice.level(QStringLiteral("a")), 3);
+            QCOMPARE(practice.level(QStringLiteral("k1")), 2);
+            QCOMPARE(practice.level(QStringLiteral("k2")), 2);
+            QVERIFY(practice.saveRound(QStringLiteral("daitoryu"), QStringLiteral("k5"), results));
+        }
+        // Kept across starts, per discipline.
+        Practice practice(path);
+        const QVariantList rounds = practice.rounds(QStringLiteral("aikido"), 8);
+        QCOMPARE(rounds.size(), 1);
+        const QVariantMap round = rounds.first().toMap();
+        QCOMPARE(round.value(QStringLiteral("grade")).toString(), QStringLiteral("k5"));
+        QCOMPARE(round.value(QStringLiteral("count")).toInt(), 2);
+        QCOMPARE(round.value(QStringLiteral("average")).toDouble(), 2.5);
+        QCOMPARE(round.value(QStringLiteral("at")).toDateTime().date(), QDate::currentDate());
+
+        // The newest `limit`, oldest first.
+        PracticeLog log;
+        QVERIFY(log.open(dir.filePath(QStringLiteral("log.sqlite"))));
+        const QDateTime t = QDateTime(QDate(2026, 11, 1), QTime(12, 0), QTimeZone::UTC);
+        for (int i = 0; i < 10; ++i) {
+            const PracticeLog::ExamRound r{QString(), t.addDays(i), QStringLiteral("aikido"), QStringLiteral("k5"), i + 1, 2.0, QStringLiteral("d")};
+            QVERIFY(!log.addRound(r).uid.isEmpty());
+        }
+        const QList<PracticeLog::ExamRound> last = log.rounds(QStringLiteral("aikido"), 8);
+        QCOMPARE(last.size(), 8);
+        QCOMPARE(last.first().count, 3);
+        QCOMPARE(last.last().count, 10);
+        QCOMPARE(last.last().at, t.addDays(9));
+        QVERIFY(log.rounds(QStringLiteral("daitoryu"), 8).isEmpty());
+    }
+
+    // A log of schema 2 (ratings, notes) gets the table of exam rounds.
+    void migratesFromSchemaTwo()
+    {
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("log.sqlite"));
+        {
+            QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("v2"));
+            db.setDatabaseName(path);
+            QVERIFY(db.open());
+            QSqlQuery q(db);
+            QVERIFY(q.exec(QStringLiteral("CREATE TABLE ratings (uid TEXT PRIMARY KEY, entry TEXT NOT NULL,"
+                                          " level INTEGER NOT NULL, at INTEGER NOT NULL, device TEXT NOT NULL)")));
+            QVERIFY(q.exec(QStringLiteral("CREATE TABLE notes (uid TEXT PRIMARY KEY, entry TEXT NOT NULL, text TEXT NOT NULL,"
+                                          " created INTEGER NOT NULL, changed INTEGER NOT NULL, device TEXT NOT NULL,"
+                                          " deleted INTEGER NOT NULL DEFAULT 0)")));
+            QVERIFY(q.exec(QStringLiteral("INSERT INTO ratings VALUES ('x', 'e', 3, %1, 'd')").arg(QDateTime::currentMSecsSinceEpoch())));
+            QVERIFY(q.exec(QStringLiteral("PRAGMA user_version = 2")));
+            db.close();
+        }
+        QSqlDatabase::removeDatabase(QStringLiteral("v2"));
+        Practice practice(path);
+        QCOMPARE(practice.errorString(), QString());
+        QCOMPARE(practice.level(QStringLiteral("e")), 3);
+        const QVariantList results{QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("e")}}, {QStringLiteral("level"), 4}}};
+        QVERIFY(practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), results));
+        QCOMPARE(practice.rounds(QStringLiteral("aikido"), 8).size(), 1);
+    }
+
     void deviceIdStays()
     {
         const QString id = Practice::deviceId();

@@ -1,0 +1,138 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Controls as QQC2
+import QtQuick.Layouts
+import org.kde.kirigami as Kirigami
+import Kante
+import Mitori
+
+// Exam mode, settings (clickdummy "Prüfungsmodus"): discipline and grade (as in the programme),
+// how many points, in which order, and whether samples from earlier grades come first. The
+// settings are kept; "Start round" shows the points one by one (ExamRoundPage).
+Kirigami.ScrollablePage {
+    id: page
+
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
+    // Kante's page ground (the scope's background role is the dialog colour).
+    property Item kanteScope: KanteScope { target: page }
+    background: Rectangle { color: KanteStyle.backgroundColor }
+
+    // Programme.discipline notifies on a new grade too, so `grade` follows both.
+    readonly property string discipline: Programme.discipline
+    readonly property var grades: Exam.grades(discipline)
+    readonly property string grade: Programme.discipline !== "" ? Exam.grade(discipline) : ""
+    readonly property var gradeInfo: grades.find(g => g.id === grade) || ({})
+    readonly property string gradeName: gradeInfo.name || ""
+    readonly property int size: gradeInfo.count || 0
+    readonly property var counts: Exam.countChoices(size)
+    // A stored count the grade does not reach means all.
+    readonly property int countIndex: Math.max(0, counts.indexOf(Exam.count))
+    readonly property bool hasEarlier: Exam.hasEarlier(discipline, grade)
+    readonly property var lastRound: Practice.revision >= 0 ? Practice.rounds(discipline, 1)[0] : undefined
+
+    title: qsTr("Exam mode")
+
+    function averageText(value) {
+        return Number(value).toLocaleString(Qt.locale(), "f", 1)
+    }
+
+    function start() {
+        const points = Exam.draw(page.discipline, page.grade)
+        if (points.length === 0) {
+            return
+        }
+        page.Kirigami.PageStack.push(Qt.resolvedUrl("ExamRoundPage.qml"),
+                                     { points: points, discipline: page.discipline, grade: page.grade })
+    }
+
+    ColumnLayout {
+        spacing: Kirigami.Units.largeSpacing
+
+        KanteSegmented {
+            Layout.fillWidth: true
+            model: Programme.disciplines.map(d => d.kurzname)
+            currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
+            onActivated: index => Programme.discipline = Programme.disciplines[index].id
+            Accessible.name: qsTr("Discipline")
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: Kirigami.Units.smallSpacing
+
+            Repeater {
+                model: page.grades
+
+                KanteChip {
+                    required property var modelData
+
+                    objectName: "grade_" + modelData.id
+                    text: modelData.name + " · " + qsTr("%n point(s)", "", modelData.count)
+                    checkable: true
+                    checked: modelData.id === page.grade
+                    onClicked: Programme.setGrade(page.discipline, modelData.id)
+                }
+            }
+        }
+
+        KanteSettingRow {
+            Layout.fillWidth: true
+            section: qsTr("Mock exam %1").arg(page.gradeName)
+            title: qsTr("Points from the %1").arg(page.gradeName)
+
+            KanteSegmented {
+                objectName: "countChoice"
+                model: page.counts.map(n => n === 0 ? qsTr("all %1").arg(page.size) : String(n))
+                currentIndex: page.countIndex
+                onActivated: index => Exam.count = page.counts[index]
+                Accessible.name: qsTr("Number of points")
+            }
+        }
+        KanteSettingRow {
+            Layout.fillWidth: true
+            title: qsTr("Random order")
+            hint: qsTr("off: as in the exam programme")
+
+            KanteSwitch {
+                objectName: "shuffledSwitch"
+                checked: Exam.shuffled
+                onToggled: Exam.shuffled = checked
+                Accessible.name: qsTr("Random order")
+            }
+        }
+        KanteSettingRow {
+            Layout.fillWidth: true
+            title: qsTr("Techniques from earlier grades")
+            hint: page.hasEarlier ? qsTr("2–5 samples, always first") : qsTr("first grade, none before")
+
+            KanteSwitch {
+                objectName: "samplesSwitch"
+                enabled: page.hasEarlier
+                checked: Exam.samples && page.hasEarlier
+                onToggled: Exam.samples = checked
+                Accessible.name: qsTr("Techniques from earlier grades")
+            }
+        }
+
+        QQC2.Label {
+            objectName: "examHint"
+            Layout.fillWidth: true
+            text: qsTr("Only what is asked is shown (for Shinki Toho only the technique): no video, no time limit. At the end you rate each technique; that sets its rating and goes into the statistics.")
+                  + (page.lastRound ? " " + qsTr("Last round: %1, average %2.")
+                                                .arg(page.lastRound.at.toLocaleDateString(Qt.locale(), Locale.ShortFormat))
+                                                .arg(page.averageText(page.lastRound.average)) : "")
+            color: KanteStyle.mutedTextColor
+            wrapMode: Text.Wrap
+        }
+
+        KanteButton {
+            objectName: "startRound"
+            enabled: page.size > 0
+            emphasis: KanteButton.Emphasis.Primary
+            icon.name: "media-playback-start"
+            text: qsTr("Start round")
+            onClicked: page.start()
+        }
+    }
+}

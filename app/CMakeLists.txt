@@ -51,6 +51,10 @@ qt_add_qml_module(mitori_app
         qml/AllNotesPage.qml
         qml/SearchPage.qml
         qml/StatsPage.qml
+        qml/ExamPage.qml
+        qml/ExamRoundPage.qml
+        qml/ExamBoard.qml
+        qml/ExamEndPage.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -60,6 +64,8 @@ qt_add_qml_module(mitori_app
         services/videos.cpp
         services/practice.h
         services/practice.cpp
+        services/exam.h
+        services/exam.cpp
         store/practicelog.h
         store/practicelog.cpp
         store/schedule.h
@@ -167,6 +173,15 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     set_target_properties(tst_programme PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_dependencies(tst_programme mitori)
     add_test(NAME programme COMMAND tst_programme)
+
+    qt_add_executable(tst_exam tests/tst_exam.cpp services/exam.cpp services/exam.h
+        services/programme.cpp services/programme.h catalog/catalog.cpp catalog/catalog.h)
+    target_include_directories(tst_exam PRIVATE catalog services store)
+    target_compile_definitions(tst_exam PRIVATE MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
+    target_link_libraries(tst_exam PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
+    set_target_properties(tst_exam PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_dependencies(tst_exam mitori)
+    add_test(NAME exam COMMAND tst_exam)
 
     qt_add_executable(tst_practice tests/tst_practice.cpp services/practice.cpp services/practice.h
         store/practicelog.cpp store/practicelog.h store/schedule.cpp store/schedule.h)

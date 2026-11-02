@@ -97,6 +97,19 @@ bool PracticeLog::migrate()
             return false;
         }
     }
+    if (version < 3) {
+        const bool ok = q.exec(QStringLiteral(
+                            "CREATE TABLE IF NOT EXISTS exam_rounds ("
+                            " uid TEXT PRIMARY KEY, at INTEGER NOT NULL, discipline TEXT NOT NULL,"
+                            " grade TEXT NOT NULL, count INTEGER NOT NULL, average REAL NOT NULL,"
+                            " device TEXT NOT NULL)"))
+            && q.exec(QStringLiteral("CREATE INDEX IF NOT EXISTS exam_rounds_discipline ON exam_rounds (discipline, at)"))
+            && q.exec(QStringLiteral("PRAGMA user_version = 3"));
+        if (!ok) {
+            m_error = q.lastError().text();
+            return false;
+        }
+    }
     return true;
 }
 
@@ -272,6 +285,55 @@ QHash<QString, PracticeLog::Note> PracticeLog::lastNotes() const
     while (q.next()) {
         const Note n = note(q);
         result.insert(n.entry, n);
+    }
+    return result;
+}
+
+PracticeLog::ExamRound PracticeLog::addRound(const ExamRound &round)
+{
+    if (round.discipline.isEmpty() || round.grade.isEmpty() || round.count <= 0) {
+        return {};
+    }
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("INSERT INTO exam_rounds (uid, at, discipline, grade, count, average, device)"
+                             " VALUES (?, ?, ?, ?, ?, ?, ?)"));
+    ExamRound saved = round;
+    saved.uid = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    saved.at = round.at.toUTC();
+    q.addBindValue(saved.uid);
+    q.addBindValue(saved.at.toMSecsSinceEpoch());
+    q.addBindValue(saved.discipline);
+    q.addBindValue(saved.grade);
+    q.addBindValue(saved.count);
+    q.addBindValue(saved.average);
+    q.addBindValue(saved.device);
+    if (!q.exec()) {
+        m_error = q.lastError().text();
+        return {};
+    }
+    return saved;
+}
+
+QList<PracticeLog::ExamRound> PracticeLog::rounds(const QString &discipline, int limit) const
+{
+    QList<ExamRound> result;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    // The newest `limit`, then turned to oldest first.
+    q.prepare(QStringLiteral("SELECT uid, at, discipline, grade, count, average, device FROM exam_rounds"
+                             " WHERE discipline = ? ORDER BY at DESC, rowid DESC LIMIT ?"));
+    q.addBindValue(discipline);
+    q.addBindValue(limit);
+    q.exec();
+    while (q.next()) {
+        ExamRound r;
+        r.uid = q.value(0).toString();
+        r.at = QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC);
+        r.discipline = q.value(2).toString();
+        r.grade = q.value(3).toString();
+        r.count = q.value(4).toInt();
+        r.average = q.value(5).toDouble();
+        r.device = q.value(6).toString();
+        result.prepend(r);
     }
     return result;
 }

@@ -308,3 +308,61 @@ bool Practice::deleteNote(const QString &uid)
     noteSaved(ok);
     return ok;
 }
+
+bool Practice::saveRound(const QString &discipline, const QString &grade, const QVariantList &results)
+{
+    if (!m_open || results.isEmpty()) {
+        return false;
+    }
+    // Every point rated before anything is written: a round is kept whole or not at all.
+    int sum = 0;
+    for (const QVariant &r : results) {
+        const int level = r.toMap().value(QStringLiteral("level")).toInt();
+        if (level < 1 || level > 4) {
+            return false;
+        }
+        sum += level;
+    }
+
+    for (const QVariant &r : results) {
+        const QVariantMap point = r.toMap();
+        const int level = point.value(QStringLiteral("level")).toInt();
+        for (const QString &entry : point.value(QStringLiteral("ids")).toStringList()) {
+            if (!rate(entry, level)) {
+                return false;
+            }
+        }
+    }
+
+    PracticeLog::ExamRound round;
+    round.at = QDateTime::currentDateTimeUtc();
+    round.discipline = discipline;
+    round.grade = grade;
+    round.count = int(results.size());
+    round.average = double(sum) / results.size();
+    round.device = deviceId();
+    if (m_log->addRound(round).uid.isEmpty()) {
+        m_error = tr("The exam round could not be saved: %1").arg(m_log->errorString());
+        qWarning("Practice: %s", qPrintable(m_error));
+        emit errorChanged();
+        return false;
+    }
+    ++m_revision;
+    emit changed();
+    return true;
+}
+
+QVariantList Practice::rounds(const QString &discipline, int limit) const
+{
+    QVariantList result;
+    if (!m_open || limit <= 0) {
+        return result;
+    }
+    for (const PracticeLog::ExamRound &r : m_log->rounds(discipline, limit)) {
+        result << QVariantMap{{QStringLiteral("at"), r.at.toLocalTime()},
+                              {QStringLiteral("grade"), r.grade},
+                              {QStringLiteral("count"), r.count},
+                              {QStringLiteral("average"), r.average}};
+    }
+    return result;
+}

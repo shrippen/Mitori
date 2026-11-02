@@ -4,11 +4,22 @@
 <context>
     <name>AllNotesPage</name>
     <message numerus="yes">
-        <location filename="../qml/AllNotesPage.qml" line="210"/>
+        <location filename="../qml/AllNotesPage.qml" line="209"/>
         <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
         <translation>
             <numerusform>%n note. Tap one to open its technique, press and hold to change or delete it.</numerusform>
             <numerusform>%n notes. Tap one to open its technique, press and hold to change or delete it.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>ExamPage</name>
+    <message numerus="yes">
+        <location filename="../qml/ExamPage.qml" line="71"/>
+        <source>%n point(s)</source>
+        <translation>
+            <numerusform>%n point</numerusform>
+            <numerusform>%n points</numerusform>
         </translation>
     </message>
 </context>
@@ -23,7 +34,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="111"/>
+        <location filename="../qml/StartPage.qml" line="129"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>
@@ -34,7 +45,8 @@
 <context>
     <name>StatsPage</name>
     <message numerus="yes">
-        <location filename="../qml/StatsPage.qml" line="104"/>
+        <location filename="../qml/StatsPage.qml" line="46"/>
+        <location filename="../qml/StatsPage.qml" line="116"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>

@@ -96,6 +96,24 @@ Kirigami.ScrollablePage {
             }
 
             KanteOptionTile {
+                objectName: "examTile"
+
+                // Programme.discipline notifies on a new grade too.
+                readonly property string grade: Exam.grade(Programme.discipline)
+                readonly property string gradeName: (Exam.grades(Programme.discipline).find(g => g.id === grade) || {}).name || ""
+
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1          // equal columns
+                visible: Programme.errorString === ""
+                checkable: false
+                autoExclusive: false
+                glyph: "試"
+                text: qsTr("Exam mode")
+                hint: qsTr("Mock exam %1").arg(gradeName)
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ExamPage.qml"))
+            }
+
+            KanteOptionTile {
                 objectName: "statsTile"
 
                 readonly property int days: Practice.revision >= 0 && Practice.today.getTime() > 0
