@@ -6,25 +6,31 @@
 
 #include <algorithm>
 
+inline bool isDash(QChar c)
+{
+    return c == u'-' || c == u'‐' || c == u'‑' || c == u'‒' || c == u'–' || c == u'—' || c == u'−';
+}
+
 // The form search compares: lower case, without accents (Ô-dachi finds o dachi, größer finds
-// grosser), full-width letters folded, hyphens, dashes, slashes and middle dots as spaces,
-// spaces simplified. `keepHyphens` leaves hyphens and dashes as "-" (for a query's words).
+// grosser; kana keep their dakuten), full-width letters folded, dashes, slashes and middle dots
+// as spaces, spaces simplified. `keepHyphens` writes dashes as "-" instead.
 inline QString searchKey(const QString &text, bool keepHyphens = false)
 {
     QString key;
     for (const QChar c : text.normalized(QString::NormalizationForm_KD)) {
-        if (c.category() == QChar::Mark_NonSpacing) {
-            continue;
+        if (c.unicode() >= 0x0300 && c.unicode() <= 0x036F) {
+            continue;   // combining accents of Latin letters
         }
-        if (c == u'ß') {
+        const QChar lower = c.toLower();
+        if (lower == u'ß') {
             key += QStringLiteral("ss");
-        } else if (c == u'-' || c == u'–' || c == u'—') {
+        } else if (isDash(c)) {
             key += keepHyphens ? QChar(u'-') : QChar(u' ');
         } else {
-            key += (c == u'/' || c == u'·') ? QChar(u' ') : c.toLower();
+            key += (c == u'/' || c == u'·') ? QChar(u' ') : lower;
         }
     }
-    return key.simplified();
+    return key.simplified().normalized(QString::NormalizationForm_C);   // kana with dakuten as one
 }
 
 // The words of a query; a word may keep its hyphens (shiho-nage, see SearchText).
@@ -50,53 +56,70 @@ inline QString withoutHiragana(QString text)
     return text;
 }
 
-// Whether every word of the query occurs in the text (as searchKey gives it). From the start of
-// a word, a word also matches across spaces and hyphens (shihonage finds Shiho-nage, but rein
-// does not find "nur ein"); a hyphenated word matches joined or part by part (ikkyo-irimi as
-// ikkyo irimi); a word with kanji leaves the okurigana out on both sides (切り落とし finds 切り落し).
+// A text to search (a technique's fields, a note): whether every word of a query occurs in it.
+// A word matches inside a word, or joined from the start of a word across the following
+// hyphens and spaces: across a hyphen it may end anywhere (shihon finds Shiho-nage while
+// typing), across a space only where a word ends (nurein finds "nur ein", mitte not "mit
+// Tenkan"). A hyphenated word matches joined, or each part from the start of a word
+// (ikkyo-irimi as ikkyo irimi; ai-hanmi not in Kaiten-nage). A word with kanji leaves the
+// okurigana out on both sides (切り落とし finds 切り落し).
 class SearchText
 {
 public:
-    explicit SearchText(const QString &key)
-        : m_key(key)
+    explicit SearchText(const QString &text)
     {
-        bool start = true;
+        const QString key = searchKey(text, true);
+        m_key = QString(key).replace(u'-', u' ');
+        QChar before = u' ';
         for (const QChar c : key) {
-            if (c == u' ') {
-                start = true;
-                continue;
+            if (c == u' ' || c == u'-') {
+                if (!m_joined.isEmpty()) {
+                    m_ends << m_joined.size();
+                    if (c == u' ') {
+                        m_spaces << m_joined.size();
+                    }
+                }
+            } else {
+                if (before == u' ' || before == u'-') {
+                    m_starts << m_joined.size();
+                }
+                m_joined += c;
             }
-            if (start) {
-                m_starts << m_joined.size();
-                start = false;
-            }
-            m_joined += c;
+            before = c;
         }
+        m_ends << m_joined.size();
     }
 
     bool matches(const QStringList &words) const
     {
         return std::all_of(words.cbegin(), words.cend(), [this](const QString &w) {
             if (!w.contains(u'-')) {
-                return matchesWord(w);
+                return m_key.contains(w) || fromWordStart(w);
             }
-            if (matchesWord(QString(w).remove(u'-'))) {
+            if (fromWordStart(QString(w).remove(u'-'))) {
                 return true;
             }
             const QStringList parts = w.split(u'-', Qt::SkipEmptyParts);
-            return std::all_of(parts.cbegin(), parts.cend(), [this](const QString &p) { return matchesWord(p); });
+            return std::all_of(parts.cbegin(), parts.cend(), [this](const QString &p) { return fromWordStart(p); });
         });
     }
 
 private:
-    bool matchesWord(const QString &w) const
+    bool fromWordStart(const QString &w) const
     {
-        if (m_key.contains(w)) {
-            return true;
-        }
         const QStringView joined(m_joined);
-        if (joined.contains(w) && std::any_of(m_starts.cbegin(), m_starts.cend(), [&](qsizetype at) { return joined.sliced(at).startsWith(w); })) {
-            return true;
+        if (joined.contains(w)) {
+            for (const qsizetype at : m_starts) {
+                if (!joined.sliced(at).startsWith(w)) {
+                    continue;
+                }
+                const qsizetype end = at + w.size();
+                const bool acrossSpace = std::any_of(m_spaces.cbegin(), m_spaces.cend(),
+                                                     [&](qsizetype s) { return s > at && s < end; });
+                if (!acrossSpace || m_ends.contains(end)) {
+                    return true;
+                }
+            }
         }
         if (!std::any_of(w.cbegin(), w.cend(), isKanji)) {
             return false;
@@ -108,8 +131,10 @@ private:
         return !bare.isEmpty() && m_kanji.contains(bare);
     }
 
-    QString m_key;
-    QString m_joined;
-    QList<qsizetype> m_starts;
+    QString m_key;                  // as searchKey gives it
+    QString m_joined;               // without spaces and hyphens
+    QList<qsizetype> m_starts;      // where words begin in m_joined
+    QList<qsizetype> m_ends;        // where words end
+    QList<qsizetype> m_spaces;      // where a space (not a hyphen) was
     mutable QString m_kanji;
 };

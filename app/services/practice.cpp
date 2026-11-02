@@ -206,7 +206,7 @@ QVariantList Practice::searchNotes(const QString &query, int limit) const
         return result;
     }
     for (const PracticeLog::Note &n : m_log->allNotes()) {
-        if (SearchText(searchKey(n.text)).matches(words)) {
+        if (SearchText(n.text).matches(words)) {
             QVariantMap row = noteMap(n);
             row[QStringLiteral("entry")] = n.entry;
             result << row;

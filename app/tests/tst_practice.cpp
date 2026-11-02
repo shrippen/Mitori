@@ -301,6 +301,12 @@ private slots:
         practice.addNote(QStringLiteral("f"), QStringLiteral("Fuß nur ein wenig drehen"));
         QVERIFY(practice.searchNotes(QStringLiteral("rein")).isEmpty());
         QCOMPARE(practice.searchNotes(QStringLiteral("nurein")).size(), 1);
+        // Across a space, the match also ends where a word ends: "mitte" is not in "mit Tenkan".
+        practice.addNote(QStringLiteral("g"), QStringLiteral("Erst mit Tenkan ausweichen"));
+        QVERIFY(practice.searchNotes(QStringLiteral("mitte")).isEmpty());
+        QCOMPARE(practice.searchNotes(QStringLiteral("mittenkan")).size(), 1);
+        // Capital ẞ as ß.
+        QCOMPARE(practice.searchNotes(QStringLiteral("NUR EIN FUẞ")).size(), 1);
         QVERIFY(practice.searchNotes(QStringLiteral(" ")).isEmpty());
     }
 

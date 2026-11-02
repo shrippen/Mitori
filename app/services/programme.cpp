@@ -270,7 +270,7 @@ QVariantList Programme::search(const QString &query, int limit) const
                                          row.value(QStringLiteral("attackExtra")).toString(),
                                          row.value(QStringLiteral("attackJp")).toString(),
                                          group};
-                if (!SearchText(searchKey(fields.join(u' '))).matches(words)) {
+                if (!SearchText(fields.join(u' ')).matches(words)) {
                     continue;
                 }
                 seen.insert(id);
@@ -291,19 +291,24 @@ QVariantList Programme::search(const QString &query, int limit) const
 
 QVariantMap Programme::entry(const QString &id) const
 {
-    for (const QVariant &d : m_catalog.disciplines()) {
-        const QVariantMap map = d.toMap();
-        const QString disciplineId = map.value(QStringLiteral("id")).toString();
-        for (const QVariant &g : map.value(QStringLiteral("grade")).toList()) {
-            for (const QVariant &e : entries(disciplineId, g.toMap().value(QStringLiteral("id")).toString())) {
-                if (e.toMap().value(QStringLiteral("id")).toString() == id) {
+    // Built once: the search page asks for one entry per note found.
+    if (m_entryIndex.isEmpty()) {
+        for (const QVariant &d : m_catalog.disciplines()) {
+            const QVariantMap map = d.toMap();
+            const QString disciplineId = map.value(QStringLiteral("id")).toString();
+            for (const QVariant &g : map.value(QStringLiteral("grade")).toList()) {
+                for (const QVariant &e : entries(disciplineId, g.toMap().value(QStringLiteral("id")).toString())) {
                     QVariantMap found = e.toMap();
+                    const QString entryId = found.value(QStringLiteral("id")).toString();
+                    if (entryId.isEmpty() || m_entryIndex.contains(entryId)) {
+                        continue;
+                    }
                     found[QStringLiteral("discipline")] = disciplineId;
                     found[QStringLiteral("grade")] = g.toMap().value(QStringLiteral("id"));
-                    return found;
+                    m_entryIndex.insert(entryId, found);
                 }
             }
         }
     }
-    return {};
+    return m_entryIndex.value(id);
 }

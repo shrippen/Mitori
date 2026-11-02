@@ -86,13 +86,33 @@ private slots:
         const QVariantList joined = programme.search(QStringLiteral("shihonage"));
         QVERIFY(!joined.isEmpty());
         QCOMPARE(joined.first().toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Shiho-nage"));
+        // While typing, a joined word may end inside a hyphenated name.
+        QVERIFY(!programme.search(QStringLiteral("shihon")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("kiriotoshi")).isEmpty());
         QCOMPARE(programme.search(QStringLiteral("kiriotoshi"), 1000).size(),
                  programme.search(QStringLiteral("kiri otoshi"), 1000).size());
-        // A hyphenated word also matches when its parts are in different fields.
+        // A hyphenated word also matches when its parts are in different fields, each from the
+        // start of a word ("ai" not in Kaiten-nage: ai-hanmi finds no Gyaku-hanmi).
+        QVERIFY(!programme.search(QStringLiteral("ikkyo-irimi")).isEmpty());
         QCOMPARE(programme.search(QStringLiteral("ikkyo-irimi"), 1000).size(),
                  programme.search(QStringLiteral("ikkyo irimi"), 1000).size());
-        // An en dash separates as a hyphen does; full-width Latin from a Japanese keyboard folds.
-        QVERIFY(!programme.search(QStringLiteral("33-43")).isEmpty());
+        const QVariantList ai = programme.search(QStringLiteral("ai-hanmi"), 1000);
+        QVERIFY(!ai.isEmpty());
+        for (const QVariant &r : ai) {
+            QVERIFY2(!searchKey(r.toMap().value(QStringLiteral("attackExtra")).toString()).contains(u"gyaku"),
+                     qPrintable(r.toMap().value(QStringLiteral("title")).toString()));
+        }
+        // Other dashes separate as a hyphen does (en dash in "Ô-dachi 33–43", U+2010, minus).
+        QCOMPARE(searchKey(QStringLiteral("Ô-dachi 33–43")), QStringLiteral("o dachi 33 43"));
+        QVERIFY(!programme.search(QStringLiteral("dachi 33 43")).isEmpty());
+        QCOMPARE(programme.search(QStringLiteral("ikkyo‐irimi"), 1000).size(),
+                 programme.search(QStringLiteral("ikkyo-irimi"), 1000).size());
+        QCOMPARE(programme.search(QStringLiteral("ikkyo−irimi"), 1000).size(),
+                 programme.search(QStringLiteral("ikkyo-irimi"), 1000).size());
+        // Kana keep their dakuten: が is not か.
+        QCOMPARE(searchKey(QStringLiteral("ガ")), QStringLiteral("ガ"));
+        // Full-width Latin from a Japanese keyboard folds.
+        QVERIFY(!programme.search(QStringLiteral("ikkyo")).isEmpty());
         QCOMPARE(programme.search(QStringLiteral("ｉｋｋｙｏ"), 1000).size(), programme.search(QStringLiteral("ikkyo"), 1000).size());
         QVERIFY(!programme.search(QStringLiteral("切り落し")).isEmpty());
         QCOMPARE(programme.search(QStringLiteral("切り落とし"), 1000).size(),

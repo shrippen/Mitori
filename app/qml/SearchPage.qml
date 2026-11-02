@@ -114,7 +114,7 @@ Kirigami.ScrollablePage {
 
                 objectName: "noteResult"
                 Layout.fillWidth: true
-                text: modelData.text
+                text: modelData.text.replace(/\s+/g, " ")       // one line, as the row shows it
                 subtitle: [entry.title, modelData.created.toLocaleDateString(Qt.locale(), Locale.ShortFormat)].filter(x => x).join(" · ")
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
             }
