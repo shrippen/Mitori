@@ -101,7 +101,7 @@ Kirigami.Page {
             Layout.fillWidth: true
             padding: Kirigami.Units.smallSpacing
             leftPadding: Kirigami.Units.largeSpacing
-            rightPadding: Kirigami.Units.largeSpacing
+            rightPadding: Math.max(Kirigami.Units.largeSpacing, effectiveScrollBarWidth)
             spacing: Kirigami.Units.smallSpacing
 
             Repeater {
@@ -122,8 +122,10 @@ Kirigami.Page {
         QQC2.ScrollView {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.leftMargin: Kirigami.Units.largeSpacing
-            Layout.rightMargin: Kirigami.Units.largeSpacing
+            // The notes keep a margin, the scroll bar stands at the window's edge.
+            leftPadding: Kirigami.Units.largeSpacing
+            rightPadding: Math.max(Kirigami.Units.largeSpacing, effectiveScrollBarWidth)
+            clip: true                                  // the notes scroll under the filter, not over it
 
             // A virtual list (years of notes): the day as its section.
             ListView {
@@ -137,10 +139,13 @@ Kirigami.Page {
                 activeFocusOnTab: true
                 keyNavigationEnabled: true
                 currentIndex: -1
+                // Only a key moves the view: a new or deleted note above shifts the index, not the view.
+                property bool byKey: false
                 onCurrentIndexChanged: {
-                    if (activeFocus && currentIndex >= 0) {
+                    if (byKey && currentIndex >= 0) {
                         positionViewAtIndex(currentIndex, ListView.Contain)
                     }
+                    byKey = false
                 }
                 // Coming in with Tab: the first note in view, not one far away.
                 onActiveFocusChanged: {
@@ -171,6 +176,8 @@ Kirigami.Page {
                 Keys.onEnterPressed: page.openCurrent(false)
                 Keys.onMenuPressed: page.openCurrent(true)
                 Keys.onPressed: event => {
+                    byKey = true                        // also Up and Down, which the list handles
+                    Qt.callLater(() => byKey = false)
                     const page_ = Math.max(1, lastShown() - firstShown())
                     if (event.key === Qt.Key_PageDown) {
                         currentIndex = Math.min(count - 1, currentIndex + page_)
@@ -178,6 +185,7 @@ Kirigami.Page {
                         currentIndex = Math.max(0, currentIndex - page_)
                     } else if (event.key === Qt.Key_Home) {
                         currentIndex = 0
+                        positionViewAtBeginning()       // with the count above the first note
                     } else if (event.key === Qt.Key_End) {
                         currentIndex = count - 1
                     } else {

@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
@@ -597,6 +598,37 @@ TestCase {
         compare(list.currentIndex, list.count - 1)
         keyClick(Qt.Key_Home)
         compare(list.currentIndex, 0)
+        tryVerify(() => list.atYBeginning, 1000, "Home shows the count above the first note")
+        // A new note while the current one is out of view: the view stays where it is.
+        list.positionViewAtIndex(30, ListView.Beginning)
+        wait(50)
+        const shownTop = page.shown[list.indexAt(10, list.contentY + 10)].uid
+        Practice.addNote(many[0].id, "ganz neu")
+        tryVerify(() => page.shown[0].text === "ganz neu")
+        wait(50)
+        compare(page.shown[list.indexAt(10, list.contentY + 10)].uid, shownTop, "no jump to the current note")
+        // Scrolled, the notes stay below the filter (the list is clipped).
+        const chip = findChild(page, "filter_all")
+        list.positionViewAtBeginning()
+        wait(50)
+        const area = chip.mapToItem(window.contentItem, 0, 0)
+        const clean = grabImage(window.contentItem)
+        list.contentY = list.originY + 150
+        wait(50)
+        const scrolled = grabImage(window.contentItem)
+        let covered = 0
+        for (let x = area.x + 1; x < area.x + chip.width - 1; x += 3)
+            for (let y = area.y + 1; y < area.y + chip.height - 1; y += 3)
+                if (String(clean.pixel(x, y)) !== String(scrolled.pixel(x, y)))
+                    covered++
+        compare(covered, 0, "the filter is not covered by the scrolled list")
+        // The scroll bar at the window's edge, not over the notes.
+        const bar = list.parent.QQC2.ScrollBar.vertical
+        if (bar) {
+            const note = findChild(list.contentItem, "note")
+            verify(note.mapToItem(page, note.width, 0).x <= bar.mapToItem(page, 0, 0).x + 1,
+                   "note " + note.mapToItem(page, note.width, 0).x + ", bar " + bar.mapToItem(page, 0, 0).x)
+        }
         // The keyboard reaches every note: Down moves through the list, which follows; Enter opens.
         list.positionViewAtBeginning()
         list.forceActiveFocus()

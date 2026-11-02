@@ -20,6 +20,7 @@ public slots:
     void applicationAvailable()
     {
         QCoreApplication::setApplicationName(QStringLiteral("mitori-ui-test"));
+        QCoreApplication::setOrganizationDomain(QStringLiteral("shrippen.github.io"));   // as main.cpp (Settings)
         // West of UTC: a QDate reaches QML as midnight UTC, the day before here (catches "today"
         // compared that way; NotesPage once did).
         qputenv("TZ", "America/Los_Angeles");
