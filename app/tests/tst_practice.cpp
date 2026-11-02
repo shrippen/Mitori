@@ -310,6 +310,8 @@ private slots:
         QVERIFY(practice.addNote(QStringLiteral("e"), QStringLiteral("Kreis größer")));
         QCOMPARE(spy.count(), 1);
         QCOMPARE(practice.lastNote(QStringLiteral("e")).value(QStringLiteral("text")).toString(), QStringLiteral("Kreis größer"));
+        QCOMPARE(practice.notesToday(QStringLiteral("e")).size(), 1);
+        QVERIFY(practice.notesToday(QStringLiteral("other")).isEmpty());
         const QString uid = practice.notes(QStringLiteral("e")).first().toMap().value(QStringLiteral("uid")).toString();
         QVERIFY(practice.changeNote(uid, QStringLiteral("Kreis viel größer")));
         QCOMPARE(practice.lastNote(QStringLiteral("e")).value(QStringLiteral("text")).toString(), QStringLiteral("Kreis viel größer"));

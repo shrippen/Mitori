@@ -67,6 +67,8 @@ public:
 
     // Notes on a technique: {uid, text, created, changed} with local dates, oldest first.
     Q_INVOKABLE QVariantList notes(const QString &entry) const;
+    // The entry's notes written today (the player's "Noted today"), oldest first.
+    Q_INVOKABLE QVariantList notesToday(const QString &entry) const;
     // The newest note of an entry ({uid, text, created, changed}), or an empty map.
     Q_INVOKABLE QVariantMap lastNote(const QString &entry) const;
     // Every note ({uid, entry, text, created, changed}), newest first.

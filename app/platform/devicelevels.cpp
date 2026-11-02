@@ -31,6 +31,9 @@ double g_brightness = 0.5;
 double g_volume = 0.5;
 // The brightness before the first change, to restore (Linux; Android restores by itself).
 double g_original = -1;
+// Whether the screen is kept on; on Linux the screen saver's cookie for releasing it.
+bool g_held = false;
+uint g_cookie = 0;
 
 double clamped(double level)
 {
@@ -39,6 +42,7 @@ double clamped(double level)
 
 #ifdef Q_OS_ANDROID
 constexpr int kStreamMusic = 3;                 // AudioManager.STREAM_MUSIC
+constexpr jint kKeepScreenOn = 128;             // WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
 constexpr float kSystemBrightness = -1.0f;      // WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
 
 QJniObject audioManager()
@@ -198,6 +202,47 @@ bool setVolume(double level)
 #else
     return false;
 #endif
+}
+
+void holdScreen(Hold hold)
+{
+    const bool keep = hold == Hold::Keep;
+    if (keep == g_held) {
+        return;
+    }
+    g_held = keep;
+    if (inMemory()) {
+        return;
+    }
+#ifdef Q_OS_ANDROID
+    // The window belongs to Android's main thread.
+    QNativeInterface::QAndroidApplication::runOnAndroidMainThread([keep] {
+        const QJniObject activity = QNativeInterface::QAndroidApplication::context();
+        const QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+        if (!window.isValid()) {
+            return;
+        }
+        window.callMethod<void>(keep ? "addFlags" : "clearFlags", "(I)V", kKeepScreenOn);
+    });
+#elif defined(Q_OS_LINUX)
+    QDBusInterface saver(QStringLiteral("org.freedesktop.ScreenSaver"), QStringLiteral("/org/freedesktop/ScreenSaver"),
+                         QStringLiteral("org.freedesktop.ScreenSaver"));
+    if (!keep) {
+        if (g_cookie != 0) {
+            saver.call(QStringLiteral("UnInhibit"), g_cookie);
+        }
+        g_cookie = 0;
+        return;
+    }
+    const QDBusReply<uint> cookie = saver.call(QStringLiteral("Inhibit"), QStringLiteral("Mitori"),
+                                               QStringLiteral("Video"));
+    g_cookie = cookie.isValid() ? cookie.value() : 0;
+#endif
+}
+
+bool screenHeld()
+{
+    return g_held;
 }
 
 }

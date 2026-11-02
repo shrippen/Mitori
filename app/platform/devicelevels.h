@@ -11,7 +11,13 @@
 //                   ("memory-screen": only the brightness, as on the desktop)
 //
 // Levels are 0..1; a negative value means "not available here".
+//
+// The screen may also be kept on (the player's "screen on"): Android sets FLAG_KEEP_SCREEN_ON on
+// the window, Linux inhibits the screen saver over org.freedesktop.ScreenSaver; in memory only
+// the state is kept.
 namespace DeviceLevels {
+
+enum class Hold { Release, Keep };
 
 double brightness();
 // False when the platform has no brightness to set.
@@ -21,5 +27,8 @@ void restoreBrightness();
 
 double volume();
 bool setVolume(double level);
+
+void holdScreen(Hold hold);
+bool screenHeld();
 
 }

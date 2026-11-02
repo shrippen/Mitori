@@ -73,7 +73,10 @@ Item {
             Qt.callLater(page.restart)
         }
     }
-    Component.onCompleted: shown(current.id)
+    Component.onCompleted: {
+        shown(current.id)
+        Levels.enter()          // keeps the screen on, if the switch says so
+    }
     Component.onDestruction: {
         player.stop()
         Levels.restore()
@@ -134,7 +137,7 @@ Item {
         source: Videos.source(page.video)
         videoOutput: output
         audioOutput: AudioOutput {
-            muted: player.playbackRate < 1
+            muted: player.playbackRate < 1 || !Levels.sound
             volume: Levels.playerVolume
         }
         playbackRate: 1
@@ -406,6 +409,32 @@ Item {
                     onSpeedChangeRequested: speed => player.playbackRate = speed
                     onRewind: player.position = page.from
                     onFrameStepRequested: direction => page.step(direction)
+                }
+
+                // The player's switches, kept for the next start: sound (always off in slow
+                // motion) and the screen staying on while the player is open.
+                RowLayout {
+                    Layout.fillWidth: true
+                    visible: page.hasVideo
+
+                    KanteToolButton {
+                        objectName: "soundSwitch"
+                        checkable: true
+                        checked: Levels.sound
+                        icon.name: Levels.sound ? "audio-volume-high" : "audio-volume-muted"
+                        text: qsTr("Sound")
+                        QQC2.ToolTip.text: qsTr("Always silent in slow motion")
+                        QQC2.ToolTip.visible: hovered
+                        onClicked: Levels.setSound(Levels.sound ? Levels.Switch.Off : Levels.Switch.On)
+                    }
+                    KanteToolButton {
+                        objectName: "awakeSwitch"
+                        checkable: true
+                        checked: Levels.awake
+                        icon.name: "brightness-high"
+                        text: qsTr("Screen on")
+                        onClicked: Levels.setAwake(Levels.awake ? Levels.Switch.Off : Levels.Switch.On)
+                    }
                 }
 
                 RatingRow {

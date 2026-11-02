@@ -7,11 +7,15 @@
 
 namespace {
 constexpr auto kVolumeKey = "player/volume";    // the player's own volume (no device volume)
+constexpr auto kSoundKey = "player/sound";
+constexpr auto kAwakeKey = "player/awake";
 }
 
 Levels::Levels(QObject *parent)
     : QObject(parent)
     , m_ownVolume(QSettings().value(QLatin1String(kVolumeKey), 1.0).toDouble())
+    , m_sound(QSettings().value(QLatin1String(kSoundKey), true).toBool())
+    , m_awake(QSettings().value(QLatin1String(kAwakeKey), true).toBool())
 {
     refresh();
 }
@@ -62,5 +66,40 @@ void Levels::restore()
 {
     DeviceLevels::restoreBrightness();
     m_brightness = DeviceLevels::brightness();
+    m_open = false;
+    hold();
     emit changed();
+}
+
+bool Levels::held() const
+{
+    return DeviceLevels::screenHeld();
+}
+
+void Levels::enter()
+{
+    m_open = true;
+    hold();
+    emit changed();
+}
+
+void Levels::setSound(Switch state)
+{
+    m_sound = state == Switch::On;
+    QSettings().setValue(QLatin1String(kSoundKey), m_sound);
+    emit changed();
+}
+
+void Levels::setAwake(Switch state)
+{
+    m_awake = state == Switch::On;
+    QSettings().setValue(QLatin1String(kAwakeKey), m_awake);
+    hold();
+    emit changed();
+}
+
+// The screen stays on while the player is open and the switch is on.
+void Levels::hold()
+{
+    DeviceLevels::holdScreen(m_open && m_awake ? DeviceLevels::Hold::Keep : DeviceLevels::Hold::Release);
 }
