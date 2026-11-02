@@ -22,8 +22,13 @@ Kirigami.ScrollablePage {
     // "" = all disciplines, else a discipline's id; kept for the next time.
     property string filter: ""
     Settings {
-        category: "allNotes"
-        property alias filter: page.filter
+        property alias allNotesFilter: page.filter
+    }
+    // A remembered discipline that no longer exists: all (also when Settings loads it).
+    onFilterChanged: {
+        if (filter !== "" && !Programme.disciplines.some(d => d.id === filter)) {
+            Qt.callLater(() => page.filter = "")     // not inside the change (Settings records it)
+        }
     }
     // Every note with its technique ({}, with only the id, when it is no longer in the programme)
     // and its local day ("YYYY-MM-DD", the list's sections). Newest first.
@@ -40,6 +45,21 @@ Kirigami.ScrollablePage {
         })
     }
     readonly property var shown: filter === "" ? all : all.filter(n => n.technique.discipline === filter)
+    // What the list shows: set from `shown` after noting the note at the top, so that a change
+    // (edit, delete, a new note) keeps the place instead of starting at the top again.
+    property var listModel: shown
+    onShownChanged: {
+        const uid = list.topUid
+        listModel = shown
+        if (uid !== "") {
+            Qt.callLater(() => {
+                const i = page.shown.findIndex(n => n.uid === uid)
+                if (i > 0) {
+                    list.positionViewAtIndex(i, ListView.Beginning)
+                }
+            })
+        }
+    }
 
     title: qsTr("All notes")
 
@@ -74,11 +94,33 @@ Kirigami.ScrollablePage {
         id: list
 
         objectName: "notesList"
-        model: page.shown
+        model: page.listModel
         spacing: Kirigami.Units.smallSpacing
+        // The keyboard moves through every note (Up, Down), Enter opens, the menu key edits; the
+        // list follows the current note.
+        activeFocusOnTab: true
+        keyNavigationEnabled: true
+        currentIndex: -1
+        onCurrentIndexChanged: {
+            if (activeFocus && currentIndex >= 0) {
+                positionViewAtIndex(currentIndex, ListView.Contain)
+            }
+        }
+        Keys.onReturnPressed: page.openCurrent(false)
+        Keys.onEnterPressed: page.openCurrent(false)
+        Keys.onMenuPressed: page.openCurrent(true)
+
+        // The note at the top (none at the very top): a new model starts at the top, the page
+        // puts it back (onShownChanged).
+        property string topUid: ""
+        onContentYChanged: {
+            const i = indexAt(width / 2, contentY + 1)
+            topUid = i > 0 && !atYBeginning ? (model[i] || {}).uid || "" : ""
+        }
         section.property: "day"
         section.delegate: KanteSectionLabel {
             required property string section
+            Accessible.role: Accessible.Heading
             width: ListView.view.width
             topPadding: Kirigami.Units.largeSpacing
             text: page.dayName(section)
@@ -125,16 +167,15 @@ Kirigami.ScrollablePage {
             required property var modelData
 
             objectName: "note"
+            required property int index
+
             width: ListView.view.width
             spacing: 0
-            activeFocusOnTab: true
+            readonly property bool current: ListView.isCurrentItem && ListView.view.activeFocus
             Accessible.role: Accessible.Button
             Accessible.name: page.techniqueName(modelData.technique) + ": " + modelData.text
             Accessible.description: qsTr("Opens the technique's notes; press and hold or the menu key to change or delete")
             Accessible.onPressAction: page.open(modelData)
-            Keys.onReturnPressed: page.open(modelData)
-            Keys.onEnterPressed: page.open(modelData)
-            Keys.onMenuPressed: editor.edit(modelData)
 
             QQC2.Label {
                 Layout.fillWidth: true
@@ -151,7 +192,7 @@ Kirigami.ScrollablePage {
                 padding: Kirigami.Units.smallSpacing
                 background: Rectangle {
                     color: KanteStyle.cardColor
-                    border.width: noteItem.activeFocus ? KanteStyle.borderWidth : 0
+                    border.width: noteItem.current ? KanteStyle.borderWidth : 0
                     border.color: KanteStyle.focusColor
                 }
             }
@@ -165,6 +206,19 @@ Kirigami.ScrollablePage {
                 acceptedButtons: Qt.RightButton
                 onTapped: editor.edit(noteItem.modelData)
             }
+        }
+    }
+
+    // Enter or the menu key on the note the keyboard is on.
+    function openCurrent(edit) {
+        const note = page.shown[list.currentIndex]
+        if (!note) {
+            return
+        }
+        if (edit) {
+            editor.edit(note)
+        } else {
+            page.open(note)
         }
     }
 

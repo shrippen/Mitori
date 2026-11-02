@@ -521,15 +521,46 @@ TestCase {
         tryVerify(() => editor.opened, 2000, "press and hold opens the editor")
         editor.close()
         tryVerify(() => !editor.opened)
-        // A virtual list: delegates for the visible notes, not for every note.
-        const list = findChild(page, "notesList")
-        verify(list && list.count !== undefined, "a ListView")
-        // An empty filter says so.
-        page.filter = "shinkitoho"
-        if (page.shown.length === 0) {
-            compare(findChild(page, "count").text, qsTr("No notes in this discipline."))
-        }
+        // Many notes: a virtual list builds delegates for the visible ones only.
         page.filter = ""
+        const many = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        for (let i = 0; i < 60; i++)
+            Practice.addNote(many[i % many.length].id, "Übung " + i)
+        const list = findChild(page, "notesList")
+        tryVerify(() => list.count >= 60)
+        verify(findChildren(list.contentItem, "note").length < list.count / 2, "only the visible delegates")
+        // A change further down keeps the place in the list.
+        list.positionViewAtIndex(40, ListView.Beginning)
+        wait(50)
+        const top = page.shown[list.indexAt(10, list.contentY + 10)].uid
+        Practice.changeNote(page.shown[42].uid, "geändert")
+        tryVerify(() => page.shown[42].text === "geändert")
+        wait(50)
+        compare(page.shown[list.indexAt(10, list.contentY + 10)].uid, top, "same note at the top")
+        // The keyboard reaches every note: Down moves through the list, which follows; Enter opens.
+        list.positionViewAtBeginning()
+        list.forceActiveFocus()
+        list.currentIndex = 0
+        for (let i = 0; i < 30; i++)
+            keyClick(Qt.Key_Down)
+        compare(list.currentIndex, 30)
+        verify(list.contentY > 200, "the list follows the keyboard (" + list.contentY + ")")
+        const target = page.shown[30].technique.id
+        keyClick(Qt.Key_Return)
+        tryVerify(() => window.pageStack.currentItem !== page, 2000)
+        compare(window.pageStack.currentItem.entry.id, target)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        // A remembered discipline that no longer exists falls back to all.
+        page.filter = "kendo"
+        tryCompare(page, "filter", "")
+        // An empty filter says so (a discipline without notes, if one is left).
+        const empty = Programme.disciplines.find(d => !page.all.some(n => n.technique.discipline === d.id))
+        if (empty) {
+            page.filter = empty.id
+            compare(findChild(page, "count").text, qsTr("No notes in this discipline."))
+            page.filter = ""
+        }
         // The orphan is named as such.
         const orphan = page.all.find(n => n.entry === "not-in-the-programme")
         compare(page.techniqueName(orphan.technique), qsTr("Technique no longer in the programme"))
@@ -543,6 +574,7 @@ TestCase {
         // The filter is kept for the next time.
         page.filter = "daitoryu"
         window.pageStack.pop()
+        wait(600)       // Settings writes a moment later (and when the popped page goes)
         const again = push("AllNotesPage")
         compare(again.filter, "daitoryu")
         again.filter = ""

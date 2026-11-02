@@ -4,7 +4,7 @@
 <context>
     <name>AllNotesPage</name>
     <message numerus="yes">
-        <location filename="../qml/AllNotesPage.qml" line="114"/>
+        <location filename="../qml/AllNotesPage.qml" line="156"/>
         <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
         <translation>
             <numerusform>%n note. Tap one to open its technique, press and hold to change or delete it.</numerusform>
