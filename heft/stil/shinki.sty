@@ -18,7 +18,7 @@
 
 \RequirePackage{fontspec}
 \RequirePackage[table]{xcolor}
-\RequirePackage{graphicx,eso-pic,multicol,longtable,array,tabularx,enumitem,tikz,needspace}
+\RequirePackage{graphicx,eso-pic,multicol,longtable,array,tabularx,enumitem,tikz}
 \RequirePackage[hidelinks]{hyperref}
 \RequirePackage[a4paper,left=18mm,right=18mm,top=27mm,bottom=24mm]{geometry}
 
@@ -30,12 +30,6 @@
 \definecolor{hai}{HTML}{D9D5CF}      % Linien
 \definecolor{balken}{HTML}{CFCFCF}   % Kopf- und Fußbalken
 \definecolor{band}{HTML}{1A1A1A}     % dunkles Band der Rubrikseiten
-\definecolor{stufe1}{HTML}{F3C7C6}   % Landkarte: früh im Programm
-\definecolor{stufe2}{HTML}{E8918F}
-\definecolor{stufe3}{HTML}{DC5A57}
-\definecolor{stufe4}{HTML}{CE171E}
-\definecolor{stufe5}{HTML}{7D0A0F}   % spät im Programm
-
 % Schriften ----------------------------------------------------------------
 \setmainfont{Cochineal}[Extension=.otf, UprightFont=*-Roman, BoldFont=*-Bold,
   ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic, Numbers=Lining]
@@ -159,45 +153,43 @@
   \vspace{1.3mm}}}
 \newcommand\tfuss[1]{\par\vspace{.5mm}{\sffamily\fontsize{7}{8.5}\selectfont\color{usuzumi}#1}\par}
 
-% ===== Tabellenkopf (Ô-dachi-Formen) ==========================================
+% ===== Ansicht 2: Matrix ======================================================
 \newcolumntype{M}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newlength\mangriff \newlength\mspalte \newlength\stspalte
+\setlength\stspalte{30mm}
+% dunkles Band über die ganze Breite
+\newcommand\band[3]{\AddToShipoutPictureBG*{\AtPageUpperLeft{\put(0,\LenToUnit{-44mm}){%
+  \begin{tikzpicture}\shade[left color=black,right color=black!72] (0,0) rectangle (\paperwidth,28mm);\end{tikzpicture}}}}%
+  \vspace*{-6mm}%
+  \begin{minipage}[b]{.7\linewidth}\color{white}\sffamily
+    {\bfseries\fontsize{17}{19}\selectfont #1}\par\vspace{.8mm}{\color{white}\rule{.62\linewidth}{.8pt}}\par\vspace{.6mm}
+    {\fontsize{8.5}{10}\selectfont #2}\end{minipage}\hfill
+  {\color{white}\jpschrift\fontsize{20}{20}\selectfont #3}\par\vspace{9mm}}
+% \matrixanfang{Disziplin}{Teil}{Kanji}{Gradzahl}{Fußrubrik}
+\newcommand\matrixanfang[5]{\querformat\setzerubrik{#1 · Matrix}{#5}%
+  \band{#2}{#1}{#3}%
+  \setlength\mangriff{40mm}\setlength\tabcolsep{1.6mm}\renewcommand\arraystretch{1}%
+  \ifnum#4>0 \setlength\mspalte{\dimexpr(\linewidth-\mangriff-#4\tabcolsep*2)/#4\relax}\fi
+  \setlength\LTpre{0pt}\setlength\LTpost{2mm}%
+  \arrayrulecolor{hai}\fontsize{7.8}{9.2}\selectfont}
 \newcommand\mkopf[2]{{\sffamily\bfseries\fontsize{9}{10}\selectfont #1}\if\relax\detokenize{#2}\relax\else\hspace{1.5mm}{\jpschrift\fontsize{8}{10}\selectfont\color{shu}#2}\fi}
 \newcommand\mkopfende{\\[-1mm]\noalign{\color{shu}\hrule height 1.1pt\vspace{.6mm}}}
+\newcommand\mzeilenende{\\\hline}
+\newcommand\mgruppe[3]{\multicolumn{#1}{@{}l}{\rule{0pt}{4.6mm}\sffamily\bfseries\fontsize{9.5}{11}\selectfont\color{shu}#2\hspace{2mm}{\mdseries\fontsize{8}{10}\selectfont\color{usuzumi}#3}}\\\hline}
+\newcommand\mfuss[2]{\multicolumn{#1}{@{}l}{\sffamily\fontsize{7}{9}\selectfont\color{usuzumi}#2}\\}
+% Technik in der Matrix: Name links, Kanji rechtsbündig, Zusatz darunter
+\newcommand\mtech[3]{\par\leavevmode#1\unskip\nobreak\hfil\penalty50\hskip.8em\hbox{}\nobreak\hfil
+  {\fontsize{6.6}{8}\selectfont\color{usuzumi}#3}{\parfillskip=0pt\par}%
+  \if\relax\detokenize{#2}\relax\else{\itshape\fontsize{6.8}{7.8}\selectfont\color{usuzumi}#2\par}\fi}
+% \matrixende{Stand}{Vorschlag 1/0}
+\newcommand\matrixende[2]{\par\vfill{\sffamily\fontsize{7}{9}\selectfont\color{usuzumi}%
+  \ifentwurf\frage{X} Rückfrage, siehe KORREKTUREN.md\quad·\quad\fi
+  \textit{kursiv}: Ausführung oder Variante\quad·\quad
+  \ifnum#2=1 Japanisch in Grau: Vorschlag, noch nicht bestätigt\quad·\quad\fi #1\par}\clearpage}
 
-% ===== Ansicht 5: Landkarte ===================================================
-\newlength\lspalte \newlength\ltechbreite
-\newcolumntype{T}{>{\raggedright\arraybackslash}p{\ltechbreite}}
-\newcolumntype{Z}{>{\centering\arraybackslash}p{\lspalte}}
-\newcolumntype{S}{>{\centering\arraybackslash}p{9mm}}
-% \landkarteanfang{Disziplin}{Gruppe}{Kanji}{Spaltenzahl}{Fußrubrik}{Zeilen}
-% Mehrere Karten teilen sich eine Seite; neue Querformatseite nur aus dem Hochformat
-% #6 = Zahl der Zeilen; passt die Karte nicht mehr ganz auf die Seite, beginnt sie oben
-\newlength\lbedarf
-\newcommand\landkarteanfang[6]{\ifnum\csname mitori@quer\endcsname=0 \querformat\else
-  \setlength\lbedarf{\dimexpr 62mm+#6\dimexpr 4.4mm\relax\relax}\ifdim\lbedarf>\textheight\setlength\lbedarf{\textheight}\fi
-  \par\needspace{\lbedarf}\addvspace{9mm}\fi
-  \setzerubrik{#1 · Technik-Landkarte}{#5}%
-  {\sffamily\bfseries\fontsize{17}{19}\selectfont Wo kommt welche Technik vor?\hspace{3mm}{\jpschrift\color{shu}技の地図}}\par
-  \vspace{1mm}{\sffamily\fontsize{10}{12}\selectfont #2\hspace{2mm}{\color{usuzumi}#3}}\par\vspace{2mm}%
-  \setlength\tabcolsep{.9mm}\setlength\ltechbreite{52mm}%
-  \setlength\lspalte{\dimexpr(\linewidth-\ltechbreite-9mm-#4\tabcolsep*2-4\tabcolsep)/#4\relax}%
-  \ifdim\lspalte>15mm\setlength\lspalte{15mm}\fi
-  \setlength\LTpre{0pt}\setlength\LTpost{0pt}\setlength\LTleft{0pt}\setlength\LTright{0pt plus 1fill}%
-  \arrayrulecolor{hai}\renewcommand\arraystretch{1.12}\fontsize{8}{9.4}\selectfont}
-\newcommand\lkopf[1]{\hfill\rotatebox{90}{\schmal\fontsize{8}{9}\selectfont #1\hspace{.5mm}}\hfill\hbox{}}
-\newcommand\lecke[1]{{\sffamily\fontsize{7}{8}\selectfont\color{usuzumi}#1}}
-\newcommand\lkopfende{\\[-.5mm]\noalign{\color{shu}\hrule height 1.1pt}}
-\newcommand\lzeilenende{\\\hline}
-\newcommand\ltech[2]{#1\if\relax\detokenize{#2}\relax\else\hfill{\fontsize{6.8}{8}\selectfont\color{usuzumi}#2}\fi}
-\newcommand\lzelle[2]{\cellcolor{stufe#1}\ifnum#1>3 \color{white}\fi\sffamily\bfseries\fontsize{7.5}{9}\selectfont#2}
-\newcommand\lsumme[1]{{\sffamily\color{usuzumi}#1}}
-\newcommand\lschluessel[3]{\hspace{3mm}{\color{stufe#1}\rule[-.4mm]{3.2mm}{3.2mm}}\,#3}
-% \landkarteende{Kyu/Dan/…}{Legende}{Hinweis}
-\newcommand\landkarteende[3]{\par\nobreak\vspace{1mm}\nobreak{\sffamily\fontsize{7.5}{9.5}\selectfont\color{usuzumi}%
-  \textbf{Farbe = erster Grad in der Zelle:}#2\par\vspace{.6mm}
-  Die Zahlen nennen die Grade, in denen die Kombination aus Angriff (Spalte) und Technik (Zeile) geprüft wird;
-  Summe = Zahl der Angriffe mit dieser Technik. Leere Felder kommen im Programm nicht vor.
-  \if\relax\detokenize{#3}\relax\else\ #3\fi\par}}
+% Shinki Toho: Kopf und Stufenzeile der Gesamttabelle
+\newcommand\stmkopf{\mkopf{}{}&\mkopf{Form}{}&\mkopf{}{日本語}&\mkopf{Uchidachi}{}&\mkopf{Shidachi}{}&\mkopf{Treffer}{}&\mkopf{Zanshin}{}\mkopfende}
+\newcommand\stmstufe[3]{\multicolumn{7}{@{}l}{\rule{0pt}{4.6mm}\sffamily\bfseries\fontsize{9.5}{11}\selectfont\color{shu}#1\hspace{2mm}{\jpschrift\mdseries\fontsize{8}{10}\selectfont\color{usuzumi}#2}\hspace{3mm}{\mdseries\fontsize{7.5}{9}\selectfont\color{usuzumi}#3}}\\\hline}
 
 % ===== Shinki Toho ============================================================
 \newenvironment{stleiter}{\par\renewcommand\arraystretch{1.25}\arrayrulecolor{hai}%

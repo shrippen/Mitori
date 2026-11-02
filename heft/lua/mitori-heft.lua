@@ -3,7 +3,7 @@
 -- Die Daten erzeugt tools/daten.py aus daten/*.yaml (geprüft, Kanji schon
 -- eingesetzt). Hier nur der Satz, in zwei Ansichten:
 --   tusche     ein Grad je Seite, zweispaltig (Entwurf 1)
---   landkarte  Technik × Angriff je Gruppe, Querformat (Entwurf 5)
+--   matrix     Angriff × Grad, Querformat (Entwurf 2)
 -- Shinki Toho hat eigene Seiten (shinkitoho-…), weil es keine Angriffe gibt.
 -- Aufruf aus LaTeX: \ansicht{tusche-aikido-1} → mitori.ansicht("tusche-aikido-1").
 -- Die Makros stehen in stil/shinki.sty.
@@ -64,6 +64,39 @@ end
 local function ohne_angriff(gr, a) return gr.ohne_angriff or gr.text or not a.angriff end
 
 -------------------------------------------------------------------------------
+-- Übersicht: Grade mit Gruppen und Wartezeit, wie Shinki Toho
+
+-- Inhalt eines Grades: "Kata, Ukemi, Tachi-waza · Mae-seme (12), Theorie"
+local function grad_inhalt(teil, gid)
+  local t = {}
+  for _, gr in ipairs(teil.gruppen) do
+    local n = 0
+    for _, a in ipairs(gr.angriffe) do n = n + #(a.techniken[gid] or {}) end
+    if n > 0 then
+      local zahl = (gr.ohne_angriff or gr.text) and "" or (" (" .. n .. ")")
+      t[#t + 1] = esc(gr.titel) .. zahl
+    end
+  end
+  return table.concat(t, ", ")
+end
+
+function M.grade(art)
+  local d = laden(art)
+  out("\\tuscheseite{" .. esc(d.titel) .. "}{" .. opt(d.untertitel) .. "}{Grade \\& Programm}{位階}"
+      .. "{Prüfungsprogramm Kyu- und Dan-Grade}{" .. esc(d.stand) .. "}{" .. esc(d.kurzname or d.titel) .. "}")
+  out("\\begin{stleiter}")
+  for _, teil in ipairs(d.teile) do
+    for _, gid in ipairs(teil.grade) do
+      local g = grad(d, gid)
+      out("\\stsprosse{" .. esc(g.name) .. "}{" .. g.jp .. "}{}{" .. grad_inhalt(teil, gid) .. "}{" .. opt(g.abstand) .. "}")
+    end
+  end
+  out("\\end{stleiter}")
+  out("\\tfuss{In Klammern: Zahl der Techniken der Gruppe im Grad. Rechts: Mindestwartezeit nach dem vorherigen Grad.}")
+  out(d.vorschlag and "\\tuscheende[1]" or "\\tuscheende")
+end
+
+-------------------------------------------------------------------------------
 -- Ansicht 1: Tusche, ein Grad je Seite
 
 function M.tusche(art, nr)
@@ -99,98 +132,38 @@ function M.tusche(art, nr)
 end
 
 -------------------------------------------------------------------------------
--- Ansicht 5: Technik-Landkarte je Gruppe
+-- Ansicht 2: Matrix Angriff × Grad
 
--- Farbstufe 1..5 für die Position eines Grades (früh = hell)
-local function stufe(pos, n)
-  if n <= 1 then return 5 end
-  return math.floor((pos - 1) * 4 / (n - 1) + 0.5) + 1
-end
-
-local function grad_kurz(g)
-  if g.id:match("^[kd]%d") then return g.id:sub(2) end
-  return "O"
-end
-
-local function landkarte_gruppe(d, teil, gr, minVorkommen)
-  local spalten = {}
-  for _, a in ipairs(gr.angriffe) do
-    if a.angriff and next(a.techniken) then spalten[#spalten + 1] = a end
-  end
-  if gr.ohne_angriff or gr.text or #spalten < 3 then return end
-
-  local pos = {}
-  for i, gid in ipairs(teil.grade) do pos[gid] = i end
-  local karte, folge = {}, {}
-  for ci, a in ipairs(spalten) do
-    for _, gid in ipairs(teil.grade) do
-      for _, e in ipairs(a.techniken[gid] or {}) do
-        if not karte[e.name] then
-          karte[e.name] = { zellen = {}, erst = 99, zahl = 0, jp = e.jp }
-          folge[#folge + 1] = e.name
-        end
-        local z = karte[e.name]
-        if not z.zellen[ci] then z.zellen[ci] = {}; z.zahl = z.zahl + 1 end
-        local zelle = z.zellen[ci]
-        if zelle[#zelle] ~= gid then zelle[#zelle + 1] = gid end
-        z.erst = math.min(z.erst, pos[gid])
-      end
-    end
-  end
-  local zeilen = {}
-  for i, name in ipairs(folge) do
-    if karte[name].zahl >= minVorkommen then zeilen[#zeilen + 1] = { name = name, i = i } end
-  end
-  table.sort(zeilen, function(x, y)
-    local a, b = karte[x.name], karte[y.name]
-    if a.erst ~= b.erst then return a.erst < b.erst end
-    if a.zahl ~= b.zahl then return a.zahl > b.zahl end
-    return x.i < y.i
-  end)
-  if #zeilen < 3 then return end -- zu wenig für eine Karte
-
-  local n = #teil.grade
-  out("\\landkarteanfang{" .. esc(d.titel) .. "}{" .. esc(gr.titel) .. " · " .. esc(teil.titel) .. "}{"
-      .. jp(d, gr.jp) .. "}{" .. #spalten .. "}{" .. rubrik(teil) .. "}{" .. #zeilen .. "}")
-  out("\\begin{longtable}{@{}T*{" .. #spalten .. "}{Z}S@{}}")
-  local kopf = { "" }
-  for _, a in ipairs(spalten) do
-    kopf[#kopf + 1] = "\\lkopf{" .. esc(a.angriff) .. (a.zusatz and (" (" .. esc(a.zusatz) .. ")") or "") .. "}"
-  end
-  kopf[#kopf + 1] = "\\lkopf{Summe}"
-  out(table.concat(kopf, "&") .. "\\lkopfende\\endhead")
-  for _, z in ipairs(zeilen) do
-    local k = karte[z.name]
-    local zeile = { "\\ltech{" .. esc(z.name) .. "}{" .. jp(d, k.jp) .. "}" }
-    for ci = 1, #spalten do
-      local zelle = k.zellen[ci]
-      if zelle then
-        local kurz, erst = {}, 99
-        for _, gid in ipairs(zelle) do
-          kurz[#kurz + 1] = grad_kurz(grad(d, gid)); erst = math.min(erst, pos[gid])
-        end
-        zeile[#zeile + 1] = "\\lzelle{" .. stufe(erst, n) .. "}{" .. table.concat(kurz, "·") .. "}"
-      else
-        zeile[#zeile + 1] = ""
-      end
-    end
-    zeile[#zeile + 1] = "\\lsumme{" .. k.zahl .. "}"
-    out(table.concat(zeile, "&") .. "\\lzeilenende")
-  end
-  out("\\end{longtable}")
-  local leg = {}
-  for i, gid in ipairs(teil.grade) do
-    leg[#leg + 1] = "\\lschluessel{" .. stufe(i, n) .. "}{" .. grad_kurz(grad(d, gid)) .. "}{" .. esc(grad(d, gid).name) .. "}"
-  end
-  out("\\landkarteende{" .. esc(teil.titel:match("^(%a+)")) .. "}{" .. table.concat(leg) .. "}{"
-      .. (minVorkommen > 1 and ("Nur Techniken, die bei mindestens " .. minVorkommen .. " Angriffen vorkommen.") or "") .. "}")
-end
-
-function M.landkarte(art, nr, minVorkommen)
+function M.matrix(art, nr)
   local d = laden(art)
   local teil = d.teile[nr]
-  out("\\clearpage")
-  for _, gr in ipairs(teil.gruppen) do landkarte_gruppe(d, teil, gr, minVorkommen or 1) end
+  local n = #teil.grade
+  out("\\matrixanfang{" .. esc(d.titel) .. "}{Programm für " .. esc(teil.titel) .. "}{" .. (d.jp or "")
+      .. "}{" .. n .. "}{" .. rubrik(teil) .. "}")
+  out("\\begin{longtable}{@{}M{\\mangriff}*{" .. n .. "}{M{\\mspalte}}@{}}")
+  local kopf = { "\\mkopf{Angriff}{}" }
+  for _, gid in ipairs(teil.grade) do
+    local g = grad(d, gid)
+    kopf[#kopf + 1] = "\\mkopf{" .. esc(g.kurzname or g.name) .. "}{" .. g.jp .. "}"
+  end
+  out(table.concat(kopf, "&") .. "\\mkopfende\\endhead")
+  for _, gr in ipairs(teil.gruppen) do
+    out("\\mgruppe{" .. (n + 1) .. "}{" .. esc(gr.titel) .. frage(gr.frage) .. "}{" .. jp(d, gr.jp) .. "}")
+    for _, a in ipairs(gr.angriffe) do
+      local zellen = { ohne_angriff(gr, a) and frage(a.frage) or angriff_tex(d, a) }
+      for _, gid in ipairs(teil.grade) do
+        local t = {}
+        for _, e in ipairs(a.techniken[gid] or {}) do
+          t[#t + 1] = "\\mtech{" .. esc(e.name) .. fragen(e.fragen) .. "}{" .. opt(e.zusatz) .. "}{" .. jp(d, e.jp) .. "}"
+        end
+        zellen[#zellen + 1] = table.concat(t)
+      end
+      out(table.concat(zellen, "&") .. "\\mzeilenende")
+    end
+    if gr.fuss then out("\\mfuss{" .. (n + 1) .. "}{" .. esc(gr.fuss) .. "}") end
+  end
+  out("\\end{longtable}")
+  out("\\matrixende{" .. esc(d.stand) .. "}{" .. (d.vorschlag and "1" or "0") .. "}")
 end
 
 -------------------------------------------------------------------------------
@@ -263,69 +236,44 @@ function M.shinkitoho_odachi()
   end
 end
 
--- Landkarte: Kamae Uchidachi × Kamae Shidachi, Zellen = Formnummern
-function M.shinkitoho_landkarte()
+-- Ô-dachi als Gesamttabelle (Matrix-Ansicht)
+function M.shinkitoho_matrix()
   local d = laden("shinki-toho")
-  local zeilen, spalten, zs, ss, karte = {}, {}, {}, {}, {}
+  out("\\matrixanfang{" .. esc(d.titel) .. "}{Ô-dachi tai Ô-dachi · alle Formen}{大太刀}{0}{Shinki Toho}")
+  out("\\begin{longtable}{@{}r@{\\hspace{3mm}}M{62mm}M{46mm}*{4}{M{\\stspalte}}@{}}")
+  out("\\stmkopf\\endhead")
+  local letzte
   for _, f in ipairs(d.odachi) do
-    local u, s = f.uchidachi, f.shidachi
-    if not zs[u] then zs[u] = true; zeilen[#zeilen + 1] = u end
-    if not ss[s] then ss[s] = true; spalten[#spalten + 1] = s end
-    karte[u] = karte[u] or {}
-    karte[u][s] = karte[u][s] or {}
-    table.insert(karte[u][s], f.nr)
-  end
-  local function zeilensumme(u) local n = 0; for _, v in pairs(karte[u]) do n = n + #v end; return n end
-  local function spaltensumme(s) local n = 0; for _, u in ipairs(zeilen) do n = n + #(karte[u][s] or {}) end; return n end
-  table.sort(zeilen, function(a, b) return zeilensumme(a) > zeilensumme(b) end)
-  table.sort(spalten, function(a, b) return spaltensumme(a) > spaltensumme(b) end)
-
-  out("\\landkarteanfang{" .. esc(d.titel) .. "}{Ô-dachi: Kamae von Uchidachi und Shidachi}{\\jp{構}}{"
-      .. #spalten .. "}{Shinki Toho}{" .. #zeilen .. "}")
-  out("\\begin{longtable}{@{}T*{" .. #spalten .. "}{Z}S@{}}")
-  local kopf = { "\\lecke{Uchidachi $\\downarrow$\\quad Shidachi $\\rightarrow$}" }
-  for _, s in ipairs(spalten) do kopf[#kopf + 1] = "\\lkopf{" .. esc(s) .. "}" end
-  kopf[#kopf + 1] = "\\lkopf{Summe}"
-  out(table.concat(kopf, "&") .. "\\lkopfende\\endhead")
-  for _, u in ipairs(zeilen) do
-    local z = { "\\ltech{" .. esc(u) .. "}{}" }
-    for _, s in ipairs(spalten) do
-      local v = karte[u][s]
-      if v then
-        local nums = {}
-        for _, x in ipairs(v) do nums[#nums + 1] = tostring(x) end
-        z[#z + 1] = "\\lzelle{" .. stufe(stufe_von(v[1]), #STUFEN) .. "}{" .. table.concat(nums, "·\\allowbreak{}") .. "}"
-      else
-        z[#z + 1] = ""
-      end
+    local st = stufe_von(f.nr)
+    if st ~= letzte then
+      local g = d.grade[st]
+      out("\\stmstufe{" .. esc(g.name) .. "}{" .. g.jp .. "}{" .. esc(g.inhalt) .. "}")
+      letzte = st
     end
-    z[#z + 1] = "\\lsumme{" .. zeilensumme(u) .. "}"
-    out(table.concat(z, "&") .. "\\lzeilenende")
+    out(f.nr .. "&" .. esc(f.name) .. form_fragen(f) .. "&" .. form_kanji(f) .. "&" .. esc(f.uchidachi) .. "&"
+        .. esc(f.shidachi) .. "&" .. esc(f.treffer) .. "&" .. esc(f.zanshin) .. "\\mzeilenende")
   end
   out("\\end{longtable}")
-  local leg = {}
-  for i, s in ipairs(STUFEN) do
-    leg[#leg + 1] = "\\lschluessel{" .. stufe(i, #STUFEN) .. "}{" .. s[1] .. "}{" .. esc(d.grade[i].name) .. " (" .. s[1] .. "–" .. s[2] .. ")}"
-  end
-  out("\\landkarteende{Stufe}{" .. table.concat(leg)
-      .. "}{Die Zahlen sind die Formnummern; die Farbe zeigt die Stufe der ersten Form in der Zelle. Summe = Zahl der Formen mit dieser Kamae von Uchidachi.}")
+  out("\\matrixende{" .. esc(d.stand) .. "}{0}")
 end
 
 -------------------------------------------------------------------------------
 -- Einstieg aus LaTeX: \ansicht{<ansicht>-<disziplin>[-<teil>]}
 
 local ANSICHTEN = {
+  ["grade-aikido"]          = { M.grade, "aikido" },
   ["tusche-aikido-1"]       = { M.tusche, "aikido", 1 },
   ["tusche-aikido-2"]       = { M.tusche, "aikido", 2 },
-  ["landkarte-aikido-1"]    = { M.landkarte, "aikido", 1, 1 },
-  ["landkarte-aikido-2"]    = { M.landkarte, "aikido", 2, 1 },
+  ["matrix-aikido-1"]       = { M.matrix, "aikido", 1 },
+  ["matrix-aikido-2"]       = { M.matrix, "aikido", 2 },
+  ["grade-daitoryu"]        = { M.grade, "daitoryu" },
   ["tusche-daitoryu-1"]     = { M.tusche, "daitoryu", 1 },
   ["tusche-daitoryu-2"]     = { M.tusche, "daitoryu", 2 },
-  ["landkarte-daitoryu-1"]  = { M.landkarte, "daitoryu", 1, 2 },
-  ["landkarte-daitoryu-2"]  = { M.landkarte, "daitoryu", 2, 2 },
+  ["matrix-daitoryu-1"]     = { M.matrix, "daitoryu", 1 },
+  ["matrix-daitoryu-2"]     = { M.matrix, "daitoryu", 2 },
   ["shinkitoho-grade"]      = { M.shinkitoho_grade },
   ["shinkitoho-odachi"]     = { M.shinkitoho_odachi },
-  ["shinkitoho-landkarte"]  = { M.shinkitoho_landkarte },
+  ["shinkitoho-matrix"]     = { M.shinkitoho_matrix },
 }
 
 function M.ansicht(name)
