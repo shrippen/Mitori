@@ -4,6 +4,8 @@
 
 #include "keyedlistmodel.h"
 
+using namespace Qt::StringLiterals;
+
 // KeyedListModel: a new list of rows changes only what changed (rows removed, inserted, data
 // changed), so that a view keeps its place and its current row; no reset after the first fill.
 class TstKeyedListModel : public QObject
@@ -28,9 +30,9 @@ private slots:
     {
         KeyedListModel model;
         QAbstractItemModelTester tester(&model, QAbstractItemModelTester::FailureReportingMode::QtTest);
-        model.setRows({row(u"a"_qs, u"1"_qs), row(u"b"_qs, u"2"_qs), row(u"c"_qs, u"3"_qs)});
-        QCOMPARE(uids(model), (QStringList{u"a"_qs, u"b"_qs, u"c"_qs}));
-        QCOMPARE(model.data(model.index(1), KeyedListModel::DayRole).toString(), u"2026-11-02"_qs);
+        model.setRows({row(u"a"_s, u"1"_s), row(u"b"_s, u"2"_s), row(u"c"_s, u"3"_s)});
+        QCOMPARE(uids(model), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+        QCOMPARE(model.data(model.index(1), KeyedListModel::DayRole).toString(), u"2026-11-02"_s);
 
         QSignalSpy reset(&model, &QAbstractItemModel::modelReset);
         QSignalSpy removed(&model, &QAbstractItemModel::rowsRemoved);
@@ -38,24 +40,24 @@ private slots:
         QSignalSpy changed(&model, &QAbstractItemModel::dataChanged);
 
         // One removed in the middle.
-        model.setRows({row(u"a"_qs, u"1"_qs), row(u"c"_qs, u"3"_qs)});
+        model.setRows({row(u"a"_s, u"1"_s), row(u"c"_s, u"3"_s)});
         QCOMPARE(removed.count(), 1);
         QCOMPARE(removed.first().at(1).toInt(), 1);
         // One changed.
-        model.setRows({row(u"a"_qs, u"1"_qs), row(u"c"_qs, u"drei"_qs)});
+        model.setRows({row(u"a"_s, u"1"_s), row(u"c"_s, u"drei"_s)});
         QCOMPARE(changed.count(), 1);
         QCOMPARE(changed.first().at(0).toModelIndex().row(), 1);
         // One new at the top, one at the end.
-        model.setRows({row(u"x"_qs, u"0"_qs), row(u"a"_qs, u"1"_qs), row(u"c"_qs, u"drei"_qs), row(u"z"_qs, u"9"_qs)});
+        model.setRows({row(u"x"_s, u"0"_s), row(u"a"_s, u"1"_s), row(u"c"_s, u"drei"_s), row(u"z"_s, u"9"_s)});
         QCOMPARE(inserted.count(), 2);
-        QCOMPARE(uids(model), (QStringList{u"x"_qs, u"a"_qs, u"c"_qs, u"z"_qs}));
+        QCOMPARE(uids(model), (QStringList{u"x"_s, u"a"_s, u"c"_s, u"z"_s}));
         // The same again: nothing.
         changed.clear();
-        model.setRows({row(u"x"_qs, u"0"_qs), row(u"a"_qs, u"1"_qs), row(u"c"_qs, u"drei"_qs), row(u"z"_qs, u"9"_qs)});
+        model.setRows({row(u"x"_s, u"0"_s), row(u"a"_s, u"1"_s), row(u"c"_s, u"drei"_s), row(u"z"_s, u"9"_s)});
         QCOMPARE(changed.count(), 0);
         // A filter: most go, the rest stay where they were relative to each other.
-        model.setRows({row(u"c"_qs, u"drei"_qs)});
-        QCOMPARE(uids(model), QStringList{u"c"_qs});
+        model.setRows({row(u"c"_s, u"drei"_s)});
+        QCOMPARE(uids(model), QStringList{u"c"_s});
         model.setRows({});
         QCOMPARE(model.rowCount(), 0);
         QCOMPARE(reset.count(), 0);

@@ -34,6 +34,8 @@ Kirigami.Page {
     readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 26
     readonly property var playlist: rows.filter(r => page.playable(r))
     readonly property bool split: wide && playlist.length > 0
+    // The small player beside the list (tablet), typed for the calls below.
+    readonly property PlayerView player: pane.item as PlayerView
 
     title: qsTr("Programme")
 
@@ -143,6 +145,7 @@ Kirigami.Page {
                     id: rowLoader
 
                     required property var modelData
+                    required property int index
 
                     width: ListView.view.width
                     sourceComponent: modelData.kind === "group" ? groupRow
@@ -196,6 +199,8 @@ Kirigami.Page {
                             subtitle: [entry.jp, entry.nr ? entry.extra : (entry.kind === "info" ? entry.text : "")].filter(x => x).join(" · ")
                             selected: entry.id === page.lastId
                             onClicked: page.open(entry)
+                            Keys.onTabPressed: event => page.tabRow(rowLoader.index, 1, event)
+                            Keys.onBacktabPressed: event => page.tabRow(rowLoader.index, -1, event)
                             trailing: RowLayout {
                                 spacing: Kirigami.Units.smallSpacing
 
@@ -207,6 +212,7 @@ Kirigami.Page {
                                 }
                                 KanteToolButton {
                                     visible: entryItem.playable
+                                    activeFocusOnTab: false     // Enter on the row: the sheet plays it
                                     icon.name: "media-playback-start"
                                     text: qsTr("Play")
                                     display: QQC2.AbstractButton.IconOnly
@@ -263,14 +269,14 @@ Kirigami.Page {
 
     // Another grade or discipline: the technique shown last if it is in it, else its first.
     onPlaylistChanged: {
-        if (pane.item) {
-            pane.item.index = Math.max(0, page.playlist.findIndex(r => r.id === page.lastId))
+        if (page.player) {
+            page.player.index = Math.max(0, page.playlist.findIndex(r => r.id === page.lastId))
         }
     }
     // Under another page (notes, comment) the small player rests.
     onIsCurrentPageChanged: {
-        if (!isCurrentPage && pane.item) {
-            pane.item.pause()
+        if (!isCurrentPage && page.player) {
+            page.player.pause()
         }
     }
     // The keys scroll the list as ScrollablePage did (Up, Down, Page Up, Page Down, Home, End).
@@ -279,12 +285,7 @@ Kirigami.Page {
         list.contentY = Math.max(list.originY, Math.min(list.originY + list.contentHeight - list.height, list.contentY + dy))
     }
     function inPlayer() {
-        for (let item = page.Window.activeFocusItem; item; item = item.parent) {
-            if (item === pane) {
-                return true
-            }
-        }
-        return false
+        return page.inside(page.Window.activeFocusItem, pane)
     }
     // From the page and from a focused row (the list passes them on before its ScrollView, which
     // would scroll a whole screen).
@@ -299,23 +300,72 @@ Kirigami.Page {
             list.positionViewAtBeginning()
         } else if (event.key === Qt.Key_End) {
             list.positionViewAtEnd()
+            endAgain.start()
         } else {
             return
         }
         event.accepted = true
     }
     Keys.onPressed: event => scrollKey(event)
+    // The rows differ in height: until the list made the last ones, its height is an estimate and
+    // End stopped a few pixels short. Once they are made, once more.
+    Timer {
+        id: endAgain
+        interval: 0
+        onTriggered: {
+            if (!list.atYEnd) {
+                list.positionViewAtEnd()
+            }
+        }
+    }
 
     // A row chosen in the list plays beside it; the list shows the row of the technique playing.
     onLastIdChanged: {
         const i = page.playlist.findIndex(r => r.id === page.lastId)
-        if (pane.item && i >= 0 && pane.item.index !== i) {
-            pane.item.index = i
+        if (page.player && i >= 0 && page.player.index !== i) {
+            page.player.index = i
         }
         const row = page.rows.findIndex(r => r.id === page.lastId)
         if (page.split && row >= 0) {
             list.positionViewAtIndex(row, ListView.Contain)
         }
+    }
+
+    // Tab and Shift+Tab from row to row in the list's order. The list reuses its rows, so the
+    // window's focus chain (the order of the rows as items) left the list after a row or two.
+    // Past the last row, or before the first, the focus leaves the list.
+    function tabRow(from, step, event) {
+        const reason = step > 0 ? Qt.TabFocusReason : Qt.BacktabFocusReason
+        event.accepted = true
+        for (let i = from + step; i >= 0 && i < page.rows.length; i += step) {
+            const kind = page.rows[i].kind
+            if (kind !== "entry" && kind !== "info") {
+                continue
+            }
+            list.positionViewAtIndex(i, ListView.Contain)
+            const row = list.itemAtIndex(i)
+            if (row && row.item) {
+                row.item.forceActiveFocus(reason)
+            }
+            return
+        }
+        // The next item of the window's chain outside the list (the small player, the header).
+        let item = page.Window.activeFocusItem
+        for (let n = 0; item && n < 1000; n++) {
+            item = item.nextItemInFocusChain(step > 0)
+            if (item && !page.inside(item, list)) {
+                item.forceActiveFocus(reason)
+                return
+            }
+        }
+    }
+    function inside(item, ancestor) {
+        for (let p = item; p; p = p.parent) {
+            if (p === ancestor) {
+                return true
+            }
+        }
+        return false
     }
 
     function open(entry) {

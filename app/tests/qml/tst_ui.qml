@@ -93,7 +93,7 @@ TestCase {
 
     // Shinki Toho Shoden: the Kamae exercise is one row; its sheet lists the 26 positions.
     function test_2g_kamae_sheet() {
-        failOnWarning(/ReferenceError|TypeError/)
+        failOnWarning(/ReferenceError|TypeError|Binding loop/)
         Programme.discipline = "shinkitoho"
         Programme.setGrade("shinkitoho", "shoden")
         const page = push("ProgrammePage")
@@ -313,7 +313,7 @@ TestCase {
         window.height = 420
         wait(500)
         shot("6-player-landscape")
-        // A phone held sideways: the controls scroll, and Back can be reached.
+        // A phone held sideways: Back in view without scrolling the column.
         window.width = 800
         window.height = 360
         wait(500)
@@ -321,10 +321,9 @@ TestCase {
         const back = findChild(page, "backButton")
         verify(view && back)
         verify(back.visible)
-        view.contentY = Math.max(0, view.contentHeight - view.height)
-        wait(100)
+        compare(view.contentY, 0)
         const at = back.mapToItem(view, 0, 0)
-        verify(at.y >= 0 && at.y + back.height <= view.height + 1, "Back in view after scrolling (" + at.y + ", " + view.height + ")")
+        verify(at.y >= 0 && at.y + back.height <= view.height + 1, "Back in view (" + at.y + ", " + view.height + ")")
         window.width = 420
         window.height = 800
         window.pageStack.pop()
@@ -682,6 +681,8 @@ TestCase {
         verify(Practice.rate("shinkitoho/odachi/12", 2))
         const form = forms.cellAt(1, 3)
         tryCompare(form, "level", 2)
+        // The level also as a number, not only as the colour.
+        compare(forms.entryOf(1, 3).label, "12·2")
         waitForRendering(forms)       // the page lays out the forms in the next frame
         mouseClick(form)
         tryVerify(() => sheet.opened)
@@ -694,12 +695,24 @@ TestCase {
         window.width = 1280
         window.height = 800
         tryCompare(forms, "perRow", 11)
-        compare(forms.entryOf(1, 0).label, "12")
+        compare(forms.entryOf(1, 0).label, "12·2")
         tryVerify(fills, 2000, "the forms fill the tablet's width")
         page.discipline = "daitoryu"
         page.grade = Programme.grades("daitoryu").slice(-1)[0].id
         verify(page.matrix)
         compare(heat.cellSize, KanteStyle.unit(34))
+        // A place with entries of several grades names them all.
+        let multi = null
+        for (let r = 0; !multi && r < heat.rowCount; r++) {
+            for (let c = 0; !multi && c < heat.columnCount; c++) {
+                const d = page.shown.rows[r].cells[c]
+                if (d.gradeNames && d.gradeNames.length > 1)
+                    multi = { r: r, c: c, names: d.gradeNames }
+            }
+        }
+        verify(multi, "a place with entries of two grades in Daitoryu")
+        for (const name of multi.names)
+            verify(heat.tipOf(multi.r, multi.c).indexOf(name) > 0, heat.tipOf(multi.r, multi.c))
         shot("11-map-tablet")
         window.pageStack.pop()
     }
@@ -944,6 +957,15 @@ TestCase {
         compare(window.pageStack.currentItem.entry.id, target)
         window.pageStack.pop()
         tryVerify(() => window.pageStack.currentItem === page)
+        // Page Up up to the first note shows the count above it too.
+        list.forceActiveFocus()
+        keyClick(Qt.Key_End)
+        tryVerify(() => list.atYEnd, 1000)
+        for (let i = 0; i < 200 && list.currentIndex > 0; i++)
+            keyClick(Qt.Key_PageUp)
+        compare(list.currentIndex, 0)
+        wait(500)
+        verify(list.atYBeginning, "the count in view after Page Up (" + list.contentY + ", " + list.originY + ")")
         // Another filter starts at the top.
         list.positionViewAtEnd()
         page.filter = "aikido"
@@ -955,10 +977,12 @@ TestCase {
         // An empty filter says so (a discipline without notes, if one is left).
         const empty = Programme.disciplines.find(d => !page.all.some(n => n.technique.discipline === d.id))
         if (empty) {
+            list.forceActiveFocus()
+            list.currentIndex = 3
             page.filter = empty.id
             compare(findChild(page, "count").text, qsTr("No notes in this discipline."))
-            list.forceActiveFocus()
-            list.currentIndex = -1
+            tryCompare(list, "count", 0)
+            compare(list.currentIndex, -1, "an empty list has no current note")
             keyClick(Qt.Key_Home)
             keyClick(Qt.Key_End)
             compare(list.currentIndex, -1, "an empty list has no current note")
@@ -1194,7 +1218,7 @@ TestCase {
     }
 
     // The Kamae player: its 26 positions come last, so "Done" and Back stay where they are for a
-    // technique without positions (phone upright: Done in view without scrolling), and a large
+    // technique without positions (in view without scrolling, also sideways), and a large
     // tablet keeps the picture as large.
     function test_9y_kamae_player() {
         failOnWarning(/ReferenceError|TypeError/)
@@ -1227,11 +1251,8 @@ TestCase {
             compare(k.steps, 26)
             compare(s.steps, 0)
             verify(Math.abs(k.y - s.y) < 1, c[3] + " at " + c + ": " + k.y + " with the positions, " + s.y + " without")
-            // Upright the done card fits; sideways the column is short anyway (what fits depends
-            // on the rating and the notes shown), the positions only must not push Back further.
-            if (c[0] < c[1]) {
-                verify(k.bottom <= k.height, c[3] + " in view at " + c + " (" + k.bottom + " of " + k.height + ")")
-            }
+            // Done and Back stand first: in view upright and sideways.
+            verify(k.bottom <= k.height, c[3] + " in view at " + c + " (" + k.bottom + " of " + k.height + ")")
         }
         // A large tablet beside the list: the picture as large as for a technique without positions.
         Programme.discipline = "shinkitoho"
@@ -1477,6 +1498,45 @@ TestCase {
         tryVerify(() => list.contentY > y, 2000, "Down on a focused row")
         wait(300)
         compare(Math.round(list.contentY - y), Kirigami.Units.gridUnit * 2, "Down on a row scrolls two lines")
+        // Tab goes from row to row down the whole list, each in view (a virtual list: the rows
+        // below are made as it scrolls).
+        list.positionViewAtBeginning()
+        wait(100)
+        let first = 0
+        while (!(list.itemAtIndex(first) && list.itemAtIndex(first).item && list.itemAtIndex(first).item.entry))
+            first++
+        list.itemAtIndex(first).item.forceActiveFocus(Qt.TabFocusReason)
+        const rowOf = item => {
+            for (let p = item; p; p = p.parent)
+                if (p.entry !== undefined && p.parent && p.parent.modelData !== undefined)
+                    return p
+            return null
+        }
+        const tabbable = page.rows.filter(r => r.kind === "entry" || r.kind === "info").map(r => r.id)
+        let seen = [list.itemAtIndex(first).item.entry.id]
+        for (let n = 0; n < tabbable.length + 5; n++) {
+            keyClick(Qt.Key_Tab)
+            wait(20)
+            const row = rowOf(window.activeFocusItem)
+            if (!row)
+                break                                   // past the last row: out of the list
+            const top = row.mapToItem(list, 0, 0).y
+            verify(top >= -1 && top + row.height <= list.height + 1, "the row in view after Tab " + (n + 1) + " (" + top + ")")
+            seen.push(row.entry.id)
+        }
+        compare(seen, tabbable, "Tab reaches every row once, in order, then leaves the list")
+        // Shift+Tab from the last row goes back up.
+        list.positionViewAtEnd()
+        wait(100)
+        const lastRow = list.itemAtIndex(page.rows.findIndex(r => r.id === tabbable[tabbable.length - 1])).item
+        lastRow.forceActiveFocus(Qt.TabFocusReason)
+        keyClick(Qt.Key_Backtab)
+        compare(rowOf(window.activeFocusItem).entry.id, tabbable[tabbable.length - 2])
+        // End reaches the end at the first press (rows of different heights: the list estimates
+        // its height until it made the last ones; it stopped 6 px short).
+        keyClick(Qt.Key_End)
+        wait(300)
+        verify(list.atYEnd, "End at the first press (" + list.contentY + ")")
         Programme.setGrade("aikido", "k5")
         window.pageStack.pop()
     }
@@ -1507,6 +1567,21 @@ TestCase {
         const bar = findChild(pane.item, "transportBar")
         const bottom = bar.mapToItem(controls, 0, bar.height).y
         verify(bottom <= controls.height, "the transport bar in view (" + bottom + " of " + controls.height + ")")
+        // Tab through the controls: the focused one stays in view.
+        bar.nextItemInFocusChain(true).forceActiveFocus(Qt.TabFocusReason)
+        verify(controls.contentHeight > controls.height, "the controls scroll on a small tablet")
+        for (let n = 0; n < 25; n++) {
+            keyClick(Qt.Key_Tab)
+            const f = window.activeFocusItem
+            let inside = false
+            for (let p = f; p; p = p.parent)
+                inside = inside || p === controls
+            if (!inside)
+                break
+            const top = f.mapToItem(controls, 0, 0).y
+            verify(top >= -1 && top + Math.min(f.height, controls.height) <= controls.height + 1,
+                   "focus in view after " + (n + 1) + " Tab (" + top + ", " + f.height + " of " + controls.height + ")")
+        }
         // A large tablet keeps the whole picture: only as little height as the controls need.
         window.width = 1920
         window.height = 1080

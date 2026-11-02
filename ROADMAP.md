@@ -23,8 +23,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Offen: Gesten für Helligkeit und Lautstärke (Plattform-Schicht), Test auf dem Telefon. Tablet quer: Startmenü als
   Raster mit vier Spalten; Programm und Player klein auf einer Seite (Liste links, Player rechts mit Kommentar). Offen
   dort: rechts das Blatt bei Techniken ohne Video, Player groß mit Titel und Steuerung über/unter dem Video,
-  Kommentar als Lesespalte. Tastatur im Programm: Tab erreicht nur die angelegten Zeilen der virtuellen Liste und
-  verliert den Fokus beim Scrollen (Auswahl mit Auf/Ab statt Scrollen, oder Zeile in den Blick holen).
+  Kommentar als Lesespalte. Tastatur im Programm: Tab geht Zeile für Zeile durch die ganze Liste und hält die
+  Zeile im Blick, Ende springt beim ersten Druck ans Ende.
 - Schritt 2: Einschätzen 1–4 im Technik-Blatt und im Player (Übungsprotokoll in SQLite, jede Einschätzung ein
   Eintrag mit Zeit und Gerät), Stand als vier Punkte in der Programmliste, Stand je Grad als Leiste mit Legende.
   Heute üben (Wiederholen nach Plan, Abstände je Stufe einstellbar, Kachel im Startmenü) und Training (Playliste der
@@ -50,8 +50,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   bleiben draußen), je Wort eine Lesung in Hiragana aus der Umschrift (`tools/daten.py`). Aussprache per Qt
   TextToSpeech mit japanischer Stimme (Kanji, sonst die Lesung); ohne Stimme oder Sprachausgabe kein Knopf, ein
   Hinweis. Sprechen kann: Android (Plugin im APK, japanische Stimme der Sprachausgabe nötig), Linux mit qt6-speech
-  und einer japanischen Stimme (speech-dispatcher). Nicht: AppImage (ohne qtspeech gebaut), Flatpak (die
-  KDE-Runtime hat nur das Test-Plugin). Offen: Aussprache auf dem Telefon prüfen, qtspeech für AppImage und
+  und einer japanischen Stimme (speech-dispatcher), das AppImage (bringt das speech-dispatcher-Plugin mit). Nicht:
+  Flatpak (die KDE-Runtime hat nur das Test-Plugin). Offen: Aussprache auf dem Telefon prüfen, qtspeech für
   Flatpak, A–Z-Sprungleiste, Lesungen ohne lange Vokale (Umschrift ohne ô, „aikido“ → あいきど), in der Suche
   Kommentare und Lehrgänge.
 - Schritt 3: Technik-Landkarte (Kachel 図 im Startmenü): Sparte, „bis“ Grad (anfangs der des Programms), je Gruppe
@@ -65,35 +65,11 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
 
 Kleinigkeiten aus Reviews und Tests, je ein Folge-PR oder beim nächsten Bearbeiten der Datei.
 
-- **Landkarte**
-  - Die Reihen eines Rasters folgen nicht der Reihenfolge des Programms (`programme.cpp`, Bau der Raster; Kommentar
-    in `programme.h` angleichen).
-  - Tooltip nennt bei mehreren Varianten eines Platzes nur einen Grad.
-  - Varianten eines Platzes (z. B. Ikkyo und Ikkyo ura) sind nur über das erste Blatt erreichbar: Frage an den
-    Owner, ob sie einzeln erreichbar sein sollen.
-  - Formenraster: der Stand steht nur in der Farbe, das Zeichen ist die Nummer (Farbe als einziges Zeichen).
-  - Datenfragen in `KORREKTUREN.md` eintragen: Aikido „Futari-gake“ mit und ohne „2 Angreifer“
-    (`daten/aikido.yaml` Z. 208/359); Daitoryu „Tachiai · Ushiro-seme · Torite“ gegen „Tachiai · Ushiro-seme“
-    (`daten/daitoryu.yaml` Z. 115/298).
-- **Programm und Player**
-  - Der erste Druck auf Ende bleibt 6 px vor dem Ende der Liste; Auf/Ab scrollt etwa 200 px statt einer Zeile.
-  - Kleiner Player (Tablet): der Tab-Fokus wird nicht in den Blick gescrollt.
-  - Telefon quer: für Zurück und Fertig muss die Spalte scrollen.
-- **Technik-Blatt**: Binding-Loop auf `y` (Kirigami-Sheet); der Schließen-Knopf hat kein Icon (`window-close` in
-  `scripts/sync-icons.sh` aufnehmen).
-- **Alle Notizen**: Bild auf bis ganz oben zeigt die Zählzeile nicht; leere Liste hat `currentIndex` 0; Seitengröße
-  nur bei Bild auf/ab berechnen; 64–120 ms je Änderung bei 2000 Notizen.
-- **Bauen und Prüfen**
-  - `start.sh` baut mit `-DMITORI_BUILD_TESTS=OFF`.
-  - `build-appimage.sh`: qtspeech festlegen (siehe Glossar).
-  - `tst_keyedlistmodel.cpp`: veraltetes `_qs` durch `_s` ersetzen (Compiler-Warnungen).
-  - qmllint: `ProgrammePage.qml` Z. 312/313, `index` auf `Loader.item` (Typ des Players angeben).
-- **Kante**
-  - Mitori auf Kante 1.65 bringen (`scripts/sync-kante.sh`): Fenster mit einem Kante-Dialog stürzen beim Abbau
-    nicht mehr ab.
-  - In Kante: `KanteScope` meldet nach dem Einsammeln durch den Garbage Collector einen `TypeError`
-    (`resweepLater`-Timer feuert auf den eingesammelten Scope; im Test `tst_kante165.qml` 14-mal). Timer in
-    `Component.onDestruction` anhalten.
+- **Landkarte**: Varianten eines Platzes (z. B. Ikkyo und Ikkyo ura) sind nur über das erste Blatt erreichbar:
+  Frage an den Owner, ob sie einzeln erreichbar sein sollen. Datenfragen A-X-04 und D-D-08 (`KORREKTUREN.md`):
+  geklärt, legen sich Spalten bzw. Raster zusammen.
+- **Alle Notizen**: 64–120 ms je Änderung bei 2000 Notizen (die Liste setzt jede Notiz in JavaScript neu
+  zusammen); mit den Lehrgangsnotizen (Schritt 4) als Liste in C++.
 
 ## Lehrgänge (Schritt 4)
 

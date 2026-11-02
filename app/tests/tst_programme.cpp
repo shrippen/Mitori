@@ -4,6 +4,8 @@
 #include <QTemporaryDir>
 #include <QTest>
 
+#include <algorithm>
+
 #include "programme.h"
 #include "searchkey.h"
 
@@ -316,6 +318,8 @@ private slots:
         const QVariantMap ikkyo = cell(grid, 0, 0);
         QCOMPARE(ikkyo.value(QStringLiteral("ids")).toStringList(), (QStringList{QStringLiteral("ikkyo-kd"), QStringLiteral("ikkyo-kd-ura")}));
         QCOMPARE(ikkyo.value(QStringLiteral("gradeName")).toString(), QStringLiteral("5. Kyu"));
+        // The tooltip names every grade of the place, not only the first one's.
+        QCOMPARE(ikkyo.value(QStringLiteral("gradeNames")).toStringList(), (QStringList{QStringLiteral("5. Kyu"), QStringLiteral("4. Kyu")}));
         QCOMPARE(ikkyo.value(QStringLiteral("entry")).toMap().value(QStringLiteral("id")).toString(), QStringLiteral("ikkyo-kd"));
         QCOMPARE(cell(grid, 0, 1).value(QStringLiteral("ids")).toStringList(), QStringList{QStringLiteral("ikkyo-kd-ai")});
         QVERIFY(cell(grid, 0, 2).isEmpty());
@@ -334,6 +338,37 @@ private slots:
         grid = p.techniqueMap(QStringLiteral("test"), QStringLiteral("k5")).first().toMap();
         QCOMPARE(grid.value(QStringLiteral("columns")).toList().size(), 2);
         QCOMPARE(grid.value(QStringLiteral("rows")).toList().size(), 2);
+    }
+
+    // The grids stand in the order of the discipline's groups (Daitoryu: "Zatori · Yoko-seme" from
+    // the kyu grades before "Sonstige Techniken", not after it, where it came in a dan grade).
+    void techniqueMapInGroupOrder()
+    {
+        for (const QString &discipline : {QStringLiteral("aikido"), QStringLiteral("daitoryu")}) {
+            const QVariantList grades = programme.grades(discipline);
+            const QString last = grades.last().toMap().value(QStringLiteral("id")).toString();
+
+            QStringList order;
+            for (const QVariant &d : programme.disciplines()) {
+                if (d.toMap().value(QStringLiteral("id")) != discipline) {
+                    continue;
+                }
+                for (const QVariant &g : d.toMap().value(QStringLiteral("gruppen")).toList()) {
+                    const QString title = g.toMap().value(QStringLiteral("titel")).toString();
+                    if (!order.contains(title)) {
+                        order << title;
+                    }
+                }
+            }
+
+            QList<qsizetype> positions;
+            for (const QVariant &grid : programme.techniqueMap(discipline, last)) {
+                positions << order.indexOf(grid.toMap().value(QStringLiteral("title")).toString());
+            }
+            QVERIFY(positions.size() > 1);
+            QVERIFY2(!positions.contains(-1), qPrintable(discipline));
+            QVERIFY2(std::is_sorted(positions.cbegin(), positions.cend()), qPrintable(discipline));
+        }
     }
 
     // Shinki Toho: the Ô-dachi forms up to a grade, numbered, each with the grade it comes in.

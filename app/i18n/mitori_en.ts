@@ -68,7 +68,7 @@
 <context>
     <name>TechniqueMapPage</name>
     <message numerus="yes">
-        <location filename="../qml/TechniqueMapPage.qml" line="187"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="188"/>
         <source>%n entries</source>
         <translation>
             <numerusform>%n entry</numerusform>

@@ -91,6 +91,7 @@ die Übersichtstabelle der Kommentare (OK S. 2–3) ab; OT und der Fließtext zu
 | A-X-01 | KL und DL | 切り落とし (KL S. 1)/切り落し, 隅落とし (KL S. 1)/隅落し, 入身投げ/入り身投げ (KL S. 4 Juji-irimi-nage, DL S. 2 Ryo-kata-dori), 袈裟懸け (KL S. 2)/袈裟掛け (DL S. 1), 巻き嵐 (DL S. 1 Gyaku-hanmi)/巻嵐 (DL S. 1 Katate-muna-dori) | im Heft je eine Form (`daten/begriffe.lua`) | eine Schreibweise je Begriff | Schreibweise |
 | A-X-02 | PO, KL, DL | Groß-/Kleinschreibung und Bindestriche wechseln (Kamae-Undo, Jiyu-Waza, Katate-Katate-dori …) | einheitlich: erstes Wort groß, Rest klein, Teile mit Bindestrich | Lesbarkeit | Schreibweise |
 | A-X-03 | DL S. 1–2, Zusätze „kote-hineri“ (Ai-hanmi 2. Dan, Gyaku-hanmi 3. Dan, Yokomen 3. Dan, Tsuki 2. Dan) | 篭手（小手） | 小手 | Doppelangabe | Schreibweise |
+| A-X-04 | PO S. 4, Sonstige Techniken (Kyu); PO S. 6, Futari-gake (Dan) | Kyu „Futari-gake“, Dan „Futari-gake (2 Angreifer)“ | beide gleich benennen? | derselbe Angriff? In der Technik-Landkarte (bis 1. Dan) zwei Spalten; eine Angleichung ändert die Ids (Videostellen, Übungsprotokoll) | klären |
 
 ## Daitoryu, Kyu-Grade
 
@@ -116,6 +117,7 @@ die Übersichtstabelle der Kommentare (OK S. 2–3) ab; OT und der Fließtext zu
 | D-D-05 | DD S. 4, Kaeshi-waza | Kotegaeshi, Ikkajô-kimeosae, Shihônage, Hiji-gime-seoi-nage | Kote-gaeshi, Ikkajô-kime-osae, Shihô-nage | Einheitlichkeit | Schreibweise |
 | D-D-06 | DD S. 2, Ushiro Ryôte-dori Okugi | „Koshi-nage uchi+soto“ | Koshi-nage (uchi + soto) | Satzform | Schreibweise |
 | D-D-07 | DD S. 3, Futari-gake Ryô-uchite-dori 3. Dan | „Ryô-Yonkajô-gime(-nage)“ | ? | „gime“ oder „nage“, oder beides? | klären |
+| D-D-08 | DD S. 2, Überschrift „Tachiai (Ushiro-Seme)“; DK S. 2 „Tachiai (Ushiro-Seme; Torite)“ | Dan ohne „Torite“ | beide „Tachiai · Ushiro-seme · Torite“? | dieselbe Gruppe? (nur Haltegriffe von hinten); in der Technik-Landkarte zwei Raster; eine Angleichung ändert die Ids | klären |
 
 ## Daitoryu, Japanisch
 

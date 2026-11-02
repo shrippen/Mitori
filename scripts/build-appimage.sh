@@ -5,7 +5,7 @@
 #
 # Usage: ./scripts/build-appimage.sh   → dist/appimage/Mitori-<version>-x86_64.AppImage
 # Needs: cmake, ninja, a C++20 compiler, git, python3 with PyYAML, pip, the GL/EGL and xkbcommon
-# development files, curl, and network access.
+# development files, libspeechd (pronunciation), curl, and network access.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -26,12 +26,13 @@ show() { if [ -n "${MITORI_VERBOSE:-}" ]; then cat; else tail -"$1"; fi; }
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
-# ── 1. Qt (with ShaderTools for Kirigami and Multimedia for the player) ──
-if [ ! -d "$QT/lib/cmake/Qt6ShaderTools" ] || [ ! -d "$QT/lib/cmake/Qt6Multimedia" ]; then
+# ── 1. Qt (with ShaderTools for Kirigami, Multimedia for the player, TextToSpeech for the glossary) ──
+if [ ! -d "$QT/lib/cmake/Qt6ShaderTools" ] || [ ! -d "$QT/lib/cmake/Qt6Multimedia" ] \
+   || [ ! -d "$QT/lib/cmake/Qt6TextToSpeech" ]; then
     info "Installing Qt $QT_VER (aqtinstall)..."
     pip install --user --break-system-packages aqtinstall 2>/dev/null || pip install --user aqtinstall
     export PATH="$HOME/.local/bin:$PATH"
-    aqt install-qt linux desktop "$QT_VER" linux_gcc_64 -m qtshadertools qtmultimedia -O "$HOME/Qt" 2>&1 | show 3
+    aqt install-qt linux desktop "$QT_VER" linux_gcc_64 -m qtshadertools qtmultimedia qtspeech -O "$HOME/Qt" 2>&1 | show 3
 fi
 
 # ── 2. KF6 into $PREFIX ──
@@ -120,6 +121,10 @@ chmod +x "$TOOLS/qmake"
         -i "$APPDIR/usr/share/icons/hicolor/256x256/apps/io.github.shrippen.Mitori.png" 2>&1 | show 15
     # Qt's own translations: the app ships its own catalogs.
     rm -rf "$APPDIR/usr/translations"
+    # Pronunciation (glossary) through the desktop's speech-dispatcher; the mock engine is for tests.
+    rm -f "$APPDIR"/usr/plugins/texttospeech/libqtexttospeech_mock.so
+    [ -f "$APPDIR/usr/plugins/texttospeech/libqtexttospeech_speechd.so" ] \
+        || { echo "error: no speech-dispatcher plugin in the AppImage (qtspeech, libspeechd)" >&2; exit 1; }
     "$TOOLS/linuxdeploy" --appdir "$APPDIR" --output appimage 2>&1 | show 15
 )
 mkdir -p "$ROOT/dist/appimage"

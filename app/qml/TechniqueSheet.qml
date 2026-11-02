@@ -26,6 +26,9 @@ Kirigami.Dialog {
 
     title: entry.title || ""
     preferredWidth: Kirigami.Units.gridUnit * 24
+    // Centred without Kirigami's move on opening (y follows the opacity): with the Kamae exercise
+    // the sheet grows while it fades in, and y ran into a binding loop.
+    y: parent ? Math.round((parent.height - height) / 2) : 0
     padding: Kirigami.Units.largeSpacing
 
     // Not a content child: the dialog's scroll view sizes itself by its only child, the column.
