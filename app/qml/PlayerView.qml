@@ -358,7 +358,9 @@ Item {
                     Layout.fillWidth: true
                     visible: !page.hasVideo
                     titleText: (page.current.nr ? page.current.nr + " · " : "") + (page.current.title || "")
-                    text: qsTr("No video on this device. Practise it from memory, then rate it.")
+                    // No video at all (the higher grades) or one not loaded on this device.
+                    text: page.video === "" ? qsTr("There is no video of this technique. Practise it from memory, then rate it.")
+                                            : qsTr("Its video is not on this device. Practise it from memory, then rate it.")
                 }
 
                 QQC2.Slider {
@@ -478,6 +480,7 @@ Item {
 
                             objectName: "trainingRow"
                             Layout.fillWidth: true
+                            focusOnClick: false     // Space stays with the player (play, pause)
                             selected: trainingRow.index === page.index
                             text: (trainingRow.index + 1) + ". " + (modelData.title || "")
                             subtitle: [modelData.attack, modelData.gradeName].filter(x => !!x).join(" · ")

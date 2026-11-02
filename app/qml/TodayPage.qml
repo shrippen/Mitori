@@ -28,7 +28,7 @@ Kirigami.ScrollablePage {
     readonly property int unsure: due.filter(r => r.level === 1 || r.level === 2).length
     readonly property int longAgo: due.filter(r => r.level >= 3).length
     readonly property int fresh: due.filter(r => r.level === 0).length
-    // The due ones the player can show (videos on the device); the others are practised from the list.
+    // The due ones with a video on the device; the hint counts the others (a card in the training).
     readonly property var playable: due.filter(r => !!r.video && Videos.available(r.video.video))
     // An exam planned in this discipline (Courses): its hint leads to the mock exam.
     readonly property var exam: Courses.revision >= 0 ? Courses.nextExam(discipline) : ({})
