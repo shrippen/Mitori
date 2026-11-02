@@ -8,6 +8,12 @@ Speaker::Speaker(const QString &engine, QObject *parent)
     : QObject(parent)
 {
 #ifdef MITORI_SPEECH
+    // Only the test engine (Flatpak's KDE runtime ships no other): no speech output here.
+    QStringList engines = QTextToSpeech::availableEngines();
+    engines.removeAll(QStringLiteral("mock"));
+    if (engine.isEmpty() && engines.isEmpty()) {
+        return;
+    }
     m_speech = engine.isEmpty() ? new QTextToSpeech(this) : new QTextToSpeech(engine, this);
     m_state = State::Starting;
     // Some engines (Android) load their voices after construction and report it as a new state.

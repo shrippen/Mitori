@@ -500,12 +500,22 @@ TestCase {
 
     // Glossary: without a query A–Z with headings, the source below; a query finds words by
     // romaji, kanji and German next to techniques; without a Japanese voice no speaker buttons.
+    SignalSpy {
+        id: saySpy
+
+        target: Glossary
+        signalName: "sayRequested"
+    }
+
     function test_9b_glossary() {
         failOnWarning(/ReferenceError|TypeError/)
         const start = window.pageStack.items[0]
         const tile = findChild(start, "glossaryTile")
         verify(tile.visible)
-        tryCompare(window.pageStack, "currentItem", start)
+        // Cases that end with skip() (no videos) leave their pages on the stack.
+        while (window.pageStack.depth > 1)
+            window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === start)
         wait(800)       // Kirigami slides the start page back in; a click meanwhile goes nowhere
         mouseClick(tile)
         tryVerify(() => window.pageStack.currentItem !== start && window.pageStack.currentItem.glossary !== undefined, 2000)
@@ -528,14 +538,20 @@ TestCase {
         verify(say === null || !say.visible)
         Glossary.say(Glossary.words[0].speech)
 
-        // Keyboard: Down from the field into the list, Return tries to speak, Up back to the field.
+        // Keyboard: Down from the field into the list, Return and Space say the current word,
+        // Up back to the field.
         field.forceActiveFocus()
         keyClick(Qt.Key_Down)
         tryVerify(() => list.activeFocus)
         compare(list.currentIndex, 0)
         keyClick(Qt.Key_Down)
         compare(list.currentIndex, 1)
+        saySpy.clear()
         keyClick(Qt.Key_Return)
+        compare(saySpy.count, 1)
+        compare(saySpy.signalArguments[0][0], page.glossary[1].speech)
+        keyClick(Qt.Key_Space)
+        compare(saySpy.count, 2)
         keyClick(Qt.Key_Up)
         keyClick(Qt.Key_Up)
         tryVerify(() => field.activeFocus)

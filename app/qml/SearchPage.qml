@@ -10,13 +10,13 @@ import Mitori
 // Glossary and search (clickdummy "Glossar & Suche"). Without a query: the glossary A–Z (word,
 // kanji, German translation, a speaker button). With a query: techniques of every discipline and
 // grade by name, attack (with its addition), group or Japanese, the glossary (also by German
-// words) and the own notes. Case, accents, hyphens and okurigana do not matter; several words
+// words) and the own notes; the glossary first, as the techniques can be up to 50 rows. Case, accents, hyphens and okurigana do not matter; several words
 // must all match. A technique opens its sheet, a note its notes page.
 //
 //   ListView (virtual: the glossary has about 300 words)
-//   ├─ header   hints, techniques found
+//   ├─ header   hints
 //   ├─ rows     the glossary, under A … Z headings without a query
-//   └─ footer   notes found, source of the translations
+//   └─ footer   techniques and notes found, source of the translations
 Kirigami.ScrollablePage {
     id: page
 
@@ -118,7 +118,7 @@ Kirigami.ScrollablePage {
                 Layout.leftMargin: Kirigami.Units.largeSpacing
                 Layout.rightMargin: Kirigami.Units.largeSpacing
                 visible: !page.searching
-                text: qsTr("%n term(s) with kanji and German translation. The search also finds German words, techniques and your notes.", "", Glossary.words.length)
+                text: qsTr("%n Japanese term(s), with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.", "", Glossary.words.length)
                 color: KanteStyle.mutedTextColor
                 wrapMode: Text.Wrap
             }
@@ -130,8 +130,8 @@ Kirigami.ScrollablePage {
                 Layout.rightMargin: Kirigami.Units.largeSpacing
                 visible: Glossary.speech === Glossary.NoVoice || Glossary.speech === Glossary.Unsupported
                 text: Glossary.speech === Glossary.Unsupported
-                      ? qsTr("This version cannot speak, so there is no pronunciation.")
-                      : qsTr("No Japanese voice for speech output on this device. Install one in the system settings (text-to-speech) to hear the pronunciation.")
+                      ? qsTr("This version of Mitori has no speech output, so there is no pronunciation.")
+                      : qsTr("No Japanese voice for speech output found. Where the system offers one (Android: settings, text-to-speech output), install it to hear the pronunciation.")
                 color: KanteStyle.mutedTextColor
                 wrapMode: Text.Wrap
             }
@@ -147,6 +147,49 @@ Kirigami.ScrollablePage {
             }
 
             KanteSectionLabel {
+                Layout.leftMargin: Kirigami.Units.largeSpacing
+                visible: page.searching && page.glossary.length > 0
+                text: qsTr("Glossary")
+            }
+        }
+
+        delegate: KanteListRow {
+            id: row
+
+            required property var modelData
+            required property int index
+
+            objectName: "glossaryRow"
+            width: ListView.view.width
+            // The list is one Tab stop; Up and Down move in it.
+            activeFocusOnTab: false
+            focusOnClick: false
+            selected: ListView.isCurrentItem && list.activeFocus
+            text: modelData.word + (modelData.jp ? "  " + modelData.jp : "")
+            subtitle: modelData.de || qsTr("No translation in the lexicon")
+            // A tap, or Return and Space on the current row (the row takes them as a click), says it.
+            onClicked: {
+                list.currentIndex = index
+                Glossary.say(modelData.speech)
+            }
+            trailing: KanteToolButton {
+                objectName: "sayButton"
+                visible: page.canSpeak
+                focusPolicy: Qt.NoFocus
+                display: QQC2.AbstractButton.IconOnly
+                icon.name: "media-playback-start"
+                text: qsTr("Pronunciation")
+                Accessible.name: qsTr("Pronounce %1").arg(row.modelData.word)
+                onClicked: Glossary.say(row.modelData.speech)
+            }
+        }
+
+        footer: ColumnLayout {
+            width: ListView.view.width
+            spacing: Kirigami.Units.largeSpacing
+
+            KanteSectionLabel {
+                Layout.topMargin: Kirigami.Units.largeSpacing
                 Layout.leftMargin: Kirigami.Units.largeSpacing
                 visible: page.techniques.length > 0
                 text: qsTr("Techniques")
@@ -184,44 +227,6 @@ Kirigami.ScrollablePage {
                 color: KanteStyle.mutedTextColor
                 wrapMode: Text.Wrap
             }
-
-            KanteSectionLabel {
-                Layout.leftMargin: Kirigami.Units.largeSpacing
-                visible: page.searching && page.glossary.length > 0
-                text: qsTr("Glossary")
-            }
-        }
-
-        delegate: KanteListRow {
-            id: row
-
-            required property var modelData
-            required property int index
-
-            objectName: "glossaryRow"
-            width: ListView.view.width
-            // The list is one Tab stop; Up and Down move in it.
-            activeFocusOnTab: false
-            focusOnClick: false
-            selected: ListView.isCurrentItem && list.activeFocus
-            text: modelData.word + (modelData.jp ? "  " + modelData.jp : "")
-            subtitle: modelData.de || qsTr("No translation in the lexicon")
-            onClicked: list.currentIndex = index
-            trailing: KanteToolButton {
-                objectName: "sayButton"
-                visible: page.canSpeak
-                focusPolicy: Qt.NoFocus
-                display: QQC2.AbstractButton.IconOnly
-                icon.name: "media-playback-start"
-                text: qsTr("Pronunciation")
-                Accessible.name: qsTr("Pronounce %1").arg(row.modelData.word)
-                onClicked: Glossary.say(row.modelData.speech)
-            }
-        }
-
-        footer: ColumnLayout {
-            width: ListView.view.width
-            spacing: Kirigami.Units.largeSpacing
 
             KanteSectionLabel {
                 Layout.topMargin: Kirigami.Units.largeSpacing

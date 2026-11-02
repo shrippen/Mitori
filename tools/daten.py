@@ -254,6 +254,33 @@ def stichwort(wort):
     return re.sub(r"\s*\(.*$", "", wort).strip()
 
 
+def zweitform(wort):
+    """Die Schreibweise in Klammern, falls es eine ist: Kubi-shime (-jime) → Kubi-jime,
+    Mune-tori (Muna-dori) → Muna-dori; Erklärungen (Verb: fuseru) → None."""
+    m = re.search(r"\((?:bzw\.\s*)?(-?[A-Za-z][a-z-]*|-[a-z-]+)\)", wort)
+    if not m:
+        return None
+    zweit, grund = m.group(1).lower(), stichwort(wort)
+    if not zweit.startswith("-"):
+        return zweit
+    return grund.rsplit("-", 1)[0] + zweit if "-" in grund else zweit[1:]
+
+
+def glossar_schluessel(name):
+    """Vergleich im Glossar: wie flach, dazu oo wie o (Oo-guruma = O-guruma)"""
+    return flach(name).replace("oo", "o")
+
+
+def offene_begriffe(ids):
+    """Begriffe in begriffe.yaml, deren Kanji eine offene Frage hat (Kommentar mit ID, Status klären)."""
+    offen = set()
+    for zeile in (DATEN / "begriffe.yaml").read_text(encoding="utf-8").splitlines():
+        m = re.match(r"^([^#:][^:]*):.*#.*?\b([ADS]-[A-Z0-9]+(?:-[A-Z0-9]+)*)", zeile)
+        if m and ids.get(m.group(2)) == "klären":
+            offen.add(m.group(1).strip())
+    return offen
+
+
 # Hepburn-Silben als Hiragana, längste zuerst gesucht (Aussprache per Sprachsynthese).
 KANA = dict(zip(
     "a i u e o ka ki ku ke ko sa shi su se so ta chi tsu te to na ni nu ne no ha hi fu he ho "
@@ -287,6 +314,8 @@ def kana(wort):
             pass
         elif z == "n" and (i + 1 == len(text) or text[i + 1] not in "aiueoy"):
             aus.append("ん")
+        elif z == "m" and text[i + 1:i + 2] in ("b", "p", "m"):    # Sempai
+            aus.append("ん")
         elif z in "kstpgcbdfhjmrz" and text[i + 1:i + 2] == z or text[i:i + 3] == "tch":
             aus.append("っ")
         else:
@@ -300,34 +329,64 @@ def kana(wort):
     return "".join(aus)
 
 
-def glossar():
+def wortgrenzen(wort, bekannt):
+    """Setzt Bindestriche, wo ein zusammengeschriebenes Wort aus bekannten Wörtern besteht und nach
+    einem n ein Vokal folgt: Yokomenuchi → yokomen-uchi (よこめんうち, nicht よこめぬち)."""
+    text = stichwort(wort).lower()
+    if not re.search(r"n[aiueoy]", text) or re.search(r"[- ]", text):
+        return wort
+
+    def teile(rest):
+        if rest in bekannt:
+            return [rest]
+        for j in range(len(rest) - 1, 1, -1):
+            if rest[:j] in bekannt and (weiter := teile(rest[j:])):
+                return [rest[:j]] + weiter
+        return None
+
+    bekannt = bekannt - {text}                          # aus anderen Wörtern, nicht aus sich selbst
+    stuecke = teile(text)
+    if not stuecke:
+        return wort
+    aus = stuecke[0]
+    for t in stuecke[1:]:
+        aus += ("-" if aus.endswith("n") and t[0] in "aiueoy" else "") + t
+    return aus
+
+
+def glossar(ids):
     """Das Glossar der App: das Aiki-Budo-Lexikon, ergänzt um die Begriffe aus begriffe.yaml, die
     es nicht kennt (ohne Übersetzung). Hat ein Lexikon-Wort kein Kanji, kommt es aus begriffe.yaml.
+    Ein Begriff gilt als bekannt, wenn er dem Stichwort oder der Schreibweise in Klammern gleicht
+    (Kubi-jime = Kubi-shime (-jime)); Begriffe mit offener Kanji-Frage bleiben draußen.
     Je Wort: wort (wie im Lexikon, erster Buchstabe groß), jp (oder None), de (oder ""), kana (die
     Lesung für die Sprachsynthese, oder None)."""
     lexikon = yaml.safe_load((DATEN / "lexikon.yaml").read_text(encoding="utf-8"))
     begriffe = yaml.safe_load((DATEN / "begriffe.yaml").read_text(encoding="utf-8"))
     for k in NICHT_JAPANISCH - begriffe.keys():
         melde(f"daten.py NICHT_JAPANISCH: {k} fehlt in begriffe.yaml")
+    offen = offene_begriffe(ids)
 
     woerter = [{"wort": w["wort"][:1].upper() + w["wort"][1:], "jp": w["jp"], "de": w["de"]}
                for w in lexikon["woerter"]]
-    nach_stichwort = {}
+    nach_schluessel = {}
     for w in woerter:
-        nach_stichwort.setdefault(flach(stichwort(w["wort"])), []).append(w)
+        for form in {stichwort(w["wort"]), zweitform(w["wort"])} - {None}:
+            nach_schluessel.setdefault(glossar_schluessel(form), []).append(w)
 
     for name, jp in begriffe.items():
-        if name in NICHT_JAPANISCH:
+        if name in NICHT_JAPANISCH or name in offen:
             continue
-        gleiche = nach_stichwort.get(flach(name))
+        gleiche = nach_schluessel.get(glossar_schluessel(name))
         if not gleiche:
             woerter.append({"wort": name, "jp": jp, "de": ""})
             continue
         if len(gleiche) == 1 and not gleiche[0]["jp"]:     # bei zwei Wörtern (kata: 型, 肩) unklar, welches
             gleiche[0]["jp"] = jp
 
+    bekannt = {stichwort(w["wort"]).lower() for w in woerter}
     for w in woerter:
-        w["kana"] = kana(w["wort"])
+        w["kana"] = kana(wortgrenzen(w["wort"], bekannt))
     woerter.sort(key=lambda w: (schluessel(w["wort"]), w["jp"] or ""))
     return {"quelle": lexikon["quelle"], "woerter": woerter}
 
@@ -402,7 +461,7 @@ def main():
 
     mit_video, videos = videostellen(disziplinen)
     app = {"format": FORMAT, "disziplinen": disziplinen, "videos": videos,
-           "glossar": glossar()}
+           "glossar": glossar(ids)}
     (ausgabe / "mitori-daten.json").write_text(json.dumps(app, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     (ausgabe / "fehlende-kanji.txt").write_text(
         "# Namen ohne Kanji (Schlüssel fehlt in daten/begriffe.yaml bzw. daten/daitoryu-begriffe.yaml)\n"

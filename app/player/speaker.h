@@ -14,7 +14,7 @@ class Speaker : public QObject
 
 public:
     enum class State {
-        Unsupported,    // built without speech output
+        Unsupported,    // built without speech output, or no engine but the test one
         Starting,       // the engine is still loading its voices
         NoVoice,        // no Japanese voice (or the engine failed)
         Ready,

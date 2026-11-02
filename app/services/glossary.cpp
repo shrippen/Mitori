@@ -11,6 +11,15 @@ QString letter(const QString &word)
     return key.isEmpty() || !key.front().isLetter() ? QStringLiteral("#") : key.left(1).toUpper();
 }
 
+// What the speaker says: the kanji, else the reading in kana, else the word itself.
+QString speechText(const QString &word, const QString &jp, const QString &kana)
+{
+    if (!jp.isEmpty()) {
+        return jp;
+    }
+    return kana.isEmpty() ? word : kana;
+}
+
 } // namespace
 
 // MITORI_SPEECH_ENGINE picks a speech engine by name (the UI test: "mock"), as MITORI_VIDEOS the videos.
@@ -41,7 +50,7 @@ void Glossary::load(const Catalog &catalog)
                                {QStringLiteral("jp"), jp},
                                {QStringLiteral("de"), de},
                                {QStringLiteral("letter"), letter(word)},
-                               {QStringLiteral("speech"), jp.isEmpty() ? kana : jp}};
+                               {QStringLiteral("speech"), speechText(word, jp, kana)}};
         m_texts << SearchText(QStringList{word, jp, kana, de}.join(u' '));
     }
 }
@@ -78,5 +87,6 @@ QVariantList Glossary::search(const QString &query) const
 
 void Glossary::say(const QString &speech)
 {
+    emit sayRequested(speech);
     m_speaker->say(speech);
 }

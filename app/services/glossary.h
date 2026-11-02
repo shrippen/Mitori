@@ -18,14 +18,15 @@ class Glossary : public QObject
     QML_ELEMENT
     QML_SINGLETON
     // Every word, alphabetical: {word, jp, de, letter, speech}. `letter` heads its section
-    // (A … Z), `speech` is what the speaker button says (the kanji, else the reading in kana).
+    // (A … Z), `speech` is what the speaker button says (the kanji, else the reading in kana,
+    // else the word).
     Q_PROPERTY(QVariantList words READ words CONSTANT)
     Q_PROPERTY(QString source READ source CONSTANT)
     Q_PROPERTY(Speech speech READ speech NOTIFY speechChanged)
 
 public:
     enum class Speech {
-        Unsupported,    // this build has no speech output
+        Unsupported,    // this build or platform has no speech output (AppImage, Flatpak)
         Starting,
         NoVoice,        // no Japanese voice on the device
         Ready,
@@ -49,6 +50,8 @@ public:
 
 signals:
     void speechChanged();
+    // Each call of say(), with or without a voice (the UI test counts them).
+    void sayRequested(const QString &speech);
 
 private:
     void load(const Catalog &catalog);
