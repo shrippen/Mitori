@@ -96,3 +96,40 @@ bool MediaStore::remove(const QString &name)
     const QString p = path(name);
     return !p.isEmpty() && QFile::remove(p);
 }
+
+QStringList MediaStore::names() const
+{
+    QStringList list;
+    for (const QString &name : QDir(m_root).entryList(QDir::Files, QDir::Name)) {
+        if (kindOf(name) != Kind::None) {
+            list << name;
+        }
+    }
+    return list;
+}
+
+bool MediaStore::has(const QString &name) const
+{
+    const QString p = path(name);
+    return !p.isEmpty() && QFile::exists(p);
+}
+
+bool MediaStore::adopt(const QString &name, const QByteArray &data)
+{
+    const QString p = path(name);
+    if (p.isEmpty() || kindOf(name) == Kind::None) {
+        return false;
+    }
+    if (QFile::exists(p)) {
+        return true;
+    }
+    QDir().mkpath(m_root);
+    QFile file(p);
+    const bool ok = file.open(QIODevice::WriteOnly) && file.write(data) == data.size() && file.flush();
+    file.close();
+    if (!ok || file.error() != QFileDevice::NoError) {
+        file.remove();
+        return false;
+    }
+    return true;
+}

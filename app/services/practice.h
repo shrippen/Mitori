@@ -89,6 +89,9 @@ public:
     QVariantList intervals() const;
     void setIntervals(const QVariantList &intervals);
 
+    // Reads the log anew (a backup was merged into it).
+    Q_INVOKABLE void refresh();
+
     static QString defaultPath();
     // This device's id for the log (made once, kept in the settings).
     static QString deviceId();

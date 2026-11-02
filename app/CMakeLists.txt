@@ -123,6 +123,14 @@ qt_add_qml_module(mitori_app
         store/zipwriter.cpp
         store/notebookexport.h
         store/notebookexport.cpp
+        store/zipreader.h
+        store/zipreader.cpp
+        store/tablemerge.h
+        store/tablemerge.cpp
+        store/backuparchive.h
+        store/backuparchive.cpp
+        services/backup.h
+        services/backup.cpp
         services/media.h
         services/media.cpp
 )
@@ -265,7 +273,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME glossary COMMAND tst_glossary)
 
     qt_add_executable(tst_practice tests/tst_practice.cpp services/practice.cpp services/practice.h
-        store/practicelog.cpp store/practicelog.h store/schedule.cpp store/schedule.h store/mediastore.cpp store/mediastore.h)
+        store/practicelog.cpp store/practicelog.h store/tablemerge.cpp store/tablemerge.h store/schedule.cpp store/schedule.h store/mediastore.cpp store/mediastore.h)
     target_include_directories(tst_practice PRIVATE services store)
     target_compile_definitions(tst_practice PRIVATE TEST_DATA_DIR="${CMAKE_BINARY_DIR}/test-data/practice")
     target_link_libraries(tst_practice PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Test)
@@ -281,7 +289,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     qt_add_executable(tst_allnotes tests/tst_allnotes.cpp services/allnotes.cpp services/allnotes.h
         services/keyedlistmodel.cpp services/keyedlistmodel.h services/practice.cpp services/practice.h
         services/courses.cpp services/courses.h services/programme.cpp services/programme.h
-        store/practicelog.cpp store/practicelog.h store/schedule.cpp store/schedule.h
+        store/practicelog.cpp store/practicelog.h store/tablemerge.cpp store/tablemerge.h store/schedule.cpp store/schedule.h
         store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
         platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h store/mediastore.cpp store/mediastore.h store/zipwriter.cpp store/zipwriter.h store/notebookexport.cpp store/notebookexport.h)
     target_include_directories(tst_allnotes PRIVATE catalog services store platform)
@@ -292,7 +300,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME allnotes COMMAND tst_allnotes)
 
     qt_add_executable(tst_media tests/tst_media.cpp store/mediastore.cpp store/mediastore.h
-        services/practice.cpp services/practice.h store/practicelog.cpp store/practicelog.h
+        services/practice.cpp services/practice.h store/practicelog.cpp store/practicelog.h store/tablemerge.cpp store/tablemerge.h
         store/schedule.cpp store/schedule.h services/courses.cpp services/courses.h
         store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
         platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h store/zipwriter.cpp store/zipwriter.h store/notebookexport.cpp store/notebookexport.h)
@@ -301,9 +309,21 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     set_target_properties(tst_media PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME media COMMAND tst_media)
 
+    qt_add_executable(tst_backup tests/tst_backup.cpp services/backup.cpp services/backup.h
+        store/backuparchive.cpp store/backuparchive.h store/zipreader.cpp store/zipreader.h
+        store/zipwriter.cpp store/zipwriter.h store/mediastore.cpp store/mediastore.h
+        services/practice.cpp services/practice.h store/practicelog.cpp store/practicelog.h store/tablemerge.cpp store/tablemerge.h
+        store/schedule.cpp store/schedule.h services/courses.cpp services/courses.h
+        store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
+        platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h store/notebookexport.cpp store/notebookexport.h)
+    target_include_directories(tst_backup PRIVATE catalog services store platform)
+    target_link_libraries(tst_backup PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Test)
+    set_target_properties(tst_backup PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME backup COMMAND tst_backup)
+
     qt_add_executable(tst_export tests/tst_export.cpp store/zipwriter.cpp store/zipwriter.h
         store/notebookexport.cpp store/notebookexport.h store/mediastore.cpp store/mediastore.h
-        services/courses.cpp services/courses.h store/coursebook.cpp store/coursebook.h
+        services/courses.cpp services/courses.h store/coursebook.cpp store/coursebook.h store/tablemerge.cpp store/tablemerge.h
         store/icsreader.cpp store/icsreader.h store/device.h platform/devicecalendar.cpp platform/devicecalendar.h
         catalog/catalog.cpp catalog/catalog.h)
     target_include_directories(tst_export PRIVATE catalog services store platform)
@@ -325,7 +345,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME ics COMMAND tst_ics)
 
     qt_add_executable(tst_courses tests/tst_courses.cpp services/courses.cpp services/courses.h
-        store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
+        store/coursebook.cpp store/coursebook.h store/tablemerge.cpp store/tablemerge.h store/icsreader.cpp store/icsreader.h store/device.h
         platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h store/mediastore.cpp store/mediastore.h store/zipwriter.cpp store/zipwriter.h store/notebookexport.cpp store/notebookexport.h)
     target_include_directories(tst_courses PRIVATE catalog services store platform)
     target_compile_definitions(tst_courses PRIVATE TEST_ICS="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/lehrgaenge.ics"

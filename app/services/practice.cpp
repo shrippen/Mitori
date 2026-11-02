@@ -50,6 +50,19 @@ void Practice::load(const QString &path)
     m_lastNotes = m_log->lastNotes();
 }
 
+void Practice::refresh()
+{
+    if (!m_open) {
+        return;
+    }
+    m_latest = m_log->latest();
+    m_first = m_log->firstRated();
+    m_lastNotes = m_log->lastNotes();
+    ++m_revision;
+    emit changed();
+    emit notesChanged();
+}
+
 QString Practice::defaultPath()
 {
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QStringLiteral("/mitori.sqlite");

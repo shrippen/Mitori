@@ -73,6 +73,33 @@
     </message>
 </context>
 <context>
+    <name>SettingsPage</name>
+    <message numerus="yes">
+        <location filename="../qml/SettingsPage.qml" line="136"/>
+        <source>%n new</source>
+        <translation>
+            <numerusform>%n new</numerusform>
+            <numerusform>%n new</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/SettingsPage.qml" line="139"/>
+        <source>%n changed</source>
+        <translation>
+            <numerusform>%n changed</numerusform>
+            <numerusform>%n changed</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/SettingsPage.qml" line="146"/>
+        <source>Photos and voice notes: %n new</source>
+        <translation>
+            <numerusform>Photos and voice notes: %n new</numerusform>
+            <numerusform>Photos and voice notes: %n new</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>StartPage</name>
     <message numerus="yes">
         <location filename="../qml/StartPage.qml" line="73"/>

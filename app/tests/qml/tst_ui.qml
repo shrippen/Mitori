@@ -308,6 +308,22 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Backup: saved, read back on the same device it changes nothing; merging says so.
+    function test_3c_backup() {
+        const page = push("SettingsPage")
+        const url = "file://" + uiShotsDir + "/sicherung-test.zip"
+        verify(Backup.save(url), Backup.errorString)
+        page.inspect(url)
+        const dialog = findChild(page, "mergeBackup")
+        tryVerify(() => dialog.opened)
+        verify(findChild(page, "mergeText").text.indexOf("Nothing new") >= 0, findChild(page, "mergeText").text)
+        shot("4c-backup", true)
+        dialog.accept()
+        tryVerify(() => findChild(page, "backupDone").visible)
+        compare(findChild(page, "backupError").visible, false)
+        window.pageStack.pop()
+    }
+
     // Swipe on the picture: up on the left half brightens the screen, down on the right half
     // turns the sound down; leaving the player gives the screen its brightness back. The levels
     // stay in memory (MITORI_DEVICE_LEVELS), no video needed.
