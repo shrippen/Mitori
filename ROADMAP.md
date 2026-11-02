@@ -68,7 +68,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   über den Kalender-Intent, sonst als ICS-Datei an die Kalender-App), „Ausschreibung“ (aus der Zeile
   „Ausschreibung: URL“), Einträge nach Tagen (lang drücken: ändern, löschen), Notizbuch löschen. Gespeichert in
   `lehrgaenge.sqlite` (`store/coursebook`, eigenes Schema), jede Zeile mit Zeit und Gerät für den Abgleich. Offen:
-  Export. Die Einträge stehen auch in „Alle Notizen“ (Filter „Lehrgänge“).
+  Die Einträge stehen auch in „Alle Notizen“ (Filter „Lehrgänge“). „Exportieren“: das Notizbuch als ZIP
+  (`notizbuch.md` nach Tagen, `bilder/`, `audio/`; `store/zipwriter`, `store/notebookexport`) in eine gewählte Datei.
 - Schritt 4: Fotos und Sprachnotizen an Notizen einer Technik und an Lehrgangseinträgen: Foto mit der Kamera
   (`CameraPage`) oder aus einer Datei, Sprachnotiz (AAC in MP4) direkt in der Eingabezeile; Anzeige in Notizen,
   Notizbuch und „Alle Notizen“, Sprachnotiz zum Abspielen. Dateien in `medien/` (`store/mediastore`, Fotos höchstens

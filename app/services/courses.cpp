@@ -2,6 +2,7 @@
 
 #include "device.h"
 #include "mediastore.h"
+#include "notebookexport.h"
 #include "devicecalendar.h"
 
 #include <QDir>
@@ -506,6 +507,42 @@ QVariantMap Courses::nextExam(const QString &discipline) const
             {QStringLiteral("grade"), best->examGrade},
             {QStringLiteral("name"), examName(best->examDiscipline, best->examGrade)},
             {QStringLiteral("days"), std::max<qint64>(0, today.daysTo(best->first))}};
+}
+
+QString Courses::exportName(const QString &uid) const
+{
+    for (const CourseBook::Course &c : m_open ? m_book->courses() : QList<CourseBook::Course>()) {
+        if (c.uid == uid) {
+            return NotebookExport::fileName(c);
+        }
+    }
+    return {};
+}
+
+bool Courses::exportNotebook(const QString &uid, const QUrl &target)
+{
+    if (!m_open) {
+        return false;
+    }
+    const QList<CourseBook::Course> list = m_book->courses();
+    const auto it = std::find_if(list.cbegin(), list.cend(), [&](const auto &c) { return c.uid == uid; });
+    if (it == list.cend()) {
+        return false;
+    }
+    // A local file, or a content:// URL from Android's file picker (QFile opens both there).
+    QFile file(target.isLocalFile() ? target.toLocalFile() : target.toString());
+    int missing = 0;
+    const bool ok = file.open(QIODevice::WriteOnly | QIODevice::Truncate)
+                    && NotebookExport::write(&file, *it, m_book->entries(uid), MediaStore::shared(), &missing);
+    if (!ok) {
+        m_error = tr("The notebook could not be exported: %1").arg(file.errorString());
+        emit errorChanged();
+        return false;
+    }
+    if (missing > 0) {
+        qWarning("Courses: export without %d missing media file(s)", missing);
+    }
+    return true;
 }
 
 bool Courses::addToDeviceCalendar(const QString &uid)

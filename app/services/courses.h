@@ -115,6 +115,12 @@ public:
     Q_INVOKABLE bool changeEntry(const QString &uid, const QString &text);
     Q_INVOKABLE bool deleteEntry(const QString &uid);
 
+    // The notebook as a ZIP (notizbuch.md, photos, voice notes; store/notebookexport) to a file
+    // the user chose (on Android a content:// URL); false with errorString on failure.
+    Q_INVOKABLE bool exportNotebook(const QString &uid, const QUrl &target);
+    // A file name for it: "Sommerlehrgang 2026-07-01.zip".
+    Q_INVOKABLE QString exportName(const QString &uid) const;
+
     // The course into the device's calendar app (platform/devicecalendar); false without one.
     Q_INVOKABLE bool addToDeviceCalendar(const QString &uid);
     // The event it hands over (tests).
