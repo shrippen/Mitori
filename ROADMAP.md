@@ -47,7 +47,13 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   und einer japanischen Stimme (speech-dispatcher). Nicht: AppImage (ohne qtspeech gebaut), Flatpak (die
   KDE-Runtime hat nur das Test-Plugin). Offen: Aussprache auf dem Telefon prüfen, qtspeech für AppImage und
   Flatpak, A–Z-Sprungleiste, Lesungen ohne lange Vokale (Umschrift ohne ô, „aikido“ → あいきど), in der Suche
-  Kommentare und Lehrgänge. Noch nicht begonnen: Prüfungsmodus, Landkarte.
+  Kommentare und Lehrgänge. Noch nicht begonnen: Prüfungsmodus.
+- Schritt 3: Technik-Landkarte (Kachel 図 im Startmenü): Sparte, „bis“ Grad (anfangs der des Programms), je Gruppe
+  ein Raster Technik × Angriff über alle Grade bis dahin (Gruppen gleichen Titels aus Kyu- und Dan-Graden zusammen),
+  jeder Platz in der Farbe seiner besten Stufe, leer, wo die Kombination nicht vorkommt; Shinki Toho als nummerierte
+  Ô-dachi-Formen. Tippen öffnet das Technik-Blatt, Überfahren zeigt Technik, Angriff, Grad und Stand; Tab erreicht
+  einen Platz je Raster, die Pfeiltasten wandern weiter. Breite Raster scrollen waagerecht, die Technik-Namen bleiben
+  stehen. Raster: `KanteHeatGrid` (Kante 1.63, dafür ergänzt).
 
 ## Lehrgänge (Schritt 4)
 

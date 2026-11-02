@@ -501,6 +501,116 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Technique map: from the start menu, a grid per group with empty places, a place coloured by
+    // its level and opening its sheet, the keys moving on; Shinki Toho as numbered forms.
+    function test_9k_map() {
+        failOnWarning(/ReferenceError|TypeError/)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k4")
+        tryCompare(window.pageStack, "depth", 1)
+        wait(500)       // Kirigami slides the last page out
+        const tile = findChild(window.pageStack.items[0], "mapTile")
+        verify(tile && tile.visible)
+        mouseClick(tile)
+        tryCompare(window.pageStack, "depth", 2)
+        const page = window.pageStack.currentItem
+        tryVerify(() => page.title === qsTr("Technique map"))
+        wait(500)       // Kirigami slides the page in
+        compare(page.grade, "k4")
+        verify(page.matrix)
+        compare(findChildren(page, "gradeChip").length, Programme.grades("aikido").length)
+
+        // Techniques × attacks (KanteHeatGrid); combinations not in the programme are gaps.
+        const heat = findChild(page, "techniqueMatrix")
+        compare(heat.rowCount, page.shown.rows.length)
+        compare(heat.columnCount, page.shown.columns.length)
+        let gap = null, target = null
+        for (let r = 0; r < heat.rowCount; r++) {
+            for (let c = 0; c < heat.columnCount; c++) {
+                if (heat.isEmpty(r, c))
+                    gap = gap || { r: r, c: c }
+                else if (!target && heat.valueOf(r, c) === 0)
+                    target = { r: r, c: c }
+            }
+        }
+        verify(gap, "combinations not in the programme stay empty")
+        verify(!heat.cellAt(gap.r, gap.c).shown)
+        verify(target)
+
+        // A rating colours the place; its tip names technique, attack, grade and level.
+        const data = page.shown.rows[target.r].cells[target.c]
+        verify(Practice.rate(data.ids[0], 4))
+        const cell = heat.cellAt(target.r, target.c)
+        tryCompare(cell, "level", 4)
+        compare(heat.entryOf(target.r, target.c).label, "4")
+        const tip = heat.tipOf(target.r, target.c)
+        verify(tip.indexOf(data.gradeName) > 0, tip)
+        verify(tip.indexOf(Practice.levelNames[4]) > 0, tip)
+        shot("11-map-aikido")
+
+        // A tap opens the technique sheet.
+        const sheet = findChild(page, "techniqueSheet")
+        mouseClick(cell)
+        tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, data.entry.id)
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+
+        // The keys: Right moves to the next place of the row (over gaps), Enter opens it.
+        cell.forceActiveFocus(Qt.TabFocusReason)
+        let next = target.c + 1
+        while (next < heat.columnCount && heat.isEmpty(target.r, next))
+            next++
+        keyClick(Qt.Key_Right)
+        if (next < heat.columnCount)
+            compare(heat.currentColumn, next)
+        keyClick(Qt.Key_Return)
+        tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, page.shown.rows[heat.currentRow].cells[heat.currentColumn].entry.id)
+        sheet.close()
+        tryVerify(() => !sheet.visible)       // a closing sheet still takes the taps
+
+        // Groups apart: another chip, another grid.
+        const chips = findChildren(page, "groupChip")
+        verify(chips.length > 1)
+        page.flickable.contentY = 0
+        mouseClick(chips[1])
+        compare(page.shown.title, chips[1].text)
+
+        // Shinki Toho: the Ô-dachi forms up to Chûden, eight to a row on the phone.
+        page.discipline = "shinkitoho"
+        page.grade = "chuden"
+        verify(!page.matrix)
+        const forms = findChild(page, "formGrid")
+        verify(forms.visible)
+        compare(forms.perRow, 8)
+        compare(forms.rowCount, 3)
+        compare(forms.entryOf(1, 3).label, "12")
+        verify(forms.isEmpty(2, 7), "after the last form")
+        verify(Practice.rate("shinkitoho/odachi/12", 2))
+        const form = forms.cellAt(1, 3)
+        tryCompare(form, "level", 2)
+        waitForRendering(forms)       // the page lays out the forms in the next frame
+        mouseClick(form)
+        tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, "shinkitoho/odachi/12")
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+        shot("11-map-shinkitoho")
+
+        // Tablet in landscape: bigger places, more forms per row.
+        window.width = 1280
+        window.height = 800
+        tryCompare(forms, "perRow", 11)
+        compare(forms.entryOf(1, 0).label, "12")
+        page.discipline = "daitoryu"
+        page.grade = Programme.grades("daitoryu").slice(-1)[0].id
+        verify(page.matrix)
+        compare(heat.cellSize, KanteStyle.unit(34))
+        shot("11-map-tablet")
+        window.pageStack.pop()
+    }
+
     // Glossary: without a query A–Z with headings, the source below; a query finds words by
     // romaji, kanji and German next to techniques; without a Japanese voice no speaker buttons.
     SignalSpy {
@@ -924,9 +1034,12 @@ TestCase {
         const tiles = findChild(start, "tiles")
         tryCompare(tiles, "columns", 4)
         const shown = tiles.children.filter(t => t.visible && t.width > 0)
-        verify(shown.length >= 3)
-        verify(shown.every(t => Math.abs(t.y - shown[0].y) < 1), "one row")
+        verify(shown.length > 4)
+        // Four per row: the first four side by side, the fifth below the first.
+        verify(shown.slice(0, 4).every(t => Math.abs(t.y - shown[0].y) < 1), "four in the first row")
         verify(shown[1].x > shown[0].x + shown[0].width - 1)
+        verify(shown[4].y > shown[0].y + shown[0].height - 1, "the fifth in the next row")
+        compare(shown[4].x, shown[0].x)
         shot("1b-start-tablet")
         window.width = 420
         window.height = 800

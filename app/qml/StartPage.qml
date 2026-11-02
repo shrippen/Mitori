@@ -113,6 +113,19 @@ Kirigami.ScrollablePage {
             }
 
             KanteOptionTile {
+                objectName: "mapTile"
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1          // equal columns
+                visible: Programme.errorString === ""
+                checkable: false
+                autoExclusive: false
+                glyph: "図"
+                text: qsTr("Technique map")
+                hint: qsTr("Attack × technique")
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("TechniqueMapPage.qml"))
+            }
+
+            KanteOptionTile {
                 objectName: "glossaryTile"
 
                 Layout.fillWidth: true

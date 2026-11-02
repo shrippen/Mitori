@@ -193,6 +193,9 @@ private slots:
             QVERIFY(practice.lastRated(QStringLiteral("a")).secsTo(QDateTime::currentDateTime()) < 5);
             const QVariantList n = practice.counts({QStringLiteral("a"), QStringLiteral("b"), QStringLiteral("c"), QStringLiteral("d")});
             QCOMPARE(n, (QVariantList{2, 1, 0, 1, 0}));
+            // A place on the technique map: the best of its entries.
+            QCOMPARE(practice.bestLevel({QStringLiteral("b"), QStringLiteral("a"), QStringLiteral("c")}), 3);
+            QCOMPARE(practice.bestLevel({QStringLiteral("c")}), 0);
             QCOMPARE(practice.levelNames().size(), 5);
         }
         Practice again(path);

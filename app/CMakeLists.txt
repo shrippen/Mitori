@@ -53,6 +53,7 @@ qt_add_qml_module(mitori_app
         qml/AllNotesPage.qml
         qml/SearchPage.qml
         qml/StatsPage.qml
+        qml/TechniqueMapPage.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
