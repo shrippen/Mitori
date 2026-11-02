@@ -38,6 +38,9 @@ Item {
     // Start at the chapter once per loaded file: the FFmpeg backend reports LoadedMedia again
     // after every seek, and restarting there would undo each step, jump and timeline move.
     property bool startPending: true
+    // Whether a newly loaded chapter plays (off while another page lies above the small player:
+    // it loads at the chapter start and waits).
+    property bool autoPlay: true
     // For the UI test: where the video stands (ms) and whether it plays.
     readonly property alias position: player.position
     readonly property alias playing: player.playing
@@ -63,7 +66,9 @@ Item {
 
     function restart() {
         player.position = from
-        player.play()
+        if (autoPlay) {
+            player.play()
+        }
     }
     // Play from the chapter start when the video stands at (or after) the chapter end.
     function togglePlay() {
@@ -153,10 +158,14 @@ Item {
         Item {
             id: stage
 
+            objectName: "stage"
             readonly property real ratio: page.crop.verhaeltnis || 16 / 9
             Layout.fillWidth: true
             Layout.fillHeight: page.landscape
             Layout.preferredHeight: page.landscape ? -1 : width / ratio
+            // Beside the list the controls keep the room they need, on a small tablet half the height.
+            Layout.maximumHeight: page.compact ? Math.max(page.height / 2, page.height - controlsView.contentHeight)
+                                               : Number.POSITIVE_INFINITY
 
             Rectangle {
                 anchors.fill: parent
@@ -264,6 +273,7 @@ Item {
                 KanteTransportBar {
                     id: transport
 
+                    objectName: "transportBar"
                     Layout.fillWidth: true
                     Layout.preferredWidth: 0        // wraps in the column instead of widening it
                     playing: player.playing

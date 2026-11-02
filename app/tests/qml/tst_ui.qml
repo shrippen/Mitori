@@ -22,6 +22,12 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem !== null)
     }
 
+    // A failed case leaves no tablet window to the next ones.
+    function cleanup() {
+        window.width = 420
+        window.height = 800
+    }
+
     function cleanupTestCase() {
         window.destroy()
     }
@@ -698,9 +704,17 @@ TestCase {
         tryCompare(pane.item.current, "id", rows[1].id, 3000)
         compare(window.pageStack.currentItem, page)
         compare(page.lastId, rows[1].id)
-        // The player moves on: its row is marked.
+        // The player moves on: its row is marked, and the list shows it.
         pane.item.go(1)
         tryCompare(page, "lastId", page.playlist[pane.item.index].id)
+        const list = findChild(page, "programmeList")
+        pane.item.index = page.playlist.length - 1
+        tryCompare(page, "lastId", page.playlist[page.playlist.length - 1].id)
+        const row = page.rows.findIndex(r => r.id === page.lastId)
+        tryVerify(() => {
+            const first = list.indexAt(10, list.contentY + 5), last = list.indexAt(10, list.contentY + list.height - 5)
+            return first >= 0 && first <= row && (last < 0 || last >= row)
+        }, 2000, "the list scrolled to the playing row")
         shot("2t-tablet")
         // Turned to portrait and back: the chosen technique stays.
         page.open(page.playlist[3])
@@ -751,6 +765,15 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem !== page, 2000)
         compare(window.pageStack.currentItem.entry.id, rows[0].id)
         tryVerify(() => !pane.item.playing, 2000, "the player pauses under another page")
+        // Turned under the comment: the player made anew stays quiet.
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => pane.item && pane.item.duration > 0, 10000)
+        wait(500)
+        verify(!pane.item.playing, "no sound under the comment page")
         window.pageStack.pop()
         window.width = 420
         window.height = 800
@@ -773,6 +796,74 @@ TestCase {
         window.width = 420
         window.height = 800
         tryCompare(tiles, "columns", 1)
+    }
+
+    // The keyboard scrolls the programme list (Down, Page Down).
+    function test_2v_programme_keys() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k3")
+        const page = push("ProgrammePage")
+        const list = findChild(page, "programmeList")
+        wait(500)
+        page.forceActiveFocus()
+        const before = list.contentY
+        keyClick(Qt.Key_PageDown)
+        tryVerify(() => list.contentY > before + 100, 2000, "Page Down")
+        const after = list.contentY
+        keyClick(Qt.Key_Down)
+        tryVerify(() => list.contentY > after, 2000, "Down")
+        keyClick(Qt.Key_Home)
+        tryVerify(() => list.contentY <= list.originY + 1, 2000, "Home")
+        // Also with a row in focus (after a click or Tab): the list scrolls, not a current index.
+        let i = 0
+        while (i < list.count && !(list.itemAtIndex(i) && list.itemAtIndex(i).item && list.itemAtIndex(i).item.entry))
+            i++
+        verify(i < list.count, "a technique row in view")
+        list.itemAtIndex(i).item.forceActiveFocus()
+        const y = list.contentY
+        keyClick(Qt.Key_Down)
+        tryVerify(() => list.contentY > y, 2000, "Down on a focused row")
+        Programme.setGrade("aikido", "k5")
+        window.pageStack.pop()
+    }
+
+    // Tablet: keys in the small player stay there (End does not scroll the list), and on a small
+    // tablet the player's controls fit under the picture.
+    function test_2w_tablet_player_keys() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        window.width = 1024
+        window.height = 560
+        const page = push("ProgrammePage")
+        tryVerify(() => page.split, 2000, "a small tablet splits too")
+        const pane = findChild(page, "playerPane")
+        tryVerify(() => pane.item && pane.item.duration > 0, 10000)
+        const list = findChild(page, "programmeList")
+        pane.item.forceActiveFocus()
+        const y = list.contentY
+        keyClick(Qt.Key_End)
+        keyClick(Qt.Key_PageDown)
+        wait(100)
+        compare(list.contentY, y, "keys in the player leave the list alone")
+        const controls = findChild(pane.item, "controlsView")
+        const bar = findChild(pane.item, "transportBar")
+        const bottom = bar.mapToItem(controls, 0, bar.height).y
+        verify(bottom <= controls.height, "the transport bar in view (" + bottom + " of " + controls.height + ")")
+        // A large tablet keeps the whole picture: only as little height as the controls need.
+        window.width = 1920
+        window.height = 1080
+        tryVerify(() => pane.item && pane.item.height > 900, 2000)
+        const stage = findChild(pane.item, "stage")
+        const controls2 = findChild(pane.item, "controlsView")
+        tryVerify(() => Math.abs(stage.height - stage.width / stage.ratio) < 1
+                         || Math.abs(controls2.contentHeight - controls2.height) < 1, 2000,
+                  "picture " + stage.width + "×" + stage.height + ", controls " + controls2.contentHeight + " of " + controls2.height)
+        verify(controls2.contentHeight <= controls2.height + 1, "the controls fit")
+        window.pageStack.pop()
     }
 
     function findChildren(item, name) {
