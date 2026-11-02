@@ -1,6 +1,8 @@
 #include "backuparchive.h"
 
+#include "coursebook.h"
 #include "mediastore.h"
+#include "practicelog.h"
 #include "zipwriter.h"
 
 #include <QCoreApplication>
@@ -36,14 +38,15 @@ const QString BackupArchive::kPractice = QStringLiteral("mitori.sqlite");
 const QString BackupArchive::kCourses = QStringLiteral("lehrgaenge.sqlite");
 
 bool BackupArchive::write(QIODevice *out, const QString &practice, const QString &courses, const MediaStore &media,
-                          const Manifest &manifest, QString *error)
+                          const Manifest &manifest, QString *error, Media withMedia)
 {
     ZipWriter zip(out);
     const QJsonObject json{{QStringLiteral("app"), kApp},
                            {QStringLiteral("format"), kFormat},
                            {QStringLiteral("version"), manifest.version},
                            {QStringLiteral("created"), manifest.created.toUTC().toString(Qt::ISODate)},
-                           {QStringLiteral("device"), manifest.device}};
+                           {QStringLiteral("device"), manifest.device},
+                           {QStringLiteral("name"), manifest.name}};
     bool ok = zip.add(kManifest, QJsonDocument(json).toJson());
 
     // The databases, then the media; a file that cannot be read fails the backup (it would be
@@ -55,7 +58,7 @@ bool BackupArchive::write(QIODevice *out, const QString &practice, const QString
         }
         ok = zip.add(name, data);
     }
-    for (const QString &name : media.names()) {
+    for (const QString &name : withMedia == Media::Include ? media.names() : QStringList()) {
         QByteArray data;
         if (!ok || !readFile(media.path(name), &data, error)) {
             return false;
@@ -88,6 +91,7 @@ bool BackupArchive::open(QIODevice *in)
     m_manifest.version = json.value(QStringLiteral("version")).toString();
     m_manifest.created = QDateTime::fromString(json.value(QStringLiteral("created")).toString(), Qt::ISODate);
     m_manifest.device = json.value(QStringLiteral("device")).toString();
+    m_manifest.name = json.value(QStringLiteral("name")).toString();
     if (m_manifest.format > kFormat) {
         m_error = QCoreApplication::translate("BackupArchive", "it comes from a newer Mitori (%1); update Mitori")
                       .arg(m_manifest.version);
@@ -127,6 +131,24 @@ bool BackupArchive::readMedia(const QString &name, QByteArray *out)
 {
     if (!m_zip.read(kMediaDir + name, out)) {
         m_error = m_zip.errorString();
+        return false;
+    }
+    return true;
+}
+
+bool BackupArchive::unpack(const QString &practice, const QString &courses)
+{
+    if (!extract(kPractice, practice) || !extract(kCourses, courses)) {
+        return false;
+    }
+    PracticeLog log;
+    if (!log.open(practice)) {
+        m_error = log.errorString();
+        return false;
+    }
+    CourseBook book;
+    if (!book.open(courses)) {
+        m_error = book.errorString();
         return false;
     }
     return true;

@@ -26,7 +26,11 @@ public:
         QString version;        // of the app that wrote it
         QDateTime created;      // UTC
         QString device;
+        QString name;           // the device's name for the user ("Tablet am Mattenrand"), or ""
     };
+
+    // The sync leaves the media out: they travel one by one (Sync).
+    enum class Media { Include, Leave };
 
     static const QString kPractice;
     static const QString kCourses;
@@ -34,7 +38,7 @@ public:
 
     // Writes an archive from the two database copies and the media folder; false with `error`.
     static bool write(QIODevice *out, const QString &practice, const QString &courses, const MediaStore &media,
-                      const Manifest &manifest, QString *error);
+                      const Manifest &manifest, QString *error, Media withMedia = Media::Include);
 
     // Reads an archive's directory and manifest; false (errorString()) when it is no backup or
     // one of a newer format.
@@ -44,6 +48,8 @@ public:
 
     // A database of the archive (kPractice, kCourses) as a file.
     bool extract(const QString &name, const QString &path);
+    // Both databases as files, migrated to this app's schema (ready for merge()).
+    bool unpack(const QString &practice, const QString &courses);
     // The names of its media files, and one file's bytes.
     QStringList media() const { return m_media; }
     bool readMedia(const QString &name, QByteArray *out);

@@ -8,8 +8,12 @@
         <!-- Photos and voice notes: a few hundred KB each would soon pass the 25 MB limit and
              stop the backup of the practice log and the notes. A device transfer takes them. -->
         <exclude domain="file" path="medien/" />
+        <!-- The sync's account (app password) and id. -->
+        <exclude domain="file" path="sync/" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="file" path="bundles/" />
+        <!-- The sync id: a copied phone next to its original must not upload to the same file. -->
+        <exclude domain="file" path="sync/" />
     </device-transfer>
 </data-extraction-rules>

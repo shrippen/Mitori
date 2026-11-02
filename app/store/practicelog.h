@@ -99,7 +99,8 @@ public:
     bool snapshot(const QString &path);
     // Merges another log (a backup, opened and migrated before): its ratings and exam rounds this
     // one lacks, and its notes that are new or newer (TableMerge).
-    bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result);
+    bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result,
+               const TableMerge::Watch &watch = {});
 
     static constexpr int schemaVersion = 5;
 

@@ -20,4 +20,22 @@ Kirigami.ApplicationWindow {
     // (app-entscheidungen.md, "Tablet quer"), not Kirigami's columns.
     pageStack.columnView.columnResizeMode: Kirigami.ColumnView.SingleColumn
     pageStack.initialPage: StartPage {}
+
+    // The sync: after it brought something the services read anew; a change asks for one soon.
+    Connections {
+        target: Sync
+        function onMerged() {
+            Practice.refresh()
+            Courses.refresh()
+        }
+    }
+    Connections {
+        target: Practice
+        function onChanged() { Sync.touched() }
+        function onNotesChanged() { Sync.touched() }
+    }
+    Connections {
+        target: Courses
+        function onChanged() { Sync.touched() }
+    }
 }

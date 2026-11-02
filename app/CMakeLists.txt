@@ -74,6 +74,7 @@ qt_add_qml_module(mitori_app
         qml/MediaView.qml
         qml/MediaCompose.qml
         qml/CameraPage.qml
+        qml/ConflictsPage.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -131,6 +132,14 @@ qt_add_qml_module(mitori_app
         store/backuparchive.cpp
         services/backup.h
         services/backup.cpp
+        store/webdav.h
+        store/webdav.cpp
+        store/syncaccount.h
+        store/syncaccount.cpp
+        services/syncjob.h
+        services/syncjob.cpp
+        services/sync.h
+        services/sync.cpp
         services/media.h
         services/media.cpp
 )
@@ -320,6 +329,19 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     target_link_libraries(tst_backup PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Test)
     set_target_properties(tst_backup PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME backup COMMAND tst_backup)
+
+    qt_add_executable(tst_sync tests/tst_sync.cpp services/sync.cpp services/sync.h services/syncjob.cpp services/syncjob.h
+        store/syncaccount.cpp store/syncaccount.h store/webdav.cpp store/webdav.h
+        store/backuparchive.cpp store/backuparchive.h store/zipreader.cpp store/zipreader.h
+        store/zipwriter.cpp store/zipwriter.h store/mediastore.cpp store/mediastore.h
+        services/practice.cpp services/practice.h store/practicelog.cpp store/practicelog.h store/tablemerge.cpp store/tablemerge.h
+        store/schedule.cpp store/schedule.h services/courses.cpp services/courses.h
+        store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
+        platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h store/notebookexport.cpp store/notebookexport.h)
+    target_include_directories(tst_sync PRIVATE catalog services store platform)
+    target_link_libraries(tst_sync PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Concurrent Qt6::Test)
+    set_target_properties(tst_sync PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME sync COMMAND tst_sync)
 
     qt_add_executable(tst_export tests/tst_export.cpp store/zipwriter.cpp store/zipwriter.h
         store/notebookexport.cpp store/notebookexport.h store/mediastore.cpp store/mediastore.h

@@ -112,7 +112,8 @@ public:
     // Merges another book (a backup, opened and migrated before) row by row (TableMerge). Two
     // notebooks of one calendar event become one (the older keeps the entries of both), two rows
     // of one passed grade the newer.
-    bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result);
+    bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result,
+               const TableMerge::Watch &watch = {});
 
     static constexpr int schemaVersion = 3;
 
