@@ -101,7 +101,7 @@ Kirigami.ScrollablePage {
             text: page.shown ? page.shown.title + (page.shown.jp ? "  " + page.shown.jp : "") : ""
         }
 
-        // Techniques × attacks of one group (Kante 1.63, KanteHeatGrid); a blank gap where a
+        // Techniques × attacks of one group (KanteHeatGrid); a blank gap where a
         // technique does not answer an attack up to the grade.
         KanteHeatGrid {
             id: heat
@@ -118,6 +118,7 @@ Kirigami.ScrollablePage {
             columnLabelsVertical: true
             columnLabelMaxLength: Kirigami.Units.gridUnit * 9
             rowLabelWidth: page.width * 0.4
+            rowLabelFont: KanteStyle.smallFont     // long technique names, readable on a phone
             cellSize: page.wide ? KanteStyle.unit(34) : KanteStyle.unit(26)
             rowTitle: qsTr("Technique")
             columnTitle: qsTr("Attack")
@@ -134,42 +135,35 @@ Kirigami.ScrollablePage {
             onActivated: (row, column) => page.open(rows[row].cells[column].entry)
         }
 
-        // Shinki Toho: the Ô-dachi forms, numbered, as many per row as the width allows.
-        Item {
-            id: formBox
+        // Shinki Toho: the Ô-dachi forms, numbered, a fixed number per row filling the width.
+        KanteHeatGrid {
+            id: forms
 
+            readonly property var list: page.shown && !page.matrix ? page.shown.cells : []
+            readonly property int perRow: page.wide ? 11 : 8
+
+            objectName: "formGrid"
             Layout.fillWidth: true
             visible: !!page.shown && !page.matrix
-            implicitHeight: forms.implicitHeight
-
-            KanteHeatGrid {
-                id: forms
-
-                readonly property var list: page.shown && !page.matrix ? page.shown.cells : []
-                readonly property int perRow: page.wide ? 11 : 8
-
-                objectName: "formGrid"
-                width: formBox.width
-                minValue: 0
-                maxValue: 4
-                showEmpty: false
-                scrollable: false
-                cellSize: Math.floor((formBox.width - (perRow - 1) * spacing - 2 * ringRoom) / perRow)
-                cells: {
-                    const out = []
-                    for (let i = 0; Practice.revision >= 0 && i < list.length; i += perRow) {
-                        const row = list.slice(i, i + perRow).map(f => page.place(f, String(f.entry.nr), f.entry.title, String(f.entry.nr)))
-                        while (row.length < perRow) {
-                            row.push(null)
-                        }
-                        out.push(row)
+            minValue: 0
+            maxValue: 4
+            showEmpty: false
+            scrollable: false
+            fillWidth: true
+            cells: {
+                const out = []
+                for (let i = 0; Practice.revision >= 0 && i < list.length; i += perRow) {
+                    const row = list.slice(i, i + perRow).map(f => page.place(f, String(f.entry.nr), f.entry.title, String(f.entry.nr)))
+                    while (row.length < perRow) {
+                        row.push(null)
                     }
-                    return out
+                    out.push(row)
                 }
-                legendLabels: page.levelWords(false)
-                noDataText: ""
-                onActivated: (row, column) => page.open(list[row * perRow + column].entry)
+                return out
             }
+            legendLabels: page.levelWords(false)
+            noDataText: ""
+            onActivated: (row, column) => page.open(list[row * perRow + column].entry)
         }
         QQC2.Label {
             Layout.fillWidth: true

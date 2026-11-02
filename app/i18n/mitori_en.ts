@@ -56,8 +56,8 @@
 <context>
     <name>StatsPage</name>
     <message numerus="yes">
-        <location filename="../qml/StatsPage.qml" line="48"/>
-        <location filename="../qml/StatsPage.qml" line="118"/>
+        <location filename="../qml/StatsPage.qml" line="46"/>
+        <location filename="../qml/StatsPage.qml" line="116"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>
@@ -68,7 +68,7 @@
 <context>
     <name>TechniqueMapPage</name>
     <message numerus="yes">
-        <location filename="../qml/TechniqueMapPage.qml" line="193"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="187"/>
         <source>%n entries</source>
         <translation>
             <numerusform>%n entry</numerusform>
