@@ -13,6 +13,36 @@
     </message>
 </context>
 <context>
+    <name>CoursePage</name>
+    <message numerus="yes">
+        <location filename="../qml/CoursePage.qml" line="240"/>
+        <source>The notebook and its %n entry(s) go from this device.</source>
+        <translation>
+            <numerusform>The notebook and its %n entry go from this device.</numerusform>
+            <numerusform>The notebook and its %n entries go from this device.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>CourseRow</name>
+    <message numerus="yes">
+        <location filename="../qml/CourseRow.qml" line="29"/>
+        <source>in %n day(s)</source>
+        <translation>
+            <numerusform>in %n day</numerusform>
+            <numerusform>in %n days</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/CourseRow.qml" line="36"/>
+        <source>%n note(s)</source>
+        <translation>
+            <numerusform>%n note</numerusform>
+            <numerusform>%n notes</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>ExamPage</name>
     <message numerus="yes">
         <location filename="../qml/ExamPage.qml" line="71"/>
@@ -45,7 +75,15 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="129"/>
+        <location filename="../qml/StartPage.qml" line="130"/>
+        <source>in %n day(s)</source>
+        <translation>
+            <numerusform>in %n day</numerusform>
+            <numerusform>in %n days</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/StartPage.qml" line="147"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>

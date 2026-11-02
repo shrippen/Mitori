@@ -48,6 +48,15 @@ TestCase {
         tryVerify(() => done)
     }
 
+    // A start tile into view (the column of tiles is taller than a phone), then a click on it.
+    function clickTile(tile) {
+        const f = window.pageStack.items[0].flickable
+        const y = tile.mapToItem(f.contentItem, 0, 0).y
+        f.contentY = Math.max(0, Math.min(y - 20, f.contentHeight - f.height))
+        wait(50)
+        mouseClick(tile)
+    }
+
     function push(page, properties) {
         window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + page + ".qml"), properties || {})
         tryVerify(() => window.pageStack.currentItem && window.pageStack.currentItem.title !== undefined)
@@ -582,6 +591,75 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Courses: the coming dates from the calendar (a local file in this test), a date's notebook
+    // with an entry, a course of one's own, deleting a notebook.
+    function test_9m_courses() {
+        failOnWarning(/ReferenceError|TypeError|Binding loop/)
+        tryCompare(window.pageStack, "depth", 1)
+        wait(500)
+        const tile = findChild(window.pageStack.items[0], "coursesTile")
+        verify(tile && tile.visible)
+        clickTile(tile)
+        tryCompare(window.pageStack, "depth", 2)
+        const page = window.pageStack.currentItem
+        tryVerify(() => page.title === qsTr("Courses"))
+        tryCompare(Courses, "calendarState", Courses.CalendarState.Ready, 5000)
+        tryVerify(() => findChildren(page, "eventRow").length === 2)
+        const rows = findChildren(page, "eventRow")
+        compare(rows[0].course.title, "Daitoryu Aiki Jujutsu")
+        compare(rows[0].course.teacher, "M. D. Nakajima Shihan")
+        compare(rows[0].daysAway, 12)
+        compare(rows[1].daysAway, 40)
+        // The first day as a local day (no time zone moves it to the day before).
+        compare(rows[0].firstDay.getDate(), new Date(Date.now() + 12 * 86400000).getDate())
+        compare(findChildren(page, "notebookRow").length, 0)
+        verify(findChild(window.pageStack.items[0], "coursesTile").hint.indexOf("Siebeldingen") === 0)
+        shot("14-courses")
+
+        // A date opens its notebook, made on first use; an entry is added from the field.
+        mouseClick(rows[0])
+        tryCompare(window.pageStack, "depth", 3)
+        const book = window.pageStack.currentItem
+        tryVerify(() => book.title === qsTr("Notebook"))
+        compare(findChild(book, "courseTitle").text, "Daitoryu Aiki Jujutsu")
+        verify(findChild(book, "announcement").visible, "the calendar names an announcement")
+        verify(findChild(book, "toCalendar").visible)
+        const compose = findChild(book, "courseCompose")
+        compose.text = "Kote-gaeshi aus Tsuki"
+        compose.accepted()                              // Enter in the field
+        tryVerify(() => book.entries.length === 1)
+        compare(compose.text, "")
+        tryVerify(() => findChildren(book, "courseEntry").length === 1)
+        shot("14b-course-notebook")
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        tryVerify(() => findChildren(page, "notebookRow").length === 1)
+        compare(findChildren(page, "eventRow")[0].course.entries, 1)
+        compare(Courses.notebookFor("ui-daito"), book.uid, "the same notebook again")
+
+        // A course of one's own.
+        const made = push("CourseNewPage")
+        verify(!findChild(made, "makeCourse").enabled, "a title is needed")
+        findChild(made, "courseTitleField").text = "Training mit Gastlehrer"
+        findChild(made, "coursePlace").text = "Dojo Weimar"
+        tryVerify(() => findChild(made, "makeCourse").enabled)
+        mouseClick(findChild(made, "makeCourse"))
+        tryVerify(() => window.pageStack.currentItem !== made && window.pageStack.currentItem.uid !== undefined)
+        const own = window.pageStack.currentItem
+        compare(own.course.title, "Training mit Gastlehrer")
+        compare(own.course.place, "Dojo Weimar")
+        verify(!findChild(own, "announcement").visible)
+        // Deleting it asks first.
+        const remove = findChild(own, "removeCourse")
+        remove.open()
+        tryVerify(() => remove.opened)
+        shot("14c-course-delete", true)
+        remove.accept()
+        tryVerify(() => window.pageStack.currentItem === page, 3000)
+        compare(findChildren(page, "notebookRow").length, 1)
+        window.pageStack.pop()
+    }
+
     // Technique map: from the start menu, a grid per group with empty places, a place coloured by
     // its level and opening its sheet, the keys moving on; Shinki Toho as numbered forms.
     function test_9k_map() {
@@ -592,7 +670,7 @@ TestCase {
         wait(500)       // Kirigami slides the last page out
         const tile = findChild(window.pageStack.items[0], "mapTile")
         verify(tile && tile.visible)
-        mouseClick(tile)
+        clickTile(tile)
         tryCompare(window.pageStack, "depth", 2)
         const page = window.pageStack.currentItem
         tryVerify(() => page.title === qsTr("Technique map"))
@@ -736,7 +814,7 @@ TestCase {
             window.pageStack.pop()
         tryVerify(() => window.pageStack.currentItem === start)
         wait(800)       // Kirigami slides the start page back in; a click meanwhile goes nowhere
-        mouseClick(tile)
+        clickTile(tile)
         tryVerify(() => window.pageStack.currentItem !== start && window.pageStack.currentItem.glossary !== undefined, 2000)
         const page = window.pageStack.currentItem
         const list = findChild(page, "glossaryList")

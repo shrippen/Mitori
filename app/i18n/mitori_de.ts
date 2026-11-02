@@ -57,6 +57,327 @@
     </message>
 </context>
 <context>
+    <name>CourseBook</name>
+    <message>
+        <location filename="../store/coursebook.cpp" line="100"/>
+        <source>it comes from a newer Mitori (schema %1); update Mitori</source>
+        <translation>sie stammt aus einem neueren Mitori (Schema %1); Mitori aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../store/coursebook.cpp" line="129"/>
+        <source>a course needs a title and a first day</source>
+        <translation>ein Lehrgang braucht einen Titel und einen ersten Tag</translation>
+    </message>
+    <message>
+        <location filename="../store/coursebook.cpp" line="190"/>
+        <location filename="../store/coursebook.cpp" line="211"/>
+        <source>an entry needs a text and a course</source>
+        <translation>ein Eintrag braucht einen Text und einen Lehrgang</translation>
+    </message>
+</context>
+<context>
+    <name>CourseNewPage</name>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="21"/>
+        <source>New course</source>
+        <translation>Neuer Lehrgang</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="40"/>
+        <source>For private trainings, guest teachers or dates that are not in the calendar.</source>
+        <translation>Für private Trainings, Gastlehrer oder Termine, die nicht im Kalender stehen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="52"/>
+        <source>Title</source>
+        <translation>Titel</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="54"/>
+        <source>Training with a guest teacher</source>
+        <translation>Training mit Gastlehrer</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="60"/>
+        <source>From</source>
+        <translation>Von</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="61"/>
+        <source>yyyy-MM-dd</source>
+        <comment>date format</comment>
+        <translation>dd.MM.yyyy</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <source>MO</source>
+        <translation>MO</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <source>TU</source>
+        <translation>DI</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <source>WE</source>
+        <translation>MI</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <source>TH</source>
+        <translation>DO</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <source>FR</source>
+        <translation>FR</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <source>SA</source>
+        <translation>SA</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <source>SU</source>
+        <translation>SO</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="63"/>
+        <source>Today</source>
+        <translation>Heute</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="70"/>
+        <source>To</source>
+        <translation>Bis</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="80"/>
+        <source>Place</source>
+        <translation>Ort</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="82"/>
+        <source>Dojo, town</source>
+        <translation>Dojo, Stadt</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="88"/>
+        <source>Teacher</source>
+        <translation>Lehrer</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="90"/>
+        <source>Name</source>
+        <translation>Name</translation>
+    </message>
+    <message>
+        <location filename="../qml/CourseNewPage.qml" line="99"/>
+        <source>Make</source>
+        <translation>Anlegen</translation>
+    </message>
+</context>
+<context>
+    <name>CoursePage</name>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="40"/>
+        <source>Notebook</source>
+        <translation>Notizbuch</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="46"/>
+        <source>Delete notebook</source>
+        <translation>Notizbuch löschen</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="73"/>
+        <source>from the calendar</source>
+        <translation>aus dem Kalender</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="73"/>
+        <source>own entry</source>
+        <translation>eigener Eintrag</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="94"/>
+        <source>In the calendar</source>
+        <translation>In den Kalender</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="105"/>
+        <source>Announcement</source>
+        <translation>Ausschreibung</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="114"/>
+        <source>No calendar app could be opened.</source>
+        <translation>Es ließ sich keine Kalender-App öffnen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="132"/>
+        <source>No entries yet. Write below what was shown.</source>
+        <translation>Noch keine Einträge. Unten schreiben, was gezeigt wurde.</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="172"/>
+        <source>Change or delete</source>
+        <translation>Ändern oder löschen</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="200"/>
+        <source>What was shown?</source>
+        <translation>Was wurde gezeigt?</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="201"/>
+        <source>New entry</source>
+        <translation>Neuer Eintrag</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="208"/>
+        <source>Add</source>
+        <translation>Hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="217"/>
+        <source>Entry</source>
+        <translation>Eintrag</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="229"/>
+        <source>Delete notebook?</source>
+        <translation>Notizbuch löschen?</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="230"/>
+        <source>Delete</source>
+        <translation>Löschen</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/CoursePage.qml" line="240"/>
+        <source>The notebook and its %n entry(s) go from this device.</source>
+        <translation>
+            <numerusform>Das Notizbuch und sein %n Eintrag verschwinden von diesem Gerät.</numerusform>
+            <numerusform>Das Notizbuch und seine %n Einträge verschwinden von diesem Gerät.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>CourseRow</name>
+    <message numerus="yes">
+        <location filename="../qml/CourseRow.qml" line="29"/>
+        <source>in %n day(s)</source>
+        <translation>
+            <numerusform>in %n Tag</numerusform>
+            <numerusform>in %n Tagen</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/CourseRow.qml" line="36"/>
+        <source>%n note(s)</source>
+        <translation>
+            <numerusform>%n Notiz</numerusform>
+            <numerusform>%n Notizen</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>Courses</name>
+    <message>
+        <location filename="../services/courses.cpp" line="62"/>
+        <source>The course notebooks could not be opened: %1</source>
+        <translation>Die Lehrgangsnotizbücher ließen sich nicht öffnen: %1</translation>
+    </message>
+    <message>
+        <location filename="../services/courses.cpp" line="228"/>
+        <location filename="../services/courses.cpp" line="245"/>
+        <source>The notebook could not be made: %1</source>
+        <translation>Das Notizbuch ließ sich nicht anlegen: %1</translation>
+    </message>
+    <message>
+        <location filename="../services/courses.cpp" line="251"/>
+        <source>The notebook could not be deleted: %1</source>
+        <translation>Das Notizbuch ließ sich nicht löschen: %1</translation>
+    </message>
+    <message>
+        <location filename="../services/courses.cpp" line="275"/>
+        <location filename="../services/courses.cpp" line="283"/>
+        <source>The entry could not be saved: %1</source>
+        <translation>Der Eintrag ließ sich nicht speichern: %1</translation>
+    </message>
+    <message>
+        <location filename="../services/courses.cpp" line="288"/>
+        <source>The entry could not be deleted: %1</source>
+        <translation>Der Eintrag ließ sich nicht löschen: %1</translation>
+    </message>
+</context>
+<context>
+    <name>CoursesPage</name>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="29"/>
+        <source>Courses</source>
+        <translation>Lehrgänge</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="35"/>
+        <source>New course</source>
+        <translation>Neuer Lehrgang</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="40"/>
+        <source>Reload</source>
+        <translation>Neu laden</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="69"/>
+        <source>Next dates</source>
+        <translation>Nächste Termine</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="79"/>
+        <source>Loading the course calendar …</source>
+        <translation>Der Lehrgangskalender wird geladen …</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="81"/>
+        <source>The course calendar could not be loaded; as of %1.</source>
+        <translation>Der Lehrgangskalender ließ sich nicht laden; Stand %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="82"/>
+        <source>The course calendar could not be loaded. Check the connection and reload.</source>
+        <translation>Der Lehrgangskalender ließ sich nicht laden. Verbindung prüfen und neu laden.</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="85"/>
+        <source>From the association&apos;s course calendar, as of %1. Tap a date for its notebook.</source>
+        <translation>Aus dem Lehrgangskalender des Verbands, Stand %1. Tippen öffnet das Notizbuch.</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="86"/>
+        <source>No coming dates in the course calendar.</source>
+        <translation>Keine kommenden Termine im Lehrgangskalender.</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="88"/>
+        <source>The course calendar is not loaded yet.</source>
+        <translation>Der Lehrgangskalender ist noch nicht geladen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="112"/>
+        <source>My notebooks</source>
+        <translation>Meine Notizbücher</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursesPage.qml" line="117"/>
+        <source>No notebooks yet. Tap a date above, or make a course of your own (+).</source>
+        <translation>Noch keine Notizbücher. Oben einen Termin antippen oder einen eigenen Lehrgang anlegen (+).</translation>
+    </message>
+</context>
+<context>
     <name>ExamBoard</name>
     <message>
         <location filename="../qml/ExamBoard.qml" line="52"/>
@@ -307,18 +628,18 @@
 <context>
     <name>NoteEditor</name>
     <message>
-        <location filename="../qml/NoteEditor.qml" line="21"/>
-        <location filename="../qml/NoteEditor.qml" line="55"/>
+        <location filename="../qml/NoteEditor.qml" line="24"/>
+        <location filename="../qml/NoteEditor.qml" line="58"/>
         <source>Note</source>
         <translation>Notiz</translation>
     </message>
     <message>
-        <location filename="../qml/NoteEditor.qml" line="28"/>
+        <location filename="../qml/NoteEditor.qml" line="31"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../qml/NoteEditor.qml" line="37"/>
+        <location filename="../qml/NoteEditor.qml" line="40"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
@@ -482,52 +803,52 @@
 <context>
     <name>Practice</name>
     <message>
-        <location filename="../services/practice.cpp" line="40"/>
+        <location filename="../services/practice.cpp" line="41"/>
         <source>The practice log could not be opened: %1</source>
         <translation>Das Übungsprotokoll lässt sich nicht öffnen: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="68"/>
+        <location filename="../services/practice.cpp" line="63"/>
         <source>not rated</source>
         <translation>offen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="68"/>
+        <location filename="../services/practice.cpp" line="63"/>
         <source>seen</source>
         <translation>gesehen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="68"/>
+        <location filename="../services/practice.cpp" line="63"/>
         <source>with help</source>
         <translation>mit Hilfe</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="68"/>
+        <location filename="../services/practice.cpp" line="63"/>
         <source>sure</source>
         <translation>sicher</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="68"/>
+        <location filename="../services/practice.cpp" line="63"/>
         <source>exam-ready</source>
         <translation>prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="78"/>
+        <location filename="../services/practice.cpp" line="73"/>
         <source>The rating could not be saved: %1</source>
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="269"/>
+        <location filename="../services/practice.cpp" line="264"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="333"/>
+        <location filename="../services/practice.cpp" line="328"/>
         <source>Not every point of the exam round is rated.</source>
         <translation>Nicht jeder Punkt der Prüfungsrunde ist eingeschätzt.</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="354"/>
+        <location filename="../services/practice.cpp" line="349"/>
         <source>The exam round could not be saved: %1</source>
         <translation>Die Prüfungsrunde konnte nicht gespeichert werden: %1</translation>
     </message>
@@ -588,7 +909,7 @@
         <translation>Auf shinkiryu.de bestellen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="213"/>
+        <location filename="../qml/ProgrammePage.qml" line="217"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
@@ -782,11 +1103,34 @@
     </message>
     <message>
         <location filename="../qml/StartPage.qml" line="128"/>
+        <source>Courses</source>
+        <translation>Lehrgänge</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="129"/>
+        <source>Calendar and notebooks</source>
+        <translation>Kalender und Notizbücher</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/StartPage.qml" line="130"/>
+        <source>in %n day(s)</source>
+        <translation>
+            <numerusform>in %n Tag</numerusform>
+            <numerusform>in %n Tagen</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="130"/>
+        <source>today</source>
+        <translation>heute</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="146"/>
         <source>Statistics</source>
         <translation>Statistik</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="129"/>
+        <location filename="../qml/StartPage.qml" line="147"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n Übungstag in 30 Tagen</numerusform>
@@ -794,22 +1138,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="141"/>
+        <location filename="../qml/StartPage.qml" line="159"/>
         <source>Technique map</source>
         <translation>Landkarte</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="142"/>
+        <location filename="../qml/StartPage.qml" line="160"/>
         <source>Attack × technique</source>
         <translation>Angriff × Technik</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="155"/>
+        <location filename="../qml/StartPage.qml" line="173"/>
         <source>Glossary</source>
         <translation>Glossar</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="156"/>
+        <location filename="../qml/StartPage.qml" line="174"/>
         <source>Kanji · pronunciation</source>
         <translation>Kanji · Aussprache</translation>
     </message>

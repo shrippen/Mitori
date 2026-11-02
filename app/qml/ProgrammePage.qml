@@ -343,9 +343,9 @@ Kirigami.Page {
                 continue
             }
             list.positionViewAtIndex(i, ListView.Contain)
-            const row = list.itemAtIndex(i)
+            const row = list.itemAtIndex(i) as Loader
             if (row && row.item) {
-                row.item.forceActiveFocus(reason)
+                (row.item as Item).forceActiveFocus(reason)
             }
             return
         }

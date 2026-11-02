@@ -5,9 +5,12 @@
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QSettings>
+#include <QStandardPaths>
+#include <QUrl>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuickTest>
 
+#include "courses.h"
 #include "practice.h"
 
 Q_IMPORT_QML_PLUGIN(MitoriPlugin)
@@ -37,6 +40,22 @@ public slots:
         // hides its speaker buttons).
         qputenv("MITORI_SPEECH_ENGINE", "mock");
         QFile::remove(Practice::defaultPath());
+        QFile::remove(Courses::defaultPath());
+        QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)).remove(QStringLiteral("lehrgaenge.ics"));
+        // The course calendar from a file, dates relative to today: never the network.
+        const auto day = [](int offset) { return QDate::currentDate().addDays(offset).toString(QStringLiteral("yyyyMMdd")).toUtf8(); };
+        QDir().mkpath(QStringLiteral(UI_DATA_DIR));
+        QFile calendar(QStringLiteral(UI_DATA_DIR "/lehrgaenge.ics"));
+        if (calendar.open(QIODevice::WriteOnly)) {
+            calendar.write("BEGIN:VCALENDAR\r\nVERSION:2.0\r\n"
+                           "BEGIN:VEVENT\r\nUID:ui-daito\r\nSUMMARY:Daitoryu Aiki Jujutsu\r\nDTSTART;VALUE=DATE:" + day(12)
+                           + "\r\nDTEND;VALUE=DATE:" + day(14) + "\r\nLOCATION:Siebeldingen\r\n"
+                           "DESCRIPTION:mit M. D. Nakajima Shihan\\nSamstag\\nAusschreibung: https://example.org/a?b=1\r\nEND:VEVENT\r\n"
+                           "BEGIN:VEVENT\r\nUID:ui-aikido\r\nSUMMARY:Aikido-Prüfungsvorbereitung\r\nDTSTART;VALUE=DATE:" + day(40)
+                           + "\r\nDTEND;VALUE=DATE:" + day(42) + "\r\nLOCATION:Pforzheim\r\nEND:VEVENT\r\n"
+                           "END:VCALENDAR\r\n");
+        }
+        qputenv("MITORI_COURSES_CALENDAR", QUrl::fromLocalFile(calendar.fileName()).toString().toUtf8());
     }
 
     void qmlEngineAvailable(QQmlEngine *engine)

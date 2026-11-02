@@ -60,6 +60,14 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Ô-dachi-Formen. Tippen öffnet das Technik-Blatt, Überfahren zeigt Technik, Angriff, Grad und Stand; Tab erreicht
   einen Platz je Raster, die Pfeiltasten wandern weiter. Breite Raster scrollen waagerecht, die Technik-Namen bleiben
   stehen. Raster: `KanteHeatGrid` (Kante 1.63, dafür ergänzt; Formenraster füllt die Breite seit Kante 1.64).
+- Schritt 4: Lehrgänge (Kachel 講 im Startmenü, nennt den nächsten Termin): die kommenden Termine aus dem öffentlichen
+  Lehrgangskalender (ICS, alle sechs Stunden neu geladen, offline vom Gerät), ein Notizbuch je Termin (beim ersten
+  Öffnen angelegt, mit einer Kopie des Termins) und eigene Lehrgänge ohne Kalendereintrag. Im Notizbuch: Tage, Ort,
+  Lehrer (aus „mit …“ der Beschreibung), „In den Kalender“ (Plattform-Schicht `platform/devicecalendar`: Android
+  über den Kalender-Intent, sonst als ICS-Datei an die Kalender-App), „Ausschreibung“ (aus der Zeile
+  „Ausschreibung: URL“), Einträge nach Tagen (lang drücken: ändern, löschen), Notizbuch löschen. Gespeichert in
+  `lehrgaenge.sqlite` (`store/coursebook`, eigenes Schema), jede Zeile mit Zeit und Gerät für den Abgleich. Offen:
+  Meine Grade, Prüfung vormerken, Wartezeiten, Fotos und Sprachnotizen, Export, Lehrgangsnotizen in „Alle Notizen“.
 
 ## Offene Punkte (Stand 02.11.2026)
 
@@ -70,19 +78,6 @@ Kleinigkeiten aus Reviews und Tests, je ein Folge-PR oder beim nächsten Bearbei
   geklärt, legen sich Spalten bzw. Raster zusammen.
 - **Alle Notizen**: 64–120 ms je Änderung bei 2000 Notizen (die Liste setzt jede Notiz in JavaScript neu
   zusammen); mit den Lehrgangsnotizen (Schritt 4) als Liste in C++.
-
-## Lehrgänge (Schritt 4)
-
-- **In den Kalender:** jeder Lehrgang aus dem Kalender lässt sich in den Kalender des Geräts eintragen (Titel, Zeit, Ort,
-  Beschreibung; Plattform-Schicht: Android über einen Kalender-Intent, Plasma als ICS-Datei an die
-  Kalender-App).
-- **Ausschreibung:** steht in der Beschreibung des ICS-Eintrags eine Zeile „Ausschreibung: URL“, zeigt der
-  Kopf des Notizbuchs (wo auch „In den Kalender“ sitzt) einen Knopf, der die offizielle
-  Lehrgangsausschreibung öffnet; ohne diese Zeile kein Knopf. Stand 02.11.2026 tragen 4 von 24 Terminen die Zeile.
-  Beim Lesen: Zeilen erst entfalten (CRLF + Leerzeichen), Escapes (`\n`, `\,`) auflösen, die URL endet am
-  Zeilenende und wird nicht umkodiert (sie enthält `&` und `%2F`). Gesucht wird im Text der `DESCRIPTION`, nicht
-  im HTML des `ALTREP` (dort `&amp;`), und nur die des Termins: eine Erinnerung (`VALARM`) hat eine eigene
-  `DESCRIPTION` („Mozilla Standardbeschreibung“). Übernommen werden nur `http(s)`-Links.
 
 ## Kante-Bedarf
 

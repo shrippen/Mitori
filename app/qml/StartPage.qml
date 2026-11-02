@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
+import "coursedays.js" as CourseDays
 
 // Start menu (clickdummy "Startmenü", variant 1): tiles; the programme tile shows the discipline
 // and grade chosen last. More tiles come with their features (ROADMAP.md).
@@ -15,6 +16,9 @@ Kirigami.ScrollablePage {
     background: Rectangle { color: KanteStyle.backgroundColor }
 
     title: "Mitori 見取り"
+
+    // The course tile names the next date: the calendar is loaded when the last load is a few hours old.
+    Component.onCompleted: Courses.reload(Courses.Reload.Older)
 
     // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
     // not a phone held sideways, about 20).
@@ -111,6 +115,24 @@ Kirigami.ScrollablePage {
                 text: qsTr("Exam mode")
                 hint: qsTr("Mock exam %1").arg(gradeName)
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ExamPage.qml"))
+            }
+
+            KanteOptionTile {
+                objectName: "coursesTile"
+
+                // The next coming date: "Siebeldingen · in 12 days", "today".
+                readonly property var next: Courses.upcoming.length > 0 ? Courses.upcoming[0] : null
+                readonly property int days: next ? Math.max(0, CourseDays.fromToday(next.first)) : 0
+
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1          // equal columns
+                checkable: false
+                autoExclusive: false
+                glyph: "講"
+                text: qsTr("Courses")
+                hint: !next ? qsTr("Calendar and notebooks")
+                            : (next.place || next.title) + " · " + (days > 0 ? qsTr("in %n day(s)", "", days) : qsTr("today"))
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("CoursesPage.qml"))
             }
 
             KanteOptionTile {

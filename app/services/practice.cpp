@@ -1,5 +1,6 @@
 #include "practice.h"
 
+#include "device.h"
 #include "searchkey.h"
 #include "schedule.h"
 
@@ -54,13 +55,7 @@ QString Practice::defaultPath()
 
 QString Practice::deviceId()
 {
-    QSettings settings;
-    QString id = settings.value(QStringLiteral("device/id")).toString();
-    if (id.isEmpty()) {
-        id = QUuid::createUuid().toString(QUuid::WithoutBraces);
-        settings.setValue(QStringLiteral("device/id"), id);
-    }
-    return id;
+    return ::deviceId();
 }
 
 QStringList Practice::levelNames() const
