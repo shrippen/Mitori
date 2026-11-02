@@ -295,6 +295,8 @@ private slots:
         QVERIFY(practice.searchNotes(QStringLiteral("kreis")).isEmpty());
         practice.addNote(QStringLiteral("d"), QStringLiteral("Fuß nach außen"));
         QCOMPARE(practice.searchNotes(QStringLiteral("fuss aussen")).size(), 1);   // ß as ss
+        practice.addNote(QStringLiteral("e"), QStringLiteral("Shiho-nage: Arm über den Kopf"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("shihonage")).size(), 1);    // the hyphen does not matter
         QVERIFY(practice.searchNotes(QStringLiteral(" ")).isEmpty());
     }
 

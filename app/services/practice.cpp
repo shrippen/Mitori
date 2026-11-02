@@ -201,13 +201,12 @@ QVariantList Practice::notes(const QString &entry) const
 QVariantList Practice::searchNotes(const QString &query, int limit) const
 {
     QVariantList result;
-    const QStringList words = searchKey(query).split(u' ', Qt::SkipEmptyParts);
+    const QStringList words = searchWords(query);
     if (!m_open || words.isEmpty()) {
         return result;
     }
     for (const PracticeLog::Note &n : m_log->allNotes()) {
-        const QString key = searchKey(n.text);
-        if (std::all_of(words.cbegin(), words.cend(), [&key](const QString &w) { return key.contains(w); })) {
+        if (SearchText(searchKey(n.text)).matches(words)) {
             QVariantMap row = noteMap(n);
             row[QStringLiteral("entry")] = n.entry;
             result << row;

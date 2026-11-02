@@ -8,8 +8,8 @@ import Kante
 import Mitori
 
 // Search (clickdummy "Glossar & Suche", the search part): techniques of every discipline and
-// grade by name, attack or Japanese, and the own notes. Case, accents and hyphens do not
-// matter; several words must all match. A technique opens its sheet, a note its notes page.
+// grade by name, attack (with its addition), group or Japanese, and the own notes. Case,
+// accents, hyphens and okurigana do not matter; several words must all match. A technique opens its sheet, a note its notes page.
 Kirigami.ScrollablePage {
     id: page
 
@@ -20,7 +20,11 @@ Kirigami.ScrollablePage {
 
     // The query searched (follows the field after a short pause while typing).
     property string query: ""
-    readonly property var techniques: query.trim() === "" ? [] : Programme.search(query)
+    // At most `limit` techniques are listed; one more found says there are more.
+    readonly property int limit: 50
+    readonly property var techniques: query.trim() === "" ? [] : Programme.search(query, limit + 1)
+    readonly property bool more: techniques.length > limit
+    readonly property var shown: more ? techniques.slice(0, limit) : techniques
     readonly property var notes: query.trim() === "" || Practice.notesRevision < 0 ? [] : Practice.searchNotes(query)
 
     title: qsTr("Search")
@@ -62,7 +66,7 @@ Kirigami.ScrollablePage {
             text: qsTr("Techniques")
         }
         Repeater {
-            model: page.techniques
+            model: page.shown
 
             KanteListRow {
                 required property var modelData
@@ -70,14 +74,27 @@ Kirigami.ScrollablePage {
                 objectName: "techniqueResult"
                 Layout.fillWidth: true
                 leadingText: modelData.nr ? String(modelData.nr) : ""
-                text: modelData.title + (modelData.jp ? "  " + modelData.jp : "")
-                subtitle: [modelData.disciplineName + " " + modelData.gradeName, modelData.groupName, modelData.attack].filter(x => x).join(" · ")
+                // As in the programme: the technique's and the attack's addition tell rows apart.
+                text: modelData.title + (modelData.extra && !modelData.nr ? " (" + modelData.extra + ")" : "")
+                      + (modelData.jp ? "  " + modelData.jp : "")
+                subtitle: [modelData.disciplineName + " " + modelData.gradeName, modelData.groupName,
+                           modelData.attack + (modelData.attackExtra ? " (" + modelData.attackExtra + ")" : ""),
+                           modelData.nr ? modelData.extra : ""].filter(x => x).join(" · ")
                 onClicked: {
                     sheet.entry = modelData
                     sheet.playable = !!modelData.video && Videos.available(modelData.video.video)
                     sheet.open()
                 }
             }
+        }
+
+        QQC2.Label {
+            objectName: "moreHint"
+            Layout.fillWidth: true
+            visible: page.more
+            text: qsTr("More than %1 techniques found. Add a word to narrow the search.").arg(page.limit)
+            color: KanteStyle.mutedTextColor
+            wrapMode: Text.Wrap
         }
 
         KanteSectionLabel {
@@ -89,7 +106,9 @@ Kirigami.ScrollablePage {
 
             KanteListRow {
                 required property var modelData
-                readonly property var entry: Programme.entry(modelData.entry)
+                // A technique no longer in the programme (a newer catalogue) keeps its notes.
+                readonly property var found: Programme.entry(modelData.entry)
+                readonly property var entry: found.id ? found : { id: modelData.entry, title: qsTr("Technique no longer in the programme") }
 
                 objectName: "noteResult"
                 Layout.fillWidth: true

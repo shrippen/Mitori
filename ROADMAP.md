@@ -29,7 +29,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   fälligen Techniken, Einschätzen schaltet weiter). Notizen je Technik (Text; nach Tagen, lang drücken zum
   Bearbeiten/Löschen, letzte Notiz im Blatt, Eingabe im Player). Offen: Fotos und Sprachnotizen an Notizen
   (Plattform-Schicht), „Alle Notizen“, Statistik. Suche (Techniken aller Sparten und Grade, eigene Notizen;
-  Groß/klein, Akzente, ß und Bindestriche egal) über die Lupe im Startmenü.
+  Groß/klein, Akzente, ß, Bindestriche und Okurigana egal; auch Angriffszusatz und Gruppe) über die Lupe im
+  Startmenü.
 
 ## Kante-Bedarf
 

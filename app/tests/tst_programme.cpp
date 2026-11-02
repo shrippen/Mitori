@@ -3,6 +3,7 @@
 #include <QTest>
 
 #include "programme.h"
+#include "searchkey.h"
 
 namespace {
 
@@ -81,6 +82,22 @@ private slots:
         QVERIFY(!programme.search(QStringLiteral("KOTE-GAESHI")).isEmpty());
         // Japanese.
         QVERIFY(!programme.search(QStringLiteral("一教")).isEmpty());
+        // Without the hyphen or spaces, and Japanese with or without okurigana, find the same.
+        QVERIFY(!programme.search(QStringLiteral("shihonage")).isEmpty());
+        QCOMPARE(programme.search(QStringLiteral("shihonage"), 1000).size(),
+                 programme.search(QStringLiteral("shiho-nage"), 1000).size());
+        QCOMPARE(programme.search(QStringLiteral("kiriotoshi"), 1000).size(),
+                 programme.search(QStringLiteral("kiri-otoshi"), 1000).size());
+        QVERIFY(!programme.search(QStringLiteral("切り落し")).isEmpty());
+        QCOMPARE(programme.search(QStringLiteral("切り落とし"), 1000).size(),
+                 programme.search(QStringLiteral("切り落し"), 1000).size());
+        // The attack's addition and Japanese, and the group, are searched too; rows carry them.
+        const QVariantList gyaku = programme.search(QStringLiteral("gyaku hanmi"));
+        QVERIFY(!gyaku.isEmpty());
+        QVERIFY(searchKey(gyaku.first().toMap().value(QStringLiteral("attackExtra")).toString()).contains(u"gyaku"));
+        QVERIFY(!programme.search(QStringLiteral("ai-hanmi")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("片手取り")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("ukemi")).isEmpty());
         // No duplicates, a limit, nothing for blanks.
         QStringList seen;
         for (const QVariant &r : ikkyo) {

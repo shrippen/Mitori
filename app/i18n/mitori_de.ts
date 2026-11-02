@@ -278,7 +278,7 @@
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="231"/>
+        <location filename="../services/practice.cpp" line="230"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
@@ -350,30 +350,40 @@
 <context>
     <name>SearchPage</name>
     <message>
-        <location filename="../qml/SearchPage.qml" line="26"/>
-        <location filename="../qml/SearchPage.qml" line="35"/>
+        <location filename="../qml/SearchPage.qml" line="30"/>
+        <location filename="../qml/SearchPage.qml" line="39"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="34"/>
+        <location filename="../qml/SearchPage.qml" line="38"/>
         <source>Technique, attack, Japanese or a word from your notes</source>
         <translation>Technik, Angriff, Japanisch oder ein Wort aus deinen Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="55"/>
+        <location filename="../qml/SearchPage.qml" line="59"/>
         <source>Nothing found for “%1”.</source>
         <translation>Nichts gefunden für „%1“.</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="62"/>
+        <location filename="../qml/SearchPage.qml" line="66"/>
         <source>Techniques</source>
         <translation>Techniken</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="85"/>
+        <location filename="../qml/SearchPage.qml" line="95"/>
+        <source>More than %1 techniques found. Add a word to narrow the search.</source>
+        <translation>Mehr als %1 Techniken gefunden. Ein weiteres Wort grenzt die Suche ein.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="102"/>
         <source>Notes</source>
         <translation>Notizen</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="111"/>
+        <source>Technique no longer in the programme</source>
+        <translation>Technik nicht mehr im Programm</translation>
     </message>
 </context>
 <context>

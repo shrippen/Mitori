@@ -453,8 +453,26 @@ TestCase {
         field.text = "kreis grosser"                    // größer without umlaut and ß
         tryVerify(() => page.query === "kreis grosser", 2000)
         compare(page.notes.length, 1)
+        // More than the list shows: a hint to narrow the search.
+        field.text = "nage"
+        tryVerify(() => page.query === "nage", 2000)
+        verify(page.more, "more than the list shows")
+        compare(page.shown.length, page.limit)
+        verify(findChild(page, "moreHint").visible)
+        // A note on a technique that is no longer in the programme still opens its notes.
+        Practice.addNote("gone-technique", "Kreis kleiner")
+        field.text = "kreis kleiner"
+        tryVerify(() => page.query === "kreis kleiner", 2000)
+        compare(page.notes.length, 1)
+        const orphan = findChild(page, "noteResult")
+        mouseClick(orphan, orphan.width / 3, orphan.height / 2)
+        tryVerify(() => window.pageStack.currentItem !== page, 2000)
+        compare(window.pageStack.currentItem.entry.id, "gone-technique")
+        verify(window.pageStack.currentItem.notes.length === 1)
+        window.pageStack.pop()
         field.text = "ikkyo"
         tryVerify(() => page.query === "ikkyo", 2000)
+        verify(!page.more)
         shot("9-search")
         const result = findChild(page, "techniqueResult")
         mouseClick(result, result.width / 3, result.height / 2)

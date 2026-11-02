@@ -166,6 +166,8 @@ QVariantList Programme::entries(const QString &disciplineId, const QString &grad
         }
         QVariantMap r = entryRow(technique, name(technique), technique.value(QStringLiteral("jp")).toString());
         r[QStringLiteral("attack")] = name(attack);
+        r[QStringLiteral("attackExtra")] = attack.value(QStringLiteral("zusatz"));
+        r[QStringLiteral("attackJp")] = attack.value(QStringLiteral("jp"));
         if (groups.value(group).value(QStringLiteral("art")) == QLatin1String("text")) {
             r[QStringLiteral("kind")] = QStringLiteral("text");  // theory: an essay, an oral exam
         }
@@ -240,7 +242,7 @@ QVariantList Programme::shinkiTohoEntries(const QVariantMap &d, const QString &g
 QVariantList Programme::search(const QString &query, int limit) const
 {
     QVariantList result;
-    const QStringList words = searchKey(query).split(u' ', Qt::SkipEmptyParts);
+    const QStringList words = searchWords(query);
     if (words.isEmpty()) {
         return result;
     }
@@ -261,14 +263,14 @@ QVariantList Programme::search(const QString &query, int limit) const
                 if (row.value(QStringLiteral("kind")) != QLatin1String("entry") || seen.contains(id)) {
                     continue;
                 }
-                const QString haystack = searchKey(QStringList{row.value(QStringLiteral("title")).toString(),
-                                                               row.value(QStringLiteral("attack")).toString(),
-                                                               row.value(QStringLiteral("jp")).toString(),
-                                                               row.value(QStringLiteral("extra")).toString()}
-                                                       .join(u' '));
-                const bool all = std::all_of(words.cbegin(), words.cend(),
-                                             [&haystack](const QString &w) { return haystack.contains(w); });
-                if (!all) {
+                const QStringList fields{row.value(QStringLiteral("title")).toString(),
+                                         row.value(QStringLiteral("jp")).toString(),
+                                         row.value(QStringLiteral("extra")).toString(),
+                                         row.value(QStringLiteral("attack")).toString(),
+                                         row.value(QStringLiteral("attackExtra")).toString(),
+                                         row.value(QStringLiteral("attackJp")).toString(),
+                                         group};
+                if (!SearchText(searchKey(fields.join(u' '))).matches(words)) {
                     continue;
                 }
                 seen.insert(id);
