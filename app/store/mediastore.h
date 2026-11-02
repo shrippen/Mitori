@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <QStringList>
 #include <QUrl>
 
 // The photos and voice notes of notes and course entries: one file each in a folder of their own
@@ -29,6 +30,12 @@ public:
     QString importPhoto(const QUrl &source);
     // A name for a new voice note; the recorder writes to path(name).
     QString newVoiceName();
+    // The files in the folder (a backup), and whether one is there.
+    QStringList names() const;
+    bool has(const QString &name) const;
+    // Takes a file into the folder (a backup read back) unless it is there; false when the name
+    // is no media file's or the file could not be written.
+    bool adopt(const QString &name, const QByteArray &data);
     // Removes a file (a deleted note's, a discarded recording); false when there was none.
     bool remove(const QString &name);
 

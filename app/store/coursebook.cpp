@@ -454,3 +454,94 @@ QHash<QString, int> CourseBook::entryCounts() const
     }
     return result;
 }
+
+bool CourseBook::snapshot(const QString &path)
+{
+    m_error.clear();
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("VACUUM INTO ?"));
+    q.addBindValue(path);
+    if (!q.exec()) {
+        m_error = q.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+namespace {
+
+// After a merge: one notebook per calendar event and one row per passed grade, as the app keeps
+// them. The losers become deletion marks (now), so a later merge carries that on.
+bool joinDoubles(QSqlDatabase &db, QString *error)
+{
+    const QString now = QStringLiteral("CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER)");
+    const QStringList steps = {
+        // Notebooks of one event: the oldest stays, the others' entries and planned exam move to it.
+        QStringLiteral("DROP TABLE IF EXISTS temp.doubles"),
+        QStringLiteral("CREATE TEMP TABLE doubles AS SELECT c.uid AS loser,"
+                       " (SELECT w.uid FROM courses w WHERE w.deleted = 0 AND w.calendar_uid = c.calendar_uid"
+                       "  ORDER BY w.created, w.uid LIMIT 1) AS winner"
+                       " FROM courses c WHERE c.deleted = 0 AND c.calendar_uid <> ''"),
+        QStringLiteral("DELETE FROM temp.doubles WHERE loser = winner"),
+        QStringLiteral("UPDATE entries SET course = (SELECT winner FROM temp.doubles WHERE loser = entries.course),"
+                       " changed = %1 WHERE course IN (SELECT loser FROM temp.doubles)").arg(now),
+        QStringLiteral("UPDATE courses SET (exam_discipline, exam_grade) = (SELECT l.exam_discipline, l.exam_grade"
+                       "  FROM temp.doubles d JOIN courses l ON l.uid = d.loser"
+                       "  WHERE d.winner = courses.uid AND l.exam_discipline <> '' LIMIT 1), changed = %1"
+                       " WHERE exam_discipline = '' AND uid IN (SELECT d.winner FROM temp.doubles d"
+                       "  JOIN courses l ON l.uid = d.loser WHERE l.exam_discipline <> '')").arg(now),
+        QStringLiteral("UPDATE courses SET deleted = 1, changed = %1 WHERE uid IN (SELECT loser FROM temp.doubles)").arg(now),
+        QStringLiteral("DROP TABLE temp.doubles"),
+        // Entries written on another device into a notebook joined here earlier: to the one left.
+        // (Deleting a notebook deletes its entries, so a live entry there came from a merge.)
+        QStringLiteral("UPDATE entries SET course = (SELECT w.uid FROM courses l JOIN courses w"
+                       "  ON w.calendar_uid = l.calendar_uid AND w.deleted = 0"
+                       "  WHERE l.uid = entries.course ORDER BY w.created, w.uid LIMIT 1), changed = %1"
+                       " WHERE deleted = 0 AND course IN (SELECT l.uid FROM courses l WHERE l.deleted = 1"
+                       "  AND l.calendar_uid <> '' AND EXISTS (SELECT 1 FROM courses w"
+                       "  WHERE w.deleted = 0 AND w.calendar_uid = l.calendar_uid))").arg(now),
+        // Any other live entry of a deleted notebook: newer than the deletion, it brings the
+        // notebook back (written after it, on another device); older, it goes with it.
+        QStringLiteral("UPDATE courses SET deleted = 0, changed = %1 WHERE deleted = 1 AND EXISTS (SELECT 1 FROM entries e"
+                       " WHERE e.course = courses.uid AND e.deleted = 0 AND e.changed > courses.changed)").arg(now),
+        QStringLiteral("UPDATE entries SET deleted = 1, changed = %1 WHERE deleted = 0"
+                       " AND course IN (SELECT uid FROM courses WHERE deleted = 1)").arg(now),
+        // One passed grade twice: the newer row stays.
+        QStringLiteral("UPDATE grades SET deleted = 1, changed = %1 WHERE deleted = 0 AND EXISTS (SELECT 1 FROM grades g"
+                       " WHERE g.deleted = 0 AND g.discipline = grades.discipline AND g.grade = grades.grade"
+                       " AND (g.changed > grades.changed OR (g.changed = grades.changed AND g.uid > grades.uid)))").arg(now),
+    };
+    QSqlQuery q(db);
+    for (const QString &step : steps) {
+        if (!q.exec(step)) {
+            *error = q.lastError().text();
+            return false;
+        }
+    }
+    return true;
+}
+
+} // namespace
+
+bool CourseBook::merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result)
+{
+    using namespace Qt::StringLiterals;
+    using TableMerge::Kind;
+    static const QList<TableMerge::Table> tables = {
+        {QStringLiteral("courses"),
+         {u"uid"_s, u"calendar_uid"_s, u"title"_s, u"first"_s, u"last"_s, u"place"_s, u"teacher"_s, u"info"_s,
+          u"announcement"_s, u"created"_s, u"changed"_s, u"device"_s, u"deleted"_s, u"exam_discipline"_s,
+          u"exam_grade"_s},
+         Kind::Editable, {}},
+        {QStringLiteral("entries"),
+         {u"uid"_s, u"course"_s, u"text"_s, u"created"_s, u"changed"_s, u"device"_s, u"deleted"_s, u"media"_s},
+         Kind::Editable, u"media"_s},
+        {QStringLiteral("grades"),
+         {u"uid"_s, u"discipline"_s, u"grade"_s, u"day"_s, u"place"_s, u"created"_s, u"changed"_s, u"device"_s,
+          u"deleted"_s},
+         Kind::Editable, {}},
+    };
+    m_error.clear();
+    QSqlDatabase db = QSqlDatabase::database(m_connection);
+    return TableMerge::run(db, otherPath, tables, mode, result, &m_error, joinDoubles);
+}

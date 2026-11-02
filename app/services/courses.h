@@ -79,6 +79,9 @@ public:
     Q_ENUM(Reload)
     Q_INVOKABLE void reload(Reload when = Reload::Always);
 
+    // Shows the notebooks anew (a backup was merged into them).
+    Q_INVOKABLE void refresh();
+
     // The notebook of a calendar event, made on first use; its uid ("" on failure).
     Q_INVOKABLE QString notebookFor(const QString &eventUid);
     // A notebook without a calendar event, days as "YYYY-MM-DD"; its uid ("" on failure).

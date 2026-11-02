@@ -67,7 +67,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Lehrer (aus „mit …“ der Beschreibung), „In den Kalender“ (Plattform-Schicht `platform/devicecalendar`: Android
   über den Kalender-Intent, sonst als ICS-Datei an die Kalender-App), „Ausschreibung“ (aus der Zeile
   „Ausschreibung: URL“), Einträge nach Tagen (lang drücken: ändern, löschen), Notizbuch löschen. Gespeichert in
-  `lehrgaenge.sqlite` (`store/coursebook`, eigenes Schema), jede Zeile mit Zeit und Gerät für den Abgleich. Offen:
+  `lehrgaenge.sqlite` (`store/coursebook`, eigenes Schema), jede Zeile mit Zeit und Gerät für den Abgleich.
   Die Einträge stehen auch in „Alle Notizen“ (Filter „Lehrgänge“). „Exportieren“: das Notizbuch als ZIP
   (`notizbuch.md` nach Tagen, `bilder/`, `audio/`; `store/zipwriter`, `store/notebookexport`) in eine gewählte Datei.
 - Schritt 4: Fotos und Sprachnotizen an Notizen einer Technik und an Lehrgangseinträgen: Foto mit der Kamera
@@ -81,6 +81,13 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Lehrgänge zeigen die geplanten Prüfungen, die Kachel 講, Heute üben und der Prüfungsmodus die nächste.
   `lehrgaenge.sqlite` Schema 2 (Tabelle `grades`, Spalten `exam_*` an `courses`). Offen: „Meine Grade“ in der
   Statistik, Trainingsbeginn für Shinki Toho.
+- Schritt 4: Sicherung als Datei (Einstellungen → Sicherung): `mitori-sicherung-JJJJ-MM-TT.zip` mit beiden Datenbanken
+  (`VACUUM INTO`), `medien/` und `manifest.json` (`store/backuparchive`, `store/zipreader`, `services/backup`).
+  Einlesen führt zusammen (`store/tablemerge`): Einschätzungen und Prüfungsrunden als Vereinigung, Notizen,
+  Notizbücher, Einträge und Grade per uid, das neuere `changed` gewinnt, Löschmarken eingeschlossen; zwei Notizbücher
+  eines Termins werden eins, ein Grad doppelt der neuere. Vorher zeigt ein Dialog, was neu und was geändert ist.
+  DVD-Codes und Inhaltsschlüssel bleiben draußen. Android Auto Backup sichert die Datenbanken ohne Medien.
+  Offen: WebDAV/Nextcloud-Abgleich mit Konflikten (Clickdummy „Telefon / Tablet / Beide behalten“).
 - Schritt 4: Video-Bundles (Einstellungen → „Videos und DVD-Codes“, Hinweis im Programm „Code eingeben“): das öffentliche
   Manifest (Gitea-Paket `mitori-manifest`) listet die Bundles; der Code einer DVD (20 Zeichen, Prüfzeichen) schaltet
   eins frei, Mitori lädt, prüft (SHA-256, Blöcke mit Tag) und entschlüsselt seine Videos aufs Gerät

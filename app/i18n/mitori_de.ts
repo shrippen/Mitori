@@ -81,6 +81,49 @@
     </message>
 </context>
 <context>
+    <name>Backup</name>
+    <message>
+        <location filename="../services/backup.cpp" line="108"/>
+        <source>The backup could not be saved: %1</source>
+        <translation>Die Sicherung ließ sich nicht speichern: %1</translation>
+    </message>
+    <message>
+        <location filename="../services/backup.cpp" line="125"/>
+        <location filename="../services/backup.cpp" line="172"/>
+        <location filename="../services/backup.cpp" line="177"/>
+        <location filename="../services/backup.cpp" line="183"/>
+        <location filename="../services/backup.cpp" line="186"/>
+        <source>The backup could not be read: %1</source>
+        <translation>Die Sicherung ließ sich nicht lesen: %1</translation>
+    </message>
+    <message>
+        <location filename="../services/backup.cpp" line="201"/>
+        <location filename="../services/backup.cpp" line="204"/>
+        <location filename="../services/backup.cpp" line="214"/>
+        <location filename="../services/backup.cpp" line="217"/>
+        <source>The backup could not be restored: %1</source>
+        <translation>Die Sicherung ließ sich nicht einlesen: %1</translation>
+    </message>
+    <message>
+        <location filename="../services/backup.cpp" line="204"/>
+        <source>%1 could not be saved</source>
+        <translation>%1 ließ sich nicht speichern</translation>
+    </message>
+</context>
+<context>
+    <name>BackupArchive</name>
+    <message>
+        <location filename="../store/backuparchive.cpp" line="19"/>
+        <source>this is no Mitori backup</source>
+        <translation>das ist keine Sicherung von Mitori</translation>
+    </message>
+    <message>
+        <location filename="../store/backuparchive.cpp" line="92"/>
+        <source>it comes from a newer Mitori (%1); update Mitori</source>
+        <translation>sie stammt von einem neueren Mitori (%1); Mitori aktualisieren</translation>
+    </message>
+</context>
+<context>
     <name>Bundles</name>
     <message>
         <location filename="../services/bundles.cpp" line="272"/>
@@ -473,44 +516,44 @@
         <translation>Die Lehrgangsnotizbücher ließen sich nicht öffnen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="252"/>
-        <location filename="../services/courses.cpp" line="269"/>
+        <location filename="../services/courses.cpp" line="259"/>
+        <location filename="../services/courses.cpp" line="276"/>
         <source>The notebook could not be made: %1</source>
         <translation>Das Notizbuch ließ sich nicht anlegen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="279"/>
+        <location filename="../services/courses.cpp" line="286"/>
         <source>The notebook could not be deleted: %1</source>
         <translation>Das Notizbuch ließ sich nicht löschen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="326"/>
-        <location filename="../services/courses.cpp" line="334"/>
+        <location filename="../services/courses.cpp" line="333"/>
+        <location filename="../services/courses.cpp" line="341"/>
         <source>The entry could not be saved: %1</source>
         <translation>Der Eintrag ließ sich nicht speichern: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="340"/>
+        <location filename="../services/courses.cpp" line="347"/>
         <source>The entry could not be deleted: %1</source>
         <translation>Der Eintrag ließ sich nicht löschen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="393"/>
+        <location filename="../services/courses.cpp" line="400"/>
         <source>The grade could not be saved: %1</source>
         <translation>Der Grad konnte nicht gespeichert werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="398"/>
+        <location filename="../services/courses.cpp" line="405"/>
         <source>The grade could not be deleted: %1</source>
         <translation>Der Grad konnte nicht gelöscht werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="480"/>
+        <location filename="../services/courses.cpp" line="487"/>
         <source>The exam could not be planned: %1</source>
         <translation>Die Prüfung konnte nicht vorgemerkt werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="538"/>
+        <location filename="../services/courses.cpp" line="553"/>
         <source>The notebook could not be exported: %1</source>
         <translation>Das Notizbuch konnte nicht exportiert werden: %1</translation>
     </message>
@@ -1298,47 +1341,47 @@
         <translation>Das Übungsprotokoll lässt sich nicht öffnen: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="65"/>
+        <location filename="../services/practice.cpp" line="78"/>
         <source>not rated</source>
         <translation>offen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="65"/>
+        <location filename="../services/practice.cpp" line="78"/>
         <source>seen</source>
         <translation>gesehen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="65"/>
+        <location filename="../services/practice.cpp" line="78"/>
         <source>with help</source>
         <translation>mit Hilfe</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="65"/>
+        <location filename="../services/practice.cpp" line="78"/>
         <source>sure</source>
         <translation>sicher</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="65"/>
+        <location filename="../services/practice.cpp" line="78"/>
         <source>exam-ready</source>
         <translation>prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="75"/>
+        <location filename="../services/practice.cpp" line="88"/>
         <source>The rating could not be saved: %1</source>
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="272"/>
+        <location filename="../services/practice.cpp" line="285"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="337"/>
+        <location filename="../services/practice.cpp" line="350"/>
         <source>Not every point of the exam round is rated.</source>
         <translation>Nicht jeder Punkt der Prüfungsrunde ist eingeschätzt.</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="358"/>
+        <location filename="../services/practice.cpp" line="371"/>
         <source>The exam round could not be saved: %1</source>
         <translation>Die Prüfungsrunde konnte nicht gespeichert werden: %1</translation>
     </message>
@@ -1516,34 +1559,159 @@
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="17"/>
+        <location filename="../qml/SettingsPage.qml" line="20"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="22"/>
+        <location filename="../qml/SettingsPage.qml" line="25"/>
         <source>Exam videos:</source>
         <translation>Prüfungsvideos:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="24"/>
+        <location filename="../qml/SettingsPage.qml" line="27"/>
         <source>Videos and DVD codes</source>
         <translation>Videos und DVD-Codes</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="30"/>
+        <location filename="../qml/SettingsPage.qml" line="33"/>
         <source>Video folder:</source>
         <translation>Videoordner:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="40"/>
+        <location filename="../qml/SettingsPage.qml" line="43"/>
         <source>Without a bundle: a folder with the videos, folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</source>
         <translation>Ohne Bundle: ein Ordner mit den Videos, Ordner und Namen wie auf den DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="41"/>
+        <location filename="../qml/SettingsPage.qml" line="44"/>
         <source>The Flatpak can read folders under ~/Videos only.</source>
         <translation>Das Flatpak liest nur Ordner unter ~/Videos.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="49"/>
+        <source>Backup</source>
+        <translation>Sicherung</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="53"/>
+        <source>Backup:</source>
+        <translation>Sicherung:</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="55"/>
+        <source>Save backup …</source>
+        <translation>Sicherung speichern …</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="64"/>
+        <source>Read backup …</source>
+        <translation>Sicherung einlesen …</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="72"/>
+        <source>One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back merges it: what is newer stays, nothing gets lost. DVD codes are not in it.</source>
+        <translation>Eine Datei mit Einschätzungen, Notizen, Prüfungsrunden, Notizbüchern, Graden, Fotos und Sprachnotizen. Beim Einlesen wird zusammengeführt: das Neuere bleibt, nichts geht verloren. DVD-Codes sind nicht enthalten.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="101"/>
+        <source>Save backup</source>
+        <translation>Sicherung speichern</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="104"/>
+        <location filename="../qml/SettingsPage.qml" line="114"/>
+        <source>ZIP archives (*.zip)</source>
+        <translation>ZIP-Archive (*.zip)</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="106"/>
+        <source>Backup saved.</source>
+        <translation>Sicherung gespeichert.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="112"/>
+        <source>Read backup</source>
+        <translation>Sicherung einlesen</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="129"/>
+        <source>Ratings</source>
+        <translation>Einschätzungen</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="129"/>
+        <source>Notes</source>
+        <translation>Notizen</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="129"/>
+        <source>Exam rounds</source>
+        <translation>Prüfungsrunden</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="130"/>
+        <source>Notebooks</source>
+        <translation>Notizbücher</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="130"/>
+        <source>Notebook entries</source>
+        <translation>Einträge in Notizbüchern</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="130"/>
+        <source>Grades</source>
+        <translation>Grade</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/SettingsPage.qml" line="136"/>
+        <source>%n new</source>
+        <translation>
+            <numerusform>%n neu</numerusform>
+            <numerusform>%n neu</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/SettingsPage.qml" line="139"/>
+        <source>%n changed</source>
+        <translation>
+            <numerusform>%n geändert</numerusform>
+            <numerusform>%n geändert</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/SettingsPage.qml" line="146"/>
+        <source>Photos and voice notes: %n new</source>
+        <translation>
+            <numerusform>Fotos und Sprachnotizen: %n neu</numerusform>
+            <numerusform>Fotos und Sprachnotizen: %n neu</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="148"/>
+        <source>Nothing new: this device has everything in the backup.</source>
+        <translation>Nichts Neues: dieses Gerät hat schon alles aus der Sicherung.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="159"/>
+        <source>Merge backup?</source>
+        <translation>Sicherung zusammenführen?</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="160"/>
+        <source>Merge</source>
+        <translation>Zusammenführen</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="163"/>
+        <source>Backup merged.</source>
+        <translation>Sicherung zusammengeführt.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="172"/>
+        <source>Backup of %1.</source>
+        <translation>Sicherung vom %1.</translation>
     </message>
 </context>
 <context>
@@ -2160,6 +2328,30 @@
         <location filename="../qml/VideosPage.qml" line="221"/>
         <source>Removing frees the space; the code stays saved, so the videos load again without it.</source>
         <translation>Entfernen gibt den Platz frei; der Code bleibt gespeichert, die Videos lassen sich ohne ihn neu laden.</translation>
+    </message>
+</context>
+<context>
+    <name>ZipReader</name>
+    <message>
+        <location filename="../store/zipreader.cpp" line="32"/>
+        <source>the archive is damaged</source>
+        <translation>das Archiv ist beschädigt</translation>
+    </message>
+    <message>
+        <location filename="../store/zipreader.cpp" line="50"/>
+        <location filename="../store/zipreader.cpp" line="62"/>
+        <source>this is no backup file</source>
+        <translation>das ist keine Sicherungsdatei</translation>
+    </message>
+    <message>
+        <location filename="../store/zipreader.cpp" line="99"/>
+        <source>%1 is missing</source>
+        <translation>%1 fehlt</translation>
+    </message>
+    <message>
+        <location filename="../store/zipreader.cpp" line="102"/>
+        <source>%1 is compressed</source>
+        <translation>%1 ist komprimiert</translation>
     </message>
 </context>
 <context>

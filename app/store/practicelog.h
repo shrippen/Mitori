@@ -5,6 +5,8 @@
 #include <QList>
 #include <QString>
 
+#include "tablemerge.h"
+
 // The practice log in SQLite: every rating of a technique as its own entry with a time stamp
 // and the device it came from, so that devices can later be merged entry by entry (sync) and
 // the history stays (statistics, "last rated"). Plain C++; QML reaches it through Practice.
@@ -91,6 +93,13 @@ public:
     // oldest first.
     SavedRound addRound(const ExamRound &round, const QList<Rating> &ratings);
     QList<ExamRound> rounds(const QString &discipline, int limit) const;
+
+    // The whole log as one new file (a backup), consistent while the app writes; false when it
+    // exists or could not be written.
+    bool snapshot(const QString &path);
+    // Merges another log (a backup, opened and migrated before): its ratings and exam rounds this
+    // one lacks, and its notes that are new or newer (TableMerge).
+    bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result);
 
     static constexpr int schemaVersion = 5;
 

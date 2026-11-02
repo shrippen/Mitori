@@ -7,6 +7,8 @@
 #include <QString>
 #include <QStringList>
 
+#include "tablemerge.h"
+
 // Course notebooks and the user's grades in SQLite (a file of their own next to the practice log):
 // a notebook per course with its entries, each with a time stamp and the device it came from, so that devices can later
 // be merged entry by entry (sync). Changes and deletions keep the uid and set `changed`; a deleted
@@ -103,6 +105,14 @@ public:
     bool deleteGrade(const QString &uid, const QDateTime &at);
     // Every passed grade that is not deleted, the latest day first.
     QList<Grade> grades() const;
+
+    // The whole book as one new file (a backup), consistent while the app writes; false when it
+    // exists or could not be written.
+    bool snapshot(const QString &path);
+    // Merges another book (a backup, opened and migrated before) row by row (TableMerge). Two
+    // notebooks of one calendar event become one (the older keeps the entries of both), two rows
+    // of one passed grade the newer.
+    bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result);
 
     static constexpr int schemaVersion = 3;
 

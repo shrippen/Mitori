@@ -134,6 +134,13 @@ void Courses::reload(Reload when)
     emit calendarChanged();
 }
 
+void Courses::refresh()
+{
+    ++m_revision;
+    emit changed();
+    emit calendarChanged();
+}
+
 // A calendar without events (an error page, an empty answer) does not replace the one on the
 // device.
 void Courses::received(QNetworkReply *reply)

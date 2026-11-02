@@ -436,3 +436,33 @@ QList<PracticeLog::ExamRound> PracticeLog::rounds(const QString &discipline, int
     }
     return result;
 }
+
+bool PracticeLog::snapshot(const QString &path)
+{
+    m_error.clear();
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("VACUUM INTO ?"));
+    q.addBindValue(path);
+    if (!q.exec()) {
+        m_error = q.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+bool PracticeLog::merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result)
+{
+    using namespace Qt::StringLiterals;
+    using TableMerge::Kind;
+    static const QList<TableMerge::Table> tables = {
+        {QStringLiteral("ratings"), {u"uid"_s, u"entry"_s, u"level"_s, u"at"_s, u"device"_s}, Kind::Log, {}},
+        {QStringLiteral("notes"),
+         {u"uid"_s, u"entry"_s, u"text"_s, u"created"_s, u"changed"_s, u"device"_s, u"deleted"_s, u"media"_s},
+         Kind::Editable, u"media"_s},
+        {QStringLiteral("exam_rounds"),
+         {u"uid"_s, u"at"_s, u"discipline"_s, u"grade"_s, u"count"_s, u"average"_s, u"device"_s}, Kind::Log, {}},
+    };
+    m_error.clear();
+    QSqlDatabase db = QSqlDatabase::database(m_connection);
+    return TableMerge::run(db, otherPath, tables, mode, result, &m_error);
+}
