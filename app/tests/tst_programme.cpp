@@ -113,6 +113,9 @@ private slots:
         QVERIFY(!programme.search(QStringLiteral("sannin")).isEmpty());
         QVERIFY(!programme.search(QStringLiteral("rechterfuss")).isEmpty());
         QVERIFY(!programme.search(QStringLiteral("片手取り合半身")).isEmpty());
+        // Separators: emoji and dashes as spaces, ´ as an apostrophe, a decimal point stays.
+        QCOMPARE(searchKey(QStringLiteral("Kote gaeshi🙂―gut")), QStringLiteral("kote gaeshi gut"));
+        QCOMPARE(searchKey(QStringLiteral("San´nin ⸺ 3,5 Min. am 12.03.")), QStringLiteral("sannin 3,5 min am 12.03"));
         // Kana keep their dakuten: が is not か.
         QCOMPARE(searchKey(QStringLiteral("ガ")), QStringLiteral("ガ"));
         // Full-width Latin from a Japanese keyboard folds.

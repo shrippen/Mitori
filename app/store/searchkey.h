@@ -6,33 +6,48 @@
 
 #include <algorithm>
 
-inline bool isDash(QChar c)
+inline bool isDash(char32_t c)
 {
     return c == u'-' || c == u'‐' || c == u'‑' || c == u'‒' || c == u'–' || c == u'—' || c == u'―' || c == u'⸺' || c == u'−';
 }
 
+inline bool isApostrophe(char32_t c)
+{
+    return c == u'\'' || c == u'’' || c == u'‘' || c == u'ʼ' || c == u'ʻ' || c == u'´' || c == u'`';
+}
+
 // The form search compares: lower case, without accents (Ô-dachi finds o dachi, größer finds
 // grosser; kana keep their dakuten), full-width letters folded, apostrophes and invisible
-// characters (soft hyphen) left out (San'nin as sannin), dashes, other punctuation and symbols
-// as spaces ("(Shiho-nage)," starts and ends words), spaces simplified. `keepHyphens` writes
-// dashes as "-" instead.
+// characters (soft hyphen) left out (San'nin as sannin), dashes, other punctuation, symbols and
+// emoji as spaces ("(Shiho-nage)," starts and ends words) except a point or comma between digits
+// (3,5), spaces simplified. `keepHyphens` writes dashes as "-" instead. By code point, so that an
+// emoji beyond the BMP counts as a symbol.
 inline QString searchKey(const QString &text, bool keepHyphens = false)
 {
+    // Apostrophes go before the decomposition, which makes ´ a space and an accent.
+    QString plain = text;
+    plain.removeIf([](QChar c) { return isApostrophe(c.unicode()); });
+    const QList<uint> points = plain.normalized(QString::NormalizationForm_KD).toUcs4();
+    const auto digit = [&points](qsizetype i) {
+        return i >= 0 && i < points.size() && QChar::isDigit(char32_t(points[i]));
+    };
     QString key;
-    for (const QChar c : text.normalized(QString::NormalizationForm_KD)) {
-        if (c.unicode() >= 0x0300 && c.unicode() <= 0x036F) {
-            continue;   // combining accents of Latin letters
+    for (qsizetype i = 0; i < points.size(); ++i) {
+        const char32_t c = points[i];
+        if ((c >= 0x0300 && c <= 0x036F) || QChar::category(c) == QChar::Other_Format) {
+            continue;   // combining accents of Latin letters, invisible characters
         }
-        if (c == u'\'' || c == u'’' || c == u'‘' || c == u'ʼ' || c.category() == QChar::Other_Format) {
-            continue;
-        }
-        const QChar lower = c.toLower();
+        const char32_t lower = QChar::toLower(c);
         if (lower == u'ß') {
             key += QStringLiteral("ss");
         } else if (isDash(c)) {
             key += keepHyphens ? QChar(u'-') : QChar(u' ');
+        } else if ((c == u'.' || c == u',') && digit(i - 1) && digit(i + 1)) {
+            key += QChar(c);
+        } else if (QChar::isPunct(c) || QChar::isSymbol(c)) {
+            key += QChar(u' ');
         } else {
-            key += (c.isPunct() || c.isSymbol()) ? QChar(u' ') : lower;
+            key += QString::fromUcs4(&lower, 1);
         }
     }
     return key.simplified().normalized(QString::NormalizationForm_C);   // kana with dakuten as one

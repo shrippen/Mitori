@@ -310,6 +310,9 @@ private slots:
         QCOMPARE(practice.searchNotes(QStringLiteral("shihonage")).size(), 2);   // with "e"
         QCOMPARE(practice.searchNotes(QStringLiteral("iriminage")).size(), 1);
         QCOMPARE(practice.searchNotes(QStringLiteral("kotegaeshi")).size(), 1);
+        // An emoji ends a word like any symbol, also outside the BMP.
+        practice.addNote(QStringLiteral("j"), QStringLiteral("Sumi otoshi👍🏽 endlich"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("sumiotoshi")).size(), 1);
         // A soft hyphen is invisible.
         practice.addNote(QStringLiteral("i"), QStringLiteral("Mit\u00ADte halten"));
         QCOMPARE(practice.searchNotes(QStringLiteral("mitte")).size(), 1);
