@@ -30,9 +30,12 @@ QList<Due> due(const QList<Candidate> &candidates, const QHash<QString, Practice
         const int level = it->level;
         const int days = int(it->at.toLocalTime().date().daysTo(today));
         if (days == 0) {
-            // Practised today: it takes a place of the day's new or rated ones.
+            // Practised today: it takes a place of the day's new ones (new in the current grade)
+            // or rated ones.
             if (firstRated.value(c.id) == today) {
-                --maxNew;
+                if (c.currentGrade) {
+                    --maxNew;
+                }
             } else {
                 --maxRated;
             }

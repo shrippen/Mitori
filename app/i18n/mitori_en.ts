@@ -30,5 +30,13 @@
             <numerusform>not practised for %n days</numerusform>
         </translation>
     </message>
+    <message numerus="yes">
+        <location filename="../qml/TodayPage.qml" line="99"/>
+        <source>%n of %1 with a video come(s) into the training; practise the others from the list below.</source>
+        <translation>
+            <numerusform>%n of %1 has a video and comes into the training; practise the others from the list below.</numerusform>
+            <numerusform>%n of %1 have a video and come into the training; practise the others from the list below.</numerusform>
+        </translation>
+    </message>
 </context>
 </TS>

@@ -203,6 +203,24 @@ private slots:
         practice.setIntervals({2, 4, 14, 35});
     }
 
+    // After a restart the log still knows what was new today (firstRated from the database).
+    void newTodayAfterRestart()
+    {
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("mitori.sqlite"));
+        const QVariantList candidates{
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("a")}, {QStringLiteral("current"), true}},
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("b")}, {QStringLiteral("current"), true}},
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("c")}, {QStringLiteral("current"), true}}};
+        {
+            Practice practice(path);
+            practice.rate(QStringLiteral("a"), 1);
+            practice.rate(QStringLiteral("b"), 2);
+        }
+        Practice again(path);
+        QVERIFY(again.due(candidates).isEmpty());
+    }
+
     void deviceIdStays()
     {
         const QString id = Practice::deviceId();

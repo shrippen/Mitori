@@ -397,10 +397,13 @@
         <source>None of them has a video on this device: practise them from the list below.</source>
         <translation>Keine davon hat ein Video auf diesem Gerät: übe sie mit der Liste unten.</translation>
     </message>
-    <message>
+    <message numerus="yes">
         <location filename="../qml/TodayPage.qml" line="99"/>
-        <source>%1 of %2 have a video and come into the training; practise the others from the list below.</source>
-        <translation>%1 von %2 haben ein Video und kommen ins Training; übe die anderen mit der Liste unten.</translation>
+        <source>%n of %1 with a video come(s) into the training; practise the others from the list below.</source>
+        <translation>
+            <numerusform>%n von %1 hat ein Video und kommt ins Training; übe die anderen mit der Liste unten.</numerusform>
+            <numerusform>%n von %1 haben ein Video und kommen ins Training; übe die anderen mit der Liste unten.</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../qml/TodayPage.qml" line="107"/>

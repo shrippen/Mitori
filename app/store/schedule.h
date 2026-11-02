@@ -29,7 +29,8 @@ QList<int> defaultIntervals();
 // Due candidates in order: rated ones by urgency (lower level and longer ago first), then new
 // ones of the current grade in programme order. A day holds at most `maxRated` rated and `maxNew`
 // new techniques, and what was practised today counts: a candidate rated today for the first
-// time (`firstRated`, the local day of its first rating) was a new one, else a rated one.
+// time (`firstRated`, the local day of its first rating) was a new one if it is of the current
+// grade, else one rated before takes one of the rated places.
 QList<Due> due(const QList<Candidate> &candidates, const QHash<QString, PracticeLog::Rating> &latest,
                const QHash<QString, QDate> &firstRated, const QDate &today, const QList<int> &intervals,
                int maxRated = 8, int maxNew = 2);

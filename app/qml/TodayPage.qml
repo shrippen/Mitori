@@ -96,8 +96,8 @@ Kirigami.ScrollablePage {
             visible: page.due.length > 0 && page.playable.length < page.due.length
             text: page.playable.length === 0
                   ? qsTr("None of them has a video on this device: practise them from the list below.")
-                  : qsTr("%1 of %2 have a video and come into the training; practise the others from the list below.")
-                        .arg(page.playable.length).arg(page.due.length)
+                  : qsTr("%n of %1 with a video come(s) into the training; practise the others from the list below.", "", page.playable.length)
+                        .arg(page.due.length)
             color: KanteStyle.mutedTextColor
             wrapMode: Text.Wrap
         }

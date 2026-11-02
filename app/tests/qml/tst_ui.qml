@@ -367,11 +367,15 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem.training === true)
         const player = window.pageStack.currentItem
         compare(player.index, 0)
-        findPicker(player, player.current.id).picked(3)
-        compare(player.index, 1, "rating moves on")
-        player.go(-1)                                   // back to the practised first one
+        // Skip the first with "next", rate the second: the training goes back to the skipped one.
         player.go(1)
         compare(player.index, 1)
+        findPicker(player, player.current.id).picked(3)
+        compare(player.index, 0, "back to the open one that was skipped")
+        findPicker(player, player.current.id).picked(2)
+        if (player.playlist.length > 2) {
+            compare(player.index, 2, "rating moves on")
+        }
         // The last one (and every one before it) practised: done, with a way back.
         for (let i = 1; i < player.playlist.length; ++i) {
             player.index = i

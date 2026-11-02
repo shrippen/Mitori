@@ -95,6 +95,12 @@ private slots:
             old << Candidate{id, false};
         }
         QCOMPARE(Schedule::due(old, latest, first, today, Schedule::defaultIntervals()).size(), 3);
+
+        // New today but of an earlier grade: no place of the current grade's new ones.
+        const QList<Candidate> mixed{{QStringLiteral("a"), false}, {QStringLiteral("b"), false},
+                                     {QStringLiteral("c"), true}, {QStringLiteral("d"), true}};
+        QCOMPARE(ids(Schedule::due(mixed, latest, first, today, Schedule::defaultIntervals())),
+                 (QStringList{QStringLiteral("c"), QStringLiteral("d")}));
     }
 
     void ownIntervals()
