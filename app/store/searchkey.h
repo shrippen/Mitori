@@ -34,8 +34,16 @@ inline QString searchKey(const QString &text, bool keepHyphens = false)
     QString key;
     for (qsizetype i = 0; i < points.size(); ++i) {
         const char32_t c = points[i];
-        if ((c >= 0x0300 && c <= 0x036F) || QChar::category(c) == QChar::Other_Format) {
-            continue;   // combining accents of Latin letters, invisible characters
+        const QChar::Category category = QChar::category(c);
+        // Combining marks (accents, variation selectors of emoji) and invisible characters go;
+        // the kana voicing marks stay (NFC joins them again: が).
+        if ((category == QChar::Mark_NonSpacing && c != 0x3099 && c != 0x309A) || category == QChar::Other_Format
+                || isApostrophe(c)) {
+            continue;
+        }
+        if (category == QChar::Mark_Enclosing) {
+            key += QChar(u' ');     // a keycap: 1️⃣ is a symbol
+            continue;
         }
         const char32_t lower = QChar::toLower(c);
         if (lower == u'ß') {
@@ -65,15 +73,18 @@ inline QStringList searchWords(const QString &query)
     return words;
 }
 
-inline bool isKanji(QChar c)
+// By code point: a kanji beyond the BMP (𠮟) is two UTF-16 units.
+inline bool hasKanji(const QString &text)
 {
-    return c.script() == QChar::Script_Han;
+    const QList<uint> points = text.toUcs4();
+    return std::any_of(points.cbegin(), points.cend(), [](uint c) { return QChar::script(char32_t(c)) == QChar::Script_Han; });
 }
 
-inline QString withoutHiragana(QString text)
+inline QString withoutHiragana(const QString &text)
 {
-    text.removeIf([](QChar c) { return c.script() == QChar::Script_Hiragana; });
-    return text;
+    QList<uint> points = text.toUcs4();
+    points.removeIf([](uint c) { return QChar::script(char32_t(c)) == QChar::Script_Hiragana; });
+    return QString::fromUcs4(reinterpret_cast<const char32_t *>(points.constData()), points.size());
 }
 
 // A text to search (a technique's fields, a note): whether every word of a query occurs in it.
@@ -141,7 +152,7 @@ private:
                 }
             }
         }
-        if (!std::any_of(w.cbegin(), w.cend(), isKanji)) {
+        if (!hasKanji(w)) {
             return false;
         }
         if (m_kanji.isNull()) {

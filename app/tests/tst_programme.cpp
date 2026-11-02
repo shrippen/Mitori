@@ -116,6 +116,12 @@ private slots:
         // Separators: emoji and dashes as spaces, ´ as an apostrophe, a decimal point stays.
         QCOMPARE(searchKey(QStringLiteral("Kote gaeshi🙂―gut")), QStringLiteral("kote gaeshi gut"));
         QCOMPARE(searchKey(QStringLiteral("San´nin ⸺ 3,5 Min. am 12.03.")), QStringLiteral("sannin 3,5 min am 12.03"));
+        // Variation selectors of emoji vanish and a keycap separates, so the emoji still ends a word;
+        // a full-width apostrophe is an apostrophe.
+        QCOMPARE(searchKey(QStringLiteral("❤️Sumi otoshi 1️⃣Kote")), QStringLiteral("sumi otoshi 1 kote"));
+        QCOMPARE(searchKey(QStringLiteral("San＇nin")), QStringLiteral("sannin"));
+        // Okurigana also go beside a kanji beyond the BMP.
+        QVERIFY(SearchText(QStringLiteral("𠮟り方")).matches(searchWords(QStringLiteral("𠮟る方"))));
         // Kana keep their dakuten: が is not か.
         QCOMPARE(searchKey(QStringLiteral("ガ")), QStringLiteral("ガ"));
         // Full-width Latin from a Japanese keyboard folds.
