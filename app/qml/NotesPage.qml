@@ -19,6 +19,8 @@ Kirigami.ScrollablePage {
     background: Rectangle { color: KanteStyle.backgroundColor }
 
     required property var entry
+    // Opened from "All notes": its action goes back there instead of stacking another list.
+    property bool fromAllNotes: false
     readonly property var notes: Practice.notesRevision >= 0 ? Practice.notes(entry.id) : []
     // [{day: Date, notes: [...]}], newest day first; within a day in the order written.
     readonly property var days: {
@@ -36,6 +38,15 @@ Kirigami.ScrollablePage {
     }
 
     title: qsTr("Notes")
+
+    actions: [
+        Kirigami.Action {
+            icon.name: "view-list-details"
+            text: qsTr("All notes")
+            onTriggered: page.fromAllNotes ? page.Kirigami.PageStack.pop()
+                                           : page.Kirigami.PageStack.push(Qt.resolvedUrl("AllNotesPage.qml"))
+        }
+    ]
 
     // Practice.today only makes the names follow a new day: as a QDate it reaches JS as
     // midnight UTC, the day before west of UTC.

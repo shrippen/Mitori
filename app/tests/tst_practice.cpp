@@ -348,6 +348,28 @@ private slots:
         QVERIFY(practice.searchNotes(QStringLiteral(" ")).isEmpty());
     }
 
+    // All notes, newest first, each with its technique; deleted ones left out.
+    void allNotes()
+    {
+        QTemporaryDir dir;
+        Practice practice(dir.filePath(QStringLiteral("mitori.sqlite")));
+        QVERIFY(practice.allNotes().isEmpty());
+        practice.addNote(QStringLiteral("a"), QStringLiteral("erste"));
+        QTest::qWait(5);
+        practice.addNote(QStringLiteral("b"), QStringLiteral("zweite"));
+        QTest::qWait(5);
+        practice.addNote(QStringLiteral("a"), QStringLiteral("dritte"));
+        QVariantList all = practice.allNotes();
+        QCOMPARE(all.size(), 3);
+        QCOMPARE(all.first().toMap().value(QStringLiteral("text")).toString(), QStringLiteral("dritte"));
+        QCOMPARE(all.first().toMap().value(QStringLiteral("entry")).toString(), QStringLiteral("a"));
+        QCOMPARE(all.last().toMap().value(QStringLiteral("text")).toString(), QStringLiteral("erste"));
+        practice.deleteNote(all.at(1).toMap().value(QStringLiteral("uid")).toString());
+        all = practice.allNotes();
+        QCOMPARE(all.size(), 2);
+        QVERIFY(all.first().toMap().value(QStringLiteral("created")).toDateTime().isValid());
+    }
+
     void deviceIdStays()
     {
         const QString id = Practice::deviceId();

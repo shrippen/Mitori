@@ -63,6 +63,8 @@ public:
     Q_INVOKABLE QVariantList notes(const QString &entry) const;
     // The newest note of an entry ({uid, text, created, changed}), or an empty map.
     Q_INVOKABLE QVariantMap lastNote(const QString &entry) const;
+    // Every note ({uid, entry, text, created, changed}), newest first.
+    Q_INVOKABLE QVariantList allNotes() const;
     // Notes containing every word of `query` (case and accents do not matter), newest first:
     // {uid, entry, text, created, changed}.
     Q_INVOKABLE QVariantList searchNotes(const QString &query, int limit = 50) const;

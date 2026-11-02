@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
@@ -494,6 +495,196 @@ TestCase {
         tryVerify(() => sheet.opened, 2000)
         sheet.close()
         tryVerify(() => !sheet.opened)
+        window.pageStack.pop()
+    }
+
+    // All notes: every technique's notes by day, a filter per discipline; a tap opens the
+    // technique's notes, press and hold the editor.
+    function test_8d_all_notes() {
+        failOnWarning(/ReferenceError|TypeError/)
+        const daito = Programme.entries("daitoryu", Programme.grades("daitoryu")[0].id).find(r => r.kind === "entry")
+        Practice.addNote(daito.id, "Daitoryu: Hüfte zuerst")
+        Practice.addNote("not-in-the-programme", "verwaist")
+        const page = push("AllNotesPage")
+        const total = page.all.length
+        verify(total >= 2)
+        compare(page.all[0].text, "verwaist", "newest first")
+        verify(page.shown.filter(n => n.day === page.shown[0].day).length >= 2, "both today")
+        wait(500)       // Kirigami slides the page in
+        mouseClick(findChild(page, "filter_daitoryu"))
+        tryVerify(() => page.filter === "daitoryu")
+        verify(page.shown.length >= 1 && page.shown.every(n => n.technique.discipline === "daitoryu"))
+        verify(page.shown.length < total, "the orphan and other disciplines left out")
+        shot("8d-all-notes")
+        const note = findChild(page, "note")
+        mouseClick(note, 20, note.height - 10)
+        tryVerify(() => window.pageStack.currentItem !== page, 2000)
+        compare(window.pageStack.currentItem.entry.id, daito.id)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        mousePress(note, 20, note.height - 10)
+        wait(1000)
+        mouseRelease(note, 20, note.height - 10)
+        const editor = findChild(page, "noteEditor")
+        tryVerify(() => editor.opened, 2000, "press and hold opens the editor")
+        editor.close()
+        tryVerify(() => !editor.opened)
+        // Many notes: a virtual list builds delegates for the visible ones only.
+        page.filter = ""
+        wait(50)        // another filter goes to the top a moment later
+        const many = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        for (let i = 0; i < 60; i++)
+            Practice.addNote(many[i % many.length].id, "Übung " + i)
+        const list = findChild(page, "notesList")
+        tryVerify(() => list.count >= 60)
+        verify(findChildren(list.contentItem, "note").length < list.count / 2, "only the visible delegates")
+        // A change further down keeps the place in the list.
+        list.positionViewAtIndex(40, ListView.Beginning)
+        wait(50)
+        const top = page.shown[list.indexAt(10, list.contentY + 10)].uid
+        Practice.changeNote(page.shown[42].uid, "geändert")
+        tryVerify(() => page.shown[42].text === "geändert")
+        wait(50)
+        compare(page.shown[list.indexAt(10, list.contentY + 10)].uid, top, "same note at the top")
+        // Also with the gap between two notes at the top, and when the top note is deleted.
+        const y = list.contentY
+        list.contentY = y - list.spacing / 2
+        wait(50)
+        verify(list.indexAt(10, list.contentY) < 0, "a gap at the very top")
+        Practice.changeNote(page.shown[44].uid, "noch einmal")
+        wait(50)
+        compare(page.shown[list.indexAt(10, list.contentY + 10)].uid, top, "same note after a gap at the top")
+        const next = page.shown[41].uid
+        Practice.deleteNote(top)
+        tryVerify(() => !page.shown.some(n => n.uid === top))
+        wait(50)
+        compare(page.shown[list.indexAt(10, list.contentY + list.spacing + 10)].uid, next, "the next note moves up")
+        // Tab: through the filter to the list, on a note in view (not the first one far above).
+        mouseClick(findChild(page, "filter_all"))
+        const chips = Programme.disciplines.length + 1
+        for (let i = 0; i <= chips + 2 && !list.activeFocus; i++)       // Back first if the page has the focus
+            keyClick(Qt.Key_Tab)
+        verify(list.activeFocus, "Tab reaches the list after the filter")
+        keyClick(Qt.Key_Backtab)
+        compare(window.activeFocusItem, findChild(page, "filter_" + Programme.disciplines[chips - 2].id), "Shift+Tab goes back to the filter")
+        keyClick(Qt.Key_Tab)
+        verify(list.activeFocus)
+        // A whole round of Tab: the toolbar (Back), every chip and the list, each once.
+        const round = []
+        for (let i = 0; i < 30; i++) {
+            keyClick(Qt.Key_Tab)
+            if (list.activeFocus)
+                break
+            round.push(String(window.activeFocusItem))
+        }
+        verify(list.activeFocus, "back at the list: " + round.join(" > "))
+        verify(round.some(t => t.indexOf("NavButton") >= 0), "Tab reaches Back: " + round.join(" > "))
+        compare(round.filter(t => t.indexOf("filter_") >= 0).length, chips, round.join(" > "))
+        const cur = list.itemAtIndex(list.currentIndex)
+        verify(cur && cur.y + cur.height > list.contentY && cur.y < list.contentY + list.height,
+               "the current note is in view (" + list.currentIndex + ")")
+        // Changed with the keyboard: the focus and the note stay.
+        const at = list.currentIndex
+        keyClick(Qt.Key_Menu)
+        tryVerify(() => editor.opened, 2000)
+        Practice.changeNote(page.shown[at].uid, "mit der Tastatur")
+        editor.close()
+        tryVerify(() => !editor.opened)
+        tryVerify(() => list.activeFocus, 1000, "the list has the focus again")
+        compare(list.currentIndex, at)
+        // Page Down, End and Home move through the list.
+        keyClick(Qt.Key_PageDown)
+        verify(list.currentIndex > at + 1, "Page Down: " + list.currentIndex)
+        keyClick(Qt.Key_End)
+        compare(list.currentIndex, list.count - 1)
+        keyClick(Qt.Key_Home)
+        compare(list.currentIndex, 0)
+        tryVerify(() => list.atYBeginning, 1000, "Home shows the count above the first note")
+        // A new note while the current one is out of view: the view stays where it is.
+        list.positionViewAtIndex(30, ListView.Beginning)
+        wait(50)
+        const shownTop = page.shown[list.indexAt(10, list.contentY + 10)].uid
+        Practice.addNote(many[0].id, "ganz neu")
+        tryVerify(() => page.shown[0].text === "ganz neu")
+        wait(50)
+        compare(page.shown[list.indexAt(10, list.contentY + 10)].uid, shownTop, "no jump to the current note")
+        // Scrolled, the notes stay below the filter (the list is clipped).
+        const chip = findChild(page, "filter_all")
+        list.positionViewAtBeginning()
+        wait(50)
+        const area = chip.mapToItem(window.contentItem, 0, 0)
+        const clean = grabImage(window.contentItem)
+        list.contentY = list.originY + 150
+        wait(50)
+        const scrolled = grabImage(window.contentItem)
+        let covered = 0
+        for (let x = area.x + 1; x < area.x + chip.width - 1; x += 3)
+            for (let y = area.y + 1; y < area.y + chip.height - 1; y += 3)
+                if (String(clean.pixel(x, y)) !== String(scrolled.pixel(x, y)))
+                    covered++
+        compare(covered, 0, "the filter is not covered by the scrolled list")
+        // The filter in line with the notes.
+        compare(findChild(page, "filter").rightPadding, findChild(page, "notesView").rightPadding)
+        // End again after scrolling away: the last note comes back into view.
+        list.forceActiveFocus()
+        keyClick(Qt.Key_End)
+        tryVerify(() => list.atYEnd, 1000)
+        list.positionViewAtBeginning()
+        wait(50)
+        keyClick(Qt.Key_End)
+        tryVerify(() => list.atYEnd, 1000, "End shows the last note again")
+        // The scroll bar at the window's edge, not over the notes.
+        const bar = list.parent.QQC2.ScrollBar.vertical
+        if (bar) {
+            const note = findChild(list.contentItem, "note")
+            verify(note.mapToItem(page, note.width, 0).x <= bar.mapToItem(page, 0, 0).x + 1,
+                   "note " + note.mapToItem(page, note.width, 0).x + ", bar " + bar.mapToItem(page, 0, 0).x)
+        }
+        // The keyboard reaches every note: Down moves through the list, which follows; Enter opens.
+        list.positionViewAtBeginning()
+        list.forceActiveFocus()
+        list.currentIndex = 0
+        for (let i = 0; i < 30; i++)
+            keyClick(Qt.Key_Down)
+        compare(list.currentIndex, 30)
+        verify(list.contentY > 200, "the list follows the keyboard (" + list.contentY + ")")
+        const target = page.shown[30].technique.id
+        keyClick(Qt.Key_Return)
+        tryVerify(() => window.pageStack.currentItem !== page, 2000)
+        compare(window.pageStack.currentItem.entry.id, target)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        // Another filter starts at the top.
+        list.positionViewAtEnd()
+        page.filter = "aikido"
+        tryVerify(() => list.atYBeginning, 1000, "another filter starts at the top")
+        page.filter = ""
+        // A remembered discipline that no longer exists falls back to all.
+        page.filter = "kendo"
+        tryCompare(page, "filter", "")
+        // An empty filter says so (a discipline without notes, if one is left).
+        const empty = Programme.disciplines.find(d => !page.all.some(n => n.technique.discipline === d.id))
+        if (empty) {
+            page.filter = empty.id
+            compare(findChild(page, "count").text, qsTr("No notes in this discipline."))
+            page.filter = ""
+        }
+        // The orphan is named as such.
+        const orphan = page.all.find(n => n.entry === "not-in-the-programme")
+        compare(page.techniqueName(orphan.technique), qsTr("Technique no longer in the programme"))
+        // Notes → All notes → Notes → All notes does not pile up: the action goes back.
+        const depth = window.pageStack.depth
+        page.open(page.shown.find(n => n.technique.title))
+        tryVerify(() => window.pageStack.depth === depth + 1)
+        window.pageStack.currentItem.actions[0].trigger()
+        tryVerify(() => window.pageStack.depth === depth, 2000, "back to the list instead of a new one")
+        compare(window.pageStack.currentItem, page)
+        // The filter is kept for the next time.
+        page.filter = "daitoryu"
+        window.pageStack.pop()
+        const again = push("AllNotesPage")
+        compare(again.filter, "daitoryu")
+        again.filter = ""
         window.pageStack.pop()
     }
 

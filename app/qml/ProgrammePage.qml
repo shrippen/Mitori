@@ -37,6 +37,14 @@ Kirigami.Page {
 
     title: qsTr("Programme")
 
+    actions: [
+        Kirigami.Action {
+            icon.name: "view-list-details"
+            text: qsTr("All notes")
+            onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("AllNotesPage.qml"))
+        }
+    ]
+
     header: ColumnLayout {
         spacing: Kirigami.Units.smallSpacing
 
