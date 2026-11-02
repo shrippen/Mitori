@@ -45,8 +45,8 @@
 <context>
     <name>StatsPage</name>
     <message numerus="yes">
-        <location filename="../qml/StatsPage.qml" line="46"/>
-        <location filename="../qml/StatsPage.qml" line="116"/>
+        <location filename="../qml/StatsPage.qml" line="48"/>
+        <location filename="../qml/StatsPage.qml" line="118"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>

@@ -23,6 +23,23 @@ Kirigami.ScrollablePage {
     // The level per point, 0 = not yet rated.
     property var levels: points.map(() => 0)
     readonly property bool complete: levels.length > 0 && levels.every(l => l > 0)
+    readonly property bool started: levels.some(l => l > 0)
+
+    // Back (button, Android, Alt+Left) after a rating asks first: it drops the round. Qt 6.12
+    // hands `event` over as a copy, so Kirigami's goBack() never sees `accepted` and steps back
+    // anyway: the page takes the stack back right after it (the same event, before a frame).
+    onBackRequested: event => {
+        if (!page.started) {
+            return
+        }
+        event.accepted = true
+        const stack = (page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow).pageStack
+        const index = page.Kirigami.ColumnView.index
+        Qt.callLater(() => {
+            stack.currentIndex = index
+            discardDialog.open()
+        })
+    }
 
     title: qsTr("How did it go?")
 
@@ -51,6 +68,30 @@ Kirigami.ScrollablePage {
         const stack = window.pageStack
         stack.pop(stack.items[0])
         stack.push(Qt.resolvedUrl("StatsPage.qml"), { discipline: page.discipline })
+    }
+
+    KanteDialog {
+        id: discardDialog
+
+        objectName: "discardDialog"
+        parent: QQC2.Overlay.overlay
+        anchors.centerIn: parent
+        modal: true
+        size: KanteDialog.Size.Small
+        destructive: true
+        title: qsTr("Discard the round?")
+        standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
+        acceptText: qsTr("Discard")
+        contentHeight: discardText.implicitHeight
+        onAccepted: page.Kirigami.PageStack.pop()
+
+        QQC2.Label {
+            id: discardText
+
+            width: parent.width
+            wrapMode: Text.Wrap
+            text: qsTr("Your ratings of this round are not kept.")
+        }
     }
 
     ColumnLayout {

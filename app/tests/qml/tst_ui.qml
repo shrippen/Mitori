@@ -801,6 +801,12 @@ TestCase {
         stats.discipline = "daitoryu"
         verify(!chart.visible)
         verify(findChild(stats, "examRoundsText").text.length > 0)
+        // A round with average 1 (all "seen") still shows a bar; the read-out says 1.
+        verify(Practice.saveRound("daitoryu", "k5", [{ ids: ["exam-test-entry"], level: 1 }]))
+        verify(chart.visible)
+        compare(chart.values.length, 1)
+        verify(chart.values[0] > 0, "a bar at average 1")
+        compare(chart.format(chart.values[0]), "1")
         stats.discipline = "aikido"
         window.pageStack.pop()
 
@@ -850,6 +856,56 @@ TestCase {
         shot("12c-exam-round-tablet")
         round.actions[0].trigger()
         tryVerify(() => window.pageStack.currentItem === page)
+        window.pageStack.pop()
+    }
+
+    // Back from the rating asks once something is rated; without a rating it just goes back.
+    function test_9g_exam_discard() {
+        failOnWarning(/ReferenceError|TypeError/)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        Exam.count = 8
+        Exam.samples = false
+        const settings = push("ExamPage")
+        const depth = window.pageStack.depth
+        settings.start()
+        tryVerify(() => window.pageStack.currentItem.points !== undefined && window.pageStack.currentItem !== settings)
+        const round = window.pageStack.currentItem
+        round.index = round.points.length - 1
+        round.next()
+        tryVerify(() => window.pageStack.currentItem.levels !== undefined)
+        let end = window.pageStack.currentItem
+        const dialog = findChild(end, "discardDialog")
+        verify(dialog)
+
+        // Nothing rated: straight back.
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem === settings)
+        verify(!dialog.opened)
+
+        // Rated: the dialog asks, Cancel stays, Discard goes back without saving.
+        settings.start()
+        tryVerify(() => window.pageStack.currentItem.points !== undefined && window.pageStack.currentItem !== settings)
+        window.pageStack.currentItem.index = window.pageStack.currentItem.points.length - 1
+        window.pageStack.currentItem.next()
+        tryVerify(() => window.pageStack.currentItem.levels !== undefined)
+        end = window.pageStack.currentItem
+        const asked = findChild(end, "discardDialog")
+        const before = Practice.rounds("aikido", 8).length
+        end.rate(0, 4)
+        window.pageStack.goBack()
+        tryVerify(() => asked.opened)
+        verify(window.pageStack.currentItem === end, "still rating")
+        shot("13b-exam-discard", true)
+        asked.reject()
+        tryVerify(() => !asked.opened)
+        verify(window.pageStack.currentItem === end, "still rating")
+        window.pageStack.goBack()
+        tryVerify(() => asked.opened)
+        asked.accept()
+        tryVerify(() => window.pageStack.currentItem === settings)
+        compare(window.pageStack.depth, depth)
+        compare(Practice.rounds("aikido", 8).length, before)
         window.pageStack.pop()
     }
 

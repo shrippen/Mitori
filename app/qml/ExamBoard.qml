@@ -17,10 +17,11 @@ ColumnLayout {
 
     readonly property real base: KanteStyle.defaultFont.pointSize > 0 ? KanteStyle.defaultFont.pointSize : 10
     readonly property bool hasAttack: !techniqueOnly && !!point.attack
-
-    function bigFont(factor) {
-        return Qt.font({ family: KanteStyle.defaultFont.family, pointSize: board.base * factor * board.zoom, bold: true })
-    }
+    // Kante's heading font in the sizes Kante itself uses: the technique as large as a KanteKpi
+    // figure, the attack and the Japanese as a KantePageTitle.
+    readonly property font techniqueFont: KanteStyle.headingFont(base * 2.6 * zoom)
+    readonly property font attackFont: KanteStyle.headingFont(base * 1.35 * zoom)
+    readonly property font kanjiFont: KanteStyle.japaneseFont(KanteStyle.titleFont(base * 1.35 * zoom))
 
     spacing: KanteStyle.unit(10) * zoom
 
@@ -59,7 +60,7 @@ ColumnLayout {
                 objectName: "boardAttack"
                 Layout.fillWidth: true
                 text: board.point.attack || ""
-                font: board.bigFont(1.7)
+                font: board.attackFont
                 wrapMode: Text.Wrap
             }
             QQC2.Label {
@@ -74,7 +75,7 @@ ColumnLayout {
                 visible: !!board.point.attackJp
                 text: board.point.attackJp || ""
                 color: KanteStyle.mutedTextColor
-                font: KanteStyle.japaneseFont(Qt.font({ pointSize: board.base * 1.2 * board.zoom }))
+                font: board.kanjiFont
                 wrapMode: Text.Wrap
             }
         }
@@ -98,7 +99,7 @@ ColumnLayout {
                 objectName: "boardTechnique"
                 Layout.fillWidth: true
                 text: (board.point.nr ? board.point.nr + " · " : "") + (board.point.title || "")
-                font: board.bigFont(2.4)
+                font: board.techniqueFont
                 wrapMode: Text.Wrap
             }
             QQC2.Label {
@@ -115,7 +116,7 @@ ColumnLayout {
                 visible: !!board.point.jp
                 text: board.point.jp || ""
                 color: KanteStyle.mutedTextColor
-                font: KanteStyle.japaneseFont(Qt.font({ pointSize: board.base * 1.5 * board.zoom }))
+                font: board.kanjiFont
                 wrapMode: Text.Wrap
             }
         }

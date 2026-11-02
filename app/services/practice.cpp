@@ -314,26 +314,25 @@ bool Practice::saveRound(const QString &discipline, const QString &grade, const 
     if (!m_open || results.isEmpty()) {
         return false;
     }
-    // Every point rated before anything is written: a round is kept whole or not at all.
+    // Every point rated before anything is written.
     int sum = 0;
+    QList<PracticeLog::Rating> ratings;
     for (const QVariant &r : results) {
-        const int level = r.toMap().value(QStringLiteral("level")).toInt();
+        const QVariantMap point = r.toMap();
+        const int level = point.value(QStringLiteral("level")).toInt();
         if (level < 1 || level > 4) {
             return false;
         }
         sum += level;
-    }
-
-    for (const QVariant &r : results) {
-        const QVariantMap point = r.toMap();
-        const int level = point.value(QStringLiteral("level")).toInt();
         for (const QString &entry : point.value(QStringLiteral("ids")).toStringList()) {
-            if (!rate(entry, level)) {
-                return false;
-            }
+            PracticeLog::Rating rating;
+            rating.entry = entry;
+            rating.level = level;
+            ratings << rating;
         }
     }
 
+    // Ratings and round in one transaction: kept whole or not at all.
     PracticeLog::ExamRound round;
     round.at = QDateTime::currentDateTimeUtc();
     round.discipline = discipline;
@@ -341,14 +340,26 @@ bool Practice::saveRound(const QString &discipline, const QString &grade, const 
     round.count = int(results.size());
     round.average = double(sum) / results.size();
     round.device = deviceId();
-    if (m_log->addRound(round).uid.isEmpty()) {
+    const PracticeLog::SavedRound saved = m_log->addRound(round, ratings);
+    if (saved.round.uid.isEmpty()) {
         m_error = tr("The exam round could not be saved: %1").arg(m_log->errorString());
         qWarning("Practice: %s", qPrintable(m_error));
         emit errorChanged();
         return false;
     }
+
+    for (const PracticeLog::Rating &r : saved.ratings) {
+        m_latest.insert(r.entry, r);
+        if (!m_first.contains(r.entry)) {
+            m_first.insert(r.entry, r.at.toLocalTime().date());
+        }
+    }
     ++m_revision;
     emit changed();
+    if (!m_error.isEmpty()) {
+        m_error.clear();
+        emit errorChanged();
+    }
     return true;
 }
 

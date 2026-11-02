@@ -289,12 +289,33 @@ QHash<QString, PracticeLog::Note> PracticeLog::lastNotes() const
     return result;
 }
 
-PracticeLog::ExamRound PracticeLog::addRound(const ExamRound &round)
+PracticeLog::SavedRound PracticeLog::addRound(const ExamRound &round, const QList<Rating> &ratings)
 {
     if (round.discipline.isEmpty() || round.grade.isEmpty() || round.count <= 0) {
+        m_error = QCoreApplication::translate("PracticeLog", "the round is incomplete");
         return {};
     }
-    QSqlQuery q(QSqlDatabase::database(m_connection));
+    QSqlDatabase db = QSqlDatabase::database(m_connection);
+    if (!db.transaction()) {
+        m_error = db.lastError().text();
+        return {};
+    }
+
+    // The ratings first; any that fails takes the whole round back.
+    SavedRound result;
+    for (const Rating &r : ratings) {
+        const Rating saved = add(r.entry, r.level, round.at, round.device);
+        if (saved.uid.isEmpty()) {
+            if (m_error.isEmpty()) {
+                m_error = QCoreApplication::translate("PracticeLog", "a rating is invalid (\"%1\")").arg(r.entry);
+            }
+            db.rollback();
+            return {};
+        }
+        result.ratings << saved;
+    }
+
+    QSqlQuery q(db);
     q.prepare(QStringLiteral("INSERT INTO exam_rounds (uid, at, discipline, grade, count, average, device)"
                              " VALUES (?, ?, ?, ?, ?, ?, ?)"));
     ExamRound saved = round;
@@ -309,9 +330,16 @@ PracticeLog::ExamRound PracticeLog::addRound(const ExamRound &round)
     q.addBindValue(saved.device);
     if (!q.exec()) {
         m_error = q.lastError().text();
+        db.rollback();
         return {};
     }
-    return saved;
+    if (!db.commit()) {
+        m_error = db.lastError().text();
+        db.rollback();
+        return {};
+    }
+    result.round = saved;
+    return result;
 }
 
 QList<PracticeLog::ExamRound> PracticeLog::rounds(const QString &discipline, int limit) const

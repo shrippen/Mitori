@@ -75,9 +75,16 @@ public:
     // The newest note of every entry that has one.
     QHash<QString, Note> lastNotes() const;
 
-    // Exam rounds: add one (an empty uid on failure); the last `limit` rounds of a discipline,
+    // A saved exam round with the ratings it wrote.
+    struct SavedRound {
+        ExamRound round;        // empty uid on failure (errorString())
+        QList<Rating> ratings;
+    };
+
+    // Exam rounds: add one with its ratings (entry and level each; time and device from the
+    // round) in one transaction, all or nothing; the last `limit` rounds of a discipline,
     // oldest first.
-    ExamRound addRound(const ExamRound &round);
+    SavedRound addRound(const ExamRound &round, const QList<Rating> &ratings);
     QList<ExamRound> rounds(const QString &discipline, int limit) const;
 
     static constexpr int schemaVersion = 3;
