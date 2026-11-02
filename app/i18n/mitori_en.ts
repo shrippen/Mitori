@@ -15,7 +15,7 @@
 <context>
     <name>CoursePage</name>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="240"/>
+        <location filename="../qml/CoursePage.qml" line="241"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>The notebook and its %n entry go from this device.</numerusform>
@@ -26,7 +26,7 @@
 <context>
     <name>CourseRow</name>
     <message numerus="yes">
-        <location filename="../qml/CourseRow.qml" line="29"/>
+        <location filename="../qml/CourseRow.qml" line="28"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -34,7 +34,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CourseRow.qml" line="36"/>
+        <location filename="../qml/CourseRow.qml" line="35"/>
         <source>%n note(s)</source>
         <translation>
             <numerusform>%n note</numerusform>
@@ -67,7 +67,15 @@
 <context>
     <name>StartPage</name>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="94"/>
+        <location filename="../qml/StartPage.qml" line="72"/>
+        <source>%n video bundle(s) can be updated.</source>
+        <translation>
+            <numerusform>%n video bundle can be updated.</numerusform>
+            <numerusform>%n video bundles can be updated.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/StartPage.qml" line="117"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n due</numerusform>
@@ -75,7 +83,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="130"/>
+        <location filename="../qml/StartPage.qml" line="153"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -83,7 +91,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="147"/>
+        <location filename="../qml/StartPage.qml" line="170"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>
@@ -138,6 +146,17 @@
         <translation>
             <numerusform>%n of %1 has a video and comes into the training; practise the others from the list below.</numerusform>
             <numerusform>%n of %1 have a video and come into the training; practise the others from the list below.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>VideosPage</name>
+    <message numerus="yes">
+        <location filename="../qml/VideosPage.qml" line="168"/>
+        <source>%n video(s)</source>
+        <translation>
+            <numerusform>%n video</numerusform>
+            <numerusform>%n videos</numerusform>
         </translation>
     </message>
 </context>

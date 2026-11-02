@@ -17,8 +17,12 @@ Kirigami.ScrollablePage {
 
     title: "Mitori 見取り"
 
-    // The course tile names the next date: the calendar is loaded when the last load is a few hours old.
-    Component.onCompleted: Courses.reload(Courses.Reload.Older)
+    // The course tile names the next date, and updates of the video bundles show here: calendar and
+    // manifest load when the last load is a few hours old.
+    Component.onCompleted: {
+        Courses.reload(Courses.Reload.Older)
+        Bundles.reload(Bundles.Reload.Older)
+    }
 
     // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
     // not a phone held sideways, about 20).
@@ -56,6 +60,21 @@ Kirigami.ScrollablePage {
             tier: KanteHintCard.Tier.Red
             titleText: qsTr("Ratings are not saved")
             text: Practice.errorString
+        }
+
+        // A new version of a loaded video bundle (its own hint, apart from the app's updates).
+        KanteHintCard {
+            objectName: "bundleUpdate"
+            Layout.fillWidth: true
+            visible: Bundles.updates > 0
+            tier: KanteHintCard.Tier.Blue
+            titleText: qsTr("New video version")
+            text: qsTr("%n video bundle(s) can be updated.", "", Bundles.updates)
+
+            KanteButton {
+                text: qsTr("Videos")
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
+            }
         }
 
         // A column on the phone, a grid of four on a tablet in landscape (app-entscheidungen.md).

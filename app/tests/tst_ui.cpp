@@ -2,6 +2,9 @@
 
 #include <QDir>
 #include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QUrl>
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QSettings>
@@ -11,6 +14,7 @@
 #include <QtQuickTest>
 
 #include "courses.h"
+#include "bundleshelf.h"
 #include "practice.h"
 
 Q_IMPORT_QML_PLUGIN(MitoriPlugin)
@@ -56,6 +60,20 @@ public slots:
                            "END:VCALENDAR\r\n");
         }
         qputenv("MITORI_COURSES_CALENDAR", QUrl::fromLocalFile(calendar.fileName()).toString().toUtf8());
+        // Video bundles from the test data (tools/bundle.py), as a local package folder: never the network.
+        QDir(BundleShelf::defaultRoot()).removeRecursively();
+        const QString packages = QStringLiteral(UI_DATA_DIR "/packages");
+        QDir().mkpath(packages + QStringLiteral("/mitori-test-bundle/1"));
+        QFile::remove(packages + QStringLiteral("/mitori-test-bundle/1/test.mvb"));
+        QFile::copy(QStringLiteral(TEST_BUNDLE_DIR "/test.mvb"), packages + QStringLiteral("/mitori-test-bundle/1/test.mvb"));
+        QFile source(QStringLiteral(TEST_BUNDLE_DIR "/manifest.json"));
+        QFile manifest(QStringLiteral(UI_DATA_DIR "/manifest.json"));
+        if (source.open(QIODevice::ReadOnly) && manifest.open(QIODevice::WriteOnly)) {
+            QJsonObject m = QJsonDocument::fromJson(source.readAll()).object();
+            m.insert(QStringLiteral("basis"), QUrl::fromLocalFile(packages).toString());
+            manifest.write(QJsonDocument(m).toJson());
+        }
+        qputenv("MITORI_BUNDLES_MANIFEST", QUrl::fromLocalFile(manifest.fileName()).toString().toUtf8());
     }
 
     void qmlEngineAvailable(QQmlEngine *engine)

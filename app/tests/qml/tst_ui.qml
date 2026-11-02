@@ -660,6 +660,42 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Videos: a DVD's code unlocks its bundle (the test data's), which loads onto the device and
+    // plays from there; a wrong code says why; removing keeps the code.
+    function test_9n_videos() {
+        failOnWarning(/ReferenceError|TypeError|Binding loop/)
+        const page = push("VideosPage")
+        tryCompare(Bundles, "manifestState", Bundles.ManifestState.Ready, 5000)
+        tryVerify(() => findChildren(page, "bundleRow").length === 1)
+        // The rows are made anew with every change of the list: look them up each time.
+        const row = () => findChildren(page, "bundleRow")[0]
+        compare(row().bundleState, Bundles.State.Locked)
+        verify(!findChild(row(), "bundleAction").visible)
+        const field = findChild(page, "codeField")
+        const message = findChild(page, "codeMessage")
+        field.text = "7KQ2M-X9HDV-3TAPR-WE6YA"          // check character wrong
+        wait(800)       // Kirigami slides the page in (disabled meanwhile)
+        mouseClick(findChild(page, "unlockButton"))
+        tryVerify(() => message.visible)
+        compare(message.text, qsTr("This is not a complete code; check it for typing errors."))
+        shot("15-videos-code-wrong")
+        field.text = "7kq2m x9hdv 3tapr we6yt"
+        mouseClick(findChild(page, "unlockButton"))
+        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Installed, 10000)
+        verify(message.text.indexOf("Test") > 0, message.text)
+        compare(field.text, "")
+        verify(Videos.available("test/v"), "the bundle's video is on the device")
+        compare(Videos.crop("test/v").h, undefined, "a bundle's file is cut already")
+        verify(Bundles.size > 0)
+        tryVerify(() => findChild(row(), "bundleAction").text === qsTr("Remove"))
+        shot("15b-videos-loaded")
+        mouseClick(findChild(row(), "bundleAction"))
+        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Unlocked)
+        verify(!Videos.available("test/v"))
+        compare(Bundles.bundles[0].code, "7KQ2M-X9HDV-3TAPR-WE6YT", "the code stays")
+        window.pageStack.pop()
+    }
+
     // Technique map: from the start menu, a grid per group with empty places, a place coloured by
     // its level and opening its sheet, the keys moving on; Shinki Toho as numbered forms.
     function test_9k_map() {

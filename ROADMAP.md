@@ -68,6 +68,14 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   „Ausschreibung: URL“), Einträge nach Tagen (lang drücken: ändern, löschen), Notizbuch löschen. Gespeichert in
   `lehrgaenge.sqlite` (`store/coursebook`, eigenes Schema), jede Zeile mit Zeit und Gerät für den Abgleich. Offen:
   Meine Grade, Prüfung vormerken, Wartezeiten, Fotos und Sprachnotizen, Export, Lehrgangsnotizen in „Alle Notizen“.
+- Schritt 4: Video-Bundles (Einstellungen → „Videos und DVD-Codes“, Hinweis im Programm „Code eingeben“): das öffentliche
+  Manifest (Gitea-Paket `mitori-manifest`) listet die Bundles; der Code einer DVD (20 Zeichen, Prüfzeichen) schaltet
+  eins frei, Mitori lädt, prüft (SHA-256, Blöcke mit Tag) und entschlüsselt seine Videos aufs Gerät
+  (`store/bundlecrypto` mit Monocypher, `store/bundleshelf`, `services/bundles`). Nur im WLAN (Schalter, „Jetzt laden“
+  einmal ohne), einzeln entfernen (Code bleibt), neue Version als Update mit Hinweis im Startmenü. Videos aus einem
+  Bundle sind schon beschnitten. Werkzeug `tools/bundle.py` (build, codes, sperren, pruefen, hochladen), Bundles in
+  `tools/bundles.yaml`, Geheimes in `../bundle-geheim`. Offen: Bundles bauen und hochladen (Owner: Zustimmung des
+  Verbands), QR-Code scannen, Freischalten auf dem Telefon prüfen (Argon2id mit 64 MiB).
 
 ## Offene Punkte (Stand 02.11.2026)
 

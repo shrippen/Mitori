@@ -126,12 +126,13 @@ Kirigami.Page {
                         titleText: qsTr("Exam videos")
                         text: !page.hasPositions
                               ? qsTr("There is no video for this grade.")
-                              : qsTr("The videos are on the DVDs of the Shinkiryu association. Until Mitori can load them with the DVD's code, put them into the video folder (settings).")
+                              : qsTr("The videos are on the DVDs of the Shinkiryu association. With the DVD's code Mitori loads them onto this device.")
 
                         KanteButton {
+                            objectName: "enterCode"
                             visible: page.hasPositions
-                            text: qsTr("Video folder")
-                            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
+                            text: qsTr("Enter code")
+                            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
                         }
                         KanteButton {
                             visible: page.hasPositions
