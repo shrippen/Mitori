@@ -108,6 +108,8 @@ Syncthing entfällt als eigener Weg (geht über den Export-Ordner).
 - **Startmenü**: Reihenfolge und Auswahl so; Einstellungen als Zahnrad; Programm-Kachel zeigt die zuletzt
   gewählte Sparte.
 - **Lehrgänge**: nur kommende Termine und vorhandene Notizbücher.
+- **Lehrgänge** (02.11.2026): je Lehrgang „In den Kalender“ (Gerätekalender) und, wenn die ICS-Beschreibung
+  eine Zeile „Ausschreibung: URL“ enthält, „Ausschreibung“ (öffnet die offizielle Ausschreibung).
 - **Landkarte**: Gruppen getrennt.
 - **Glossar**: Übersetzungen aus dem Aiki-Budo-Lexikon von shinkiryu.de (`tools/lexikon.py` →
   `daten/lexikon.yaml`, 219 Wörter); Aussprache zunächst per Sprachsynthese.
