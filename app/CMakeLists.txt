@@ -174,7 +174,8 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     qt_add_executable(tst_programme tests/tst_programme.cpp services/programme.cpp services/programme.h
         catalog/catalog.cpp catalog/catalog.h)
     target_include_directories(tst_programme PRIVATE catalog services store)
-    target_compile_definitions(tst_programme PRIVATE MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
+    target_compile_definitions(tst_programme PRIVATE MITORI_DATEN_JSON="${MITORI_DATEN_JSON}"
+        TEST_DATA_DIR="${CMAKE_BINARY_DIR}/test-data/programme")
     target_link_libraries(tst_programme PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
     set_target_properties(tst_programme PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_dependencies(tst_programme mitori)
@@ -196,6 +197,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     qt_add_executable(tst_practice tests/tst_practice.cpp services/practice.cpp services/practice.h
         store/practicelog.cpp store/practicelog.h store/schedule.cpp store/schedule.h)
     target_include_directories(tst_practice PRIVATE services store)
+    target_compile_definitions(tst_practice PRIVATE TEST_DATA_DIR="${CMAKE_BINARY_DIR}/test-data/practice")
     target_link_libraries(tst_practice PRIVATE Qt6::Core Qt6::Qml Qt6::Sql Qt6::Test)
     set_target_properties(tst_practice PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME practice COMMAND tst_practice)
