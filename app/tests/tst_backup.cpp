@@ -179,6 +179,7 @@ private slots:
         QCOMPARE(summary.value(u"entries"_s).toMap().value(u"added"_s).toInt(), 1);
         QCOMPARE(summary.value(u"grades"_s).toMap().value(u"added"_s).toInt(), 1);
         QCOMPARE(summary.value(u"media"_s).toInt(), 1);
+        QCOMPARE(summary.value(u"starts"_s).toMap().value(u"added"_s).toInt(), 1);
         QVERIFY(summary.value(u"created"_s).toDateTime().isValid());
         QFile f(tablet.practice);
         QVERIFY(f.open(QIODevice::ReadOnly));

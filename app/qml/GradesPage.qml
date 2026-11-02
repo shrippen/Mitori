@@ -100,16 +100,25 @@ Kirigami.ScrollablePage {
                         text: qsTr("Training since:")
                     }
                     KanteDateField {
+                        id: startField
+
+                        // The saved day; a pick sets `date` itself, so the binding comes back after
+                        // it (a sync or a failed save shows the day that counts).
+                        function saved() {
+                            const day = Courses.revision >= 0 ? Courses.trainingStart(block.discipline) : ""
+                            return day ? CourseDays.day(day) : null
+                        }
+
                         objectName: "trainingStart"
                         format: qsTr("yyyy-MM-dd", "date format")
                         dayNames: [qsTr("MO"), qsTr("TU"), qsTr("WE"), qsTr("TH"), qsTr("FR"), qsTr("SA"), qsTr("SU")]
                         todayText: qsTr("Today")
-                        date: {
-                            const day = Courses.revision >= 0 ? Courses.trainingStart(block.discipline) : ""
-                            return day ? CourseDays.day(day) : null
-                        }
+                        date: saved()
                         Accessible.name: qsTr("Start of training")
-                        onDateEdited: day => Courses.setTrainingStart(block.discipline, day ? CourseDays.iso(day) : "")
+                        onDateEdited: day => {
+                            Courses.setTrainingStart(block.discipline, day ? CourseDays.iso(day) : "")
+                            startField.date = Qt.binding(() => startField.saved())
+                        }
                     }
                 }
 

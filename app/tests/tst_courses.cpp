@@ -173,6 +173,9 @@ private slots:
         QCOMPARE(book.entries(u"c1"_s).size(), 1);
         QCOMPARE(book.entries(u"c1"_s).first().media, QString());          // schema 3
         QVERIFY(book.grades().isEmpty());
+        QVERIFY(book.starts().isEmpty());                                     // schema 4
+        QVERIFY(book.setStart(u"shinkitoho"_s, QDate(2024, 9, 1), QDateTime::currentDateTimeUtc(), u"dev"_s));
+        QCOMPARE(book.starts().value(u"shinkitoho"_s), QDate(2024, 9, 1));
         QVERIFY(book.planExam(u"c1"_s, u"aikido"_s, u"k4"_s, QDateTime::currentDateTimeUtc()));
         QCOMPARE(book.courses().first().examGrade, u"k4"_s);
     }

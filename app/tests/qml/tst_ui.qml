@@ -793,7 +793,13 @@ TestCase {
         verify(Courses.setTrainingStart("shinkitoho", "2024-09-01"))
         tryVerify(() => findChild(toho, "trainingStart").date !== null)
         const shoden = findChild(toho, "nextGrade").text
-        verify(shoden.indexOf("enter it") < 0 && /\b26\b/.test(shoden), shoden)     // from 01.09.26
+        verify(shoden.indexOf("enter it") < 0 && /26/.test(shoden), shoden)     // from 01.09.26 (C: 1 09 2026)
+        // Picked by the user, the field still follows the saved day (a sync may bring another).
+        const startField = findChild(toho, "trainingStart")
+        startField.pick(new Date(2024, 9, 1, 12))
+        compare(Courses.trainingStart("shinkitoho"), "2024-10-01")
+        verify(Courses.setTrainingStart("shinkitoho", "2024-09-01"))
+        tryVerify(() => startField.date && startField.date.getMonth() === 8, 2000, "the field follows the saved day")
         shot("16-grades")
         window.pageStack.pop()
 
@@ -1642,6 +1648,13 @@ TestCase {
         verify(block, "this year")
         verify(findChild(block, "yearHeading").text.indexOf(qsTr("%n practice day(s)", "", 1)) > 0,
                findChild(block, "yearHeading").text)
+        // Every day says what it was, also one without practice.
+        const dayBefore = new Date()
+        dayBefore.setDate(dayBefore.getDate() - 1)
+        const yearHeat = findChild(block, "yearHeatmap")
+        if (dayBefore.getFullYear() === year) {
+            verify(yearHeat.tipOf(dayBefore).indexOf(qsTr("no practice")) > 0, yearHeat.tipOf(dayBefore))
+        }
         years.discipline = "shinkitoho"
         verify(findChild(findChild(years, "year_" + year), "yearHeading").text.indexOf(qsTr("%n practice day(s)", "", 1)) > 0)
         shot("10b-years")

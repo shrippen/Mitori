@@ -83,7 +83,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="249"/>
+        <location filename="../qml/SettingsPage.qml" line="250"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n new</numerusform>
@@ -91,7 +91,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="252"/>
+        <location filename="../qml/SettingsPage.qml" line="253"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n changed</numerusform>
@@ -99,7 +99,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="259"/>
+        <location filename="../qml/SettingsPage.qml" line="260"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>
@@ -206,7 +206,7 @@
 <context>
     <name>YearsPage</name>
     <message numerus="yes">
-        <location filename="../qml/YearsPage.qml" line="90"/>
+        <location filename="../qml/YearsPage.qml" line="93"/>
         <source>%n practice day(s)</source>
         <translation>
             <numerusform>%n practice day</numerusform>
@@ -214,8 +214,8 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/YearsPage.qml" line="91"/>
-        <location filename="../qml/YearsPage.qml" line="125"/>
+        <location filename="../qml/YearsPage.qml" line="94"/>
+        <location filename="../qml/YearsPage.qml" line="132"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>
@@ -237,16 +237,16 @@
         <location filename="../qml/grades.js" line="28"/>
         <source>%n year(s) after %1: enter that grade</source>
         <translation>
-            <numerusform>%n Jahr nach %1: diesen Grad eintragen</numerusform>
-            <numerusform>%n Jahre nach %1: diesen Grad eintragen</numerusform>
+            <numerusform>%n year after %1: enter that grade</numerusform>
+            <numerusform>%n years after %1: enter that grade</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <location filename="../qml/grades.js" line="47"/>
         <source>Exam %1 in %n day(s)</source>
         <translation>
-            <numerusform>Prüfung %1 in %n Tag</numerusform>
-            <numerusform>Prüfung %1 in %n Tagen</numerusform>
+            <numerusform>Exam %1 in %n day</numerusform>
+            <numerusform>Exam %1 in %n days</numerusform>
         </translation>
     </message>
 </context>

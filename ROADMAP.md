@@ -76,7 +76,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   2048 px), mit der Notiz gelöscht. Übungsprotokoll Schema 5, Lehrgänge Schema 3 (Spalte `media`). Android fragt nach
   Kamera und Mikrofon beim ersten Mal. Offen: Test auf dem Telefon (Kamera, Mikrofon, Bild aus der Galerie).
 - Schritt 4: Meine Grade (in Lehrgänge oben): je Sparte die abgelegten Grade mit Tag und Ort, der nächste Grad mit
-  Wartezeit (`wartezeit` aus `abstand` der Programmdaten; Shinki Toho Shoden ab Trainingsbeginn, ohne Datum).
+  Wartezeit (`wartezeit` aus `abstand` der Programmdaten; Shinki Toho Shoden ab Trainingsbeginn).
   Im Notizbuch eines kommenden Lehrgangs „Prüfung hier ablegen …“ (Sparte, Grad, Wartezeit gegen den ersten Tag);
   Lehrgänge zeigen die geplanten Prüfungen, die Kachel 講, Heute üben und der Prüfungsmodus die nächste.
   `lehrgaenge.sqlite` Schema 2 (Tabelle `grades`, Spalten `exam_*` an `courses`). Trainingsbeginn je Sparte, wo eine

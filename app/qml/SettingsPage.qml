@@ -240,7 +240,8 @@ Kirigami.ScrollablePage {
     // "Notes: 3 new, 2 changed" per kind that changes; a line when nothing does.
     function changes(s) {
         const kinds = [["ratings", qsTr("Ratings")], ["notes", qsTr("Notes")], ["rounds", qsTr("Exam rounds")],
-                       ["notebooks", qsTr("Notebooks")], ["entries", qsTr("Notebook entries")], ["grades", qsTr("Grades")]]
+                       ["notebooks", qsTr("Notebooks")], ["entries", qsTr("Notebook entries")], ["grades", qsTr("Grades")],
+                       ["starts", qsTr("Start of training")]]
         let lines = []
         for (const [key, name] of kinds) {
             const c = s[key] || {}

@@ -23,10 +23,15 @@ Kirigami.ScrollablePage {
 
     // "" all, else a discipline's id.
     property string discipline: ""
+    // Today as a date; reading Practice.today makes it follow midnight (a new year included).
+    readonly property date todayDate: {
+        Practice.today
+        return new Date()
+    }
     readonly property var years: {
         Practice.revision
         const list = []
-        for (let y = new Date().getFullYear(); y >= Practice.firstYear(); y--) {
+        for (let y = page.todayDate.getFullYear(); y >= Practice.firstYear(); y--) {
             list.push(y)
         }
         return list
@@ -73,10 +78,8 @@ Kirigami.ScrollablePage {
                 readonly property var grades: (Courses.revision >= 0 ? Courses.grades : [])
                     .filter(g => g.day.startsWith(String(modelData)) && (page.discipline === "" || g.discipline === page.discipline))
                 // The year's last day shown: today in the current year.
-                readonly property date endDate: {
-                    const now = new Date()
-                    return modelData === now.getFullYear() ? now : new Date(modelData, 11, 31, 12)
-                }
+                readonly property date endDate: modelData === page.todayDate.getFullYear()
+                                                ? page.todayDate : new Date(modelData, 11, 31, 12)
 
                 objectName: "year_" + modelData
                 Layout.fillWidth: true
@@ -102,6 +105,7 @@ Kirigami.ScrollablePage {
                     KanteCalendarHeatmap {
                         id: heat
 
+                        objectName: "yearHeatmap"
                         cellSize: Math.max(KanteStyle.unit(4), Math.min(KanteStyle.unit(12),
                                                Math.floor((heatBox.width - labelWidth + spacing) / weeks) - spacing))
                         // From the week of 1 January to the last day.
@@ -119,10 +123,13 @@ Kirigami.ScrollablePage {
                             }
                             return l
                         }
+                        // Every day of the year says what it was, also one without practice.
                         tips: {
                             const t = {}
-                            for (const d of yearBlock.days) {
-                                t[d] = qsTr("%n technique(s)", "", yearBlock.perDay[d])
+                            for (let day = new Date(yearBlock.modelData, 0, 1, 12); day <= yearBlock.endDate;
+                                 day = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1, 12)) {
+                                const key = isoDay(day)
+                                t[key] = yearBlock.perDay[key] ? qsTr("%n technique(s)", "", yearBlock.perDay[key]) : qsTr("no practice")
                             }
                             return t
                         }
