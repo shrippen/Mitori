@@ -2,6 +2,17 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en" sourcelanguage="en">
 <context>
+    <name>AllNotesPage</name>
+    <message numerus="yes">
+        <location filename="../qml/AllNotesPage.qml" line="101"/>
+        <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
+        <translation>
+            <numerusform>%n note. Tap one to open its technique, press and hold to change or delete it.</numerusform>
+            <numerusform>%n notes. Tap one to open its technique, press and hold to change or delete it.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>StartPage</name>
     <message numerus="yes">
         <location filename="../qml/StartPage.qml" line="80"/>

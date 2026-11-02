@@ -37,6 +37,14 @@ Kirigami.ScrollablePage {
 
     title: qsTr("Notes")
 
+    actions: [
+        Kirigami.Action {
+            icon.name: "view-list-details"
+            text: qsTr("All notes")
+            onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("AllNotesPage.qml"))
+        }
+    ]
+
     // Practice.today only makes the names follow a new day: as a QDate it reaches JS as
     // midnight UTC, the day before west of UTC.
     function dayName(day) {

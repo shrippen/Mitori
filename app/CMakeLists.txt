@@ -47,6 +47,7 @@ qt_add_qml_module(mitori_app
         qml/NotesPage.qml
         qml/NoteEditor.qml
         qml/NoteRow.qml
+        qml/AllNotesPage.qml
         qml/SearchPage.qml
     SOURCES
         catalog/catalog.h

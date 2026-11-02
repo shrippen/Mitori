@@ -27,8 +27,9 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Eintrag mit Zeit und Gerät), Stand als vier Punkte in der Programmliste, Stand je Grad als Leiste mit Legende.
   Heute üben (Wiederholen nach Plan, Abstände je Stufe einstellbar, Kachel im Startmenü) und Training (Playliste der
   fälligen Techniken, Einschätzen schaltet weiter). Notizen je Technik (Text; nach Tagen, lang drücken zum
-  Bearbeiten/Löschen, letzte Notiz im Blatt, Eingabe im Player). Offen: Fotos und Sprachnotizen an Notizen
-  (Plattform-Schicht), „Alle Notizen“, Statistik. Suche (Techniken aller Sparten und Grade, eigene Notizen;
+  Bearbeiten/Löschen, letzte Notiz im Blatt, Eingabe im Player). „Alle Notizen“ (nach Tagen, Filter je
+  Sparte; im Programm und in den Notizen einer Technik). Offen: Fotos und Sprachnotizen an Notizen
+  (Plattform-Schicht), Lehrgangsnotizen in „Alle Notizen“ (mit Schritt 4), Statistik. Suche (Techniken aller Sparten und Grade, eigene Notizen;
   Groß/klein, Akzente, ß, Bindestriche und Okurigana egal; auch Angriffszusatz und Gruppe) über die Lupe im
   Startmenü.
 

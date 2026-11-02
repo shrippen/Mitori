@@ -198,6 +198,20 @@ QVariantList Practice::notes(const QString &entry) const
     return result;
 }
 
+QVariantList Practice::allNotes() const
+{
+    QVariantList result;
+    if (!m_open) {
+        return result;
+    }
+    for (const PracticeLog::Note &n : m_log->allNotes()) {
+        QVariantMap row = noteMap(n);
+        row[QStringLiteral("entry")] = n.entry;
+        result << row;
+    }
+    return result;
+}
+
 QVariantList Practice::searchNotes(const QString &query, int limit) const
 {
     QVariantList result;

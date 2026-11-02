@@ -2,6 +2,48 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de" sourcelanguage="en">
 <context>
+    <name>AllNotesPage</name>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="49"/>
+        <source>All notes</source>
+        <translation>Alle Notizen</translation>
+    </message>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="54"/>
+        <source>Today</source>
+        <translation>Heute</translation>
+    </message>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="70"/>
+        <location filename="../qml/AllNotesPage.qml" line="177"/>
+        <source>Technique no longer in the programme</source>
+        <translation>Technik nicht mehr im Programm</translation>
+    </message>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="83"/>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="100"/>
+        <source>No notes yet. Notes are written on a technique or in the player.</source>
+        <translation>Noch keine Notizen. Notizen schreibst du zu einer Technik oder im Player.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/AllNotesPage.qml" line="101"/>
+        <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
+        <translation>
+            <numerusform>%n Notiz. Tippen öffnet die Technik, lang drücken ändert oder löscht sie.</numerusform>
+            <numerusform>%n Notizen. Tippen öffnet die Technik, lang drücken ändert oder löscht sie.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="134"/>
+        <source>Opens the technique&apos;s notes; press and hold to change or delete</source>
+        <translation>Öffnet die Notizen der Technik; lang drücken zum Ändern oder Löschen</translation>
+    </message>
+</context>
+<context>
     <name>CommentPage</name>
     <message>
         <location filename="../qml/CommentPage.qml" line="31"/>
@@ -130,37 +172,42 @@
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="44"/>
+        <location filename="../qml/NotesPage.qml" line="43"/>
+        <source>All notes</source>
+        <translation>Alle Notizen</translation>
+    </message>
+    <message>
+        <location filename="../qml/NotesPage.qml" line="52"/>
         <source>Today</source>
         <translation>Heute</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="97"/>
+        <location filename="../qml/NotesPage.qml" line="105"/>
         <source>No notes on this technique yet.</source>
         <translation>Noch keine Notizen zu dieser Technik.</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="140"/>
+        <location filename="../qml/NotesPage.qml" line="148"/>
         <source>Change or delete</source>
         <translation>Bearbeiten oder löschen</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="161"/>
+        <location filename="../qml/NotesPage.qml" line="169"/>
         <source>Press and hold a note (or Enter on it) to change or delete it.</source>
         <translation>Lang drücken (oder Enter auf der Notiz): bearbeiten oder löschen.</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="176"/>
+        <location filename="../qml/NotesPage.qml" line="184"/>
         <source>Note for today …</source>
         <translation>Notiz für heute …</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="177"/>
+        <location filename="../qml/NotesPage.qml" line="185"/>
         <source>New note</source>
         <translation>Neue Notiz</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="184"/>
+        <location filename="../qml/NotesPage.qml" line="192"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
@@ -278,7 +325,7 @@
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="230"/>
+        <location filename="../services/practice.cpp" line="244"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
@@ -299,32 +346,37 @@
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="94"/>
+        <location filename="../qml/ProgrammePage.qml" line="35"/>
+        <source>All notes</source>
+        <translation>Alle Notizen</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="102"/>
         <source>Exam videos</source>
         <translation>Prüfungsvideos</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="96"/>
+        <location filename="../qml/ProgrammePage.qml" line="104"/>
         <source>There is no video for this grade.</source>
         <translation>Zu diesem Grad gibt es kein Video.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="97"/>
+        <location filename="../qml/ProgrammePage.qml" line="105"/>
         <source>The videos are on the DVDs of the Shinkiryu association. Until Mitori can load them with the DVD&apos;s code, put them into the video folder (settings).</source>
         <translation>Die Videos gibt es als DVD beim Shinkiryu-Verband. Bis Mitori sie mit dem Code der DVD laden kann, gehören sie in den Videoordner (Einstellungen).</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="101"/>
+        <location filename="../qml/ProgrammePage.qml" line="109"/>
         <source>Video folder</source>
         <translation>Videoordner</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="106"/>
+        <location filename="../qml/ProgrammePage.qml" line="114"/>
         <source>Order on shinkiryu.de</source>
         <translation>Auf shinkiryu.de bestellen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="181"/>
+        <location filename="../qml/ProgrammePage.qml" line="189"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>

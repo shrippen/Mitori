@@ -491,6 +491,39 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // All notes: every technique's notes by day, a filter per discipline; a tap opens the
+    // technique's notes, press and hold the editor.
+    function test_8d_all_notes() {
+        const daito = Programme.entries("daitoryu", Programme.grades("daitoryu")[0].id).find(r => r.kind === "entry")
+        Practice.addNote(daito.id, "Daitoryu: Hüfte zuerst")
+        Practice.addNote("not-in-the-programme", "verwaist")
+        const page = push("AllNotesPage")
+        const total = page.all.length
+        verify(total >= 2)
+        compare(page.all[0].text, "verwaist", "newest first")
+        verify(page.days[0].notes.length >= 2)
+        wait(500)       // Kirigami slides the page in
+        mouseClick(findChild(page, "filter_daitoryu"))
+        tryVerify(() => page.filter === "daitoryu")
+        verify(page.shown.length >= 1 && page.shown.every(n => n.technique.discipline === "daitoryu"))
+        verify(page.shown.length < total, "the orphan and other disciplines left out")
+        shot("8d-all-notes")
+        const note = findChild(page, "note")
+        mouseClick(note, 20, note.height - 10)
+        tryVerify(() => window.pageStack.currentItem !== page, 2000)
+        compare(window.pageStack.currentItem.entry.id, daito.id)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        mousePress(note, 20, note.height - 10)
+        wait(1000)
+        mouseRelease(note, 20, note.height - 10)
+        const editor = findChild(page, "noteEditor")
+        tryVerify(() => editor.opened, 2000, "press and hold opens the editor")
+        editor.close()
+        tryVerify(() => !editor.opened)
+        window.pageStack.pop()
+    }
+
     function findChildren(item, name) {
         let found = []
         if (item.objectName === name) {
