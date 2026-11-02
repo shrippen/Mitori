@@ -104,17 +104,21 @@ bool PracticeLog::migrate()
 }
 
 // Schema 3: the Kamae exercise of Shinki Toho was 26 entries (shinkitoho/kamae/1 … /26) and is
-// one now (shinkitoho/kamae), practised in one flow. Of its old ratings the best of each local
-// day stays (the newest on a tie), so the history keeps one rating a day; the notes move along.
+// one now (shinkitoho/kamae), practised in one flow. Of its old ratings the weakest of each
+// local day stays (the newest on a tie): a weak position makes the whole exercise due again
+// sooner. The history keeps one rating a day; the notes move along.
 bool PracticeLog::mergeKamae()
 {
     QSqlDatabase db = QSqlDatabase::database(m_connection);
     QSqlQuery q(db);
-    db.transaction();
+    if (!db.transaction()) {
+        m_error = db.lastError().text();
+        return false;
+    }
     const bool ok = q.exec(QStringLiteral(
                         "DELETE FROM ratings WHERE entry GLOB 'shinkitoho/kamae/*' AND rowid NOT IN ("
                         " SELECT rowid FROM (SELECT rowid, ROW_NUMBER() OVER ("
-                        "  PARTITION BY date(at / 1000, 'unixepoch', 'localtime') ORDER BY level DESC, at DESC) AS n"
+                        "  PARTITION BY date(at / 1000, 'unixepoch', 'localtime') ORDER BY level ASC, at DESC) AS n"
                         "  FROM ratings WHERE entry GLOB 'shinkitoho/kamae/*') WHERE n = 1)"))
         && q.exec(QStringLiteral("UPDATE ratings SET entry = 'shinkitoho/kamae' WHERE entry GLOB 'shinkitoho/kamae/*'"))
         && q.exec(QStringLiteral("UPDATE notes SET entry = 'shinkitoho/kamae' WHERE entry GLOB 'shinkitoho/kamae/*'"))
@@ -124,7 +128,12 @@ bool PracticeLog::mergeKamae()
         db.rollback();
         return false;
     }
-    return db.commit();
+    if (!db.commit()) {
+        m_error = db.lastError().text();
+        db.rollback();
+        return false;
+    }
+    return true;
 }
 
 PracticeLog::Rating PracticeLog::add(const QString &entry, int level, const QDateTime &at, const QString &device)

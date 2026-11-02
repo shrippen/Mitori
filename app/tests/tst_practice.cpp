@@ -305,8 +305,8 @@ private slots:
         QCOMPARE(spy.count(), 3);
     }
 
-    // A log of schema 2 with the 26 Kamae entries of before: one entry now, the best rating of
-    // each day (the newest on a tie) and every note on it; other entries stay as they were.
+    // A log of schema 2 with the 26 Kamae entries of before: one entry now, the weakest rating
+    // of each day (the newest on a tie) and every note on it; other entries stay as they were.
     void migratesKamaeToOneEntry()
     {
         QTemporaryDir dir;
@@ -316,9 +316,9 @@ private slots:
         {
             PracticeLog log;
             QVERIFY(log.open(path));
-            log.add(QStringLiteral("shinkitoho/kamae/1"), 2, day1, QStringLiteral("phone"));
-            log.add(QStringLiteral("shinkitoho/kamae/2"), 3, day1.addSecs(60), QStringLiteral("phone"));
-            log.add(QStringLiteral("shinkitoho/kamae/3"), 1, day1.addSecs(120), QStringLiteral("phone"));
+            log.add(QStringLiteral("shinkitoho/kamae/3"), 1, day1, QStringLiteral("phone"));
+            log.add(QStringLiteral("shinkitoho/kamae/1"), 2, day1.addSecs(60), QStringLiteral("phone"));
+            log.add(QStringLiteral("shinkitoho/kamae/2"), 3, day1.addSecs(120), QStringLiteral("phone"));
             log.add(QStringLiteral("shinkitoho/kamae/12"), 1, day2, QStringLiteral("phone"));
             log.add(QStringLiteral("shinkitoho/kamae/26"), 1, day2.addSecs(60), QStringLiteral("tablet"));
             log.add(QStringLiteral("shinkitoho/kiriotoshi"), 4, day2, QStringLiteral("phone"));
@@ -339,8 +339,8 @@ private slots:
         const QString kamae = QStringLiteral("shinkitoho/kamae");
         const auto history = log.history(kamae);
         QCOMPARE(history.size(), 2);
-        QCOMPARE(history.at(0).level, 3);
-        QCOMPARE(history.at(0).at, day1.addSecs(60));
+        QCOMPARE(history.at(0).level, 1);
+        QCOMPARE(history.at(0).at, day1);
         QCOMPARE(history.at(1).level, 1);
         QCOMPARE(history.at(1).device, QStringLiteral("tablet"));
         QCOMPARE(log.latest().size(), 2);

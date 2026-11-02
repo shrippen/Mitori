@@ -327,6 +327,14 @@ Item {
                     }
                 }
 
+                // The positions of a sequence (Kamae exercise): beside the list on a tablet no
+                // sheet opens, and in the player they go along with the video.
+                StepList {
+                    Layout.fillWidth: true
+                    Layout.topMargin: Kirigami.Units.largeSpacing
+                    steps: page.current.steps || []
+                }
+
                 KanteHintCard {
                     objectName: "trainingDone"
                     Layout.fillWidth: true

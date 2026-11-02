@@ -71,6 +71,9 @@ def test_kamae_eine_technik(daten):
     namen = [p["name"] for p in kamae["positionen"]]
     assert len(namen) == 26 and namen.count("Seigan") == 2
     assert all(p["kanji"] for p in kamae["positionen"])
+    # Der Kommentar zählt wie das Blatt (1–26), nicht wie die Quelle (1–24).
+    text = kamae["kommentar"]["text"]
+    assert "\n\n2–3. Battô Seigan\n" in text and "\n\n4. " in text and "\n\n26. " in text
     assert kamae["video"] == {"video": "shinkitoho/suburi", "von": 212.88, "bis": 593.3}
     assert not any(i.startswith("shinkitoho/kamae/") for i in alle_ids(daten))
 

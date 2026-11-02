@@ -104,8 +104,9 @@ TestCase {
         const sheet = findChild(page, "techniqueSheet")
         tryVerify(() => sheet.opened)
         compare(sheet.steps.length, 26)
-        tryVerify(() => findChildren(sheet.contentItem, "sheetStep").length === 26)
-        const steps = findChildren(sheet.contentItem, "sheetStep")
+        const list = findChild(sheet.contentItem, "sheetSteps")
+        tryCompare(list, "count", 26)
+        const steps = findChildren(list, "step")
         compare(steps[2].modelData.title, "Seigan")
         compare(steps[11].modelData.title, "Seigan")
         shot("2g-sheet-kamae", true)
@@ -115,7 +116,35 @@ TestCase {
         page.open(page.rows.find(r => r.kind === "entry" && r.id.startsWith("shinkitoho/odachi/")))
         tryVerify(() => sheet.opened)
         compare(sheet.steps.length, 0)
-        compare(findChildren(sheet.contentItem, "sheetStep").length, 0)
+        verify(!findChild(sheet.contentItem, "sheetSteps").visible)
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        window.pageStack.pop()
+    }
+
+    // A small phone: the Kamae sheet is taller than the window; the keys scroll it.
+    function test_2h_sheet_keys() {
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        window.width = 360
+        window.height = 640
+        const page = push("ProgrammePage")
+        page.open(page.rows.find(r => r.id === "shinkitoho/kamae"))
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        wait(500)
+        const flick = sheet.flickable
+        verify(flick && flick.contentHeight > flick.height, "taller than the window")
+        compare(flick.contentY, 0)
+        keyClick(Qt.Key_Down)
+        tryVerify(() => flick.contentY > 0, 1000, "Down scrolls")
+        const down = flick.contentY
+        keyClick(Qt.Key_PageDown)
+        tryVerify(() => flick.contentY > down, 1000, "Page Down scrolls")
+        keyClick(Qt.Key_End)
+        tryVerify(() => Math.abs(flick.contentY - (flick.contentHeight - flick.height)) < 2, 1000, "End to the last position")
+        keyClick(Qt.Key_Home)
+        tryCompare(flick, "contentY", 0)
         sheet.close()
         tryVerify(() => !sheet.opened)
         window.pageStack.pop()
@@ -940,6 +969,36 @@ TestCase {
         wait(500)
         verify(!pane.item.playing, "no sound under the comment page")
         window.pageStack.pop()
+        window.width = 420
+        window.height = 800
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
+    }
+
+    // Tablet: the Kamae exercise plays beside the list, with its 26 positions under the player.
+    function test_2u_tablet_kamae() {
+        failOnWarning(/ReferenceError|TypeError/)
+        const kamae = Programme.entry("shinkitoho/kamae")
+        if (!kamae.video || !Videos.available(kamae.video.video)) {
+            skip("no video for the Kamae exercise (set MITORI_VIDEOS)")
+        }
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        window.width = 1280
+        window.height = 800
+        const page = push("ProgrammePage")
+        tryVerify(() => page.split)
+        page.open(page.rows.find(r => r.id === "shinkitoho/kamae"))
+        const pane = findChild(page, "playerPane")
+        tryCompare(pane.item.current, "id", "shinkitoho/kamae", 3000)
+        const list = findChild(pane.item, "stepList")
+        verify(list && list.visible, "the positions beside the player")
+        tryCompare(list, "count", 26)
+        shot("2u-tablet-kamae")
+        // A form has none.
+        page.open(page.playlist.find(r => r.id.startsWith("shinkitoho/odachi/")))
+        tryVerify(() => pane.item.current.id.startsWith("shinkitoho/odachi/"), 3000)
+        verify(!findChild(pane.item, "stepList").visible)
         window.width = 420
         window.height = 800
         window.pageStack.pop()

@@ -16,6 +16,8 @@ Kirigami.Dialog {
     readonly property bool hasVideo: playable && !!entry.video
     readonly property bool hasComment: !!entry.comment
     readonly property var steps: entry.steps || []
+    // The dialog's scrolling content (Kirigami puts the column into a ScrollView).
+    readonly property Flickable flickable: ((contentItem as QQC2.ScrollView)?.contentItem as Flickable) ?? null
 
     signal playRequested(var entry)
     signal commentRequested(var entry)
@@ -29,8 +31,37 @@ Kirigami.Dialog {
     // Not a content child: the dialog's scroll view sizes itself by its only child, the column.
     property Item kanteScope: KanteScope { target: sheet.contentItem }
 
+    // Up/Down, Page Up/Down, Home and End scroll a sheet taller than the window (the Kamae
+    // exercise on a phone); the mouse wheel does already.
+    function scrollKey(event) {
+        const f = sheet.flickable
+        const end = f ? Math.max(0, f.contentHeight - f.height) : 0
+        let y = 0
+        if (!f) {
+            return
+        } else if (event.key === Qt.Key_Up || event.key === Qt.Key_Down) {
+            y = f.contentY + (event.key === Qt.Key_Down ? 1 : -1) * Kirigami.Units.gridUnit * 2
+        } else if (event.key === Qt.Key_PageUp || event.key === Qt.Key_PageDown) {
+            y = f.contentY + (event.key === Qt.Key_PageDown ? 1 : -1) * f.height * 0.9
+        } else if (event.key === Qt.Key_Home) {
+            y = 0
+        } else if (event.key === Qt.Key_End) {
+            y = end
+        } else {
+            return
+        }
+        f.contentY = Math.max(0, Math.min(end, y))
+        event.accepted = true
+    }
+
+    // The popup itself holds the focus when it opens; the column takes it for the keys.
+    onOpened: column.forceActiveFocus()
+
     ColumnLayout {
+        id: column
+
         spacing: Kirigami.Units.smallSpacing
+        Keys.onPressed: event => sheet.scrollKey(event)
 
         QQC2.Label {
             Layout.fillWidth: true
@@ -95,46 +126,13 @@ Kirigami.Dialog {
             }
         }
 
-        // The description of a sequence (Kamae exercise): its positions in order, after the
-        // rating and the buttons, so those stay in view. Seigan comes twice (KORREKTUREN S-09).
-        KanteSectionLabel {
+        // The description of a sequence (Kamae exercise), after the rating and the buttons, so
+        // those stay in view.
+        StepList {
+            objectName: "sheetSteps"
             Layout.fillWidth: true
             Layout.topMargin: Kirigami.Units.largeSpacing
-            visible: sheet.steps.length > 0
-            rule: true
-            text: qsTr("Positions in one flow")
-        }
-        Repeater {
-            model: sheet.steps
-
-            RowLayout {
-                id: step
-
-                required property var modelData
-                required property int index
-
-                objectName: "sheetStep"
-                Layout.fillWidth: true
-                spacing: Kirigami.Units.smallSpacing
-
-                QQC2.Label {
-                    Layout.minimumWidth: Kirigami.Units.gridUnit * 1.5
-                    horizontalAlignment: Text.AlignRight
-                    text: step.index + 1
-                    font: KanteStyle.monoFont(Kirigami.Theme.smallFont.pointSize)
-                    color: KanteStyle.mutedTextColor
-                }
-                QQC2.Label {
-                    Layout.fillWidth: true
-                    text: step.modelData.title
-                    wrapMode: Text.Wrap
-                }
-                QQC2.Label {
-                    text: step.modelData.jp
-                    font: KanteStyle.japaneseFont()
-                    color: KanteStyle.mutedTextColor
-                }
-            }
+            steps: sheet.steps
         }
     }
 }

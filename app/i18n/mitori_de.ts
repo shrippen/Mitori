@@ -276,28 +276,28 @@
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="335"/>
+        <location filename="../qml/PlayerView.qml" line="343"/>
         <source>Done</source>
         <translation>Geschafft</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="336"/>
+        <location filename="../qml/PlayerView.qml" line="344"/>
         <source>Every technique of today&apos;s training is practised.</source>
         <translation>Alle Techniken des heutigen Trainings sind geübt.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="340"/>
-        <location filename="../qml/PlayerView.qml" line="370"/>
+        <location filename="../qml/PlayerView.qml" line="348"/>
+        <location filename="../qml/PlayerView.qml" line="378"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="352"/>
+        <location filename="../qml/PlayerView.qml" line="360"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="361"/>
+        <location filename="../qml/PlayerView.qml" line="369"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>
@@ -666,31 +666,34 @@
     </message>
 </context>
 <context>
+    <name>StepList</name>
+    <message>
+        <location filename="../qml/StepList.qml" line="27"/>
+        <source>Positions in one flow</source>
+        <translation>Positionen in einem Ablauf</translation>
+    </message>
+</context>
+<context>
     <name>TechniqueSheet</name>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="62"/>
+        <location filename="../qml/TechniqueSheet.qml" line="93"/>
         <source>Last note: %1</source>
         <translation>Letzte Notiz: %1</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="76"/>
+        <location filename="../qml/TechniqueSheet.qml" line="107"/>
         <source>Watch video</source>
         <translation>Video ansehen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="81"/>
+        <location filename="../qml/TechniqueSheet.qml" line="112"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="90"/>
+        <location filename="../qml/TechniqueSheet.qml" line="121"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
-    </message>
-    <message>
-        <location filename="../qml/TechniqueSheet.qml" line="105"/>
-        <source>Positions in one flow</source>
-        <translation>Positionen in einem Ablauf</translation>
     </message>
 </context>
 <context>

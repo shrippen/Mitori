@@ -205,6 +205,12 @@ def programm(art, ids, gloss):
 
 # --- Shinki Toho -------------------------------------------------------------
 
+def positionen(indizes):
+    """Nummern der Kamae-Positionen (wie im Blatt und im Heft, ab 1) eines Kommentars: [1, 2] → "2–3"."""
+    erste, letzte = indizes[0] + 1, indizes[-1] + 1
+    return str(erste) if erste == letzte else f"{erste}–{letzte}"
+
+
 def shinki_toho(ids):
     d = yaml.safe_load((DATEN / "shinki-toho.yaml").read_text(encoding="utf-8"))
     for g in d["grade"]:
@@ -238,7 +244,7 @@ def shinki_toho(ids):
     for s, ks in zip(app["suburi"], k["suburi"], strict=True):
         s["kommentar"] = {"titel": ks["titel"], "text": ks["text"]}
     app["kamae"]["kommentar"] = {"titel": kamae["name"],
-                                 "text": "\n\n".join(f"{kk['nr']}. {kk['titel']}\n{kk['text']}" for kk in k["kamae"])}
+                                 "text": "\n\n".join(f"{positionen(kk['kamae'])}. {kk['titel']}\n{kk['text']}" for kk in k["kamae"])}
     for f, kf in zip(app["odachi"], k["odachi"], strict=True):
         f["kommentar"] = {"titel": f"{kf['nr']}. {kf['titel']}", "text": kf["text"]}
     return d, app

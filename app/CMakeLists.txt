@@ -40,6 +40,7 @@ qt_add_qml_module(mitori_app
         qml/StartPage.qml
         qml/ProgrammePage.qml
         qml/TechniqueSheet.qml
+        qml/StepList.qml
         qml/CommentPage.qml
         qml/PlayerPage.qml
         qml/PlayerView.qml
