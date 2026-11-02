@@ -1,9 +1,8 @@
 -- Mitori-Heft: setzt das Prüfungsprogramm aus build/daten/*.lua.
 --
 -- Die Daten erzeugt tools/daten.py aus daten/*.yaml (geprüft, Kanji schon
--- eingesetzt). Hier nur der Satz, in drei Ansichten:
+-- eingesetzt). Hier nur der Satz, in zwei Ansichten:
 --   tusche     ein Grad je Seite, zweispaltig (Entwurf 1)
---   matrix     Angriff × Grad, Querformat (Entwurf 2)
 --   landkarte  Technik × Angriff je Gruppe, Querformat (Entwurf 5)
 -- Shinki Toho hat eigene Seiten (shinkitoho-…), weil es keine Angriffe gibt.
 -- Aufruf aus LaTeX: \ansicht{tusche-aikido-1} → mitori.ansicht("tusche-aikido-1").
@@ -97,41 +96,6 @@ function M.tusche(art, nr)
     out("\\end{tuschespalten}")
     out(d.vorschlag and "\\tuscheende[1]" or "\\tuscheende")
   end
-end
-
--------------------------------------------------------------------------------
--- Ansicht 2: Matrix Angriff × Grad
-
-function M.matrix(art, nr)
-  local d = laden(art)
-  local teil = d.teile[nr]
-  local n = #teil.grade
-  out("\\matrixanfang{" .. esc(d.titel) .. "}{Programm für " .. esc(teil.titel) .. "}{" .. (d.jp or "")
-      .. "}{" .. n .. "}{" .. rubrik(teil) .. "}")
-  out("\\begin{longtable}{@{}M{\\mangriff}*{" .. n .. "}{M{\\mspalte}}@{}}")
-  local kopf = { "\\mkopf{Angriff}{}" }
-  for _, gid in ipairs(teil.grade) do
-    local g = grad(d, gid)
-    kopf[#kopf + 1] = "\\mkopf{" .. esc(g.kurzname or g.name) .. "}{" .. g.jp .. "}"
-  end
-  out(table.concat(kopf, "&") .. "\\mkopfende\\endhead")
-  for _, gr in ipairs(teil.gruppen) do
-    out("\\mgruppe{" .. (n + 1) .. "}{" .. esc(gr.titel) .. frage(gr.frage) .. "}{" .. jp(d, gr.jp) .. "}")
-    for _, a in ipairs(gr.angriffe) do
-      local zellen = { ohne_angriff(gr, a) and frage(a.frage) or angriff_tex(d, a) }
-      for _, gid in ipairs(teil.grade) do
-        local t = {}
-        for _, e in ipairs(a.techniken[gid] or {}) do
-          t[#t + 1] = "\\mtech{" .. esc(e.name) .. fragen(e.fragen) .. "}{" .. opt(e.zusatz) .. "}{" .. jp(d, e.jp) .. "}"
-        end
-        zellen[#zellen + 1] = table.concat(t)
-      end
-      out(table.concat(zellen, "&") .. "\\mzeilenende")
-    end
-    if gr.fuss then out("\\mfuss{" .. (n + 1) .. "}{" .. esc(gr.fuss) .. "}") end
-  end
-  out("\\end{longtable}")
-  out("\\matrixende{" .. esc(d.stand) .. "}{" .. (d.vorschlag and "1" or "0") .. "}")
 end
 
 -------------------------------------------------------------------------------
@@ -299,27 +263,6 @@ function M.shinkitoho_odachi()
   end
 end
 
--- Ô-dachi als Gesamttabelle (Matrix-Ansicht)
-function M.shinkitoho_matrix()
-  local d = laden("shinki-toho")
-  out("\\matrixanfang{" .. esc(d.titel) .. "}{Ô-dachi tai Ô-dachi · alle Formen}{大太刀}{0}{Shinki Toho}")
-  out("\\begin{longtable}{@{}r@{\\hspace{3mm}}M{62mm}M{46mm}*{4}{M{\\stspalte}}@{}}")
-  out("\\stmkopf\\endhead")
-  local letzte
-  for _, f in ipairs(d.odachi) do
-    local st = stufe_von(f.nr)
-    if st ~= letzte then
-      local g = d.grade[st]
-      out("\\stmstufe{" .. esc(g.name) .. "}{" .. g.jp .. "}{" .. esc(g.inhalt) .. "}")
-      letzte = st
-    end
-    out(f.nr .. "&" .. esc(f.name) .. form_fragen(f) .. "&" .. form_kanji(f) .. "&" .. esc(f.uchidachi) .. "&"
-        .. esc(f.shidachi) .. "&" .. esc(f.treffer) .. "&" .. esc(f.zanshin) .. "\\mzeilenende")
-  end
-  out("\\end{longtable}")
-  out("\\matrixende{" .. esc(d.stand) .. "}{0}")
-end
-
 -- Landkarte: Kamae Uchidachi × Kamae Shidachi, Zellen = Formnummern
 function M.shinkitoho_landkarte()
   local d = laden("shinki-toho")
@@ -374,19 +317,14 @@ end
 local ANSICHTEN = {
   ["tusche-aikido-1"]       = { M.tusche, "aikido", 1 },
   ["tusche-aikido-2"]       = { M.tusche, "aikido", 2 },
-  ["matrix-aikido-1"]       = { M.matrix, "aikido", 1 },
-  ["matrix-aikido-2"]       = { M.matrix, "aikido", 2 },
   ["landkarte-aikido-1"]    = { M.landkarte, "aikido", 1, 1 },
   ["landkarte-aikido-2"]    = { M.landkarte, "aikido", 2, 1 },
   ["tusche-daitoryu-1"]     = { M.tusche, "daitoryu", 1 },
   ["tusche-daitoryu-2"]     = { M.tusche, "daitoryu", 2 },
-  ["matrix-daitoryu-1"]     = { M.matrix, "daitoryu", 1 },
-  ["matrix-daitoryu-2"]     = { M.matrix, "daitoryu", 2 },
   ["landkarte-daitoryu-1"]  = { M.landkarte, "daitoryu", 1, 2 },
   ["landkarte-daitoryu-2"]  = { M.landkarte, "daitoryu", 2, 2 },
   ["shinkitoho-grade"]      = { M.shinkitoho_grade },
   ["shinkitoho-odachi"]     = { M.shinkitoho_odachi },
-  ["shinkitoho-matrix"]     = { M.shinkitoho_matrix },
   ["shinkitoho-landkarte"]  = { M.shinkitoho_landkarte },
 }
 

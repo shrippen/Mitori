@@ -111,10 +111,6 @@
 \newcommand\textseite[3]{\hochformat\setzerubrik{#1}{#2}\addcontentsline{toc}{subsection}{#3}%
   {\sffamily\bfseries\fontsize{20}{24}\selectfont #3}\par\vspace{2mm}{\color{shu}\rule{30mm}{1.2pt}}\par\vspace{6mm}}
 
-% Tusche-Ecke rechts oben, nur auf der aktuellen Seite
-\newcommand\tuscheecke{\AddToShipoutPictureBG*{\AtPageUpperLeft{%
-  \put(\LenToUnit{\paperwidth},0){\makebox[0pt][r]{\raisebox{-\height}{%
-    \includegraphics[height=.36\paperheight]{grafik/tusche.jpg}}}}}}}
 \makeatother
 
 % Logo mit Disziplin -----------------------------------------------------------
@@ -127,7 +123,6 @@
 % ===== Ansicht 1: Tusche ======================================================
 % \tuscheseite{Disziplin}{Untertitel}{Grad}{Kanji}{Programmzeile}{Stand}{Fußrubrik}
 \newcommand\tuscheseite[7]{\hochformat\setzerubrik{#1 · Prüfungsprogramm}{#7}%
-  \tuscheecke
   \vspace*{-2mm}\logozeile{#1}{#2}\vspace{5mm}%
   {\sffamily\bfseries\fontsize{34}{32}\selectfont #3}\hspace{5mm}%
   {\jpschrift\bfseries\fontsize{24}{24}\selectfont\color{shu}#4}\par
@@ -164,43 +159,10 @@
   \vspace{1.3mm}}}
 \newcommand\tfuss[1]{\par\vspace{.5mm}{\sffamily\fontsize{7}{8.5}\selectfont\color{usuzumi}#1}\par}
 
-% ===== Ansicht 2: Matrix ======================================================
+% ===== Tabellenkopf (Ô-dachi-Formen) ==========================================
 \newcolumntype{M}[1]{>{\raggedright\arraybackslash}p{#1}}
-\newlength\mangriff \newlength\mspalte \newlength\stspalte
-\setlength\stspalte{30mm}
-% dunkles Band über die ganze Breite
-\newcommand\band[3]{\AddToShipoutPictureBG*{\AtPageUpperLeft{\put(0,\LenToUnit{-44mm}){%
-  \begin{tikzpicture}\shade[left color=black,right color=black!72] (0,0) rectangle (\paperwidth,28mm);\end{tikzpicture}}}}%
-  \vspace*{-6mm}%
-  \begin{minipage}[b]{.7\linewidth}\color{white}\sffamily
-    {\bfseries\fontsize{17}{19}\selectfont #1}\par\vspace{.8mm}{\color{white}\rule{.62\linewidth}{.8pt}}\par\vspace{.6mm}
-    {\fontsize{8.5}{10}\selectfont #2}\end{minipage}\hfill
-  {\color{white}\jpschrift\fontsize{20}{20}\selectfont #3}\par\vspace{9mm}}
-% \matrixanfang{Disziplin}{Teil}{Kanji}{Gradzahl}{Fußrubrik}
-\newcommand\matrixanfang[5]{\querformat\setzerubrik{#1 · Matrix}{#5}%
-  \band{#2}{#1}{#3}%
-  \setlength\mangriff{40mm}\setlength\tabcolsep{1.6mm}\renewcommand\arraystretch{1}%
-  \ifnum#4>0 \setlength\mspalte{\dimexpr(\linewidth-\mangriff-#4\tabcolsep*2)/#4\relax}\fi
-  \setlength\LTpre{0pt}\setlength\LTpost{2mm}%
-  \arrayrulecolor{hai}\fontsize{7.8}{9.2}\selectfont}
 \newcommand\mkopf[2]{{\sffamily\bfseries\fontsize{9}{10}\selectfont #1}\if\relax\detokenize{#2}\relax\else\hspace{1.5mm}{\jpschrift\fontsize{8}{10}\selectfont\color{shu}#2}\fi}
 \newcommand\mkopfende{\\[-1mm]\noalign{\color{shu}\hrule height 1.1pt\vspace{.6mm}}}
-\newcommand\mzeilenende{\\\hline}
-\newcommand\mgruppe[3]{\multicolumn{#1}{@{}l}{\rule{0pt}{4.6mm}\sffamily\bfseries\fontsize{9.5}{11}\selectfont\color{shu}#2\hspace{2mm}{\mdseries\fontsize{8}{10}\selectfont\color{usuzumi}#3}}\\\hline}
-\newcommand\mfuss[2]{\multicolumn{#1}{@{}l}{\sffamily\fontsize{7}{9}\selectfont\color{usuzumi}#2}\\}
-% Technik in der Matrix: Name links, Kanji rechtsbündig, Zusatz darunter
-\newcommand\mtech[3]{\par\leavevmode#1\unskip\nobreak\hfil\penalty50\hskip.8em\hbox{}\nobreak\hfil
-  {\fontsize{6.6}{8}\selectfont\color{usuzumi}#3}{\parfillskip=0pt\par}%
-  \if\relax\detokenize{#2}\relax\else{\itshape\fontsize{6.8}{7.8}\selectfont\color{usuzumi}#2\par}\fi}
-% \matrixende{Stand}{Vorschlag 1/0}
-\newcommand\matrixende[2]{\par\vfill{\sffamily\fontsize{7}{9}\selectfont\color{usuzumi}%
-  \ifentwurf\frage{X} Rückfrage, siehe KORREKTUREN.md\quad·\quad\fi
-  \textit{kursiv}: Ausführung oder Variante\quad·\quad
-  \ifnum#2=1 Japanisch in Grau: Vorschlag, noch nicht bestätigt\quad·\quad\fi #1\par}\clearpage}
-
-% Shinki Toho: Kopf und Stufenzeile der Gesamttabelle
-\newcommand\stmkopf{\mkopf{}{}&\mkopf{Form}{}&\mkopf{}{日本語}&\mkopf{Uchidachi}{}&\mkopf{Shidachi}{}&\mkopf{Treffer}{}&\mkopf{Zanshin}{}\mkopfende}
-\newcommand\stmstufe[3]{\multicolumn{7}{@{}l}{\rule{0pt}{4.6mm}\sffamily\bfseries\fontsize{9.5}{11}\selectfont\color{shu}#1\hspace{2mm}{\jpschrift\mdseries\fontsize{8}{10}\selectfont\color{usuzumi}#2}\hspace{3mm}{\mdseries\fontsize{7.5}{9}\selectfont\color{usuzumi}#3}}\\\hline}
 
 % ===== Ansicht 5: Landkarte ===================================================
 \newlength\lspalte \newlength\ltechbreite
