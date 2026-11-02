@@ -36,7 +36,8 @@ costs data or trust:
 - Layers: QML only through services; services own SQLite, files, network.
   Database changes come with a migration and a test on an old database.
 - Texts in both catalogs (de, en). GUI rule: Kante as it is, no hex or
-  `px` outside `app/qml/Kante`, no local copy of a Kante component.
+  `px` outside `app/qml/Kante` and `shinki/`, no local copy of a Kante component. Shinki
+  (`shinki/`) follows `shinki/README.md`: values only from `shinki/tokens.json`.
 - Bug fixes: a test that failed before the fix, and the cause removed, not
   one case hidden. A release follows the release rule (`CHANGELOG.md`, the
   same text in `docs/index.html` `#changes` and the Gitea release notes,

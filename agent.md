@@ -145,6 +145,11 @@ For now releases go out on GitHub only (APK, AppImage, Flatpak); stores (F-Droid
 - Exception: Kimai plugins take their GUI from Knust (`kimai/knust/` in shrippen/Kante), the
   Kante spinoff that adapts Kante to Kimai's look. The same rule applies to Knust: use it
   as it is, and add missing elements to Knust.
+- Exception (owner, 02.11.2026): Mitori's second style **Shinki** (the club's newspaper) is
+  separate from Kante, not a variant of it. Its values live in `shinki/tokens.json`, its
+  components in `shinki/qml/Shinki`, its rules in `shinki/README.md`. Pages move to reach
+  Kante and Shinki through `app/qml/Look`; once `app/qml/Look` exists, a new or changed page
+  uses it (the bible's section 6). The styles: Breeze, Material, Kante (also Leinen), Shinki. Kante stays as it is; Shinki follows its own bible.
 - A project without a GUI (library, CLI, scripts) has nothing to do here.
 - Rule text: https://github.com/shrippen/Kante/blob/main/AGENT-RULE.md
 
