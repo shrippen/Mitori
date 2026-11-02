@@ -49,8 +49,9 @@ Kirigami.Page {
         anchors.fill: parent
         focus: true
         playlist: page.playlist
-        // Both ways: the view moves on (next, training), a caller may set the page's index.
-        Component.onCompleted: index = page.index
+        // Both ways: the view moves on (next, training), a caller may set the page's index. Bound
+        // at first, so that the view starts at it (not at 0, loading another file first).
+        index: page.index
         onIndexChanged: page.index = index
         onShown: id => page.shown(id)
         onBackRequested: page.Kirigami.PageStack.pop()

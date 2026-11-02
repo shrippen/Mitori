@@ -16,8 +16,8 @@ Kirigami.ScrollablePage {
 
     title: "Mitori 見取り"
 
-    // Landscape and wide enough for four tiles in a row.
-    readonly property bool wide: width > height && width >= Kirigami.Units.gridUnit * 40
+    // A tablet in landscape (the shorter side as on a 600 dp tablet; not a phone held sideways).
+    readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 30
 
     actions: [
         Kirigami.Action {

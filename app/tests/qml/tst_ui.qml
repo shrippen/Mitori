@@ -554,10 +554,60 @@ TestCase {
         pane.item.go(1)
         tryCompare(page, "lastId", page.playlist[pane.item.index].id)
         shot("2t-tablet")
+        // Turned to portrait and back: the chosen technique stays.
+        page.open(page.playlist[3])
+        tryCompare(pane.item.current, "id", page.playlist[3].id, 3000)
+        const chosen = page.playlist[3].id
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => pane.item && pane.item.current.id === chosen, 3000, "still " + chosen)
+        compare(page.lastId, chosen)
+        // Another grade: its first technique plays, not the same place in another list.
+        Programme.setGrade("aikido", "k4")
+        page.grade = "k4"
+        tryVerify(() => pane.item && pane.item.current.id === page.playlist[0].id, 3000)
+        compare(page.lastId, page.playlist[0].id)
+        // A phone in landscape is no tablet: no split, ▶ opens the player page.
+        window.width = 915
+        window.height = 412
+        tryVerify(() => !page.split, 2000, "phone landscape")
         window.width = 420
         window.height = 800
         tryVerify(() => !page.split)
+        Programme.setGrade("aikido", "k5")
         window.pageStack.pop()
+    }
+
+    // Tablet: a technique with a comment (Shinki Toho) shows the way to it beside the player.
+    function test_2u_tablet_comment() {
+        const grade = Programme.grades("shinkitoho")[0].id
+        const rows = Programme.entries("shinkitoho", grade).filter(r => r.kind === "entry" && r.video && r.comment)
+        if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Shinki Toho (set MITORI_VIDEOS)")
+        }
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", grade)
+        window.width = 1280
+        window.height = 800
+        const page = push("ProgrammePage")
+        tryVerify(() => page.split)
+        page.open(rows[0])
+        const pane = findChild(page, "playerPane")
+        tryCompare(pane.item.current, "id", rows[0].id, 3000)
+        const button = findChild(pane.item, "commentButton")
+        verify(button && button.visible, "comment beside the player")
+        button.clicked()
+        tryVerify(() => window.pageStack.currentItem !== page, 2000)
+        compare(window.pageStack.currentItem.entry.id, rows[0].id)
+        tryVerify(() => !pane.item.playing, 2000, "the player pauses under another page")
+        window.pageStack.pop()
+        window.width = 420
+        window.height = 800
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
     }
 
     // Tablet in landscape: the start menu as a grid of four, the tiles in one row.

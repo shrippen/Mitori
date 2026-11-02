@@ -49,6 +49,7 @@ Item {
     // Back (landscape, training done) and the notes of the technique: the page decides.
     signal backRequested()
     signal notesRequested(var entry)
+    signal commentRequested(var entry)
 
     onCurrentChanged: {
         shown(current.id)
@@ -73,6 +74,9 @@ Item {
         } else {
             player.play()
         }
+    }
+    function pause() {
+        player.pause()
     }
     function step(direction) {
         player.pause()
@@ -292,6 +296,15 @@ Item {
                     onRated: if (page.training) page.nextOpen()
                 }
 
+                // Beside the list on a tablet the sheet does not open: the comment is here.
+                KanteButton {
+                    objectName: "commentButton"
+                    visible: page.compact && !!page.current.comment
+                    icon.name: "documentinfo"
+                    text: qsTr("Comment")
+                    onClicked: page.commentRequested(page.current)
+                }
+
                 NoteRow {
                     Layout.fillWidth: true
                     entry: page.current
@@ -321,7 +334,7 @@ Item {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    visible: !page.landscape && !page.compact
+                    visible: !page.landscape
 
                     KanteToolButton {
                         enabled: page.index > 0
