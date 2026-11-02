@@ -174,21 +174,27 @@ Kirigami.Page {
                 // Only a key moves the view (a new or deleted note above shifts the index, not the
                 // view), also when the index stays (the last note again after scrolling away).
                 Keys.onPressed: event => {
-                    if ([Qt.Key_Up, Qt.Key_Down, Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_End].includes(event.key)) {
-                        Qt.callLater(() => positionViewAtIndex(currentIndex, ListView.Contain))
+                    const keys = [Qt.Key_Up, Qt.Key_Down, Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Home, Qt.Key_End]
+                    if (!keys.includes(event.key)) {
+                        return
                     }
-                    const page_ = Math.max(1, lastShown() - firstShown())
-                    if (event.key === Qt.Key_PageDown) {
-                        currentIndex = Math.min(count - 1, currentIndex + page_)
-                    } else if (event.key === Qt.Key_PageUp) {
-                        currentIndex = Math.max(0, currentIndex - page_)
+                    if (count === 0) {
+                        event.accepted = true               // nothing to move to
+                        return
+                    }
+                    // At the first note the count above it shows too.
+                    Qt.callLater(() => currentIndex === 0 ? positionViewAtBeginning()
+                                                          : positionViewAtIndex(currentIndex, ListView.Contain))
+                    if (event.key === Qt.Key_PageDown || event.key === Qt.Key_PageUp) {
+                        const step = Math.max(1, lastShown() - firstShown())
+                        currentIndex = event.key === Qt.Key_PageDown ? Math.min(count - 1, currentIndex + step)
+                                                                     : Math.max(0, currentIndex - step)
                     } else if (event.key === Qt.Key_Home) {
                         currentIndex = 0
-                        positionViewAtBeginning()       // with the count above the first note
                     } else if (event.key === Qt.Key_End) {
                         currentIndex = count - 1
                     } else {
-                        return
+                        return                              // Up and Down: the list moves the index
                     }
                     event.accepted = true
                 }
