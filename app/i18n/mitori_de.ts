@@ -817,39 +817,39 @@
 <context>
     <name>StatsPage</name>
     <message>
-        <location filename="../qml/StatsPage.qml" line="57"/>
+        <location filename="../qml/StatsPage.qml" line="56"/>
         <source>Statistics</source>
         <translation>Statistik</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="63"/>
+        <location filename="../qml/StatsPage.qml" line="62"/>
         <source>Last 30 days</source>
         <translation>Letzte 30 Tage</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="72"/>
+        <location filename="../qml/StatsPage.qml" line="71"/>
         <source>practice days</source>
         <translation>Übungstage</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="77"/>
+        <location filename="../qml/StatsPage.qml" line="76"/>
         <source>techniques practised</source>
         <translation>Techniken geübt</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="82"/>
+        <location filename="../qml/StatsPage.qml" line="81"/>
         <source>A technique counts once on each day it is rated.</source>
         <translation>Eine Technik zählt an jedem Tag, an dem sie eingeschätzt wird, einmal.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="89"/>
-        <location filename="../qml/StatsPage.qml" line="121"/>
+        <location filename="../qml/StatsPage.qml" line="88"/>
+        <location filename="../qml/StatsPage.qml" line="120"/>
         <source>Practice days</source>
         <translation>Übungstage</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StatsPage.qml" line="47"/>
-        <location filename="../qml/StatsPage.qml" line="117"/>
+        <location filename="../qml/StatsPage.qml" line="46"/>
+        <location filename="../qml/StatsPage.qml" line="116"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n Technik</numerusform>
@@ -857,64 +857,64 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="47"/>
+        <location filename="../qml/StatsPage.qml" line="46"/>
         <source>average</source>
         <translation>Schnitt</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="117"/>
-        <location filename="../qml/StatsPage.qml" line="126"/>
+        <location filename="../qml/StatsPage.qml" line="116"/>
+        <location filename="../qml/StatsPage.qml" line="125"/>
         <source>no practice</source>
         <translation>kein Training</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="127"/>
+        <location filename="../qml/StatsPage.qml" line="126"/>
         <source>1–2 techniques</source>
         <translation>1–2 Techniken</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="130"/>
+        <location filename="../qml/StatsPage.qml" line="129"/>
         <source>10 and more</source>
         <translation>10 und mehr</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="134"/>
+        <location filename="../qml/StatsPage.qml" line="133"/>
         <source>Rating by grade</source>
         <translation>Stand je Grad</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="166"/>
+        <location filename="../qml/StatsPage.qml" line="165"/>
         <source>%1 of %2 exam-ready</source>
         <translation>%1 von %2 prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="190"/>
+        <location filename="../qml/StatsPage.qml" line="189"/>
         <source>Exam mode · average per round</source>
         <translation>Prüfungsmodus · Schnitt je Runde</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="200"/>
+        <location filename="../qml/StatsPage.qml" line="199"/>
         <source>M/d</source>
         <comment>date under a bar</comment>
         <translation>d.M.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="205"/>
+        <location filename="../qml/StatsPage.qml" line="204"/>
         <source>Average</source>
         <translation>Schnitt</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="209"/>
+        <location filename="../qml/StatsPage.qml" line="208"/>
         <source>Exam mode, average per round</source>
         <translation>Prüfungsmodus, Schnitt je Runde</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="220"/>
+        <location filename="../qml/StatsPage.qml" line="219"/>
         <source>Vertical: average of the ratings (1 %1 … 4 %2). Horizontal: date of the round.</source>
         <translation>Senkrecht: Durchschnitt der Einschätzungen (1 %1 … 4 %2). Waagerecht: Datum der Runde.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="222"/>
+        <location filename="../qml/StatsPage.qml" line="221"/>
         <source>No round in the exam mode yet.</source>
         <translation>Noch keine Runde im Prüfungsmodus.</translation>
     </message>

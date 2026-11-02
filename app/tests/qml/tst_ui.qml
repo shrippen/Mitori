@@ -606,6 +606,9 @@ TestCase {
         const heat = findChild(page, "techniqueMatrix")
         compare(heat.rowCount, page.shown.rows.length)
         compare(heat.columnCount, page.shown.columns.length)
+        // Technique names in the text font, not the small mono labels.
+        compare(heat.rowLabelFont.family, KanteStyle.smallFont.family)
+        compare(heat.rowLabelFont.pointSize, KanteStyle.smallFont.pointSize)
         let gap = null, target = null
         for (let r = 0; r < heat.rowCount; r++) {
             for (let c = 0; c < heat.columnCount; c++) {

@@ -36,7 +36,6 @@ Kirigami.ScrollablePage {
     property string discipline: Programme.discipline
     // The last eight exam rounds of the discipline, oldest first.
     readonly property var rounds: Practice.revision >= 0 ? Practice.rounds(discipline, 8) : []
-    // Smallest bar of the exam chart, in averages above 1 (rounds to 1 in the read-out).
 
     function averageText(value) {
         const rounded = Math.round(value * 10) / 10
