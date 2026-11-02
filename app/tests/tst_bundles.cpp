@@ -145,6 +145,8 @@ private slots:
         b.unlock(u"7KQ2M-X9HDV-3TAPR-WE6YA"_s);             // check character wrong: a typo
         QCOMPARE(failed.count(), 1);
         QCOMPARE(failed.takeFirst().at(0).value<Bundles::UnlockError>(), Bundles::UnlockError::Typo);
+        b.unlock(u"7KQ2M-X9HDV-3TAPR-WE6YU"_s);             // a character outside the alphabet: a typo too
+        QCOMPARE(failed.takeFirst().at(0).value<Bundles::UnlockError>(), Bundles::UnlockError::Typo);
         b.unlock(u"7KQ2M-X9HDV"_s);                         // too short
         QCOMPARE(failed.takeFirst().at(0).value<Bundles::UnlockError>(), Bundles::UnlockError::Invalid);
         b.unlock(u"0000000000000000000"_s + u'0');           // valid, not in the manifest

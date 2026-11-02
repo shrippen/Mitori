@@ -2365,8 +2365,8 @@
     </message>
     <message>
         <location filename="../qml/VideosPage.qml" line="54"/>
-        <source>A code has 20 characters (letters and digits); this one is not complete.</source>
-        <translation>Ein Code hat 20 Zeichen (Buchstaben und Ziffern); dieser ist nicht vollständig.</translation>
+        <source>A code has 20 characters (letters and digits); check that none is missing or extra.</source>
+        <translation>Ein Code hat 20 Zeichen (Buchstaben und Ziffern); bitte prüfen, dass keines fehlt oder zu viel ist.</translation>
     </message>
     <message>
         <location filename="../qml/VideosPage.qml" line="55"/>
