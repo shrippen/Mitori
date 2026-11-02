@@ -9,6 +9,11 @@ import Mitori
 Kirigami.ScrollablePage {
     id: page
 
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
+    // Kante's page ground (the scope's background role is the dialog colour).
+    property Item kanteScope: KanteScope { target: page }
+    background: Rectangle { color: KanteStyle.backgroundColor }
+
     title: "Mitori 見取り"
 
     actions: [

@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import Kante
 import Mitori
 
 // The pages as the user meets them: start menu, programme, technique sheet, comment, player.
@@ -194,6 +195,9 @@ TestCase {
     function test_3b_settings() {
         const page = push("SettingsPage")
         compare(page.title, "Settings")
+        // Kante's ground, not the platform's (ScrollablePage does not inherit the theme).
+        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor),
+               page.background.color + " is not " + KanteStyle.backgroundColor)
         shot("4b-settings")
         window.pageStack.pop()
     }
@@ -345,6 +349,7 @@ TestCase {
         compare(page.due.length, 1 - newToday)
         verify(page.due.every(r => r.id !== first), "practised today: not due")
         compare(findChild(page, "dueCount").value, String(1 - newToday))
+        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor), "Kante's ground")
         shot("7-today")
         if (page.due.length > 0) {
             Practice.rate(page.due[0].id, 1)
