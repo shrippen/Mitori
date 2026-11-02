@@ -8,12 +8,14 @@
 
 inline bool isDash(QChar c)
 {
-    return c == u'-' || c == u'‐' || c == u'‑' || c == u'‒' || c == u'–' || c == u'—' || c == u'−';
+    return c == u'-' || c == u'‐' || c == u'‑' || c == u'‒' || c == u'–' || c == u'—' || c == u'―' || c == u'⸺' || c == u'−';
 }
 
 // The form search compares: lower case, without accents (Ô-dachi finds o dachi, größer finds
-// grosser; kana keep their dakuten), full-width letters folded, dashes, slashes and middle dots
-// as spaces, spaces simplified. `keepHyphens` writes dashes as "-" instead.
+// grosser; kana keep their dakuten), full-width letters folded, apostrophes and invisible
+// characters (soft hyphen) left out (San'nin as sannin), dashes, other punctuation and symbols
+// as spaces ("(Shiho-nage)," starts and ends words), spaces simplified. `keepHyphens` writes
+// dashes as "-" instead.
 inline QString searchKey(const QString &text, bool keepHyphens = false)
 {
     QString key;
@@ -21,13 +23,16 @@ inline QString searchKey(const QString &text, bool keepHyphens = false)
         if (c.unicode() >= 0x0300 && c.unicode() <= 0x036F) {
             continue;   // combining accents of Latin letters
         }
+        if (c == u'\'' || c == u'’' || c == u'‘' || c == u'ʼ' || c.category() == QChar::Other_Format) {
+            continue;
+        }
         const QChar lower = c.toLower();
         if (lower == u'ß') {
             key += QStringLiteral("ss");
         } else if (isDash(c)) {
             key += keepHyphens ? QChar(u'-') : QChar(u' ');
         } else {
-            key += (c == u'/' || c == u'·') ? QChar(u' ') : lower;
+            key += (c.isPunct() || c.isSymbol()) ? QChar(u' ') : lower;
         }
     }
     return key.simplified().normalized(QString::NormalizationForm_C);   // kana with dakuten as one
@@ -114,9 +119,9 @@ private:
                     continue;
                 }
                 const qsizetype end = at + w.size();
-                const bool acrossSpace = std::any_of(m_spaces.cbegin(), m_spaces.cend(),
-                                                     [&](qsizetype s) { return s > at && s < end; });
-                if (!acrossSpace || m_ends.contains(end)) {
+                const auto space = std::upper_bound(m_spaces.cbegin(), m_spaces.cend(), at);
+                const bool acrossSpace = space != m_spaces.cend() && *space < end;
+                if (!acrossSpace || std::binary_search(m_ends.cbegin(), m_ends.cend(), end)) {
                     return true;
                 }
             }

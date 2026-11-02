@@ -46,8 +46,9 @@ public:
     // `gradeName`.
     Q_INVOKABLE QVariantList practiceEntries(const QString &discipline) const;
     // Techniques whose name, attack, Japanese, additions or group contain every word of `query`
-    // (see SearchText), across all disciplines and grades in programme order (at most `limit`). Each row as in entries(), with `discipline`, `disciplineName`,
-    // `grade`, `gradeName` and `groupName` (Tachi-waza · Mae-seme …).
+    // (see SearchText), across all disciplines and grades in programme order (at most `limit`).
+    // Each row as in entries(), with `discipline`, `disciplineName`, `grade`, `gradeName` and
+    // `groupName` (Tachi-waza · Mae-seme …).
     Q_INVOKABLE QVariantList search(const QString &query, int limit = 50) const;
     // One entry by id (the same map as in entries()), or an empty map.
     Q_INVOKABLE QVariantMap entry(const QString &id) const;

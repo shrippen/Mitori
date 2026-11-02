@@ -109,6 +109,10 @@ private slots:
                  programme.search(QStringLiteral("ikkyo-irimi"), 1000).size());
         QCOMPARE(programme.search(QStringLiteral("ikkyo−irimi"), 1000).size(),
                  programme.search(QStringLiteral("ikkyo-irimi"), 1000).size());
+        // Apostrophes vanish (San'nin-gake as sannin), brackets and ・ separate.
+        QVERIFY(!programme.search(QStringLiteral("sannin")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("rechterfuss")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("片手取り合半身")).isEmpty());
         // Kana keep their dakuten: が is not か.
         QCOMPARE(searchKey(QStringLiteral("ガ")), QStringLiteral("ガ"));
         // Full-width Latin from a Japanese keyboard folds.

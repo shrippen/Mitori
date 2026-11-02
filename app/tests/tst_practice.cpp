@@ -305,6 +305,14 @@ private slots:
         practice.addNote(QStringLiteral("g"), QStringLiteral("Erst mit Tenkan ausweichen"));
         QVERIFY(practice.searchNotes(QStringLiteral("mitte")).isEmpty());
         QCOMPARE(practice.searchNotes(QStringLiteral("mittenkan")).size(), 1);
+        // Punctuation separates words: a word after "(" or before "," still starts or ends there.
+        practice.addNote(QStringLiteral("h"), QStringLiteral("Wie im Kurs (Shiho-nage) gezeigt. Irimi nage, dann „Kote gaeshi“."));
+        QCOMPARE(practice.searchNotes(QStringLiteral("shihonage")).size(), 2);   // with "e"
+        QCOMPARE(practice.searchNotes(QStringLiteral("iriminage")).size(), 1);
+        QCOMPARE(practice.searchNotes(QStringLiteral("kotegaeshi")).size(), 1);
+        // A soft hyphen is invisible.
+        practice.addNote(QStringLiteral("i"), QStringLiteral("Mit\u00ADte halten"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("mitte")).size(), 1);
         // Capital ẞ as ß.
         QCOMPARE(practice.searchNotes(QStringLiteral("NUR EIN FUẞ")).size(), 1);
         QVERIFY(practice.searchNotes(QStringLiteral(" ")).isEmpty());
