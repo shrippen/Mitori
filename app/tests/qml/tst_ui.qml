@@ -423,11 +423,47 @@ TestCase {
         const editor = findChild(page, "noteEditor")
         tryVerify(() => editor.opened, 2000, "press and hold opens the editor")
         compare(editor.note.uid, page.notes[0].uid)
-        editor.close()
-        verify(Practice.changeNote(page.notes[0].uid, "Hüfte viel früher drehen"))
+        // Save from the editor.
+        findChild(editor, "noteArea").text = "Hüfte viel früher drehen"
+        editor.customFooterActions[1].trigger()
+        tryVerify(() => !editor.opened)
         compare(page.notes[0].text, "Hüfte viel früher drehen")
-        verify(Practice.deleteNote(page.notes[1].uid))
+        // Right-click the second note, delete it from the editor.
+        wait(500)                                       // the editor's overlay fades out
+        const second = findChildren(page, "note").find(n => n.modelData.uid === page.notes[1].uid)
+        mouseClick(second, 20, second.height / 2, Qt.RightButton)
+        tryVerify(() => editor.opened)
+        compare(editor.note.uid, page.notes[1].uid)
+        editor.customFooterActions[0].trigger()
+        tryVerify(() => !editor.opened)
         compare(page.notes.length, 1)
+        compare(findChild(page, "dayName").text, "Today")
+        window.pageStack.pop()
+    }
+
+    function findChildren(item, name) {
+        let found = []
+        if (item.objectName === name) {
+            found.push(item)
+        }
+        for (let i = 0; i < item.children.length; i++) {
+            found = found.concat(findChildren(item.children[i], name))
+        }
+        return found
+    }
+
+    // A note begun in the player belongs to the technique it was typed for, also when the player
+    // moves on before it is added (training moves on after a rating).
+    function test_8b_note_draft_stays_with_its_technique() {
+        const page = playerAt(1)
+        const first = page.current.id
+        const field = findChild(page, "noteField")
+        field.text = "für die erste Technik"
+        page.go(1)
+        verify(page.current.id !== first)
+        compare(Practice.lastNote(first).text, "für die erste Technik", "saved for the technique it was typed for")
+        verify(Practice.lastNote(page.current.id).text !== "für die erste Technik")
+        compare(field.text, "", "the field is empty for the next technique")
         window.pageStack.pop()
     }
 

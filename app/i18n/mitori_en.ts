@@ -4,7 +4,7 @@
 <context>
     <name>StartPage</name>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="69"/>
+        <location filename="../qml/StartPage.qml" line="74"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n due</numerusform>
@@ -15,7 +15,7 @@
 <context>
     <name>TodayPage</name>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="35"/>
+        <location filename="../qml/TodayPage.qml" line="40"/>
         <source>%1 · %n day(s) ago</source>
         <translation>
             <numerusform>%1 · %n day ago</numerusform>
@@ -23,7 +23,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="37"/>
+        <location filename="../qml/TodayPage.qml" line="42"/>
         <source>not practised for %n day(s)</source>
         <translation>
             <numerusform>not practised for %n day</numerusform>
@@ -31,7 +31,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="99"/>
+        <location filename="../qml/TodayPage.qml" line="104"/>
         <source>%n of %1 with a video come(s) into the training; practise the others from the list below.</source>
         <translation>
             <numerusform>%n of %1 has a video and comes into the training; practise the others from the list below.</numerusform>

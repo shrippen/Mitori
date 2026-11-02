@@ -275,6 +275,12 @@ Kirigami.Page {
                     Layout.fillWidth: true
                     entry: page.current
                     onNotesRequested: page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: page.current })
+                    // Above the on-screen keyboard: scroll the field into view.
+                    onFieldFocused: field => Qt.callLater(() => {
+                        const y = field.mapToItem(controls, 0, 0).y
+                        controlsView.contentY = Math.max(0, Math.min(controlsView.contentHeight - controlsView.height,
+                                                                      y - controlsView.height + field.height + Kirigami.Units.largeSpacing))
+                    })
                 }
 
                 KanteHintCard {

@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls as QQC2
-import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
@@ -51,6 +50,7 @@ Kirigami.Dialog {
     QQC2.TextArea {
         id: area
 
+        objectName: "noteArea"
         wrapMode: TextEdit.Wrap
         Accessible.name: qsTr("Note")
     }

@@ -37,9 +37,10 @@ Kirigami.ScrollablePage {
 
     title: qsTr("Notes")
 
+    // Practice.today only makes the names follow a new day: as a QDate it reaches JS as
+    // midnight UTC, the day before west of UTC.
     function dayName(day) {
-        const today = Practice.today
-        if (day.toDateString() === today.toDateString()) {
+        if (Practice.today && day.toDateString() === new Date().toDateString()) {
             return qsTr("Today")
         }
         return day.toLocaleDateString(Qt.locale(), Locale.ShortFormat)
@@ -84,6 +85,14 @@ Kirigami.ScrollablePage {
 
         QQC2.Label {
             Layout.fillWidth: true
+            visible: Practice.errorString !== ""
+            text: Practice.errorString
+            color: KanteStyle.negativeTextColor
+            wrapMode: Text.Wrap
+        }
+
+        QQC2.Label {
+            Layout.fillWidth: true
             visible: page.notes.length === 0
             text: qsTr("No notes on this technique yet.")
             color: KanteStyle.mutedTextColor
@@ -102,6 +111,7 @@ Kirigami.ScrollablePage {
                 spacing: Kirigami.Units.smallSpacing
 
                 KanteSectionLabel {
+                    objectName: "dayName"
                     text: page.dayName(dayBlock.modelData.day)
                 }
                 Repeater {
@@ -117,9 +127,20 @@ Kirigami.ScrollablePage {
                         text: modelData.text
                         wrapMode: Text.Wrap
                         padding: Kirigami.Units.smallSpacing
-                        background: Rectangle { color: KanteStyle.cardColor }
-                        Accessible.role: Accessible.StaticText
+                        // Keyboard and screen readers: Tab to the note, Enter (or the press action)
+                        // opens the editor.
+                        activeFocusOnTab: true
+                        background: Rectangle {
+                            color: KanteStyle.cardColor
+                            border.width: noteItem.activeFocus ? KanteStyle.borderWidth : 0
+                            border.color: KanteStyle.focusColor
+                        }
+                        Accessible.role: Accessible.Button
                         Accessible.name: text
+                        Accessible.description: qsTr("Change or delete")
+                        Accessible.onPressAction: editor.edit(modelData)
+                        Keys.onReturnPressed: editor.edit(modelData)
+                        Keys.onEnterPressed: editor.edit(modelData)
 
                         TapHandler {
                             acceptedButtons: Qt.LeftButton
@@ -137,7 +158,7 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             visible: page.notes.length > 0
-            text: qsTr("Press and hold a note to change or delete it.")
+            text: qsTr("Press and hold a note (or Enter on it) to change or delete it.")
             color: KanteStyle.mutedTextColor
             wrapMode: Text.Wrap
         }

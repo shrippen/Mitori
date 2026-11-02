@@ -211,6 +211,10 @@ void Practice::noteSaved(bool ok)
     }
     ++m_notesRevision;
     emit notesChanged();
+    if (!m_error.isEmpty()) {
+        m_error.clear();
+        emit errorChanged();
+    }
 }
 
 bool Practice::addNote(const QString &entry, const QString &text)
