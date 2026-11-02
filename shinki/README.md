@@ -6,8 +6,8 @@ Tusche, ein einziges Rot. Vorlage für die App ist der Clickdummy (`entwuerfe/cl
 Ansicht im Stil Shinki.
 
 Shinki ist **kein Unterthema von Kante**, sondern ein eigener Stil mit eigenen Farben, Schriften und
-Bausteinen (Owner, 02.11.2026). Er ist eine ausdrückliche Ausnahme von der GUI-Regel in `agent.md` und lebt
-vorerst hier im Repo, in diesem Ordner.
+Bausteinen (Owner, 02.11.2026). Er ist eine Ausnahme von der GUI-Regel. `agent.md` (GUI rule) und
+`REVIEW.md` nennen sie. Shinki lebt vorerst hier im Repo, in diesem Ordner.
 
 ```
 shinki/
@@ -35,15 +35,18 @@ shinki/
    - Ordnende Überschriften stehen schmal, in Versalien und rot (PT Sans Narrow), wie die Kolumnentitel der Zeitung.
    - Was man liest und übt, steht in einer Buchschrift (Crimson Pro): Techniknamen, Notizen, Kommentare.
    - Japanisch steht in einer Mincho (Noto Serif JP).
-5. **Kanji als Zeichen.** Die Kacheln und Köpfe tragen ihr Kanji (稽古, 試, 講, 記録, 辞書, 図) in Rot. Es gehört
+5. **Kanji als Zeichen.** Die Kacheln tragen ihr Kanji (技, 稽, 試, 記, 講, 図, 辞) in Rot, die Köpfe ihr Wort
+   (稽古, 記録, 辞書 …) klein daneben. Es gehört
    zur Erkennung, nicht zur Übersetzung.
 6. **Lesbar zuerst.**
-   - Jeder Text erreicht WCAG AA, Abschnitt 3 nennt die Werte.
+   - Jeder Text erreicht WCAG AA (4,5:1) auf jedem Grund, auf dem er stehen darf. Abschnitt 2 nennt die Werte.
    - Rot steht nie allein für eine Bedeutung: Gewählt ist zugleich gefüllt oder unterstrichen, eine Stufe zugleich die Zahl.
 
 ## 2 Farben
 
 Rollen statt Werte: Bausteine und Seiten nennen die Rolle, nie die Hex-Zahl. Die Quelle der Werte ist `tokens.json`.
+Der Clickdummy hat für Nebentext `#77716C`; auf `chip` und `selected` verfehlt das AA (4,3 und 4,1). Shinki
+nimmt darum das etwas dunklere `#6B655F` (nahe an `--muted` der Clickdummy-Seite, `#6E6863`).
 
 | Rolle | Wert | Wofür | Kontrast auf `paper` |
 |---|---|---|---|
@@ -52,10 +55,11 @@ Rollen statt Werte: Bausteine und Seiten nennen die Rolle, nie die Hex-Zahl. Die
 | `chip` | `#F3F1EE` | Hinweisfläche, Marke, Knopf unter dem Zeiger | |
 | `line` | `#E6E2DD` | feine Linien, Rahmen, Trenner | 1,3 (Linie, kein Text) |
 | `ink` | `#1D1B1A` | Text, Symbole, gewähltes Tempo | 17,2 |
-| `inkMuted` | `#77716C` | Nebentext: Untertitel, Achsen, Zeiten | 4,8 (auf `paperAlt` 4,6) |
-| `red` | `#CE171E` | Akzent: gewählt, Kopfzeile, Hauptknopf, Fortschritt | 5,6 |
+| `inkMuted` | `#6B655F` | Nebentext: Untertitel, Achsen, Zeiten | 5,8 (`paperAlt` 5,5, `chip` 5,1, `selected` 4,8) |
+| `selected` | `#FAE5E5` | gewählte Listenzeile (9 % Rot auf `paper`) | |
+| `red` | `#CE171E` | Akzent: gewählt, Kopfzeile, Hauptknopf, Fortschritt | 5,6 (`chip` 5,0) |
 | `onRed` | `#FFFFFF` | Text auf Rot | 5,6 |
-| `scrim` | `#140F0A` mit 38 % | Grund hinter einem Blatt (Bottom Sheet) | |
+| `scrim` | `#140F0A`, Deckkraft 0,38 | Grund hinter einem Blatt (Bottom Sheet) | |
 | `video` | `#111111` | Fläche hinter dem Video, Player quer | |
 
 **Stufen** (Einschätzung, Stand je Grad, Kalender, Landkarte). Es ist eine Reihe von Papier zu Rot. Die
@@ -72,7 +76,7 @@ Zahl der Stufe steht immer dabei, so trägt die Farbe die Bedeutung nicht allein
 **Zustände.**
 - Fehler stehen in `red` mit Text. Es gibt kein zweites Rot.
 - Erfolg steht in `ink` mit Haken. Shinki kennt kein Grün; die Bestätigung ist das Wort.
-- Warnungen bekommen eine `chip`-Fläche mit einem roten Strich links (3 px), wie der Hinweis „Code eingeben“ im Programm.
+- Warnungen und wichtige Hinweise stehen auf `paperAlt` mit 1 px Rahmen und 3 px Rot links, wie „Code eingeben“ im Programm (`.novid.buy`).
 - **Fokus** (Tastatur) ist ein 2 px Rahmen in `ink`. Dunkel auf Weiß ist überall sichtbar und verwechselt sich nicht mit „gewählt“ (Rot).
 
 **Dunkel.** Shinki ist ein heller Stil, wie die gedruckte Zeitung. Wer dunkel will, nimmt Kante. Nur der
@@ -91,8 +95,8 @@ Akzent `red`, Linien weiß mit 30 %.
 Die Shinki News setzen Myriad und Minion. Mitori nimmt freie Schriften mit ähnlichem Bild. PT Sans und
 PT Sans Narrow ersetzen Myriad und Myriad Condensed, Crimson Pro ersetzt Minion. Alle stehen unter der SIL
 Open Font License, dürfen also mit der App ausgeliefert werden. Noto Serif JP kommt als Teilmenge: nur die
-Zeichen der Programmdaten und des Glossars (`tools/` erzeugt sie beim Build). Die ganze Schrift hat über
-20 MB.
+Zeichen, die die App zeigt: Programmdaten, Glossar, QML und Übersetzungskataloge (die Kachel-Kanji 稽 試 講
+記 図 辞 stehen nur im QML). `tools/` erzeugt sie beim Build. Die ganze Schrift hat über 20 MB.
 
 Größen (bei 96 dpi; die App rechnet sie in die Einheit der Plattform um):
 
@@ -113,8 +117,9 @@ Zahlen in Tabellen, Zeiten und Zählern stehen in Tabellenziffern.
 ## 4 Formen und Abstände
 
 - **Ecken.** Flächen sind eckig (Radius 0): Kacheln, Karten, Knöpfe, Felder, Blätter. Rund sind nur der
-  Abspielknopf (Kreis, 52 px im Player, 34 px in der Liste), der Punkt im Schieber (14 px) und die
-  Stufenpunkte (8 px).
+  Abspielknopf (Kreis, 52 px im Player, 34 px in der Liste), der Punkt im Schieber (14 px), die
+  Stufenpunkte (8 px), der Griff des Blatts (2 px) und die Fläche eines Symbolknopfs unter dem Zeiger (`.iconbtn`).
+- **Schatten.** Nur das Blatt wirft einen, nach oben (0 −6 px, 24 px weich, 18 % Schwarz): Es liegt über der Seite.
 - **Linien.** 1 px in `line` für Rahmen und Trenner. Listenzeilen trennt eine Linie in `paperAlt`.
   Gruppenköpfe tragen unten eine Linie in `line`.
 - **Gewählt.**
@@ -134,7 +139,8 @@ Zahlen in Tabellen, Zeiten und Zählern stehen in Tabellenziffern.
 
 ## 5 Bausteine
 
-Jeder Baustein nennt, was er zeigt, und seine Werte. Die Namen sind die des Clickdummys (CSS-Klasse in Klammern).
+Jeder Baustein nennt, was er zeigt, und seine Werte, mit der CSS-Klasse des Clickdummys in Klammern. Was der
+Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest; das steht dort ohne Klasse.
 
 - **Kopf** (`.hd`)
   - Optional ein Logo-Quadrat: 40 px, `red`, darauf 神氣 in Noto Serif JP, weiß.
@@ -149,7 +155,7 @@ Jeder Baustein nennt, was er zeigt, und seine Werte. Die Namen sind die des Clic
 - **Gruppenkopf** (`.gh`): Kolumne in Rot, das Japanische in `inkMuted` daneben, unten eine Linie.
 - **Listenzeile** (`.li`)
   - Techniknamen in Crimson Pro 16 px, Angriff oder Zusatz klein darunter.
-  - Rechts die vier Stufenpunkte und der Abspielknopf (rot gefüllt, Video da) oder ein Ring (kein Video).
+  - Rechts die vier Stufenpunkte und der Abspielknopf (rot gefüllt); ohne Video bleibt der Platz leer.
 - **Blatt** (`.sheet`)
   - Weiß von unten, darauf ein Griff 40 × 4 px in `line`.
   - Oben Eyebrow, Titel 25 px Crimson Pro, Japanisch 16 px darunter.
@@ -159,8 +165,8 @@ Jeder Baustein nennt, was er zeigt, und seine Werte. Die Namen sind die des Clic
   - Hauptknopf: rot gefüllt, weiß, 15 px fett, volle Breite im Blatt.
   - Zweitknopf: weiß mit 1 px Rahmen, Text `ink`.
 - **Feld** (`.qnote input`): `paperAlt`, 1 px Rahmen, Notizen in Crimson Pro 15 px. Im Fokus wird der Rahmen 2 px `ink`.
-- **Schalter** (`.sw`): eckige Bahn; aus heißt `line`, an heißt `red`, der Knopf ist weiß. An und Aus unterscheidet auch die Seite des Knopfes.
-- **Hinweis** (`.novid`, `.notice`): `chip`-Fläche, Text 12,5 px `inkMuted`, die Aktion rot und fett am Ende.
+- **Schalter**: eckige Bahn; aus heißt `line`, an heißt `red`, der Knopf ist weiß. An und Aus unterscheidet auch die Seite des Knopfes.
+- **Hinweis** (`.novid`, `.sheet .hint`): `chip`-Fläche, Text 12,5 px `inkMuted`, die Aktion rot und fett am Ende.
   Wichtiger Hinweis: `paperAlt` mit 1 px Rahmen und 3 px Rot links.
 - **Letzte Notiz** (`.lastnote`): `paperAlt`, darüber Datum und Gerät 11 px, der Text in Crimson Pro.
 - **Player** (`.vid`, `.ctrl`, `.speeds`)
@@ -175,30 +181,42 @@ Jeder Baustein nennt, was er zeigt, und seine Werte. Die Namen sind die des Clic
 
 ## 6 Umsetzung in Qt Quick
 
-Shinki wird ein **Qt-Quick-Controls-Stil** (`shinki/qml/Shinki`, Modul `Shinki`), so wie Material oder
-Breeze einer sind.
-- Mitori wählt ihn beim Start, wenn in Einstellungen → Darstellung „Shinki“ gewählt ist. Ein Wechsel gilt
-  nach dem Neustart, Qt erlaubt den Stil nur vor dem ersten Fenster.
-- Kante läuft dann in seiner Art „System“: Seine Bausteine zeichnen nicht selbst, sondern nehmen die
-  Controls des gewählten Stils und die Farben der Plattform. Diese Farben setzt Shinki:
-  `ShinkiScope` belegt `Kirigami.Theme` mit den Rollen aus Abschnitt 2. Kante bleibt dabei unverändert.
-  Shinki hängt nicht von Kante ab, und Kante nicht von Shinki.
-- Der Stil bringt die Controls mit, die Mitori nutzt: Button, ToolButton, TextField, TextArea, ComboBox,
-  Switch, CheckBox, RadioButton, Slider, ProgressBar, TabBar/TabButton, Dialog, Menu/MenuItem, ToolTip,
-  ScrollBar, Popup, Drawer, ItemDelegate.
-- Dazu kommen eigene Bausteine, wo es in Qt Quick keinen passenden gibt: `ShinkiInk` (die
-  Tuschelavierung), `ShinkiLogo` und `ShinkiStyle`, ein Singleton mit Rollen, Schriften und Größen aus
-  `tokens.json`.
-- Seiten, die heute einen Kante-Baustein mit eigener Zeichnung nutzen (Kachel, Segmente, Stufenpunkte,
-  Kalender), bekommen ihn unter Shinki aus `Kirigami.Theme`. Wo das Ergebnis die Bibel verfehlt, wählt die
-  Seite unter Shinki den Shinki-Baustein. Das geht Baustein für Baustein, angefangen bei Startmenü,
-  Programm, Blatt und Player.
+Kante und Shinki bleiben zwei getrennte Stile. Keiner hängt vom anderen ab, und keiner wird für den anderen
+geändert. Dazwischen liegt in Mitori eine dünne Schicht **Look** (`app/qml/Look`). Die Seiten fragen sie,
+und sie antwortet je nach gewähltem Stil mit Kante oder Shinki.
+
+```
+Seiten (app/qml)        Look.levelColor(3), Look.mutedText, LookTile { … }, LookSegmented { … }
+   │
+Look (app/qml/Look)     wählt je Stil:   Kante ─────────────── Shinki
+   │                                     app/qml/Kante          shinki/qml/Shinki
+   │                                     (KanteStyle, Kante*)    (ShinkiStyle, Shinki*, Controls-Stil)
+Controls (QQC2)         Kante: Material/Breeze wie heute       Shinki: der Controls-Stil „Shinki“
+```
+
+- **Wahl.** Einstellungen → Darstellung: Kante oder Shinki. Der Wechsel gilt nach dem Neustart, denn Qt
+  setzt den Controls-Stil nur vor dem ersten Fenster. Unter Shinki läuft Kante in seiner Art „System“ und
+  zeichnet dort, wo eine Seite es noch direkt nutzt, mit dem Controls-Stil Shinki.
+- **`ShinkiStyle`** ist ein Singleton mit den Rollen, Stufen, Schriften und Größen aus `tokens.json`. Es ist
+  die einzige Stelle mit Werten. Die Werte erzeugt ein Werkzeug aus der JSON-Datei, damit nichts doppelt gepflegt wird.
+- **Controls-Stil `Shinki`** für die Controls, die Mitori nutzt: Button, ToolButton, TextField, TextArea,
+  ComboBox, Switch, CheckBox, RadioButton, Slider, ProgressBar, TabBar/TabButton, Dialog, Menu/MenuItem,
+  ToolTip, ScrollBar, Popup, Drawer, ItemDelegate.
+- **Eigene Bausteine** für alles, was Kante mit eigener Zeichnung und eigenen Rollen löst, vor allem die
+  Stufenfarben, die Kante aus seiner Fokusfarbe ableitet: Kachel, Segmente, Grad-Chip, Gruppenkopf,
+  Listenzeile, Stufenpunkte und -wahl, Stand-Leiste, Kalender, Raster der Landkarte, Säulen, Legende, Karte,
+  Kennzahl, Tuschelavierung (`ShinkiInk`), Logo (`ShinkiLogo`).
+- **Look** hat für jeden dieser Bausteine einen `Look…`-Baustein, der per Loader den Kante- oder
+  Shinki-Baustein lädt, mit derselben Schnittstelle. Für die Rollen, die Seiten direkt lesen (`levelColor`,
+  Nebentext, Linien), gibt es Funktionen und Eigenschaften. Die Seiten ziehen Baustein für Baustein von
+  `Kante…` auf `Look…` um, angefangen bei Startmenü, Programm, Blatt und Player. Bis dahin zeigt Shinki dort
+  Kante in der Art „System“.
 - **Schriften** liegen in `shinki/fonts` und kommen als Ressource in die App (Android und AppImage haben sie
-  sonst nicht). Noto Serif JP ist die Teilmenge der Zeichen aus `mitori-daten.json`. Ein Test prüft, dass
-  jedes Zeichen der Daten in der Teilmenge steht.
-- **Prüfen:** Der Oberflächentest (`tst_ui`) läuft für Shinki ein drittes Mal, nach Material und Breeze.
-  Seine Bilder vergleicht ein Mensch mit dem Clickdummy. Ein Test prüft die Kontraste aus Abschnitt 2
-  gegen `tokens.json`.
+  sonst nicht). Noto Serif JP ist eine Teilmenge (Abschnitt 3). Ein Test prüft, dass jedes Kanji und Kana
+  aus Daten, QML und Katalogen darin steht.
+- **Prüfen.**
+  - Der Oberflächentest (`tst_ui`, heute mit Material) bekommt einen zweiten Lauf mit Shinki. Seine Bilder vergleicht ein Mensch mit dem Clickdummy.
+  - Ein Test rechnet die Kontraste aus Abschnitt 2 aus `tokens.json` nach, für jede Paarung aus Text und Grund, die die Bibel erlaubt.
 
 ## 7 Was Shinki nicht ist
 
