@@ -22,6 +22,12 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem !== null)
     }
 
+    // A failed case leaves no tablet window to the next ones.
+    function cleanup() {
+        window.width = 420
+        window.height = 800
+    }
+
     function cleanupTestCase() {
         window.destroy()
     }
@@ -662,12 +668,26 @@ TestCase {
         tryVerify(() => list.contentY <= list.originY + 1, 2000, "Home")
         // Also with a row in focus (after a click or Tab): the list scrolls, not a current index.
         let i = 0
-        while (!(list.itemAtIndex(i) && list.itemAtIndex(i).item && list.itemAtIndex(i).item.entry))
+        while (i < list.count && !(list.itemAtIndex(i) && list.itemAtIndex(i).item && list.itemAtIndex(i).item.entry))
             i++
+        verify(i < list.count, "a technique row in view")
         list.itemAtIndex(i).item.forceActiveFocus()
         const y = list.contentY
         keyClick(Qt.Key_Down)
         tryVerify(() => list.contentY > y, 2000, "Down on a focused row")
+        // Tab from row to row: the focused row stays in view.
+        list.positionViewAtBeginning()
+        list.itemAtIndex(i).item.forceActiveFocus()
+        for (let n = 0; n < 30; n++) {
+            keyClick(Qt.Key_Tab)
+            const f = window.activeFocusItem
+            if (!f || !list.contentItem.contains(f.mapToItem(list.contentItem, 1, 1)))
+                break
+            tryVerify(() => {
+                const top = f.mapToItem(list, 0, 0).y
+                return top >= -1 && top + f.height <= list.height + 1
+            }, 1000, "row " + n + " in view")
+        }
         Programme.setGrade("aikido", "k5")
         window.pageStack.pop()
     }
@@ -698,9 +718,17 @@ TestCase {
         const bar = findChild(pane.item, "transportBar")
         const bottom = bar.mapToItem(controls, 0, bar.height).y
         verify(bottom <= controls.height, "the transport bar in view (" + bottom + " of " + controls.height + ")")
+        // A large tablet keeps the whole picture: only as little height as the controls need.
+        window.width = 1920
+        window.height = 1080
+        tryVerify(() => pane.item && pane.item.height > 900, 2000)
+        const stage = findChild(pane.item, "stage")
+        const controls2 = findChild(pane.item, "controlsView")
+        tryVerify(() => Math.abs(stage.height - stage.width / stage.ratio) < 1
+                         || Math.abs(controls2.contentHeight - controls2.height) < 1, 2000,
+                  "picture " + stage.width + "×" + stage.height + ", controls " + controls2.contentHeight + " of " + controls2.height)
+        verify(controls2.contentHeight <= controls2.height + 1, "the controls fit")
         window.pageStack.pop()
-        window.width = 420
-        window.height = 800
     }
 
     function findChildren(item, name) {

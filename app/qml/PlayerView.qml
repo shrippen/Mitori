@@ -158,12 +158,14 @@ Item {
         Item {
             id: stage
 
+            objectName: "stage"
             readonly property real ratio: page.crop.verhaeltnis || 16 / 9
             Layout.fillWidth: true
             Layout.fillHeight: page.landscape
             Layout.preferredHeight: page.landscape ? -1 : width / ratio
-            // Beside the list on a small tablet the controls keep half the height.
-            Layout.maximumHeight: page.compact ? page.height / 2 : Number.POSITIVE_INFINITY
+            // Beside the list the controls keep the room they need, on a small tablet half the height.
+            Layout.maximumHeight: page.compact ? Math.max(page.height / 2, page.height - controlsView.contentHeight)
+                                               : Number.POSITIVE_INFINITY
 
             Rectangle {
                 anchors.fill: parent

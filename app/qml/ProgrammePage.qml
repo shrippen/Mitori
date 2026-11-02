@@ -134,6 +134,7 @@ Kirigami.Page {
                     id: rowLoader
 
                     required property var modelData
+                    required property int index
 
                     width: ListView.view.width
                     sourceComponent: modelData.kind === "group" ? groupRow
@@ -187,6 +188,13 @@ Kirigami.Page {
                             subtitle: [entry.jp, entry.nr ? entry.extra : (entry.kind === "info" ? entry.text : "")].filter(x => x).join(" · ")
                             selected: entry.id === page.lastId
                             onClicked: page.open(entry)
+                            // Tab from row to row: the list follows (once the row has its height).
+                            onActiveFocusChanged: {
+                                if (activeFocus) {
+                                    const i = rowLoader.index
+                                    Qt.callLater(() => list.positionViewAtIndex(i, ListView.Contain))
+                                }
+                            }
                             trailing: RowLayout {
                                 spacing: Kirigami.Units.smallSpacing
 
@@ -265,7 +273,7 @@ Kirigami.Page {
         }
     }
     // The keys scroll the list as ScrollablePage did (Up, Down, Page Up, Page Down, Home, End).
-    // Keys the small player leaves (End, Page Down) stay with it.
+    // Keys the small player leaves (Up, Down, Page Up, Page Down, End) stay with it.
     function scrollBy(dy) {
         list.contentY = Math.max(list.originY, Math.min(list.originY + list.contentHeight - list.height, list.contentY + dy))
     }
