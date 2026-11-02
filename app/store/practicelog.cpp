@@ -327,6 +327,7 @@ QHash<QString, PracticeLog::Note> PracticeLog::lastNotes() const
 
 PracticeLog::SavedRound PracticeLog::addRound(const ExamRound &round, const QList<Rating> &ratings)
 {
+    m_error.clear();
     if (round.discipline.isEmpty() || round.grade.isEmpty() || round.count <= 0) {
         m_error = QCoreApplication::translate("PracticeLog", "the round is incomplete");
         return {};

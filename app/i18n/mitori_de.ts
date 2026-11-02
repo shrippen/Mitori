@@ -230,7 +230,7 @@
     <message>
         <location filename="../qml/ExamRoundPage.qml" line="115"/>
         <source>You rate every technique at the end of the round.</source>
-        <translation>Bewertung aller Techniken am Ende der Runde.</translation>
+        <translation>Am Ende der Runde schätzt du jede Technik ein.</translation>
     </message>
 </context>
 <context>
@@ -527,7 +527,7 @@
         <translation>Nicht jeder Punkt der Prüfungsrunde ist eingeschätzt.</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="356"/>
+        <location filename="../services/practice.cpp" line="354"/>
         <source>The exam round could not be saved: %1</source>
         <translation>Die Prüfungsrunde konnte nicht gespeichert werden: %1</translation>
     </message>
@@ -540,12 +540,12 @@
         <translation>es stammt aus einer neueren Mitori-Version (Schema %1); bitte Mitori aktualisieren</translation>
     </message>
     <message>
-        <location filename="../store/practicelog.cpp" line="331"/>
+        <location filename="../store/practicelog.cpp" line="332"/>
         <source>the round is incomplete</source>
         <translation>die Runde ist unvollständig</translation>
     </message>
     <message>
-        <location filename="../store/practicelog.cpp" line="346"/>
+        <location filename="../store/practicelog.cpp" line="347"/>
         <source>a rating is invalid (&quot;%1&quot;)</source>
         <translation>eine Einschätzung ist ungültig („%1“)</translation>
     </message>

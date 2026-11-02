@@ -59,7 +59,7 @@ Kirigami.ScrollablePage {
         if (!page.complete) {
             return
         }
-        const results = page.points.map((p, i) => ({ ids: p.ids, level: page.levels[i] }))
+        const results = page.points.map((p, i) => ({ id: p.id, level: page.levels[i] }))
         if (!Practice.saveRound(page.discipline, page.grade, results)) {
             return
         }

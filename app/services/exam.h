@@ -17,7 +17,7 @@
 //              all or `count` of them, in programme order or shuffled]
 //
 // Each point: id, title, jp, extra, nr, group, attack, attackExtra, attackJp, grade,
-// gradeName, sample (from an earlier grade), ids (the entries its rating sets).
+// gradeName, sample (from an earlier grade).
 class Exam : public QObject
 {
     Q_OBJECT
