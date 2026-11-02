@@ -107,7 +107,9 @@ Syncthing entfällt als eigener Weg (geht über den Export-Ordner).
   1. Dan 1 Jahr nach dem 1. Kyu; Daitoryu-Okugi 4 Jahre nach dem 3. Dan (bestätigt).
 - **Startmenü**: Reihenfolge und Auswahl so; Einstellungen als Zahnrad; Programm-Kachel zeigt die zuletzt
   gewählte Sparte.
-- **Lehrgänge**: nur kommende Termine und vorhandene Notizbücher.
+- **Lehrgänge**: nur kommende Termine und vorhandene Notizbücher. Je Termin aus dem Kalender „In den
+  Kalender“ (Gerätekalender) und, wenn die ICS-Beschreibung eine Zeile „Ausschreibung: URL“ enthält,
+  „Ausschreibung“ (öffnet die offizielle Ausschreibung); im Clickdummy im Kopf des Notizbuchs.
 - **Landkarte**: Gruppen getrennt.
 - **Glossar**: Übersetzungen aus dem Aiki-Budo-Lexikon von shinkiryu.de (`tools/lexikon.py` →
   `daten/lexikon.yaml`, 219 Wörter); Aussprache zunächst per Sprachsynthese.

@@ -600,6 +600,8 @@ V.lehrgaenge = () => {
   return `${sbar()}<div class="body" data-scroll="lg"><div class="ink"></div>${backHd("Menü", "Lehrgänge", "講習会")}<div class="page">${lehrgangsListe()}</div></div>`;
 };
 V.lehrgang = key => `${sbar()}<div class="body" data-scroll="kurs" style="display:flex;flex-direction:column"><div class="ink"></div>${backHd("Lehrgänge", "Notizbuch", "", `<button class="iconbtn" title="Exportieren" onclick="exportKurs('${key}')">⇪</button>`)}${kursInhalt(key)}</div>`;
+/* Link der offiziellen Ausschreibung: Zeile „Ausschreibung: URL“ in der Beschreibung des Termins */
+const ausschreibung = k => (k.info || "").match(/Ausschreibung:\s*(https?:\/\/\S+)/)?.[1] || "";
 let STRUKTUR = false;
 function kursInhalt(key){
   const k = kurse()[key]; if (!k) return "";
@@ -609,6 +611,8 @@ function kursInhalt(key){
      <div style="font:600 21px/1.15 var(--f-serif);margin:3px 0">${esc(k.titel)}</div><p>${esc(k.ort || "")}${lehrer(k) ? " · " + esc(lehrer(k)) : ""}</p>
      ${k.pruefung ? `<div class="row2" style="margin-top:6px"><span>${pruefChip(k)} <span class="muted">${esc(wartezeitText(k.pruefung.disc, k.pruefung.grade, parseD(k.von)))}</span></span><b style="color:var(--pri);cursor:pointer;font-size:12.5px" onclick="pruefBlatt('${key}')">ändern</b></div>`
        : parseD(k.bis || k.von) >= heute0() ? `<button class="btn ghost small" style="width:auto;margin-top:6px" onclick="pruefBlatt('${key}')">Prüfung hier ablegen …</button>` : ""}
+     ${k.uid ? `<button class="btn ghost small" style="width:auto;margin-top:6px" onclick="toast('Kalender des Geräts: Termin mit Zeit und Ort übernommen')">In den Kalender</button>` : ""}
+     ${ausschreibung(k) ? `<button class="btn ghost small" style="width:auto;margin-top:6px" onclick="window.open('${esc(ausschreibung(k))}','_blank')">Ausschreibung ↗</button>` : ""}
      ${T() ? `<button class="btn ghost small" style="width:auto;margin-top:6px" onclick="exportKurs('${key}')">⇪ Exportieren</button>` : ""}</div>
     ${k.eintraege.map(en => `<div class="entry"><span class="tm">${esc(en.tm)}</span><p>${esc(en.text)}</p>
       ${en.foto ? `<div class="foto">Foto / Skizze</div>` : ""}${en.audio ? `<span class="audio">▶ <i></i> ${esc(en.audio)}</span>` : ""}

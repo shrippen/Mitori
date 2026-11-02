@@ -10,7 +10,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
 | 1 · Abspielen | Repo-Gerüst aus Plasmai ✓, Startmenü, Programm, Player mit Zeitlupe und Schleife; Videos vorerst aus einem lokalen Ordner | APK aus der CI spielt jede Technik ab |
 | 2 · Üben | Einschätzen (vier Punkte), Notizen mit Fotos und Sprachnotizen, Heute üben, Training als Playliste, Statistik, Suche | eine Woche im Dojo benutzt |
 | 3 · Prüfen und Lernen | Prüfungsmodus (Tafel), Technik-Landkarte, Glossar mit Lexikon und Aussprache, Kommentare Shinki Toho | Probeprüfung damit gemacht |
-| 4 · Bundles und Termine | `tools/bundle.py` (Beschnitt, Verschlüsselung, Manifest), Code-Eingabe und QR, Download; Lehrgänge aus ICS, Meine Grade, Wartezeiten, Lehrgangsnotizbuch, Sicherung (Export, Auto Backup, WebDAV-Abgleich) | ein Bundle per Code auf einem fremden Telefon geladen |
+| 4 · Bundles und Termine | `tools/bundle.py` (Beschnitt, Verschlüsselung, Manifest), Code-Eingabe und QR, Download; Lehrgänge aus ICS (je Lehrgang: in den Gerätekalender eintragen, Ausschreibung öffnen), Meine Grade, Wartezeiten, Lehrgangsnotizbuch, Sicherung (Export, Auto Backup, WebDAV-Abgleich) | ein Bundle per Code auf einem fremden Telefon geladen |
 | 5 · Release | Demo-Modus mit Studio-Weber-Daten, Update-Check, Screenshots, Landing Page `docs/`, GitHub-Release | v1.0.0 auf GitHub und der Landing Page |
 
 ## Stand
@@ -31,6 +31,19 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   (Plattform-Schicht), „Alle Notizen“, Statistik. Suche (Techniken aller Sparten und Grade, eigene Notizen;
   Groß/klein, Akzente, ß, Bindestriche und Okurigana egal; auch Angriffszusatz und Gruppe) über die Lupe im
   Startmenü.
+
+## Lehrgänge (Schritt 4)
+
+- **In den Kalender:** jeder Lehrgang aus dem Kalender lässt sich in den Kalender des Geräts eintragen (Titel, Zeit, Ort,
+  Beschreibung; Plattform-Schicht: Android über einen Kalender-Intent, Plasma als ICS-Datei an die
+  Kalender-App).
+- **Ausschreibung:** steht in der Beschreibung des ICS-Eintrags eine Zeile „Ausschreibung: URL“, zeigt der
+  Kopf des Notizbuchs (wo auch „In den Kalender“ sitzt) einen Knopf, der die offizielle
+  Lehrgangsausschreibung öffnet; ohne diese Zeile kein Knopf. Stand 02.11.2026 tragen 4 von 24 Terminen die Zeile.
+  Beim Lesen: Zeilen erst entfalten (CRLF + Leerzeichen), Escapes (`\n`, `\,`) auflösen, die URL endet am
+  Zeilenende und wird nicht umkodiert (sie enthält `&` und `%2F`). Gesucht wird im Text der `DESCRIPTION`, nicht
+  im HTML des `ALTREP` (dort `&amp;`), und nur die des Termins: eine Erinnerung (`VALARM`) hat eine eigene
+  `DESCRIPTION` („Mozilla Standardbeschreibung“). Übernommen werden nur `http(s)`-Links.
 
 ## Kante-Bedarf
 
