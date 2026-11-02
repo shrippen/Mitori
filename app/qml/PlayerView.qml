@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
@@ -22,6 +24,14 @@ Item {
     property bool compact: false
     readonly property var current: playlist[index] || ({})
     readonly property string video: current.video ? current.video.video : ""
+    // A technique of the training may have no video on the device: a card stands for the picture.
+    readonly property bool hasVideo: video !== "" && Videos.available(video)
+    // Where the technique stands: attack · addition · grade · position ("Shomen-uchi · 5. Kyu · 3 / 8").
+    readonly property string placeText: [current.attack, current.attackExtra, current.gradeName,
+                                         playlist.length > 1 ? (index + 1) + " / " + playlist.length : ""]
+                                        .filter(x => !!x).join(" · ")
+    // How many of the playlist are rated today (the training's progress).
+    readonly property int practisedCount: Practice.revision >= 0 ? playlist.filter(r => Practice.ratedToday(r.id)).length : 0
     readonly property real from: current.video ? current.video.von * 1000 : 0
     readonly property real to: current.video ? current.video.bis * 1000 : 0
     // Where the loop turns: the chapter end, but never the end of the file (the last chapter of a
@@ -164,6 +174,7 @@ Item {
             id: stage
 
             objectName: "stage"
+            visible: page.hasVideo
             readonly property real ratio: page.crop.verhaeltnis || 16 / 9
             Layout.fillWidth: true
             Layout.fillHeight: page.landscape
@@ -322,7 +333,7 @@ Item {
                     visible: page.trainingDone
                     tier: KanteHintCard.Tier.Blue
                     titleText: qsTr("Done")
-                    text: qsTr("Every technique of today's training is practised.")
+                    text: qsTr("%n technique(s) practised today. They count as a practice day in the statistics.", "", page.practisedCount)
 
                     KanteButton {
                         visible: !page.compact && !page.landscape     // sideways Back stands above
@@ -332,17 +343,28 @@ Item {
                 }
 
                 QQC2.Label {
+                    objectName: "placeText"
                     Layout.fillWidth: true
-                    visible: !page.landscape && !!page.current.attack
-                    text: page.current.attack || ""
+                    visible: !page.landscape && page.placeText !== ""
+                    text: page.placeText
                     color: KanteStyle.disabledTextColor
                     wrapMode: Text.Wrap
+                }
+
+                // Without a video: the technique's name and what to do (the training goes on).
+                KanteHintCard {
+                    objectName: "noVideoCard"
+                    Layout.fillWidth: true
+                    visible: !page.hasVideo
+                    titleText: (page.current.nr ? page.current.nr + " · " : "") + (page.current.title || "")
+                    text: qsTr("No video on this device. Practise it from memory, then rate it.")
                 }
 
                 QQC2.Slider {
                     id: timeline
 
                     Layout.fillWidth: true
+                    visible: page.hasVideo
                     from: page.from
                     to: page.to > page.from ? page.to : page.from + 1
                     value: player.position
@@ -357,6 +379,7 @@ Item {
 
                     objectName: "transportBar"
                     Layout.fillWidth: true
+                    visible: page.hasVideo
                     Layout.preferredWidth: 0        // wraps in the column instead of widening it
                     playing: player.playing
                     looping: page.looping
@@ -427,6 +450,43 @@ Item {
                         icon.name: "media-skip-forward"
                         text: qsTr("Next technique")
                         onClicked: page.go(1)
+                    }
+                }
+
+                // The training's playlist: numbered, ✓ for the rated ones, a tap jumps there.
+                ColumnLayout {
+                    objectName: "trainingList"
+                    Layout.fillWidth: true
+                    visible: page.training
+                    spacing: 0
+
+                    KanteSectionLabel {
+                        Layout.fillWidth: true
+                        rule: true
+                        text: qsTr("Today's playlist · %1 of %2 practised").arg(page.practisedCount).arg(page.playlist.length)
+                    }
+                    Repeater {
+                        model: page.training ? page.playlist : []
+
+                        KanteListRow {
+                            id: trainingRow
+
+                            required property var modelData
+                            required property int index
+                            readonly property bool done: Practice.revision >= 0 && Practice.ratedToday(modelData.id)
+
+                            objectName: "trainingRow"
+                            Layout.fillWidth: true
+                            selected: trainingRow.index === page.index
+                            text: (trainingRow.index + 1) + ". " + (modelData.title || "")
+                            subtitle: [modelData.attack, modelData.gradeName].filter(x => !!x).join(" · ")
+                            trailing: QQC2.Label {
+                                text: trainingRow.done ? "✓" : ""
+                                color: KanteStyle.positiveTextColor
+                                Accessible.name: trainingRow.done ? qsTr("practised") : ""
+                            }
+                            onClicked: page.index = trainingRow.index
+                        }
                     }
                 }
 

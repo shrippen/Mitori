@@ -128,9 +128,7 @@ Vergleich jeder Ansicht mit `entwuerfe/clickdummy/` (Bilder beider Seiten, Code 
 Kommentar leer, Programmliste über den Grad-Chips, Tippfehler im DVD-Code als „unvollständig“ gemeldet,
 Reihenfolge der Kacheln. Offen, nach Gewicht:
 
-- **Training**: Playliste fehlt (nummeriert, ✓ für Geübtes, tippen springt; Telefon unter dem Player, Tablet
-  links), Position „Angriff · Grad · 1 / 8“, Abschlussseite „Geschafft“ mit Zahl; Techniken ohne Video kommen nicht
-  ins Training (Dummy: Karte mit Name und letzter Notiz, einschätzen).
+- **Training**: Playliste auf dem Tablet links neben dem Player (Telefon: darunter, erledigt).
 - **Player**: Schalter „Ton“ und „Bildschirm an“ fehlen (kein Wach-Halten des Bildschirms); Knopf ⤢ ins
   Querformat; Titelzeile (Angriff · Zusatz · Grad · i / n, Name mit Kanji); quer die schmale Spalte nach Entwurf B,
   Zeitleiste im Bild; unter dem Notizfeld „Heute notiert“ statt nur der letzten Notiz.
