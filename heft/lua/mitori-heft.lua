@@ -1,7 +1,8 @@
 -- Mitori-Heft: setzt das Prüfungsprogramm aus build/daten/*.lua.
 --
 -- Die Daten erzeugt tools/daten.py aus daten/*.yaml (geprüft, Kanji schon
--- eingesetzt). Hier nur der Satz, in zwei Ansichten:
+-- eingesetzt). Hier nur der Satz: eine Übersicht und zwei Ansichten.
+--   grade      Grade mit Gruppen und Wartezeit, eine Seite je Disziplin
 --   tusche     ein Grad je Seite, zweispaltig (Entwurf 1)
 --   matrix     Angriff × Grad, Querformat (Entwurf 2)
 -- Shinki Toho hat eigene Seiten (shinkitoho-…), weil es keine Angriffe gibt.
@@ -83,7 +84,7 @@ end
 function M.grade(art)
   local d = laden(art)
   out("\\tuscheseite{" .. esc(d.titel) .. "}{" .. opt(d.untertitel) .. "}{Grade \\& Programm}{位階}"
-      .. "{Prüfungsprogramm Kyu- und Dan-Grade}{" .. esc(d.stand) .. "}{" .. esc(d.kurzname or d.titel) .. "}")
+      .. "{Prüfungsprogramm Kyu- und Dan-Grade}{" .. esc(d.stand) .. "}{" .. esc(d.titel) .. "}")
   out("\\begin{stleiter}")
   for _, teil in ipairs(d.teile) do
     for _, gid in ipairs(teil.grade) do
