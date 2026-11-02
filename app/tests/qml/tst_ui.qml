@@ -459,6 +459,14 @@ TestCase {
         verify(page.more, "more than the list shows")
         compare(page.shown.length, page.limit)
         verify(findChild(page, "moreHint").visible)
+        // The notes have the same limit and hint.
+        for (let i = 0; i <= page.limit; i++)
+            Practice.addNote("many-notes", "Wiederholung " + i)
+        field.text = "wiederholung"
+        tryVerify(() => page.query === "wiederholung", 2000)
+        verify(page.notesMore)
+        compare(page.notesShown.length, page.limit)
+        verify(findChild(page, "notesMoreHint").visible)
         // A note on a technique that is no longer in the programme still opens its notes.
         Practice.addNote("gone-technique", "Kreis kleiner")
         field.text = "kreis kleiner"

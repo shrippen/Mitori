@@ -297,6 +297,10 @@ private slots:
         QCOMPARE(practice.searchNotes(QStringLiteral("fuss aussen")).size(), 1);   // ß as ss
         practice.addNote(QStringLiteral("e"), QStringLiteral("Shiho-nage: Arm über den Kopf"));
         QCOMPARE(practice.searchNotes(QStringLiteral("shihonage")).size(), 1);    // the hyphen does not matter
+        // Joined across a space only from the start of a word: "rein" is not in "nur ein".
+        practice.addNote(QStringLiteral("f"), QStringLiteral("Fuß nur ein wenig drehen"));
+        QVERIFY(practice.searchNotes(QStringLiteral("rein")).isEmpty());
+        QCOMPARE(practice.searchNotes(QStringLiteral("nurein")).size(), 1);
         QVERIFY(practice.searchNotes(QStringLiteral(" ")).isEmpty());
     }
 

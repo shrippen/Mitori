@@ -83,11 +83,17 @@ private slots:
         // Japanese.
         QVERIFY(!programme.search(QStringLiteral("一教")).isEmpty());
         // Without the hyphen or spaces, and Japanese with or without okurigana, find the same.
-        QVERIFY(!programme.search(QStringLiteral("shihonage")).isEmpty());
-        QCOMPARE(programme.search(QStringLiteral("shihonage"), 1000).size(),
-                 programme.search(QStringLiteral("shiho-nage"), 1000).size());
+        const QVariantList joined = programme.search(QStringLiteral("shihonage"));
+        QVERIFY(!joined.isEmpty());
+        QCOMPARE(joined.first().toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Shiho-nage"));
         QCOMPARE(programme.search(QStringLiteral("kiriotoshi"), 1000).size(),
-                 programme.search(QStringLiteral("kiri-otoshi"), 1000).size());
+                 programme.search(QStringLiteral("kiri otoshi"), 1000).size());
+        // A hyphenated word also matches when its parts are in different fields.
+        QCOMPARE(programme.search(QStringLiteral("ikkyo-irimi"), 1000).size(),
+                 programme.search(QStringLiteral("ikkyo irimi"), 1000).size());
+        // An en dash separates as a hyphen does; full-width Latin from a Japanese keyboard folds.
+        QVERIFY(!programme.search(QStringLiteral("33-43")).isEmpty());
+        QCOMPARE(programme.search(QStringLiteral("ｉｋｋｙｏ"), 1000).size(), programme.search(QStringLiteral("ikkyo"), 1000).size());
         QVERIFY(!programme.search(QStringLiteral("切り落し")).isEmpty());
         QCOMPARE(programme.search(QStringLiteral("切り落とし"), 1000).size(),
                  programme.search(QStringLiteral("切り落し"), 1000).size());

@@ -350,40 +350,45 @@
 <context>
     <name>SearchPage</name>
     <message>
-        <location filename="../qml/SearchPage.qml" line="30"/>
-        <location filename="../qml/SearchPage.qml" line="39"/>
+        <location filename="../qml/SearchPage.qml" line="32"/>
+        <location filename="../qml/SearchPage.qml" line="41"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="38"/>
+        <location filename="../qml/SearchPage.qml" line="40"/>
         <source>Technique, attack, Japanese or a word from your notes</source>
         <translation>Technik, Angriff, Japanisch oder ein Wort aus deinen Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="59"/>
+        <location filename="../qml/SearchPage.qml" line="61"/>
         <source>Nothing found for “%1”.</source>
         <translation>Nichts gefunden für „%1“.</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="66"/>
+        <location filename="../qml/SearchPage.qml" line="68"/>
         <source>Techniques</source>
         <translation>Techniken</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="95"/>
+        <location filename="../qml/SearchPage.qml" line="97"/>
         <source>More than %1 techniques found. Add a word to narrow the search.</source>
         <translation>Mehr als %1 Techniken gefunden. Ein weiteres Wort grenzt die Suche ein.</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="102"/>
+        <location filename="../qml/SearchPage.qml" line="104"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="111"/>
+        <location filename="../qml/SearchPage.qml" line="113"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="127"/>
+        <source>More than %1 notes found. Add a word to narrow the search.</source>
+        <translation>Mehr als %1 Notizen gefunden. Ein weiteres Wort grenzt die Suche ein.</translation>
     </message>
 </context>
 <context>

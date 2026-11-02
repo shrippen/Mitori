@@ -25,7 +25,9 @@ Kirigami.ScrollablePage {
     readonly property var techniques: query.trim() === "" ? [] : Programme.search(query, limit + 1)
     readonly property bool more: techniques.length > limit
     readonly property var shown: more ? techniques.slice(0, limit) : techniques
-    readonly property var notes: query.trim() === "" || Practice.notesRevision < 0 ? [] : Practice.searchNotes(query)
+    readonly property var notes: query.trim() === "" || Practice.notesRevision < 0 ? [] : Practice.searchNotes(query, limit + 1)
+    readonly property bool notesMore: notes.length > limit
+    readonly property var notesShown: notesMore ? notes.slice(0, limit) : notes
 
     title: qsTr("Search")
 
@@ -102,7 +104,7 @@ Kirigami.ScrollablePage {
             text: qsTr("Notes")
         }
         Repeater {
-            model: page.notes
+            model: page.notesShown
 
             KanteListRow {
                 required property var modelData
@@ -116,6 +118,15 @@ Kirigami.ScrollablePage {
                 subtitle: [entry.title, modelData.created.toLocaleDateString(Qt.locale(), Locale.ShortFormat)].filter(x => x).join(" · ")
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
             }
+        }
+
+        QQC2.Label {
+            objectName: "notesMoreHint"
+            Layout.fillWidth: true
+            visible: page.notesMore
+            text: qsTr("More than %1 notes found. Add a word to narrow the search.").arg(page.limit)
+            color: KanteStyle.mutedTextColor
+            wrapMode: Text.Wrap
         }
     }
 
