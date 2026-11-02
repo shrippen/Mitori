@@ -38,9 +38,9 @@ Item {
 
     Accessible.role: Accessible.Grouping
 
-    // x of an item `w` wide at `x` from the leading edge.
+    // x of an item `w` wide at `x` from the leading edge; mirrored at the width it gets (1.62.1).
     function lead(x, w) {
-        return mirrored ? implicitWidth - x - w : x
+        return mirrored ? width - x - w : x
     }
 
     implicitWidth: labelWidth + weeks * step - spacing
@@ -84,7 +84,7 @@ Item {
         return rows
     }
     // [{week, month, text}]: the weeks a month begins in; the first column names the month of its
-    // last day when the next name is at least three weeks away.
+    // last drawn day when the next name is at least three weeks away.
     function monthLabels() {
         const result = []
         const label = (w, m) => ({ week: w, month: m, text: locale.standaloneMonthName(m, Locale.ShortFormat) })
@@ -97,7 +97,8 @@ Item {
             }
         }
         if (result.length === 0 || result[0].week >= 3) {
-            result.unshift(label(0, dayAt(0, 6).getMonth()))
+            const last = dayAt(0, 6) > lastDay ? lastDay : dayAt(0, 6)     // one week: the last drawn day
+            result.unshift(label(0, last.getMonth()))
         }
         return result
     }

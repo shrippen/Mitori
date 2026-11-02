@@ -587,6 +587,104 @@ TestCase {
         compare(tile.days, 1)
     }
 
+    // Tablet in landscape: list and small player on one page; a row with a video plays beside the
+    // list, the player moving on marks its row.
+    function test_2t_tablet() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        window.width = 1280
+        window.height = 800
+        const page = push("ProgrammePage")
+        tryVerify(() => page.split, 2000, "list and player side by side")
+        const pane = findChild(page, "playerPane")
+        tryVerify(() => pane.item && pane.item.playing, 10000)
+        compare(pane.item.compact, true)
+        // A row with a video plays beside the list, the page stays.
+        page.open(rows[1])
+        tryCompare(pane.item.current, "id", rows[1].id, 3000)
+        compare(window.pageStack.currentItem, page)
+        compare(page.lastId, rows[1].id)
+        // The player moves on: its row is marked.
+        pane.item.go(1)
+        tryCompare(page, "lastId", page.playlist[pane.item.index].id)
+        shot("2t-tablet")
+        // Turned to portrait and back: the chosen technique stays.
+        page.open(page.playlist[3])
+        tryCompare(pane.item.current, "id", page.playlist[3].id, 3000)
+        const chosen = page.playlist[3].id
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => pane.item && pane.item.current.id === chosen, 3000, "still " + chosen)
+        compare(page.lastId, chosen)
+        // Another grade: its first technique plays, not the same place in another list.
+        Programme.setGrade("aikido", "k4")
+        page.grade = "k4"
+        tryVerify(() => pane.item && pane.item.current.id === page.playlist[0].id, 3000)
+        compare(page.lastId, page.playlist[0].id)
+        // A phone in landscape is no tablet: no split, ▶ opens the player page.
+        window.width = 915
+        window.height = 412
+        tryVerify(() => !page.split, 2000, "phone landscape")
+        window.width = 420
+        window.height = 800
+        tryVerify(() => !page.split)
+        Programme.setGrade("aikido", "k5")
+        window.pageStack.pop()
+    }
+
+    // Tablet: a technique with a comment (Shinki Toho) shows the way to it beside the player.
+    function test_2u_tablet_comment() {
+        const grade = Programme.grades("shinkitoho")[0].id
+        const rows = Programme.entries("shinkitoho", grade).filter(r => r.kind === "entry" && r.video && r.comment)
+        if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Shinki Toho (set MITORI_VIDEOS)")
+        }
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", grade)
+        window.width = 1280
+        window.height = 800
+        const page = push("ProgrammePage")
+        tryVerify(() => page.split)
+        page.open(rows[0])
+        const pane = findChild(page, "playerPane")
+        tryCompare(pane.item.current, "id", rows[0].id, 3000)
+        const button = findChild(pane.item, "commentButton")
+        verify(button && button.visible, "comment beside the player")
+        button.clicked()
+        tryVerify(() => window.pageStack.currentItem !== page, 2000)
+        compare(window.pageStack.currentItem.entry.id, rows[0].id)
+        tryVerify(() => !pane.item.playing, 2000, "the player pauses under another page")
+        window.pageStack.pop()
+        window.width = 420
+        window.height = 800
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
+    }
+
+    // Tablet in landscape: the start menu as a grid of four, the tiles in one row.
+    function test_1b_start_tablet() {
+        const start = window.pageStack.items[0]
+        window.width = 1280
+        window.height = 800
+        const tiles = findChild(start, "tiles")
+        tryCompare(tiles, "columns", 4)
+        const shown = tiles.children.filter(t => t.visible && t.width > 0)
+        verify(shown.length >= 3)
+        verify(shown.every(t => Math.abs(t.y - shown[0].y) < 1), "one row")
+        verify(shown[1].x > shown[0].x + shown[0].width - 1)
+        shot("1b-start-tablet")
+        window.width = 420
+        window.height = 800
+        tryCompare(tiles, "columns", 1)
+    }
+
     function findChildren(item, name) {
         let found = []
         if (item.objectName === name) {
