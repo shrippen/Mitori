@@ -111,6 +111,18 @@ QHash<QString, PracticeLog::Rating> PracticeLog::latest() const
     return result;
 }
 
+QHash<QString, QDate> PracticeLog::firstRated() const
+{
+    QHash<QString, QDate> result;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.exec(QStringLiteral("SELECT entry, MIN(at) FROM ratings WHERE level BETWEEN 1 AND 4 GROUP BY entry"));
+    while (q.next()) {
+        result.insert(q.value(0).toString(),
+                      QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC).toLocalTime().date());
+    }
+    return result;
+}
+
 QList<PracticeLog::Rating> PracticeLog::history(const QString &entry) const
 {
     QList<Rating> result;

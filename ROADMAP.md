@@ -25,7 +25,9 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   einer Seite), Test auf dem Telefon.
 - Schritt 2: Einschätzen 1–4 im Technik-Blatt und im Player (Übungsprotokoll in SQLite, jede Einschätzung ein
   Eintrag mit Zeit und Gerät), Stand als vier Punkte in der Programmliste, Stand je Grad als Leiste mit Legende.
-  Offen: Notizen mit Fotos und Sprachnotizen, Heute üben, Training, Statistik, Suche.
+  Heute üben (Wiederholen nach Plan, Abstände je Stufe einstellbar, Kachel im Startmenü) und Training (Playliste der
+  fälligen Techniken, Einschätzen schaltet weiter). Offen: Notizen mit Fotos und Sprachnotizen, Statistik, Suche;
+  Seitenhintergrund in Kante bei Einstellungen und Heute üben (zeigen die Plattformfarbe).
 
 ## Kante-Bedarf
 

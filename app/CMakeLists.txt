@@ -43,6 +43,7 @@ qt_add_qml_module(mitori_app
         qml/SettingsPage.qml
         qml/RatingRow.qml
         qml/GradeStand.qml
+        qml/TodayPage.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -54,6 +55,8 @@ qt_add_qml_module(mitori_app
         services/practice.cpp
         store/practicelog.h
         store/practicelog.cpp
+        store/schedule.h
+        store/schedule.cpp
 )
 
 # Texts: English in the code, German in i18n/mitori_de.ts (update: cmake --build <dir> --target
@@ -156,11 +159,17 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME programme COMMAND tst_programme)
 
     qt_add_executable(tst_practice tests/tst_practice.cpp services/practice.cpp services/practice.h
-        store/practicelog.cpp store/practicelog.h)
+        store/practicelog.cpp store/practicelog.h store/schedule.cpp store/schedule.h)
     target_include_directories(tst_practice PRIVATE services store)
     target_link_libraries(tst_practice PRIVATE Qt6::Core Qt6::Qml Qt6::Sql Qt6::Test)
     set_target_properties(tst_practice PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME practice COMMAND tst_practice)
+
+    qt_add_executable(tst_schedule tests/tst_schedule.cpp store/schedule.cpp store/schedule.h store/practicelog.h)
+    target_include_directories(tst_schedule PRIVATE store)
+    target_link_libraries(tst_schedule PRIVATE Qt6::Core Qt6::Test)
+    set_target_properties(tst_schedule PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME schedule COMMAND tst_schedule)
 
     # The pages with Kirigami and Kante, offscreen; screenshots into <build>/ui-shots. Plays a video
     # only with MITORI_VIDEOS (the videos are not in the repository).

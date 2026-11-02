@@ -1,5 +1,7 @@
 #include "practice.h"
 
+#include "schedule.h"
+
 #include <QDir>
 #include <QSettings>
 #include <QStandardPaths>
@@ -15,6 +17,15 @@ Practice::Practice(const QString &path, QObject *parent)
     , m_log(std::make_unique<PracticeLog>())
 {
     load(path);
+    // A minute's check for a new day: it also catches the day after a device slept.
+    m_dayTimer.setInterval(60 * 1000);
+    connect(&m_dayTimer, &QTimer::timeout, this, [this] {
+        if (QDate::currentDate() != m_today) {
+            m_today = QDate::currentDate();
+            emit todayChanged();
+        }
+    });
+    m_dayTimer.start();
 }
 
 Practice::~Practice() = default;
@@ -29,6 +40,7 @@ void Practice::load(const QString &path)
     }
     m_open = true;
     m_latest = m_log->latest();
+    m_first = m_log->firstRated();
 }
 
 QString Practice::defaultPath()
@@ -65,6 +77,9 @@ bool Practice::rate(const QString &entry, int level)
         return false;
     }
     m_latest.insert(entry, r);
+    if (!m_first.contains(entry)) {
+        m_first.insert(entry, r.at.toLocalTime().date());
+    }
     ++m_revision;
     emit changed();
     if (!m_error.isEmpty()) {
@@ -92,4 +107,65 @@ QVariantList Practice::counts(const QStringList &entries) const
         ++n[level(e)];
     }
     return {n[0], n[1], n[2], n[3], n[4]};
+}
+
+bool Practice::ratedToday(const QString &entry) const
+{
+    const QDateTime last = lastRated(entry);
+    return last.isValid() && last.date() == m_today;
+}
+
+QVariantList Practice::intervals() const
+{
+    // Numbers (the settings file gives them back as text after a restart).
+    const QVariantList stored = QSettings().value(QStringLiteral("practice/intervals")).toList();
+    if (stored.size() == 4) {
+        QVariantList days;
+        for (const QVariant &v : stored) {
+            days << v.toInt();
+        }
+        return days;
+    }
+    QVariantList result;
+    for (int days : Schedule::defaultIntervals()) {
+        result << days;
+    }
+    return result;
+}
+
+void Practice::setIntervals(const QVariantList &intervals)
+{
+    if (intervals.size() != 4 || intervals == this->intervals()) {
+        return;
+    }
+    QVariantList clean;
+    for (const QVariant &v : intervals) {
+        clean << qBound(1, v.toInt(), 365);
+    }
+    QSettings().setValue(QStringLiteral("practice/intervals"), clean);
+    emit intervalsChanged();
+}
+
+QVariantList Practice::due(const QVariantList &candidates) const
+{
+    QList<Schedule::Candidate> list;
+    QHash<QString, QVariantMap> rows;
+    for (const QVariant &c : candidates) {
+        const QVariantMap row = c.toMap();
+        const QString id = row.value(QStringLiteral("id")).toString();
+        list << Schedule::Candidate{id, row.value(QStringLiteral("current")).toBool()};
+        rows.insert(id, row);
+    }
+    QList<int> days;
+    for (const QVariant &v : intervals()) {
+        days << v.toInt();
+    }
+    QVariantList result;
+    for (const Schedule::Due &d : Schedule::due(list, m_latest, m_first, m_today, days)) {
+        QVariantMap row = rows.value(d.id);
+        row[QStringLiteral("level")] = d.level;
+        row[QStringLiteral("days")] = d.days;
+        result << row;
+    }
+    return result;
 }

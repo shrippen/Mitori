@@ -28,6 +28,9 @@ Kirigami.Page {
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
     readonly property int jumpMs: 2000      // double tap
     property bool looping: true
+    // Training (today's practice): rating a technique moves on to the next one not yet
+    // practised today.
+    property bool training: false
     // Start at the chapter once per loaded file: the FFmpeg backend reports LoadedMedia again
     // after every seek, and restarting there would undo each step, jump and timeline move.
     property bool startPending: true
@@ -74,6 +77,18 @@ Kirigami.Page {
     }
     function jump(ms) {
         player.position = Math.max(from, Math.min(to, player.position + ms))
+    }
+    // Training: the next technique not practised today, after this one and then from the start
+    // (one skipped with "next"); when all are, the training is done and the player stays.
+    readonly property bool trainingDone: training && Practice.revision >= 0 && playlist.every(r => Practice.ratedToday(r.id))
+    function nextOpen() {
+        for (let k = 1; k < playlist.length; ++k) {
+            const i = (index + k) % playlist.length
+            if (!Practice.ratedToday(playlist[i].id)) {
+                index = i
+                return
+            }
+        }
     }
     function go(direction) {
         const next = index + direction
@@ -251,6 +266,21 @@ Kirigami.Page {
                 RatingRow {
                     Layout.fillWidth: true
                     entry: page.current.id || ""
+                    onRated: if (page.training) page.nextOpen()
+                }
+
+                KanteHintCard {
+                    objectName: "trainingDone"
+                    Layout.fillWidth: true
+                    visible: page.trainingDone
+                    tier: KanteHintCard.Tier.Blue
+                    titleText: qsTr("Done")
+                    text: qsTr("Every technique of today's training is practised.")
+
+                    KanteButton {
+                        text: qsTr("Back")
+                        onClicked: page.Kirigami.PageStack.pop()
+                    }
                 }
 
                 RowLayout {

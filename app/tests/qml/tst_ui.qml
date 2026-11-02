@@ -327,6 +327,69 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Today's practice: two new techniques of the current grade; rating one brings the next.
+    function test_7_today() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("TodayPage")
+        compare(page.discipline, "aikido")
+        // Two new ones a day, less those of the grade already rated today (earlier cases).
+        const newToday = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && Practice.ratedToday(r.id)).length
+        verify(newToday < 2, "room for a new one today")
+        compare(page.due.length, 2 - newToday)
+        verify(page.due.every(r => r.level === 0 && r.current))
+        const first = page.due[0].id
+        verify(!Practice.ratedToday(first))
+        Practice.rate(first, 2)
+        // At most two new ones a day: the one practised counts, no other new one comes.
+        compare(page.due.length, 1 - newToday)
+        verify(page.due.every(r => r.id !== first), "practised today: not due")
+        compare(findChild(page, "dueCount").value, String(1 - newToday))
+        shot("7-today")
+        if (page.due.length > 0) {
+            Practice.rate(page.due[0].id, 1)
+        }
+        compare(page.due.length, 0, "everything practised for today")
+        window.pageStack.pop()
+    }
+
+    // Training plays today's due techniques; a rating moves on to the next open one.
+    function test_7b_training() {
+        // Daitoryu: nothing practised there yet today, two new ones are due.
+        Programme.discipline = "daitoryu"
+        Programme.setGrade("daitoryu", "k5")
+        const today = push("TodayPage")
+        const playable = today.due.filter(r => !!r.video && Videos.available(r.video.video))
+        if (playable.length < 2) {
+            skip("no video for Daitoryu 5. Kyu (set MITORI_VIDEOS)")
+        }
+        today.startTraining()
+        tryVerify(() => window.pageStack.currentItem.training === true)
+        const player = window.pageStack.currentItem
+        compare(player.index, 0)
+        // Skip the first with "next", rate the second: the training goes back to the skipped one.
+        player.go(1)
+        compare(player.index, 1)
+        findPicker(player, player.current.id).picked(3)
+        compare(player.index, 0, "back to the open one that was skipped")
+        findPicker(player, player.current.id).picked(2)
+        if (player.playlist.length > 2) {
+            compare(player.index, 2, "rating moves on")
+        }
+        // The last one (and every one before it) practised: done, with a way back.
+        for (let i = 1; i < player.playlist.length; ++i) {
+            player.index = i
+            if (!Practice.ratedToday(player.current.id)) {
+                Practice.rate(player.current.id, 2)
+            }
+        }
+        verify(player.trainingDone)
+        verify(findChild(player, "trainingDone").visible)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === today)
+        window.pageStack.pop()
+    }
+
     // The last chapter ends with the file; the loop must still start over at the chapter.
     function test_6_loop_at_end_of_file() {
         const page = playerAt(-1)

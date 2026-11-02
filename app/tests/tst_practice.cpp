@@ -1,4 +1,5 @@
 #include <QFile>
+#include <QSettings>
 #include <QSignalSpy>
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -17,6 +18,7 @@ private slots:
     void initTestCase()
     {
         QStandardPaths::setTestModeEnabled(true);
+        QSettings().clear();
     }
 
     void logKeepsEveryRating()
@@ -169,6 +171,54 @@ private slots:
         }
         Practice again(path);
         QCOMPARE(again.level(QStringLiteral("b")), 1);
+    }
+
+    void dueAndIntervals()
+    {
+        QTemporaryDir dir;
+        Practice practice(dir.filePath(QStringLiteral("mitori.sqlite")));
+        QSignalSpy spy(&practice, &Practice::intervalsChanged);
+        QCOMPARE(practice.intervals(), (QVariantList{2, 4, 14, 35}));
+        practice.setIntervals({1, 0, 500, 7});
+        QCOMPARE(spy.count(), 1);
+        QCOMPARE(practice.intervals(), (QVariantList{1, 1, 365, 7}));
+        practice.setIntervals({1, 2});
+        QCOMPARE(spy.count(), 1);
+
+        // Rated today: practised, not due; two new ones of the current grade.
+        practice.rate(QStringLiteral("a"), 1);
+        QVERIFY(practice.ratedToday(QStringLiteral("a")));
+        QVERIFY(!practice.ratedToday(QStringLiteral("b")));
+        const QVariantList candidates{
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("a")}, {QStringLiteral("current"), true}},
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("b")}, {QStringLiteral("current"), true}, {QStringLiteral("title"), QStringLiteral("B")}},
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("c")}, {QStringLiteral("current"), false}},
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("d")}, {QStringLiteral("current"), true}}};
+        // "a" was new and is practised today: one of the day's two new places is taken.
+        const QVariantList due = practice.due(candidates);
+        QCOMPARE(due.size(), 1);
+        QCOMPARE(due.first().toMap().value(QStringLiteral("id")).toString(), QStringLiteral("b"));
+        QCOMPARE(due.first().toMap().value(QStringLiteral("title")).toString(), QStringLiteral("B"));
+        QCOMPARE(due.first().toMap().value(QStringLiteral("level")).toInt(), 0);
+        practice.setIntervals({2, 4, 14, 35});
+    }
+
+    // After a restart the log still knows what was new today (firstRated from the database).
+    void newTodayAfterRestart()
+    {
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("mitori.sqlite"));
+        const QVariantList candidates{
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("a")}, {QStringLiteral("current"), true}},
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("b")}, {QStringLiteral("current"), true}},
+            QVariantMap{{QStringLiteral("id"), QStringLiteral("c")}, {QStringLiteral("current"), true}}};
+        {
+            Practice practice(path);
+            practice.rate(QStringLiteral("a"), 1);
+            practice.rate(QStringLiteral("b"), 2);
+        }
+        Practice again(path);
+        QVERIFY(again.due(candidates).isEmpty());
     }
 
     void deviceIdStays()
