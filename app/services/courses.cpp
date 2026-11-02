@@ -519,15 +519,15 @@ QString Courses::exportName(const QString &uid) const
     return {};
 }
 
-bool Courses::exportNotebook(const QString &uid, const QUrl &target)
+int Courses::exportNotebook(const QString &uid, const QUrl &target)
 {
     if (!m_open) {
-        return false;
+        return -1;
     }
     const QList<CourseBook::Course> list = m_book->courses();
     const auto it = std::find_if(list.cbegin(), list.cend(), [&](const auto &c) { return c.uid == uid; });
     if (it == list.cend()) {
-        return false;
+        return -1;
     }
     // A local file, or a content:// URL from Android's file picker (QFile opens both there).
     QFile file(target.isLocalFile() ? target.toLocalFile() : target.toString());
@@ -537,12 +537,13 @@ bool Courses::exportNotebook(const QString &uid, const QUrl &target)
     if (!ok) {
         m_error = tr("The notebook could not be exported: %1").arg(file.errorString());
         emit errorChanged();
-        return false;
+        return -1;
     }
-    if (missing > 0) {
-        qWarning("Courses: export without %d missing media file(s)", missing);
+    if (!m_error.isEmpty()) {
+        m_error.clear();
+        emit errorChanged();
     }
-    return true;
+    return missing;
 }
 
 bool Courses::addToDeviceCalendar(const QString &uid)

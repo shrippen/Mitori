@@ -83,7 +83,11 @@ private slots:
 
         QCOMPARE(courses.exportName(uid), u"Sommer Lehrgang Mainz 2026-07-04.zip"_s);
         const QString zip = m_dir.filePath(courses.exportName(uid));
-        QVERIFY2(courses.exportNotebook(uid, QUrl::fromLocalFile(zip)), qPrintable(courses.errorString()));
+        // A failed export, then a good one: the error goes again; the lost file is counted.
+        QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(m_dir.filePath(u"no/such/dir/x.zip"_s))), -1);
+        QVERIFY(!courses.errorString().isEmpty());
+        QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(zip)), 1);
+        QCOMPARE(courses.errorString(), QString());
         const QString back = readBack(zip);
         QVERIFY2(!back.startsWith(u"failed"_s), qPrintable(back));
         const QStringList parts = back.split(u"---\n"_s);
@@ -101,9 +105,16 @@ private slots:
         QVERIFY(md.contains(u"](audio/03-sprachnotiz.m4a)"_s));
         QVERIFY(md.contains(u"verloren"_s));
         QVERIFY(!md.contains(u"04-"_s));                // the lost file is not linked
+        QVERIFY(md.contains(u"verloren  \n(Voice note not on the device)"_s));
+    }
 
-        QVERIFY(!courses.exportNotebook(uid, QUrl::fromLocalFile(m_dir.filePath(u"no/such/dir/x.zip"_s))));
-        QVERIFY(!courses.errorString().isEmpty());
+    // Characters a URL or a file system takes for something else stay out of the name.
+    void safeFileName()
+    {
+        CourseBook::Course c;
+        c.title = u"Lehrgang #3: 100% Irimi?"_s;
+        c.first = QDate(2026, 6, 6);
+        QCOMPARE(NotebookExport::fileName(c), u"Lehrgang 3 100 Irimi 2026-06-06.zip"_s);
     }
 };
 

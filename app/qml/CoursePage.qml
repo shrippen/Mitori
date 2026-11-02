@@ -52,7 +52,7 @@ Kirigami.ScrollablePage {
             icon.name: "document-export"
             text: qsTr("Export")
             onTriggered: {
-                exportDialog.selectedFile = exportDialog.currentFolder + "/" + Courses.exportName(page.uid)
+                exportDialog.selectedFile = exportDialog.currentFolder + "/" + encodeURIComponent(Courses.exportName(page.uid))
                 exportDialog.open()
             }
         },
@@ -141,6 +141,7 @@ Kirigami.ScrollablePage {
                     Layout.fillWidth: true
                     visible: page.exported !== ""
                     text: qsTr("Exported: %1 (notizbuch.md with the photos and voice notes)").arg(page.exported)
+                          + (page.exportMissing > 0 ? " " + qsTr("%n file(s) were not on this device and are missing.", "", page.exportMissing) : "")
                     color: KanteStyle.positiveTextColor
                     wrapMode: Text.Wrap
                 }
@@ -402,8 +403,10 @@ Kirigami.ScrollablePage {
         }
     }
 
-    // Where the export went, shown under the course ("" before one).
+    // Where the export went, shown under the course ("" before one), and how many of its media
+    // files were not on the device.
     property string exported: ""
+    property int exportMissing: 0
 
     FileDialog {
         id: exportDialog
@@ -416,8 +419,13 @@ Kirigami.ScrollablePage {
         onAccepted: page.exportTo(selectedFile)
     }
 
+    // A local file shows its name; Android's picker gives a content:// URL with a document id, so
+    // there the name the dialog was offered.
     function exportTo(url) {
-        page.exported = Courses.exportNotebook(page.uid, url) ? decodeURIComponent(String(url).split("/").pop()) : ""
+        const missing = Courses.exportNotebook(page.uid, url)
+        const local = String(url).startsWith("file:")
+        page.exportMissing = Math.max(0, missing)
+        page.exported = missing < 0 ? "" : local ? decodeURIComponent(String(url).split("/").pop()) : Courses.exportName(page.uid)
     }
 
     // A note without text says what it holds.

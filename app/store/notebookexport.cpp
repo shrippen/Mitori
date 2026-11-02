@@ -54,6 +54,10 @@ QByteArray markdown(const CourseBook::Course &c, const QList<CourseBook::Entry> 
         }
         md += QStringLiteral("\n**%1** %2").arg(locale.toString(local.time(), QLocale::ShortFormat), e.text);
         const QString file = files.value(e.media);
+        const bool photo = MediaStore::kindOf(e.media) == MediaStore::Kind::Photo;
+        if (!e.media.isEmpty() && file.isEmpty()) {
+            md += QStringLiteral("  \n(%1)").arg(photo ? tr("Photo not on the device") : tr("Voice note not on the device"));
+        }
         if (!file.isEmpty()) {
             md += MediaStore::kindOf(e.media) == MediaStore::Kind::Photo
                       ? QStringLiteral("  \n![%1](%2)").arg(tr("Photo"), file)
@@ -95,7 +99,8 @@ bool write(QIODevice *out, const CourseBook::Course &course, const QList<CourseB
 
 QString fileName(const CourseBook::Course &c)
 {
-    static const QRegularExpression unsafe(QStringLiteral("[\\\\/:*?\"<>|\\x00-\\x1f]+"));
+    // Also "#" and "%": a URL would take them for a fragment or an escape.
+    static const QRegularExpression unsafe(QStringLiteral("[\\\\/:*?\"<>|#%\\x00-\\x1f]+"));
     QString title = c.title;
     title.replace(unsafe, QStringLiteral(" "));
     return title.simplified() + QLatin1Char(' ') + c.first.toString(Qt::ISODate) + QStringLiteral(".zip");

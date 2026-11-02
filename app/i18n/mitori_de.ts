@@ -304,133 +304,141 @@
         <source>Exported: %1 (notizbuch.md with the photos and voice notes)</source>
         <translation>Exportiert: %1 (notizbuch.md mit den Fotos und Sprachnotizen)</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../qml/CoursePage.qml" line="144"/>
+        <source>%n file(s) were not on this device and are missing.</source>
+        <translation>
+            <numerusform>%n Datei war nicht auf diesem Gerät und fehlt.</numerusform>
+            <numerusform>%n Dateien waren nicht auf diesem Gerät und fehlen.</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="152"/>
+        <location filename="../qml/CoursePage.qml" line="153"/>
         <source>No calendar app could be opened.</source>
         <translation>Es ließ sich keine Kalender-App öffnen.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="172"/>
+        <location filename="../qml/CoursePage.qml" line="173"/>
         <source>Exam %1</source>
         <translation>Prüfung %1</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="189"/>
+        <location filename="../qml/CoursePage.qml" line="190"/>
         <source>Change</source>
         <translation>Ändern</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="197"/>
+        <location filename="../qml/CoursePage.qml" line="198"/>
         <source>Plan an exam here …</source>
         <translation>Prüfung hier ablegen …</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="214"/>
+        <location filename="../qml/CoursePage.qml" line="215"/>
         <source>Plan an exam here</source>
         <translation>Prüfung hier ablegen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="224"/>
+        <location filename="../qml/CoursePage.qml" line="225"/>
         <source>Discipline</source>
         <translation>Sparte</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="238"/>
+        <location filename="../qml/CoursePage.qml" line="239"/>
         <source>next</source>
         <translation>nächster</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="238"/>
+        <location filename="../qml/CoursePage.qml" line="239"/>
         <source>passed</source>
         <translation>abgelegt</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="249"/>
+        <location filename="../qml/CoursePage.qml" line="250"/>
         <source>Waiting time: %1</source>
         <translation>Wartezeit: %1</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="249"/>
+        <location filename="../qml/CoursePage.qml" line="250"/>
         <source>All grades passed.</source>
         <translation>Alle Grade abgelegt.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="261"/>
+        <location filename="../qml/CoursePage.qml" line="262"/>
         <source>Plan</source>
         <translation>Vormerken</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="270"/>
+        <location filename="../qml/CoursePage.qml" line="271"/>
         <source>No exam</source>
         <translation>Keine Prüfung</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="278"/>
+        <location filename="../qml/CoursePage.qml" line="279"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="297"/>
+        <location filename="../qml/CoursePage.qml" line="298"/>
         <source>No entries yet. Write below what was shown.</source>
         <translation>Noch keine Einträge. Unten schreiben, was gezeigt wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="346"/>
+        <location filename="../qml/CoursePage.qml" line="347"/>
         <source>Change or delete</source>
         <translation>Ändern oder löschen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="379"/>
+        <location filename="../qml/CoursePage.qml" line="380"/>
         <source>What was shown?</source>
         <translation>Was wurde gezeigt?</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="380"/>
+        <location filename="../qml/CoursePage.qml" line="381"/>
         <source>New entry</source>
         <translation>Neuer Eintrag</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="399"/>
+        <location filename="../qml/CoursePage.qml" line="400"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="411"/>
+        <location filename="../qml/CoursePage.qml" line="414"/>
         <source>Export notebook</source>
         <translation>Notizbuch exportieren</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="414"/>
+        <location filename="../qml/CoursePage.qml" line="417"/>
         <source>ZIP archives (*.zip)</source>
         <translation>ZIP-Archive (*.zip)</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="426"/>
+        <location filename="../qml/CoursePage.qml" line="434"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="426"/>
+        <location filename="../qml/CoursePage.qml" line="434"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="432"/>
+        <location filename="../qml/CoursePage.qml" line="440"/>
         <source>Entry</source>
         <translation>Eintrag</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="444"/>
+        <location filename="../qml/CoursePage.qml" line="452"/>
         <source>Delete notebook?</source>
         <translation>Notizbuch löschen?</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="445"/>
+        <location filename="../qml/CoursePage.qml" line="453"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="455"/>
+        <location filename="../qml/CoursePage.qml" line="463"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>Das Notizbuch und sein %n Eintrag verschwinden von diesem Gerät.</numerusform>
@@ -951,62 +959,62 @@
 <context>
     <name>MediaCompose</name>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="35"/>
+        <location filename="../qml/MediaCompose.qml" line="42"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="45"/>
+        <location filename="../qml/MediaCompose.qml" line="52"/>
         <source>Take a photo</source>
         <translation>Foto aufnehmen</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="51"/>
+        <location filename="../qml/MediaCompose.qml" line="58"/>
         <source>Choose a picture …</source>
         <translation>Bild auswählen …</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="60"/>
+        <location filename="../qml/MediaCompose.qml" line="67"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="71"/>
+        <location filename="../qml/MediaCompose.qml" line="78"/>
         <source>Recording</source>
         <translation>Aufnahme läuft</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="77"/>
+        <location filename="../qml/MediaCompose.qml" line="84"/>
         <source>Stop</source>
         <translation>Stopp</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="83"/>
+        <location filename="../qml/MediaCompose.qml" line="90"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="93"/>
+        <location filename="../qml/MediaCompose.qml" line="102"/>
         <source>Mitori may not use the camera. Allow it in the system settings.</source>
         <translation>Mitori darf die Kamera nicht nutzen. Das lässt sich in den Systemeinstellungen erlauben.</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="105"/>
+        <location filename="../qml/MediaCompose.qml" line="114"/>
         <source>Mitori may not use the microphone. Allow it in the system settings.</source>
         <translation>Mitori darf das Mikrofon nicht nutzen. Das lässt sich in den Systemeinstellungen erlauben.</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="122"/>
+        <location filename="../qml/MediaCompose.qml" line="131"/>
         <source>This file could not be read as a picture.</source>
         <translation>Diese Datei ließ sich nicht als Bild lesen.</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="169"/>
+        <location filename="../qml/MediaCompose.qml" line="178"/>
         <source>Choose a picture</source>
         <translation>Bild auswählen</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="170"/>
+        <location filename="../qml/MediaCompose.qml" line="179"/>
         <source>Pictures (*.jpg *.jpeg *.png *.webp)</source>
         <translation>Bilder (*.jpg *.jpeg *.png *.webp)</translation>
     </message>
@@ -1115,11 +1123,21 @@
     </message>
     <message>
         <location filename="../store/notebookexport.cpp" line="59"/>
+        <source>Photo not on the device</source>
+        <translation>Foto nicht auf dem Gerät</translation>
+    </message>
+    <message>
+        <location filename="../store/notebookexport.cpp" line="59"/>
+        <source>Voice note not on the device</source>
+        <translation>Sprachnotiz nicht auf dem Gerät</translation>
+    </message>
+    <message>
+        <location filename="../store/notebookexport.cpp" line="63"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../store/notebookexport.cpp" line="60"/>
+        <location filename="../store/notebookexport.cpp" line="64"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
@@ -1167,17 +1185,17 @@
         <translation>Neue Notiz</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="220"/>
+        <location filename="../qml/NotesPage.qml" line="221"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="229"/>
+        <location filename="../qml/NotesPage.qml" line="230"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="229"/>
+        <location filename="../qml/NotesPage.qml" line="230"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
