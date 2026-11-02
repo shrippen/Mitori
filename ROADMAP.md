@@ -53,7 +53,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   jeder Platz in der Farbe seiner besten Stufe, leer, wo die Kombination nicht vorkommt; Shinki Toho als nummerierte
   Ô-dachi-Formen. Tippen öffnet das Technik-Blatt, Überfahren zeigt Technik, Angriff, Grad und Stand; Tab erreicht
   einen Platz je Raster, die Pfeiltasten wandern weiter. Breite Raster scrollen waagerecht, die Technik-Namen bleiben
-  stehen.
+  stehen. Raster: `KanteHeatGrid` (Kante 1.63, dafür ergänzt).
 
 ## Lehrgänge (Schritt 4)
 
@@ -71,9 +71,6 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
 ## Kante-Bedarf
 
 Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutzt:
-- Beschriftete Matrix (Heatmap mit Zeilen- und Spaltennamen, leeren Plätzen, Tooltip, Tippen, Pfeiltasten,
-  waagerecht scrollend mit stehenden Zeilennamen): die Landkarte baut sie heute aus Kante-Tokens selbst
-  (`TechniqueMatrix.qml`, `FormGrid.qml`, `MapPlace.qml`).
 - Seiten-Scope: Kirigamis ScrollablePage erbt die Kante-Farben nicht (`Theme.inherit: false`); jetzt je Seite
   `KanteScope` plus Seitengrund. Besser eine Option in `KanteScope` (auch für System/Kante Light: View- statt
   Window-Farbe bei Listen) und die globale Kopfleiste des pageStack in Kante-Farben (heute Plattformfarbe).

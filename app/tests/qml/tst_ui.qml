@@ -515,44 +515,58 @@ TestCase {
         tryCompare(window.pageStack, "depth", 2)
         const page = window.pageStack.currentItem
         tryVerify(() => page.title === qsTr("Technique map"))
+        wait(500)       // Kirigami slides the page in
         compare(page.grade, "k4")
         verify(page.matrix)
         compare(findChildren(page, "gradeChip").length, Programme.grades("aikido").length)
 
-        const matrix = findChild(page, "techniqueMatrix")
-        const places = findChildren(matrix, "mapPlace")
-        compare(places.length, page.shown.rows.length * page.shown.columns.length)
-        const filled = places.filter(p => p.visible)
-        verify(filled.length > 0)
-        verify(filled.length < places.length, "combinations not in the programme stay empty")
+        // Techniques × attacks (KanteHeatGrid); combinations not in the programme are gaps.
+        const heat = findChild(page, "techniqueMatrix")
+        compare(heat.rowCount, page.shown.rows.length)
+        compare(heat.columnCount, page.shown.columns.length)
+        let gap = null, target = null
+        for (let r = 0; r < heat.rowCount; r++) {
+            for (let c = 0; c < heat.columnCount; c++) {
+                if (heat.isEmpty(r, c))
+                    gap = gap || { r: r, c: c }
+                else if (!target && heat.valueOf(r, c) === 0)
+                    target = { r: r, c: c }
+            }
+        }
+        verify(gap, "combinations not in the programme stay empty")
+        verify(!heat.cellAt(gap.r, gap.c).shown)
+        verify(target)
 
         // A rating colours the place; its tip names technique, attack, grade and level.
-        const target = filled.find(p => p.level === 0)
-        verify(Practice.rate(target.cell.ids[0], 4))
-        tryCompare(target, "level", 4)
-        compare(target.fill, KanteStyle.levelColor(4))
-        verify(target.tip.indexOf(target.cell.gradeName) > 0, target.tip)
-        verify(target.tip.indexOf(Practice.levelNames[4]) > 0, target.tip)
+        const data = page.shown.rows[target.r].cells[target.c]
+        verify(Practice.rate(data.ids[0], 4))
+        const cell = heat.cellAt(target.r, target.c)
+        tryCompare(cell, "level", 4)
+        compare(heat.entryOf(target.r, target.c).label, "4")
+        const tip = heat.tipOf(target.r, target.c)
+        verify(tip.indexOf(data.gradeName) > 0, tip)
+        verify(tip.indexOf(Practice.levelNames[4]) > 0, tip)
         shot("11-map-aikido")
 
         // A tap opens the technique sheet.
         const sheet = findChild(page, "techniqueSheet")
-        mouseClick(target)
+        mouseClick(cell)
         tryVerify(() => sheet.opened)
-        compare(sheet.entry.id, target.cell.entry.id)
+        compare(sheet.entry.id, data.entry.id)
         sheet.close()
         tryVerify(() => !sheet.visible)
 
-        // The keys: Right moves to the next place of the row, Enter opens it.
-        const first = filled[0]
-        first.forceActiveFocus(Qt.TabFocusReason)
-        const row = filled.filter(p => p.row === first.row)
+        // The keys: Right moves to the next place of the row (over gaps), Enter opens it.
+        cell.forceActiveFocus(Qt.TabFocusReason)
+        let next = target.c + 1
+        while (next < heat.columnCount && heat.isEmpty(target.r, next))
+            next++
         keyClick(Qt.Key_Right)
-        if (row.length > 1) {
-            verify(row[1].activeFocus, "Right reaches the next place of the row")
-        }
+        if (next < heat.columnCount)
+            compare(heat.currentColumn, next)
         keyClick(Qt.Key_Return)
         tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, page.shown.rows[heat.currentRow].cells[heat.currentColumn].entry.id)
         sheet.close()
         tryVerify(() => !sheet.visible)       // a closing sheet still takes the taps
 
@@ -563,20 +577,21 @@ TestCase {
         mouseClick(chips[1])
         compare(page.shown.title, chips[1].text)
 
-        // Shinki Toho: the Ô-dachi forms up to Chûden.
+        // Shinki Toho: the Ô-dachi forms up to Chûden, eight to a row on the phone.
         page.discipline = "shinkitoho"
         page.grade = "chuden"
         verify(!page.matrix)
         const forms = findChild(page, "formGrid")
         verify(forms.visible)
-        const formPlaces = findChildren(forms, "formPlace")
-        compare(formPlaces.length, 21)
-        compare(formPlaces[11].label, "12")
+        compare(forms.perRow, 8)
+        compare(forms.rowCount, 3)
+        compare(forms.entryOf(1, 3).label, "12")
+        verify(forms.isEmpty(2, 7), "after the last form")
         verify(Practice.rate("shinkitoho/odachi/12", 2))
-        tryCompare(formPlaces[11], "level", 2)
-        compare(formPlaces[11].fill, KanteStyle.levelColor(2))
+        const form = forms.cellAt(1, 3)
+        tryCompare(form, "level", 2)
         waitForRendering(forms)       // the page lays out the forms in the next frame
-        mouseClick(formPlaces[11])
+        mouseClick(form)
         tryVerify(() => sheet.opened)
         compare(sheet.entry.id, "shinkitoho/odachi/12")
         sheet.close()
@@ -586,10 +601,12 @@ TestCase {
         // Tablet in landscape: bigger places, more forms per row.
         window.width = 1280
         window.height = 800
-        tryCompare(forms, "columns", 11)
+        tryCompare(forms, "perRow", 11)
+        compare(forms.entryOf(1, 0).label, "12")
         page.discipline = "daitoryu"
         page.grade = Programme.grades("daitoryu").slice(-1)[0].id
         verify(page.matrix)
+        compare(heat.cellSize, KanteStyle.unit(34))
         shot("11-map-tablet")
         window.pageStack.pop()
     }

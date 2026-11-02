@@ -101,32 +101,75 @@ Kirigami.ScrollablePage {
             text: page.shown ? page.shown.title + (page.shown.jp ? "  " + page.shown.jp : "") : ""
         }
 
-        TechniqueMatrix {
+        // Techniques × attacks of one group (Kante 1.63, KanteHeatGrid); a blank gap where a
+        // technique does not answer an attack up to the grade.
+        KanteHeatGrid {
+            id: heat
+
+            readonly property var rows: page.matrix ? page.shown.rows : []
+            readonly property var columns: page.matrix ? page.shown.columns : []
+
             objectName: "techniqueMatrix"
             Layout.fillWidth: true
             visible: page.matrix
-            grid: page.matrix ? page.shown : ({})
+            minValue: 0
+            maxValue: 4                     // whole values are the levels
+            showEmpty: false
+            columnLabelsVertical: true
+            columnLabelMaxLength: Kirigami.Units.gridUnit * 9
+            rowLabelWidth: page.width * 0.4
             cellSize: page.wide ? KanteStyle.unit(34) : KanteStyle.unit(26)
-            onActivated: cell => page.open(cell.entry)
+            rowTitle: qsTr("Technique")
+            columnTitle: qsTr("Attack")
+            rowLabels: rows.map(r => r.title)
+            columnLabels: columns.map(c => page.attackName(c))
+            columnTips: columns.map(c => c.jp ? page.attackName(c) + "  " + c.jp : "")
+            // Rows and columns of the same grid (not heat.columns, which may follow a moment later).
+            cells: {
+                const g = page.matrix && Practice.revision >= 0 ? page.shown : { rows: [], columns: [] }
+                return g.rows.map(r => r.cells.map((c, i) => c.ids ? page.place(c, r.title, page.attackName(g.columns[i])) : null))
+            }
+            legendLabels: page.levelWords(true)
+            noDataText: qsTr("no such combination")
+            onActivated: (row, column) => page.open(rows[row].cells[column].entry)
         }
 
-        FormGrid {
-            objectName: "formGrid"
+        // Shinki Toho: the Ô-dachi forms, numbered, as many per row as the width allows.
+        Item {
+            id: formBox
+
             Layout.fillWidth: true
             visible: !!page.shown && !page.matrix
-            cells: page.shown && !page.matrix ? page.shown.cells : []
-            columns: page.wide ? 11 : 8
-            onActivated: cell => page.open(cell.entry)
-        }
+            implicitHeight: forms.implicitHeight
 
-        KanteLegend {
-            Layout.fillWidth: true
-            visible: !!page.shown
-            model: [0, 1, 2, 3, 4].map(l => ({
-                color: KanteStyle.levelColor(l),
-                value: l > 0 && page.matrix ? String(l) : undefined,
-                text: Practice.levelNames[l]
-            }))
+            KanteHeatGrid {
+                id: forms
+
+                readonly property var list: page.shown && !page.matrix ? page.shown.cells : []
+                readonly property int perRow: page.wide ? 11 : 8
+
+                objectName: "formGrid"
+                width: formBox.width
+                minValue: 0
+                maxValue: 4
+                showEmpty: false
+                scrollable: false
+                cellSize: Math.floor((formBox.width - (perRow - 1) * spacing - 2 * ringRoom) / perRow)
+                cells: {
+                    const out = []
+                    for (let i = 0; Practice.revision >= 0 && i < list.length; i += perRow) {
+                        const row = list.slice(i, i + perRow).map(f => page.place(f, String(f.entry.nr), f.entry.title, String(f.entry.nr)))
+                        while (row.length < perRow) {
+                            row.push(null)
+                        }
+                        out.push(row)
+                    }
+                    return out
+                }
+                legendLabels: page.levelWords(false)
+                noDataText: ""
+                onActivated: (row, column) => page.open(list[row * perRow + column].entry)
+            }
         }
         QQC2.Label {
             Layout.fillWidth: true
@@ -138,6 +181,25 @@ Kirigami.ScrollablePage {
             font: KanteStyle.smallFont
             wrapMode: Text.Wrap
         }
+    }
+
+    function attackName(column) {
+        return column.extra ? column.title + " · " + column.extra : column.title
+    }
+    // A cell of a grid: the best level of its entries, its tip "row · column · grade: level". The
+    // level as its number unless `label` is given (a form's number).
+    function place(cell, rowName, columnName, label) {
+        const level = Practice.bestLevel(cell.ids)
+        const more = cell.ids.length > 1 ? " · " + qsTr("%n entries", "", cell.ids.length) : ""
+        return {
+            value: level,
+            label: label !== undefined ? label : (level > 0 ? String(level) : ""),
+            tip: qsTr("%1 · %2 · %3: %4").arg(rowName).arg(columnName).arg(cell.gradeName).arg(Practice.levelNames[level]) + more
+        }
+    }
+    // The legend's words by level; with `numbered` the number first, as the cells show it.
+    function levelWords(numbered) {
+        return Practice.levelNames.map((name, l) => numbered && l > 0 ? l + " " + name : name)
     }
 
     function open(entry) {

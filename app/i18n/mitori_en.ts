@@ -54,9 +54,9 @@
     </message>
 </context>
 <context>
-    <name>TechniqueMatrix</name>
+    <name>TechniqueMapPage</name>
     <message numerus="yes">
-        <location filename="../qml/TechniqueMatrix.qml" line="199"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="193"/>
         <source>%n entries</source>
         <translation>
             <numerusform>%n entry</numerusform>
