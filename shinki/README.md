@@ -46,7 +46,7 @@ shinki/
 ## 2 Farben
 
 Rollen statt Werte: Bausteine und Seiten nennen die Rolle, nie die Hex-Zahl. Die Quelle der Werte ist `tokens.json`.
-Der Clickdummy hat für Nebentext `#77716C`; auf `chip` und `selected` verfehlt das AA (4,3 und 4,3). Shinki
+Der Clickdummy hat für Nebentext `#77716C`; auf `chip` und `selected` verfehlt das AA (4,3 und 4,1). Shinki
 nimmt darum das etwas dunklere `#6B655F` (nahe an `--muted` der Clickdummy-Seite, `#6E6863`).
 
 | Rolle | Wert | Wofür | Kontrast auf `paper` |
@@ -144,7 +144,7 @@ Jeder Baustein nennt, was er zeigt, und seine Werte, mit der CSS-Klasse des Clic
 Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest; das steht dort ohne Klasse.
 
 - **Kopf** (`.hd`)
-  - Optional ein Logo-Quadrat: 40 px, `red`, darauf 神氣 in Noto Serif JP, weiß.
+  - Optional ein Logo-Quadrat: 40 px, `red`, darauf 神氣 in Noto Serif JP, 15 px, weiß.
   - Darüber eine Eyebrow-Kolumne in Rot, etwa „‹ MENÜ“; sie ist zugleich der Zurück-Knopf.
   - Der Seitentitel steht in PT Sans fett, sein Kanji klein in `inkMuted` daneben.
 - **Kachel** (`.tile`)
@@ -182,9 +182,12 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
 
 ## 6 Umsetzung in Qt Quick
 
-Kante und Shinki bleiben zwei getrennte Stile. Keiner hängt vom anderen ab, und keiner wird für den anderen
-geändert. Dazwischen liegt in Mitori eine dünne Schicht **Look** (`app/qml/Look`). Die Seiten fragen sie,
-und sie antwortet je nach gewähltem Stil mit Kante oder Shinki.
+Mitori hat vier Stile (Owner, 03.11.2026): **Breeze**, **Material**, **Kante** (dunkel oder hell „Leinen“) und
+**Shinki**. Breeze und Material sind die Controls-Stile der Plattform, Kante zeichnet sie in seiner Art „System“.
+Kante ist Kantes eigene Art, Shinki dieser Stil. Kante und Shinki bleiben getrennt. Keiner hängt vom anderen
+ab, und keiner wird für den anderen geändert. Dazwischen liegt in Mitori eine dünne Schicht **Look**
+(`app/qml/Look`). Die Seiten fragen sie, und sie antwortet je nach Stil mit Kante (Breeze, Material, Kante)
+oder Shinki.
 
 ```
 Seiten (app/qml)        Look.levelColor(3), Look.mutedText, LookTile { … }, LookSegmented { … }
@@ -192,12 +195,13 @@ Seiten (app/qml)        Look.levelColor(3), Look.mutedText, LookTile { … }, Lo
 Look (app/qml/Look)     wählt je Stil:   Kante ─────────────── Shinki
    │                                     app/qml/Kante          shinki/qml/Shinki
    │                                     (KanteStyle, Kante*)    (ShinkiStyle, Shinki*, Controls-Stil)
-Controls (QQC2)         Kante: Material/Breeze wie heute       Shinki: der Controls-Stil „Shinki“
+Controls (QQC2)         Breeze, Material, Kante wie heute      Shinki: der Controls-Stil „Shinki“
 ```
 
-- **Wahl.** Einstellungen → Darstellung: Kante oder Shinki. Der Wechsel gilt nach dem Neustart, denn Qt
-  setzt den Controls-Stil nur vor dem ersten Fenster. Unter Shinki läuft Kante in seiner Art „System“ und
-  zeichnet dort, wo eine Seite es noch direkt nutzt, mit dem Controls-Stil Shinki.
+- **Wahl.** Der Einrichtungsassistent beim ersten Start fragt nach dem Stil. Er zeigt dazu ein kleines
+  Tutorial zu den Funktionen. Später lässt sich der Stil in Einstellungen → Darstellung ändern. Der Wechsel
+  gilt nach dem Neustart, denn Qt setzt den Controls-Stil nur vor dem ersten Fenster. Breeze bietet Mitori
+  nur dort an, wo es den Stil gibt (Linux).
 - **`ShinkiStyle`** ist ein Singleton mit den Rollen, Stufen, Schriften und Größen aus `tokens.json`. Es ist
   die einzige Stelle mit Werten; jeder Wert dieser Bibel steht in `tokens.json`. Die Werte erzeugt ein Werkzeug aus der JSON-Datei, damit nichts doppelt gepflegt wird.
 - **Controls-Stil `Shinki`** für die Controls, die Mitori nutzt: Button, ToolButton, TextField, TextArea,
@@ -214,11 +218,10 @@ Controls (QQC2)         Kante: Material/Breeze wie heute       Shinki: der Contr
   Linien, `levelColor`, die kleine, Mono-, japanische, Überschrift- und Titelschrift. `Look` bildet sie unter
   Shinki auf `ShinkiStyle` ab.
 - **Übergang.** Die Seiten ziehen Baustein für Baustein von `Kante…` auf `Look…` um, angefangen bei
-  Startmenü, Programm, Blatt und Player; eine neue oder geänderte Seite nimmt gleich `Look`. Bis eine Seite
-  umgezogen ist, zeigt Shinki dort Kante in der Art „System“. Damit sie auch dann Shinki-Farben trägt, setzt
-  `ShinkiScope` unter Shinki `Kirigami.Theme` (Grund `paper`, Text `ink`, Hervorhebung und Fokus `red`).
-  Auf solchen Seiten ist der Fokus also vorerst rot und die Stufen sind Töne von Rot. Das ist eine bekannte
-  Abweichung von Abschnitt 2, sie verschwindet mit dem Umzug.
+  Startmenü, Programm, Blatt und Player. Sobald es `app/qml/Look` gibt, nimmt jede neue oder geänderte Seite
+  `Look`. Eine noch nicht umgezogene Seite liest ihre Farben aus `KanteStyle`, einem Singleton, das kein
+  Scope erreicht; unter Shinki trüge sie Plattformfarben neben Shinki-Controls. Darum bietet Mitori Shinki
+  erst an, wenn alle Seiten umgezogen sind. Bis dahin gibt es Shinki nur im Entwicklerbuild, zum Prüfen.
 - **Schriften** liegen in `shinki/fonts` und kommen als Ressource in die App (Android und AppImage haben sie
   sonst nicht). Noto Serif JP ist eine Teilmenge (Abschnitt 3). Ein Test prüft, dass jedes Kanji und Kana
   aus Daten, QML und Katalogen darin steht.
