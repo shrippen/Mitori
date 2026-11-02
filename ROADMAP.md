@@ -131,7 +131,8 @@ Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutz
 
 ## Querschnitt
 
-- **Theme Shinki** (Farben der Shinki News) als Rollen in Kante, wählbar neben Kante.
+- **Stil Shinki** (Shinki News): eigener Stil neben Kante, kein Unterthema (Owner, 02.11.2026); Style-Bibel in
+  `shinki/README.md`, Umsetzung als Qt-Quick-Controls-Stil `shinki/qml/Shinki`, wählbar in Einstellungen → Darstellung.
 - **Videos ausliefern**: beschnitten (Aikido `crop=720:372:0:64`, Daitoryu `crop=720:374:0:50`,
   Shinki Toho ohne), HEVC, als versionierte Bundles im generischen Gitea-Paket.
 - **Übersetzungen** deutsch und englisch von Anfang an.
