@@ -1,6 +1,11 @@
 #include "programme.h"
 
+#include "searchkey.h"
+
+#include <QSet>
 #include <QSettings>
+
+#include <algorithm>
 
 namespace {
 
@@ -161,6 +166,8 @@ QVariantList Programme::entries(const QString &disciplineId, const QString &grad
         }
         QVariantMap r = entryRow(technique, name(technique), technique.value(QStringLiteral("jp")).toString());
         r[QStringLiteral("attack")] = name(attack);
+        r[QStringLiteral("attackExtra")] = attack.value(QStringLiteral("zusatz"));
+        r[QStringLiteral("attackJp")] = attack.value(QStringLiteral("jp"));
         if (groups.value(group).value(QStringLiteral("art")) == QLatin1String("text")) {
             r[QStringLiteral("kind")] = QStringLiteral("text");  // theory: an essay, an oral exam
         }
@@ -232,21 +239,76 @@ QVariantList Programme::shinkiTohoEntries(const QVariantMap &d, const QString &g
     return result;
 }
 
-QVariantMap Programme::entry(const QString &id) const
+QVariantList Programme::search(const QString &query, int limit) const
 {
+    QVariantList result;
+    const QStringList words = searchWords(query);
+    if (words.isEmpty()) {
+        return result;
+    }
+    QSet<QString> seen;
     for (const QVariant &d : m_catalog.disciplines()) {
-        const QVariantMap map = d.toMap();
-        const QString disciplineId = map.value(QStringLiteral("id")).toString();
-        for (const QVariant &g : map.value(QStringLiteral("grade")).toList()) {
-            for (const QVariant &e : entries(disciplineId, g.toMap().value(QStringLiteral("id")).toString())) {
-                if (e.toMap().value(QStringLiteral("id")).toString() == id) {
-                    QVariantMap found = e.toMap();
-                    found[QStringLiteral("discipline")] = disciplineId;
-                    found[QStringLiteral("grade")] = g.toMap().value(QStringLiteral("id"));
-                    return found;
+        const QVariantMap discipline = d.toMap();
+        const QString disciplineId = discipline.value(QStringLiteral("id")).toString();
+        for (const QVariant &g : grades(disciplineId)) {
+            const QVariantMap grade = g.toMap();
+            QString group;
+            for (const QVariant &e : entries(disciplineId, grade.value(QStringLiteral("id")).toString())) {
+                QVariantMap row = e.toMap();
+                if (row.value(QStringLiteral("kind")) == QLatin1String("group")) {
+                    group = row.value(QStringLiteral("title")).toString();
+                    continue;
+                }
+                const QString id = row.value(QStringLiteral("id")).toString();
+                if (row.value(QStringLiteral("kind")) != QLatin1String("entry") || seen.contains(id)) {
+                    continue;
+                }
+                const QStringList fields{row.value(QStringLiteral("title")).toString(),
+                                         row.value(QStringLiteral("jp")).toString(),
+                                         row.value(QStringLiteral("extra")).toString(),
+                                         row.value(QStringLiteral("attack")).toString(),
+                                         row.value(QStringLiteral("attackExtra")).toString(),
+                                         row.value(QStringLiteral("attackJp")).toString(),
+                                         group};
+                if (!SearchText(fields.join(u' ')).matches(words)) {
+                    continue;
+                }
+                seen.insert(id);
+                row[QStringLiteral("discipline")] = disciplineId;
+                row[QStringLiteral("disciplineName")] = discipline.value(QStringLiteral("kurzname"));
+                row[QStringLiteral("grade")] = grade.value(QStringLiteral("id"));
+                row[QStringLiteral("gradeName")] = grade.value(QStringLiteral("name"));
+                row[QStringLiteral("groupName")] = group;
+                result << row;
+                if (result.size() >= limit) {
+                    return result;
                 }
             }
         }
     }
-    return {};
+    return result;
+}
+
+QVariantMap Programme::entry(const QString &id) const
+{
+    // Built once: the search page asks for one entry per note found.
+    if (m_entryIndex.isEmpty()) {
+        for (const QVariant &d : m_catalog.disciplines()) {
+            const QVariantMap map = d.toMap();
+            const QString disciplineId = map.value(QStringLiteral("id")).toString();
+            for (const QVariant &g : map.value(QStringLiteral("grade")).toList()) {
+                for (const QVariant &e : entries(disciplineId, g.toMap().value(QStringLiteral("id")).toString())) {
+                    QVariantMap found = e.toMap();
+                    const QString entryId = found.value(QStringLiteral("id")).toString();
+                    if (entryId.isEmpty() || m_entryIndex.contains(entryId)) {
+                        continue;
+                    }
+                    found[QStringLiteral("discipline")] = disciplineId;
+                    found[QStringLiteral("grade")] = g.toMap().value(QStringLiteral("id"));
+                    m_entryIndex.insert(entryId, found);
+                }
+            }
+        }
+    }
+    return m_entryIndex.value(id);
 }

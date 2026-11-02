@@ -243,42 +243,42 @@
 <context>
     <name>Practice</name>
     <message>
-        <location filename="../services/practice.cpp" line="37"/>
+        <location filename="../services/practice.cpp" line="40"/>
         <source>The practice log could not be opened: %1</source>
         <translation>Das Übungsprotokoll lässt sich nicht öffnen: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="65"/>
+        <location filename="../services/practice.cpp" line="68"/>
         <source>not rated</source>
         <translation>offen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="65"/>
+        <location filename="../services/practice.cpp" line="68"/>
         <source>seen</source>
         <translation>gesehen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="65"/>
+        <location filename="../services/practice.cpp" line="68"/>
         <source>with help</source>
         <translation>mit Hilfe</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="65"/>
+        <location filename="../services/practice.cpp" line="68"/>
         <source>sure</source>
         <translation>sicher</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="65"/>
+        <location filename="../services/practice.cpp" line="68"/>
         <source>exam-ready</source>
         <translation>prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="75"/>
+        <location filename="../services/practice.cpp" line="78"/>
         <source>The rating could not be saved: %1</source>
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="223"/>
+        <location filename="../services/practice.cpp" line="246"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
@@ -348,6 +348,50 @@
     </message>
 </context>
 <context>
+    <name>SearchPage</name>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="32"/>
+        <location filename="../qml/SearchPage.qml" line="41"/>
+        <source>Search</source>
+        <translation>Suche</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="40"/>
+        <source>Technique, attack, Japanese or a word from your notes</source>
+        <translation>Technik, Angriff, Japanisch oder ein Wort aus deinen Notizen</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="61"/>
+        <source>Nothing found for “%1”.</source>
+        <translation>Nichts gefunden für „%1“.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="68"/>
+        <source>Techniques</source>
+        <translation>Techniken</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="97"/>
+        <source>More than %1 techniques found. Add a word to narrow the search.</source>
+        <translation>Mehr als %1 Techniken gefunden. Ein weiteres Wort grenzt die Suche ein.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="104"/>
+        <source>Notes</source>
+        <translation>Notizen</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="113"/>
+        <source>Technique no longer in the programme</source>
+        <translation>Technik nicht mehr im Programm</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="127"/>
+        <source>More than %1 notes found. Add a word to narrow the search.</source>
+        <translation>Mehr als %1 Notizen gefunden. Ein weiteres Wort grenzt die Suche ein.</translation>
+    </message>
+</context>
+<context>
     <name>SettingsPage</name>
     <message>
         <location filename="../qml/SettingsPage.qml" line="17"/>
@@ -374,31 +418,36 @@
     <name>StartPage</name>
     <message>
         <location filename="../qml/StartPage.qml" line="22"/>
+        <source>Search</source>
+        <translation>Suche</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="28"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="35"/>
+        <location filename="../qml/StartPage.qml" line="41"/>
         <source>Programme data missing</source>
         <translation>Programmdaten fehlen</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="43"/>
+        <location filename="../qml/StartPage.qml" line="49"/>
         <source>Ratings are not saved</source>
         <translation>Einschätzungen werden nicht gespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="57"/>
+        <location filename="../qml/StartPage.qml" line="63"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="73"/>
+        <location filename="../qml/StartPage.qml" line="79"/>
         <source>Practice today</source>
         <translation>Heute üben</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="74"/>
+        <location filename="../qml/StartPage.qml" line="80"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n fällig</numerusform>
@@ -406,17 +455,17 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="74"/>
+        <location filename="../qml/StartPage.qml" line="80"/>
         <source>all practised</source>
         <translation>alles geübt</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="89"/>
+        <location filename="../qml/StartPage.qml" line="95"/>
         <source>Statistics</source>
         <translation>Statistik</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="90"/>
+        <location filename="../qml/StartPage.qml" line="96"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n Übungstag in 30 Tagen</numerusform>

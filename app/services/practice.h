@@ -63,6 +63,9 @@ public:
     Q_INVOKABLE QVariantList notes(const QString &entry) const;
     // The newest note of an entry ({uid, text, created, changed}), or an empty map.
     Q_INVOKABLE QVariantMap lastNote(const QString &entry) const;
+    // Notes containing every word of `query` (case and accents do not matter), newest first:
+    // {uid, entry, text, created, changed}.
+    Q_INVOKABLE QVariantList searchNotes(const QString &query, int limit = 50) const;
     // Add, change or delete a note; false (and errorString set) when it could not be saved.
     Q_INVOKABLE bool addNote(const QString &entry, const QString &text);
     Q_INVOKABLE bool changeNote(const QString &uid, const QString &text);

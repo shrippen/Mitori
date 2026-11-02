@@ -58,6 +58,8 @@ public:
     bool deleteNote(const QString &uid, const QDateTime &at);
     // The notes of one entry that are not deleted, oldest first.
     QList<Note> notes(const QString &entry) const;
+    // Every note that is not deleted, newest first.
+    QList<Note> allNotes() const;
     // The newest note of every entry that has one.
     QHash<QString, Note> lastNotes() const;
 

@@ -47,6 +47,7 @@ qt_add_qml_module(mitori_app
         qml/NotesPage.qml
         qml/NoteEditor.qml
         qml/NoteRow.qml
+        qml/SearchPage.qml
         qml/StatsPage.qml
     SOURCES
         catalog/catalog.h
@@ -61,6 +62,7 @@ qt_add_qml_module(mitori_app
         store/practicelog.cpp
         store/schedule.h
         store/schedule.cpp
+        store/searchkey.h
 )
 
 # Texts: English in the code, German in i18n/mitori_de.ts (update: cmake --build <dir> --target
@@ -155,7 +157,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
 
     qt_add_executable(tst_programme tests/tst_programme.cpp services/programme.cpp services/programme.h
         catalog/catalog.cpp catalog/catalog.h)
-    target_include_directories(tst_programme PRIVATE catalog services)
+    target_include_directories(tst_programme PRIVATE catalog services store)
     target_compile_definitions(tst_programme PRIVATE MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
     target_link_libraries(tst_programme PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
     set_target_properties(tst_programme PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)

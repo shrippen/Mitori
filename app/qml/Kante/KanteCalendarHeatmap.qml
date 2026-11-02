@@ -5,9 +5,11 @@ import "."
 /**
  * Days on a calendar grid (Kante 1.62, for Mitori's practice days): a column per week, a row per
  * weekday, the newest week on the right. The axes are labelled: weekday names on every second row
- * at the left, the month's name above the week it begins in. Each day has a level 0..4, coloured
- * as KanteHeatmap does (KanteStyle.levelColor); hovering a day shows its date and `tips` entry,
- * screen readers hear the same. Pair it with a KanteLegend for the levels.
+ * at the side, the month's name above the week it begins in (the first column names its month
+ * when the next name is three weeks away or more). Each day has a level 0..4, coloured as KanteHeatmap
+ * does (KanteStyle.levelColor); hovering a day, or tapping it (for a few seconds, on touch), shows
+ * its date and `tips` entry; screen readers hear the date in full. Mirrored right to left with
+ * LayoutMirroring (the newest week on the left). Pair it with a KanteLegend for the levels.
  *   endDate         the last day shown (today unless set); later days of its week stay empty
  *   weeks           how many weeks (columns)
  *   levels          {"2026-11-02": 3, …} by ISO day (isoDay()); a missing day is 0, above 4 is 4
@@ -30,6 +32,16 @@ Item {
     readonly property real step: cellSize + spacing
     readonly property real labelWidth: Math.ceil(Math.max(...weekdayLabels().map(t => monthMetrics.advanceWidth(t)))) + KanteStyle.unit(6)
     readonly property real labelHeight: monthMetrics.height + KanteStyle.unit(2)
+    readonly property bool mirrored: LayoutMirroring.enabled
+    // The day tapped last, its tooltip shown for a few seconds (touch has no hover).
+    property int tappedIndex: -1
+
+    Accessible.role: Accessible.Grouping
+
+    // x of an item `w` wide at `x` from the leading edge.
+    function lead(x, w) {
+        return mirrored ? implicitWidth - x - w : x
+    }
 
     implicitWidth: labelWidth + weeks * step - spacing
     implicitHeight: labelHeight + 7 * step - spacing
@@ -58,8 +70,8 @@ Item {
     function levelOf(day) {
         return Math.max(0, Math.min(4, Number(levels[isoDay(day)]) || 0))
     }
-    function tipOf(day) {
-        const date = day.toLocaleDateString(locale, Locale.ShortFormat)
+    function tipOf(day, format) {
+        const date = day.toLocaleDateString(locale, format === undefined ? Locale.ShortFormat : format)
         const tip = tips[isoDay(day)]
         return tip ? date + " · " + tip : date
     }
@@ -71,16 +83,21 @@ Item {
         }
         return rows
     }
-    // [{week, month, text}]: the weeks a month begins in, after the first column.
+    // [{week, month, text}]: the weeks a month begins in; the first column names the month of its
+    // last day when the next name is at least three weeks away.
     function monthLabels() {
         const result = []
+        const label = (w, m) => ({ week: w, month: m, text: locale.standaloneMonthName(m, Locale.ShortFormat) })
         for (let w = 0; w < weeks; w++) {
             for (let r = 0; r < 7; r++) {
                 const d = dayAt(w, r)
-                if (d.getDate() === 1 && d <= lastDay && (w > 0 || r === 0)) {
-                    result.push({ week: w, month: d.getMonth(), text: locale.standaloneMonthName(d.getMonth(), Locale.ShortFormat) })
+                if (d.getDate() === 1 && d <= lastDay) {
+                    result.push(label(w, d.getMonth()))
                 }
             }
+        }
+        if (result.length === 0 || result[0].week >= 3) {
+            result.unshift(label(0, dayAt(0, 6).getMonth()))
         }
         return result
     }
@@ -92,7 +109,7 @@ Item {
         delegate: Text {
             required property int index
             required property string modelData
-            x: 0
+            x: heat.lead(0, implicitWidth)
             y: heat.labelHeight + index * heat.step + (heat.cellSize - height) / 2
             text: modelData
             font: KanteStyle.smallFont
@@ -105,7 +122,7 @@ Item {
         delegate: Text {
             required property var modelData
             // Kept inside the grid when a month begins in one of the last weeks.
-            x: Math.min(heat.labelWidth + modelData.week * heat.step, heat.implicitWidth - implicitWidth)
+            x: heat.lead(Math.min(heat.labelWidth + modelData.week * heat.step, heat.implicitWidth - implicitWidth), implicitWidth)
             y: 0
             text: modelData.text
             font: KanteStyle.smallFont
@@ -125,20 +142,32 @@ Item {
             readonly property string tip: heat.tipOf(day)
 
             visible: heat.shown(week, row)
-            x: heat.labelWidth + week * heat.step
+            x: heat.lead(heat.labelWidth + week * heat.step, heat.cellSize)
             y: heat.labelHeight + row * heat.step
             width: heat.cellSize
             height: heat.cellSize
             Accessible.role: Accessible.StaticText
-            Accessible.name: tip
+            Accessible.name: heat.tipOf(day, Locale.LongFormat)
 
             Rectangle { anchors.fill: parent; color: KanteStyle.sunkenColor }
             Rectangle { anchors.fill: parent; color: cell.level > 0 ? KanteStyle.levelColor(cell.level, 4) : "transparent" }
 
             HoverHandler { id: hover }
+            TapHandler {
+                onTapped: {
+                    heat.tappedIndex = cell.index
+                    tipTimer.restart()
+                }
+            }
             QQC2.ToolTip.text: tip
-            QQC2.ToolTip.visible: hover.hovered
-            QQC2.ToolTip.delay: 300
+            QQC2.ToolTip.visible: hover.hovered || heat.tappedIndex === index
+            QQC2.ToolTip.delay: heat.tappedIndex === index ? 0 : 300
         }
+    }
+
+    Timer {
+        id: tipTimer
+        interval: 3000
+        onTriggered: heat.tappedIndex = -1
     }
 }
