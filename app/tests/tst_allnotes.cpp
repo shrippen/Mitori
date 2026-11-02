@@ -1,4 +1,4 @@
-#include <QElapsedTimer>
+#include <ctime>
 #include <QSettings>
 #include <QSignalSpy>
 #include <QStandardPaths>
@@ -144,21 +144,29 @@ private slots:
         s.notes->setCourses(s.courses.get());
         QCOMPARE(s.notes->count(), 2200);
 
-        QElapsedTimer clock;
         QList<qint64> times;
         // Rows 0–199 are the course entries (added last): change technique notes below them.
         for (int i = 0; i < 5; ++i) {
-            clock.start();
+            const qint64 start = cpuMs();
             QVERIFY(s.practice->changeNote(row(*s.notes, 300 + i).value(u"uid"_s).toString(), u"neu %1"_s.arg(i)));
-            times << clock.elapsed();
+            times << cpuMs() - start;
         }
         std::sort(times.begin(), times.end());
         const qint64 median = times.at(times.size() / 2);
-        qInfo("a change with 2200 notes: %lld ms (median of 5)", median);
+        qInfo("a change with 2200 notes: %lld ms CPU (median of 5)", median);
         QVERIFY2(median < kMaxMs, qPrintable(u"%1 ms"_s.arg(median)));
     }
 
 private:
+    // The CPU time of this thread (ms): other work on the machine (a parallel build) does not
+    // count, as it does in wall time (152 ms under load, 32 ms alone).
+    static qint64 cpuMs()
+    {
+        timespec t{};
+        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &t);
+        return qint64(t.tv_sec) * 1000 + t.tv_nsec / 1000000;
+    }
+
     // A frame at 60 Hz in a release build (measured 9–10 ms); a debug build is about three times
     // slower (31 ms), with room for a slower CI machine.
 #ifdef NDEBUG
