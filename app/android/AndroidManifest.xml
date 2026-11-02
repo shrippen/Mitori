@@ -21,6 +21,8 @@
         android:label="${appLabel}"
         android:icon="@drawable/icon"
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:supportsRtl="true"
         android:enableOnBackInvokedCallback="false">
 

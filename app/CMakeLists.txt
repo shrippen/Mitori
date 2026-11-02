@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
-project(mitori VERSION 0.1.0 LANGUAGES CXX)
+project(mitori VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Multimedia Sql Network LinguistTools)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Multimedia Sql Network Concurrent LinguistTools)
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 find_package(KF6 REQUIRED COMPONENTS Kirigami)
@@ -64,6 +64,7 @@ qt_add_qml_module(mitori_app
         qml/CoursePage.qml
         qml/CourseNewPage.qml
         qml/coursedays.js
+        qml/VideosPage.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -93,6 +94,12 @@ qt_add_qml_module(mitori_app
         services/courses.cpp
         platform/devicecalendar.h
         platform/devicecalendar.cpp
+        store/bundlecrypto.h
+        store/bundlecrypto.cpp
+        store/bundleshelf.h
+        store/bundleshelf.cpp
+        services/bundles.h
+        services/bundles.cpp
         services/keyedlistmodel.h
         services/keyedlistmodel.cpp
 )
@@ -130,9 +137,15 @@ qt_add_resources(mitori_app "kante"
     FILES ${KANTE_FILES}
 )
 
+# Monocypher (app/third_party, BSD-2-Clause / CC0): Argon2id, BLAKE2b and XChaCha20-Poly1305 for the
+# video bundles (store/bundlecrypto).
+add_library(monocypher STATIC third_party/monocypher/monocypher.c third_party/monocypher/monocypher.h)
+target_include_directories(monocypher PUBLIC third_party/monocypher)
+set_target_properties(monocypher PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 # The generated type registration includes the headers by name.
 target_include_directories(mitori_app PUBLIC catalog services store player platform)
-target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql Qt6::Network KF6::Kirigami)
+target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql Qt6::Network Qt6::Concurrent KF6::Kirigami monocypher)
 if(TARGET Qt6::TextToSpeech)
     target_link_libraries(mitori_app PUBLIC Qt6::TextToSpeech)
     target_compile_definitions(mitori_app PRIVATE MITORI_SPEECH)
@@ -260,6 +273,20 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     target_link_libraries(tst_courses PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Test)
     set_target_properties(tst_courses PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME courses COMMAND tst_courses)
+    qt_add_executable(tst_bundlecrypto tests/tst_bundlecrypto.cpp store/bundlecrypto.cpp store/bundlecrypto.h)
+    target_include_directories(tst_bundlecrypto PRIVATE store)
+    target_compile_definitions(tst_bundlecrypto PRIVATE TEST_BUNDLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/bundle")
+    target_link_libraries(tst_bundlecrypto PRIVATE Qt6::Core Qt6::Test monocypher)
+    set_target_properties(tst_bundlecrypto PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME bundlecrypto COMMAND tst_bundlecrypto)
+
+    qt_add_executable(tst_bundles tests/tst_bundles.cpp services/bundles.cpp services/bundles.h
+        store/bundleshelf.cpp store/bundleshelf.h store/bundlecrypto.cpp store/bundlecrypto.h)
+    target_include_directories(tst_bundles PRIVATE services store)
+    target_compile_definitions(tst_bundles PRIVATE TEST_BUNDLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/bundle")
+    target_link_libraries(tst_bundles PRIVATE Qt6::Core Qt6::Qml Qt6::Network Qt6::Concurrent Qt6::Test monocypher)
+    set_target_properties(tst_bundles PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME bundles COMMAND tst_bundles)
 
     # The pages with Kirigami and Kante, offscreen; screenshots into <build>/ui-shots. Plays a video
     # only with MITORI_VIDEOS (the videos are not in the repository).
@@ -267,7 +294,8 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     qt_add_executable(tst_ui tests/tst_ui.cpp)
     target_link_libraries(tst_ui PRIVATE mitori_app mitori_appplugin Qt6::QuickTest)
     target_compile_definitions(tst_ui PRIVATE QUICK_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/qml"
-        UI_SHOTS_DIR="${CMAKE_BINARY_DIR}/ui-shots" UI_DATA_DIR="${CMAKE_BINARY_DIR}/ui-data")
+        UI_SHOTS_DIR="${CMAKE_BINARY_DIR}/ui-shots" UI_DATA_DIR="${CMAKE_BINARY_DIR}/ui-data"
+        TEST_BUNDLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/bundle")
     set_target_properties(tst_ui PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME ui COMMAND tst_ui)
     set_tests_properties(ui PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material")

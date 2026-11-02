@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+: Auto Backup and device transfer leave out the video bundles (files/bundles: the
+     decrypted videos, their codes and keys). Hundreds of MB would stop the whole backup (25 MB
+     limit); they load again from the code. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="bundles/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="bundles/" />
+    </device-transfer>
+</data-extraction-rules>

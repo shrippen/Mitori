@@ -1,0 +1,31 @@
+{
+ "format": 1,
+ "basis": "file:///unused",
+ "bundles": [
+  {
+   "id": "test-bundle",
+   "version": 1,
+   "titel": "Test",
+   "videos": [
+    {
+     "video": "test/v",
+     "datei": "test.mvb",
+     "groesse": 440,
+     "sha256": "04b984b376b06fd067078bfa501cb0f04ef1e65cfd0bc3d380e96b18a5fe4d81",
+     "klar": 400,
+     "beschnitten": true
+    }
+   ],
+   "hinweis": ""
+  }
+ ],
+ "codes": {
+  "c6ed7df09b097d62c971802d6c4d6906": {
+   "bundle": "test-bundle",
+   "salz": "kTr3dw1z3PPElooYxismTQ==",
+   "t": 1,
+   "m": 8,
+   "schluessel": "yRhTeubUUb5GA7sxPsHA4oI3eVbwKlPiHydwSkQYd27uzcbbAlicmn+IdbPKFQJ56bPrKaT4tQyzt5qcIc3FVWrTFSo1l4R6"
+  }
+ }
+}

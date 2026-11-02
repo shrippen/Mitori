@@ -1,5 +1,7 @@
 #include "videos.h"
 
+#include "bundleshelf.h"
+
 #include <QDir>
 #include <QFileInfo>
 #include <QSettings>
@@ -19,6 +21,8 @@ Videos::Videos(const Catalog &catalog, QObject *parent)
     , m_catalog(catalog)
     , m_folder(QSettings().value(QLatin1String(kFolderKey), defaultFolder()).toString())
 {
+    // Videos of a bundle came or went: bindings that ask available() follow (they read folder).
+    connect(&BundleShelf::notifier(), &BundleShelfNotifier::changed, this, &Videos::folderChanged);
 }
 
 QString Videos::defaultFolder()
@@ -48,8 +52,13 @@ void Videos::setFolder(const QString &folder)
     emit folderChanged();
 }
 
+// A loaded bundle first, else the folder of the settings.
 QString Videos::path(const QString &video) const
 {
+    const QString bundled = BundleShelf::shared().path(video);
+    if (!bundled.isEmpty()) {
+        return bundled;
+    }
     const QString file = m_catalog.videos().value(video).toMap().value(QStringLiteral("datei")).toString();
     return file.isEmpty() ? QString() : QDir(m_folder).filePath(file);
 }
@@ -65,7 +74,12 @@ QUrl Videos::source(const QString &video) const
     return available(video) ? QUrl::fromLocalFile(path(video)) : QUrl();
 }
 
+// A bundle's file is cut already: its picture is the whole frame, at the same aspect ratio.
 QVariantMap Videos::crop(const QString &video) const
 {
-    return m_catalog.videos().value(video).toMap().value(QStringLiteral("beschnitt")).toMap();
+    const QVariantMap crop = m_catalog.videos().value(video).toMap().value(QStringLiteral("beschnitt")).toMap();
+    if (!BundleShelf::shared().cropped(video) || BundleShelf::shared().path(video).isEmpty()) {
+        return crop;
+    }
+    return {{QStringLiteral("verhaeltnis"), crop.value(QStringLiteral("verhaeltnis"))}};
 }
