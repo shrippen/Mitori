@@ -532,10 +532,17 @@ int Courses::exportNotebook(const QString &uid, const QUrl &target)
     // A local file, or a content:// URL from Android's file picker (QFile opens both there).
     QFile file(target.isLocalFile() ? target.toLocalFile() : target.toString());
     int missing = 0;
+    // The last pieces (notizbuch.md, the directory) sit in QFile's buffer: a full disk shows only
+    // when they are flushed, and a ZIP without its directory does not open.
     const bool ok = file.open(QIODevice::WriteOnly | QIODevice::Truncate)
-                    && NotebookExport::write(&file, *it, m_book->entries(uid), MediaStore::shared(), &missing);
-    if (!ok) {
+                    && NotebookExport::write(&file, *it, m_book->entries(uid), MediaStore::shared(), &missing)
+                    && file.flush();
+    file.close();
+    if (!ok || file.error() != QFileDevice::NoError) {
         m_error = tr("The notebook could not be exported: %1").arg(file.errorString());
+        if (target.isLocalFile() && QFileInfo(file).isFile()) {
+            file.remove();                      // no broken archive that looks like a backup
+        }
         emit errorChanged();
         return -1;
     }

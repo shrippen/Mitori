@@ -86,6 +86,11 @@ private slots:
         // A failed export, then a good one: the error goes again; the lost file is counted.
         QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(m_dir.filePath(u"no/such/dir/x.zip"_s))), -1);
         QVERIFY(!courses.errorString().isEmpty());
+        // A full disk fails when the last pieces are flushed, not when they are written.
+        if (QFile::exists(u"/dev/full"_s)) {
+            QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(u"/dev/full"_s)), -1);
+            QVERIFY(!courses.errorString().isEmpty());
+        }
         QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(zip)), 1);
         QCOMPARE(courses.errorString(), QString());
         const QString back = readBack(zip);
