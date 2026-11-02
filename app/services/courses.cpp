@@ -534,14 +534,20 @@ int Courses::exportNotebook(const QString &uid, const QUrl &target)
     int missing = 0;
     // The last pieces (notizbuch.md, the directory) sit in QFile's buffer: a full disk shows only
     // when they are flushed, and a ZIP without its directory does not open.
-    const bool ok = file.open(QIODevice::WriteOnly | QIODevice::Truncate)
-                    && NotebookExport::write(&file, *it, m_book->entries(uid), MediaStore::shared(), &missing)
+    const bool opened = file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    const bool ok = opened && NotebookExport::write(&file, *it, m_book->entries(uid), MediaStore::shared(), &missing)
                     && file.flush();
+    QString why = file.errorString();           // close() may reset it (a write past the buffer failed)
     file.close();
+    if (ok && file.error() != QFileDevice::NoError) {
+        why = file.errorString();
+    }
     if (!ok || file.error() != QFileDevice::NoError) {
-        m_error = tr("The notebook could not be exported: %1").arg(file.errorString());
-        if (target.isLocalFile() && QFileInfo(file).isFile()) {
-            file.remove();                      // no broken archive that looks like a backup
+        m_error = tr("The notebook could not be exported: %1").arg(why);
+        // Only a file this export truncated: no broken archive that looks like a backup, and never
+        // one it could not open (an old backup, read-only).
+        if (opened && target.isLocalFile() && QFileInfo(file).isFile()) {
+            file.remove();
         }
         emit errorChanged();
         return -1;

@@ -67,8 +67,13 @@ private slots:
                         m_dir.filePath(u"cache.ics"_s), catalog);
         const QString uid = courses.create(u"Sommer: Lehrgang/Mainz"_s, u"2026-07-04"_s, u"2026-07-05"_s, u"Mainz"_s, u"Gast"_s);
         QVERIFY(courses.addEntry(uid, u"Tenkan: Fuß zuerst"_s));
-        QImage image(120, 80, QImage::Format_RGB32);
-        image.fill(Qt::gray);
+        // Noise: a JPEG of some 100 KB, past QFile's 16 KB buffer (a write that fails at once).
+        QImage image(400, 300, QImage::Format_RGB32);
+        for (int y = 0; y < image.height(); ++y) {
+            for (int x = 0; x < image.width(); ++x) {
+                image.setPixel(x, y, qRgb((x * 37 + y * 91) % 256, (x * y) % 256, (x ^ y) % 256));
+            }
+        }
         image.save(m_dir.filePath(u"p.png"_s));
         const QString photo = MediaStore::shared().importPhoto(QUrl::fromLocalFile(m_dir.filePath(u"p.png"_s)));
         QVERIFY(courses.addEntry(uid, u"Tafel"_s, photo));
@@ -90,7 +95,19 @@ private slots:
         if (QFile::exists(u"/dev/full"_s)) {
             QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(u"/dev/full"_s)), -1);
             QVERIFY(!courses.errorString().isEmpty());
+            // A large piece (the photo, past QFile's buffer) fails at once: its message stays.
+            QVERIFY2(!courses.errorString().contains(u"Unknown error"_s), qPrintable(courses.errorString()));
         }
+        // An existing file the export cannot open stays (it is not ours to remove).
+        const QString existing = m_dir.filePath(u"alt.zip"_s);
+        QFile keep(existing);
+        QVERIFY(keep.open(QIODevice::WriteOnly));
+        keep.write("alte Sicherung");
+        keep.close();
+        QVERIFY(keep.setPermissions(QFileDevice::ReadOwner));
+        QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(existing)), -1);
+        QVERIFY(QFile::exists(existing));
+        keep.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
         QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(zip)), 1);
         QCOMPARE(courses.errorString(), QString());
         const QString back = readBack(zip);
