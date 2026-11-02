@@ -16,6 +16,9 @@ Kirigami.ScrollablePage {
 
     title: "Mitori 見取り"
 
+    // Landscape and wide enough for four tiles in a row.
+    readonly property bool wide: width > height && width >= Kirigami.Units.gridUnit * 40
+
     actions: [
         Kirigami.Action {
             icon.name: "search"
@@ -50,51 +53,63 @@ Kirigami.ScrollablePage {
             text: Practice.errorString
         }
 
-        KanteOptionTile {
-            id: programmeTile
-
-            readonly property var current: page.disciplineInfo(Programme.discipline)
-
+        // A column on the phone, a grid of four on a tablet in landscape (app-entscheidungen.md).
+        GridLayout {
+            objectName: "tiles"
             Layout.fillWidth: true
-            visible: Programme.errorString === ""
-            checkable: false
-            autoExclusive: false
-            glyph: "技"
-            text: qsTr("Programme")
-            hint: current.title + " · " + current.grade
-            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ProgrammePage.qml"))
-        }
+            columns: page.wide ? 4 : 1
+            rowSpacing: Kirigami.Units.largeSpacing
+            columnSpacing: Kirigami.Units.largeSpacing
 
-        KanteOptionTile {
-            objectName: "todayTile"
+            KanteOptionTile {
+                id: programmeTile
 
-            readonly property int due: Practice.revision >= 0 && Practice.intervals.length === 4 && Practice.today.getTime() > 0
-                                       ? Practice.due(Programme.practiceEntries(Programme.discipline)).length : 0
+                readonly property var current: page.disciplineInfo(Programme.discipline)
 
-            Layout.fillWidth: true
-            visible: Programme.errorString === ""
-            checkable: false
-            autoExclusive: false
-            glyph: "稽"
-            text: qsTr("Practice today")
-            hint: due > 0 ? qsTr("%n due", "", due) : qsTr("all practised")
-            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("TodayPage.qml"))
-        }
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1          // equal columns
+                visible: Programme.errorString === ""
+                checkable: false
+                autoExclusive: false
+                glyph: "技"
+                text: qsTr("Programme")
+                hint: current.title + " · " + current.grade
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ProgrammePage.qml"))
+            }
 
-        KanteOptionTile {
-            objectName: "statsTile"
+            KanteOptionTile {
+                objectName: "todayTile"
 
-            readonly property int days: Practice.revision >= 0 && Practice.today.getTime() > 0
-                                        ? Object.keys(Practice.practisedPerDay(30)).length : 0
+                readonly property int due: Practice.revision >= 0 && Practice.intervals.length === 4 && Practice.today.getTime() > 0
+                                           ? Practice.due(Programme.practiceEntries(Programme.discipline)).length : 0
 
-            Layout.fillWidth: true
-            visible: Programme.errorString === ""
-            checkable: false
-            autoExclusive: false
-            glyph: "記"
-            text: qsTr("Statistics")
-            hint: qsTr("%n practice day(s) in 30 days", "", days)
-            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("StatsPage.qml"))
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1          // equal columns
+                visible: Programme.errorString === ""
+                checkable: false
+                autoExclusive: false
+                glyph: "稽"
+                text: qsTr("Practice today")
+                hint: due > 0 ? qsTr("%n due", "", due) : qsTr("all practised")
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("TodayPage.qml"))
+            }
+
+            KanteOptionTile {
+                objectName: "statsTile"
+
+                readonly property int days: Practice.revision >= 0 && Practice.today.getTime() > 0
+                                            ? Object.keys(Practice.practisedPerDay(30)).length : 0
+
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1          // equal columns
+                visible: Programme.errorString === ""
+                checkable: false
+                autoExclusive: false
+                glyph: "記"
+                text: qsTr("Statistics")
+                hint: qsTr("%n practice day(s) in 30 days", "", days)
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("StatsPage.qml"))
+            }
         }
     }
 

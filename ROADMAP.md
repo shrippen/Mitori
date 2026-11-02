@@ -21,9 +21,10 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Abweichungen Video ↔ Daten in `KORREKTUREN.md` (V-…) klären.
 - Schritt 1: Startmenü (Kachel Programm), Programm (Sparte, Grad, Liste), Technik-Blatt, Kommentar,
   Player (Schleife, vier Tempi, Einzelbild, Doppeltipp, Querformat), Videos aus einem lokalen Ordner.
-  Offen: Gesten für Helligkeit und Lautstärke (Plattform-Schicht), Test auf dem Telefon. Tablet quer:
-  Programm und Player klein auf einer Seite (Liste links, Player rechts; ohne Video das Blatt). Offen dort: Startmenü
-  als 4-spaltiges Raster, Player groß mit Titel und Steuerung über/unter dem Video, Kommentar als Lesespalte.
+  Offen: Gesten für Helligkeit und Lautstärke (Plattform-Schicht), Test auf dem Telefon. Tablet quer: Startmenü als
+  Raster mit vier Spalten; Programm und Player klein auf einer Seite (Liste links, Player rechts mit Kommentar). Offen
+  dort: rechts das Blatt bei Techniken ohne Video, Player groß mit Titel und Steuerung über/unter dem Video,
+  Kommentar als Lesespalte.
 - Schritt 2: Einschätzen 1–4 im Technik-Blatt und im Player (Übungsprotokoll in SQLite, jede Einschätzung ein
   Eintrag mit Zeit und Gerät), Stand als vier Punkte in der Programmliste, Stand je Grad als Leiste mit Legende.
   Heute üben (Wiederholen nach Plan, Abstände je Stufe einstellbar, Kachel im Startmenü) und Training (Playliste der

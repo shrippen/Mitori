@@ -560,6 +560,23 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Tablet in landscape: the start menu as a grid of four, the tiles in one row.
+    function test_1b_start_tablet() {
+        const start = window.pageStack.items[0]
+        window.width = 1280
+        window.height = 800
+        const tiles = findChild(start, "tiles")
+        tryCompare(tiles, "columns", 4)
+        const shown = tiles.children.filter(t => t.visible && t.width > 0)
+        verify(shown.length >= 3)
+        verify(shown.every(t => Math.abs(t.y - shown[0].y) < 1), "one row")
+        verify(shown[1].x > shown[0].x + shown[0].width - 1)
+        shot("1b-start-tablet")
+        window.width = 420
+        window.height = 800
+        tryCompare(tiles, "columns", 1)
+    }
+
     function findChildren(item, name) {
         let found = []
         if (item.objectName === name) {
