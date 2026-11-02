@@ -1,6 +1,8 @@
 #pragma once
 
+#include <QDate>
 #include <QObject>
+#include <QTimer>
 #include <QStringList>
 #include <QVariantList>
 #include <QtQml/qqmlregistration.h>
@@ -21,6 +23,8 @@ class Practice : public QObject
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorChanged)
     // Days until a technique of level 1..4 is due again (settings, "Heute üben").
     Q_PROPERTY(QVariantList intervals READ intervals WRITE setIntervals NOTIFY intervalsChanged)
+    // Today's date; changes at midnight, so due lists and "rated today" follow a new day.
+    Q_PROPERTY(QDate today READ today NOTIFY todayChanged)
     // Words per level: [none, seen, with help, sure, ready for the exam] (translated).
     Q_PROPERTY(QStringList levelNames READ levelNames CONSTANT)
 
@@ -49,6 +53,7 @@ public:
     // ones in order (Schedule::due), each row with `level` and `days` added.
     Q_INVOKABLE QVariantList due(const QVariantList &candidates) const;
 
+    QDate today() const { return m_today; }
     QVariantList intervals() const;
     void setIntervals(const QVariantList &intervals);
 
@@ -60,12 +65,16 @@ signals:
     void changed();
     void errorChanged();
     void intervalsChanged();
+    void todayChanged();
 
 private:
     void load(const QString &path);
 
     std::unique_ptr<PracticeLog> m_log;
     QHash<QString, PracticeLog::Rating> m_latest;
+    QHash<QString, QDate> m_first;
+    QDate m_today = QDate::currentDate();
+    QTimer m_dayTimer;
     QString m_error;
     bool m_open = false;
     int m_revision = 0;

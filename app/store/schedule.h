@@ -26,9 +26,12 @@ struct Due {
 // Days until a technique of level 1..4 is due again: [seen, with help, sure, exam-ready].
 QList<int> defaultIntervals();
 
-// Due candidates in order: rated ones by urgency (lower level and longer ago first, at most
-// `maxRated`), then up to `maxNew` new ones of the current grade in programme order.
+// Due candidates in order: rated ones by urgency (lower level and longer ago first), then new
+// ones of the current grade in programme order. A day holds at most `maxRated` rated and `maxNew`
+// new techniques, and what was practised today counts: a candidate rated today for the first
+// time (`firstRated`, the local day of its first rating) was a new one, else a rated one.
 QList<Due> due(const QList<Candidate> &candidates, const QHash<QString, PracticeLog::Rating> &latest,
-               const QDate &today, const QList<int> &intervals, int maxRated = 8, int maxNew = 2);
+               const QHash<QString, QDate> &firstRated, const QDate &today, const QList<int> &intervals,
+               int maxRated = 8, int maxNew = 2);
 
 } // namespace Schedule

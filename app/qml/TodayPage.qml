@@ -17,11 +17,13 @@ Kirigami.ScrollablePage {
     readonly property var disciplineInfo: Programme.disciplines.find(d => d.id === discipline) || ({})
     readonly property string gradeName: (Programme.grades(discipline).find(g => g.id === Programme.grade(discipline)) || {}).name || ""
     // Re-read after every rating and when the intervals change.
-    readonly property var due: Practice.revision >= 0 && Practice.intervals.length === 4
+    readonly property var due: Practice.revision >= 0 && Practice.intervals.length === 4 && Practice.today.getTime() > 0
                                ? Practice.due(Programme.practiceEntries(discipline)) : []
     readonly property int unsure: due.filter(r => r.level === 1 || r.level === 2).length
     readonly property int longAgo: due.filter(r => r.level >= 3).length
     readonly property int fresh: due.filter(r => r.level === 0).length
+    // The due ones the player can show (videos on the device); the others are practised from the list.
+    readonly property var playable: due.filter(r => !!r.video && Videos.available(r.video.video))
 
     title: qsTr("Practice today")
 
@@ -36,7 +38,7 @@ Kirigami.ScrollablePage {
     }
 
     function startTraining() {
-        const playlist = page.due.filter(r => !!r.video && Videos.available(r.video.video))
+        const playlist = page.playable
         if (playlist.length === 0) {
             return
         }
@@ -83,11 +85,21 @@ Kirigami.ScrollablePage {
         }
         KanteButton {
             visible: page.due.length > 0
-            enabled: page.due.some(r => !!r.video && Videos.available(r.video.video))
+            enabled: page.playable.length > 0
             emphasis: KanteButton.Emphasis.Primary
             icon.name: "media-playback-start"
             text: qsTr("Start training")
             onClicked: page.startTraining()
+        }
+        QQC2.Label {
+            Layout.fillWidth: true
+            visible: page.due.length > 0 && page.playable.length < page.due.length
+            text: page.playable.length === 0
+                  ? qsTr("None of them has a video on this device: practise them from the list below.")
+                  : qsTr("%1 of %2 have a video and come into the training; practise the others from the list below.")
+                        .arg(page.playable.length).arg(page.due.length)
+            color: KanteStyle.mutedTextColor
+            wrapMode: Text.Wrap
         }
 
         KanteSectionLabel {

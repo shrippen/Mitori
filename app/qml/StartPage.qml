@@ -57,7 +57,7 @@ Kirigami.ScrollablePage {
         KanteOptionTile {
             objectName: "todayTile"
 
-            readonly property int due: Practice.revision >= 0 && Practice.intervals.length === 4
+            readonly property int due: Practice.revision >= 0 && Practice.intervals.length === 4 && Practice.today.getTime() > 0
                                        ? Practice.due(Programme.practiceEntries(Programme.discipline)).length : 0
 
             Layout.fillWidth: true

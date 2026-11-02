@@ -1,4 +1,5 @@
 #include <QFile>
+#include <QSettings>
 #include <QSignalSpy>
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -17,6 +18,7 @@ private slots:
     void initTestCase()
     {
         QStandardPaths::setTestModeEnabled(true);
+        QSettings().clear();
     }
 
     void logKeepsEveryRating()
@@ -192,8 +194,9 @@ private slots:
             QVariantMap{{QStringLiteral("id"), QStringLiteral("b")}, {QStringLiteral("current"), true}, {QStringLiteral("title"), QStringLiteral("B")}},
             QVariantMap{{QStringLiteral("id"), QStringLiteral("c")}, {QStringLiteral("current"), false}},
             QVariantMap{{QStringLiteral("id"), QStringLiteral("d")}, {QStringLiteral("current"), true}}};
+        // "a" was new and is practised today: one of the day's two new places is taken.
         const QVariantList due = practice.due(candidates);
-        QCOMPARE(due.size(), 2);
+        QCOMPARE(due.size(), 1);
         QCOMPARE(due.first().toMap().value(QStringLiteral("id")).toString(), QStringLiteral("b"));
         QCOMPARE(due.first().toMap().value(QStringLiteral("title")).toString(), QStringLiteral("B"));
         QCOMPARE(due.first().toMap().value(QStringLiteral("level")).toInt(), 0);

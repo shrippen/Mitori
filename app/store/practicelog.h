@@ -32,6 +32,8 @@ public:
     Rating add(const QString &entry, int level, const QDateTime &at, const QString &device);
     // The latest rating of every entry (for lists); entries with a level outside 1..4 are skipped.
     QHash<QString, Rating> latest() const;
+    // The local day each entry was rated first (its history begins: it was new that day).
+    QHash<QString, QDate> firstRated() const;
     // All ratings of one entry, oldest first.
     QList<Rating> history(const QString &entry) const;
 

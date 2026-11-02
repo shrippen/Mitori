@@ -78,9 +78,12 @@ Kirigami.Page {
     function jump(ms) {
         player.position = Math.max(from, Math.min(to, player.position + ms))
     }
-    // Training: the next technique after this one not practised today, else stay.
+    // Training: the next technique not practised today, after this one and then from the start
+    // (one skipped with "next"); when all are, the training is done and the player stays.
+    readonly property bool trainingDone: training && Practice.revision >= 0 && playlist.every(r => Practice.ratedToday(r.id))
     function nextOpen() {
-        for (let i = index + 1; i < playlist.length; ++i) {
+        for (let k = 1; k < playlist.length; ++k) {
+            const i = (index + k) % playlist.length
             if (!Practice.ratedToday(playlist[i].id)) {
                 index = i
                 return
@@ -264,6 +267,20 @@ Kirigami.Page {
                     Layout.fillWidth: true
                     entry: page.current.id || ""
                     onRated: if (page.training) page.nextOpen()
+                }
+
+                KanteHintCard {
+                    objectName: "trainingDone"
+                    Layout.fillWidth: true
+                    visible: page.trainingDone
+                    tier: KanteHintCard.Tier.Blue
+                    titleText: qsTr("Done")
+                    text: qsTr("Every technique of today's training is practised.")
+
+                    KanteButton {
+                        text: qsTr("Back")
+                        onClicked: page.Kirigami.PageStack.pop()
+                    }
                 }
 
                 RowLayout {
