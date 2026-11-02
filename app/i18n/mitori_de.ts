@@ -15,32 +15,32 @@
     </message>
     <message>
         <location filename="../qml/AllNotesPage.qml" line="88"/>
-        <location filename="../qml/AllNotesPage.qml" line="284"/>
+        <location filename="../qml/AllNotesPage.qml" line="283"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="108"/>
+        <location filename="../qml/AllNotesPage.qml" line="109"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="211"/>
+        <location filename="../qml/AllNotesPage.qml" line="210"/>
         <source>No notes in this discipline.</source>
         <translation>Keine Notizen in dieser Sparte.</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="212"/>
+        <location filename="../qml/AllNotesPage.qml" line="211"/>
         <source>No notes yet. Notes are written on a technique or in the player.</source>
         <translation>Noch keine Notizen. Notizen schreibst du zu einer Technik oder im Player.</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="230"/>
+        <location filename="../qml/AllNotesPage.qml" line="229"/>
         <source>Opens the technique&apos;s notes; press and hold or the menu key to change or delete</source>
         <translation>Öffnet die Notizen der Technik; lang drücken oder Menütaste zum Ändern oder Löschen</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/AllNotesPage.qml" line="210"/>
+        <location filename="../qml/AllNotesPage.qml" line="209"/>
         <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
         <translation>
             <numerusform>%n Notiz. Tippen öffnet die Technik, lang drücken ändert oder löscht die Notiz.</numerusform>
@@ -417,45 +417,92 @@
 <context>
     <name>SearchPage</name>
     <message>
-        <location filename="../qml/SearchPage.qml" line="32"/>
-        <location filename="../qml/SearchPage.qml" line="41"/>
+        <location filename="../qml/SearchPage.qml" line="56"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="40"/>
-        <source>Technique, attack, Japanese or a word from your notes</source>
-        <translation>Technik, Angriff, Japanisch oder ein Wort aus deinen Notizen</translation>
+        <location filename="../qml/SearchPage.qml" line="43"/>
+        <source>Glossary &amp; search</source>
+        <translation>Glossar &amp; Suche</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="61"/>
+        <location filename="../qml/SearchPage.qml" line="55"/>
+        <source>Kiriotoshi, 切り落とし or Hüftwurf</source>
+        <translation>Kiriotoshi, 切り落とし oder Hüftwurf</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/SearchPage.qml" line="121"/>
+        <source>%n term(s) with kanji and German translation. The search also finds German words, techniques and your notes.</source>
+        <translation>
+            <numerusform>%n Begriff mit Kanji und deutscher Übersetzung. Die Suche findet auch deutsche Wörter, Techniken und deine Notizen.</numerusform>
+            <numerusform>%n Begriffe mit Kanji und deutscher Übersetzung. Die Suche findet auch deutsche Wörter, Techniken und deine Notizen.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="133"/>
+        <source>This version cannot speak, so there is no pronunciation.</source>
+        <translation>Diese Version kann nicht sprechen, die Aussprache fehlt.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="134"/>
+        <source>No Japanese voice for speech output on this device. Install one in the system settings (text-to-speech) to hear the pronunciation.</source>
+        <translation>Keine japanische Stimme für die Sprachausgabe auf diesem Gerät. Für die Aussprache eine in den Systemeinstellungen (Text-zu-Sprache) installieren.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="144"/>
         <source>Nothing found for “%1”.</source>
         <translation>Nichts gefunden für „%1“.</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="68"/>
+        <location filename="../qml/SearchPage.qml" line="152"/>
         <source>Techniques</source>
         <translation>Techniken</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="97"/>
+        <location filename="../qml/SearchPage.qml" line="183"/>
         <source>More than %1 techniques found. Add a word to narrow the search.</source>
         <translation>Mehr als %1 Techniken gefunden. Ein weiteres Wort grenzt die Suche ein.</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="104"/>
+        <location filename="../qml/SearchPage.qml" line="191"/>
+        <source>Glossary</source>
+        <translation>Glossar</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="208"/>
+        <source>No translation in the lexicon</source>
+        <translation>Übersetzung fehlt im Lexikon</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="216"/>
+        <source>Pronunciation</source>
+        <translation>Aussprache</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="217"/>
+        <source>Pronounce %1</source>
+        <translation>%1 aussprechen</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="230"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="113"/>
+        <location filename="../qml/SearchPage.qml" line="239"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="127"/>
+        <location filename="../qml/SearchPage.qml" line="255"/>
         <source>More than %1 notes found. Add a word to narrow the search.</source>
         <translation>Mehr als %1 Notizen gefunden. Ein weiteres Wort grenzt die Suche ein.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="265"/>
+        <source>Translations: %1</source>
+        <translation>Übersetzungen: %1</translation>
     </message>
 </context>
 <context>
@@ -538,6 +585,16 @@
             <numerusform>%n Übungstag in 30 Tagen</numerusform>
             <numerusform>%n Übungstage in 30 Tagen</numerusform>
         </translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="124"/>
+        <source>Glossary</source>
+        <translation>Glossar</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="125"/>
+        <source>Kanji · pronunciation</source>
+        <translation>Kanji · Aussprache</translation>
     </message>
 </context>
 <context>

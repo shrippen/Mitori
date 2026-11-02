@@ -498,6 +498,68 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Glossary: without a query A–Z with headings, the source below; a query finds words by
+    // romaji, kanji and German next to techniques; without a Japanese voice no speaker buttons.
+    function test_9b_glossary() {
+        failOnWarning(/ReferenceError|TypeError/)
+        const start = window.pageStack.items[0]
+        const tile = findChild(start, "glossaryTile")
+        verify(tile.visible)
+        tryCompare(window.pageStack, "currentItem", start)
+        wait(800)       // Kirigami slides the start page back in; a click meanwhile goes nowhere
+        mouseClick(tile)
+        tryVerify(() => window.pageStack.currentItem !== start && window.pageStack.currentItem.glossary !== undefined, 2000)
+        const page = window.pageStack.currentItem
+        const list = findChild(page, "glossaryList")
+        const field = findChild(page, "searchField")
+        verify(Glossary.words.length > 219)
+        tryCompare(list, "count", Glossary.words.length)
+        verify(findChild(page, "glossaryIntro").visible)
+        compare(list.section.property, "letter")
+        tryVerify(() => findChild(list, "letterHeading") !== null)
+        compare(findChild(list, "letterHeading").text, "A")
+        compare(Glossary.words[0].word, "Ago")
+        shot("9b-glossary")
+
+        // No Japanese voice (mock engine): a hint, no buttons, saying does nothing.
+        verify(Glossary.speech !== Glossary.Ready)
+        verify(findChild(page, "speechHint").visible)
+        const say = findChild(list, "sayButton")
+        verify(say === null || !say.visible)
+        Glossary.say(Glossary.words[0].speech)
+
+        // Keyboard: Down from the field into the list, Return tries to speak, Up back to the field.
+        field.forceActiveFocus()
+        keyClick(Qt.Key_Down)
+        tryVerify(() => list.activeFocus)
+        compare(list.currentIndex, 0)
+        keyClick(Qt.Key_Down)
+        compare(list.currentIndex, 1)
+        keyClick(Qt.Key_Return)
+        keyClick(Qt.Key_Up)
+        keyClick(Qt.Key_Up)
+        tryVerify(() => field.activeFocus)
+
+        // The same word by romaji with or without hyphen and by kanji with other okurigana.
+        for (const q of ["Kiriotoshi", "Kiri-otoshi", "切り落とし"]) {
+            field.text = q
+            tryVerify(() => page.query === q, 2000)
+            verify(page.glossary.some(w => w.word === "Kiri-otoshi"), q)
+            verify(page.techniques.length > 0, q)
+        }
+        compare(list.section.property, "")
+        verify(!findChild(page, "glossaryIntro").visible)
+        // German words find their Japanese term.
+        field.text = "hüftwurf"
+        tryVerify(() => page.query === "hüftwurf", 2000)
+        verify(page.glossary.some(w => w.word === "Koshi-nage"))
+        tryCompare(list, "count", page.glossary.length)
+        tryVerify(() => findChild(page, "glossarySource") !== null && findChild(page, "glossarySource").visible)
+        verify(findChild(page, "glossarySource").text.includes("shinkiryu.de"))
+        shot("9b-glossary-search")
+        window.pageStack.pop()
+    }
+
     // All notes: every technique's notes by day, a filter per discipline; a tap opens the
     // technique's notes, press and hold the editor.
     function test_8d_all_notes() {

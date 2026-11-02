@@ -16,7 +16,8 @@ Eingabe (daten/):
 Ausgabe (build/daten/):
   <disziplin>.lua              für das Heft (heft/lua/mitori-heft.lua), Kanji schon eingesetzt
   mitori-daten.json            für die App: jede Technik einzeln mit fester ID, Videostellen,
-                               je Video Datei (relativ zum Videoordner) und Beschnitt
+                               je Video Datei (relativ zum Videoordner) und Beschnitt; das Glossar
+                               (Lexikon und Begriffe ohne Lexikon-Eintrag, alphabetisch)
   fehlende-kanji.txt           Namen, zu denen es kein Kanji gibt
 
 Bricht mit Exit-Code 1 ab, wenn die Daten Fehler haben (unbekannter Grad, unbekannte
@@ -242,6 +243,95 @@ def shinki_toho(ids):
     return d, app
 
 
+# --- Glossar -----------------------------------------------------------------
+
+# Schlüssel in begriffe.yaml, die deutsche Wörter sind, keine japanischen Begriffe.
+NICHT_JAPANISCH = {"diagonal", "gerade", "Sonstige Techniken"}
+
+
+def stichwort(wort):
+    """Lexikon-Wort ohne Zusatz in Klammern: kime (-gime) → kime"""
+    return re.sub(r"\s*\(.*$", "", wort).strip()
+
+
+# Hepburn-Silben als Hiragana, längste zuerst gesucht (Aussprache per Sprachsynthese).
+KANA = dict(zip(
+    "a i u e o ka ki ku ke ko sa shi su se so ta chi tsu te to na ni nu ne no ha hi fu he ho "
+    "ma mi mu me mo ya yu yo ra ri ru re ro wa wo ga gi gu ge go za ji zu ze zo da di du de do "
+    "ba bi bu be bo pa pi pu pe po si ti tu hu zi "
+    "kya kyu kyo sha shu sho cha chu cho nya nyu nyo hya hyu hyo mya myu myo rya ryu ryo "
+    "gya gyu gyo ja ju jo bya byu byo pya pyu pyo".split(),
+    "あ い う え お か き く け こ さ し す せ そ た ち つ て と な に ぬ ね の は ひ ふ へ ほ "
+    "ま み む め も や ゆ よ ら り る れ ろ わ を が ぎ ぐ げ ご ざ じ ず ぜ ぞ だ ぢ づ で ど "
+    "ば び ぶ べ ぼ ぱ ぴ ぷ ぺ ぽ し ち つ ふ じ "
+    "きゃ きゅ きょ しゃ しゅ しょ ちゃ ちゅ ちょ にゃ にゅ にょ ひゃ ひゅ ひょ みゃ みゅ みょ りゃ りゅ りょ "
+    "ぎゃ ぎゅ ぎょ じゃ じゅ じょ びゃ びゅ びょ ぴゃ ぴゅ ぴょ".split(), strict=True))
+ZAHLEN = dict(zip("123456789", "いち に さん よん ご ろく なな はち きゅう".split(), strict=True))
+LANG = {"â": "aa", "î": "ii", "û": "uu", "ê": "ee", "ô": "ou", "ā": "aa", "ī": "ii", "ū": "uu", "ē": "ee", "ō": "ou"}
+
+
+def kana(wort):
+    """Lesung in Hiragana aus der Umschrift: "Kiri-otoshi" → きりおとし, "Ikkajô" → いっかじょう,
+    "San'nin" → さんにん; None, wenn ein Teil keine Silbe ist."""
+    text = "".join(LANG.get(z, z) for z in stichwort(wort).lower())
+    text = re.sub(r"oh(?![aiueoy])", "ou", text)        # Shikkoh: langes o
+    text = text.replace("!", "")
+    aus, i = [], 0
+    while i < len(text):
+        z = text[i]
+        if z == " ":
+            aus.append("　")
+        elif z in ZAHLEN:
+            aus.append(ZAHLEN[z])
+        elif z in "'-":                                  # Silbengrenze: Shomen-uchi, San'nin
+            pass
+        elif z == "n" and (i + 1 == len(text) or text[i + 1] not in "aiueoy"):
+            aus.append("ん")
+        elif z in "kstpgcbdfhjmrz" and text[i + 1:i + 2] == z or text[i:i + 3] == "tch":
+            aus.append("っ")
+        else:
+            silbe = next((text[i:j] for j in (i + 3, i + 2, i + 1) if text[i:j] in KANA), None)
+            if silbe is None:
+                return None
+            aus.append(KANA[silbe])
+            i += len(silbe)
+            continue
+        i += 1
+    return "".join(aus)
+
+
+def glossar():
+    """Das Glossar der App: das Aiki-Budo-Lexikon, ergänzt um die Begriffe aus begriffe.yaml, die
+    es nicht kennt (ohne Übersetzung). Hat ein Lexikon-Wort kein Kanji, kommt es aus begriffe.yaml.
+    Je Wort: wort (wie im Lexikon, erster Buchstabe groß), jp (oder None), de (oder ""), kana (die
+    Lesung für die Sprachsynthese, oder None)."""
+    lexikon = yaml.safe_load((DATEN / "lexikon.yaml").read_text(encoding="utf-8"))
+    begriffe = yaml.safe_load((DATEN / "begriffe.yaml").read_text(encoding="utf-8"))
+    for k in NICHT_JAPANISCH - begriffe.keys():
+        melde(f"daten.py NICHT_JAPANISCH: {k} fehlt in begriffe.yaml")
+
+    woerter = [{"wort": w["wort"][:1].upper() + w["wort"][1:], "jp": w["jp"], "de": w["de"]}
+               for w in lexikon["woerter"]]
+    nach_stichwort = {}
+    for w in woerter:
+        nach_stichwort.setdefault(flach(stichwort(w["wort"])), []).append(w)
+
+    for name, jp in begriffe.items():
+        if name in NICHT_JAPANISCH:
+            continue
+        gleiche = nach_stichwort.get(flach(name))
+        if not gleiche:
+            woerter.append({"wort": name, "jp": jp, "de": ""})
+            continue
+        if len(gleiche) == 1 and not gleiche[0]["jp"]:     # bei zwei Wörtern (kata: 型, 肩) unklar, welches
+            gleiche[0]["jp"] = jp
+
+    for w in woerter:
+        w["kana"] = kana(w["wort"])
+    woerter.sort(key=lambda w: (schluessel(w["wort"]), w["jp"] or ""))
+    return {"quelle": lexikon["quelle"], "woerter": woerter}
+
+
 # --- Ausgabe -----------------------------------------------------------------
 
 def lua(wert, tiefe=0):
@@ -312,8 +402,7 @@ def main():
 
     mit_video, videos = videostellen(disziplinen)
     app = {"format": FORMAT, "disziplinen": disziplinen, "videos": videos,
-           "glossar": {k: v for k, v in yaml.safe_load((DATEN / "begriffe.yaml").read_text(encoding="utf-8")).items()},
-           "lexikon": yaml.safe_load((DATEN / "lexikon.yaml").read_text(encoding="utf-8"))}
+           "glossar": glossar()}
     (ausgabe / "mitori-daten.json").write_text(json.dumps(app, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     (ausgabe / "fehlende-kanji.txt").write_text(
         "# Namen ohne Kanji (Schlüssel fehlt in daten/begriffe.yaml bzw. daten/daitoryu-begriffe.yaml)\n"

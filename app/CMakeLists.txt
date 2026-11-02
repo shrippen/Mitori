@@ -10,6 +10,8 @@ find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 find_package(KF6 REQUIRED COMPONENTS Kirigami)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+# Pronunciation in the glossary; without the module the speaker buttons stay hidden.
+find_package(Qt6 6.8 QUIET COMPONENTS TextToSpeech)
 
 qt_standard_project_setup(REQUIRES 6.8)
 # Module output in <build>/qml: scripts/qmllint.sh finds the Mitori module there.
@@ -56,6 +58,10 @@ qt_add_qml_module(mitori_app
         catalog/catalog.cpp
         services/programme.h
         services/programme.cpp
+        services/glossary.h
+        services/glossary.cpp
+        player/speaker.h
+        player/speaker.cpp
         services/videos.h
         services/videos.cpp
         services/practice.h
@@ -103,8 +109,14 @@ qt_add_resources(mitori_app "kante"
 )
 
 # The generated type registration includes the headers by name.
-target_include_directories(mitori_app PUBLIC catalog services store)
+target_include_directories(mitori_app PUBLIC catalog services store player)
 target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql KF6::Kirigami)
+if(TARGET Qt6::TextToSpeech)
+    target_link_libraries(mitori_app PUBLIC Qt6::TextToSpeech)
+    target_compile_definitions(mitori_app PRIVATE MITORI_SPEECH)
+else()
+    message(STATUS "Qt6 TextToSpeech not found: the glossary has no pronunciation")
+endif()
 
 qt_add_executable(mitori main.cpp)
 target_link_libraries(mitori PRIVATE mitori_app mitori_appplugin)
@@ -167,6 +179,19 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     set_target_properties(tst_programme PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_dependencies(tst_programme mitori)
     add_test(NAME programme COMMAND tst_programme)
+
+    qt_add_executable(tst_glossary tests/tst_glossary.cpp services/glossary.cpp services/glossary.h
+        player/speaker.cpp player/speaker.h catalog/catalog.cpp catalog/catalog.h)
+    target_include_directories(tst_glossary PRIVATE catalog services store player)
+    target_compile_definitions(tst_glossary PRIVATE MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
+    target_link_libraries(tst_glossary PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
+    if(TARGET Qt6::TextToSpeech)
+        target_link_libraries(tst_glossary PRIVATE Qt6::TextToSpeech)
+        target_compile_definitions(tst_glossary PRIVATE MITORI_SPEECH)
+    endif()
+    set_target_properties(tst_glossary PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_dependencies(tst_glossary mitori)
+    add_test(NAME glossary COMMAND tst_glossary)
 
     qt_add_executable(tst_practice tests/tst_practice.cpp services/practice.cpp services/practice.h
         store/practicelog.cpp store/practicelog.h store/schedule.cpp store/schedule.h)

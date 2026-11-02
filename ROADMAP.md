@@ -37,6 +37,13 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Legende, Tooltip je Tag), Stand je Grad einer Sparte. Offen: Fotos und Sprachnotizen an Notizen
   (Plattform-Schicht), Lehrgangsnotizen in „Alle Notizen“ (mit Schritt 4); in der Statistik Prüfungsrunden und
   „Meine Grade“ (mit Schritt 3 und 4), „alle Jahre“.
+- Schritt 3: Glossar (Kachel 辞 im Startmenü, auch die Lupe): ohne Eingabe A–Z mit Kanji und Übersetzung, mit
+  Eingabe neben Techniken und Notizen (auch deutsche Wörter; gleiche Normalisierung wie die Suche). Daten: Aiki-Budo-
+  Lexikon plus die Begriffe aus `daten/begriffe.yaml`, die es nicht hat (`tools/daten.py`, je Wort eine Lesung in
+  Hiragana aus der Umschrift; die Daitoryu-Bausteine sind ungeprüft und bleiben draußen). Aussprache per Qt TextToSpeech mit japanischer Stimme (Kanji, sonst die Lesung); ohne
+  Stimme oder Modul kein Knopf, ein Hinweis. Offen: Aussprache auf dem Telefon prüfen, A–Z-Sprungleiste, Lesungen
+  ohne lange Vokale (Umschrift ohne ô, „aikido“ → あいきど), in der Suche Kommentare und Lehrgänge. Noch nicht
+  begonnen: Prüfungsmodus, Landkarte.
 
 ## Lehrgänge (Schritt 4)
 

@@ -4,11 +4,22 @@
 <context>
     <name>AllNotesPage</name>
     <message numerus="yes">
-        <location filename="../qml/AllNotesPage.qml" line="210"/>
+        <location filename="../qml/AllNotesPage.qml" line="209"/>
         <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
         <translation>
             <numerusform>%n note. Tap one to open its technique, press and hold to change or delete it.</numerusform>
             <numerusform>%n notes. Tap one to open its technique, press and hold to change or delete it.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>SearchPage</name>
+    <message numerus="yes">
+        <location filename="../qml/SearchPage.qml" line="121"/>
+        <source>%n term(s) with kanji and German translation. The search also finds German words, techniques and your notes.</source>
+        <translation>
+            <numerusform>%n term with kanji and German translation. The search also finds German words, techniques and your notes.</numerusform>
+            <numerusform>%n terms with kanji and German translation. The search also finds German words, techniques and your notes.</numerusform>
         </translation>
     </message>
 </context>
