@@ -277,6 +277,50 @@ private slots:
         QCOMPARE(spy.count(), 3);
     }
 
+    void searchNotes()
+    {
+        QTemporaryDir dir;
+        Practice practice(dir.filePath(QStringLiteral("mitori.sqlite")));
+        practice.addNote(QStringLiteral("a"), QStringLiteral("Hüfte früher drehen"));
+        practice.addNote(QStringLiteral("b"), QStringLiteral("Blick beim Partner, Hüfte tief"));
+        practice.addNote(QStringLiteral("c"), QStringLiteral("Kreis größer"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("hufte")).size(), 2);       // without the umlaut
+        const QVariantList both = practice.searchNotes(QStringLiteral("HÜFTE blick"));
+        QCOMPARE(both.size(), 1);
+        QCOMPARE(both.first().toMap().value(QStringLiteral("entry")).toString(), QStringLiteral("b"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("hüfte")).first().toMap().value(QStringLiteral("entry")).toString(),
+                 QStringLiteral("b"));                                         // newest first
+        const QString uid = practice.notes(QStringLiteral("c")).first().toMap().value(QStringLiteral("uid")).toString();
+        practice.deleteNote(uid);
+        QVERIFY(practice.searchNotes(QStringLiteral("kreis")).isEmpty());
+        practice.addNote(QStringLiteral("d"), QStringLiteral("Fuß nach außen"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("fuss aussen")).size(), 1);   // ß as ss
+        practice.addNote(QStringLiteral("e"), QStringLiteral("Shiho-nage: Arm über den Kopf"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("shihonage")).size(), 1);    // the hyphen does not matter
+        // Joined across a space only from the start of a word: "rein" is not in "nur ein".
+        practice.addNote(QStringLiteral("f"), QStringLiteral("Fuß nur ein wenig drehen"));
+        QVERIFY(practice.searchNotes(QStringLiteral("rein")).isEmpty());
+        QCOMPARE(practice.searchNotes(QStringLiteral("nurein")).size(), 1);
+        // Across a space, the match also ends where a word ends: "mitte" is not in "mit Tenkan".
+        practice.addNote(QStringLiteral("g"), QStringLiteral("Erst mit Tenkan ausweichen"));
+        QVERIFY(practice.searchNotes(QStringLiteral("mitte")).isEmpty());
+        QCOMPARE(practice.searchNotes(QStringLiteral("mittenkan")).size(), 1);
+        // Punctuation separates words: a word after "(" or before "," still starts or ends there.
+        practice.addNote(QStringLiteral("h"), QStringLiteral("Wie im Kurs (Shiho-nage) gezeigt. Irimi nage, dann „Kote gaeshi“."));
+        QCOMPARE(practice.searchNotes(QStringLiteral("shihonage")).size(), 2);   // with "e"
+        QCOMPARE(practice.searchNotes(QStringLiteral("iriminage")).size(), 1);
+        QCOMPARE(practice.searchNotes(QStringLiteral("kotegaeshi")).size(), 1);
+        // An emoji ends a word like any symbol, also outside the BMP.
+        practice.addNote(QStringLiteral("j"), QStringLiteral("Sumi otoshi👍🏽 endlich"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("sumiotoshi")).size(), 1);
+        // A soft hyphen is invisible.
+        practice.addNote(QStringLiteral("i"), QStringLiteral("Mit\u00ADte halten"));
+        QCOMPARE(practice.searchNotes(QStringLiteral("mitte")).size(), 1);
+        // Capital ẞ as ß.
+        QCOMPARE(practice.searchNotes(QStringLiteral("NUR EIN FUẞ")).size(), 1);
+        QVERIFY(practice.searchNotes(QStringLiteral(" ")).isEmpty());
+    }
+
     void deviceIdStays()
     {
         const QString id = Practice::deviceId();

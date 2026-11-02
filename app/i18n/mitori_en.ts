@@ -4,7 +4,7 @@
 <context>
     <name>StartPage</name>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="74"/>
+        <location filename="../qml/StartPage.qml" line="80"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n due</numerusform>

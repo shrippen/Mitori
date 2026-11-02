@@ -3,6 +3,7 @@
 #include <QTest>
 
 #include "programme.h"
+#include "searchkey.h"
 
 namespace {
 
@@ -60,6 +61,92 @@ private slots:
         QCOMPARE(rows.last().toMap().value(QStringLiteral("gradeName")).toString(), QStringLiteral("4. Kyu"));
         programme.setGrade(QStringLiteral("aikido"), QStringLiteral("k5"));
         QCOMPARE(programme.practiceEntries(QStringLiteral("aikido")).size(), k5);
+    }
+
+    // Search across disciplines: every word must match; case, accents and hyphens do not matter.
+    void searchFindsTechniques()
+    {
+        const QVariantList ikkyo = programme.search(QStringLiteral("ikkyo"));
+        QVERIFY(ikkyo.size() > 5);
+        const QVariantMap first = ikkyo.first().toMap();
+        QCOMPARE(first.value(QStringLiteral("discipline")).toString(), QStringLiteral("aikido"));
+        QVERIFY(!first.value(QStringLiteral("gradeName")).toString().isEmpty());
+        QVERIFY(!first.value(QStringLiteral("disciplineName")).toString().isEmpty());
+        QVERIFY(!first.value(QStringLiteral("groupName")).toString().isEmpty());
+        // Two words narrow it down; the order of the words does not matter.
+        const QVariantList narrow = programme.search(QStringLiteral("shomen IKKYO"));
+        QVERIFY(!narrow.isEmpty() && narrow.size() < ikkyo.size());
+        QCOMPARE(programme.search(QStringLiteral("ikkyo shomen")).size(), narrow.size());
+        // Hyphens and accents: "shiho nage" finds Shiho-nage, "kote gaeshi" Kote-gaeshi.
+        QVERIFY(!programme.search(QStringLiteral("shiho nage")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("KOTE-GAESHI")).isEmpty());
+        // Japanese.
+        QVERIFY(!programme.search(QStringLiteral("一教")).isEmpty());
+        // Without the hyphen or spaces, and Japanese with or without okurigana, find the same.
+        const QVariantList joined = programme.search(QStringLiteral("shihonage"));
+        QVERIFY(!joined.isEmpty());
+        QCOMPARE(joined.first().toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Shiho-nage"));
+        // While typing, a joined word may end inside a hyphenated name.
+        QVERIFY(!programme.search(QStringLiteral("shihon")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("kiriotoshi")).isEmpty());
+        QCOMPARE(programme.search(QStringLiteral("kiriotoshi"), 1000).size(),
+                 programme.search(QStringLiteral("kiri otoshi"), 1000).size());
+        // A hyphenated word also matches when its parts are in different fields, each from the
+        // start of a word ("ai" not in Kaiten-nage: ai-hanmi finds no Gyaku-hanmi).
+        QVERIFY(!programme.search(QStringLiteral("ikkyo-irimi")).isEmpty());
+        QCOMPARE(programme.search(QStringLiteral("ikkyo-irimi"), 1000).size(),
+                 programme.search(QStringLiteral("ikkyo irimi"), 1000).size());
+        const QVariantList ai = programme.search(QStringLiteral("ai-hanmi"), 1000);
+        QVERIFY(!ai.isEmpty());
+        for (const QVariant &r : ai) {
+            QVERIFY2(!searchKey(r.toMap().value(QStringLiteral("attackExtra")).toString()).contains(u"gyaku"),
+                     qPrintable(r.toMap().value(QStringLiteral("title")).toString()));
+        }
+        // Other dashes separate as a hyphen does (en dash in "Ô-dachi 33–43", U+2010, minus).
+        QCOMPARE(searchKey(QStringLiteral("Ô-dachi 33–43")), QStringLiteral("o dachi 33 43"));
+        QVERIFY(!programme.search(QStringLiteral("dachi 33 43")).isEmpty());
+        QCOMPARE(programme.search(QStringLiteral("ikkyo‐irimi"), 1000).size(),
+                 programme.search(QStringLiteral("ikkyo-irimi"), 1000).size());
+        QCOMPARE(programme.search(QStringLiteral("ikkyo−irimi"), 1000).size(),
+                 programme.search(QStringLiteral("ikkyo-irimi"), 1000).size());
+        // Apostrophes vanish (San'nin-gake as sannin), brackets and ・ separate.
+        QVERIFY(!programme.search(QStringLiteral("sannin")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("rechterfuss")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("片手取り合半身")).isEmpty());
+        // Separators: emoji and dashes as spaces, ´ as an apostrophe, a decimal point stays.
+        QCOMPARE(searchKey(QStringLiteral("Kote gaeshi🙂―gut")), QStringLiteral("kote gaeshi gut"));
+        QCOMPARE(searchKey(QStringLiteral("San´nin ⸺ 3,5 Min. am 12.03.")), QStringLiteral("sannin 3,5 min am 12.03"));
+        // Variation selectors of emoji vanish and a keycap separates, so the emoji still ends a word;
+        // a full-width apostrophe is an apostrophe.
+        QCOMPARE(searchKey(QStringLiteral("❤️Sumi otoshi 1️⃣Kote")), QStringLiteral("sumi otoshi 1 kote"));
+        QCOMPARE(searchKey(QStringLiteral("San＇nin")), QStringLiteral("sannin"));
+        // Okurigana also go beside a kanji beyond the BMP.
+        QVERIFY(SearchText(QStringLiteral("𠮟り方")).matches(searchWords(QStringLiteral("𠮟る方"))));
+        // Kana keep their dakuten: が is not か.
+        QCOMPARE(searchKey(QStringLiteral("ガ")), QStringLiteral("ガ"));
+        // Full-width Latin from a Japanese keyboard folds.
+        QVERIFY(!programme.search(QStringLiteral("ikkyo")).isEmpty());
+        QCOMPARE(programme.search(QStringLiteral("ｉｋｋｙｏ"), 1000).size(), programme.search(QStringLiteral("ikkyo"), 1000).size());
+        QVERIFY(!programme.search(QStringLiteral("切り落し")).isEmpty());
+        QCOMPARE(programme.search(QStringLiteral("切り落とし"), 1000).size(),
+                 programme.search(QStringLiteral("切り落し"), 1000).size());
+        // The attack's addition and Japanese, and the group, are searched too; rows carry them.
+        const QVariantList gyaku = programme.search(QStringLiteral("gyaku hanmi"));
+        QVERIFY(!gyaku.isEmpty());
+        QVERIFY(searchKey(gyaku.first().toMap().value(QStringLiteral("attackExtra")).toString()).contains(u"gyaku"));
+        QVERIFY(!programme.search(QStringLiteral("ai-hanmi")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("片手取り")).isEmpty());
+        QVERIFY(!programme.search(QStringLiteral("ukemi")).isEmpty());
+        // No duplicates, a limit, nothing for blanks.
+        QStringList seen;
+        for (const QVariant &r : ikkyo) {
+            const QString id = r.toMap().value(QStringLiteral("id")).toString();
+            QVERIFY(!seen.contains(id));
+            seen << id;
+        }
+        QCOMPARE(programme.search(QStringLiteral("ikkyo"), 3).size(), 3);
+        QVERIFY(programme.search(QStringLiteral("   ")).isEmpty());
+        QVERIFY(programme.search(QStringLiteral("zzzzqqq")).isEmpty());
     }
 
     void selectionIsKept()

@@ -441,6 +441,56 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Search: techniques across disciplines and own notes; a result opens the sheet.
+    function test_9_search() {
+        Practice.addNote(Programme.entries("aikido", "k5").find(r => r.kind === "entry").id, "Kreis größer machen")
+        const page = push("SearchPage")
+        const field = findChild(page, "searchField")
+        field.text = "ikkyo shomen"
+        tryVerify(() => page.techniques.length > 0, 2000)
+        verify(page.techniques.every(r => r.discipline !== undefined))
+        compare(page.notes.length, 0)
+        field.text = "kreis grosser"                    // größer without umlaut and ß
+        tryVerify(() => page.query === "kreis grosser", 2000)
+        compare(page.notes.length, 1)
+        // More than the list shows: a hint to narrow the search.
+        field.text = "nage"
+        tryVerify(() => page.query === "nage", 2000)
+        verify(page.more, "more than the list shows")
+        compare(page.shown.length, page.limit)
+        verify(findChild(page, "moreHint").visible)
+        // The notes have the same limit and hint.
+        for (let i = 0; i <= page.limit; i++)
+            Practice.addNote("many-notes", "Wiederholung " + i)
+        field.text = "wiederholung"
+        tryVerify(() => page.query === "wiederholung", 2000)
+        verify(page.notesMore)
+        compare(page.notesShown.length, page.limit)
+        verify(findChild(page, "notesMoreHint").visible)
+        // A note on a technique that is no longer in the programme still opens its notes.
+        Practice.addNote("gone-technique", "Kreis kleiner")
+        field.text = "kreis kleiner"
+        tryVerify(() => page.query === "kreis kleiner", 2000)
+        compare(page.notes.length, 1)
+        const orphan = findChild(page, "noteResult")
+        mouseClick(orphan, orphan.width / 3, orphan.height / 2)
+        tryVerify(() => window.pageStack.currentItem !== page, 2000)
+        compare(window.pageStack.currentItem.entry.id, "gone-technique")
+        verify(window.pageStack.currentItem.notes.length === 1)
+        window.pageStack.pop()
+        field.text = "ikkyo"
+        tryVerify(() => page.query === "ikkyo", 2000)
+        verify(!page.more)
+        shot("9-search")
+        const result = findChild(page, "techniqueResult")
+        mouseClick(result, result.width / 3, result.height / 2)
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened, 2000)
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        window.pageStack.pop()
+    }
+
     function findChildren(item, name) {
         let found = []
         if (item.objectName === name) {
@@ -474,9 +524,10 @@ TestCase {
     // With the note field focused, the controls scroll it into view when the window shrinks
     // (the on-screen keyboard opens after the focus).
     function test_8c_note_field_above_keyboard() {
+        const page = playerAt(0)                       // skips without videos, before the window changes
         window.width = 800
         window.height = 360
-        const page = playerAt(0)
+        wait(300)
         const view = findChild(page, "controlsView")
         const field = findChild(page, "noteField")
         field.forceActiveFocus()

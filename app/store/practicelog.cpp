@@ -232,6 +232,18 @@ QList<PracticeLog::Note> PracticeLog::notes(const QString &entry) const
     return result;
 }
 
+QList<PracticeLog::Note> PracticeLog::allNotes() const
+{
+    QList<Note> result;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.exec(QStringLiteral("SELECT uid, entry, text, created, changed, device, deleted FROM notes"
+                          " WHERE deleted = 0 ORDER BY created DESC, rowid DESC"));
+    while (q.next()) {
+        result << note(q);
+    }
+    return result;
+}
+
 QHash<QString, PracticeLog::Note> PracticeLog::lastNotes() const
 {
     QHash<QString, Note> result;

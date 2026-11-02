@@ -1,6 +1,9 @@
 #include "practice.h"
 
+#include "searchkey.h"
 #include "schedule.h"
+
+#include <algorithm>
 
 #include <QDir>
 #include <QSettings>
@@ -191,6 +194,26 @@ QVariantList Practice::notes(const QString &entry) const
     }
     for (const PracticeLog::Note &n : m_log->notes(entry)) {
         result << noteMap(n);
+    }
+    return result;
+}
+
+QVariantList Practice::searchNotes(const QString &query, int limit) const
+{
+    QVariantList result;
+    const QStringList words = searchWords(query);
+    if (!m_open || words.isEmpty()) {
+        return result;
+    }
+    for (const PracticeLog::Note &n : m_log->allNotes()) {
+        if (SearchText(n.text).matches(words)) {
+            QVariantMap row = noteMap(n);
+            row[QStringLiteral("entry")] = n.entry;
+            result << row;
+            if (result.size() >= limit) {
+                break;
+            }
+        }
     }
     return result;
 }
