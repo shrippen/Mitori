@@ -10,8 +10,9 @@ import Mitori
 // without the black bars, in a loop by default; Kante's transport bar with four tempi (sound off
 // below 100 %) and single frames; double tap left/right = 2 s back/on. Landscape: the controls in
 // a column on the right. PlayerPage shows it as a page; on a tablet the programme shows it beside
-// the list (`compact`: picture above the controls, no Back). Brightness and volume gestures come
-// with the platform layer (ROADMAP.md).
+// the list (`compact`: picture above the controls, no Back). Swipe up/down on the left half of
+// the picture: the screen's brightness, on the right half: the volume (Levels); the picture's
+// height is the whole range. Leaving the player gives the screen its brightness back.
 Item {
     id: page
 
@@ -62,7 +63,10 @@ Item {
         }
     }
     Component.onCompleted: shown(current.id)
-    Component.onDestruction: player.stop()
+    Component.onDestruction: {
+        player.stop()
+        Levels.restore()
+    }
 
     function restart() {
         player.position = from
@@ -120,6 +124,7 @@ Item {
         videoOutput: output
         audioOutput: AudioOutput {
             muted: player.playbackRate < 1
+            volume: Levels.playerVolume
         }
         playbackRate: 1
         onSourceChanged: page.startPending = true
@@ -200,6 +205,54 @@ Item {
                 color: KanteStyle.stageTextColor
                 style: Text.Outline
                 styleColor: KanteStyle.stageColor
+            }
+
+            // Swipe: brightness (left half) or volume (right half), shown while the finger moves.
+            DragHandler {
+                id: swipe
+
+                property int level: Levels.Level.Brightness
+                property real lastY: 0
+
+                target: null
+                xAxis.enabled: false
+                onActiveChanged: {
+                    if (!active) {
+                        return
+                    }
+                    Levels.refresh()
+                    level = centroid.pressPosition.x < stage.width / 2 ? Levels.Level.Brightness : Levels.Level.Volume
+                    lastY = 0
+                }
+                onTranslationChanged: {
+                    if (!active) {
+                        return
+                    }
+                    const dy = translation.y - lastY
+                    lastY = translation.y
+                    Levels.change(level, -dy / stage.height)
+                }
+            }
+
+            ColumnLayout {
+                objectName: "levelShown"
+                anchors.centerIn: parent
+                width: Math.min(parent.width / 2, Kirigami.Units.gridUnit * 12)
+                visible: swipe.active && value >= 0
+                readonly property real value: swipe.level === Levels.Level.Brightness ? Levels.brightness : Levels.volume
+
+                QQC2.Label {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: (swipe.level === Levels.Level.Brightness ? qsTr("Brightness %1 %") : qsTr("Volume %1 %"))
+                          .arg(Math.round(parent.value * 100))
+                    color: KanteStyle.stageTextColor
+                    style: Text.Outline
+                    styleColor: KanteStyle.stageColor
+                }
+                KanteProgressBar {
+                    Layout.fillWidth: true
+                    value: parent.value
+                }
             }
 
             TapHandler {

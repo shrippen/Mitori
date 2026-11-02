@@ -962,79 +962,89 @@
 <context>
     <name>PlayerView</name>
     <message>
-        <location filename="../qml/PlayerView.qml" line="297"/>
-        <location filename="../qml/PlayerView.qml" line="323"/>
+        <location filename="../qml/PlayerView.qml" line="350"/>
+        <location filename="../qml/PlayerView.qml" line="376"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="316"/>
+        <location filename="../qml/PlayerView.qml" line="369"/>
         <source>Chapter start</source>
         <translation>Kapitelanfang</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="317"/>
+        <location filename="../qml/PlayerView.qml" line="370"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="318"/>
+        <location filename="../qml/PlayerView.qml" line="371"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="319"/>
+        <location filename="../qml/PlayerView.qml" line="372"/>
         <source>Loop</source>
         <translation>Schleife</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="320"/>
+        <location filename="../qml/PlayerView.qml" line="373"/>
         <source>Tempo</source>
         <translation>Tempo</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="321"/>
+        <location filename="../qml/PlayerView.qml" line="374"/>
         <source>Frame back</source>
         <translation>Bild zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="322"/>
+        <location filename="../qml/PlayerView.qml" line="375"/>
         <source>Frame on</source>
         <translation>Bild vor</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="324"/>
+        <location filename="../qml/PlayerView.qml" line="377"/>
         <source>Playback</source>
         <translation>Wiedergabe</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="343"/>
+        <location filename="../qml/PlayerView.qml" line="396"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="271"/>
+        <location filename="../qml/PlayerView.qml" line="324"/>
         <source>Done</source>
         <translation>Geschafft</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="272"/>
+        <location filename="../qml/PlayerView.qml" line="325"/>
         <source>Every technique of today&apos;s training is practised.</source>
         <translation>Alle Techniken des heutigen Trainings sind geübt.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="262"/>
-        <location filename="../qml/PlayerView.qml" line="276"/>
+        <location filename="../qml/PlayerView.qml" line="315"/>
+        <location filename="../qml/PlayerView.qml" line="329"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="366"/>
+        <location filename="../qml/PlayerView.qml" line="246"/>
+        <source>Brightness %1 %</source>
+        <translation>Helligkeit %1 %</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerView.qml" line="246"/>
+        <source>Volume %1 %</source>
+        <translation>Lautstärke %1 %</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerView.qml" line="419"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="375"/>
+        <location filename="../qml/PlayerView.qml" line="428"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>

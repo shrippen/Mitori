@@ -20,7 +20,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   `pruefen: true` gegenlesen, Abweichungen Video ↔ Daten in `KORREKTUREN.md` (V-…) klären.
 - Schritt 1: Startmenü (Kachel Programm), Programm (Sparte, Grad, Liste), Technik-Blatt, Kommentar,
   Player (Schleife, vier Tempi, Einzelbild, Doppeltipp, Querformat), Videos aus einem lokalen Ordner.
-  Offen: Gesten für Helligkeit und Lautstärke (Plattform-Schicht), Test auf dem Telefon. Tablet quer: Startmenü als
+  Wischen hoch/runter links: Helligkeit, rechts: Lautstärke (`platform/devicelevels`: Android Fenster-Helligkeit
+  und AudioManager, Linux Helligkeit über Solid, Ton des Players). Offen: Test auf dem Telefon. Tablet quer: Startmenü als
   Raster mit vier Spalten; Programm und Player klein auf einer Seite (Liste links, Player rechts mit Kommentar). Offen
   dort: rechts das Blatt bei Techniken ohne Video, Player groß mit Titel und Steuerung über/unter dem Video,
   Kommentar als Lesespalte. Tastatur im Programm: Tab geht Zeile für Zeile durch die ganze Liste und hält die

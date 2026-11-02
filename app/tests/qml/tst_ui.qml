@@ -307,6 +307,29 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Swipe on the picture: up on the left half brightens the screen, down on the right half
+    // turns the sound down; leaving the player gives the screen its brightness back. The levels
+    // stay in memory (MITORI_DEVICE_LEVELS), no video needed.
+    function test_4s_player_swipe() {
+        failOnWarning(/ReferenceError|TypeError|Binding loop/)
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const page = push("PlayerPage", { playlist: rows, index: 0 })
+        const stage = findChild(page, "stage")
+        verify(stage)
+        wait(800)       // Kirigami slides the page in (disabled meanwhile)
+        verify(stage.height > 100, "stage " + stage.width + "×" + stage.height)
+        const brightness = Levels.brightness
+        const volume = Levels.volume
+        mouseDrag(stage, stage.width / 4, stage.height * 0.8, 0, -stage.height / 2)
+        tryVerify(() => Levels.brightness > brightness + 0.3, 2000, "brightness " + Levels.brightness)
+        compare(Levels.volume, volume)
+        mouseDrag(stage, stage.width * 3 / 4, stage.height * 0.2, 0, stage.height / 4)
+        tryVerify(() => Levels.volume < volume - 0.1, 2000, "volume " + Levels.volume)
+        verify(!findChild(page, "levelShown").visible, "shown only while swiping")
+        window.pageStack.pop()
+        tryCompare(Levels, "brightness", brightness)
+    }
+
     function test_4_player() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
         if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
