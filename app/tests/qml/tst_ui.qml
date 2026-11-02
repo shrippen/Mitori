@@ -529,6 +529,37 @@ TestCase {
         compare(tile.days, 1)
     }
 
+    // Tablet in landscape: list and small player on one page; a row with a video plays beside the
+    // list, the player moving on marks its row.
+    function test_2t_tablet() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        window.width = 1280
+        window.height = 800
+        const page = push("ProgrammePage")
+        tryVerify(() => page.split, 2000, "list and player side by side")
+        const pane = findChild(page, "playerPane")
+        tryVerify(() => pane.item && pane.item.playing, 10000)
+        compare(pane.item.compact, true)
+        // A row with a video plays beside the list, the page stays.
+        page.open(rows[1])
+        tryCompare(pane.item.current, "id", rows[1].id, 3000)
+        compare(window.pageStack.currentItem, page)
+        compare(page.lastId, rows[1].id)
+        // The player moves on: its row is marked.
+        pane.item.go(1)
+        tryCompare(page, "lastId", page.playlist[pane.item.index].id)
+        shot("2t-tablet")
+        window.width = 420
+        window.height = 800
+        tryVerify(() => !page.split)
+        window.pageStack.pop()
+    }
+
     function findChildren(item, name) {
         let found = []
         if (item.objectName === name) {

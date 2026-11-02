@@ -8,11 +8,13 @@ import Kante
 import Mitori
 
 // Programme (clickdummy "Programm"): discipline, grade, and the grade's own material. A row opens
-// the technique sheet first; ▶ goes straight to the player.
-Kirigami.ScrollablePage {
+// the technique sheet first; ▶ goes straight to the player. On a tablet in landscape
+// (app-entscheidungen.md, "Tablet quer") list and small player are one page: a row with a video
+// plays beside the list, one without opens the sheet.
+Kirigami.Page {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
+    // The page keeps the platform's colours (Theme.inherit: false): give it Kante's, and
     // Kante's page ground (the scope's background role is the dialog colour).
     property Item kanteScope: KanteScope { target: page }
     background: Rectangle { color: KanteStyle.backgroundColor }
@@ -24,8 +26,13 @@ Kirigami.ScrollablePage {
     // Whether the grade has video positions at all, and whether any of their videos is on the device.
     readonly property bool hasPositions: rows.some(r => !!r.video)
     readonly property bool hasVideo: rows.some(r => page.playable(r))
-    // The entry shown last in the player, marked when the list comes back.
+    // The entry shown last in the player, marked when the list comes back (on a tablet: the one
+    // playing beside the list).
     property string lastId: ""
+    // Landscape and wide enough for the list and the small player side by side.
+    readonly property bool wide: width > height && width >= Kirigami.Units.gridUnit * 40
+    readonly property var playlist: rows.filter(r => page.playable(r))
+    readonly property bool split: wide && playlist.length > 0
 
     title: qsTr("Programme")
 
@@ -66,6 +73,17 @@ Kirigami.ScrollablePage {
             }
         }
     }
+
+    padding: 0
+
+    RowLayout {
+        anchors.fill: parent
+        spacing: 0
+
+    QQC2.ScrollView {
+        Layout.fillHeight: true
+        Layout.fillWidth: !page.split
+        Layout.preferredWidth: page.split ? Kirigami.Units.gridUnit * 20 : -1
 
     ListView {
         id: list
@@ -188,6 +206,34 @@ Kirigami.ScrollablePage {
         }
     }
 
+    }
+
+    Kirigami.Separator {
+        visible: page.split
+        Layout.fillHeight: true
+    }
+
+    // The small player beside the list (tablet).
+    Loader {
+        id: pane
+
+        objectName: "playerPane"
+        active: page.split
+        visible: active
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+
+        sourceComponent: PlayerView {
+            compact: true
+            playlist: page.playlist
+            // Set, not bound: the player moves on by itself (next, previous).
+            Component.onCompleted: index = Math.max(0, page.playlist.findIndex(r => r.id === page.lastId))
+            onShown: id => page.lastId = id
+            onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
+        }
+    }
+    }
+
     TechniqueSheet {
         id: sheet
 
@@ -197,7 +243,19 @@ Kirigami.ScrollablePage {
         onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
     }
 
+    // A row chosen in the list plays beside it.
+    onLastIdChanged: {
+        const i = page.playlist.findIndex(r => r.id === page.lastId)
+        if (pane.item && i >= 0 && pane.item.index !== i) {
+            pane.item.index = i
+        }
+    }
+
     function open(entry) {
+        if (page.split && page.playable(entry)) {
+            page.lastId = entry.id
+            return
+        }
         if (entry.kind === "info") {
             page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
             return
@@ -209,6 +267,10 @@ Kirigami.ScrollablePage {
 
     function play(entry) {
         sheet.close()
+        if (page.split) {
+            page.lastId = entry.id
+            return
+        }
         const playlist = page.rows.filter(r => page.playable(r))
         // The window's page stack returns the new page (the attached PageStack.push returns nothing).
         const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
