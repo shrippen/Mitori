@@ -24,8 +24,9 @@ shinki/
    - Es gibt genau eine Farbe, das Shinki-Rot `#CE171E`. Es markiert, was gewählt, wichtig oder zu tun ist,
      und nie bloß zur Zierde.
 2. **Ruhe vor Effekt.**
-   - Keine Schatten, Verläufe oder Rundungen an Flächen.
-   - Rund ist nur, was rund gemeint ist: der Abspielknopf, der Punkt im Schieber, die vier Stufenpunkte.
+   - Keine Schatten, Verläufe oder Rundungen an Flächen. Die wenigen Ausnahmen nennt Abschnitt 4: das Blatt
+     wirft einen Schatten, rund ist nur, was rund gemeint ist (Abspielknopf, Schieberpunkt, Stufenpunkte,
+     Griff, Symbolknopf).
    - Kanten sind 1 px feine Linien.
 3. **Die Tuschelavierung ist das einzige Ornament.**
    - Ein grauer Pinselnebel oben rechts auf Seiten mit Kopf, wie hinter dem „No. 45“ der Zeitung.
@@ -45,7 +46,7 @@ shinki/
 ## 2 Farben
 
 Rollen statt Werte: Bausteine und Seiten nennen die Rolle, nie die Hex-Zahl. Die Quelle der Werte ist `tokens.json`.
-Der Clickdummy hat für Nebentext `#77716C`; auf `chip` und `selected` verfehlt das AA (4,3 und 4,1). Shinki
+Der Clickdummy hat für Nebentext `#77716C`; auf `chip` und `selected` verfehlt das AA (4,3 und 4,3). Shinki
 nimmt darum das etwas dunklere `#6B655F` (nahe an `--muted` der Clickdummy-Seite, `#6E6863`).
 
 | Rolle | Wert | Wofür | Kontrast auf `paper` |
@@ -55,8 +56,8 @@ nimmt darum das etwas dunklere `#6B655F` (nahe an `--muted` der Clickdummy-Seite
 | `chip` | `#F3F1EE` | Hinweisfläche, Marke, Knopf unter dem Zeiger | |
 | `line` | `#E6E2DD` | feine Linien, Rahmen, Trenner | 1,3 (Linie, kein Text) |
 | `ink` | `#1D1B1A` | Text, Symbole, gewähltes Tempo | 17,2 |
-| `inkMuted` | `#6B655F` | Nebentext: Untertitel, Achsen, Zeiten | 5,8 (`paperAlt` 5,5, `chip` 5,1, `selected` 4,8) |
-| `selected` | `#FAE5E5` | gewählte Listenzeile (9 % Rot auf `paper`) | |
+| `inkMuted` | `#6B655F` | Nebentext: Untertitel, Achsen, Zeiten | 5,8 (`paperAlt` 5,5, `chip` 5,1, `selected` 4,9) |
+| `selected` | `#FBEAEB` | gewählte Listenzeile (9 % `red` in `paper` gemischt) | |
 | `red` | `#CE171E` | Akzent: gewählt, Kopfzeile, Hauptknopf, Fortschritt | 5,6 (`chip` 5,0) |
 | `onRed` | `#FFFFFF` | Text auf Rot | 5,6 |
 | `scrim` | `#140F0A`, Deckkraft 0,38 | Grund hinter einem Blatt (Bottom Sheet) | |
@@ -125,7 +126,7 @@ Zahlen in Tabellen, Zeiten und Zählern stehen in Tabellenziffern.
 - **Gewählt.**
   - Ein Segment ist gewählt, wenn es ganz rot gefüllt ist und weiß beschriftet.
   - Ein Grad-Chip ist gewählt, wenn er einen roten Rahmen und 3 px Rot innen unten hat.
-  - Eine Listenzeile ist gewählt, wenn sie 3 px Rot links hat und einen Hauch Rot (9 %) als Fläche.
+  - Eine Listenzeile ist gewählt, wenn sie 3 px Rot links hat und `selected` als Fläche.
 - **Abstände.** Raster 4 px. Seitenrand 16 px (Kopf 18 px), Abstand zwischen Kacheln 10 px, Innenabstand
   von Kachel und Karte 12–14 px. Zeilenhöhe der Listen mindestens 44 px (Finger).
 - **Tuschelavierung.**
@@ -198,19 +199,26 @@ Controls (QQC2)         Kante: Material/Breeze wie heute       Shinki: der Contr
   setzt den Controls-Stil nur vor dem ersten Fenster. Unter Shinki läuft Kante in seiner Art „System“ und
   zeichnet dort, wo eine Seite es noch direkt nutzt, mit dem Controls-Stil Shinki.
 - **`ShinkiStyle`** ist ein Singleton mit den Rollen, Stufen, Schriften und Größen aus `tokens.json`. Es ist
-  die einzige Stelle mit Werten. Die Werte erzeugt ein Werkzeug aus der JSON-Datei, damit nichts doppelt gepflegt wird.
+  die einzige Stelle mit Werten; jeder Wert dieser Bibel steht in `tokens.json`. Die Werte erzeugt ein Werkzeug aus der JSON-Datei, damit nichts doppelt gepflegt wird.
 - **Controls-Stil `Shinki`** für die Controls, die Mitori nutzt: Button, ToolButton, TextField, TextArea,
   ComboBox, Switch, CheckBox, RadioButton, Slider, ProgressBar, TabBar/TabButton, Dialog, Menu/MenuItem,
   ToolTip, ScrollBar, Popup, Drawer, ItemDelegate.
 - **Eigene Bausteine** für alles, was Kante mit eigener Zeichnung und eigenen Rollen löst, vor allem die
-  Stufenfarben, die Kante aus seiner Fokusfarbe ableitet: Kachel, Segmente, Grad-Chip, Gruppenkopf,
-  Listenzeile, Stufenpunkte und -wahl, Stand-Leiste, Kalender, Raster der Landkarte, Säulen, Legende, Karte,
-  Kennzahl, Tuschelavierung (`ShinkiInk`), Logo (`ShinkiLogo`).
+  Stufenfarben, die Kante aus seiner Fokusfarbe ableitet: Kopf (statt `KanteHeading`), Kachel, Segmente,
+  Grad-Chip, Gruppenkopf (statt `KanteSectionLabel`), Listenzeile, Stufenpunkte und -wahl, Stand-Leiste,
+  Kalender, Raster der Landkarte, Säulen, Legende, Karte, Kennzahl, Hinweis (statt `KanteHintCard`),
+  Transportleiste des Players, Toast, Tuschelavierung (`ShinkiInk`), Logo (`ShinkiLogo`).
 - **Look** hat für jeden dieser Bausteine einen `Look…`-Baustein, der per Loader den Kante- oder
-  Shinki-Baustein lädt, mit derselben Schnittstelle. Für die Rollen, die Seiten direkt lesen (`levelColor`,
-  Nebentext, Linien), gibt es Funktionen und Eigenschaften. Die Seiten ziehen Baustein für Baustein von
-  `Kante…` auf `Look…` um, angefangen bei Startmenü, Programm, Blatt und Player. Bis dahin zeigt Shinki dort
-  Kante in der Art „System“.
+  Shinki-Baustein lädt, mit derselben Schnittstelle. Dazu kommen alle Rollen und Schriften, die Seiten heute
+  direkt aus `KanteStyle` lesen: Grund, Karte, Bühne, Text, Nebentext, deaktiviert, positiv, negativ, Fokus,
+  Linien, `levelColor`, die kleine, Mono-, japanische, Überschrift- und Titelschrift. `Look` bildet sie unter
+  Shinki auf `ShinkiStyle` ab.
+- **Übergang.** Die Seiten ziehen Baustein für Baustein von `Kante…` auf `Look…` um, angefangen bei
+  Startmenü, Programm, Blatt und Player; eine neue oder geänderte Seite nimmt gleich `Look`. Bis eine Seite
+  umgezogen ist, zeigt Shinki dort Kante in der Art „System“. Damit sie auch dann Shinki-Farben trägt, setzt
+  `ShinkiScope` unter Shinki `Kirigami.Theme` (Grund `paper`, Text `ink`, Hervorhebung und Fokus `red`).
+  Auf solchen Seiten ist der Fokus also vorerst rot und die Stufen sind Töne von Rot. Das ist eine bekannte
+  Abweichung von Abschnitt 2, sie verschwindet mit dem Umzug.
 - **Schriften** liegen in `shinki/fonts` und kommen als Ressource in die App (Android und AppImage haben sie
   sonst nicht). Noto Serif JP ist eine Teilmenge (Abschnitt 3). Ein Test prüft, dass jedes Kanji und Kana
   aus Daten, QML und Katalogen darin steht.
