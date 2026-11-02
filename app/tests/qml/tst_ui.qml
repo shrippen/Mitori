@@ -464,6 +464,28 @@ TestCase {
         compare(Practice.lastNote(first).text, "für die erste Technik", "saved for the technique it was typed for")
         verify(Practice.lastNote(page.current.id).text !== "für die erste Technik")
         compare(field.text, "", "the field is empty for the next technique")
+        // Leaving the player keeps a draft as well.
+        const second = page.current.id
+        field.text = "beim Verlassen"
+        window.pageStack.pop()
+        tryVerify(() => Practice.lastNote(second).text === "beim Verlassen", 3000, "saved when the player closes")
+    }
+
+    // With the note field focused, the controls scroll it into view when the window shrinks
+    // (the on-screen keyboard opens after the focus).
+    function test_8c_note_field_above_keyboard() {
+        window.width = 800
+        window.height = 360
+        const page = playerAt(0)
+        const view = findChild(page, "controlsView")
+        const field = findChild(page, "noteField")
+        field.forceActiveFocus()
+        window.height = 200
+        wait(300)
+        const at = field.mapToItem(view, 0, 0)
+        verify(at.y >= 0 && at.y + field.height <= view.height + 1, "field in view (" + at.y + ", " + view.height + ")")
+        window.width = 420
+        window.height = 800
         window.pageStack.pop()
     }
 

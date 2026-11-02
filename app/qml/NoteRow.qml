@@ -19,13 +19,26 @@ ColumnLayout {
     // The field got the keyboard focus (the player scrolls it into view above the keyboard).
     signal fieldFocused(Item field)
 
-    onEntryChanged: {
-        if (draftFor !== "" && draftFor !== entry.id && field.text.trim() !== "") {
-            Practice.addNote(draftFor, field.text)
+    // Saves a begun note for its technique; the field empties only when it was saved.
+    function keepDraft() {
+        if (draftFor === "" || field.text.trim() === "") {
+            field.clear()
+            draftFor = ""
+            return
         }
-        field.clear()
-        draftFor = ""
+        if (Practice.addNote(draftFor, field.text)) {
+            field.clear()
+            draftFor = ""
+        }
     }
+
+    onEntryChanged: {
+        if (draftFor !== entry.id) {
+            keepDraft()
+        }
+    }
+    // Leaving the player (Back, the training's Done card) keeps the draft too.
+    Component.onDestruction: keepDraft()
 
     spacing: KanteStyle.unit(6)
 
@@ -49,8 +62,16 @@ ColumnLayout {
             placeholderText: qsTr("Note for today …")
             Accessible.name: qsTr("New note")
             onAccepted: add()
-            onTextChanged: if (text !== "" && noteRow.draftFor === "") noteRow.draftFor = noteRow.entry.id
-            onActiveFocusChanged: if (activeFocus) noteRow.fieldFocused(field)
+            onTextChanged: {
+                if (text !== "" && noteRow.draftFor === "") {
+                    noteRow.draftFor = noteRow.entry.id
+                }
+            }
+            onActiveFocusChanged: {
+                if (activeFocus) {
+                    noteRow.fieldFocused(field)
+                }
+            }
 
             function add() {
                 if (Practice.addNote(noteRow.draftFor || noteRow.entry.id, text)) {
