@@ -13,6 +13,10 @@ def test_internet_permission():
     rights = {p.get(ANDROID) for p in root.iter("uses-permission")}
     assert "android.permission.INTERNET" in rights
     assert "android.permission.ACCESS_NETWORK_STATE" in rights      # Wi-Fi only downloads
+    assert {"android.permission.CAMERA", "android.permission.RECORD_AUDIO"} <= rights   # photos, voice notes
+    # Not required: the app installs on devices without a camera or microphone.
+    features = {f.get(ANDROID): f.get("{http://schemas.android.com/apk/res/android}required") for f in root.iter("uses-feature")}
+    assert features.get("android.hardware.camera") == "false" and features.get("android.hardware.microphone") == "false"
 
 
 RES = MANIFEST.parent / "res" / "xml"

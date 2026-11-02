@@ -110,7 +110,8 @@ public:
     // Every notebook's entries, newest first, and the notebooks' titles by uid (C++ only: AllNotes).
     QList<CourseBook::Entry> allEntries() const;
     QHash<QString, QString> courseTitles() const;
-    Q_INVOKABLE bool addEntry(const QString &course, const QString &text);
+    // Text, a photo or voice note (its name from Media), or both.
+    Q_INVOKABLE bool addEntry(const QString &course, const QString &text, const QString &media = {});
     Q_INVOKABLE bool changeEntry(const QString &uid, const QString &text);
     Q_INVOKABLE bool deleteEntry(const QString &uid);
 

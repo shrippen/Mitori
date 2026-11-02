@@ -1,4 +1,5 @@
 import QtQuick
+import QtMultimedia
 import QtTest
 import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
@@ -1880,6 +1881,72 @@ TestCase {
 
     // A note begun in the player belongs to the technique it was typed for, also when the player
     // moves on before it is added (training moves on after a rating).
+    // Photos and voice notes: a picked picture becomes a note with the text typed so far, shown
+    // in the notes, the notebook and All notes; a voice note plays; the camera page says when
+    // there is no camera (offscreen). Deleting a note deletes its file.
+    MediaDevices {
+        id: devices
+    }
+
+    function test_8f_photo_and_voice() {
+        failOnWarning(/ReferenceError|TypeError|Binding loop/)
+        const entry = Programme.entries("aikido", "k4").find(r => r.kind === "entry")
+        const page = push("NotesPage", { entry: entry })
+        const compose = findChild(page, "compose")
+        compose.text = "Fußstellung"
+        const name = Media.importPhoto("file://" + testMediaDir + "/foto.png")
+        verify(name.endsWith(".jpg"), name)
+        const media = findChild(page.footer, "addPhoto").parent
+        media.attached(name)
+        tryVerify(() => Practice.notes(entry.id).some(n => n.media === name))
+        compare(compose.text, "", "the text went with the photo")
+        tryVerify(() => findChildren(page, "notePhoto").some(i => i.visible && i.status === Image.Ready), 3000)
+        shot("8f-note-photo")
+
+        // A voice note without text: named as such, it plays.
+        verify(Practice.addNote(entry.id, "", "test-stimme.m4a"))
+        tryVerify(() => findChildren(page, "note").some(n => n.text === qsTr("Voice note")))
+        const play = findChildren(page, "playVoice").find(b => b.visible)
+        verify(play)
+        wait(800)
+        mouseClick(play)
+        // Loaded, it shows its length ("Voice note 0:02"); playing, the button stops it.
+        tryVerify(() => findChildren(page, "voiceLength").some(l => l.visible && /\d:\d\d$/.test(l.text)), 5000,
+                  findChildren(page, "voiceLength").map(l => l.text).join(", "))
+
+        // Without a camera the camera page says so (a machine with a webcam does not switch it on
+        // for a test).
+        if (devices.videoInputs.length === 0) {
+            const camera = push("CameraPage")
+            tryVerify(() => findChild(camera, "cameraError").visible, 3000)
+            verify(!findChild(camera, "shutter").enabled)
+            window.pageStack.pop()
+        }
+
+        // All notes shows the photo too.
+        const all = push("AllNotesPage")
+        all.filter = ""
+        tryVerify(() => findChildren(all, "notePhoto").some(i => i.visible))
+        window.pageStack.pop()
+
+        // Deleted, the photo's file goes.
+        const photoNote = Practice.notes(entry.id).find(n => n.media === name)
+        verify(Practice.deleteNote(photoNote.uid))
+        const voiceNote = Practice.notes(entry.id).find(n => n.media === "test-stimme.m4a")
+        verify(Practice.changeNote(voiceNote.uid, ""), "a voice note needs no text")
+        window.pageStack.pop()
+
+        // A notebook entry with a photo.
+        const course = Courses.create("Fotolehrgang", "2026-05-01", "", "", "")
+        const book = push("CoursePage", { uid: course })
+        findChild(book, "courseCompose").text = "Tafel"
+        findChild(book, "courseMedia").attached(Media.importPhoto("file://" + testMediaDir + "/foto.png"))
+        tryVerify(() => Courses.entries(course).length === 1 && Courses.entries(course)[0].media.endsWith(".jpg"))
+        tryVerify(() => findChildren(book, "notePhoto").some(i => i.visible))
+        window.pageStack.pop()
+        verify(Courses.remove(course))
+    }
+
     function test_8b_note_draft_stays_with_its_technique() {
         const page = playerAt(1)
         const first = page.current.id

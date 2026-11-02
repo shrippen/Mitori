@@ -34,8 +34,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Programm und in den Notizen einer Technik). Suche (Techniken aller Sparten und Grade, eigene Notizen; Groß/klein,
   Akzente, ß, Bindestriche und Okurigana egal; auch Angriffszusatz und Gruppe) über die Lupe im Startmenü. Statistik
   (Kachel im Startmenü): letzte 30 Tage (Übungstage, Techniken geübt), Übungstage als Kalender (halbes Jahr,
-  Legende, Tooltip je Tag), Stand je Grad einer Sparte. Offen: Fotos und Sprachnotizen an Notizen
-  (Plattform-Schicht); in der Statistik „Meine Grade“
+  Legende, Tooltip je Tag), Stand je Grad einer Sparte. Fotos und Sprachnotizen an Notizen (mit Schritt 4).
+  Offen: in der Statistik „Meine Grade“
   (mit Schritt 4), „alle Jahre“.
 - Schritt 3: Prüfungsmodus (Kachel 試 im Startmenü, „Probe <Grad>“): Sparte, Grad (nur mit Prüfungsstoff, je
   Anzahl Punkte), Anzahl (alle / 8 / 12 / 15), zufällige Reihenfolge, 2–5 Stichproben aus früheren Graden am
@@ -68,7 +68,12 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   über den Kalender-Intent, sonst als ICS-Datei an die Kalender-App), „Ausschreibung“ (aus der Zeile
   „Ausschreibung: URL“), Einträge nach Tagen (lang drücken: ändern, löschen), Notizbuch löschen. Gespeichert in
   `lehrgaenge.sqlite` (`store/coursebook`, eigenes Schema), jede Zeile mit Zeit und Gerät für den Abgleich. Offen:
-  Fotos und Sprachnotizen, Export. Die Einträge stehen auch in „Alle Notizen“ (Filter „Lehrgänge“).
+  Export. Die Einträge stehen auch in „Alle Notizen“ (Filter „Lehrgänge“).
+- Schritt 4: Fotos und Sprachnotizen an Notizen einer Technik und an Lehrgangseinträgen: Foto mit der Kamera
+  (`CameraPage`) oder aus einer Datei, Sprachnotiz (AAC in MP4) direkt in der Eingabezeile; Anzeige in Notizen,
+  Notizbuch und „Alle Notizen“, Sprachnotiz zum Abspielen. Dateien in `medien/` (`store/mediastore`, Fotos höchstens
+  2048 px), mit der Notiz gelöscht. Übungsprotokoll Schema 5, Lehrgänge Schema 3 (Spalte `media`). Android fragt nach
+  Kamera und Mikrofon beim ersten Mal. Offen: Test auf dem Telefon (Kamera, Mikrofon, Bild aus der Galerie).
 - Schritt 4: Meine Grade (in Lehrgänge oben): je Sparte die abgelegten Grade mit Tag und Ort, der nächste Grad mit
   Wartezeit (`wartezeit` aus `abstand` der Programmdaten; Shinki Toho Shoden ab Trainingsbeginn, ohne Datum).
   Im Notizbuch eines kommenden Lehrgangs „Prüfung hier ablegen …“ (Sparte, Grad, Wartezeit gegen den ersten Tag);

@@ -558,6 +558,7 @@ private slots:
         QCOMPARE(again.errorString(), QString());
         QCOMPARE(again.level(QStringLiteral("e")), 4);
         QCOMPARE(again.lastNote(QStringLiteral("e")).value(QStringLiteral("text")).toString(), QStringLiteral("Hüfte"));
+        QCOMPARE(again.lastNote(QStringLiteral("e")).value(QStringLiteral("media")).toString(), QString());   // schema 5
         QCOMPARE(again.rounds(QStringLiteral("aikido"), 8).size(), 1);
         {
             QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("v4"));

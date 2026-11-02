@@ -171,6 +171,7 @@ private slots:
         QCOMPARE(list.first().title, u"Alt"_s);
         QCOMPARE(list.first().examDiscipline, QString());
         QCOMPARE(book.entries(u"c1"_s).size(), 1);
+        QCOMPARE(book.entries(u"c1"_s).first().media, QString());          // schema 3
         QVERIFY(book.grades().isEmpty());
         QVERIFY(book.planExam(u"c1"_s, u"aikido"_s, u"k4"_s, QDateTime::currentDateTimeUtc()));
         QCOMPARE(book.courses().first().examGrade, u"k4"_s);

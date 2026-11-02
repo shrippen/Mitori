@@ -1,6 +1,7 @@
 #include "courses.h"
 
 #include "device.h"
+#include "mediastore.h"
 #include "devicecalendar.h"
 
 #include <QDir>
@@ -270,7 +271,17 @@ QString Courses::create(const QString &title, const QString &first, const QStrin
 
 bool Courses::remove(const QString &uid)
 {
-    return m_open && saved(m_book->deleteCourse(uid, QDateTime::currentDateTimeUtc()), tr("The notebook could not be deleted: %1"));
+    if (!m_open) {
+        return false;
+    }
+    const QStringList media = m_book->courseMedia(uid);
+    if (!saved(m_book->deleteCourse(uid, QDateTime::currentDateTimeUtc()), tr("The notebook could not be deleted: %1"))) {
+        return false;
+    }
+    for (const QString &name : media) {
+        MediaStore::shared().remove(name);
+    }
+    return true;
 }
 
 QVariantList Courses::entries(const QString &course) const
@@ -283,7 +294,8 @@ QVariantList Courses::entries(const QString &course) const
         result << QVariantMap{{QStringLiteral("uid"), e.uid},
                               {QStringLiteral("text"), e.text},
                               {QStringLiteral("created"), e.created.toLocalTime()},
-                              {QStringLiteral("changed"), e.changed.toLocalTime()}};
+                              {QStringLiteral("changed"), e.changed.toLocalTime()},
+                              {QStringLiteral("media"), e.media}};
     }
     return result;
 }
@@ -304,26 +316,31 @@ QHash<QString, QString> Courses::courseTitles() const
     return titles;
 }
 
-bool Courses::addEntry(const QString &course, const QString &text)
+bool Courses::addEntry(const QString &course, const QString &text, const QString &media)
 {
-    if (!m_open || text.trimmed().isEmpty()) {
+    if (!m_open || (text.trimmed().isEmpty() && media.isEmpty())) {
         return false;
     }
-    const CourseBook::Entry e = m_book->addEntry(course, text, QDateTime::currentDateTimeUtc(), deviceId());
+    const CourseBook::Entry e = m_book->addEntry(course, text, QDateTime::currentDateTimeUtc(), deviceId(), media);
     return saved(!e.uid.isEmpty(), tr("The entry could not be saved: %1"));
 }
 
 bool Courses::changeEntry(const QString &uid, const QString &text)
 {
-    if (!m_open || text.trimmed().isEmpty()) {
+    if (!m_open || (text.trimmed().isEmpty() && m_book->entryMedia(uid).isEmpty())) {
         return false;
     }
     return saved(m_book->changeEntry(uid, text, QDateTime::currentDateTimeUtc()), tr("The entry could not be saved: %1"));
 }
 
+// The entry stays as a mark (sync), its photo or voice note goes.
 bool Courses::deleteEntry(const QString &uid)
 {
-    return m_open && saved(m_book->deleteEntry(uid, QDateTime::currentDateTimeUtc()), tr("The entry could not be deleted: %1"));
+    if (!m_open || !saved(m_book->deleteEntry(uid, QDateTime::currentDateTimeUtc()), tr("The entry could not be deleted: %1"))) {
+        return false;
+    }
+    MediaStore::shared().remove(m_book->entryMedia(uid));
+    return true;
 }
 
 QList<Courses::Step> Courses::steps(const QString &discipline) const

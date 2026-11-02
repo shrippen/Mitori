@@ -22,7 +22,17 @@
         <translation>Heute</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="273"/>
+        <location filename="../qml/AllNotesPage.qml" line="227"/>
+        <source>Photo</source>
+        <translation>Foto</translation>
+    </message>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="228"/>
+        <source>Voice note</source>
+        <translation>Sprachnotiz</translation>
+    </message>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="280"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
@@ -100,6 +110,24 @@
     </message>
 </context>
 <context>
+    <name>CameraPage</name>
+    <message>
+        <location filename="../qml/CameraPage.qml" line="20"/>
+        <source>Photo</source>
+        <translation>Foto</translation>
+    </message>
+    <message>
+        <location filename="../qml/CameraPage.qml" line="60"/>
+        <source>No camera found.</source>
+        <translation>Keine Kamera gefunden.</translation>
+    </message>
+    <message>
+        <location filename="../qml/CameraPage.qml" line="74"/>
+        <source>Take photo</source>
+        <translation>Auslösen</translation>
+    </message>
+</context>
+<context>
     <name>CommentPage</name>
     <message>
         <location filename="../qml/CommentPage.qml" line="31"/>
@@ -110,23 +138,22 @@
 <context>
     <name>CourseBook</name>
     <message>
-        <location filename="../store/coursebook.cpp" line="118"/>
+        <location filename="../store/coursebook.cpp" line="132"/>
         <source>it comes from a newer Mitori (schema %1); update Mitori</source>
         <translation>sie stammt aus einem neueren Mitori (Schema %1); Mitori aktualisieren</translation>
     </message>
     <message>
-        <location filename="../store/coursebook.cpp" line="164"/>
+        <location filename="../store/coursebook.cpp" line="189"/>
         <source>a course needs a title and a first day</source>
         <translation>ein Lehrgang braucht einen Titel und einen ersten Tag</translation>
     </message>
     <message>
-        <location filename="../store/coursebook.cpp" line="259"/>
+        <location filename="../store/coursebook.cpp" line="284"/>
         <source>a grade needs a discipline, a grade and a day</source>
         <translation>ein Grad braucht Sparte, Grad und Tag</translation>
     </message>
     <message>
-        <location filename="../store/coursebook.cpp" line="319"/>
-        <location filename="../store/coursebook.cpp" line="340"/>
+        <location filename="../store/coursebook.cpp" line="345"/>
         <source>an entry needs a text and a course</source>
         <translation>ein Eintrag braucht einen Text und einen Lehrgang</translation>
     </message>
@@ -338,42 +365,52 @@
         <translation>Noch keine Einträge. Unten schreiben, was gezeigt wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="317"/>
+        <location filename="../qml/CoursePage.qml" line="323"/>
         <source>Change or delete</source>
         <translation>Ändern oder löschen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="345"/>
+        <location filename="../qml/CoursePage.qml" line="356"/>
         <source>What was shown?</source>
         <translation>Was wurde gezeigt?</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="346"/>
+        <location filename="../qml/CoursePage.qml" line="357"/>
         <source>New entry</source>
         <translation>Neuer Eintrag</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="353"/>
+        <location filename="../qml/CoursePage.qml" line="376"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="362"/>
+        <location filename="../qml/CoursePage.qml" line="385"/>
+        <source>Photo</source>
+        <translation>Foto</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="385"/>
+        <source>Voice note</source>
+        <translation>Sprachnotiz</translation>
+    </message>
+    <message>
+        <location filename="../qml/CoursePage.qml" line="391"/>
         <source>Entry</source>
         <translation>Eintrag</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="374"/>
+        <location filename="../qml/CoursePage.qml" line="403"/>
         <source>Delete notebook?</source>
         <translation>Notizbuch löschen?</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="375"/>
+        <location filename="../qml/CoursePage.qml" line="404"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="385"/>
+        <location filename="../qml/CoursePage.qml" line="414"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>Das Notizbuch und sein %n Eintrag verschwinden von diesem Gerät.</numerusform>
@@ -403,44 +440,44 @@
 <context>
     <name>Courses</name>
     <message>
-        <location filename="../services/courses.cpp" line="84"/>
+        <location filename="../services/courses.cpp" line="85"/>
         <source>The course notebooks could not be opened: %1</source>
         <translation>Die Lehrgangsnotizbücher ließen sich nicht öffnen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="250"/>
-        <location filename="../services/courses.cpp" line="267"/>
+        <location filename="../services/courses.cpp" line="251"/>
+        <location filename="../services/courses.cpp" line="268"/>
         <source>The notebook could not be made: %1</source>
         <translation>Das Notizbuch ließ sich nicht anlegen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="273"/>
+        <location filename="../services/courses.cpp" line="278"/>
         <source>The notebook could not be deleted: %1</source>
         <translation>Das Notizbuch ließ sich nicht löschen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="313"/>
-        <location filename="../services/courses.cpp" line="321"/>
+        <location filename="../services/courses.cpp" line="325"/>
+        <location filename="../services/courses.cpp" line="333"/>
         <source>The entry could not be saved: %1</source>
         <translation>Der Eintrag ließ sich nicht speichern: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="326"/>
+        <location filename="../services/courses.cpp" line="339"/>
         <source>The entry could not be deleted: %1</source>
         <translation>Der Eintrag ließ sich nicht löschen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="375"/>
+        <location filename="../services/courses.cpp" line="392"/>
         <source>The grade could not be saved: %1</source>
         <translation>Der Grad konnte nicht gespeichert werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="380"/>
+        <location filename="../services/courses.cpp" line="397"/>
         <source>The grade could not be deleted: %1</source>
         <translation>Der Grad konnte nicht gelöscht werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="462"/>
+        <location filename="../services/courses.cpp" line="479"/>
         <source>The exam could not be planned: %1</source>
         <translation>Die Prüfung konnte nicht vorgemerkt werden: %1</translation>
     </message>
@@ -887,6 +924,82 @@
     </message>
 </context>
 <context>
+    <name>MediaCompose</name>
+    <message>
+        <location filename="../qml/MediaCompose.qml" line="34"/>
+        <source>Photo</source>
+        <translation>Foto</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaCompose.qml" line="44"/>
+        <source>Take a photo</source>
+        <translation>Foto aufnehmen</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaCompose.qml" line="50"/>
+        <source>Choose a picture …</source>
+        <translation>Bild auswählen …</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaCompose.qml" line="59"/>
+        <source>Voice note</source>
+        <translation>Sprachnotiz</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaCompose.qml" line="70"/>
+        <source>Recording</source>
+        <translation>Aufnahme läuft</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaCompose.qml" line="76"/>
+        <source>Stop</source>
+        <translation>Stopp</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaCompose.qml" line="82"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaCompose.qml" line="132"/>
+        <source>Choose a picture</source>
+        <translation>Bild auswählen</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaCompose.qml" line="133"/>
+        <source>Pictures (*.jpg *.jpeg *.png *.webp *.heic)</source>
+        <translation>Bilder (*.jpg *.jpeg *.png *.webp *.heic)</translation>
+    </message>
+</context>
+<context>
+    <name>MediaView</name>
+    <message>
+        <location filename="../qml/MediaView.qml" line="31"/>
+        <source>Photo</source>
+        <translation>Foto</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaView.qml" line="41"/>
+        <source>Stop</source>
+        <translation>Stopp</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaView.qml" line="41"/>
+        <source>Play voice note</source>
+        <translation>Sprachnotiz abspielen</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaView.qml" line="54"/>
+        <source>Voice note %1</source>
+        <translation>Sprachnotiz %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/MediaView.qml" line="55"/>
+        <source>Voice note</source>
+        <translation>Sprachnotiz</translation>
+    </message>
+</context>
+<context>
     <name>NoteEditor</name>
     <message>
         <location filename="../qml/NoteEditor.qml" line="24"/>
@@ -956,29 +1069,39 @@
         <translation>Noch keine Notizen zu dieser Technik.</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="151"/>
+        <location filename="../qml/NotesPage.qml" line="157"/>
         <source>Change or delete</source>
         <translation>Bearbeiten oder löschen</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="172"/>
+        <location filename="../qml/NotesPage.qml" line="183"/>
         <source>Press and hold a note (or Enter on it) to change or delete it.</source>
         <translation>Lang drücken (oder Enter auf der Notiz): bearbeiten oder löschen.</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="187"/>
+        <location filename="../qml/NotesPage.qml" line="198"/>
         <source>Note for today …</source>
         <translation>Notiz für heute …</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="188"/>
+        <location filename="../qml/NotesPage.qml" line="199"/>
         <source>New note</source>
         <translation>Neue Notiz</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="195"/>
+        <location filename="../qml/NotesPage.qml" line="217"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="../qml/NotesPage.qml" line="226"/>
+        <source>Photo</source>
+        <translation>Foto</translation>
+    </message>
+    <message>
+        <location filename="../qml/NotesPage.qml" line="226"/>
+        <source>Voice note</source>
+        <translation>Sprachnotiz</translation>
     </message>
 </context>
 <context>
@@ -1074,52 +1197,52 @@
 <context>
     <name>Practice</name>
     <message>
-        <location filename="../services/practice.cpp" line="41"/>
+        <location filename="../services/practice.cpp" line="43"/>
         <source>The practice log could not be opened: %1</source>
         <translation>Das Übungsprotokoll lässt sich nicht öffnen: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="63"/>
+        <location filename="../services/practice.cpp" line="65"/>
         <source>not rated</source>
         <translation>offen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="63"/>
+        <location filename="../services/practice.cpp" line="65"/>
         <source>seen</source>
         <translation>gesehen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="63"/>
+        <location filename="../services/practice.cpp" line="65"/>
         <source>with help</source>
         <translation>mit Hilfe</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="63"/>
+        <location filename="../services/practice.cpp" line="65"/>
         <source>sure</source>
         <translation>sicher</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="63"/>
+        <location filename="../services/practice.cpp" line="65"/>
         <source>exam-ready</source>
         <translation>prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="73"/>
+        <location filename="../services/practice.cpp" line="75"/>
         <source>The rating could not be saved: %1</source>
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="269"/>
+        <location filename="../services/practice.cpp" line="272"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="333"/>
+        <location filename="../services/practice.cpp" line="337"/>
         <source>Not every point of the exam round is rated.</source>
         <translation>Nicht jeder Punkt der Prüfungsrunde ist eingeschätzt.</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="354"/>
+        <location filename="../services/practice.cpp" line="358"/>
         <source>The exam round could not be saved: %1</source>
         <translation>Die Prüfungsrunde konnte nicht gespeichert werden: %1</translation>
     </message>
@@ -1127,17 +1250,17 @@
 <context>
     <name>PracticeLog</name>
     <message>
-        <location filename="../store/practicelog.cpp" line="72"/>
+        <location filename="../store/practicelog.cpp" line="87"/>
         <source>it comes from a newer Mitori (schema %1); update Mitori</source>
         <translation>es stammt aus einer neueren Mitori-Version (Schema %1); bitte Mitori aktualisieren</translation>
     </message>
     <message>
-        <location filename="../store/practicelog.cpp" line="332"/>
+        <location filename="../store/practicelog.cpp" line="366"/>
         <source>the round is incomplete</source>
         <translation>die Runde ist unvollständig</translation>
     </message>
     <message>
-        <location filename="../store/practicelog.cpp" line="347"/>
+        <location filename="../store/practicelog.cpp" line="381"/>
         <source>a rating is invalid (&quot;%1&quot;)</source>
         <translation>eine Einschätzung ist ungültig („%1“)</translation>
     </message>

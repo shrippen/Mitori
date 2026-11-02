@@ -29,6 +29,7 @@ public:
         QDateTime changed;      // UTC
         QString device;
         bool deleted = false;
+        QString media;          // a photo or voice note: its file in the media folder, or ""
     };
 
     // A round of the exam mode (mock exam): when, which grade, how many points were asked and
@@ -65,7 +66,11 @@ public:
     QList<Rating> history(const QString &entry) const;
 
     // Notes: add one (an empty uid on failure), change or delete one by uid (false on failure).
-    Note addNote(const QString &entry, const QString &text, const QDateTime &at, const QString &device);
+    // Text, a media file (MediaStore), or both.
+    Note addNote(const QString &entry, const QString &text, const QDateTime &at, const QString &device,
+                 const QString &media = {});
+    // The media file of a note (also a deleted one), or "".
+    QString noteMedia(const QString &uid) const;
     bool changeNote(const QString &uid, const QString &text, const QDateTime &at);
     bool deleteNote(const QString &uid, const QDateTime &at);
     // The notes of one entry that are not deleted, oldest first.
@@ -87,7 +92,7 @@ public:
     SavedRound addRound(const ExamRound &round, const QList<Rating> &ratings);
     QList<ExamRound> rounds(const QString &discipline, int limit) const;
 
-    static constexpr int schemaVersion = 4;
+    static constexpr int schemaVersion = 5;
 
 private:
     bool migrate();
