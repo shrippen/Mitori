@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Multimedia Sql LinguistTools)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Multimedia Sql Network LinguistTools)
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 find_package(KF6 REQUIRED COMPONENTS Kirigami)
@@ -59,6 +59,11 @@ qt_add_qml_module(mitori_app
         qml/ExamBoard.qml
         qml/ExamEndPage.qml
         qml/TechniqueMapPage.qml
+        qml/CoursesPage.qml
+        qml/CourseRow.qml
+        qml/CoursePage.qml
+        qml/CourseNewPage.qml
+        qml/coursedays.js
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -79,6 +84,15 @@ qt_add_qml_module(mitori_app
         store/schedule.h
         store/schedule.cpp
         store/searchkey.h
+        store/icsreader.h
+        store/icsreader.cpp
+        store/coursebook.h
+        store/coursebook.cpp
+        store/device.h
+        services/courses.h
+        services/courses.cpp
+        platform/devicecalendar.h
+        platform/devicecalendar.cpp
         services/keyedlistmodel.h
         services/keyedlistmodel.cpp
 )
@@ -117,8 +131,8 @@ qt_add_resources(mitori_app "kante"
 )
 
 # The generated type registration includes the headers by name.
-target_include_directories(mitori_app PUBLIC catalog services store player)
-target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql KF6::Kirigami)
+target_include_directories(mitori_app PUBLIC catalog services store player platform)
+target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql Qt6::Network KF6::Kirigami)
 if(TARGET Qt6::TextToSpeech)
     target_link_libraries(mitori_app PUBLIC Qt6::TextToSpeech)
     target_compile_definitions(mitori_app PRIVATE MITORI_SPEECH)
@@ -230,6 +244,22 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     target_link_libraries(tst_keyedlistmodel PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
     set_target_properties(tst_keyedlistmodel PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME keyedlistmodel COMMAND tst_keyedlistmodel)
+
+    qt_add_executable(tst_ics tests/tst_ics.cpp store/icsreader.cpp store/icsreader.h)
+    target_include_directories(tst_ics PRIVATE store)
+    target_compile_definitions(tst_ics PRIVATE TEST_ICS="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/lehrgaenge.ics")
+    target_link_libraries(tst_ics PRIVATE Qt6::Core Qt6::Test)
+    set_target_properties(tst_ics PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME ics COMMAND tst_ics)
+
+    qt_add_executable(tst_courses tests/tst_courses.cpp services/courses.cpp services/courses.h
+        store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
+        platform/devicecalendar.cpp platform/devicecalendar.h)
+    target_include_directories(tst_courses PRIVATE services store platform)
+    target_compile_definitions(tst_courses PRIVATE TEST_ICS="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/lehrgaenge.ics")
+    target_link_libraries(tst_courses PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Test)
+    set_target_properties(tst_courses PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME courses COMMAND tst_courses)
 
     # The pages with Kirigami and Kante, offscreen; screenshots into <build>/ui-shots. Plays a video
     # only with MITORI_VIDEOS (the videos are not in the repository).

@@ -4,11 +4,14 @@ import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
 
-// Change or delete one note (from the notes page, press and hold).
+// Change or delete one note (from the notes page, press and hold). A technique's note by
+// default; a course notebook gives its own `save` and `remove` (Courses).
 Kirigami.Dialog {
     id: editor
 
     property var note: ({})
+    property var save: (uid, text) => Practice.changeNote(uid, text)
+    property var remove: uid => Practice.deleteNote(uid)
 
     function edit(n) {
         note = n
@@ -27,7 +30,7 @@ Kirigami.Dialog {
             icon.name: "edit-delete"
             text: qsTr("Delete")
             onTriggered: {
-                if (Practice.deleteNote(editor.note.uid)) {
+                if (editor.remove(editor.note.uid)) {
                     editor.close()
                 }
             }
@@ -37,7 +40,7 @@ Kirigami.Dialog {
             text: qsTr("Save")
             enabled: area.text.trim() !== ""
             onTriggered: {
-                if (Practice.changeNote(editor.note.uid, area.text)) {
+                if (editor.save(editor.note.uid, area.text)) {
                     editor.close()
                 }
             }
