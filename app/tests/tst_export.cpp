@@ -95,7 +95,7 @@ private slots:
         if (QFile::exists(u"/dev/full"_s)) {
             QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(u"/dev/full"_s)), -1);
             QVERIFY(!courses.errorString().isEmpty());
-            // A large piece (the photo, past QFile's buffer) fails at once: its message stays.
+            // Safeguard: the message names the write error, not "Unknown error".
             QVERIFY2(!courses.errorString().contains(u"Unknown error"_s), qPrintable(courses.errorString()));
         }
         // An existing file the export cannot open stays (it is not ours to remove).
@@ -105,8 +105,14 @@ private slots:
         keep.write("alte Sicherung");
         keep.close();
         QVERIFY(keep.setPermissions(QFileDevice::ReadOwner));
-        QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(existing)), -1);
-        QVERIFY(QFile::exists(existing));
+
+        // Root (the CI container) writes it anyway; the case needs a user without the right.
+        QFile probe(existing);
+        if (!probe.open(QIODevice::WriteOnly | QIODevice::Append)) {
+            QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(existing)), -1);
+            QVERIFY(QFile::exists(existing));
+        }
+        probe.close();
         keep.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
         QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(zip)), 1);
         QCOMPARE(courses.errorString(), QString());
