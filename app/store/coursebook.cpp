@@ -386,6 +386,19 @@ QList<CourseBook::Entry> CourseBook::entries(const QString &courseUid) const
     return result;
 }
 
+QList<CourseBook::Entry> CourseBook::allEntries() const
+{
+    QList<Entry> result;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.exec(QStringLiteral("SELECT e.uid, e.course, e.text, e.created, e.changed, e.device, e.deleted FROM entries e"
+                          " JOIN courses c ON c.uid = e.course WHERE e.deleted = 0 AND c.deleted = 0"
+                          " ORDER BY e.created DESC, e.rowid DESC"));
+    while (q.next()) {
+        result << entry(q);
+    }
+    return result;
+}
+
 QHash<QString, int> CourseBook::entryCounts() const
 {
     QHash<QString, int> result;

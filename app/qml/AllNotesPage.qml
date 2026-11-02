@@ -8,9 +8,10 @@ import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
 
-// All notes (clickdummy "Alle Notizen"): the notes on every technique by day, newest first, with
-// a filter per discipline. A tap opens the technique's notes, press and hold changes or deletes
-// a note. Course notebooks join with the courses (ROADMAP.md, step 4).
+// All notes (clickdummy "Alle Notizen"): the notes on every technique and the entries of every
+// course notebook by day, newest first, with a filter per discipline and one for the courses. A
+// tap opens the technique's notes or the notebook, press and hold changes or deletes a note. The
+// rows come from C++ (AllNotes): fast with thousands of notes.
 Kirigami.Page {
     id: page
 
@@ -18,7 +19,7 @@ Kirigami.Page {
     property Item kanteScope: KanteScope { target: page }
     background: Rectangle { color: KanteStyle.backgroundColor }
 
-    // "" = all disciplines, else a discipline's id; kept for the next time.
+    // "" = all, a discipline's id, or "courses"; kept for the next time.
     property string filter: ""
     Settings {
         id: settings
@@ -28,7 +29,7 @@ Kirigami.Page {
     // A remembered discipline that no longer exists: all (also when Settings loads it). Another
     // filter starts at the top of the list.
     onFilterChanged: {
-        if (filter !== "" && !Programme.disciplines.some(d => d.id === filter)) {
+        if (filter !== "" && filter !== page.coursesFilter && !Programme.disciplines.some(d => d.id === filter)) {
             Qt.callLater(() => page.filter = "")     // not inside the change (Settings records it)
         }
         settings.setValue("allNotesFilter", filter)  // now, not a moment later (the page may go)
@@ -39,27 +40,18 @@ Kirigami.Page {
     }
     // The filter the list was last at the top for (Settings reports the same filter again).
     property string listFilter: ""
-    // Every note with its technique ({}, with only the id, when it is no longer in the programme)
-    // and its local day ("YYYY-MM-DD", the list's sections). Newest first.
-    readonly property var all: {
-        if (Practice.notesRevision < 0) {
-            return []
-        }
-        const p = n => (n < 10 ? "0" : "") + n
-        return Practice.allNotes().map(n => {
-            const e = Programme.entry(n.entry)
-            const c = n.created
-            return Object.assign({ technique: e.id ? e : { id: n.entry },
-                                   day: c.getFullYear() + "-" + p(c.getMonth() + 1) + "-" + p(c.getDate()) }, n)
-        })
-    }
-    readonly property var shown: filter === "" ? all : all.filter(n => n.technique.discipline === filter)
-    // The list's model: a new `shown` changes only the rows that changed, so the list keeps its
-    // place and its current note after an edit, a deletion or a new note.
-    KeyedListModel {
+    readonly property string coursesFilter: "courses"     // AllNotes::kCourses
+    // The rows shown (AllNotes): {uid, kind, text, created, day, title, discipline, entry, course}.
+    readonly property var shown: notesModel.rows
+    // The list's model: a change rebuilds the rows in C++ and changes only those that changed, so
+    // the list keeps its place and its current note after an edit, a deletion or a new note.
+    AllNotes {
         id: notesModel
 
-        rows: page.shown
+        practice: Practice
+        courses: Courses
+        programme: Programme
+        filter: page.filter
     }
 
     title: qsTr("All notes")
@@ -73,23 +65,6 @@ Kirigami.Page {
         }
         return day.toLocaleDateString(Qt.locale(), Locale.ShortFormat)
     }
-    // "Aikido 5. Kyu" by discipline and grade id.
-    readonly property var gradeNames: {
-        const names = {}
-        for (const d of Programme.disciplines) {
-            for (const g of Programme.grades(d.id)) {
-                names[d.id + "/" + g.id] = d.kurzname + " " + g.name
-            }
-        }
-        return names
-    }
-    function techniqueName(e) {
-        if (!e.title) {
-            return qsTr("Technique no longer in the programme")
-        }
-        return [page.gradeNames[e.discipline + "/" + e.grade], (e.nr ? e.nr + " · " : "") + e.title, e.attack].filter(x => x).join(" · ")
-    }
-
     padding: 0
 
     // The filter, then the list: in this order also for Tab.
@@ -107,6 +82,7 @@ Kirigami.Page {
 
             Repeater {
                 model: [{ id: "", name: qsTr("All") }].concat(Programme.disciplines.map(d => ({ id: d.id, name: d.kurzname })))
+                                                     .concat([{ id: page.coursesFilter, name: qsTr("Courses") }])
 
                 KanteChip {
                     required property var modelData
@@ -211,9 +187,10 @@ Kirigami.Page {
                     objectName: "count"
                     width: ListView.view.width
                     bottomPadding: Kirigami.Units.largeSpacing
-                    text: page.shown.length > 0
-                          ? qsTr("%n note(s). Tap one to open its technique, press and hold to change or delete it.", "", page.shown.length)
-                          : page.filter !== "" && page.all.length > 0 ? qsTr("No notes in this discipline.")
+                    text: notesModel.count > 0
+                          ? qsTr("%n note(s). Tap one to open its technique or notebook, press and hold to change or delete it.", "", notesModel.count)
+                          : page.filter === page.coursesFilter ? qsTr("No entries in course notebooks yet.")
+                          : page.filter !== "" && notesModel.total > 0 ? qsTr("No notes in this discipline.")
                           : qsTr("No notes yet. Notes are written on a technique or in the player.")
                     color: KanteStyle.mutedTextColor
                     wrapMode: Text.Wrap
@@ -231,13 +208,15 @@ Kirigami.Page {
                     spacing: 0
                     readonly property bool current: ListView.isCurrentItem && ListView.view.activeFocus
                     Accessible.role: Accessible.Button
-                    Accessible.name: page.techniqueName(row.technique) + ": " + row.text
-                    Accessible.description: qsTr("Opens the technique's notes; press and hold or the menu key to change or delete")
+                    Accessible.name: row.title + ": " + row.text
+                    Accessible.description: row.kind === "course" ? qsTr("Opens the notebook; press and hold or the menu key to change or delete")
+                                                                  : qsTr("Opens the technique's notes; press and hold or the menu key to change or delete")
                     Accessible.onPressAction: page.open(row)
 
                     QQC2.Label {
                         Layout.fillWidth: true
-                        text: page.techniqueName(noteItem.row.technique)
+                        objectName: "noteTitle"
+                        text: noteItem.row.title
                         color: KanteStyle.mutedTextColor
                         font: KanteStyle.smallFont
                         elide: Text.ElideRight
@@ -258,11 +237,11 @@ Kirigami.Page {
                     TapHandler {
                         acceptedButtons: Qt.LeftButton
                         onTapped: page.open(noteItem.row)
-                        onLongPressed: editor.edit(noteItem.row)
+                        onLongPressed: page.edit(noteItem.row)
                     }
                     TapHandler {
                         acceptedButtons: Qt.RightButton
-                        onTapped: editor.edit(noteItem.row)
+                        onTapped: page.edit(noteItem.row)
                     }
                 }
             }
@@ -277,18 +256,31 @@ Kirigami.Page {
         }
         if (edit) {
             editor.returnFocus = list
-            editor.edit(note)
+            page.edit(note)
         } else {
             page.open(note)
         }
     }
 
     function open(note) {
+        if (note.kind === "course") {
+            page.Kirigami.PageStack.push(Qt.resolvedUrl("CoursePage.qml"), { uid: note.course })
+            return
+        }
         // The notes page's "All notes" comes back here instead of opening another list.
+        const e = Programme.entry(note.entry)
         page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), {
-            entry: note.technique.title ? note.technique : { id: note.entry, title: qsTr("Technique no longer in the programme") },
+            entry: e.title ? e : { id: note.entry, title: qsTr("Technique no longer in the programme") },
             fromAllNotes: true
         })
+    }
+
+    // A course entry is saved and deleted by Courses, a technique's note by Practice.
+    function edit(note) {
+        const course = note.kind === "course"
+        editor.save = course ? (uid, text) => Courses.changeEntry(uid, text) : (uid, text) => Practice.changeNote(uid, text)
+        editor.remove = course ? uid => Courses.deleteEntry(uid) : uid => Practice.deleteNote(uid)
+        editor.edit(note)
     }
 
     NoteEditor {

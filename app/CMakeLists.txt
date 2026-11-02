@@ -112,6 +112,8 @@ qt_add_qml_module(mitori_app
         services/bundles.cpp
         services/keyedlistmodel.h
         services/keyedlistmodel.cpp
+        services/allnotes.h
+        services/allnotes.cpp
 )
 
 # Texts: English in the code, German in i18n/mitori_de.ts (update: cmake --build <dir> --target
@@ -264,6 +266,19 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     target_link_libraries(tst_schedule PRIVATE Qt6::Core Qt6::Test)
     set_target_properties(tst_schedule PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME schedule COMMAND tst_schedule)
+
+    qt_add_executable(tst_allnotes tests/tst_allnotes.cpp services/allnotes.cpp services/allnotes.h
+        services/keyedlistmodel.cpp services/keyedlistmodel.h services/practice.cpp services/practice.h
+        services/courses.cpp services/courses.h services/programme.cpp services/programme.h
+        store/practicelog.cpp store/practicelog.h store/schedule.cpp store/schedule.h
+        store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
+        platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h)
+    target_include_directories(tst_allnotes PRIVATE catalog services store platform)
+    target_compile_definitions(tst_allnotes PRIVATE MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
+    target_link_libraries(tst_allnotes PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Test)
+    set_target_properties(tst_allnotes PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_dependencies(tst_allnotes mitori)
+    add_test(NAME allnotes COMMAND tst_allnotes)
 
     qt_add_executable(tst_keyedlistmodel tests/tst_keyedlistmodel.cpp services/keyedlistmodel.cpp services/keyedlistmodel.h)
     target_include_directories(tst_keyedlistmodel PRIVATE services)

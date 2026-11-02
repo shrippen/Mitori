@@ -107,6 +107,9 @@ public:
     Q_INVOKABLE QVariantMap nextExam(const QString &discipline = {}) const;
 
     Q_INVOKABLE QVariantList entries(const QString &course) const;
+    // Every notebook's entries, newest first, and the notebooks' titles by uid (C++ only: AllNotes).
+    QList<CourseBook::Entry> allEntries() const;
+    QHash<QString, QString> courseTitles() const;
     Q_INVOKABLE bool addEntry(const QString &course, const QString &text);
     Q_INVOKABLE bool changeEntry(const QString &uid, const QString &text);
     Q_INVOKABLE bool deleteEntry(const QString &uid);

@@ -67,6 +67,8 @@ public:
     Q_INVOKABLE QVariantMap lastNote(const QString &entry) const;
     // Every note ({uid, entry, text, created, changed}), newest first.
     Q_INVOKABLE QVariantList allNotes() const;
+    // The same as records, newest first (C++ only: AllNotes builds its rows without maps).
+    QList<PracticeLog::Note> noteRecords() const;
     // Notes containing every word of `query` (case and accents do not matter), newest first:
     // {uid, entry, text, created, changed}.
     Q_INVOKABLE QVariantList searchNotes(const QString &query, int limit = 50) const;

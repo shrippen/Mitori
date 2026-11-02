@@ -288,6 +288,22 @@ QVariantList Courses::entries(const QString &course) const
     return result;
 }
 
+QList<CourseBook::Entry> Courses::allEntries() const
+{
+    return m_open ? m_book->allEntries() : QList<CourseBook::Entry>();
+}
+
+QHash<QString, QString> Courses::courseTitles() const
+{
+    QHash<QString, QString> titles;
+    if (m_open) {
+        for (const CourseBook::Course &c : m_book->courses()) {
+            titles.insert(c.uid, c.title);
+        }
+    }
+    return titles;
+}
+
 bool Courses::addEntry(const QString &course, const QString &text)
 {
     if (!m_open || text.trimmed().isEmpty()) {

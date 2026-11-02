@@ -30,12 +30,12 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Eintrag mit Zeit und Gerät), Stand als vier Punkte in der Programmliste, Stand je Grad als Leiste mit Legende.
   Heute üben (Wiederholen nach Plan, Abstände je Stufe einstellbar, Kachel im Startmenü) und Training (Playliste der
   fälligen Techniken, Einschätzen schaltet weiter). Notizen je Technik (Text; nach Tagen, lang drücken zum
-  Bearbeiten/Löschen, letzte Notiz im Blatt, Eingabe im Player), „Alle Notizen“ (nach Tagen, Filter je Sparte; im
+  Bearbeiten/Löschen, letzte Notiz im Blatt, Eingabe im Player), „Alle Notizen“ (nach Tagen, Filter je Sparte und Lehrgänge, Zeilen in C++; im
   Programm und in den Notizen einer Technik). Suche (Techniken aller Sparten und Grade, eigene Notizen; Groß/klein,
   Akzente, ß, Bindestriche und Okurigana egal; auch Angriffszusatz und Gruppe) über die Lupe im Startmenü. Statistik
   (Kachel im Startmenü): letzte 30 Tage (Übungstage, Techniken geübt), Übungstage als Kalender (halbes Jahr,
   Legende, Tooltip je Tag), Stand je Grad einer Sparte. Offen: Fotos und Sprachnotizen an Notizen
-  (Plattform-Schicht), Lehrgangsnotizen in „Alle Notizen“ (mit Schritt 4); in der Statistik „Meine Grade“
+  (Plattform-Schicht); in der Statistik „Meine Grade“
   (mit Schritt 4), „alle Jahre“.
 - Schritt 3: Prüfungsmodus (Kachel 試 im Startmenü, „Probe <Grad>“): Sparte, Grad (nur mit Prüfungsstoff, je
   Anzahl Punkte), Anzahl (alle / 8 / 12 / 15), zufällige Reihenfolge, 2–5 Stichproben aus früheren Graden am
@@ -68,7 +68,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   über den Kalender-Intent, sonst als ICS-Datei an die Kalender-App), „Ausschreibung“ (aus der Zeile
   „Ausschreibung: URL“), Einträge nach Tagen (lang drücken: ändern, löschen), Notizbuch löschen. Gespeichert in
   `lehrgaenge.sqlite` (`store/coursebook`, eigenes Schema), jede Zeile mit Zeit und Gerät für den Abgleich. Offen:
-  Fotos und Sprachnotizen, Export, Lehrgangsnotizen in „Alle Notizen“.
+  Fotos und Sprachnotizen, Export. Die Einträge stehen auch in „Alle Notizen“ (Filter „Lehrgänge“).
 - Schritt 4: Meine Grade (in Lehrgänge oben): je Sparte die abgelegten Grade mit Tag und Ort, der nächste Grad mit
   Wartezeit (`wartezeit` aus `abstand` der Programmdaten; Shinki Toho Shoden ab Trainingsbeginn, ohne Datum).
   Im Notizbuch eines kommenden Lehrgangs „Prüfung hier ablegen …“ (Sparte, Grad, Wartezeit gegen den ersten Tag);
@@ -91,8 +91,9 @@ Kleinigkeiten aus Reviews und Tests, je ein Folge-PR oder beim nächsten Bearbei
 - **Landkarte**: Varianten eines Platzes (z. B. Ikkyo und Ikkyo ura) sind nur über das erste Blatt erreichbar:
   Frage an den Owner, ob sie einzeln erreichbar sein sollen. Datenfragen A-X-04 und D-D-08 (`KORREKTUREN.md`):
   geklärt, legen sich Spalten bzw. Raster zusammen.
-- **Alle Notizen**: 64–120 ms je Änderung bei 2000 Notizen (die Liste setzt jede Notiz in JavaScript neu
-  zusammen); mit den Lehrgangsnotizen (Schritt 4) als Liste in C++.
+- **Player-Gesten** (Review #35, mit dem Test auf dem Telefon): Android-Helligkeit über 255 (manche Hersteller)
+  auf 0..1 begrenzen; Linux: Solid-Aufrufe asynchron, `brightnessMax` einmal je Wisch; beim Verlassen nicht
+  zurücksetzen, wenn die Helligkeit inzwischen mit den Tasten geändert wurde.
 
 - **Video-Bundles** (Review #33): ein Update tauscht die Ordner über `.old` statt erst zu löschen; „wartet auf
   WLAN“ startet beim Wechsel ins WLAN von selbst (oder anderer Text); HTTP-Status vor dem Entschlüsseln prüfen

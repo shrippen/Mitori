@@ -232,6 +232,11 @@ QVariantList Practice::allNotes() const
     return result;
 }
 
+QList<PracticeLog::Note> Practice::noteRecords() const
+{
+    return m_open ? m_log->allNotes() : QList<PracticeLog::Note>();
+}
+
 QVariantList Practice::searchNotes(const QString &query, int limit) const
 {
     QVariantList result;

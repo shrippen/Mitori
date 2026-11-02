@@ -1045,14 +1045,15 @@ TestCase {
         Practice.addNote(daito.id, "Daitoryu: Hüfte zuerst")
         Practice.addNote("not-in-the-programme", "verwaist")
         const page = push("AllNotesPage")
-        const total = page.all.length
+        page.filter = ""
+        const total = page.shown.length
         verify(total >= 2)
-        compare(page.all[0].text, "verwaist", "newest first")
+        compare(page.shown[0].text, "verwaist", "newest first")
         verify(page.shown.filter(n => n.day === page.shown[0].day).length >= 2, "both today")
         wait(500)       // Kirigami slides the page in
         mouseClick(findChild(page, "filter_daitoryu"))
         tryVerify(() => page.filter === "daitoryu")
-        verify(page.shown.length >= 1 && page.shown.every(n => n.technique.discipline === "daitoryu"))
+        verify(page.shown.length >= 1 && page.shown.every(n => n.discipline === "daitoryu"))
         verify(page.shown.length < total, "the orphan and other disciplines left out")
         shot("8d-all-notes")
         const note = findChild(page, "note")
@@ -1100,12 +1101,12 @@ TestCase {
         compare(page.shown[list.indexAt(10, list.contentY + list.spacing + 10)].uid, next, "the next note moves up")
         // Tab: through the filter to the list, on a note in view (not the first one far above).
         mouseClick(findChild(page, "filter_all"))
-        const chips = Programme.disciplines.length + 1
+        const chips = Programme.disciplines.length + 2          // All, the disciplines, Courses
         for (let i = 0; i <= chips + 2 && !list.activeFocus; i++)       // Back first if the page has the focus
             keyClick(Qt.Key_Tab)
         verify(list.activeFocus, "Tab reaches the list after the filter")
         keyClick(Qt.Key_Backtab)
-        compare(window.activeFocusItem, findChild(page, "filter_" + Programme.disciplines[chips - 2].id), "Shift+Tab goes back to the filter")
+        compare(window.activeFocusItem, findChild(page, "filter_courses"), "Shift+Tab goes back to the filter")
         keyClick(Qt.Key_Tab)
         verify(list.activeFocus)
         // A whole round of Tab: the toolbar (Back), every chip and the list, each once.
@@ -1193,7 +1194,7 @@ TestCase {
             keyClick(Qt.Key_Down)
         compare(list.currentIndex, 30)
         verify(list.contentY > 200, "the list follows the keyboard (" + list.contentY + ")")
-        const target = page.shown[30].technique.id
+        const target = page.shown[30].entry
         keyClick(Qt.Key_Return)
         tryVerify(() => window.pageStack.currentItem !== page, 2000)
         compare(window.pageStack.currentItem.entry.id, target)
@@ -1217,7 +1218,8 @@ TestCase {
         page.filter = "kendo"
         tryCompare(page, "filter", "")
         // An empty filter says so (a discipline without notes, if one is left).
-        const empty = Programme.disciplines.find(d => !page.all.some(n => n.technique.discipline === d.id))
+        const everything = page.shown
+        const empty = Programme.disciplines.find(d => !everything.some(n => n.discipline === d.id))
         if (empty) {
             list.forceActiveFocus()
             list.currentIndex = 3
@@ -1231,11 +1233,11 @@ TestCase {
             page.filter = ""
         }
         // The orphan is named as such.
-        const orphan = page.all.find(n => n.entry === "not-in-the-programme")
-        compare(page.techniqueName(orphan.technique), qsTr("Technique no longer in the programme"))
+        const orphan = everything.find(n => n.entry === "not-in-the-programme")
+        compare(orphan.title, qsTr("Technique no longer in the programme"))
         // Notes → All notes → Notes → All notes does not pile up: the action goes back.
         const depth = window.pageStack.depth
-        page.open(page.shown.find(n => n.technique.title))
+        page.open(page.shown.find(n => n.kind === "technique" && n.entry !== "not-in-the-programme"))
         tryVerify(() => window.pageStack.depth === depth + 1)
         window.pageStack.currentItem.actions[0].trigger()
         tryVerify(() => window.pageStack.depth === depth, 2000, "back to the list instead of a new one")
@@ -1245,6 +1247,34 @@ TestCase {
         window.pageStack.pop()
         const again = push("AllNotesPage")
         compare(again.filter, "daitoryu")
+        again.filter = ""
+
+        // A course notebook's entries join the list: their own filter, a tap opens the notebook,
+        // the editor changes them through Courses.
+        const course = Courses.create("Gastlehrer", "2026-05-01", "", "", "")
+        verify(Courses.addEntry(course, "Irimi früher"))
+        tryVerify(() => again.shown[0].kind === "course")
+        compare(again.shown[0].title, "Gastlehrer")
+        wait(800)
+        mouseClick(findChild(again, "filter_courses"))
+        tryVerify(() => again.filter === "courses")
+        tryVerify(() => again.shown.length === 1)
+        shot("8e-all-notes-courses")
+        const entry = findChild(again, "note")
+        mouseClick(entry, 20, entry.height - 10)
+        tryVerify(() => window.pageStack.currentItem.uid === course, 2000)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === again)
+        again.edit(again.shown[0])
+        const courseEditor = findChild(again, "noteEditor")
+        tryVerify(() => courseEditor.opened)
+        verify(courseEditor.save(again.shown[0].uid, "Irimi noch früher"))
+        courseEditor.close()
+        tryVerify(() => again.shown[0].text === "Irimi noch früher")
+        compare(Courses.entries(course)[0].text, "Irimi noch früher")
+        verify(Courses.remove(course))
+        tryVerify(() => again.shown.length === 0)
+        compare(findChild(again, "count").text, qsTr("No entries in course notebooks yet."))
         again.filter = ""
         window.pageStack.pop()
     }
