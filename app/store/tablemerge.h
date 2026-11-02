@@ -16,8 +16,8 @@ class QSqlDatabase;
 //           note b  changed 12:00               note b  changed 09:00   → b stays
 //                                               note c                  → c added
 //
-// Watched (the sync): a row changed on both sides since the last sync, to different texts, is a
-// conflict. It stays as it is here until the user chooses, and is held on later merges.
+// Watched (the sync): a row changed on both sides since both last agreed, to different texts, is
+// a conflict. It stays as it is here until the user chooses, and is held on later merges.
 namespace TableMerge {
 
 enum class Kind { Log, Editable };
@@ -45,10 +45,11 @@ struct Conflict {
     QString theirDevice;        // its device (the sync puts the name the user gave it)
 };
 
-// When conflicts count: changes after `since` on both sides, and the rows still `held` (open
-// conflicts of an earlier merge). Without `since`, none.
+// When conflicts count: `base` holds each row's `changed` when this device last synced it; a row
+// changed since then on both sides is a conflict, as are the rows still `held` (open conflicts of
+// an earlier merge). A row without a base (new, or the first sync) is none.
 struct Watch {
-    QDateTime since;
+    QHash<QString, QDateTime> base;
     QStringList held;
 };
 

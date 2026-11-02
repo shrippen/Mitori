@@ -437,6 +437,17 @@ QList<PracticeLog::ExamRound> PracticeLog::rounds(const QString &discipline, int
     return result;
 }
 
+QHash<QString, QDateTime> PracticeLog::noteVersions() const
+{
+    QHash<QString, QDateTime> versions;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.exec(QStringLiteral("SELECT uid, changed FROM notes"));
+    while (q.next()) {
+        versions.insert(q.value(0).toString(), QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC));
+    }
+    return versions;
+}
+
 bool PracticeLog::snapshot(const QString &path)
 {
     m_error.clear();

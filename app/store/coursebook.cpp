@@ -455,6 +455,17 @@ QHash<QString, int> CourseBook::entryCounts() const
     return result;
 }
 
+QHash<QString, QDateTime> CourseBook::entryVersions() const
+{
+    QHash<QString, QDateTime> versions;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.exec(QStringLiteral("SELECT uid, changed FROM entries"));
+    while (q.next()) {
+        versions.insert(q.value(0).toString(), QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC));
+    }
+    return versions;
+}
+
 bool CourseBook::snapshot(const QString &path)
 {
     m_error.clear();

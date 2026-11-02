@@ -17,6 +17,7 @@ class QSettings;
 //   sync/konto.ini        [konto] server, user, password, folder, name, enabled, auto
 //                         [stand] id, last, devices (JSON)
 //   sync/konflikte.json   [{table, uid, parent, mine, theirs, …}]
+//   sync/basis.json       {uid: changed}  each row as last synced (TableMerge::Watch)
 //
 // The id is not the rows' device id (kept in the settings, which a device transfer copies): a
 // copied phone and its original must not upload to the same file.
@@ -49,6 +50,10 @@ public:
     void setLast(const QDateTime &at);
     QList<Device> devices() const;
     void setDevices(const QList<Device> &devices);
+
+    // Each note's and entry's `changed` at the last sync.
+    QHash<QString, QDateTime> base() const;
+    bool setBase(const QHash<QString, QDateTime> &base);
 
     QList<TableMerge::Conflict> conflicts() const;
     bool setConflicts(const QList<TableMerge::Conflict> &conflicts);

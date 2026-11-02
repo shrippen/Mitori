@@ -267,6 +267,108 @@ private slots:
         QVERIFY(phone.conflicts().isEmpty());
     }
 
+    static void change(const QString &practice, const QString &uid, const QString &text)
+    {
+        PracticeLog log;
+        QVERIFY(log.open(practice));
+        QVERIFY(log.changeNote(uid, text, now()));
+    }
+
+    // The tablet changes offline and uploads after the phone's sync; then the phone changes the
+    // same note without having seen it: a conflict, nothing lost.
+    void lateUpload()
+    {
+        FakeDav dav;
+        const Device a = device(u"spaet-a"_s);
+        const Device b = device(u"spaet-b"_s);
+        Sync phone(a.practice, a.courses, a.media, a.folder);
+        Sync tablet(b.practice, b.courses, b.media, b.folder);
+        for (Sync *s : {&phone, &tablet}) {
+            s->setAccount(dav.url(), u"ich"_s, u"geheim"_s, s == &phone ? u"Telefon"_s : u"Tablet"_s);
+            s->setEnabled(true);
+        }
+        QString uid;
+        {
+            PracticeLog log;
+            QVERIFY(log.open(a.practice));
+            uid = log.addNote(u"aikido/k5/a"_s, u"alt"_s, now(), u"a"_s).uid;
+        }
+        QVERIFY(synced(phone));
+        QVERIFY(synced(tablet));
+
+        change(b.practice, uid, u"Tablet-Text"_s);
+        QVERIFY(synced(phone));
+        QVERIFY(synced(tablet));
+        change(a.practice, uid, u"Telefon-Text"_s);
+        QVERIFY(synced(phone));
+        QCOMPARE(phone.conflicts().size(), 1);
+        QCOMPARE(texts(a.practice), QStringList{u"Telefon-Text"_s});
+    }
+
+    // Solving after a later edit of one's own keeps that edit.
+    void resolveAfterEdit()
+    {
+        FakeDav dav;
+        const Device a = device(u"nach-a"_s);
+        const Device b = device(u"nach-b"_s);
+        Sync phone(a.practice, a.courses, a.media, a.folder);
+        Sync tablet(b.practice, b.courses, b.media, b.folder);
+        for (Sync *s : {&phone, &tablet}) {
+            s->setAccount(dav.url(), u"ich"_s, u"geheim"_s, s == &phone ? u"Telefon"_s : u"Tablet"_s);
+            s->setEnabled(true);
+        }
+        QString uid;
+        {
+            PracticeLog log;
+            QVERIFY(log.open(a.practice));
+            uid = log.addNote(u"aikido/k5/a"_s, u"alt"_s, now(), u"a"_s).uid;
+        }
+        QVERIFY(synced(phone));
+        QVERIFY(synced(tablet));
+        change(a.practice, uid, u"Telefon-Text"_s);
+        change(b.practice, uid, u"Tablet-Text"_s);
+        QVERIFY(synced(phone));
+        QVERIFY(synced(tablet));
+        QCOMPARE(tablet.conflicts().size(), 1);
+
+        change(b.practice, uid, u"Tablet-neu"_s);
+        QVERIFY(tablet.resolve(0, Sync::Choice::Both));
+        QCOMPARE(texts(b.practice), (QStringList{u"Tablet-neu"_s, u"Telefon-Text"_s}));
+    }
+
+    // The other side's text is the newer one; after "this device" the conflict does not return.
+    void resolvedStays()
+    {
+        FakeDav dav;
+        const Device a = device(u"bleibt-a"_s);
+        const Device b = device(u"bleibt-b"_s);
+        Sync phone(a.practice, a.courses, a.media, a.folder);
+        Sync tablet(b.practice, b.courses, b.media, b.folder);
+        for (Sync *s : {&phone, &tablet}) {
+            s->setAccount(dav.url(), u"ich"_s, u"geheim"_s, s == &phone ? u"Telefon"_s : u"Tablet"_s);
+            s->setEnabled(true);
+        }
+        QString uid;
+        {
+            PracticeLog log;
+            QVERIFY(log.open(a.practice));
+            uid = log.addNote(u"aikido/k5/a"_s, u"alt"_s, now(), u"a"_s).uid;
+        }
+        QVERIFY(synced(phone));
+        QVERIFY(synced(tablet));
+        change(b.practice, uid, u"Tablet-Text"_s);
+        change(a.practice, uid, u"Telefon-Text"_s);
+        QVERIFY(synced(phone));
+        QVERIFY(synced(tablet));
+        QCOMPARE(tablet.conflicts().size(), 1);
+        QVERIFY(tablet.resolve(0, Sync::Choice::Mine));
+        QVERIFY(synced(tablet));
+        QCOMPARE(tablet.conflicts().size(), 0);
+        QVERIFY(synced(phone));
+        QCOMPARE(phone.conflicts().size(), 0);
+        QCOMPARE(texts(a.practice), QStringList{u"Tablet-Text"_s});
+    }
+
     // A conflict on a course entry, solved with the other device's text.
     void entryConflict()
     {

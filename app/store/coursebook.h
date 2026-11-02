@@ -106,6 +106,9 @@ public:
     // Every passed grade that is not deleted, the latest day first.
     QList<Grade> grades() const;
 
+    // Every entry's `changed` by uid, deleted ones too (the sync's base versions).
+    QHash<QString, QDateTime> entryVersions() const;
+
     // The whole book as one new file (a backup), consistent while the app writes; false when it
     // exists or could not be written.
     bool snapshot(const QString &path);

@@ -8,6 +8,7 @@
 #include <QSaveFile>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QTimeZone>
 #include <QUuid>
 
 using namespace Qt::StringLiterals;
@@ -16,6 +17,7 @@ namespace {
 
 const QString kAccountFile = QStringLiteral("konto.ini");
 const QString kConflictFile = QStringLiteral("konflikte.json");
+const QString kBaseFile = QStringLiteral("basis.json");
 
 QString iso(const QDateTime &t)
 {
@@ -160,4 +162,30 @@ bool SyncAccount::setConflicts(const QList<TableMerge::Conflict> &conflicts)
     QDir().mkpath(m_folder);
     QSaveFile file(QDir(m_folder).filePath(kConflictFile));
     return file.open(QIODevice::WriteOnly) && file.write(QJsonDocument(array).toJson()) >= 0 && file.commit();
+}
+
+QHash<QString, QDateTime> SyncAccount::base() const
+{
+    QFile file(QDir(m_folder).filePath(kBaseFile));
+    if (!file.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+    QHash<QString, QDateTime> base;
+    const QJsonObject o = QJsonDocument::fromJson(file.readAll()).object();
+    for (auto it = o.constBegin(); it != o.constEnd(); ++it) {
+        base.insert(it.key(), QDateTime::fromMSecsSinceEpoch(it.value().toInteger(), QTimeZone::UTC));
+    }
+    return base;
+}
+
+bool SyncAccount::setBase(const QHash<QString, QDateTime> &base)
+{
+    QJsonObject o;
+    for (auto it = base.cbegin(); it != base.cend(); ++it) {
+        o.insert(it.key(), it.value().toMSecsSinceEpoch());
+    }
+    QDir().mkpath(m_folder);
+    QSaveFile file(QDir(m_folder).filePath(kBaseFile));
+    return file.open(QIODevice::WriteOnly) && file.write(QJsonDocument(o).toJson(QJsonDocument::Compact)) >= 0
+           && file.commit();
 }

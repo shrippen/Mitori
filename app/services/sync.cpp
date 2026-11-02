@@ -14,6 +14,19 @@
 
 namespace {
 const QString kNotes = QStringLiteral("notes");
+
+// The row's text now: changed again after the sync, that change is "mine" (not the older text).
+template<typename Rows>
+QString currentText(const Rows &rows, const TableMerge::Conflict &c)
+{
+    for (const auto &row : rows) {
+        if (row.uid == c.uid) {
+            return row.text;
+        }
+    }
+    return c.mine;
+}
+
 const QString kEntries = QStringLiteral("entries");
 const QString kLocalHost = QStringLiteral("localhost");
 }
@@ -104,7 +117,9 @@ void Sync::setAccount(const QString &server, const QString &user, const QString 
 
 bool Sync::syncNow()
 {
+    // One runs: another follows it (a change after its snapshot would wait for the next day).
     if (m_busy) {
+        m_again = true;
         return true;
     }
     const WebDav::Account account = m_account.account();
@@ -112,7 +127,7 @@ bool Sync::syncNow()
         setError(tr("Enter the server, user and app password first."));
         return false;
     }
-    const SyncJob::Input input{account,  m_account.id(), deviceName(), deviceId(),     m_account.last(),
+    const SyncJob::Input input{account,  m_account.id(), deviceName(), deviceId(),     m_account.base(),
                                m_account.conflicts(), m_practice, m_courses, m_media, m_work};
     m_busy = true;
     emit busyChanged();
@@ -139,11 +154,16 @@ void Sync::finished()
         return;
     }
     m_busy = false;
+    if (m_again) {
+        m_again = false;
+        m_soon.start(kAfterChangeMs);
+    }
     const SyncJob::Output out = m_watcher.result();
     if (out.ok) {
         m_account.setLast(out.started);
         m_account.setDevices(out.devices);
         m_account.setConflicts(out.conflicts);
+        m_account.setBase(out.base);
         m_error.clear();
     } else {
         m_error = tr("The sync failed: %1").arg(out.error);
@@ -207,16 +227,19 @@ bool Sync::resolve(int index, Choice choice)
     }
     const TableMerge::Conflict c = list.at(index);
     const QDateTime now = QDateTime::currentDateTimeUtc();
-    const QString text = choice == Choice::Theirs ? c.theirs : c.mine;
     bool ok = false;
     if (c.table == kNotes) {
         PracticeLog log;
-        ok = log.open(m_practice) && log.changeNote(c.uid, text, now)
+        ok = log.open(m_practice);
+        const QString mine = ok ? currentText(log.notes(c.parent), c) : QString();
+        ok = ok && log.changeNote(c.uid, choice == Choice::Theirs ? c.theirs : mine, now)
              && (choice != Choice::Both || !log.addNote(c.parent, c.theirs, now, deviceId()).uid.isEmpty());
         m_error = ok ? QString() : log.errorString();
     } else {
         CourseBook book;
-        ok = book.open(m_courses) && book.changeEntry(c.uid, text, now)
+        ok = book.open(m_courses);
+        const QString mine = ok ? currentText(book.entries(c.parent), c) : QString();
+        ok = ok && book.changeEntry(c.uid, choice == Choice::Theirs ? c.theirs : mine, now)
              && (choice != Choice::Both || !book.addEntry(c.parent, c.theirs, now, deviceId()).uid.isEmpty());
         m_error = ok ? QString() : book.errorString();
     }

@@ -73,7 +73,7 @@ SyncJob::Output SyncJob::run(const Input &in)
     for (const TableMerge::Conflict &c : in.held) {
         held << c.uid;
     }
-    const TableMerge::Watch watch{in.since, held};
+    const TableMerge::Watch watch{in.base, held};
     QHash<QString, TableMerge::Conflict> open;
     QSet<QString> named;
     QStringList orphans;
@@ -162,6 +162,19 @@ SyncJob::Output SyncJob::run(const Input &in)
         } else if (!book.open(in.courses) || !book.snapshot(courses)) {
             why = book.errorString();
         }
+    }
+    // The base for the next sync: the versions in the archive the others get.
+    if (why.isEmpty()) {
+        PracticeLog log;
+        CourseBook book;
+        if (log.open(practice) && book.open(courses)) {
+            out.base = log.noteVersions();
+            out.base.insert(book.entryVersions());
+        }
+    }
+    // An open conflict has seen the other side's version: after the choice only a newer one clashes.
+    for (const TableMerge::Conflict &c : std::as_const(out.conflicts)) {
+        out.base.insert(c.uid, std::max(out.base.value(c.uid), c.theirsChanged));
     }
     QBuffer buffer;
     buffer.open(QIODevice::WriteOnly);
