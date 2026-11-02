@@ -23,7 +23,7 @@
 <context>
     <name>StatsPage</name>
     <message numerus="yes">
-        <location filename="../qml/StatsPage.qml" line="100"/>
+        <location filename="../qml/StatsPage.qml" line="104"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>
