@@ -37,6 +37,7 @@ KanteGoalMeter 1.0 KanteGoalMeter.qml
 KanteHazard 1.0 KanteHazard.qml
 KanteHeading 1.0 KanteHeading.qml
 KanteHeardLine 1.0 KanteHeardLine.qml
+KanteHeatGrid 1.0 KanteHeatGrid.qml
 KanteHeatmap 1.0 KanteHeatmap.qml
 KanteHintCard 1.0 KanteHintCard.qml
 KanteHud 1.0 KanteHud.qml

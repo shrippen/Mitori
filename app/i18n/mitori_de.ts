@@ -340,7 +340,7 @@
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="260"/>
+        <location filename="../services/practice.cpp" line="269"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
@@ -587,12 +587,22 @@
         </translation>
     </message>
     <message>
+        <location filename="../qml/StartPage.qml" line="123"/>
+        <source>Technique map</source>
+        <translation>Landkarte</translation>
+    </message>
+    <message>
         <location filename="../qml/StartPage.qml" line="124"/>
+        <source>Attack × technique</source>
+        <translation>Angriff × Technik</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="137"/>
         <source>Glossary</source>
         <translation>Glossar</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="125"/>
+        <location filename="../qml/StartPage.qml" line="138"/>
         <source>Kanji · pronunciation</source>
         <translation>Kanji · Aussprache</translation>
     </message>
@@ -671,6 +681,62 @@
         <location filename="../qml/StepList.qml" line="27"/>
         <source>Positions in one flow</source>
         <translation>Positionen in einem Ablauf</translation>
+    </message>
+</context>
+<context>
+    <name>TechniqueMapPage</name>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="36"/>
+        <source>Technique map</source>
+        <translation>Landkarte</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="62"/>
+        <source>up to %1</source>
+        <translation>bis %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="94"/>
+        <source>No techniques with an attack up to %1.</source>
+        <translation>Keine Techniken mit Angriff bis %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="122"/>
+        <source>Technique</source>
+        <translation>Technik</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="123"/>
+        <source>Attack</source>
+        <translation>Angriff</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="133"/>
+        <source>no such combination</source>
+        <translation>keine solche Kombination</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="178"/>
+        <source>Rows: technique, columns: attack. An empty place does not occur up to %1. Tap a place to open the technique.</source>
+        <translation>Zeilen: Technik, Spalten: Angriff. Ein leerer Platz kommt bis %1 nicht vor. Tippen öffnet die Technik.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="179"/>
+        <source>A place per form, numbered. Tap a place to open the form.</source>
+        <translation>Ein Platz je Form, nummeriert. Tippen öffnet die Form.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/TechniqueMapPage.qml" line="193"/>
+        <source>%n entries</source>
+        <translation>
+            <numerusform>%n Eintrag</numerusform>
+            <numerusform>%n Einträge</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="197"/>
+        <source>%1 · %2 · %3: %4</source>
+        <translation>%1 · %2 · %3: %4</translation>
     </message>
 </context>
 <context>

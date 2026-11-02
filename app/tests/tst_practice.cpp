@@ -18,7 +18,6 @@ class TstPractice : public QObject
 private slots:
     void initTestCase()
     {
-        QStandardPaths::setTestModeEnabled(true);
         QSettings().clear();
     }
 
@@ -195,6 +194,9 @@ private slots:
             QVERIFY(practice.lastRated(QStringLiteral("a")).secsTo(QDateTime::currentDateTime()) < 5);
             const QVariantList n = practice.counts({QStringLiteral("a"), QStringLiteral("b"), QStringLiteral("c"), QStringLiteral("d")});
             QCOMPARE(n, (QVariantList{2, 1, 0, 1, 0}));
+            // A place on the technique map: the best of its entries.
+            QCOMPARE(practice.bestLevel({QStringLiteral("b"), QStringLiteral("a"), QStringLiteral("c")}), 3);
+            QCOMPARE(practice.bestLevel({QStringLiteral("c")}), 0);
             QCOMPARE(practice.levelNames().size(), 5);
         }
         Practice again(path);
@@ -427,5 +429,15 @@ private slots:
     }
 };
 
-QTEST_GUILESS_MAIN(TstPractice)
+int main(int argc, char *argv[])
+{
+    // Settings and data in the build directory (not ~/.qttest, which every build and review
+    // running at the same time would share and overwrite).
+    qputenv("XDG_CONFIG_HOME", TEST_DATA_DIR "/config");
+    qputenv("XDG_DATA_HOME", TEST_DATA_DIR "/data");
+    QCoreApplication app(argc, argv);
+    QCoreApplication::setApplicationName(QStringLiteral("mitori-practice-test"));
+    TstPractice test;
+    return QTest::qExec(&test, argc, argv);
+}
 #include "tst_practice.moc"
