@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
+import "grades.js" as Grades
 
 // Exam mode, settings (clickdummy "Prüfungsmodus"): discipline and grade (as in the programme),
 // how many points, in which order, and whether samples from earlier grades come first. The
@@ -29,6 +30,8 @@ Kirigami.ScrollablePage {
     // A stored count the grade does not reach means all.
     readonly property int countIndex: Math.max(0, counts.indexOf(Exam.count))
     readonly property bool hasEarlier: Exam.hasEarlier(discipline, grade)
+    // An exam planned in this discipline (Courses): its grade is a tap away.
+    readonly property var exam: Courses.revision >= 0 ? Courses.nextExam(discipline) : ({})
     readonly property var lastRound: Practice.revision >= 0 ? Practice.rounds(discipline, 1)[0] : undefined
 
     title: qsTr("Exam mode")
@@ -55,6 +58,24 @@ Kirigami.ScrollablePage {
             currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
             onActivated: index => Programme.discipline = Programme.disciplines[index].id
             Accessible.name: qsTr("Discipline")
+        }
+
+        KanteHintCard {
+            objectName: "plannedHint"
+            Layout.fillWidth: true
+            visible: !!page.exam.course
+            compact: true
+            tier: KanteHintCard.Tier.Primary
+            titleText: page.exam.course ? qsTr("Planned: %1").arg(Grades.examText(page.exam)) : ""
+            meta: page.exam.place || page.exam.title || ""
+
+            KanteButton {
+                objectName: "toExamGrade"
+                // Only for a grade with material (Exam.grade falls back to the first one otherwise).
+                visible: page.exam.grade !== page.grade && page.grades.some(g => g.id === page.exam.grade)
+                text: qsTr("This grade")
+                onClicked: Programme.setGrade(page.discipline, page.exam.grade)
+            }
         }
 
         Flow {

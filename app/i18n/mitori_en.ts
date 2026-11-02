@@ -15,7 +15,7 @@
 <context>
     <name>CoursePage</name>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="241"/>
+        <location filename="../qml/CoursePage.qml" line="385"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>The notebook and its %n entry go from this device.</numerusform>
@@ -45,7 +45,7 @@
 <context>
     <name>ExamPage</name>
     <message numerus="yes">
-        <location filename="../qml/ExamPage.qml" line="71"/>
+        <location filename="../qml/ExamPage.qml" line="91"/>
         <source>%n point(s)</source>
         <translation>
             <numerusform>%n point</numerusform>
@@ -67,7 +67,7 @@
 <context>
     <name>StartPage</name>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="72"/>
+        <location filename="../qml/StartPage.qml" line="73"/>
         <source>%n video bundle(s) can be updated.</source>
         <translation>
             <numerusform>%n video bundle can be updated.</numerusform>
@@ -75,7 +75,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="117"/>
+        <location filename="../qml/StartPage.qml" line="118"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n due</numerusform>
@@ -83,7 +83,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="153"/>
+        <location filename="../qml/StartPage.qml" line="157"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -91,7 +91,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="170"/>
+        <location filename="../qml/StartPage.qml" line="174"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>
@@ -125,7 +125,7 @@
 <context>
     <name>TodayPage</name>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="40"/>
+        <location filename="../qml/TodayPage.qml" line="43"/>
         <source>%1 · %n day(s) ago</source>
         <translation>
             <numerusform>%1 · %n day ago</numerusform>
@@ -133,7 +133,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="42"/>
+        <location filename="../qml/TodayPage.qml" line="45"/>
         <source>not practised for %n day(s)</source>
         <translation>
             <numerusform>not practised for %n day</numerusform>
@@ -141,7 +141,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="104"/>
+        <location filename="../qml/TodayPage.qml" line="126"/>
         <source>%n of %1 with a video come(s) into the training; practise the others from the list below.</source>
         <translation>
             <numerusform>%n of %1 has a video and comes into the training; practise the others from the list below.</numerusform>
@@ -152,11 +152,38 @@
 <context>
     <name>VideosPage</name>
     <message numerus="yes">
-        <location filename="../qml/VideosPage.qml" line="168"/>
+        <location filename="../qml/VideosPage.qml" line="176"/>
         <source>%n video(s)</source>
         <translation>
             <numerusform>%n video</numerusform>
             <numerusform>%n videos</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>grades</name>
+    <message numerus="yes">
+        <location filename="../qml/grades.js" line="25"/>
+        <source>%n year(s) after the start of training</source>
+        <translation>
+            <numerusform>%n Jahr nach Trainingsbeginn</numerusform>
+            <numerusform>%n Jahre nach Trainingsbeginn</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/grades.js" line="27"/>
+        <source>%n year(s) after %1: enter that grade</source>
+        <translation>
+            <numerusform>%n Jahr nach %1: diesen Grad eintragen</numerusform>
+            <numerusform>%n Jahre nach %1: diesen Grad eintragen</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/grades.js" line="46"/>
+        <source>Exam %1 in %n day(s)</source>
+        <translation>
+            <numerusform>Prüfung %1 in %n Tag</numerusform>
+            <numerusform>Prüfung %1 in %n Tagen</numerusform>
         </translation>
     </message>
 </context>

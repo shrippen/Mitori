@@ -197,10 +197,37 @@ def programm(art, ids, gloss):
                     if liste:
                         h_a["techniken"][gid] = liste
     app = {"id": art, "titel": d["titel"], "kurzname": d["kurzname"], "untertitel": d.get("untertitel"), "jp": d.get("jp"),
-           "stand": d.get("stand"), "kanji_vorschlag": vorschlag, "grade": d["grade"],
+           "stand": d.get("stand"), "kanji_vorschlag": vorschlag, "grade": grade_app(art, d["grade"]),
            "teile": [{"titel": t["titel"], "grade": t["grade"]} for t in d["teile"]],
            "gruppen": app_gruppen, "techniken": app_techniken}
     return heft, app
+
+
+# --- Wartezeiten ---------------------------------------------------------------
+
+ABSTAND = re.compile(r"(\d+) Jahre?( nach Trainingsbeginn)?")
+
+
+def grade_app(art, grade):
+    """Grade für die App: `abstand` ("2 Jahre", "2 Jahre nach Trainingsbeginn") auch als
+    `wartezeit` {jahre, nach: "grad" | "beginn"}; `pruefbar` false für Grade ohne Prüfung (Hôshu).
+    Jeder prüfbare Grad außer dem ersten braucht einen Abstand."""
+    ergebnis = []
+    for i, g in enumerate(grade):
+        g = dict(g, pruefbar=g.get("pruefbar", True), wartezeit=None)
+        abstand = g.get("abstand")
+        if abstand:
+            m = ABSTAND.fullmatch(abstand)
+            if not m:
+                melde(f"{art}, Grad {g['name']}: Abstand „{abstand}“ nicht lesbar (\"N Jahr(e) [nach Trainingsbeginn]\")")
+            elif m.group(2) and i > 0:
+                melde(f"{art}, Grad {g['name']}: „nach Trainingsbeginn“ nur beim ersten Grad")
+            else:
+                g["wartezeit"] = {"jahre": int(m.group(1)), "nach": "beginn" if m.group(2) else "grad"}
+        elif g["pruefbar"] and i > 0:
+            melde(f"{art}, Grad {g['name']}: Abstand fehlt (oder pruefbar: false)")
+        ergebnis.append(g)
+    return ergebnis
 
 
 # --- Shinki Toho -------------------------------------------------------------
@@ -224,6 +251,7 @@ def shinki_toho(ids):
             if not f.get(k):
                 melde(f"shinki-toho, Ô-dachi {f['nr']}: {k} fehlt")
     app = dict(d, id="shinkitoho")
+    app["grade"] = grade_app("shinki-toho", d["grade"])
     app["odachi"] = [dict(f, id=f"shinkitoho/odachi/{f['nr']}", fragen=(f.get("frage") or "").split())
                      for f in d["odachi"]]
     for f in app["odachi"]:

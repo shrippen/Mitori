@@ -4,6 +4,7 @@ import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
 import "coursedays.js" as CourseDays
+import "grades.js" as Grades
 
 // Start menu (clickdummy "Startmenü", variant 1): tiles; the programme tile shows the discipline
 // and grade chosen last. More tiles come with their features (ROADMAP.md).
@@ -139,7 +140,9 @@ Kirigami.ScrollablePage {
             KanteOptionTile {
                 objectName: "coursesTile"
 
-                // The next coming date: "Siebeldingen · in 12 days", "today".
+                // A planned exam first ("Exam Aikido 4. Kyu in 30 days"), else the next coming
+                // date: "Siebeldingen · in 12 days", "today".
+                readonly property var exam: Courses.revision >= 0 ? Courses.nextExam() : ({})
                 readonly property var next: Courses.upcoming.length > 0 ? Courses.upcoming[0] : null
                 readonly property int days: next ? Math.max(0, CourseDays.fromToday(next.first)) : 0
 
@@ -149,7 +152,8 @@ Kirigami.ScrollablePage {
                 autoExclusive: false
                 glyph: "講"
                 text: qsTr("Courses")
-                hint: !next ? qsTr("Calendar and notebooks")
+                hint: exam.course ? Grades.examText(exam)
+                    : !next ? qsTr("Calendar and notebooks")
                             : (next.place || next.title) + " · " + (days > 0 ? qsTr("in %n day(s)", "", days) : qsTr("today"))
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("CoursesPage.qml"))
             }

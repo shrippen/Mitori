@@ -137,7 +137,8 @@ QString BundleShelf::folder(const QString &id) const
 // Lower case letters, digits and hyphens, as tools/bundle.py makes them.
 bool BundleShelf::validId(const QString &id)
 {
-    static const QRegularExpression plain(QStringLiteral("^[a-z0-9][a-z0-9-]*$"));
+    // Anchored: "$" alone also matches before a final line break ("abc\n").
+    static const QRegularExpression plain(QRegularExpression::anchoredPattern(QStringLiteral("[a-z0-9][a-z0-9-]*")));
     return plain.match(id).hasMatch();
 }
 

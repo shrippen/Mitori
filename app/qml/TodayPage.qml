@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
+import "grades.js" as Grades
 
 // Today's practice (clickdummy "Heute üben"): one discipline per session, up to the grade
 // chosen in the programme. Due is what is unsure or long unpractised (days per level, set
@@ -29,6 +30,8 @@ Kirigami.ScrollablePage {
     readonly property int fresh: due.filter(r => r.level === 0).length
     // The due ones the player can show (videos on the device); the others are practised from the list.
     readonly property var playable: due.filter(r => !!r.video && Videos.available(r.video.video))
+    // An exam planned in this discipline (Courses): its hint leads to the mock exam.
+    readonly property var exam: Courses.revision >= 0 ? Courses.nextExam(discipline) : ({})
 
     title: qsTr("Practice today")
 
@@ -69,6 +72,27 @@ Kirigami.ScrollablePage {
             text: qsTr("up to %1 (as chosen in the programme)").arg(page.gradeName)
             color: KanteStyle.mutedTextColor
             wrapMode: Text.Wrap
+        }
+        KanteHintCard {
+            objectName: "plannedHint"
+            Layout.fillWidth: true
+            visible: !!page.exam.course
+            compact: true
+            tier: KanteHintCard.Tier.Primary
+            titleText: page.exam.course ? Grades.examText(page.exam) : ""
+            meta: page.exam.place || page.exam.title || ""
+
+            KanteButton {
+                objectName: "toMockExam"
+                // Only for a grade the exam mode has material for (not Shinki Toho Hon-Menkyo).
+                visible: !!page.exam.course && Exam.grades(page.exam.discipline).some(g => g.id === page.exam.grade)
+                text: qsTr("Mock exam")
+                onClicked: {
+                    Programme.discipline = page.exam.discipline
+                    Programme.setGrade(page.exam.discipline, page.exam.grade)
+                    page.Kirigami.PageStack.push(Qt.resolvedUrl("ExamPage.qml"))
+                }
+            }
         }
 
         RowLayout {

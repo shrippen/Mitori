@@ -276,7 +276,7 @@ private slots:
     // is no bundle, so nothing outside the shelf is loaded into or deleted.
     void unsafeIdsAreNoBundles()
     {
-        for (const QString &id : {u".."_s, u"/tmp"_s, u"a/b"_s, u"Test"_s, u""_s}) {
+        for (const QString &id : {u".."_s, u"/tmp"_s, u"a/b"_s, u"Test"_s, u""_s, u"abc\n"_s}) {
             const QString name = u"unsafe-%1"_s.arg(QString::number(qHash(id)));
             const QUrl manifest = publish(name);
             editManifest(manifest, [&](QJsonObject &o) {
