@@ -550,9 +550,17 @@ TestCase {
         tryCompare(pane.item.current, "id", rows[1].id, 3000)
         compare(window.pageStack.currentItem, page)
         compare(page.lastId, rows[1].id)
-        // The player moves on: its row is marked.
+        // The player moves on: its row is marked, and the list shows it.
         pane.item.go(1)
         tryCompare(page, "lastId", page.playlist[pane.item.index].id)
+        const list = findChild(page, "programmeList")
+        pane.item.index = page.playlist.length - 1
+        tryCompare(page, "lastId", page.playlist[page.playlist.length - 1].id)
+        const row = page.rows.findIndex(r => r.id === page.lastId)
+        tryVerify(() => {
+            const first = list.indexAt(10, list.contentY + 5), last = list.indexAt(10, list.contentY + list.height - 5)
+            return first >= 0 && first <= row && (last < 0 || last >= row)
+        }, 2000, "the list scrolled to the playing row")
         shot("2t-tablet")
         // Turned to portrait and back: the chosen technique stays.
         page.open(page.playlist[3])
@@ -603,6 +611,15 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem !== page, 2000)
         compare(window.pageStack.currentItem.entry.id, rows[0].id)
         tryVerify(() => !pane.item.playing, 2000, "the player pauses under another page")
+        // Turned under the comment: the player made anew stays quiet.
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => pane.item && pane.item.duration > 0, 10000)
+        wait(500)
+        verify(!pane.item.playing, "no sound under the comment page")
         window.pageStack.pop()
         window.width = 420
         window.height = 800
@@ -625,6 +642,26 @@ TestCase {
         window.width = 420
         window.height = 800
         tryCompare(tiles, "columns", 1)
+    }
+
+    // The keyboard scrolls the programme list (Down, Page Down).
+    function test_2v_programme_keys() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k3")
+        const page = push("ProgrammePage")
+        const list = findChild(page, "programmeList")
+        wait(500)
+        page.forceActiveFocus()
+        const before = list.contentY
+        keyClick(Qt.Key_PageDown)
+        tryVerify(() => list.contentY > before + 100, 2000, "Page Down")
+        const after = list.contentY
+        keyClick(Qt.Key_Down)
+        tryVerify(() => list.contentY > after, 2000, "Down")
+        keyClick(Qt.Key_Home)
+        tryVerify(() => list.contentY <= list.originY + 1, 2000, "Home")
+        Programme.setGrade("aikido", "k5")
+        window.pageStack.pop()
     }
 
     function findChildren(item, name) {

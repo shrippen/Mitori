@@ -29,9 +29,9 @@ Kirigami.Page {
     // The entry shown last in the player, marked when the list comes back (on a tablet: the one
     // playing beside the list).
     property string lastId: ""
-    // A tablet in landscape (the shorter side as on a 600 dp tablet; a phone held sideways keeps
-    // the list and opens the player page).
-    readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 30
+    // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
+    // a phone held sideways has about 20) keeps the list and the small player side by side.
+    readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 26
     readonly property var playlist: rows.filter(r => page.playable(r))
     readonly property bool split: wide && playlist.length > 0
 
@@ -224,6 +224,7 @@ Kirigami.Page {
 
             sourceComponent: PlayerView {
                 compact: true
+                autoPlay: page.isCurrentPage
                 playlist: page.playlist
                 // The chosen technique (also after the pane is made anew, turning the tablet); bound
                 // only until the player moves on by itself (next, previous).
@@ -248,8 +249,7 @@ Kirigami.Page {
         onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
     }
 
-    // A row chosen in the list plays beside it.
-    // Another grade or discipline: its remembered technique, else its first.
+    // Another grade or discipline: the technique shown last if it is in it, else its first.
     onPlaylistChanged: {
         if (pane.item) {
             pane.item.index = Math.max(0, page.playlist.findIndex(r => r.id === page.lastId))
@@ -261,13 +261,34 @@ Kirigami.Page {
             pane.item.pause()
         }
     }
-    // The arrows and Page Down scroll the list (ScrollablePage did that).
-    Keys.forwardTo: [list]
+    // The keys scroll the list as ScrollablePage did (Up, Down, Page Up, Page Down, Home, End).
+    function scrollBy(dy) {
+        list.contentY = Math.max(list.originY, Math.min(list.originY + list.contentHeight - list.height, list.contentY + dy))
+    }
+    Keys.onUpPressed: scrollBy(-Kirigami.Units.gridUnit * 2)
+    Keys.onDownPressed: scrollBy(Kirigami.Units.gridUnit * 2)
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_PageUp || event.key === Qt.Key_PageDown) {
+            scrollBy((event.key === Qt.Key_PageDown ? 1 : -1) * list.height * 0.9)
+        } else if (event.key === Qt.Key_Home) {
+            list.positionViewAtBeginning()
+        } else if (event.key === Qt.Key_End) {
+            list.positionViewAtEnd()
+        } else {
+            return
+        }
+        event.accepted = true
+    }
 
+    // A row chosen in the list plays beside it; the list shows the row of the technique playing.
     onLastIdChanged: {
         const i = page.playlist.findIndex(r => r.id === page.lastId)
         if (pane.item && i >= 0 && pane.item.index !== i) {
             pane.item.index = i
+        }
+        const row = page.rows.findIndex(r => r.id === page.lastId)
+        if (page.split && row >= 0) {
+            list.positionViewAtIndex(row, ListView.Contain)
         }
     }
 
