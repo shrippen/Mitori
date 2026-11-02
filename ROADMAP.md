@@ -37,6 +37,12 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Legende, Tooltip je Tag), Stand je Grad einer Sparte. Offen: Fotos und Sprachnotizen an Notizen
   (Plattform-Schicht), Lehrgangsnotizen in „Alle Notizen“ (mit Schritt 4); in der Statistik Prüfungsrunden und
   „Meine Grade“ (mit Schritt 3 und 4), „alle Jahre“.
+- Schritt 3: Technik-Landkarte (Kachel 図 im Startmenü): Sparte, „bis“ Grad (anfangs der des Programms), je Gruppe
+  ein Raster Technik × Angriff über alle Grade bis dahin (Gruppen gleichen Titels aus Kyu- und Dan-Graden zusammen),
+  jeder Platz in der Farbe seiner besten Stufe, leer, wo die Kombination nicht vorkommt; Shinki Toho als nummerierte
+  Ô-dachi-Formen. Tippen öffnet das Technik-Blatt, Überfahren zeigt Technik, Angriff, Grad und Stand; Tab erreicht
+  einen Platz je Raster, die Pfeiltasten wandern weiter. Breite Raster scrollen waagerecht, die Technik-Namen bleiben
+  stehen.
 
 ## Lehrgänge (Schritt 4)
 
@@ -54,6 +60,9 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
 ## Kante-Bedarf
 
 Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutzt:
+- Beschriftete Matrix (Heatmap mit Zeilen- und Spaltennamen, leeren Plätzen, Tooltip, Tippen, Pfeiltasten,
+  waagerecht scrollend mit stehenden Zeilennamen): die Landkarte baut sie heute aus Kante-Tokens selbst
+  (`TechniqueMatrix.qml`, `FormGrid.qml`, `MapPlace.qml`).
 - Seiten-Scope: Kirigamis ScrollablePage erbt die Kante-Farben nicht (`Theme.inherit: false`); jetzt je Seite
   `KanteScope` plus Seitengrund. Besser eine Option in `KanteScope` (auch für System/Kante Light: View- statt
   Window-Farbe bei Listen) und die globale Kopfleiste des pageStack in Kante-Farben (heute Plattformfarbe).

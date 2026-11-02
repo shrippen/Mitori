@@ -4,7 +4,7 @@
 <context>
     <name>AllNotesPage</name>
     <message numerus="yes">
-        <location filename="../qml/AllNotesPage.qml" line="210"/>
+        <location filename="../qml/AllNotesPage.qml" line="209"/>
         <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
         <translation>
             <numerusform>%n note. Tap one to open its technique, press and hold to change or delete it.</numerusform>
@@ -39,6 +39,17 @@
         <translation>
             <numerusform>%n technique</numerusform>
             <numerusform>%n techniques</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>TechniqueMatrix</name>
+    <message numerus="yes">
+        <location filename="../qml/TechniqueMatrix.qml" line="199"/>
+        <source>%n entries</source>
+        <translation>
+            <numerusform>%n entry</numerusform>
+            <numerusform>%n entries</numerusform>
         </translation>
     </message>
 </context>

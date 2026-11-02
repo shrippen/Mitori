@@ -498,6 +498,99 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Technique map: from the start menu, a grid per group with empty places, a place coloured by
+    // its level and opening its sheet, the keys moving on; Shinki Toho as numbered forms.
+    function test_9k_map() {
+        failOnWarning(/ReferenceError|TypeError/)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k4")
+        tryCompare(window.pageStack, "depth", 1)
+        wait(500)       // Kirigami slides the last page out
+        const tile = findChild(window.pageStack.items[0], "mapTile")
+        verify(tile && tile.visible)
+        mouseClick(tile)
+        tryCompare(window.pageStack, "depth", 2)
+        const page = window.pageStack.currentItem
+        tryVerify(() => page.title === qsTr("Technique map"))
+        compare(page.grade, "k4")
+        verify(page.matrix)
+        compare(findChildren(page, "gradeChip").length, Programme.grades("aikido").length)
+
+        const matrix = findChild(page, "techniqueMatrix")
+        const places = findChildren(matrix, "mapPlace")
+        compare(places.length, page.shown.rows.length * page.shown.columns.length)
+        const filled = places.filter(p => p.visible)
+        verify(filled.length > 0)
+        verify(filled.length < places.length, "combinations not in the programme stay empty")
+
+        // A rating colours the place; its tip names technique, attack, grade and level.
+        const target = filled.find(p => p.level === 0)
+        verify(Practice.rate(target.cell.ids[0], 4))
+        tryCompare(target, "level", 4)
+        compare(target.fill, KanteStyle.levelColor(4))
+        verify(target.tip.indexOf(target.cell.gradeName) > 0, target.tip)
+        verify(target.tip.indexOf(Practice.levelNames[4]) > 0, target.tip)
+        shot("11-map-aikido")
+
+        // A tap opens the technique sheet.
+        const sheet = findChild(page, "techniqueSheet")
+        mouseClick(target)
+        tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, target.cell.entry.id)
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+
+        // The keys: Right moves to the next place of the row, Enter opens it.
+        const first = filled[0]
+        first.forceActiveFocus(Qt.TabFocusReason)
+        const row = filled.filter(p => p.row === first.row)
+        keyClick(Qt.Key_Right)
+        if (row.length > 1) {
+            verify(row[1].activeFocus, "Right reaches the next place of the row")
+        }
+        keyClick(Qt.Key_Return)
+        tryVerify(() => sheet.opened)
+        sheet.close()
+        tryVerify(() => !sheet.visible)       // a closing sheet still takes the taps
+
+        // Groups apart: another chip, another grid.
+        const chips = findChildren(page, "groupChip")
+        verify(chips.length > 1)
+        page.flickable.contentY = 0
+        mouseClick(chips[1])
+        compare(page.shown.title, chips[1].text)
+
+        // Shinki Toho: the Ô-dachi forms up to Chûden.
+        page.discipline = "shinkitoho"
+        page.grade = "chuden"
+        verify(!page.matrix)
+        const forms = findChild(page, "formGrid")
+        verify(forms.visible)
+        const formPlaces = findChildren(forms, "formPlace")
+        compare(formPlaces.length, 21)
+        compare(formPlaces[11].label, "12")
+        verify(Practice.rate("shinkitoho/odachi/12", 2))
+        tryCompare(formPlaces[11], "level", 2)
+        compare(formPlaces[11].fill, KanteStyle.levelColor(2))
+        waitForRendering(forms)       // the page lays out the forms in the next frame
+        mouseClick(formPlaces[11])
+        tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, "shinkitoho/odachi/12")
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+        shot("11-map-shinkitoho")
+
+        // Tablet in landscape: bigger places, more forms per row.
+        window.width = 1280
+        window.height = 800
+        tryCompare(forms, "columns", 11)
+        page.discipline = "daitoryu"
+        page.grade = Programme.grades("daitoryu").slice(-1)[0].id
+        verify(page.matrix)
+        shot("11-map-tablet")
+        window.pageStack.pop()
+    }
+
     // All notes: every technique's notes by day, a filter per discipline; a tap opens the
     // technique's notes, press and hold the editor.
     function test_8d_all_notes() {

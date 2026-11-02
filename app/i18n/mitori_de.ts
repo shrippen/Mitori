@@ -15,32 +15,32 @@
     </message>
     <message>
         <location filename="../qml/AllNotesPage.qml" line="88"/>
-        <location filename="../qml/AllNotesPage.qml" line="284"/>
+        <location filename="../qml/AllNotesPage.qml" line="283"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="108"/>
+        <location filename="../qml/AllNotesPage.qml" line="109"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="211"/>
+        <location filename="../qml/AllNotesPage.qml" line="210"/>
         <source>No notes in this discipline.</source>
         <translation>Keine Notizen in dieser Sparte.</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="212"/>
+        <location filename="../qml/AllNotesPage.qml" line="211"/>
         <source>No notes yet. Notes are written on a technique or in the player.</source>
         <translation>Noch keine Notizen. Notizen schreibst du zu einer Technik oder im Player.</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="230"/>
+        <location filename="../qml/AllNotesPage.qml" line="229"/>
         <source>Opens the technique&apos;s notes; press and hold or the menu key to change or delete</source>
         <translation>Öffnet die Notizen der Technik; lang drücken oder Menütaste zum Ändern oder Löschen</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/AllNotesPage.qml" line="210"/>
+        <location filename="../qml/AllNotesPage.qml" line="209"/>
         <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
         <translation>
             <numerusform>%n Notiz. Tippen öffnet die Technik, lang drücken ändert oder löscht die Notiz.</numerusform>
@@ -54,6 +54,14 @@
         <location filename="../qml/CommentPage.qml" line="31"/>
         <source>Source: shinkiryu.de, Itto-den Shinki Toho</source>
         <translation>Quelle: shinkiryu.de, Itto-den Shinki Toho</translation>
+    </message>
+</context>
+<context>
+    <name>FormGrid</name>
+    <message>
+        <location filename="../qml/FormGrid.qml" line="45"/>
+        <source>%1 · %2 · %3: %4</source>
+        <translation>%1 · %2 · %3: %4</translation>
     </message>
 </context>
 <context>
@@ -340,7 +348,7 @@
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="260"/>
+        <location filename="../services/practice.cpp" line="269"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
@@ -539,6 +547,16 @@
             <numerusform>%n Übungstage in 30 Tagen</numerusform>
         </translation>
     </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="123"/>
+        <source>Technique map</source>
+        <translation>Landkarte</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="124"/>
+        <source>Attack × technique</source>
+        <translation>Angriff × Technik</translation>
+    </message>
 </context>
 <context>
     <name>StatsPage</name>
@@ -606,6 +624,50 @@
         <location filename="../qml/StatsPage.qml" line="153"/>
         <source>%1 of %2 exam-ready</source>
         <translation>%1 von %2 prüfungsreif</translation>
+    </message>
+</context>
+<context>
+    <name>TechniqueMapPage</name>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="36"/>
+        <source>Technique map</source>
+        <translation>Landkarte</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="62"/>
+        <source>up to %1</source>
+        <translation>bis %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="94"/>
+        <source>No techniques with an attack up to %1.</source>
+        <translation>Keine Techniken mit Angriff bis %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="135"/>
+        <source>Rows: technique, columns: attack. An empty place does not occur up to %1. Tap a place to open the technique.</source>
+        <translation>Zeilen: Technik, Spalten: Angriff. Ein leerer Platz kommt bis %1 nicht vor. Tippen öffnet die Technik.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueMapPage.qml" line="136"/>
+        <source>A place per form, numbered. Tap a place to open the form.</source>
+        <translation>Ein Platz je Form, nummeriert. Tippen öffnet die Form.</translation>
+    </message>
+</context>
+<context>
+    <name>TechniqueMatrix</name>
+    <message>
+        <location filename="../qml/TechniqueMatrix.qml" line="196"/>
+        <source>%1 · %2 · %3: %4</source>
+        <translation>%1 · %2 · %3: %4</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/TechniqueMatrix.qml" line="199"/>
+        <source>%n entries</source>
+        <translation>
+            <numerusform>%n Eintrag</numerusform>
+            <numerusform>%n Einträge</numerusform>
+        </translation>
     </message>
 </context>
 <context>
