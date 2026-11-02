@@ -162,6 +162,8 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: page.landscape
             Layout.preferredHeight: page.landscape ? -1 : width / ratio
+            // Beside the list on a small tablet the controls keep half the height.
+            Layout.maximumHeight: page.compact ? page.height / 2 : Number.POSITIVE_INFINITY
 
             Rectangle {
                 anchors.fill: parent
@@ -269,6 +271,7 @@ Item {
                 KanteTransportBar {
                     id: transport
 
+                    objectName: "transportBar"
                     Layout.fillWidth: true
                     Layout.preferredWidth: 0        // wraps in the column instead of widening it
                     playing: player.playing

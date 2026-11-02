@@ -660,8 +660,47 @@ TestCase {
         tryVerify(() => list.contentY > after, 2000, "Down")
         keyClick(Qt.Key_Home)
         tryVerify(() => list.contentY <= list.originY + 1, 2000, "Home")
+        // Also with a row in focus (after a click or Tab): the list scrolls, not a current index.
+        let i = 0
+        while (!(list.itemAtIndex(i) && list.itemAtIndex(i).item && list.itemAtIndex(i).item.entry))
+            i++
+        list.itemAtIndex(i).item.forceActiveFocus()
+        const y = list.contentY
+        keyClick(Qt.Key_Down)
+        tryVerify(() => list.contentY > y, 2000, "Down on a focused row")
         Programme.setGrade("aikido", "k5")
         window.pageStack.pop()
+    }
+
+    // Tablet: keys in the small player stay there (End does not scroll the list), and on a small
+    // tablet the player's controls fit under the picture.
+    function test_2w_tablet_player_keys() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        window.width = 1024
+        window.height = 560
+        const page = push("ProgrammePage")
+        tryVerify(() => page.split, 2000, "a small tablet splits too")
+        const pane = findChild(page, "playerPane")
+        tryVerify(() => pane.item && pane.item.duration > 0, 10000)
+        const list = findChild(page, "programmeList")
+        pane.item.forceActiveFocus()
+        const y = list.contentY
+        keyClick(Qt.Key_End)
+        keyClick(Qt.Key_PageDown)
+        wait(100)
+        compare(list.contentY, y, "keys in the player leave the list alone")
+        const controls = findChild(pane.item, "controlsView")
+        const bar = findChild(pane.item, "transportBar")
+        const bottom = bar.mapToItem(controls, 0, bar.height).y
+        verify(bottom <= controls.height, "the transport bar in view (" + bottom + " of " + controls.height + ")")
+        window.pageStack.pop()
+        window.width = 420
+        window.height = 800
     }
 
     function findChildren(item, name) {
