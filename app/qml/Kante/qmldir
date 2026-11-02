@@ -12,6 +12,7 @@ KanteBrackets 1.0 KanteBrackets.qml
 KanteBulkBar 1.0 KanteBulkBar.qml
 KanteButton 1.0 KanteButton.qml
 KanteCalendarGrid 1.0 KanteCalendarGrid.qml
+KanteCalendarHeatmap 1.0 KanteCalendarHeatmap.qml
 KanteCallout 1.0 KanteCallout.qml
 KanteCard 1.0 KanteCard.qml
 KanteCheckSkin 1.0 KanteCheckSkin.qml

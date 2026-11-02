@@ -113,6 +113,22 @@ QVariantList Practice::counts(const QStringList &entries) const
     return {n[0], n[1], n[2], n[3], n[4]};
 }
 
+QVariantMap Practice::practisedPerDay(int days) const
+{
+    QVariantMap result;
+    if (!m_open || days <= 0) {
+        return result;
+    }
+    const QDate first = m_today.addDays(1 - days);
+    const QHash<QDate, int> perDay = m_log->practisedPerDay(first.startOfDay().toUTC());
+    for (auto it = perDay.cbegin(); it != perDay.cend(); ++it) {
+        if (it.key() >= first && it.key() <= m_today) {
+            result.insert(it.key().toString(Qt::ISODate), it.value());
+        }
+    }
+    return result;
+}
+
 bool Practice::ratedToday(const QString &entry) const
 {
     const QDateTime last = lastRated(entry);

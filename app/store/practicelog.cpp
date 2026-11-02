@@ -4,6 +4,7 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QSet>
 #include <QTimeZone>
 #include <QUuid>
 #include <QVariant>
@@ -145,6 +146,24 @@ QHash<QString, QDate> PracticeLog::firstRated() const
     while (q.next()) {
         result.insert(q.value(0).toString(),
                       QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC).toLocalTime().date());
+    }
+    return result;
+}
+
+QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from) const
+{
+    QHash<QDate, QSet<QString>> entries;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ?"));
+    q.addBindValue(from.toMSecsSinceEpoch());
+    q.exec();
+    while (q.next()) {
+        const QDate day = QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC).toLocalTime().date();
+        entries[day].insert(q.value(0).toString());
+    }
+    QHash<QDate, int> result;
+    for (auto it = entries.cbegin(); it != entries.cend(); ++it) {
+        result.insert(it.key(), int(it.value().size()));
     }
     return result;
 }

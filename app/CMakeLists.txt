@@ -49,6 +49,7 @@ qt_add_qml_module(mitori_app
         qml/NoteRow.qml
         qml/AllNotesPage.qml
         qml/SearchPage.qml
+        qml/StatsPage.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -183,7 +184,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     qt_add_executable(tst_ui tests/tst_ui.cpp)
     target_link_libraries(tst_ui PRIVATE mitori_app mitori_appplugin Qt6::QuickTest)
     target_compile_definitions(tst_ui PRIVATE QUICK_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/qml"
-        UI_SHOTS_DIR="${CMAKE_BINARY_DIR}/ui-shots")
+        UI_SHOTS_DIR="${CMAKE_BINARY_DIR}/ui-shots" UI_DATA_DIR="${CMAKE_BINARY_DIR}/ui-data")
     set_target_properties(tst_ui PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME ui COMMAND tst_ui)
     set_tests_properties(ui PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material")

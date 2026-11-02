@@ -54,9 +54,14 @@
 <context>
     <name>GradeStand</name>
     <message>
-        <location filename="../qml/GradeStand.qml" line="27"/>
+        <location filename="../qml/GradeStand.qml" line="29"/>
         <source>Rating of the grade</source>
         <translation>Stand des Grades</translation>
+    </message>
+    <message>
+        <location filename="../qml/GradeStand.qml" line="29"/>
+        <source>Rating of %1</source>
+        <translation>Stand %1</translation>
     </message>
 </context>
 <context>
@@ -325,7 +330,7 @@
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="244"/>
+        <location filename="../services/practice.cpp" line="246"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
@@ -333,7 +338,7 @@
 <context>
     <name>PracticeLog</name>
     <message>
-        <location filename="../store/practicelog.cpp" line="71"/>
+        <location filename="../store/practicelog.cpp" line="72"/>
         <source>it comes from a newer Mitori (schema %1); update Mitori</source>
         <translation>es stammt aus einer neueren Mitori-Version (Schema %1); bitte Mitori aktualisieren</translation>
     </message>
@@ -510,6 +515,87 @@
         <location filename="../qml/StartPage.qml" line="80"/>
         <source>all practised</source>
         <translation>alles geübt</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="95"/>
+        <source>Statistics</source>
+        <translation>Statistik</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/StartPage.qml" line="96"/>
+        <source>%n practice day(s) in 30 days</source>
+        <translation>
+            <numerusform>%n Übungstag in 30 Tagen</numerusform>
+            <numerusform>%n Übungstage in 30 Tagen</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>StatsPage</name>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="44"/>
+        <source>Statistics</source>
+        <translation>Statistik</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="50"/>
+        <source>Last 30 days</source>
+        <translation>Letzte 30 Tage</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="59"/>
+        <source>practice days</source>
+        <translation>Übungstage</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="64"/>
+        <source>techniques practised</source>
+        <translation>Techniken geübt</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="69"/>
+        <source>A technique counts once on each day it is rated.</source>
+        <translation>Eine Technik zählt an jedem Tag, an dem sie eingeschätzt wird, einmal.</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="76"/>
+        <location filename="../qml/StatsPage.qml" line="108"/>
+        <source>Practice days</source>
+        <translation>Übungstage</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/StatsPage.qml" line="104"/>
+        <source>%n technique(s)</source>
+        <translation>
+            <numerusform>%n Technik</numerusform>
+            <numerusform>%n Techniken</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="104"/>
+        <location filename="../qml/StatsPage.qml" line="113"/>
+        <source>no practice</source>
+        <translation>kein Training</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="114"/>
+        <source>1–2 techniques</source>
+        <translation>1–2 Techniken</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="117"/>
+        <source>10 and more</source>
+        <translation>10 und mehr</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="121"/>
+        <source>Rating by grade</source>
+        <translation>Stand je Grad</translation>
+    </message>
+    <message>
+        <location filename="../qml/StatsPage.qml" line="153"/>
+        <source>%1 of %2 exam-ready</source>
+        <translation>%1 von %2 prüfungsreif</translation>
     </message>
 </context>
 <context>

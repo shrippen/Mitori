@@ -524,6 +524,44 @@ TestCase {
         window.pageStack.pop()
     }
 
+    function test_9z_stats() {
+        // A rating today makes today a practice day (Shinki Toho: the other cases leave it alone;
+        // the cases run in name order, this one last).
+        const grade = Programme.grades("shinkitoho")[0].id
+        const rows = Programme.entries("shinkitoho", grade).filter(r => r.kind === "entry")
+        verify(Practice.rate(rows[0].id, 2))
+        const page = push("StatsPage")
+        compare(page.last30.days, 1)
+        compare(findChild(page, "practiceDays").value, "1")
+        // The open page follows new ratings; a technique counts once a day.
+        const before = page.last30.techniques
+        verify(Practice.rate(rows[0].id, 3))
+        verify(Practice.rate(rows[1].id, 1))
+        verify(Practice.rate(rows[1].id, 2))
+        compare(page.last30.techniques, before + 1)
+        compare(findChild(page, "techniquesPractised").value, String(before + 1))
+        const heat = findChild(page, "practiceHeatmap")
+        verify(heat.weeks >= 4 && heat.weeks <= 26)
+        const today = heat.isoDay(new Date())
+        verify(heat.levels[today] >= 1, "today coloured")
+        verify(heat.tipOf(new Date()).indexOf(String(page.perDay[today])) >= 0, heat.tipOf(new Date()))
+        // A day without practice says so.
+        const yesterday = new Date()
+        yesterday.setDate(yesterday.getDate() - 1)
+        verify(heat.tipOf(yesterday).indexOf(qsTr("no practice")) > 0, heat.tipOf(yesterday))
+        // Each grade shows its figures without hovering: exam-ready of all.
+        const stands = findChildren(page, "statsGradeStand")
+        verify(stands.length > 3, "a bar per grade")
+        const figures = findChildren(page, "gradeFigure")
+        verify(figures.length > 3)
+        verify(/\d+.*\d+/.test(figures[0].text), figures[0].text)
+        shot("10-stats")
+        window.pageStack.pop()
+        // The start tile counts the practice days.
+        const tile = findChild(window.pageStack.items[0], "statsTile")
+        compare(tile.days, 1)
+    }
+
     function findChildren(item, name) {
         let found = []
         if (item.objectName === name) {

@@ -50,6 +50,9 @@ public:
     Q_INVOKABLE QDateTime lastRated(const QString &entry) const;
     // How many of the entries stand at each level: [none, 1, 2, 3, 4].
     Q_INVOKABLE QVariantList counts(const QStringList &entries) const;
+    // How many techniques were practised on each of the last `days` days up to today:
+    // {"YYYY-MM-DD": count}, days without practice left out.
+    Q_INVOKABLE QVariantMap practisedPerDay(int days) const;
     // Whether the entry was rated today (practised).
     Q_INVOKABLE bool ratedToday(const QString &entry) const;
     // Today's practice from candidate rows (Programme.practiceEntries: id, current, …): the due
