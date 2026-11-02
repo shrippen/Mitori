@@ -60,6 +60,68 @@ def test_shinki_toho_kommentare(daten):
     assert all(o.get("kommentar") for o in st["odachi"])
 
 
+def test_glossar(daten):
+    """Lexicon plus the terms of begriffe.yaml it lacks, alphabetical, each with a reading."""
+    import yaml
+    lexikon = yaml.safe_load((WURZEL / "daten" / "lexikon.yaml").read_text(encoding="utf-8"))
+    glossar = daten["glossar"]
+    woerter = glossar["woerter"]
+    assert glossar["quelle"] == lexikon["quelle"]
+    assert len(woerter) > len(lexikon["woerter"])
+    assert {w["de"] for w in lexikon["woerter"]} <= {w["de"] for w in woerter}
+    assert all(w["wort"] and w["kana"] and w["wort"][0].isupper() for w in woerter)
+    namen = [w["wort"] for w in woerter]
+    assert {"diagonal", "gerade", "Sonstige Techniken"}.isdisjoint(namen)
+    kiri = [w for w in woerter if w["wort"] == "Kiri-otoshi"]
+    assert kiri == [{"wort": "Kiri-otoshi", "jp": "切り落し", "de": "", "kana": "きりおとし"}]
+    # Lexicon word without kanji: from begriffe.yaml, unless two words share the name (kata: form, shoulder).
+    assert next(w for w in woerter if w["wort"] == "Shomen-uchi")["jp"] == "正面打ち"
+    assert [w["jp"] for w in woerter if w["wort"] == "Kata"] == [None, None]
+    assert namen.index("Ai-hanmi") < namen.index("Aikido") < namen.index("Zori")
+
+
+def test_glossar_ohne_dubletten(daten):
+    """One word per term: lexicon alternatives in brackets (-jime) and oo as o join begriffe.yaml."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("daten", WURZEL / "tools" / "daten.py")
+    modul = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modul)
+    woerter = daten["glossar"]["woerter"]
+    schluessel = [modul.glossar_schluessel(modul.stichwort(w["wort"])) for w in woerter]
+    doppelt = sorted({s for s in schluessel if schluessel.count(s) > 1})
+    assert doppelt == ["ha", "ho", "kata"]            # homonyms with different meanings
+    nach_wort = {w["wort"]: w for w in woerter}
+    assert nach_wort["Oo-guruma"]["jp"] == "大車"
+    assert nach_wort["Kubi-shime (-jime)"]["jp"] == "首締め"
+    assert nach_wort["Ryote-tori (-dori)"]["jp"] == "両手取り"
+    assert "O-guruma" not in nach_wort and "Kubi-jime" not in nach_wort
+
+
+def test_glossar_ohne_offene_kanji(daten):
+    """A term whose kanji is an open question (KORREKTUREN.md, status klären) stays out: A-K-04."""
+    assert not [w for w in daten["glossar"]["woerter"] if w["wort"] == "Shiho-gaeshi"]
+
+
+def test_glossar_lesung_an_wortgrenzen(daten):
+    """Joined words read at the boundary of known words: Yokomenuchi as yokomen + uchi."""
+    nach_wort = {w["wort"]: w for w in daten["glossar"]["woerter"]}
+    assert nach_wort["Yokomenuchi"]["kana"] == "よこめんうち"
+
+
+@pytest.mark.parametrize("wort, lesung", [
+    ("Kiri-otoshi", "きりおとし"), ("Shomen-uchi", "しょめんうち"), ("Ikkajô", "いっかじょう"),
+    ("San'nin-gake", "さんにんがけ"), ("Shikkoh", "しっこう"), ("Massugu", "まっすぐ"),
+    ("Kime (-gime)", "きめ"), ("Yame!", "やめ"), ("Jo-suburi 2", "じょすぶり　に"), ("Ryote-tori", "りょてとり"),
+    ("Sempai", "せんぱい"), ("Lex", None),
+])
+def test_kana(wort, lesung):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("daten", WURZEL / "tools" / "daten.py")
+    modul = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modul)
+    assert modul.kana(wort) == lesung
+
+
 def test_uebersetzungen_vollstaendig():
     """Every text of the app is in the German catalog and translated there (app/i18n/*.ts)."""
     import re

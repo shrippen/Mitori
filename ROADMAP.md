@@ -43,8 +43,18 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   aller 26 Kamae) und Ô-dachi 1–11, höhere Grade ihre Formen. Runde als Tafel (Gruppe, Angriff, Technik; Shinki
   Toho nur Technik), Weiter mit Leertaste/Enter, Tablet größer. Am Ende jede Technik 1–4 einschätzen; Übernehmen
   setzt den Stand (Übungsprotokoll) und speichert die Runde (SQLite, Schema 3), die Statistik zeigt den Schnitt
-  der letzten 8 Runden je Sparte. Offen: Hinweis auf eine vorgemerkte Prüfung (mit Schritt 4, Lehrgänge);
-  Landkarte, Glossar mit Lexikon und Aussprache.
+  der letzten 8 Runden je Sparte. Offen: Hinweis auf eine vorgemerkte Prüfung (mit Schritt 4, Lehrgänge).
+- Schritt 3: Glossar (Kachel 辞 im Startmenü, auch die Lupe): ohne Eingabe A–Z mit Kanji und Übersetzung, mit
+  Eingabe vor Techniken und Notizen (auch deutsche Wörter; gleiche Normalisierung wie die Suche). Daten: Aiki-Budo-
+  Lexikon plus die Begriffe aus `daten/begriffe.yaml`, die es nicht hat (Schreibweise in Klammern und oo wie o
+  zählen als dasselbe Wort; Begriffe mit offener Kanji-Frage wie A-K-04 und die ungeprüften Daitoryu-Bausteine
+  bleiben draußen), je Wort eine Lesung in Hiragana aus der Umschrift (`tools/daten.py`). Aussprache per Qt
+  TextToSpeech mit japanischer Stimme (Kanji, sonst die Lesung); ohne Stimme oder Sprachausgabe kein Knopf, ein
+  Hinweis. Sprechen kann: Android (Plugin im APK, japanische Stimme der Sprachausgabe nötig), Linux mit qt6-speech
+  und einer japanischen Stimme (speech-dispatcher). Nicht: AppImage (ohne qtspeech gebaut), Flatpak (die
+  KDE-Runtime hat nur das Test-Plugin). Offen: Aussprache auf dem Telefon prüfen, qtspeech für AppImage und
+  Flatpak, A–Z-Sprungleiste, Lesungen ohne lange Vokale (Umschrift ohne ô, „aikido“ → あいきど), in der Suche
+  Kommentare und Lehrgänge. Noch nicht begonnen: Landkarte.
 
 ## Lehrgänge (Schritt 4)
 

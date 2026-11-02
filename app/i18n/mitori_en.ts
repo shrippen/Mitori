@@ -24,6 +24,17 @@
     </message>
 </context>
 <context>
+    <name>SearchPage</name>
+    <message numerus="yes">
+        <location filename="../qml/SearchPage.qml" line="121"/>
+        <source>%n Japanese term(s), with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</source>
+        <translation>
+            <numerusform>%n Japanese term, with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</numerusform>
+            <numerusform>%n Japanese terms, with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>StartPage</name>
     <message numerus="yes">
         <location filename="../qml/StartPage.qml" line="94"/>

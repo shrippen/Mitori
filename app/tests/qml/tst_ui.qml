@@ -501,6 +501,84 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Glossary: without a query A–Z with headings, the source below; a query finds words by
+    // romaji, kanji and German next to techniques; without a Japanese voice no speaker buttons.
+    SignalSpy {
+        id: saySpy
+
+        target: Glossary
+        signalName: "sayRequested"
+    }
+
+    function test_9b_glossary() {
+        failOnWarning(/ReferenceError|TypeError/)
+        const start = window.pageStack.items[0]
+        const tile = findChild(start, "glossaryTile")
+        verify(tile.visible)
+        // Cases that end with skip() (no videos) leave their pages on the stack.
+        while (window.pageStack.depth > 1)
+            window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === start)
+        wait(800)       // Kirigami slides the start page back in; a click meanwhile goes nowhere
+        mouseClick(tile)
+        tryVerify(() => window.pageStack.currentItem !== start && window.pageStack.currentItem.glossary !== undefined, 2000)
+        const page = window.pageStack.currentItem
+        const list = findChild(page, "glossaryList")
+        const field = findChild(page, "searchField")
+        verify(Glossary.words.length > 219)
+        tryCompare(list, "count", Glossary.words.length)
+        verify(findChild(page, "glossaryIntro").visible)
+        compare(list.section.property, "letter")
+        tryVerify(() => findChild(list, "letterHeading") !== null)
+        compare(findChild(list, "letterHeading").text, "A")
+        compare(Glossary.words[0].word, "Ago")
+        shot("9b-glossary")
+
+        // No Japanese voice (mock engine): a hint, no buttons, saying does nothing.
+        verify(Glossary.speech !== Glossary.Ready)
+        verify(findChild(page, "speechHint").visible)
+        const say = findChild(list, "sayButton")
+        verify(say === null || !say.visible)
+        Glossary.say(Glossary.words[0].speech)
+
+        // Keyboard: Down from the field into the list, Return and Space say the current word,
+        // Up back to the field.
+        field.forceActiveFocus()
+        keyClick(Qt.Key_Down)
+        tryVerify(() => list.activeFocus)
+        compare(list.currentIndex, 0)
+        keyClick(Qt.Key_Down)
+        compare(list.currentIndex, 1)
+        saySpy.clear()
+        keyClick(Qt.Key_Return)
+        compare(saySpy.count, 1)
+        compare(saySpy.signalArguments[0][0], page.glossary[1].speech)
+        keyClick(Qt.Key_Space)
+        compare(saySpy.count, 2)
+        keyClick(Qt.Key_Up)
+        keyClick(Qt.Key_Up)
+        tryVerify(() => field.activeFocus)
+
+        // The same word by romaji with or without hyphen and by kanji with other okurigana.
+        for (const q of ["Kiriotoshi", "Kiri-otoshi", "切り落とし"]) {
+            field.text = q
+            tryVerify(() => page.query === q, 2000)
+            verify(page.glossary.some(w => w.word === "Kiri-otoshi"), q)
+            verify(page.techniques.length > 0, q)
+        }
+        compare(list.section.property, "")
+        verify(!findChild(page, "glossaryIntro").visible)
+        // German words find their Japanese term.
+        field.text = "hüftwurf"
+        tryVerify(() => page.query === "hüftwurf", 2000)
+        verify(page.glossary.some(w => w.word === "Koshi-nage"))
+        tryCompare(list, "count", page.glossary.length)
+        tryVerify(() => findChild(page, "glossarySource") !== null && findChild(page, "glossarySource").visible)
+        verify(findChild(page, "glossarySource").text.includes("shinkiryu.de"))
+        shot("9b-glossary-search")
+        window.pageStack.pop()
+    }
+
     // All notes: every technique's notes by day, a filter per discipline; a tap opens the
     // technique's notes, press and hold the editor.
     function test_8d_all_notes() {
@@ -1054,8 +1132,15 @@ TestCase {
         tryCompare(tiles, "columns", 4)
         const shown = tiles.children.filter(t => t.visible && t.width > 0)
         verify(shown.length >= 3)
-        verify(shown.every(t => Math.abs(t.y - shown[0].y) < 1), "one row")
-        verify(shown[1].x > shown[0].x + shown[0].width - 1)
+        // Four to a row, in order: the fifth starts the next row under the first.
+        shown.forEach((t, i) => {
+            const first = shown[i - i % 4]
+            verify(Math.abs(t.y - first.y) < 1, "tile " + i + " in its row")
+            if (i % 4)
+                verify(t.x > shown[i - 1].x + shown[i - 1].width - 1, "tile " + i + " right of the one before")
+            else if (i)
+                verify(Math.abs(t.x - shown[0].x) < 1 && t.y > shown[i - 4].y, "tile " + i + " starts a row")
+        })
         shot("1b-start-tablet")
         window.width = 420
         window.height = 800

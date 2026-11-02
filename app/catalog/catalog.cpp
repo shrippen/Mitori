@@ -19,6 +19,8 @@ bool Catalog::load(const QString &path)
 {
     m_disciplines.clear();
     m_videos.clear();
+    m_glossary.clear();
+    m_glossarySource.clear();
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
         return fail(QStringLiteral("%1: %2").arg(path, file.errorString()));
@@ -39,6 +41,9 @@ bool Catalog::load(const QString &path)
     }
     m_disciplines = disciplines.toVariantList();
     m_videos = root.value(QLatin1String("videos")).toObject().toVariantMap();
+    const QJsonObject glossary = root.value(QLatin1String("glossar")).toObject();
+    m_glossary = glossary.value(QLatin1String("woerter")).toArray().toVariantList();
+    m_glossarySource = glossary.value(QLatin1String("quelle")).toString();
     m_error.clear();
     return true;
 }

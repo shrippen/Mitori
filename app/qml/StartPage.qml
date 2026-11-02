@@ -129,6 +129,20 @@ Kirigami.ScrollablePage {
                 hint: qsTr("%n practice day(s) in 30 days", "", days)
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("StatsPage.qml"))
             }
+
+            KanteOptionTile {
+                objectName: "glossaryTile"
+
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1          // equal columns
+                visible: Programme.errorString === ""
+                checkable: false
+                autoExclusive: false
+                glyph: "辞"
+                text: qsTr("Glossary")
+                hint: qsTr("Kanji · pronunciation")
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("SearchPage.qml"))
+            }
         }
     }
 
