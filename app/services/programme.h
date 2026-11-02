@@ -37,7 +37,8 @@ public:
     // Rows of a grade in programme order. Each row has `kind`:
     //   "group"     title, jp            a heading (Kata, Tachi-waza · Mae-seme, Kamae, Ô-dachi …)
     //   "attack"    title, extra, jp     the attack the techniques below answer
-    //   "entry"     id, title, extra, jp, nr, video {video, von, bis} or none, comment {titel, text} or none
+    //   "entry"     id, title, extra, jp, nr, video {video, von, bis} or none, comment {titel, text} or none,
+    //               steps [{title, jp}]: the positions of a sequence (Kamae exercise), else empty
     //   "info"      id, title, jp, text, comment   an introduction with a comment only (Kumidachi)
     //   "text"      id, title            a theory item of the exam (essay, oral exam): no video, no rating
     Q_INVOKABLE QVariantList entries(const QString &discipline, const QString &grade) const;
@@ -45,7 +46,7 @@ public:
     // discipline, in programme order, each with `current` (part of the chosen grade) and
     // `gradeName`.
     Q_INVOKABLE QVariantList practiceEntries(const QString &discipline) const;
-    // Techniques whose name, attack, Japanese, additions or group contain every word of `query`
+    // Techniques whose name, attack, Japanese, additions, group or steps contain every word of `query`
     // (see SearchText), across all disciplines and grades in programme order (at most `limit`).
     // Each row as in entries(), with `discipline`, `disciplineName`, `grade`, `gradeName` and
     // `groupName` (Tachi-waza · Mae-seme …).

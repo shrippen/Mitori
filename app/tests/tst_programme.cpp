@@ -204,11 +204,35 @@ private slots:
     void shinkiTohoGradesShowTheirOwnForms()
     {
         const QVariantList shoden = programme.entries(QStringLiteral("shinkitoho"), QStringLiteral("shoden"));
-        QCOMPARE(count(shoden, QStringLiteral("entry")), 3 + 1 + 26 + 11);
+        QCOMPARE(count(shoden, QStringLiteral("entry")), 3 + 1 + 1 + 11);
         QCOMPARE(count(shoden, QStringLiteral("info")), 1);
         const QStringList chuden = ids(programme.entries(QStringLiteral("shinkitoho"), QStringLiteral("chuden")));
         QCOMPARE(chuden.size(), 10);
         QCOMPARE(chuden.first(), QStringLiteral("shinkitoho/odachi/12"));
+    }
+
+    // The Kamae exercise is one entry (one flow); its 26 positions are its steps, Seigan twice.
+    void kamaeIsOneEntry()
+    {
+        const QStringList shoden = ids(programme.entries(QStringLiteral("shinkitoho"), QStringLiteral("shoden")));
+        QCOMPARE(shoden.filter(QStringLiteral("shinkitoho/kamae")), QStringList{QStringLiteral("shinkitoho/kamae")});
+        const QVariantMap kamae = programme.entry(QStringLiteral("shinkitoho/kamae"));
+        QCOMPARE(kamae.value(QStringLiteral("title")).toString(), QStringLiteral("Kamae-Übung"));
+        QCOMPARE(kamae.value(QStringLiteral("jp")).toString(), QStringLiteral("構"));
+        QVERIFY(kamae.value(QStringLiteral("video")).isValid());
+        QVERIFY(kamae.value(QStringLiteral("comment")).isValid());
+        const QVariantList steps = kamae.value(QStringLiteral("steps")).toList();
+        QCOMPARE(steps.size(), 26);
+        QCOMPARE(steps.first().toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Rei"));
+        QCOMPARE(steps.at(2).toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Seigan"));
+        QCOMPARE(steps.at(11).toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Seigan"));
+        QCOMPARE(steps.at(2).toMap().value(QStringLiteral("jp")).toString(), QStringLiteral("正眼"));
+        QVERIFY(programme.entry(QStringLiteral("shinkitoho/kamae/1")).isEmpty());
+        QVERIFY(programme.entry(QStringLiteral("shinkitoho/odachi/1")).value(QStringLiteral("steps")).toList().isEmpty());
+        // Today's practice and the search hold it once; a position finds it.
+        QCOMPARE(ids(programme.practiceEntries(QStringLiteral("shinkitoho"))).count(QStringLiteral("shinkitoho/kamae")), 1);
+        QVERIFY(ids(programme.search(QStringLiteral("jodan ura gasumi"))).contains(QStringLiteral("shinkitoho/kamae")));
+        QVERIFY(ids(programme.search(QStringLiteral("開太刀"))).contains(QStringLiteral("shinkitoho/kamae")));
     }
 
     void gradesWithoutMaterialAreLeftOut()

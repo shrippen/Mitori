@@ -6,7 +6,8 @@ import Kante
 import Mitori
 
 // Technique sheet (clickdummy "Programm", row tapped): name, attack, kanji, how well it sits
-// (rate 1–4), the last note, and the way on to the video, the notes and the comment.
+// (rate 1–4), the last note, the way on to the video, the notes and the comment, and the
+// positions of a sequence (the Kamae exercise of Shinki Toho).
 Kirigami.Dialog {
     id: sheet
 
@@ -14,6 +15,7 @@ Kirigami.Dialog {
     property bool playable: false
     readonly property bool hasVideo: playable && !!entry.video
     readonly property bool hasComment: !!entry.comment
+    readonly property var steps: entry.steps || []
 
     signal playRequested(var entry)
     signal commentRequested(var entry)
@@ -89,6 +91,48 @@ Kirigami.Dialog {
                 onClicked: {
                     sheet.close()
                     sheet.commentRequested(sheet.entry)
+                }
+            }
+        }
+
+        // The description of a sequence (Kamae exercise): its positions in order, after the
+        // rating and the buttons, so those stay in view. Seigan comes twice (KORREKTUREN S-09).
+        KanteSectionLabel {
+            Layout.fillWidth: true
+            Layout.topMargin: Kirigami.Units.largeSpacing
+            visible: sheet.steps.length > 0
+            rule: true
+            text: qsTr("Positions in one flow")
+        }
+        Repeater {
+            model: sheet.steps
+
+            RowLayout {
+                id: step
+
+                required property var modelData
+                required property int index
+
+                objectName: "sheetStep"
+                Layout.fillWidth: true
+                spacing: Kirigami.Units.smallSpacing
+
+                QQC2.Label {
+                    Layout.minimumWidth: Kirigami.Units.gridUnit * 1.5
+                    horizontalAlignment: Text.AlignRight
+                    text: step.index + 1
+                    font: KanteStyle.monoFont(Kirigami.Theme.smallFont.pointSize)
+                    color: KanteStyle.mutedTextColor
+                }
+                QQC2.Label {
+                    Layout.fillWidth: true
+                    text: step.modelData.title
+                    wrapMode: Text.Wrap
+                }
+                QQC2.Label {
+                    text: step.modelData.jp
+                    font: KanteStyle.japaneseFont()
+                    color: KanteStyle.mutedTextColor
                 }
             }
         }

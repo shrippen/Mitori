@@ -407,14 +407,10 @@ V.session = () => {
 S.prSet = Object.assign({ n: 0, zufall: false, frueher: true }, S.prSet || {}); // n = 0: alle
 const swb = (on, js) => `<button class="sw ${on ? "on" : ""}" onclick="${js}"></button>`;
 /* Prüfungsstoff eines Grades. Shinki Toho: Shoden = Kamae (als ein Punkt) und Ô-dachi 1–11, danach nur die Formen. */
-const KAMAE_PR = { id: "shinkitoho/kamae", disc: "shinkitoho", grade: "shoden", title: "Kamae", jp: "構", gruppe: "Kamae|構", meta: "Shoden" };
-const _findEintrag = findEintrag;
-findEintrag = id => id === KAMAE_PR.id ? KAMAE_PR : _findEintrag(id);
 function prStoff(did, g){
   const es = uebbar(eintraege(did, g)).map(e => Object.assign({ disc: did }, e));
   if (did !== "shinkitoho") return es;
-  const formen = es.filter(e => e.id.startsWith("shinkitoho/odachi/"));
-  return g === "shoden" ? [KAMAE_PR, ...formen] : formen;
+  return es.filter(e => e.id === "shinkitoho/kamae" || e.id.startsWith("shinkitoho/odachi/"));
 }
 V.pruefung = () => {
   const d = disc(S.disc), g = S.grade[S.disc], gname = d.grade.find(x => x.id === g).name;

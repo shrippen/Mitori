@@ -88,6 +88,36 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Shinki Toho Shoden: the Kamae exercise is one row; its sheet lists the 26 positions.
+    function test_2g_kamae_sheet() {
+        failOnWarning(/ReferenceError|TypeError/)
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        const page = push("ProgrammePage")
+        const kamae = page.rows.filter(r => r.kind === "entry" && r.id.startsWith("shinkitoho/kamae"))
+        compare(kamae.length, 1)
+        compare(kamae[0].id, "shinkitoho/kamae")
+        page.open(kamae[0])
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        compare(sheet.steps.length, 26)
+        tryVerify(() => findChildren(sheet.contentItem, "sheetStep").length === 26)
+        const steps = findChildren(sheet.contentItem, "sheetStep")
+        compare(steps[2].modelData.title, "Seigan")
+        compare(steps[11].modelData.title, "Seigan")
+        shot("2g-sheet-kamae", true)
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        // A technique without positions shows none.
+        page.open(page.rows.find(r => r.kind === "entry" && r.id.startsWith("shinkitoho/odachi/")))
+        tryVerify(() => sheet.opened)
+        compare(sheet.steps.length, 0)
+        compare(findChildren(sheet.contentItem, "sheetStep").length, 0)
+        sheet.close()
+        tryVerify(() => !sheet.opened)
+        window.pageStack.pop()
+    }
+
     // Rating in the sheet: the list row shows the level as dots, the sheet the last rating.
     function test_2d_rate_in_sheet() {
         Programme.discipline = "aikido"
