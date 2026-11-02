@@ -62,6 +62,17 @@
     </message>
 </context>
 <context>
+    <name>PlayerView</name>
+    <message numerus="yes">
+        <location filename="../qml/PlayerView.qml" line="337"/>
+        <source>%n technique(s) practised today. They count as a practice day in the statistics.</source>
+        <translation>
+            <numerusform>%n technique practised today. It counts as a practice day in the statistics.</numerusform>
+            <numerusform>%n techniques practised today. They count as a practice day in the statistics.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>SearchPage</name>
     <message numerus="yes">
         <location filename="../qml/SearchPage.qml" line="121"/>
@@ -184,11 +195,11 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="128"/>
-        <source>%n of %1 with a video come(s) into the training; practise the others from the list below.</source>
+        <location filename="../qml/TodayPage.qml" line="126"/>
+        <source>%n of them without a video on this device: the training shows their name, practise from memory.</source>
         <translation>
-            <numerusform>%n of %1 has a video and comes into the training; practise the others from the list below.</numerusform>
-            <numerusform>%n of %1 have a video and come into the training; practise the others from the list below.</numerusform>
+            <numerusform>%n of them has no video on this device: the training shows its name, practise it from memory.</numerusform>
+            <numerusform>%n of them have no video on this device: the training shows their names, practise them from memory.</numerusform>
         </translation>
     </message>
 </context>

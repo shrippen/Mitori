@@ -24,6 +24,8 @@ Kirigami.Page {
     readonly property alias duration: view.duration
     readonly property alias rate: view.rate
     readonly property alias trainingDone: view.trainingDone
+    readonly property alias practisedCount: view.practisedCount
+    readonly property alias hasVideo: view.hasVideo
     function go(direction) { view.go(direction) }
     function jump(ms) { view.jump(ms) }
     function step(direction) { view.step(direction) }

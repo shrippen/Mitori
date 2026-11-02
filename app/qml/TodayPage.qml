@@ -28,7 +28,7 @@ Kirigami.ScrollablePage {
     readonly property int unsure: due.filter(r => r.level === 1 || r.level === 2).length
     readonly property int longAgo: due.filter(r => r.level >= 3).length
     readonly property int fresh: due.filter(r => r.level === 0).length
-    // The due ones the player can show (videos on the device); the others are practised from the list.
+    // The due ones with a video on the device; the hint counts the others (a card in the training).
     readonly property var playable: due.filter(r => !!r.video && Videos.available(r.video.video))
     // An exam planned in this discipline (Courses): its hint leads to the mock exam.
     readonly property var exam: Courses.revision >= 0 ? Courses.nextExam(discipline) : ({})
@@ -45,8 +45,9 @@ Kirigami.ScrollablePage {
         return qsTr("not practised for %n day(s)", "", row.days)
     }
 
+    // Every due technique; one without a video on the device shows as a card in the player.
     function startTraining() {
-        const playlist = page.playable
+        const playlist = page.due
         if (playlist.length === 0) {
             return
         }
@@ -114,7 +115,6 @@ Kirigami.ScrollablePage {
         }
         KanteButton {
             visible: page.due.length > 0
-            enabled: page.playable.length > 0
             emphasis: KanteButton.Emphasis.Primary
             icon.name: "media-playback-start"
             text: qsTr("Start training")
@@ -123,10 +123,7 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             visible: page.due.length > 0 && page.playable.length < page.due.length
-            text: page.playable.length === 0
-                  ? qsTr("None of them has a video on this device: practise them from the list below.")
-                  : qsTr("%n of %1 with a video come(s) into the training; practise the others from the list below.", "", page.playable.length)
-                        .arg(page.due.length)
+            text: qsTr("%n of them without a video on this device: the training shows their name, practise from memory.", "", page.due.length - page.playable.length)
             color: KanteStyle.mutedTextColor
             wrapMode: Text.Wrap
         }

@@ -364,6 +364,7 @@ TestCase {
         const page = push("PlayerPage", { playlist: rows, index: 0 })
         const stage = findChild(page, "stage")
         verify(stage)
+        stage.visible = true    // without a video a card stands for the stage; the gesture needs it
         wait(800)       // Kirigami slides the page in (disabled meanwhile)
         verify(stage.height > 100, "stage " + stage.width + "×" + stage.height)
         const brightness = Levels.brightness
@@ -566,6 +567,55 @@ TestCase {
         }
         verify(player.trainingDone)
         verify(findChild(player, "trainingDone").visible)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === today)
+        window.pageStack.pop()
+    }
+
+    // Training without videos (CI): every due technique comes in, shown as a card, with the
+    // playlist (✓, tap jumps), the position and an end hint with the count.
+    function test_7c_training_list() {
+        Programme.discipline = "daitoryu"
+        Programme.setGrade("daitoryu", "k4")
+        const today = push("TodayPage")
+        verify(today.due.length >= 2, "Daitoryu 4. Kyu has due techniques")
+        today.startTraining()
+        tryVerify(() => window.pageStack.currentItem.training === true)
+        const player = window.pageStack.currentItem
+        compare(player.playlist.length, today.due.length, "every due technique, with or without a video")
+
+        // Position and the card standing for a missing video.
+        const place = findChild(player, "placeText")
+        verify(place.text.endsWith("1 / " + player.playlist.length), place.text)
+        verify(place.text.indexOf(player.current.gradeName) >= 0, place.text)
+        if (!player.hasVideo) {
+            verify(findChild(player, "noVideoCard").visible)
+            verify(!findChild(player, "stage").visible)
+        }
+
+        // The playlist: one numbered row each, the current one selected, a tap jumps.
+        const rows = findChildren(player, "trainingRow")
+        compare(rows.length, player.playlist.length)
+        verify(rows[0].selected)
+        verify(rows[1].text.startsWith("2. "), rows[1].text)
+        rows[1].clicked()
+        compare(player.index, 1)
+        verify(rows[1].selected && !rows[0].selected)
+        verify(place.text.endsWith("2 / " + player.playlist.length), place.text)
+        shot("7c-training-list")
+
+        // Rating ticks the row; all rated: the end hint counts them.
+        const before = player.practisedCount
+        findPicker(player, player.current.id).picked(3)
+        verify(rows[1].done)
+        compare(player.practisedCount, before + 1)
+        for (let i = 0; i < player.playlist.length; ++i) {
+            if (!Practice.ratedToday(player.playlist[i].id)) {
+                Practice.rate(player.playlist[i].id, 2)
+            }
+        }
+        verify(player.trainingDone)
+        verify(findChild(player, "trainingDone").text.indexOf(String(player.playlist.length)) >= 0)
         window.pageStack.pop()
         tryVerify(() => window.pageStack.currentItem === today)
         window.pageStack.pop()
