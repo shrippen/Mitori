@@ -9,7 +9,8 @@ import Mitori
 
 // Statistics (clickdummy "Statistik"): the last 30 days in two figures, the practice days of the
 // last half year on a calendar, and how each grade of a discipline sits. A technique counts once
-// a day it was rated. Exam rounds and "my grades" come with their features (ROADMAP.md).
+// a day it was rated; the average of the last exam rounds of the discipline. "My grades" come
+// with their feature (ROADMAP.md).
 Kirigami.ScrollablePage {
     id: page
 
@@ -33,6 +34,19 @@ Kirigami.ScrollablePage {
         return { days: days.length, techniques: days.reduce((sum, d) => sum + page.perDay[d], 0) }
     }
     property string discipline: Programme.discipline
+    // The last eight exam rounds of the discipline, oldest first.
+    readonly property var rounds: Practice.revision >= 0 ? Practice.rounds(discipline, 8) : []
+    // Smallest bar of the exam chart, in averages above 1 (rounds to 1 in the read-out).
+    readonly property real minBar: 0.04
+
+    function averageText(value) {
+        const rounded = Math.round(value * 10) / 10
+        return Number.isInteger(rounded) ? String(rounded) : rounded.toLocaleString(Qt.locale(), "f", 1)
+    }
+    function roundText(round) {
+        const grade = Programme.grades(page.discipline).find(g => g.id === round.grade)
+        return [grade ? grade.name : round.grade, qsTr("%n technique(s)", "", round.count), qsTr("average")].join(" · ")
+    }
 
     // Techniques on a day as a level of the calendar: 1–2, 3–5, 6–9, 10 and more (finer than the
     // clickdummy's 1–4 … 13+: a session rates a handful of techniques).
@@ -168,6 +182,46 @@ Kirigami.ScrollablePage {
         KanteLegend {
             Layout.fillWidth: true
             model: [4, 3, 2, 1, 0].map(l => ({ color: KanteStyle.levelColor(l), text: Practice.levelNames[l] }))
+        }
+
+        // Exam mode: the average rating of each of the last rounds of the discipline. The scale
+        // runs from 1 (seen) to 4 (exam-ready): the bars stand on 1, the axis adds it back. A round
+        // of all 1 gets a sliver (minBar, read out as 1), else it would show no bar at all.
+        KanteSectionLabel {
+            text: qsTr("Exam mode · average per round")
+        }
+        KanteBarChart {
+            id: examChart
+
+            objectName: "examChart"
+            Layout.fillWidth: true
+            Layout.preferredHeight: KanteStyle.unit(160)
+            visible: page.rounds.length > 0
+            values: page.rounds.map(r => Math.max(r.average - 1, page.minBar))
+            labels: page.rounds.map(r => r.at.toLocaleDateString(Qt.locale(), qsTr("M/d", "date under a bar")))
+            maxValue: 3
+            axis: true
+            axisTitle: qsTr("Average")
+            formatter: v => page.averageText(v + 1)
+            // The read-out names the round: date (its title), grade, techniques and average.
+            partNames: hoverIndex >= 0 && hoverIndex < page.rounds.length ? [page.roundText(page.rounds[hoverIndex])] : []
+            Accessible.name: qsTr("Exam mode, average per round")
+
+            // Touch has no hover: a tap shows the read-out of its bar.
+            TapHandler {
+                onTapped: point => examChart.hoverIndex = examChart.barAt(point.position.x)
+            }
+        }
+        QQC2.Label {
+            objectName: "examRoundsText"
+            Layout.fillWidth: true
+            text: page.rounds.length > 0
+                  ? qsTr("Vertical: average of the ratings (1 %1 … 4 %2). Horizontal: date of the round.")
+                        .arg(Practice.levelNames[1]).arg(Practice.levelNames[4])
+                  : qsTr("No round in the exam mode yet.")
+            color: KanteStyle.mutedTextColor
+            font: KanteStyle.smallFont
+            wrapMode: Text.Wrap
         }
     }
 }

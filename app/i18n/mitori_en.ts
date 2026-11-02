@@ -13,6 +13,17 @@
     </message>
 </context>
 <context>
+    <name>ExamPage</name>
+    <message numerus="yes">
+        <location filename="../qml/ExamPage.qml" line="71"/>
+        <source>%n point(s)</source>
+        <translation>
+            <numerusform>%n point</numerusform>
+            <numerusform>%n points</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>SearchPage</name>
     <message numerus="yes">
         <location filename="../qml/SearchPage.qml" line="121"/>
@@ -34,7 +45,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="111"/>
+        <location filename="../qml/StartPage.qml" line="129"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>
@@ -45,7 +56,8 @@
 <context>
     <name>StatsPage</name>
     <message numerus="yes">
-        <location filename="../qml/StatsPage.qml" line="104"/>
+        <location filename="../qml/StatsPage.qml" line="48"/>
+        <location filename="../qml/StatsPage.qml" line="118"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>

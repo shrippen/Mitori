@@ -317,3 +317,74 @@ bool Practice::deleteNote(const QString &uid)
     noteSaved(ok);
     return ok;
 }
+
+bool Practice::saveRound(const QString &discipline, const QString &grade, const QVariantList &results)
+{
+    if (!m_open || results.isEmpty()) {
+        return false;
+    }
+    // Every point rated before anything is written.
+    int sum = 0;
+    QList<PracticeLog::Rating> ratings;
+    for (const QVariant &r : results) {
+        const QVariantMap point = r.toMap();
+        const int level = point.value(QStringLiteral("level")).toInt();
+        if (level < 1 || level > 4) {
+            m_error = tr("Not every point of the exam round is rated.");
+            emit errorChanged();
+            return false;
+        }
+        sum += level;
+        for (const QString &entry : point.value(QStringLiteral("ids")).toStringList()) {
+            PracticeLog::Rating rating;
+            rating.entry = entry;
+            rating.level = level;
+            ratings << rating;
+        }
+    }
+
+    // Ratings and round in one transaction: kept whole or not at all.
+    PracticeLog::ExamRound round;
+    round.at = QDateTime::currentDateTimeUtc();
+    round.discipline = discipline;
+    round.grade = grade;
+    round.count = int(results.size());
+    round.average = double(sum) / results.size();
+    round.device = deviceId();
+    const PracticeLog::SavedRound saved = m_log->addRound(round, ratings);
+    if (saved.round.uid.isEmpty()) {
+        m_error = tr("The exam round could not be saved: %1").arg(m_log->errorString());
+        qWarning("Practice: %s", qPrintable(m_error));
+        emit errorChanged();
+        return false;
+    }
+
+    for (const PracticeLog::Rating &r : saved.ratings) {
+        m_latest.insert(r.entry, r);
+        if (!m_first.contains(r.entry)) {
+            m_first.insert(r.entry, r.at.toLocalTime().date());
+        }
+    }
+    ++m_revision;
+    emit changed();
+    if (!m_error.isEmpty()) {
+        m_error.clear();
+        emit errorChanged();
+    }
+    return true;
+}
+
+QVariantList Practice::rounds(const QString &discipline, int limit) const
+{
+    QVariantList result;
+    if (!m_open || limit <= 0) {
+        return result;
+    }
+    for (const PracticeLog::ExamRound &r : m_log->rounds(discipline, limit)) {
+        result << QVariantMap{{QStringLiteral("at"), r.at.toLocalTime()},
+                              {QStringLiteral("grade"), r.grade},
+                              {QStringLiteral("count"), r.count},
+                              {QStringLiteral("average"), r.average}};
+    }
+    return result;
+}

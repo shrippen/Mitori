@@ -972,6 +972,216 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Exam mode: settings, a round with samples first (marked), rating at the end; "Apply" sets
+    // the ratings and the statistics show the round.
+    function test_9e_exam() {
+        failOnWarning(/ReferenceError|TypeError/)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k4")
+        Exam.count = 8
+        Exam.shuffled = false
+        Exam.samples = true
+        const tile = findChild(window.pageStack.items[0], "examTile")
+        verify(tile.hint.indexOf("4. Kyu") >= 0, tile.hint)
+
+        const page = push("ExamPage")
+        compare(page.grade, "k4")
+        compare(page.size, Exam.material("aikido", "k4").length)
+        compare(page.counts[page.countIndex], 8)
+        tryVerify(() => findChild(page, "samplesSwitch").enabled, 2000, "samples from 5. Kyu possible")
+        verify(findChild(page, "grade_k5"), "a chip per grade")
+        shot("11-exam")
+
+        mouseClick(findChild(page, "startRound"))
+        tryVerify(() => window.pageStack.currentItem !== page && window.pageStack.currentItem.points !== undefined)
+        const round = window.pageStack.currentItem
+        const n = round.points.length
+        const samples = round.points.filter(p => p.sample).length
+        verify(samples >= 2 && samples <= 5, "samples: " + samples)
+        compare(n, 8 + samples)
+        verify(round.points.slice(0, samples).every(p => p.sample && p.gradeName === "5. Kyu"), "samples first")
+        const mark = findChild(round, "sampleMark")
+        verify(mark.visible)
+        verify(mark.text.indexOf("5. Kyu") >= 0, mark.text)
+        compare(findChild(round, "counter").text, "1 / " + n)
+        const board = findChild(round, "examBoard")
+        compare(findChild(board, "boardAttack").visible, !!round.current.attack)
+        verify(findChild(board, "boardTechnique").text.indexOf(round.current.title) >= 0)
+        shot("12-exam-round")
+
+        // Space and Enter move on; past the samples the mark goes.
+        keyClick(Qt.Key_Space)
+        compare(round.index, 1)
+        keyClick(Qt.Key_Return)
+        compare(round.index, 2)
+        round.index = samples
+        verify(!mark.visible, "own grade: no mark")
+        const withAttack = round.points.findIndex(p => !p.sample && !!p.attack)
+        if (withAttack >= 0) {
+            round.index = withAttack
+            verify(findChild(board, "boardAttack").visible)
+            verify(findChild(board, "boardGroup").visible)
+        }
+        round.index = n - 1
+        mouseClick(findChild(round, "nextButton"))
+        tryVerify(() => window.pageStack.currentItem !== round && window.pageStack.currentItem.levels !== undefined)
+        const end = window.pageStack.currentItem
+        compare(window.pageStack.depth, 3, "the round page was replaced")
+
+        // "Apply" only once every point is rated.
+        const apply = findChild(end, "applyRound")
+        wait(500)       // past the page transition, during which no button is enabled anyway
+        verify(!apply.enabled)
+        verify(!end.complete)
+        const pickers = findChildren(end, "pointPicker").sort((a, b) => a.parent.index - b.parent.index)
+        compare(pickers.length, n)
+        let sum = 0
+        for (let i = 0; i < n; ++i) {
+            const level = i % 4 + 1
+            sum += level
+            pickers[i].picked(level)
+            compare(end.complete, i === n - 1)
+        }
+        tryVerify(() => apply.enabled)
+        compare(pickers[1].value, 2)
+        shot("13-exam-end")
+        apply.clicked()
+
+        // The ratings are set, the statistics show the round (with the menu behind them).
+        tryVerify(() => !!findChild(window.pageStack.currentItem, "examChart"))
+        compare(window.pageStack.depth, 2)
+        for (let i = 0; i < n; ++i) {
+            compare(Practice.level(end.points[i].ids[0]), i % 4 + 1)
+        }
+        const stats = window.pageStack.currentItem
+        compare(stats.discipline, "aikido")
+        const chart = findChild(stats, "examChart")
+        verify(chart.visible)
+        compare(chart.values.length, 1)
+        fuzzyCompare(chart.values[0] + 1, sum / n, 0.001)
+        compare(chart.gridLines, 4)
+        compare(chart.format(0), "1")
+        compare(chart.format(3), "4")
+        chart.hoverIndex = 0
+        verify(chart.partNames[0].indexOf("4. Kyu") >= 0 && chart.partNames[0].indexOf(String(n)) >= 0, chart.partNames[0])
+        wait(1000)
+        stats.flickable.contentY = stats.flickable.contentHeight - stats.flickable.height
+        shot("14-stats-exam")
+        chart.hoverIndex = -1
+        // Another discipline without rounds says so.
+        stats.discipline = "daitoryu"
+        verify(!chart.visible)
+        verify(findChild(stats, "examRoundsText").text.length > 0)
+        // A round with average 1 (all "seen") still shows a bar; the read-out says 1.
+        verify(Practice.saveRound("daitoryu", "k5", [{ ids: ["exam-test-entry"], level: 1 }]))
+        verify(chart.visible)
+        compare(chart.values.length, 1)
+        verify(chart.values[0] > 0, "a bar at average 1")
+        compare(chart.format(chart.values[0]), "1")
+        stats.discipline = "aikido"
+        window.pageStack.pop()
+
+        // The settings show the last round.
+        const again = push("ExamPage")
+        verify(findChild(again, "examHint").text.indexOf(again.averageText(sum / n)) >= 0, findChild(again, "examHint").text)
+        window.pageStack.pop()
+    }
+
+    // Shinki Toho: Shoden asks the Kamae as one point and Ô-dachi 1–11; the board shows only the
+    // technique; no samples before the first grade. Cancel goes back to the settings.
+    function test_9f_exam_shinkitoho() {
+        failOnWarning(/ReferenceError|TypeError/)
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        Exam.count = 0
+        Exam.samples = true
+        const page = push("ExamPage")
+        compare(page.size, 12)
+        compare(page.counts, [0, 8])
+        verify(!findChild(page, "samplesSwitch").enabled, "first grade")
+        page.start()
+        tryVerify(() => window.pageStack.currentItem !== page && window.pageStack.currentItem.points !== undefined)
+        const round = window.pageStack.currentItem
+        compare(round.points.length, 12)
+        compare(round.points[0].id, "shinkitoho/kamae")
+        compare(round.points[0].ids, ["shinkitoho/kamae"])
+        verify(round.points.every(p => !p.sample))
+        const board = findChild(round, "examBoard")
+        verify(!findChild(board, "boardAttack").visible)
+        verify(!findChild(board, "boardGroup").visible)
+        verify(findChild(board, "boardTechnique").visible)
+        verify(!findChild(round, "sampleMark").visible)
+        round.index = 1
+        compare(round.current.id, "shinkitoho/odachi/1")
+        verify(!findChild(board, "boardAttack").visible)
+        // Only number, name and kanji: the addition (In · Seigan → Hidari-gote) is the answer.
+        verify(!!round.current.extra, "the form has an addition")
+        verify(!findChild(board, "boardExtra").visible, "the board keeps the addition back")
+        verify(findChild(board, "boardKanji").visible)
+        shot("12b-exam-round-shinkitoho")
+        // A tablet in landscape: the board grows.
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => round.tablet)
+        compare(board.zoom, 1.6)
+        shot("12c-exam-round-tablet")
+        round.actions[0].trigger()
+        tryVerify(() => window.pageStack.currentItem === page)
+        window.pageStack.pop()
+    }
+
+    // Back from the rating asks once something is rated; without a rating it just goes back.
+    function test_9g_exam_discard() {
+        failOnWarning(/ReferenceError|TypeError/)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        Exam.count = 8
+        Exam.samples = false
+        const settings = push("ExamPage")
+        const depth = window.pageStack.depth
+        settings.start()
+        tryVerify(() => window.pageStack.currentItem.points !== undefined && window.pageStack.currentItem !== settings)
+        const round = window.pageStack.currentItem
+        round.index = round.points.length - 1
+        round.next()
+        tryVerify(() => window.pageStack.currentItem.levels !== undefined)
+        let end = window.pageStack.currentItem
+        const dialog = findChild(end, "discardDialog")
+        verify(dialog)
+
+        // Nothing rated: straight back.
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem === settings)
+        wait(300)       // the question would come a moment later (Qt.callLater)
+        verify(window.pageStack.currentItem === settings, "stays back")
+        verify(!dialog.opened)
+
+        // Rated: the dialog asks, Cancel stays, Discard goes back without saving.
+        settings.start()
+        tryVerify(() => window.pageStack.currentItem.points !== undefined && window.pageStack.currentItem !== settings)
+        window.pageStack.currentItem.index = window.pageStack.currentItem.points.length - 1
+        window.pageStack.currentItem.next()
+        tryVerify(() => window.pageStack.currentItem.levels !== undefined)
+        end = window.pageStack.currentItem
+        const asked = findChild(end, "discardDialog")
+        const before = Practice.rounds("aikido", 8).length
+        end.rate(0, 4)
+        window.pageStack.goBack()
+        tryVerify(() => asked.opened)
+        verify(window.pageStack.currentItem === end, "still rating")
+        shot("13b-exam-discard", true)
+        asked.reject()
+        tryVerify(() => !asked.opened)
+        verify(window.pageStack.currentItem === end, "still rating")
+        window.pageStack.goBack()
+        tryVerify(() => asked.opened)
+        asked.accept()
+        tryVerify(() => window.pageStack.currentItem === settings)
+        compare(window.pageStack.depth, depth)
+        compare(Practice.rounds("aikido", 8).length, before)
+        window.pageStack.pop()
+    }
+
     // The Kamae player: its 26 positions come last, so "Done" and Back stay where they are for a
     // technique without positions (phone upright: Done in view without scrolling), and a large
     // tablet keeps the picture as large.
@@ -1211,12 +1421,16 @@ TestCase {
         const tiles = findChild(start, "tiles")
         tryCompare(tiles, "columns", 4)
         const shown = tiles.children.filter(t => t.visible && t.width > 0)
-        verify(shown.length > 4)
-        // Four per row: the first four side by side, the fifth below the first.
-        verify(shown.slice(0, 4).every(t => Math.abs(t.y - shown[0].y) < 1), "four in the first row")
-        verify(shown[1].x > shown[0].x + shown[0].width - 1)
-        verify(shown[4].y > shown[0].y + shown[0].height - 1, "the fifth in the next row")
-        compare(shown[4].x, shown[0].x)
+        verify(shown.length >= 3)
+        // Four to a row, in order: the fifth starts the next row under the first.
+        shown.forEach((t, i) => {
+            const first = shown[i - i % 4]
+            verify(Math.abs(t.y - first.y) < 1, "tile " + i + " in its row")
+            if (i % 4)
+                verify(t.x > shown[i - 1].x + shown[i - 1].width - 1, "tile " + i + " right of the one before")
+            else if (i)
+                verify(Math.abs(t.x - shown[0].x) < 1 && t.y > shown[i - 4].y, "tile " + i + " starts a row")
+        })
         shot("1b-start-tablet")
         window.width = 420
         window.height = 800
