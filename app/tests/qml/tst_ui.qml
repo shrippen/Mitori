@@ -1051,7 +1051,7 @@ TestCase {
         tryVerify(() => !!findChild(window.pageStack.currentItem, "examChart"))
         compare(window.pageStack.depth, 2)
         for (let i = 0; i < n; ++i) {
-            compare(Practice.level(end.points[i].ids[0]), i % 4 + 1)
+            compare(Practice.level(end.points[i].id), i % 4 + 1)
         }
         const stats = window.pageStack.currentItem
         compare(stats.discipline, "aikido")
@@ -1073,7 +1073,7 @@ TestCase {
         verify(!chart.visible)
         verify(findChild(stats, "examRoundsText").text.length > 0)
         // A round with average 1 (all "seen") still shows a bar; the read-out says 1.
-        verify(Practice.saveRound("daitoryu", "k5", [{ ids: ["exam-test-entry"], level: 1 }]))
+        verify(Practice.saveRound("daitoryu", "k5", [{ id: "exam-test-entry", level: 1 }]))
         verify(chart.visible)
         compare(chart.values.length, 1)
         verify(chart.values[0] > 0, "a bar at average 1")
@@ -1104,7 +1104,6 @@ TestCase {
         const round = window.pageStack.currentItem
         compare(round.points.length, 12)
         compare(round.points[0].id, "shinkitoho/kamae")
-        compare(round.points[0].ids, ["shinkitoho/kamae"])
         verify(round.points.every(p => !p.sample))
         const board = findChild(round, "examBoard")
         verify(!findChild(board, "boardAttack").visible)
@@ -1421,7 +1420,7 @@ TestCase {
         const tiles = findChild(start, "tiles")
         tryCompare(tiles, "columns", 4)
         const shown = tiles.children.filter(t => t.visible && t.width > 0)
-        verify(shown.length >= 3)
+        verify(shown.length > 4, "a second row")
         // Four to a row, in order: the fifth starts the next row under the first.
         shown.forEach((t, i) => {
             const first = shown[i - i % 4]

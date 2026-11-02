@@ -31,7 +31,6 @@ QVariantMap point(const QVariantMap &row, const QString &group, const QVariantMa
     p[QStringLiteral("grade")] = grade.value(QStringLiteral("id"));
     p[QStringLiteral("gradeName")] = grade.value(QStringLiteral("name"));
     p[QStringLiteral("sample")] = false;
-    p[QStringLiteral("ids")] = QStringList{text(row, "id")};
     return p;
 }
 

@@ -75,10 +75,9 @@ public:
     Q_INVOKABLE bool changeNote(const QString &uid, const QString &text);
     Q_INVOKABLE bool deleteNote(const QString &uid);
 
-    // The end of an exam round: every point's rating ([{ids: [...], level: 1..4}]) goes into the
-    // log like any rating,
-    // and the round (date, discipline, grade, number of points, average) is kept for the
-    // statistics. False (and errorString set) when a level is missing or it could not be saved.
+    // The end of an exam round: every point's rating ([{id, level: 1..4}]) goes into the log
+    // like any rating, and the round (date, discipline, grade, number of points, average) is
+    // kept for the statistics. False (and errorString set) when a level is missing or it could not be saved.
     Q_INVOKABLE bool saveRound(const QString &discipline, const QString &grade, const QVariantList &results);
     // The last `limit` exam rounds of a discipline, oldest first: {at (local), grade, count, average}.
     Q_INVOKABLE QVariantList rounds(const QString &discipline, int limit) const;

@@ -63,7 +63,6 @@ private slots:
         for (const QVariant &p : points) {
             QVERIFY(!field(p, "group").isEmpty());
             QCOMPARE(field(p, "gradeName"), QStringLiteral("5. Kyu"));
-            QCOMPARE(p.toMap().value(QStringLiteral("ids")).toStringList(), QStringList{field(p, "id")});
         }
         QVERIFY(std::any_of(points.cbegin(), points.cend(), [](const QVariant &p) { return !field(p, "attack").isEmpty(); }));
         QVERIFY(exam.material(aikido, QStringLiteral("nope")).isEmpty());
@@ -78,7 +77,6 @@ private slots:
         QCOMPARE(shoden.size(), 12);
         QCOMPARE(field(shoden.first(), "id"), QString::fromLatin1(Exam::kKamaeId));
         QCOMPARE(field(shoden.first(), "jp"), QStringLiteral("構"));
-        QCOMPARE(shoden.first().toMap().value(QStringLiteral("ids")).toStringList(), QStringList{QString::fromLatin1(Exam::kKamaeId)});
         QCOMPARE(field(shoden.at(1), "id"), QStringLiteral("shinkitoho/odachi/1"));
         QCOMPARE(field(shoden.last(), "id"), QStringLiteral("shinkitoho/odachi/11"));
 

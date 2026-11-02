@@ -335,12 +335,10 @@ bool Practice::saveRound(const QString &discipline, const QString &grade, const 
             return false;
         }
         sum += level;
-        for (const QString &entry : point.value(QStringLiteral("ids")).toStringList()) {
-            PracticeLog::Rating rating;
-            rating.entry = entry;
-            rating.level = level;
-            ratings << rating;
-        }
+        PracticeLog::Rating rating;
+        rating.entry = point.value(QStringLiteral("id")).toString();
+        rating.level = level;
+        ratings << rating;
     }
 
     // Ratings and round in one transaction: kept whole or not at all.

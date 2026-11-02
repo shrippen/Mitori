@@ -421,28 +421,27 @@ private slots:
         QVERIFY(all.first().toMap().value(QStringLiteral("created")).toDateTime().isValid());
     }
 
-    // An exam round: every point's rating goes into the log (a point may stand for several
-    // entries), the round is kept with its average; a round with a point unrated is refused whole.
+    // An exam round: every point's rating goes into the log, the round is kept with its average;
+    // a round with a point unrated is refused whole.
     void examRoundSaved()
     {
         QTemporaryDir dir;
         const QString path = dir.filePath(QStringLiteral("mitori.sqlite"));
         {
             Practice practice(path);
-            const QVariantList unrated{QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("a")}}, {QStringLiteral("level"), 3}},
-                                       QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("b")}}, {QStringLiteral("level"), 0}}};
+            const QVariantList unrated{QVariantMap{{QStringLiteral("id"), QStringLiteral("a")}, {QStringLiteral("level"), 3}},
+                                       QVariantMap{{QStringLiteral("id"), QStringLiteral("b")}, {QStringLiteral("level"), 0}}};
             QVERIFY(!practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), unrated));
             QCOMPARE(practice.level(QStringLiteral("a")), 0);
             QVERIFY(practice.rounds(QStringLiteral("aikido"), 8).isEmpty());
 
-            const QVariantList results{QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("a")}}, {QStringLiteral("level"), 3}},
-                                       QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("k1"), QStringLiteral("k2")}}, {QStringLiteral("level"), 2}}};
+            const QVariantList results{QVariantMap{{QStringLiteral("id"), QStringLiteral("a")}, {QStringLiteral("level"), 3}},
+                                       QVariantMap{{QStringLiteral("id"), QStringLiteral("k")}, {QStringLiteral("level"), 2}}};
             QSignalSpy spy(&practice, &Practice::changed);
             QVERIFY(practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), results));
             QVERIFY(spy.count() >= 1);
             QCOMPARE(practice.level(QStringLiteral("a")), 3);
-            QCOMPARE(practice.level(QStringLiteral("k1")), 2);
-            QCOMPARE(practice.level(QStringLiteral("k2")), 2);
+            QCOMPARE(practice.level(QStringLiteral("k")), 2);
             QVERIFY(practice.saveRound(QStringLiteral("daitoryu"), QStringLiteral("k5"), results));
         }
         // Kept across starts, per discipline.
@@ -479,17 +478,36 @@ private slots:
         const QString path = dir.filePath(QStringLiteral("mitori.sqlite"));
         {
             Practice practice(path);
-            const QVariantList results{QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("a")}}, {QStringLiteral("level"), 3}},
-                                       QVariantMap{{QStringLiteral("ids"), QStringList{QString()}}, {QStringLiteral("level"), 2}}};
+            const QVariantList results{QVariantMap{{QStringLiteral("id"), QStringLiteral("a")}, {QStringLiteral("level"), 3}},
+                                       QVariantMap{{QStringLiteral("id"), QString()}, {QStringLiteral("level"), 2}}};
             QSignalSpy spy(&practice, &Practice::changed);
             QVERIFY(!practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), results));
             QCOMPARE(practice.level(QStringLiteral("a")), 0);
             QCOMPARE(spy.count(), 0);
             QVERIFY(practice.rounds(QStringLiteral("aikido"), 8).isEmpty());
+            // The failed round is rolled back: the next one is saved.
+            const QVariantList next{QVariantMap{{QStringLiteral("id"), QStringLiteral("b")}, {QStringLiteral("level"), 4}}};
+            QVERIFY2(practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), next), qPrintable(practice.errorString()));
         }
         Practice again(path);
         QCOMPARE(again.level(QStringLiteral("a")), 0);
-        QVERIFY(again.rounds(QStringLiteral("aikido"), 8).isEmpty());
+        QCOMPARE(again.level(QStringLiteral("b")), 4);
+        QCOMPARE(again.rounds(QStringLiteral("aikido"), 8).size(), 1);
+    }
+
+    // The error names the last failure, not an earlier one.
+    void examRoundErrorIsFresh()
+    {
+        QTemporaryDir dir;
+        PracticeLog log;
+        QVERIFY(log.open(dir.filePath(QStringLiteral("log.sqlite"))));
+        QVERIFY(log.addRound(PracticeLog::ExamRound{}, {}).round.uid.isEmpty());
+        QVERIFY(log.errorString().contains(QStringLiteral("incomplete")));
+        const PracticeLog::ExamRound round{QString(), QDateTime::currentDateTimeUtc(), QStringLiteral("aikido"), QStringLiteral("k5"), 1, 2.0, QStringLiteral("d")};
+        PracticeLog::Rating empty;
+        empty.level = 2;
+        QVERIFY(log.addRound(round, {empty}).round.uid.isEmpty());
+        QVERIFY2(log.errorString().contains(QStringLiteral("invalid")), qPrintable(log.errorString()));
     }
 
     // A point without a rating: nothing is written, and the error says why.
@@ -497,8 +515,8 @@ private slots:
     {
         QTemporaryDir dir;
         Practice practice(dir.filePath(QStringLiteral("mitori.sqlite")));
-        const QVariantList results{QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("a")}}, {QStringLiteral("level"), 3}},
-                                   QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("b")}}}};
+        const QVariantList results{QVariantMap{{QStringLiteral("id"), QStringLiteral("a")}, {QStringLiteral("level"), 3}},
+                                   QVariantMap{{QStringLiteral("id"), QStringLiteral("b")}}};
         QVERIFY(!practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), results));
         QCOMPARE(practice.errorString(), QStringLiteral("Not every point of the exam round is rated."));
         QCOMPARE(practice.level(QStringLiteral("a")), 0);
@@ -531,7 +549,7 @@ private slots:
             QCOMPARE(practice.errorString(), QString());
             QCOMPARE(practice.level(QStringLiteral("e")), 3);
             QCOMPARE(practice.notes(QStringLiteral("e")).size(), 1);
-            const QVariantList results{QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("e")}}, {QStringLiteral("level"), 4}}};
+            const QVariantList results{QVariantMap{{QStringLiteral("id"), QStringLiteral("e")}, {QStringLiteral("level"), 4}}};
             QVERIFY(practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), results));
             QCOMPARE(practice.rounds(QStringLiteral("aikido"), 8).size(), 1);
         }
@@ -541,6 +559,16 @@ private slots:
         QCOMPARE(again.level(QStringLiteral("e")), 4);
         QCOMPARE(again.lastNote(QStringLiteral("e")).value(QStringLiteral("text")).toString(), QStringLiteral("Hüfte"));
         QCOMPARE(again.rounds(QStringLiteral("aikido"), 8).size(), 1);
+        {
+            QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("v4"));
+            db.setDatabaseName(path);
+            QVERIFY(db.open());
+            QSqlQuery q(db);
+            QVERIFY(q.exec(QStringLiteral("PRAGMA user_version")) && q.next());
+            QCOMPARE(q.value(0).toInt(), PracticeLog::schemaVersion);
+            db.close();
+        }
+        QSqlDatabase::removeDatabase(QStringLiteral("v4"));
     }
 
     void deviceIdStays()
