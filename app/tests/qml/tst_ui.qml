@@ -501,7 +501,7 @@ TestCase {
         const total = page.all.length
         verify(total >= 2)
         compare(page.all[0].text, "verwaist", "newest first")
-        verify(page.days[0].notes.length >= 2)
+        verify(page.shown.filter(n => n.day === page.shown[0].day).length >= 2, "both today")
         wait(500)       // Kirigami slides the page in
         mouseClick(findChild(page, "filter_daitoryu"))
         tryVerify(() => page.filter === "daitoryu")
@@ -521,6 +521,31 @@ TestCase {
         tryVerify(() => editor.opened, 2000, "press and hold opens the editor")
         editor.close()
         tryVerify(() => !editor.opened)
+        // A virtual list: delegates for the visible notes, not for every note.
+        const list = findChild(page, "notesList")
+        verify(list && list.count !== undefined, "a ListView")
+        // An empty filter says so.
+        page.filter = "shinkitoho"
+        if (page.shown.length === 0) {
+            compare(findChild(page, "count").text, qsTr("No notes in this discipline."))
+        }
+        page.filter = ""
+        // The orphan is named as such.
+        const orphan = page.all.find(n => n.entry === "not-in-the-programme")
+        compare(page.techniqueName(orphan.technique), qsTr("Technique no longer in the programme"))
+        // Notes → All notes → Notes → All notes does not pile up: the action goes back.
+        const depth = window.pageStack.depth
+        page.open(page.shown.find(n => n.technique.title))
+        tryVerify(() => window.pageStack.depth === depth + 1)
+        window.pageStack.currentItem.actions[0].trigger()
+        tryVerify(() => window.pageStack.depth === depth, 2000, "back to the list instead of a new one")
+        compare(window.pageStack.currentItem, page)
+        // The filter is kept for the next time.
+        page.filter = "daitoryu"
+        window.pageStack.pop()
+        const again = push("AllNotesPage")
+        compare(again.filter, "daitoryu")
+        again.filter = ""
         window.pageStack.pop()
     }
 
