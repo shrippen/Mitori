@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QCryptographicHash>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -107,6 +108,7 @@ private:
         std::unique_ptr<BundleCrypto::Decryptor> decryptor;
         QCryptographicHash sha{QCryptographicHash::Sha256};
         qint64 received = 0;
+        QElapsedTimer shown;        // since the last progress report
     };
 
     void loadCache();

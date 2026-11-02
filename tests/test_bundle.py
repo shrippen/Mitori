@@ -97,3 +97,10 @@ def test_bundles_kennen_ihre_videos():
     videos = json.loads((WURZEL / "build" / "daten" / "mitori-daten.json").read_text(encoding="utf-8"))["videos"]
     alle = [v for b in bundle.definitionen().values() for v in b["videos"]]
     assert sorted(alle) == sorted(videos), "jedes Video in genau einem Bundle"
+
+
+def test_ids_sind_ordnernamen():
+    """Die App nimmt nur Ids aus Kleinbuchstaben, Ziffern und Bindestrichen (BundleShelf::validId)."""
+    assert all(bundle.ID.fullmatch(i) for i in bundle.definitionen())
+    for falsch in ("..", "/tmp", "a/b", "Aikido", ""):
+        assert not bundle.ID.fullmatch(falsch)

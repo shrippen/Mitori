@@ -667,9 +667,11 @@ TestCase {
         const page = push("VideosPage")
         tryCompare(Bundles, "manifestState", Bundles.ManifestState.Ready, 5000)
         tryVerify(() => findChildren(page, "bundleRow").length === 1)
-        // The rows are made anew with every change of the list: look them up each time.
         const row = () => findChildren(page, "bundleRow")[0]
         compare(row().bundleState, Bundles.State.Locked)
+        // A change of the list changes the row in place (a press on Cancel during a download
+        // meets the same button when it is let go).
+        const first = row()
         verify(!findChild(row(), "bundleAction").visible)
         const field = findChild(page, "codeField")
         const message = findChild(page, "codeMessage")
@@ -687,6 +689,8 @@ TestCase {
         verify(Videos.available("test/v"), "the bundle's video is on the device")
         compare(Videos.crop("test/v").h, undefined, "a bundle's file is cut already")
         verify(Bundles.size > 0)
+        compare(findChildren(page, "bundleRow").length, 1)
+        verify(row() === first, "the row stays through unlocking and loading")
         tryVerify(() => findChild(row(), "bundleAction").text === qsTr("Remove"))
         shot("15b-videos-loaded")
         mouseClick(findChild(row(), "bundleAction"))

@@ -7,6 +7,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QRegularExpression>
 #include <QSaveFile>
 #include <QStandardPaths>
 
@@ -46,6 +47,9 @@ void BundleShelf::load()
     const QJsonObject all = QJsonDocument::fromJson(file.readAll()).object();
     for (auto it = all.begin(); it != all.end(); ++it) {
         const QJsonObject o = it.value().toObject();
+        if (!validId(it.key())) {
+            continue;
+        }
         Bundle b;
         b.code = o.value(QStringLiteral("code")).toString();
         b.key = QByteArray::fromBase64(o.value(QStringLiteral("key")).toString().toLatin1());
@@ -90,6 +94,9 @@ bool BundleShelf::save() const
 
 bool BundleShelf::unlock(const QString &id, const QString &code, const QByteArray &key)
 {
+    if (!validId(id)) {
+        return false;
+    }
     Bundle &b = m_bundles[id];
     b.code = code;
     b.key = key;
@@ -98,6 +105,9 @@ bool BundleShelf::unlock(const QString &id, const QString &code, const QByteArra
 
 bool BundleShelf::installed(const QString &id, int version, const QHash<QString, QString> &files, const QStringList &cropped)
 {
+    if (!validId(id)) {
+        return false;
+    }
     Bundle &b = m_bundles[id];
     b.version = version;
     b.files = files;
@@ -107,7 +117,7 @@ bool BundleShelf::installed(const QString &id, int version, const QHash<QString,
 
 bool BundleShelf::remove(const QString &id)
 {
-    if (!m_bundles.contains(id)) {
+    if (!validId(id) || !m_bundles.contains(id)) {
         return false;
     }
     QDir(folder(id)).removeRecursively();
@@ -120,7 +130,15 @@ bool BundleShelf::remove(const QString &id)
 
 QString BundleShelf::folder(const QString &id) const
 {
+    Q_ASSERT(validId(id));
     return QDir(m_root).filePath(id);
+}
+
+// Lower case letters, digits and hyphens, as tools/bundle.py makes them.
+bool BundleShelf::validId(const QString &id)
+{
+    static const QRegularExpression plain(QStringLiteral("^[a-z0-9][a-z0-9-]*$"));
+    return plain.match(id).hasMatch();
 }
 
 QString BundleShelf::path(const QString &video) const

@@ -43,14 +43,18 @@ public:
     QHash<QString, Bundle> bundles() const { return m_bundles; }
     Bundle bundle(const QString &id) const { return m_bundles.value(id); }
 
-    // Keeps the code and key of a bundle (unlocked, not loaded yet); false when it cannot be saved.
+    // Keeps the code and key of a bundle (unlocked, not loaded yet); false when it cannot be saved
+    // or the id is not valid (as for installed and remove).
     bool unlock(const QString &id, const QString &code, const QByteArray &key);
     // A loaded version: its files (in folder(id)) and which are cropped.
     bool installed(const QString &id, int version, const QHash<QString, QString> &files, const QStringList &cropped);
     // The bundle's files go; code and key stay.
     bool remove(const QString &id);
 
+    // A bundle's folder; only for a valid id.
     QString folder(const QString &id) const;
+    // Whether an id (from the manifest) can name a folder: "aikido-kyu", not "..", "/x" or "a/b".
+    static bool validId(const QString &id);
     // The file of a video from a loaded bundle, or "" (then the video folder of the settings counts).
     QString path(const QString &video) const;
     bool cropped(const QString &video) const;

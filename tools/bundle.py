@@ -52,6 +52,7 @@ import datetime
 import hashlib
 import json
 import os
+import re
 import secrets
 import struct
 import subprocess
@@ -81,7 +82,8 @@ ARGON_M = 64 * 1024                             # KiB
 # ── Codes ──
 
 def pruefzeichen(zeichen):
-    """Luhn mod 32 über die Zeichen (Werte im Alphabet): fängt ein falsches und zwei vertauschte."""
+    """Luhn mod 32 über die Zeichen (Werte im Alphabet): fängt ein falsches und zwei vertauschte
+    Nachbarn, außer 0 und Z (Werte 0 und 31)."""
     summe, faktor = 0, 2
     for z in reversed(zeichen):
         wert = faktor * ALPHABET.index(z)
@@ -202,8 +204,16 @@ def schluessel(bundle):
     return p.read_bytes()
 
 
+# Ids werden Ordnernamen in der App (BundleShelf::validId): nur a-z, 0-9 und Bindestriche.
+ID = re.compile(r"[a-z0-9][a-z0-9-]*")
+
+
 def definitionen():
-    return {b["id"]: b for b in yaml.safe_load((WURZEL / "tools" / "bundles.yaml").read_text(encoding="utf-8"))["bundles"]}
+    liste = yaml.safe_load((WURZEL / "tools" / "bundles.yaml").read_text(encoding="utf-8"))["bundles"]
+    for b in liste:
+        if not ID.fullmatch(b["id"]):
+            sys.exit(f"bundles.yaml: Id „{b['id']}“ nur aus a-z, 0-9 und Bindestrichen")
+    return {b["id"]: b for b in liste}
 
 
 def videodaten():

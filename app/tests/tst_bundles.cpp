@@ -1,4 +1,6 @@
+#include <QCryptographicHash>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -7,7 +9,10 @@
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QTest>
+#include <QTimer>
 
 #include "bundles.h"
 
@@ -52,6 +57,52 @@ class TstBundles : public QObject
         }
         m.write(QJsonDocument(manifest).toJson());
         return QUrl::fromLocalFile(m.fileName());
+    }
+
+    // The manifest of a published test bundle, changed by `edit`.
+    template<typename Edit>
+    static void editManifest(const QUrl &manifest, Edit edit)
+    {
+        QFile m(manifest.toLocalFile());
+        if (!m.open(QIODevice::ReadOnly)) {
+            return;
+        }
+        QJsonObject o = QJsonDocument::fromJson(m.readAll()).object();
+        m.close();
+        edit(o);
+        if (m.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            m.write(QJsonDocument(o).toJson());
+        }
+    }
+
+    // A local HTTP server that sends `data` to every request in pieces of 16 KiB, one per turn of
+    // the event loop, as a slow network does.
+    static void serveInPieces(QTcpServer &server, const QByteArray &data)
+    {
+        QObject::connect(&server, &QTcpServer::newConnection, &server, [&server, data] {
+            QTcpSocket *socket = server.nextPendingConnection();
+            QObject::connect(socket, &QTcpSocket::readyRead, socket, [socket, data] {
+                if (!socket->readAll().contains("\r\n\r\n")) {
+                    return;
+                }
+                socket->write("HTTP/1.1 200 OK\r\nContent-Length: " + QByteArray::number(data.size())
+                              + "\r\nConnection: close\r\n\r\n");
+                auto *at = new qsizetype(0);
+                auto *timer = new QTimer(socket);
+                QObject::connect(timer, &QTimer::timeout, socket, [socket, timer, data, at] {
+                    if (*at >= data.size()) {
+                        timer->stop();
+                        delete at;
+                        socket->disconnectFromHost();
+                        return;
+                    }
+                    socket->write(data.mid(*at, 16 << 10));
+                    socket->flush();
+                    *at += 16 << 10;
+                });
+                timer->start(0);
+            });
+        });
     }
 
     static void waitReady(Bundles &b)
@@ -219,6 +270,88 @@ private slots:
         waitReady(b);
         QCOMPARE(b.manifestState(), Bundles::ManifestState::Failed);
         QCOMPARE(b.bundles().size(), 1);
+    }
+
+    // A bundle's id from the manifest goes into a path: one that is no plain name ("..", "/x")
+    // is no bundle, so nothing outside the shelf is loaded into or deleted.
+    void unsafeIdsAreNoBundles()
+    {
+        for (const QString &id : {u".."_s, u"/tmp"_s, u"a/b"_s, u"Test"_s, u""_s}) {
+            const QString name = u"unsafe-%1"_s.arg(QString::number(qHash(id)));
+            const QUrl manifest = publish(name);
+            editManifest(manifest, [&](QJsonObject &o) {
+                QJsonArray list = o.value(u"bundles"_s).toArray();
+                QJsonObject b = list.first().toObject();
+                b.insert(u"id"_s, id);
+                list[0] = b;
+                o.insert(u"bundles"_s, list);
+                QJsonObject codes = o.value(u"codes"_s).toObject();
+                QJsonObject entry = codes.begin().value().toObject();
+                entry.insert(u"bundle"_s, id);
+                codes[codes.begin().key()] = entry;
+                o.insert(u"codes"_s, codes);
+            });
+            const QString root = m_dir.filePath(name + u"/shelf"_s);
+            QDir().mkpath(root);
+            QFile keep(m_dir.filePath(name + u"/keep.txt"_s));
+            QVERIFY(keep.open(QIODevice::WriteOnly));
+            keep.close();
+
+            Bundles b(manifest, root);
+            waitReady(b);
+            QCOMPARE(b.manifestState(), Bundles::ManifestState::Ready);
+            QVERIFY2(b.bundles().isEmpty(), qPrintable(id));
+            QSignalSpy failed(&b, &Bundles::unlockFailed);
+            b.unlock(m_code);
+            QCOMPARE(failed.count(), 1);
+            QCOMPARE(failed.takeFirst().at(0).value<Bundles::UnlockError>(), Bundles::UnlockError::Unknown);
+            b.load(id, Bundles::Network::Any);
+            QVERIFY(!b.remove(id));
+            QVERIFY(!BundleShelf(root).unlock(id, m_code, QByteArray(32, 'k')));
+            QVERIFY(keep.exists());
+            QVERIFY(QDir(root).exists());
+        }
+    }
+
+    // While a video loads, the list changes a few times a second, not with every piece that
+    // arrives: each change draws the page anew (a 16 MiB video in pieces of a few KiB).
+    void progressFewTimesASecond()
+    {
+        const QUrl manifest = publish(u"progress"_s);
+        const QByteArray key = QByteArray::fromHex("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
+        const QByteArray plain(16 << 20, 'v');
+        const QByteArray file = BundleCrypto::encrypted(plain, key, QByteArray(16, 'p'));
+        QTcpServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+        serveInPieces(server, file);
+        editManifest(manifest, [&](QJsonObject &o) {
+            o.insert(u"basis"_s, u"http://127.0.0.1:%1"_s.arg(server.serverPort()));
+            QJsonArray list = o.value(u"bundles"_s).toArray();
+            QJsonObject b = list.first().toObject();
+            QJsonArray videos = b.value(u"videos"_s).toArray();
+            QJsonObject v = videos.first().toObject();
+            v.insert(u"groesse"_s, double(file.size()));
+            v.insert(u"klar"_s, double(plain.size()));
+            v.insert(u"sha256"_s, QString::fromLatin1(QCryptographicHash::hash(file, QCryptographicHash::Sha256).toHex()));
+            videos[0] = v;
+            b.insert(u"videos"_s, videos);
+            list[0] = b;
+            o.insert(u"bundles"_s, list);
+        });
+
+        Bundles b(manifest, m_dir.filePath(u"progress-shelf"_s));
+        waitReady(b);
+        QSignalSpy unlocked(&b, &Bundles::unlocked);
+        b.unlock(m_code);
+        QVERIFY(unlocked.wait(10000));
+        QSignalSpy changed(&b, &Bundles::changed);
+        QSignalSpy installed(&b, &Bundles::installed);
+        QElapsedTimer clock;
+        clock.start();
+        b.load(u"test-bundle"_s, Bundles::Network::Any);
+        QVERIFY(installed.wait(30000));
+        const qint64 allowed = 4 + clock.elapsed() / 100;      // start, end, and ten a second at most
+        QVERIFY2(changed.count() <= allowed, qPrintable(u"%1 changes in %2 ms"_s.arg(changed.count()).arg(clock.elapsed())));
     }
 
     // File names from the manifest may not leave the bundle's folder.

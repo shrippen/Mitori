@@ -22,6 +22,7 @@ constexpr int kFormat = 1;                      // "format" of the manifest
 constexpr auto kWifiOnlyKey = "videos/wifiOnly";
 constexpr qint64 kFreshSeconds = 6 * 60 * 60;
 constexpr int kTimeoutMs = 30 * 1000;           // without a byte for this long a download fails
+constexpr qint64 kProgressMs = 250;             // the least time between two progress reports
 const QString kManifestFile = QStringLiteral("manifest.json");
 
 // The file a video gets on the device: "aikido-k5.mvb" → "aikido-k5.mkv".
@@ -155,8 +156,12 @@ void Bundles::received(QNetworkReply *reply)
     emit changed();
 }
 
+// Only bundles whose id can name a folder (BundleShelf::validId): the id goes into paths.
 QJsonObject Bundles::manifestBundle(const QString &id) const
 {
+    if (!BundleShelf::validId(id)) {
+        return {};
+    }
     for (const QJsonValue &b : m_manifest.value(QStringLiteral("bundles")).toArray()) {
         if (b.toObject().value(QStringLiteral("id")).toString() == id) {
             return b.toObject();
@@ -171,6 +176,9 @@ QVariantList Bundles::bundles() const
     for (const QJsonValue &v : m_manifest.value(QStringLiteral("bundles")).toArray()) {
         const QJsonObject b = v.toObject();
         const QString id = b.value(QStringLiteral("id")).toString();
+        if (!BundleShelf::validId(id)) {
+            continue;
+        }
         const int version = b.value(QStringLiteral("version")).toInt();
         const BundleShelf::Bundle shelf = m_shelf->bundle(id);
         qint64 size = 0;
@@ -193,6 +201,7 @@ QVariantList Bundles::bundles() const
             progress = job->total > 0 ? double(job->done + job->received) / double(job->total) : 0;
         }
         result << QVariantMap{{QStringLiteral("id"), id},
+                              {QStringLiteral("uid"), id},         // the key of the page's rows (KeyedListModel)
                               {QStringLiteral("title"), b.value(QStringLiteral("titel")).toString()},
                               {QStringLiteral("version"), version},
                               {QStringLiteral("installed"), shelf.version},
@@ -354,6 +363,11 @@ void Bundles::next(Job &job)
             reply->abort();
             return;
         }
+        // Progress a few times a second: each change draws the page anew.
+        if (j->shown.isValid() && j->shown.elapsed() < kProgressMs) {
+            return;
+        }
+        j->shown.start();
         emit changed();
     });
     connect(reply, &QNetworkReply::finished, this, [this, id, reply, f] {
@@ -407,6 +421,9 @@ void Bundles::fail(const QString &id, const QString &why)
 
 void Bundles::cancel(const QString &id)
 {
+    if (!BundleShelf::validId(id)) {
+        return;
+    }
     const auto job = m_jobs.take(id);
     if (job && job->reply) {
         job->reply->abort();
@@ -418,6 +435,9 @@ void Bundles::cancel(const QString &id)
 
 bool Bundles::remove(const QString &id)
 {
+    if (!BundleShelf::validId(id)) {
+        return false;
+    }
     cancel(id);
     const bool ok = m_shelf->remove(id);
     emit changed();

@@ -21,7 +21,8 @@ const QByteArray kMagic = QByteArrayLiteral("MITORIV1");
 constexpr int kMaxKibibytes = 256 * 1024;
 constexpr int kMaxPasses = 16;
 
-// Luhn mod 32 over the characters' values: one wrong character or two swapped ones show.
+// Luhn mod 32 over the characters' values: one wrong character shows, and two swapped
+// neighbours do, except 0 and Z (values 0 and 31).
 QChar check(const QString &characters)
 {
     int sum = 0;

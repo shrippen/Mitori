@@ -58,6 +58,14 @@ Kirigami.ScrollablePage {
         }
     }
 
+    // The rows' model: a change of the list (progress, state) changes a row in place, so a press
+    // on its button meets the same button when it is let go.
+    KeyedListModel {
+        id: bundleModel
+
+        rows: Bundles.bundles
+    }
+
     function megabytes(bytes) {
         return Math.round(bytes / 1e6).toLocaleString(Qt.locale(), 'f', 0) + " MB"
     }
@@ -154,53 +162,53 @@ Kirigami.ScrollablePage {
         }
 
         Repeater {
-            model: Bundles.bundles
+            model: bundleModel
 
             KanteListRow {
-                id: row
+                id: bundleRow
 
-                required property var modelData
-                readonly property int bundleState: modelData.state
+                required property var row
+                readonly property int bundleState: row.state
 
                 objectName: "bundleRow"
                 Layout.fillWidth: true
-                text: modelData.title
-                subtitle: [qsTr("%n video(s)", "", modelData.videos.length), page.megabytes(modelData.size),
-                           modelData.installed > 0 ? qsTr("version %1").arg(modelData.installed) : "",
-                           row.bundleState === Bundles.State.Update ? qsTr("version %1: %2").arg(modelData.version).arg(modelData.hint || qsTr("new")) : ""]
+                text: row.title
+                subtitle: [qsTr("%n video(s)", "", row.videos.length), page.megabytes(row.size),
+                           row.installed > 0 ? qsTr("version %1").arg(row.installed) : "",
+                           bundleRow.bundleState === Bundles.State.Update ? qsTr("version %1: %2").arg(row.version).arg(row.hint || qsTr("new")) : ""]
                           .filter(x => x).join(" · ")
                 trailing: RowLayout {
                     spacing: Kirigami.Units.smallSpacing
 
                     QQC2.Label {
                         objectName: "bundleState"
-                        text: row.bundleState === Bundles.State.Locked ? qsTr("not unlocked")
-                            : row.bundleState === Bundles.State.Unlocked ? qsTr("code saved")
-                            : row.bundleState === Bundles.State.Waiting ? qsTr("waits for Wi-Fi")
-                            : row.bundleState === Bundles.State.Downloading ? qsTr("loading %1 %").arg(Math.floor(row.modelData.progress * 100))
-                            : row.bundleState === Bundles.State.Installed ? qsTr("loaded")
-                            : row.bundleState === Bundles.State.Update ? qsTr("update")
+                        text: bundleRow.bundleState === Bundles.State.Locked ? qsTr("not unlocked")
+                            : bundleRow.bundleState === Bundles.State.Unlocked ? qsTr("code saved")
+                            : bundleRow.bundleState === Bundles.State.Waiting ? qsTr("waits for Wi-Fi")
+                            : bundleRow.bundleState === Bundles.State.Downloading ? qsTr("loading %1 %").arg(Math.floor(bundleRow.row.progress * 100))
+                            : bundleRow.bundleState === Bundles.State.Installed ? qsTr("loaded")
+                            : bundleRow.bundleState === Bundles.State.Update ? qsTr("update")
                             : qsTr("failed")
-                        color: row.bundleState === Bundles.State.Failed ? KanteStyle.negativeTextColor : KanteStyle.mutedTextColor
+                        color: bundleRow.bundleState === Bundles.State.Failed ? KanteStyle.negativeTextColor : KanteStyle.mutedTextColor
                         font: KanteStyle.smallFont
                     }
                     KanteButton {
                         objectName: "bundleAction"
-                        visible: row.bundleState !== Bundles.State.Locked
-                        text: row.bundleState === Bundles.State.Downloading ? qsTr("Cancel")
-                            : row.bundleState === Bundles.State.Installed ? qsTr("Remove")
-                            : row.bundleState === Bundles.State.Update ? qsTr("Update")
-                            : row.bundleState === Bundles.State.Waiting ? qsTr("Load now")
+                        visible: bundleRow.bundleState !== Bundles.State.Locked
+                        text: bundleRow.bundleState === Bundles.State.Downloading ? qsTr("Cancel")
+                            : bundleRow.bundleState === Bundles.State.Installed ? qsTr("Remove")
+                            : bundleRow.bundleState === Bundles.State.Update ? qsTr("Update")
+                            : bundleRow.bundleState === Bundles.State.Waiting ? qsTr("Load now")
                             : qsTr("Load")
                         onClicked: {
-                            const id = row.modelData.id
-                            if (row.bundleState === Bundles.State.Downloading) {
+                            const id = bundleRow.row.id
+                            if (bundleRow.bundleState === Bundles.State.Downloading) {
                                 Bundles.cancel(id)
-                            } else if (row.bundleState === Bundles.State.Installed) {
+                            } else if (bundleRow.bundleState === Bundles.State.Installed) {
                                 Bundles.remove(id)
                             } else {
                                 // "Load now" overrides Wi-Fi only once.
-                                Bundles.load(id, row.bundleState === Bundles.State.Waiting ? Bundles.Network.Any : Bundles.Network.WifiOnly)
+                                Bundles.load(id, bundleRow.bundleState === Bundles.State.Waiting ? Bundles.Network.Any : Bundles.Network.WifiOnly)
                             }
                         }
                     }
