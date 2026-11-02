@@ -491,9 +491,22 @@ private slots:
         QCOMPARE(again.level(QStringLiteral("a")), 0);
         QVERIFY(again.rounds(QStringLiteral("aikido"), 8).isEmpty());
     }
+
+    // A point without a rating: nothing is written, and the error says why.
+    void examRoundUnrated()
+    {
+        QTemporaryDir dir;
+        Practice practice(dir.filePath(QStringLiteral("mitori.sqlite")));
+        const QVariantList results{QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("a")}}, {QStringLiteral("level"), 3}},
+                                   QVariantMap{{QStringLiteral("ids"), QStringList{QStringLiteral("b")}}}};
+        QVERIFY(!practice.saveRound(QStringLiteral("aikido"), QStringLiteral("k5"), results));
+        QCOMPARE(practice.errorString(), QStringLiteral("Not every point of the exam round is rated."));
+        QCOMPARE(practice.level(QStringLiteral("a")), 0);
+        QVERIFY(practice.rounds(QStringLiteral("aikido"), 8).isEmpty());
+    }
+
     // A log of schema 3 (ratings, notes, the Kamae as one entry) gets the table of exam rounds.
-    // A log of schema 2 (ratings, notes) gets the table of exam rounds.
-    void migratesFromSchemaTwo()
+    void migratesFromSchemaThree()
     {
         QTemporaryDir dir;
         const QString path = dir.filePath(QStringLiteral("log.sqlite"));

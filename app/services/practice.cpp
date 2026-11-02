@@ -330,6 +330,8 @@ bool Practice::saveRound(const QString &discipline, const QString &grade, const 
         const QVariantMap point = r.toMap();
         const int level = point.value(QStringLiteral("level")).toInt();
         if (level < 1 || level > 4) {
+            m_error = tr("Not every point of the exam round is rated.");
+            emit errorChanged();
             return false;
         }
         sum += level;

@@ -38,10 +38,10 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   (mit Schritt 4), „alle Jahre“.
 - Schritt 3: Prüfungsmodus (Kachel 試 im Startmenü, „Probe <Grad>“): Sparte, Grad (nur mit Prüfungsstoff, je
   Anzahl Punkte), Anzahl (alle / 8 / 12 / 15), zufällige Reihenfolge, 2–5 Stichproben aus früheren Graden am
-  Anfang (markiert); Einstellungen bleiben. Shinki Toho: Shoden prüft Kamae als einen Punkt (setzt den Stand
-  aller 26 Kamae) und Ô-dachi 1–11, höhere Grade ihre Formen. Runde als Tafel (Gruppe, Angriff, Technik; Shinki
+  Anfang (markiert); Einstellungen bleiben. Shinki Toho: Shoden prüft die Kamae-Übung (ein Eintrag) und
+  Ô-dachi 1–11, höhere Grade ihre Formen. Runde als Tafel (Gruppe, Angriff, Technik; Shinki
   Toho nur Technik), Weiter mit Leertaste/Enter, Tablet größer. Am Ende jede Technik 1–4 einschätzen; Übernehmen
-  setzt den Stand (Übungsprotokoll) und speichert die Runde (SQLite, Schema 3), die Statistik zeigt den Schnitt
+  setzt den Stand (Übungsprotokoll) und speichert die Runde (SQLite, Schema 4), die Statistik zeigt den Schnitt
   der letzten 8 Runden je Sparte. Offen: Hinweis auf eine vorgemerkte Prüfung (mit Schritt 4, Lehrgänge).
 - Schritt 3: Glossar (Kachel 辞 im Startmenü, auch die Lupe): ohne Eingabe A–Z mit Kanji und Übersetzung, mit
   Eingabe vor Techniken und Notizen (auch deutsche Wörter; gleiche Normalisierung wie die Suche). Daten: Aiki-Budo-
@@ -53,17 +53,13 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   und einer japanischen Stimme (speech-dispatcher). Nicht: AppImage (ohne qtspeech gebaut), Flatpak (die
   KDE-Runtime hat nur das Test-Plugin). Offen: Aussprache auf dem Telefon prüfen, qtspeech für AppImage und
   Flatpak, A–Z-Sprungleiste, Lesungen ohne lange Vokale (Umschrift ohne ô, „aikido“ → あいきど), in der Suche
-<<<<<<< HEAD
-  Kommentare und Lehrgänge. Noch nicht begonnen: Landkarte.
-=======
-  Kommentare und Lehrgänge. Noch nicht begonnen: Prüfungsmodus.
+  Kommentare und Lehrgänge.
 - Schritt 3: Technik-Landkarte (Kachel 図 im Startmenü): Sparte, „bis“ Grad (anfangs der des Programms), je Gruppe
   ein Raster Technik × Angriff über alle Grade bis dahin (Gruppen gleichen Titels aus Kyu- und Dan-Graden zusammen),
   jeder Platz in der Farbe seiner besten Stufe, leer, wo die Kombination nicht vorkommt; Shinki Toho als nummerierte
   Ô-dachi-Formen. Tippen öffnet das Technik-Blatt, Überfahren zeigt Technik, Angriff, Grad und Stand; Tab erreicht
   einen Platz je Raster, die Pfeiltasten wandern weiter. Breite Raster scrollen waagerecht, die Technik-Namen bleiben
   stehen. Raster: `KanteHeatGrid` (Kante 1.63, dafür ergänzt).
->>>>>>> origin/main
 
 ## Lehrgänge (Schritt 4)
 

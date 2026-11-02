@@ -1030,6 +1030,7 @@ TestCase {
 
         // "Apply" only once every point is rated.
         const apply = findChild(end, "applyRound")
+        wait(500)       // past the page transition, during which no button is enabled anyway
         verify(!apply.enabled)
         verify(!end.complete)
         const pickers = findChildren(end, "pointPicker").sort((a, b) => a.parent.index - b.parent.index)
@@ -1151,6 +1152,8 @@ TestCase {
         // Nothing rated: straight back.
         window.pageStack.goBack()
         tryVerify(() => window.pageStack.currentItem === settings)
+        wait(300)       // the question would come a moment later (Qt.callLater)
+        verify(window.pageStack.currentItem === settings, "stays back")
         verify(!dialog.opened)
 
         // Rated: the dialog asks, Cancel stays, Discard goes back without saving.

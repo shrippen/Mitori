@@ -522,7 +522,12 @@
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="354"/>
+        <location filename="../services/practice.cpp" line="333"/>
+        <source>Not every point of the exam round is rated.</source>
+        <translation>Nicht jeder Punkt der Prüfungsrunde ist eingeschätzt.</translation>
+    </message>
+    <message>
+        <location filename="../services/practice.cpp" line="356"/>
         <source>The exam round could not be saved: %1</source>
         <translation>Die Prüfungsrunde konnte nicht gespeichert werden: %1</translation>
     </message>
