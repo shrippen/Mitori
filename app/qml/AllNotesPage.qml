@@ -22,14 +22,24 @@ Kirigami.ScrollablePage {
     // "" = all disciplines, else a discipline's id; kept for the next time.
     property string filter: ""
     Settings {
+        id: settings
+
         property alias allNotesFilter: page.filter
     }
-    // A remembered discipline that no longer exists: all (also when Settings loads it).
+    // A remembered discipline that no longer exists: all (also when Settings loads it). Another
+    // filter starts at the top of the list.
     onFilterChanged: {
         if (filter !== "" && !Programme.disciplines.some(d => d.id === filter)) {
             Qt.callLater(() => page.filter = "")     // not inside the change (Settings records it)
         }
+        settings.setValue("allNotesFilter", filter)  // now, not a moment later (the page may go)
+        if (filter !== listFilter) {
+            listFilter = filter
+            Qt.callLater(() => list.positionViewAtBeginning())
+        }
     }
+    // The filter the list was last at the top for (Settings reports the same filter again).
+    property string listFilter: ""
     // Every note with its technique ({}, with only the id, when it is no longer in the programme)
     // and its local day ("YYYY-MM-DD", the list's sections). Newest first.
     readonly property var all: {
@@ -45,23 +55,41 @@ Kirigami.ScrollablePage {
         })
     }
     readonly property var shown: filter === "" ? all : all.filter(n => n.technique.discipline === filter)
-    // What the list shows: set from `shown` after noting the note at the top, so that a change
-    // (edit, delete, a new note) keeps the place instead of starting at the top again.
-    property var listModel: shown
-    onShownChanged: {
-        const uid = list.topUid
-        listModel = shown
-        if (uid !== "") {
-            Qt.callLater(() => {
-                const i = page.shown.findIndex(n => n.uid === uid)
-                if (i > 0) {
-                    list.positionViewAtIndex(i, ListView.Beginning)
-                }
-            })
-        }
+    // The list's model: a new `shown` changes only the rows that changed, so the list keeps its
+    // place and its current note after an edit, a deletion or a new note.
+    KeyedListModel {
+        id: notesModel
+
+        rows: page.shown
     }
 
     title: qsTr("All notes")
+
+    // The filter above the list (Tab reaches the chips, then the list).
+    header: Flow {
+        padding: Kirigami.Units.smallSpacing
+        spacing: Kirigami.Units.smallSpacing
+
+        Repeater {
+            id: chips
+
+            model: [{ id: "", name: qsTr("All") }].concat(Programme.disciplines.map(d => ({ id: d.id, name: d.kurzname })))
+
+            KanteChip {
+                required property var modelData
+                required property int index
+
+                objectName: "filter_" + (modelData.id || "all")
+                // The page's header comes after the list in the item tree: from the last chip, Tab
+                // goes on to the list (not to the window's toolbar), Shift+Tab comes back.
+                KeyNavigation.tab: index === chips.count - 1 ? list : null
+                text: modelData.name
+                checkable: true
+                checked: page.filter === modelData.id
+                onClicked: page.filter = modelData.id
+            }
+        }
+    }
 
     // A section's day ("YYYY-MM-DD"); Practice.today only makes the names follow a new day.
     function dayName(iso) {
@@ -94,11 +122,12 @@ Kirigami.ScrollablePage {
         id: list
 
         objectName: "notesList"
-        model: page.listModel
+        model: notesModel
         spacing: Kirigami.Units.smallSpacing
         // The keyboard moves through every note (Up, Down), Enter opens, the menu key edits; the
         // list follows the current note.
         activeFocusOnTab: true
+        KeyNavigation.backtab: chips.count > 0 ? chips.itemAt(chips.count - 1) : null
         keyNavigationEnabled: true
         currentIndex: -1
         onCurrentIndexChanged: {
@@ -106,16 +135,48 @@ Kirigami.ScrollablePage {
                 positionViewAtIndex(currentIndex, ListView.Contain)
             }
         }
+        // Coming in with Tab: the first note in view, not one far away.
+        onActiveFocusChanged: {
+            if (activeFocus && (currentIndex < 0 || currentIndex < firstShown() || currentIndex > lastShown())) {
+                currentIndex = firstShown()
+            }
+        }
+        // The first and last note in view (a day's heading or the gap between notes is no note).
+        function firstShown() {
+            for (let y = contentY; y < contentY + height; y += Kirigami.Units.smallSpacing) {
+                const i = indexAt(width / 2, y)
+                if (i >= 0) {
+                    return i
+                }
+            }
+            return count > 0 ? 0 : -1
+        }
+        function lastShown() {
+            for (let y = contentY + height - 1; y > contentY; y -= Kirigami.Units.smallSpacing) {
+                const i = indexAt(width / 2, y)
+                if (i >= 0) {
+                    return i
+                }
+            }
+            return firstShown()
+        }
         Keys.onReturnPressed: page.openCurrent(false)
         Keys.onEnterPressed: page.openCurrent(false)
         Keys.onMenuPressed: page.openCurrent(true)
-
-        // The note at the top (none at the very top): a new model starts at the top, the page
-        // puts it back (onShownChanged).
-        property string topUid: ""
-        onContentYChanged: {
-            const i = indexAt(width / 2, contentY + 1)
-            topUid = i > 0 && !atYBeginning ? (model[i] || {}).uid || "" : ""
+        Keys.onPressed: event => {
+            const page_ = Math.max(1, lastShown() - firstShown())
+            if (event.key === Qt.Key_PageDown) {
+                currentIndex = Math.min(count - 1, currentIndex + page_)
+            } else if (event.key === Qt.Key_PageUp) {
+                currentIndex = Math.max(0, currentIndex - page_)
+            } else if (event.key === Qt.Key_Home) {
+                currentIndex = 0
+            } else if (event.key === Qt.Key_End) {
+                currentIndex = count - 1
+            } else {
+                return
+            }
+            event.accepted = true
         }
         section.property: "day"
         section.delegate: KanteSectionLabel {
@@ -126,60 +187,37 @@ Kirigami.ScrollablePage {
             text: page.dayName(section)
         }
 
-        header: ColumnLayout {
+        header: QQC2.Label {
+            objectName: "count"
             width: ListView.view.width
-            spacing: Kirigami.Units.largeSpacing
-
-            Flow {
-                Layout.fillWidth: true
-                spacing: Kirigami.Units.smallSpacing
-
-                Repeater {
-                    model: [{ id: "", name: qsTr("All") }].concat(Programme.disciplines.map(d => ({ id: d.id, name: d.kurzname })))
-
-                    KanteChip {
-                        required property var modelData
-
-                        objectName: "filter_" + (modelData.id || "all")
-                        text: modelData.name
-                        checkable: true
-                        checked: page.filter === modelData.id
-                        onClicked: page.filter = modelData.id
-                    }
-                }
-            }
-
-            QQC2.Label {
-                objectName: "count"
-                Layout.fillWidth: true
-                text: page.shown.length > 0
-                      ? qsTr("%n note(s). Tap one to open its technique, press and hold to change or delete it.", "", page.shown.length)
-                      : page.filter !== "" && page.all.length > 0 ? qsTr("No notes in this discipline.")
-                      : qsTr("No notes yet. Notes are written on a technique or in the player.")
-                color: KanteStyle.mutedTextColor
-                wrapMode: Text.Wrap
-            }
+            bottomPadding: Kirigami.Units.largeSpacing
+            text: page.shown.length > 0
+                  ? qsTr("%n note(s). Tap one to open its technique, press and hold to change or delete it.", "", page.shown.length)
+                  : page.filter !== "" && page.all.length > 0 ? qsTr("No notes in this discipline.")
+                  : qsTr("No notes yet. Notes are written on a technique or in the player.")
+            color: KanteStyle.mutedTextColor
+            wrapMode: Text.Wrap
         }
 
         delegate: ColumnLayout {
             id: noteItem
 
-            required property var modelData
+            required property var row
+            required property int index
 
             objectName: "note"
-            required property int index
 
             width: ListView.view.width
             spacing: 0
             readonly property bool current: ListView.isCurrentItem && ListView.view.activeFocus
             Accessible.role: Accessible.Button
-            Accessible.name: page.techniqueName(modelData.technique) + ": " + modelData.text
+            Accessible.name: page.techniqueName(row.technique) + ": " + row.text
             Accessible.description: qsTr("Opens the technique's notes; press and hold or the menu key to change or delete")
-            Accessible.onPressAction: page.open(modelData)
+            Accessible.onPressAction: page.open(row)
 
             QQC2.Label {
                 Layout.fillWidth: true
-                text: page.techniqueName(noteItem.modelData.technique)
+                text: page.techniqueName(noteItem.row.technique)
                 color: KanteStyle.mutedTextColor
                 font: KanteStyle.smallFont
                 elide: Text.ElideRight
@@ -187,7 +225,7 @@ Kirigami.ScrollablePage {
             }
             QQC2.Label {
                 Layout.fillWidth: true
-                text: noteItem.modelData.text
+                text: noteItem.row.text
                 wrapMode: Text.Wrap
                 padding: Kirigami.Units.smallSpacing
                 background: Rectangle {
@@ -199,12 +237,12 @@ Kirigami.ScrollablePage {
 
             TapHandler {
                 acceptedButtons: Qt.LeftButton
-                onTapped: page.open(noteItem.modelData)
-                onLongPressed: editor.edit(noteItem.modelData)
+                onTapped: page.open(noteItem.row)
+                onLongPressed: editor.edit(noteItem.row)
             }
             TapHandler {
                 acceptedButtons: Qt.RightButton
-                onTapped: editor.edit(noteItem.modelData)
+                onTapped: editor.edit(noteItem.row)
             }
         }
     }
@@ -216,6 +254,7 @@ Kirigami.ScrollablePage {
             return
         }
         if (edit) {
+            editor.returnFocus = list
             editor.edit(note)
         } else {
             page.open(note)
@@ -232,5 +271,14 @@ Kirigami.ScrollablePage {
 
     NoteEditor {
         id: editor
+
+        // Edited with the keyboard: the list gets the focus back, on the same note.
+        property Item returnFocus: null
+        onClosed: {
+            if (returnFocus) {
+                returnFocus.forceActiveFocus()
+                returnFocus = null
+            }
+        }
     }
 }

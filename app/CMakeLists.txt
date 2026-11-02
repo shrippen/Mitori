@@ -65,6 +65,8 @@ qt_add_qml_module(mitori_app
         store/schedule.h
         store/schedule.cpp
         store/searchkey.h
+        services/keyedlistmodel.h
+        services/keyedlistmodel.cpp
 )
 
 # Texts: English in the code, German in i18n/mitori_de.ts (update: cmake --build <dir> --target
@@ -178,6 +180,12 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     target_link_libraries(tst_schedule PRIVATE Qt6::Core Qt6::Test)
     set_target_properties(tst_schedule PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME schedule COMMAND tst_schedule)
+
+    qt_add_executable(tst_keyedlistmodel tests/tst_keyedlistmodel.cpp services/keyedlistmodel.cpp services/keyedlistmodel.h)
+    target_include_directories(tst_keyedlistmodel PRIVATE services)
+    target_link_libraries(tst_keyedlistmodel PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
+    set_target_properties(tst_keyedlistmodel PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME keyedlistmodel COMMAND tst_keyedlistmodel)
 
     # The pages with Kirigami and Kante, offscreen; screenshots into <build>/ui-shots. Plays a video
     # only with MITORI_VIDEOS (the videos are not in the repository).

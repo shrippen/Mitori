@@ -523,6 +523,7 @@ TestCase {
         tryVerify(() => !editor.opened)
         // Many notes: a virtual list builds delegates for the visible ones only.
         page.filter = ""
+        wait(50)        // another filter goes to the top a moment later
         const many = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
         for (let i = 0; i < 60; i++)
             Practice.addNote(many[i % many.length].id, "Übung " + i)
@@ -537,6 +538,48 @@ TestCase {
         tryVerify(() => page.shown[42].text === "geändert")
         wait(50)
         compare(page.shown[list.indexAt(10, list.contentY + 10)].uid, top, "same note at the top")
+        // Also with the gap between two notes at the top, and when the top note is deleted.
+        const y = list.contentY
+        list.contentY = y - list.spacing / 2
+        wait(50)
+        verify(list.indexAt(10, list.contentY) < 0, "a gap at the very top")
+        Practice.changeNote(page.shown[44].uid, "noch einmal")
+        wait(50)
+        compare(page.shown[list.indexAt(10, list.contentY + 10)].uid, top, "same note after a gap at the top")
+        const next = page.shown[41].uid
+        Practice.deleteNote(top)
+        tryVerify(() => !page.shown.some(n => n.uid === top))
+        wait(50)
+        compare(page.shown[list.indexAt(10, list.contentY + list.spacing + 10)].uid, next, "the next note moves up")
+        // Tab: through the filter to the list, on a note in view (not the first one far above).
+        mouseClick(findChild(page, "filter_all"))
+        const chips = Programme.disciplines.length + 1
+        for (let i = 0; i <= chips && !list.activeFocus; i++)
+            keyClick(Qt.Key_Tab)
+        verify(list.activeFocus, "Tab reaches the list after the filter")
+        keyClick(Qt.Key_Backtab)
+        compare(window.activeFocusItem, findChild(page, "filter_" + Programme.disciplines[chips - 2].id), "Shift+Tab goes back to the filter")
+        keyClick(Qt.Key_Tab)
+        verify(list.activeFocus)
+        const cur = list.itemAtIndex(list.currentIndex)
+        verify(cur && cur.y + cur.height > list.contentY && cur.y < list.contentY + list.height,
+               "the current note is in view (" + list.currentIndex + ")")
+        // Changed with the keyboard: the focus and the note stay.
+        const at = list.currentIndex
+        keyClick(Qt.Key_Menu)
+        tryVerify(() => editor.opened, 2000)
+        Practice.changeNote(page.shown[at].uid, "mit der Tastatur")
+        editor.close()
+        tryVerify(() => !editor.opened)
+        tryVerify(() => list.activeFocus, 1000, "the list has the focus again")
+        compare(list.currentIndex, at)
+        // Page Down, End and Home move through the list.
+        keyClick(Qt.Key_PageDown)
+        verify(list.currentIndex > at + 1, "Page Down: " + list.currentIndex)
+        keyClick(Qt.Key_End)
+        compare(list.currentIndex, list.count - 1)
+        keyClick(Qt.Key_Home)
+        compare(list.currentIndex, 0)
         // The keyboard reaches every note: Down moves through the list, which follows; Enter opens.
         list.positionViewAtBeginning()
         list.forceActiveFocus()
@@ -551,6 +594,11 @@ TestCase {
         compare(window.pageStack.currentItem.entry.id, target)
         window.pageStack.pop()
         tryVerify(() => window.pageStack.currentItem === page)
+        // Another filter starts at the top.
+        list.positionViewAtEnd()
+        page.filter = "aikido"
+        tryVerify(() => list.atYBeginning, 1000, "another filter starts at the top")
+        page.filter = ""
         // A remembered discipline that no longer exists falls back to all.
         page.filter = "kendo"
         tryCompare(page, "filter", "")
@@ -574,7 +622,6 @@ TestCase {
         // The filter is kept for the next time.
         page.filter = "daitoryu"
         window.pageStack.pop()
-        wait(600)       // Settings writes a moment later (and when the popped page goes)
         const again = push("AllNotesPage")
         compare(again.filter, "daitoryu")
         again.filter = ""
