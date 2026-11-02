@@ -130,7 +130,7 @@ Reihenfolge der Kacheln. Offen, nach Gewicht:
 
 - **Training**: Playliste auf dem Tablet links neben dem Player (Telefon: darunter, erledigt).
 - **Player**: Schalter „Ton“ und „Bildschirm an“ fehlen (kein Wach-Halten des Bildschirms); Knopf ⤢ ins
-  Querformat; Titelzeile (Angriff · Zusatz · Grad · i / n, Name mit Kanji); quer die schmale Spalte nach Entwurf B,
+  Querformat; Titelzeile mit Kanji (Angriff · Zusatz · Grad · i / n steht hochkant schon, quer fehlt sie im Bild); quer die schmale Spalte nach Entwurf B,
   Zeitleiste im Bild; unter dem Notizfeld „Heute notiert“ statt nur der letzten Notiz.
 - **Lehrgangsnotizbuch**: ⌗-Verknüpfung (Angriff, Technik, Waffe mit Vorschlägen; Chips, „↗ im Programm“, die
   Notiz auch bei der Technik und in deren Notizen).

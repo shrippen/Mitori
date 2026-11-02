@@ -38,7 +38,8 @@ Item {
     // video ends with it, and a player at the end of the file no longer seeks back).
     readonly property real end: player.duration > 0 ? Math.min(to, player.duration - 250) : to
     readonly property var crop: Videos.crop(video)
-    readonly property bool landscape: !compact && width > height
+    // Sideways only with a picture; without a video the card and the controls stand as upright.
+    readonly property bool landscape: !compact && width > height && hasVideo
     readonly property var tempi: [0.25, 0.5, 0.75, 1]
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
     readonly property int jumpMs: 2000      // double tap
