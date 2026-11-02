@@ -1,5 +1,7 @@
 import QtQuick
 import QtTest
+import org.kde.kirigami as Kirigami
+import Kante
 import Mitori
 
 // The pages as the user meets them: start menu, programme, technique sheet, comment, player.
@@ -194,6 +196,12 @@ TestCase {
     function test_3b_settings() {
         const page = push("SettingsPage")
         compare(page.title, "Settings")
+        // Kante's ground, not the platform's (ScrollablePage does not inherit the theme).
+        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor),
+               page.background.color + " is not " + KanteStyle.backgroundColor)
+        // and the scope reaches the page's controls: Kante's text colour, not the platform's.
+        verify(Qt.colorEqual(page.Kirigami.Theme.textColor, KanteStyle.textColor),
+               page.Kirigami.Theme.textColor + " is not " + KanteStyle.textColor)
         shot("4b-settings")
         window.pageStack.pop()
     }
@@ -207,6 +215,7 @@ TestCase {
         tryVerify(() => page.playing, 10000)
         tryVerify(() => page.position >= page.from && page.position < page.to, 10000)
         wait(1500)
+        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor), "Kante's ground")
         shot("5-player")
         window.width = 900
         window.height = 420
@@ -345,6 +354,7 @@ TestCase {
         compare(page.due.length, 1 - newToday)
         verify(page.due.every(r => r.id !== first), "practised today: not due")
         compare(findChild(page, "dueCount").value, String(1 - newToday))
+        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor), "Kante's ground")
         shot("7-today")
         if (page.due.length > 0) {
             Practice.rate(page.due[0].id, 1)

@@ -26,13 +26,14 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
 - Schritt 2: Einschätzen 1–4 im Technik-Blatt und im Player (Übungsprotokoll in SQLite, jede Einschätzung ein
   Eintrag mit Zeit und Gerät), Stand als vier Punkte in der Programmliste, Stand je Grad als Leiste mit Legende.
   Heute üben (Wiederholen nach Plan, Abstände je Stufe einstellbar, Kachel im Startmenü) und Training (Playliste der
-  fälligen Techniken, Einschätzen schaltet weiter). Offen: Notizen mit Fotos und Sprachnotizen, Statistik, Suche;
-  Seitenhintergrund in Kante bei Einstellungen und Heute üben (zeigen die Plattformfarbe).
+  fälligen Techniken, Einschätzen schaltet weiter). Offen: Notizen mit Fotos und Sprachnotizen, Statistik, Suche.
 
 ## Kante-Bedarf
 
 Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutzt:
-- Stand als vier Punkte (Schritt 2).
+- Seiten-Scope: Kirigamis ScrollablePage erbt die Kante-Farben nicht (`Theme.inherit: false`); jetzt je Seite
+  `KanteScope` plus Seitengrund. Besser eine Option in `KanteScope` (auch für System/Kante Light: View- statt
+  Window-Farbe bei Listen) und die globale Kopfleiste des pageStack in Kante-Farben (heute Plattformfarbe).
 
 ## Querschnitt
 
