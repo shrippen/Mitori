@@ -693,6 +693,12 @@ TestCase {
         keyClick(Qt.Key_Home)
         compare(list.currentIndex, 0)
         tryVerify(() => list.atYBeginning, 1000, "Home shows the count above the first note")
+        // Page Up back to the first note shows the count too.
+        for (let i = 0; i < 3; i++)
+            keyClick(Qt.Key_PageDown)
+        while (list.currentIndex > 0)
+            keyClick(Qt.Key_PageUp)
+        tryVerify(() => list.atYBeginning, 1000, "Page Up to the first note shows the count")
         // A new note while the current one is out of view: the view stays where it is.
         list.positionViewAtIndex(30, ListView.Beginning)
         wait(50)
@@ -760,6 +766,11 @@ TestCase {
         if (empty) {
             page.filter = empty.id
             compare(findChild(page, "count").text, qsTr("No notes in this discipline."))
+            list.forceActiveFocus()
+            list.currentIndex = -1
+            keyClick(Qt.Key_Home)
+            keyClick(Qt.Key_End)
+            compare(list.currentIndex, -1, "an empty list has no current note")
             page.filter = ""
         }
         // The orphan is named as such.
@@ -948,6 +959,8 @@ TestCase {
         const after = list.contentY
         keyClick(Qt.Key_Down)
         tryVerify(() => list.contentY > after, 2000, "Down")
+        wait(300)
+        compare(Math.round(list.contentY - after), Kirigami.Units.gridUnit * 2, "Down scrolls two lines")
         keyClick(Qt.Key_Home)
         tryVerify(() => list.contentY <= list.originY + 1, 2000, "Home")
         // Also with a row in focus (after a click or Tab): the list scrolls, not a current index.
@@ -959,6 +972,8 @@ TestCase {
         const y = list.contentY
         keyClick(Qt.Key_Down)
         tryVerify(() => list.contentY > y, 2000, "Down on a focused row")
+        wait(300)
+        compare(Math.round(list.contentY - y), Kirigami.Units.gridUnit * 2, "Down on a row scrolls two lines")
         Programme.setGrade("aikido", "k5")
         window.pageStack.pop()
     }
