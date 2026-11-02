@@ -23,10 +23,13 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem !== null)
     }
 
-    // A failed case leaves no tablet window to the next ones.
+    // A failed or skipped case (no videos, as in the CI) leaves no tablet window and no pages
+    // to the next ones: each starts on the start page.
     function cleanup() {
         window.width = 420
         window.height = 800
+        while (window.pageStack.depth > 1)
+            window.pageStack.pop()
     }
 
     function cleanupTestCase() {
