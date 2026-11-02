@@ -87,6 +87,10 @@ Kleinigkeiten aus Reviews und Tests, je ein Folge-PR oder beim nächsten Bearbei
 - **Alle Notizen**: 64–120 ms je Änderung bei 2000 Notizen (die Liste setzt jede Notiz in JavaScript neu
   zusammen); mit den Lehrgangsnotizen (Schritt 4) als Liste in C++.
 
+- **Video-Bundles** (Review #33): ein Update tauscht die Ordner über `.old` statt erst zu löschen; „wartet auf
+  WLAN“ startet beim Wechsel ins WLAN von selbst (oder anderer Text); HTTP-Status vor dem Entschlüsseln prüfen
+  (sonst „beschädigt“ statt „nicht gefunden“); `tools/bundle.py hochladen` als Stream.
+
 ## Kante-Bedarf
 
 Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutzt:
