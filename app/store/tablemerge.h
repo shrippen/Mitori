@@ -29,7 +29,7 @@ struct Table {
 struct Result {
     QHash<QString, int> added;          // {table: rows}
     QHash<QString, int> changed;
-    QStringList orphans;                // media files of this copy that no row names any more
+    QStringList orphans;                // media files the rows named before and no more
     QStringList media;                  // media files the rows name after the merge (not deleted)
 };
 

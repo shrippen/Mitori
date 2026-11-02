@@ -2,6 +2,7 @@
 
 #include <QSqlDatabase>
 #include <QSqlError>
+#include <QSet>
 #include <QSqlQuery>
 
 namespace {
@@ -29,18 +30,7 @@ bool mergeTable(QSqlDatabase &db, const TableMerge::Table &t, TableMerge::Result
         return true;
     }
 
-    // A newer row from the other copy: the media file it had here goes when the row drops it.
     const QString newer = QStringLiteral("o.%1 = main.%2.%1 AND o.changed > main.%2.changed").arg(uid, t.name);
-    if (!t.media.isEmpty()) {
-        if (!q.exec(QStringLiteral("SELECT main.%1.%2 FROM main.%1 JOIN %3.%1 o ON %4"
-                                   " WHERE main.%1.%2 <> '' AND (o.%2 <> main.%1.%2 OR o.deleted = 1)")
-                        .arg(t.name, t.media, kOther, newer))) {
-            return failed(q, error);
-        }
-        while (q.next()) {
-            result->orphans << q.value(0).toString();
-        }
-    }
     const QString rest = t.columns.mid(1).join(u", ");
     if (!q.exec(QStringLiteral("UPDATE main.%1 SET (%2) = (SELECT %2 FROM %3.%1 o WHERE o.%4 = main.%1.%4)"
                                " WHERE EXISTS (SELECT 1 FROM %3.%1 o WHERE %5)")
@@ -49,6 +39,26 @@ bool mergeTable(QSqlDatabase &db, const TableMerge::Table &t, TableMerge::Result
     }
     result->changed[t.name] = q.numRowsAffected();
     return true;
+}
+
+// The media files the rows that are not deleted name.
+QSet<QString> liveMedia(QSqlDatabase &db, const QList<TableMerge::Table> &tables, bool *ok, QString *error)
+{
+    QSet<QString> names;
+    QSqlQuery q(db);
+    for (const TableMerge::Table &t : tables) {
+        if (t.media.isEmpty()) {
+            continue;
+        }
+        if (!q.exec(QStringLiteral("SELECT %1 FROM main.%2 WHERE deleted = 0 AND %1 <> ''").arg(t.media, t.name))) {
+            *ok = failed(q, error);
+            return {};
+        }
+        while (q.next()) {
+            names.insert(q.value(0).toString());
+        }
+    }
+    return names;
 }
 
 } // namespace
@@ -69,25 +79,17 @@ bool TableMerge::run(QSqlDatabase &db, const QString &otherPath, const QList<Tab
     if (!ok) {
         *error = db.lastError().text();
     }
+    const QSet<QString> before = ok ? liveMedia(db, tables, &ok, error) : QSet<QString>();
     for (const Table &t : tables) {
         ok = ok && mergeTable(db, t, result, error);
     }
     ok = ok && (!after || after(db, error));
 
-    // The media the merged rows name: only those come from the backup (a deleted note's photo not).
-    for (const Table &t : tables) {
-        if (!ok || t.media.isEmpty()) {
-            continue;
-        }
-        QSqlQuery m(db);
-        ok = m.exec(QStringLiteral("SELECT %1 FROM main.%2 WHERE deleted = 0 AND %1 <> ''").arg(t.media, t.name));
-        if (!ok) {
-            *error = m.lastError().text();
-        }
-        while (m.next()) {
-            result->media << m.value(0).toString();
-        }
-    }
+    // The media the rows name after the merge: only those come from the backup (a deleted note's
+    // photo not); what they named before and no more goes.
+    const QSet<QString> named = ok ? liveMedia(db, tables, &ok, error) : QSet<QString>();
+    result->media = named.values();
+    result->orphans = (before - named).values();
     if (ok && mode == Mode::Apply) {
         ok = db.commit();
         if (!ok) {

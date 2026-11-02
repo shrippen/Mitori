@@ -274,6 +274,69 @@ private slots:
         QCOMPARE(texts, (QStringList{u"e1"_s, u"e2"_s}));
     }
 
+    // A notebook deleted on A while B writes in it: an entry newer than the deletion brings the
+    // notebook back; one older than it goes with it (and its photo from A's media folder).
+    void entryInDeletedNotebook()
+    {
+        const Device a = device(u"weg-a"_s);
+        const Device b = device(u"weg-b"_s);
+        MediaStore mediaA(a.media);
+        QVERIFY(mediaA.adopt(u"alt.jpg"_s, "jpeg"));
+        CourseBook::Course c;
+        c.calendarUid = u"ev-7"_s;
+        c.title = u"Winter"_s;
+        c.first = c.last = QDate(2026, 12, 5);
+        QString course;
+        QString old;
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            course = book.addCourse(c, at(7), u"a"_s).uid;
+        }
+        QVERIFY(QFile::copy(a.courses, b.courses));
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            QVERIFY(book.deleteCourse(course, at(9)));
+        }
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            old = book.addEntry(course, u"vor der Löschung"_s, at(8), u"a"_s, u"alt.jpg"_s).uid;
+            QVERIFY(!old.isEmpty());
+        }
+
+        // B's deletion (9:00) is newer than A's entry (8:00): both go.
+        Backup backupA(a.practice, a.courses, a.media, a.work);
+        Backup backupB(b.practice, b.courses, b.media, b.work);
+        const QString fromB = m_dir.filePath(u"weg-b.zip"_s);
+        QVERIFY(backupB.save(QUrl::fromLocalFile(fromB)));
+        QVERIFY(!backupA.inspect(QUrl::fromLocalFile(fromB)).isEmpty());
+        QVERIFY(backupA.restore());
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QCOMPARE(book.courses().size(), 0);
+            QCOMPARE(book.entries(course).size(), 0);
+        }
+        QVERIFY(!mediaA.has(u"alt.jpg"_s));
+
+        // B writes after the deletion (10:00): the notebook comes back on A.
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            QVERIFY(!book.addEntry(course, u"nach der Löschung"_s, at(10), u"b"_s).uid.isEmpty());
+        }
+        QVERIFY(backupB.save(QUrl::fromLocalFile(fromB)));
+        QVERIFY(!backupA.inspect(QUrl::fromLocalFile(fromB)).isEmpty());
+        QVERIFY(backupA.restore());
+        CourseBook book;
+        QVERIFY(book.open(a.courses));
+        QCOMPARE(book.courses().size(), 1);
+        QCOMPARE(book.entries(course).size(), 1);
+        QCOMPARE(book.entries(course).first().text, u"nach der Löschung"_s);
+    }
+
     // A photo whose note was deleted after the backup does not come back from it.
     void deletedMediaStays()
     {

@@ -500,6 +500,12 @@ bool joinDoubles(QSqlDatabase &db, QString *error)
                        " WHERE deleted = 0 AND course IN (SELECT l.uid FROM courses l WHERE l.deleted = 1"
                        "  AND l.calendar_uid <> '' AND EXISTS (SELECT 1 FROM courses w"
                        "  WHERE w.deleted = 0 AND w.calendar_uid = l.calendar_uid))").arg(now),
+        // Any other live entry of a deleted notebook: newer than the deletion, it brings the
+        // notebook back (written after it, on another device); older, it goes with it.
+        QStringLiteral("UPDATE courses SET deleted = 0, changed = %1 WHERE deleted = 1 AND EXISTS (SELECT 1 FROM entries e"
+                       " WHERE e.course = courses.uid AND e.deleted = 0 AND e.changed > courses.changed)").arg(now),
+        QStringLiteral("UPDATE entries SET deleted = 1, changed = %1 WHERE deleted = 0"
+                       " AND course IN (SELECT uid FROM courses WHERE deleted = 1)").arg(now),
         // One passed grade twice: the newer row stays.
         QStringLiteral("UPDATE grades SET deleted = 1, changed = %1 WHERE deleted = 0 AND EXISTS (SELECT 1 FROM grades g"
                        " WHERE g.deleted = 0 AND g.discipline = grades.discipline AND g.grade = grades.grade"
