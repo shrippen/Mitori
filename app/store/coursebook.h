@@ -85,6 +85,8 @@ public:
     bool deleteEntry(const QString &uid, const QDateTime &at);
     // The entries of a notebook that are not deleted, oldest first.
     QList<Entry> entries(const QString &course) const;
+    // The entries of every notebook that is not deleted, newest first (All notes).
+    QList<Entry> allEntries() const;
     // How many entries each notebook has: {course uid: count}.
     QHash<QString, int> entryCounts() const;
 

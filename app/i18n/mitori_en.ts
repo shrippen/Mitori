@@ -4,11 +4,11 @@
 <context>
     <name>AllNotesPage</name>
     <message numerus="yes">
-        <location filename="../qml/AllNotesPage.qml" line="215"/>
-        <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
+        <location filename="../qml/AllNotesPage.qml" line="191"/>
+        <source>%n note(s). Tap one to open its technique or notebook, press and hold to change or delete it.</source>
         <translation>
-            <numerusform>%n note. Tap one to open its technique, press and hold to change or delete it.</numerusform>
-            <numerusform>%n notes. Tap one to open its technique, press and hold to change or delete it.</numerusform>
+            <numerusform>%n note. Tap it to open its technique or notebook, press and hold to change or delete it.</numerusform>
+            <numerusform>%n notes. Tap one to open its technique or notebook, press and hold to change or delete it.</numerusform>
         </translation>
     </message>
 </context>
@@ -45,7 +45,7 @@
 <context>
     <name>ExamPage</name>
     <message numerus="yes">
-        <location filename="../qml/ExamPage.qml" line="91"/>
+        <location filename="../qml/ExamPage.qml" line="92"/>
         <source>%n point(s)</source>
         <translation>
             <numerusform>%n point</numerusform>
@@ -141,7 +141,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="126"/>
+        <location filename="../qml/TodayPage.qml" line="128"/>
         <source>%n of %1 with a video come(s) into the training; practise the others from the list below.</source>
         <translation>
             <numerusform>%n of %1 has a video and comes into the training; practise the others from the list below.</numerusform>

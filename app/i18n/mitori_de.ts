@@ -2,50 +2,72 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de" sourcelanguage="en">
 <context>
+    <name>AllNotes</name>
+    <message>
+        <location filename="../services/allnotes.cpp" line="94"/>
+        <source>Technique no longer in the programme</source>
+        <translation>Technik nicht mehr im Programm</translation>
+    </message>
+</context>
+<context>
     <name>AllNotesPage</name>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="65"/>
+        <location filename="../qml/AllNotesPage.qml" line="57"/>
         <source>All notes</source>
         <translation>Alle Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="72"/>
+        <location filename="../qml/AllNotesPage.qml" line="64"/>
         <source>Today</source>
         <translation>Heute</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="88"/>
-        <location filename="../qml/AllNotesPage.qml" line="289"/>
+        <location filename="../qml/AllNotesPage.qml" line="273"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="109"/>
+        <location filename="../qml/AllNotesPage.qml" line="84"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="216"/>
+        <location filename="../qml/AllNotesPage.qml" line="85"/>
+        <source>Courses</source>
+        <translation>Lehrgänge</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/AllNotesPage.qml" line="191"/>
+        <source>%n note(s). Tap one to open its technique or notebook, press and hold to change or delete it.</source>
+        <translation>
+            <numerusform>%n Notiz. Tippen öffnet die Technik oder das Notizbuch, lang drücken ändert oder löscht sie.</numerusform>
+            <numerusform>%n Notizen. Tippen öffnet die Technik oder das Notizbuch, lang drücken ändert oder löscht eine.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="192"/>
+        <source>No entries in course notebooks yet.</source>
+        <translation>Noch keine Einträge in Lehrgangs-Notizbüchern.</translation>
+    </message>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="193"/>
         <source>No notes in this discipline.</source>
         <translation>Keine Notizen in dieser Sparte.</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="217"/>
+        <location filename="../qml/AllNotesPage.qml" line="194"/>
         <source>No notes yet. Notes are written on a technique or in the player.</source>
         <translation>Noch keine Notizen. Notizen schreibst du zu einer Technik oder im Player.</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="235"/>
+        <location filename="../qml/AllNotesPage.qml" line="212"/>
+        <source>Opens the notebook; press and hold or the menu key to change or delete</source>
+        <translation>Öffnet das Notizbuch; lang drücken oder Menütaste zum Ändern oder Löschen</translation>
+    </message>
+    <message>
+        <location filename="../qml/AllNotesPage.qml" line="213"/>
         <source>Opens the technique&apos;s notes; press and hold or the menu key to change or delete</source>
         <translation>Öffnet die Notizen der Technik; lang drücken oder Menütaste zum Ändern oder Löschen</translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../qml/AllNotesPage.qml" line="215"/>
-        <source>%n note(s). Tap one to open its technique, press and hold to change or delete it.</source>
-        <translation>
-            <numerusform>%n Notiz. Tippen öffnet die Technik, lang drücken ändert oder löscht die Notiz.</numerusform>
-            <numerusform>%n Notizen. Tippen öffnet die Technik, lang drücken ändert oder löscht die Notiz.</numerusform>
-        </translation>
     </message>
 </context>
 <context>
@@ -397,28 +419,28 @@
         <translation>Das Notizbuch ließ sich nicht löschen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="297"/>
-        <location filename="../services/courses.cpp" line="305"/>
+        <location filename="../services/courses.cpp" line="313"/>
+        <location filename="../services/courses.cpp" line="321"/>
         <source>The entry could not be saved: %1</source>
         <translation>Der Eintrag ließ sich nicht speichern: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="310"/>
+        <location filename="../services/courses.cpp" line="326"/>
         <source>The entry could not be deleted: %1</source>
         <translation>Der Eintrag ließ sich nicht löschen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="359"/>
+        <location filename="../services/courses.cpp" line="375"/>
         <source>The grade could not be saved: %1</source>
         <translation>Der Grad konnte nicht gespeichert werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="364"/>
+        <location filename="../services/courses.cpp" line="380"/>
         <source>The grade could not be deleted: %1</source>
         <translation>Der Grad konnte nicht gelöscht werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="446"/>
+        <location filename="../services/courses.cpp" line="462"/>
         <source>The exam could not be planned: %1</source>
         <translation>Die Prüfung konnte nicht vorgemerkt werden: %1</translation>
     </message>
@@ -575,12 +597,12 @@
         <translation>Geplant: %1</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="75"/>
+        <location filename="../qml/ExamPage.qml" line="76"/>
         <source>This grade</source>
         <translation>Diesen Grad</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/ExamPage.qml" line="91"/>
+        <location filename="../qml/ExamPage.qml" line="92"/>
         <source>%n point(s)</source>
         <translation>
             <numerusform>%n Punkt</numerusform>
@@ -588,64 +610,64 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="101"/>
+        <location filename="../qml/ExamPage.qml" line="102"/>
         <source>Mock exam %1</source>
         <translation>Probe %1</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="102"/>
+        <location filename="../qml/ExamPage.qml" line="103"/>
         <source>Points from the %1</source>
         <translation>Anzahl aus dem %1</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="106"/>
+        <location filename="../qml/ExamPage.qml" line="107"/>
         <source>all %1</source>
         <translation>alle %1</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="109"/>
+        <location filename="../qml/ExamPage.qml" line="110"/>
         <source>Number of points</source>
         <translation>Anzahl</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="114"/>
-        <location filename="../qml/ExamPage.qml" line="121"/>
+        <location filename="../qml/ExamPage.qml" line="115"/>
+        <location filename="../qml/ExamPage.qml" line="122"/>
         <source>Random order</source>
         <translation>Zufällige Reihenfolge</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="115"/>
+        <location filename="../qml/ExamPage.qml" line="116"/>
         <source>off: as in the exam programme</source>
         <translation>aus: wie in der Prüfungsordnung</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="126"/>
-        <location filename="../qml/ExamPage.qml" line="134"/>
+        <location filename="../qml/ExamPage.qml" line="127"/>
+        <location filename="../qml/ExamPage.qml" line="135"/>
         <source>Techniques from earlier grades</source>
         <translation>Techniken aus früheren Graden</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="127"/>
+        <location filename="../qml/ExamPage.qml" line="128"/>
         <source>2–5 samples, always first</source>
         <translation>2–5 Stichproben, immer am Anfang</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="127"/>
+        <location filename="../qml/ExamPage.qml" line="128"/>
         <source>first grade, none before</source>
         <translation>erster Grad, keine früheren</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="141"/>
+        <location filename="../qml/ExamPage.qml" line="142"/>
         <source>Only what is asked is shown (for Shinki Toho only the technique): no video, no time limit. At the end you rate each technique; that sets its rating and goes into the statistics.</source>
         <translation>Eingeblendet wird nur, was geprüft wird (bei Shinki Toho nur die Technik), kein Video, kein Zeitdruck. Am Ende schätzt du jede Technik ein; das setzt ihren Stand und geht in die Statistik.</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="142"/>
+        <location filename="../qml/ExamPage.qml" line="143"/>
         <source>Last round: %1, average %2.</source>
         <translation>Letzte Runde: %1, Schnitt %2.</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="154"/>
+        <location filename="../qml/ExamPage.qml" line="155"/>
         <source>Start round</source>
         <translation>Runde starten</translation>
     </message>
@@ -709,99 +731,99 @@
         <translation>Meine Grade</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="64"/>
+        <location filename="../qml/GradesPage.qml" line="67"/>
         <source>last %1</source>
         <translation>zuletzt %1</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="64"/>
+        <location filename="../qml/GradesPage.qml" line="67"/>
         <source>no grade yet</source>
         <translation>noch kein Grad</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="82"/>
+        <location filename="../qml/GradesPage.qml" line="85"/>
         <source>Remove %1</source>
         <translation>%1 entfernen</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="98"/>
+        <location filename="../qml/GradesPage.qml" line="101"/>
         <source>Next: %1</source>
         <translation>Nächster: %1</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="100"/>
+        <location filename="../qml/GradesPage.qml" line="103"/>
         <source>planned: %1, %2</source>
         <translation>vorgemerkt: %1, %2</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="119"/>
+        <location filename="../qml/GradesPage.qml" line="123"/>
         <source>Grade</source>
         <translation>Grad</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="125"/>
+        <location filename="../qml/GradesPage.qml" line="129"/>
         <source>yyyy-MM-dd</source>
         <comment>date format</comment>
         <translation>dd.MM.yyyy</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="126"/>
+        <location filename="../qml/GradesPage.qml" line="130"/>
         <source>MO</source>
         <translation>MO</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="126"/>
+        <location filename="../qml/GradesPage.qml" line="130"/>
         <source>TU</source>
         <translation>DI</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="126"/>
+        <location filename="../qml/GradesPage.qml" line="130"/>
         <source>WE</source>
         <translation>MI</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="126"/>
+        <location filename="../qml/GradesPage.qml" line="130"/>
         <source>TH</source>
         <translation>DO</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="126"/>
+        <location filename="../qml/GradesPage.qml" line="130"/>
         <source>FR</source>
         <translation>FR</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="126"/>
+        <location filename="../qml/GradesPage.qml" line="130"/>
         <source>SA</source>
         <translation>SA</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="126"/>
+        <location filename="../qml/GradesPage.qml" line="130"/>
         <source>SU</source>
         <translation>SO</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="127"/>
+        <location filename="../qml/GradesPage.qml" line="131"/>
         <source>Today</source>
         <translation>Heute</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="129"/>
+        <location filename="../qml/GradesPage.qml" line="133"/>
         <source>Day of the exam</source>
         <translation>Tag der Prüfung</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="135"/>
-        <location filename="../qml/GradesPage.qml" line="136"/>
+        <location filename="../qml/GradesPage.qml" line="139"/>
+        <location filename="../qml/GradesPage.qml" line="140"/>
         <source>Place</source>
         <translation>Ort</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="141"/>
+        <location filename="../qml/GradesPage.qml" line="145"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/GradesPage.qml" line="156"/>
+        <location filename="../qml/GradesPage.qml" line="160"/>
         <source>The ground for waiting times and the hints before an exam. The same grade again corrects its day and place.</source>
         <translation>Grundlage für Wartezeiten und die Hinweise vor einer Prüfung. Derselbe Grad noch einmal berichtigt Tag und Ort.</translation>
     </message>
@@ -1087,17 +1109,17 @@
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="264"/>
+        <location filename="../services/practice.cpp" line="269"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="328"/>
+        <location filename="../services/practice.cpp" line="333"/>
         <source>Not every point of the exam round is rated.</source>
         <translation>Nicht jeder Punkt der Prüfungsrunde ist eingeschätzt.</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="349"/>
+        <location filename="../services/practice.cpp" line="354"/>
         <source>The exam round could not be saved: %1</source>
         <translation>Die Prüfungsrunde konnte nicht gespeichert werden: %1</translation>
     </message>
@@ -1671,37 +1693,37 @@
         <translation>bis %1 (wie im Programm gewählt)</translation>
     </message>
     <message>
-        <location filename="../qml/TodayPage.qml" line="87"/>
+        <location filename="../qml/TodayPage.qml" line="89"/>
         <source>Mock exam</source>
         <translation>Probeprüfung</translation>
     </message>
     <message>
-        <location filename="../qml/TodayPage.qml" line="103"/>
+        <location filename="../qml/TodayPage.qml" line="105"/>
         <source>due</source>
         <translation>fällig</translation>
     </message>
     <message>
-        <location filename="../qml/TodayPage.qml" line="107"/>
+        <location filename="../qml/TodayPage.qml" line="109"/>
         <source>Everything is practised for today.</source>
         <translation>Für heute ist alles geübt.</translation>
     </message>
     <message>
-        <location filename="../qml/TodayPage.qml" line="108"/>
+        <location filename="../qml/TodayPage.qml" line="110"/>
         <source>%1 unsure · %2 long ago · %3 new</source>
         <translation>%1 unsicher · %2 lange nicht geübt · %3 neu</translation>
     </message>
     <message>
-        <location filename="../qml/TodayPage.qml" line="118"/>
+        <location filename="../qml/TodayPage.qml" line="120"/>
         <source>Start training</source>
         <translation>Training starten</translation>
     </message>
     <message>
-        <location filename="../qml/TodayPage.qml" line="125"/>
+        <location filename="../qml/TodayPage.qml" line="127"/>
         <source>None of them has a video on this device: practise them from the list below.</source>
         <translation>Keine davon hat ein Video auf diesem Gerät: übe sie mit der Liste unten.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="126"/>
+        <location filename="../qml/TodayPage.qml" line="128"/>
         <source>%n of %1 with a video come(s) into the training; practise the others from the list below.</source>
         <translation>
             <numerusform>%n von %1 hat ein Video und kommt ins Training; übe die anderen mit der Liste unten.</numerusform>
@@ -1709,22 +1731,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/TodayPage.qml" line="134"/>
+        <location filename="../qml/TodayPage.qml" line="136"/>
         <source>Due</source>
         <translation>Fällig</translation>
     </message>
     <message>
-        <location filename="../qml/TodayPage.qml" line="162"/>
+        <location filename="../qml/TodayPage.qml" line="164"/>
         <source>Intervals · days until due again</source>
         <translation>Abstände · Tage bis wieder fällig</translation>
     </message>
     <message>
-        <location filename="../qml/TodayPage.qml" line="186"/>
+        <location filename="../qml/TodayPage.qml" line="188"/>
         <source>Days for %1</source>
         <translation>Tage für %1</translation>
     </message>
     <message>
-        <location filename="../qml/TodayPage.qml" line="198"/>
+        <location filename="../qml/TodayPage.qml" line="200"/>
         <source>New techniques of the current grade come on top, at most two a day.</source>
         <translation>Neue Techniken des aktuellen Grades kommen dazu, höchstens zwei am Tag.</translation>
     </message>
