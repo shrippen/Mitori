@@ -2,6 +2,7 @@
 
 #include "device.h"
 #include "mediastore.h"
+#include "notebookexport.h"
 #include "devicecalendar.h"
 
 #include <QDir>
@@ -506,6 +507,56 @@ QVariantMap Courses::nextExam(const QString &discipline) const
             {QStringLiteral("grade"), best->examGrade},
             {QStringLiteral("name"), examName(best->examDiscipline, best->examGrade)},
             {QStringLiteral("days"), std::max<qint64>(0, today.daysTo(best->first))}};
+}
+
+QString Courses::exportName(const QString &uid) const
+{
+    for (const CourseBook::Course &c : m_open ? m_book->courses() : QList<CourseBook::Course>()) {
+        if (c.uid == uid) {
+            return NotebookExport::fileName(c);
+        }
+    }
+    return {};
+}
+
+int Courses::exportNotebook(const QString &uid, const QUrl &target)
+{
+    if (!m_open) {
+        return -1;
+    }
+    const QList<CourseBook::Course> list = m_book->courses();
+    const auto it = std::find_if(list.cbegin(), list.cend(), [&](const auto &c) { return c.uid == uid; });
+    if (it == list.cend()) {
+        return -1;
+    }
+    // A local file, or a content:// URL from Android's file picker (QFile opens both there).
+    QFile file(target.isLocalFile() ? target.toLocalFile() : target.toString());
+    int missing = 0;
+    // The last pieces (notizbuch.md, the directory) sit in QFile's buffer: a full disk shows only
+    // when they are flushed, and a ZIP without its directory does not open.
+    const bool opened = file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    const bool ok = opened && NotebookExport::write(&file, *it, m_book->entries(uid), MediaStore::shared(), &missing)
+                    && file.flush();
+    QString why = file.errorString();           // close() may reset it (a write past the buffer failed)
+    file.close();
+    if (ok && file.error() != QFileDevice::NoError) {
+        why = file.errorString();
+    }
+    if (!ok || file.error() != QFileDevice::NoError) {
+        m_error = tr("The notebook could not be exported: %1").arg(why);
+        // Only a file this export truncated: no broken archive that looks like a backup, and never
+        // one it could not open (an old backup, read-only).
+        if (opened && target.isLocalFile() && QFileInfo(file).isFile()) {
+            file.remove();
+        }
+        emit errorChanged();
+        return -1;
+    }
+    if (!m_error.isEmpty()) {
+        m_error.clear();
+        emit errorChanged();
+    }
+    return missing;
 }
 
 bool Courses::addToDeviceCalendar(const QString &uid)

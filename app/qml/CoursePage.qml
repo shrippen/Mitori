@@ -1,7 +1,9 @@
 pragma ComponentBehavior: Bound
 
+import QtCore
 import QtQuick
 import QtQuick.Controls as QQC2
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Kante
@@ -44,6 +46,16 @@ Kirigami.ScrollablePage {
     title: qsTr("Notebook")
 
     actions: [
+        // The notebook as a ZIP (notizbuch.md, photos, voice notes) to a file the user picks.
+        Kirigami.Action {
+            objectName: "exportCourse"
+            icon.name: "document-export"
+            text: qsTr("Export")
+            onTriggered: {
+                exportDialog.selectedFile = exportDialog.currentFolder + "/" + encodeURIComponent(Courses.exportName(page.uid))
+                exportDialog.open()
+            }
+        },
         Kirigami.Action {
             objectName: "deleteCourse"
             icon.name: "edit-delete"
@@ -123,6 +135,15 @@ Kirigami.ScrollablePage {
                         text: qsTr("Announcement")
                         onClicked: Qt.openUrlExternally(page.course.announcement)
                     }
+                }
+                QQC2.Label {
+                    objectName: "exportedTo"
+                    Layout.fillWidth: true
+                    visible: page.exported !== ""
+                    text: qsTr("Exported: %1 (notizbuch.md with the photos and voice notes)").arg(page.exported)
+                          + (page.exportMissing > 0 ? " " + qsTr("%n file(s) were not on this device and are missing.", "", page.exportMissing) : "")
+                    color: KanteStyle.positiveTextColor
+                    wrapMode: Text.Wrap
                 }
                 QQC2.Label {
                     id: calendarFailed
@@ -380,6 +401,31 @@ Kirigami.ScrollablePage {
                 onClicked: page.add()
             }
         }
+    }
+
+    // Where the export went, shown under the course ("" before one), and how many of its media
+    // files were not on the device.
+    property string exported: ""
+    property int exportMissing: 0
+
+    FileDialog {
+        id: exportDialog
+
+        title: qsTr("Export notebook")
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: "zip"
+        nameFilters: [qsTr("ZIP archives (*.zip)")]
+        currentFolder: StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]
+        onAccepted: page.exportTo(selectedFile)
+    }
+
+    // A local file shows its name; Android's picker gives a content:// URL with a document id, so
+    // there the name the dialog was offered.
+    function exportTo(url) {
+        const missing = Courses.exportNotebook(page.uid, url)
+        const local = String(url).startsWith("file:")
+        page.exportMissing = Math.max(0, missing)
+        page.exported = missing < 0 ? "" : local ? decodeURIComponent(String(url).split("/").pop()) : Courses.exportName(page.uid)
     }
 
     // A note without text says what it holds.

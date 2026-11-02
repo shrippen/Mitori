@@ -1894,13 +1894,13 @@ TestCase {
         compose.text = "Fußstellung"
         const name = Media.importPhoto("file://" + testMediaDir + "/foto.png")
         verify(name.endsWith(".jpg"), name)
-        const media = findChild(page.footer, "addPhoto").parent
+        const media = findChild(page.footer, "noteMedia")
         media.attached(name)
         tryVerify(() => Practice.notes(entry.id).some(n => n.media === name))
         // A file that is no picture says so (and makes no note).
         const before = Practice.notes(entry.id).length
         media.importPicture("file://" + testMediaDir + "/README.md")
-        tryVerify(() => findChild(media, "mediaProblem").shown, 2000, "a message for an unreadable picture")
+        tryVerify(() => media.problem.shown, 2000, "a message for an unreadable picture")
         compare(Practice.notes(entry.id).length, before)
         compare(compose.text, "", "the text went with the photo")
         tryVerify(() => findChildren(page, "notePhoto").some(i => i.visible && i.status === Image.Ready), 3000)
@@ -1925,6 +1925,12 @@ TestCase {
             verify(!findChild(camera, "shutter").enabled)
             window.pageStack.pop()
         }
+
+        // A file that is gone (a cloud backup leaves the media out) says so instead of an empty picture.
+        verify(Practice.addNote(entry.id, "", "fehlt-" + name))
+        tryVerify(() => findChildren(page, "mediaMissing").some(l => l.visible && l.text === qsTr("The photo is not on this device.")),
+                  3000, "a missing photo is named")
+        verify(Practice.deleteNote(Practice.notes(entry.id).find(n => n.media === "fehlt-" + name).uid))
 
         // All notes shows the photo too.
         const all = push("AllNotesPage")
@@ -1960,6 +1966,12 @@ TestCase {
         findChild(book, "courseMedia").attached(Media.importPhoto("file://" + testMediaDir + "/foto.png"))
         tryVerify(() => Courses.entries(course).length === 1 && Courses.entries(course)[0].media.endsWith(".jpg"))
         tryVerify(() => findChildren(book, "notePhoto").some(i => i.visible))
+        // Exported as a ZIP (the file dialog is the platform's; the page's step after it).
+        const target = "file://" + uiShotsDir + "/" + Courses.exportName(course)
+        book.exportTo(target)
+        tryVerify(() => findChild(book, "exportedTo").visible)
+        verify(findChild(book, "exportedTo").text.indexOf("Fotolehrgang") > 0, findChild(book, "exportedTo").text)
+        shot("14d-course-exported")
         window.pageStack.pop()
         verify(Courses.remove(course))
     }
