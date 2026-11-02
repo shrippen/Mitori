@@ -194,6 +194,7 @@ Kirigami.ScrollablePage {
         objectName: "techniqueSheet"
         onPlayRequested: entry => page.play(entry)
         onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
+        onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
     }
 
     function open(entry) {

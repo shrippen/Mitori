@@ -400,6 +400,95 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Notes: add one for today from the field, change it and delete it (press and hold).
+    function test_8_notes() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        const page = push("NotesPage", { entry: entry })
+        compare(page.notes.length, 0)
+        const compose = findChild(page, "compose")
+        compose.text = "Hüfte früher drehen"
+        compose.accepted()                              // Enter in the field
+        compare(page.notes.length, 1)
+        compare(compose.text, "")
+        compare(Practice.lastNote(entry.id).text, "Hüfte früher drehen")
+        compare(page.days.length, 1)
+        Practice.addNote(entry.id, "Blick beim Partner")
+        compare(page.days[0].notes.length, 2)
+        shot("8-notes")
+        const note = findChild(page, "note")
+        verify(note)
+        mousePress(note, 20, note.height / 2)
+        wait(1000)
+        mouseRelease(note, 20, note.height / 2)
+        const editor = findChild(page, "noteEditor")
+        tryVerify(() => editor.opened, 2000, "press and hold opens the editor")
+        compare(editor.note.uid, page.notes[0].uid)
+        // Save from the editor.
+        findChild(editor, "noteArea").text = "Hüfte viel früher drehen"
+        editor.customFooterActions[1].trigger()
+        tryVerify(() => !editor.opened)
+        compare(page.notes[0].text, "Hüfte viel früher drehen")
+        // Right-click the second note, delete it from the editor.
+        wait(500)                                       // the editor's overlay fades out
+        const second = findChildren(page, "note").find(n => n.modelData.uid === page.notes[1].uid)
+        mouseClick(second, 20, second.height / 2, Qt.RightButton)
+        tryVerify(() => editor.opened)
+        compare(editor.note.uid, page.notes[1].uid)
+        editor.customFooterActions[0].trigger()
+        tryVerify(() => !editor.opened)
+        compare(page.notes.length, 1)
+        compare(findChild(page, "dayName").text, "Today")
+        window.pageStack.pop()
+    }
+
+    function findChildren(item, name) {
+        let found = []
+        if (item.objectName === name) {
+            found.push(item)
+        }
+        for (let i = 0; i < item.children.length; i++) {
+            found = found.concat(findChildren(item.children[i], name))
+        }
+        return found
+    }
+
+    // A note begun in the player belongs to the technique it was typed for, also when the player
+    // moves on before it is added (training moves on after a rating).
+    function test_8b_note_draft_stays_with_its_technique() {
+        const page = playerAt(1)
+        const first = page.current.id
+        const field = findChild(page, "noteField")
+        field.text = "für die erste Technik"
+        page.go(1)
+        verify(page.current.id !== first)
+        compare(Practice.lastNote(first).text, "für die erste Technik", "saved for the technique it was typed for")
+        verify(Practice.lastNote(page.current.id).text !== "für die erste Technik")
+        compare(field.text, "", "the field is empty for the next technique")
+        // Leaving the player keeps a draft as well.
+        const second = page.current.id
+        field.text = "beim Verlassen"
+        window.pageStack.pop()
+        tryVerify(() => Practice.lastNote(second).text === "beim Verlassen", 3000, "saved when the player closes")
+    }
+
+    // With the note field focused, the controls scroll it into view when the window shrinks
+    // (the on-screen keyboard opens after the focus).
+    function test_8c_note_field_above_keyboard() {
+        window.width = 800
+        window.height = 360
+        const page = playerAt(0)
+        const view = findChild(page, "controlsView")
+        const field = findChild(page, "noteField")
+        field.forceActiveFocus()
+        window.height = 200
+        wait(300)
+        const at = field.mapToItem(view, 0, 0)
+        verify(at.y >= 0 && at.y + field.height <= view.height + 1, "field in view (" + at.y + ", " + view.height + ")")
+        window.width = 420
+        window.height = 800
+        window.pageStack.pop()
+    }
+
     // The last chapter ends with the file; the loop must still start over at the chapter.
     function test_6_loop_at_end_of_file() {
         const page = playerAt(-1)

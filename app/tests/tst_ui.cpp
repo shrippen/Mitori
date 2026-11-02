@@ -1,3 +1,5 @@
+#include <ctime>
+
 #include <QDir>
 #include <QFile>
 #include <QQmlContext>
@@ -19,6 +21,10 @@ public slots:
     void applicationAvailable()
     {
         QCoreApplication::setApplicationName(QStringLiteral("mitori-ui-test"));
+        // West of UTC: a QDate reaches QML as midnight UTC, the day before here (catches "today"
+        // compared that way; NotesPage once did).
+        qputenv("TZ", "America/Los_Angeles");
+        tzset();
         QStandardPaths::setTestModeEnabled(true);
         // Every run starts from the defaults (the video folder from MITORI_VIDEOS, not from the
         // setting a test wrote last time).

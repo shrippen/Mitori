@@ -207,6 +207,18 @@ Kirigami.Page {
             clip: true
             QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
 
+            // The note field while it has the focus (NoteRow), kept in view as the height changes.
+            property Item focusedField: null
+            function showFocusedField() {
+                if (!focusedField || !focusedField.activeFocus) {
+                    return
+                }
+                const y = focusedField.mapToItem(controls, 0, 0).y
+                contentY = Math.max(0, Math.min(contentHeight - height,
+                                                y - height + focusedField.height + Kirigami.Units.largeSpacing))
+            }
+            onHeightChanged: Qt.callLater(showFocusedField)
+
             ColumnLayout {
                 id: controls
 
@@ -269,6 +281,18 @@ Kirigami.Page {
                     Layout.fillWidth: true
                     entry: page.current.id || ""
                     onRated: if (page.training) page.nextOpen()
+                }
+
+                NoteRow {
+                    Layout.fillWidth: true
+                    entry: page.current
+                    onNotesRequested: page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: page.current })
+                    // Above the on-screen keyboard: scroll the field into view when it gets the
+                    // focus and again when the keyboard opens (the window shrinks: adjustResize).
+                    onFieldFocused: field => {
+                        controlsView.focusedField = field
+                        Qt.callLater(controlsView.showFocusedField)
+                    }
                 }
 
                 KanteHintCard {

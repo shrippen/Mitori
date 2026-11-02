@@ -221,6 +221,62 @@ private slots:
         QVERIFY(again.due(candidates).isEmpty());
     }
 
+    void notesKeepTheirHistory()
+    {
+        QTemporaryDir dir;
+        PracticeLog log;
+        QVERIFY(log.open(dir.filePath(QStringLiteral("log.sqlite"))));
+        const QDateTime t = QDateTime(QDate(2026, 11, 2), QTime(18, 0), QTimeZone::UTC);
+        const auto a = log.addNote(QStringLiteral("e"), QStringLiteral("  Hüfte früher drehen  "), t, QStringLiteral("phone"));
+        QVERIFY(!a.uid.isEmpty());
+        QCOMPARE(a.text, QStringLiteral("Hüfte früher drehen"));
+        QVERIFY(log.addNote(QStringLiteral("e"), QStringLiteral("   "), t, QStringLiteral("phone")).uid.isEmpty());
+        const auto b = log.addNote(QStringLiteral("e"), QStringLiteral("Blick beim Partner"), t.addSecs(60), QStringLiteral("phone"));
+        QVERIFY(log.changeNote(a.uid, QStringLiteral("Hüfte früher"), t.addSecs(120)));
+        QVERIFY(!log.changeNote(a.uid, QStringLiteral(" "), t.addSecs(130)));
+        QCOMPARE(log.notes(QStringLiteral("e")).size(), 2);
+        QCOMPARE(log.notes(QStringLiteral("e")).first().text, QStringLiteral("Hüfte früher"));
+        QCOMPARE(log.notes(QStringLiteral("e")).first().changed, t.addSecs(120));
+        QCOMPARE(log.lastNotes().value(QStringLiteral("e")).uid, b.uid);
+        QVERIFY(log.deleteNote(b.uid, t.addSecs(180)));
+        QVERIFY(!log.deleteNote(b.uid, t.addSecs(190)));
+        QVERIFY(!log.changeNote(b.uid, QStringLiteral("again"), t.addSecs(200)));
+        QCOMPARE(log.notes(QStringLiteral("e")).size(), 1);
+        QCOMPARE(log.lastNotes().value(QStringLiteral("e")).uid, a.uid);
+    }
+
+    // A log of schema 1 (ratings only) gets the notes table and keeps its ratings.
+    void migratesFromSchemaOne()
+    {
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("log.sqlite"));
+        {
+            QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("v1"));
+            db.setDatabaseName(path);
+            QVERIFY(db.open());
+            QSqlQuery q(db);
+            QVERIFY(q.exec(QStringLiteral("CREATE TABLE ratings (uid TEXT PRIMARY KEY, entry TEXT NOT NULL,"
+                                          " level INTEGER NOT NULL, at INTEGER NOT NULL, device TEXT NOT NULL)")));
+            QVERIFY(q.exec(QStringLiteral("INSERT INTO ratings VALUES ('x', 'e', 3, %1, 'd')").arg(QDateTime::currentMSecsSinceEpoch())));
+            QVERIFY(q.exec(QStringLiteral("PRAGMA user_version = 1")));
+            db.close();
+        }
+        QSqlDatabase::removeDatabase(QStringLiteral("v1"));
+        Practice practice(path);
+        QCOMPARE(practice.errorString(), QString());
+        QCOMPARE(practice.level(QStringLiteral("e")), 3);
+        QSignalSpy spy(&practice, &Practice::notesChanged);
+        QVERIFY(practice.addNote(QStringLiteral("e"), QStringLiteral("Kreis größer")));
+        QCOMPARE(spy.count(), 1);
+        QCOMPARE(practice.lastNote(QStringLiteral("e")).value(QStringLiteral("text")).toString(), QStringLiteral("Kreis größer"));
+        const QString uid = practice.notes(QStringLiteral("e")).first().toMap().value(QStringLiteral("uid")).toString();
+        QVERIFY(practice.changeNote(uid, QStringLiteral("Kreis viel größer")));
+        QCOMPARE(practice.lastNote(QStringLiteral("e")).value(QStringLiteral("text")).toString(), QStringLiteral("Kreis viel größer"));
+        QVERIFY(practice.deleteNote(uid));
+        QVERIFY(practice.lastNote(QStringLiteral("e")).isEmpty());
+        QCOMPARE(spy.count(), 3);
+    }
+
     void deviceIdStays()
     {
         const QString id = Practice::deviceId();

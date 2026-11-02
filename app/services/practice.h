@@ -19,6 +19,8 @@ class Practice : public QObject
     QML_ELEMENT
     QML_SINGLETON
     Q_PROPERTY(int revision READ revision NOTIFY changed)
+    // Grows with every new, changed or deleted note.
+    Q_PROPERTY(int notesRevision READ notesRevision NOTIFY notesChanged)
     // Why the log could not be opened or the last rating not saved; empty when all is well.
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorChanged)
     // Days until a technique of level 1..4 is due again (settings, "Heute üben").
@@ -35,6 +37,7 @@ public:
     ~Practice() override;
 
     int revision() const { return m_revision; }
+    int notesRevision() const { return m_notesRevision; }
     QString errorString() const { return m_error; }
     QStringList levelNames() const;
 
@@ -53,6 +56,15 @@ public:
     // ones in order (Schedule::due), each row with `level` and `days` added.
     Q_INVOKABLE QVariantList due(const QVariantList &candidates) const;
 
+    // Notes on a technique: {uid, text, created, changed} with local dates, oldest first.
+    Q_INVOKABLE QVariantList notes(const QString &entry) const;
+    // The newest note of an entry ({uid, text, created, changed}), or an empty map.
+    Q_INVOKABLE QVariantMap lastNote(const QString &entry) const;
+    // Add, change or delete a note; false (and errorString set) when it could not be saved.
+    Q_INVOKABLE bool addNote(const QString &entry, const QString &text);
+    Q_INVOKABLE bool changeNote(const QString &uid, const QString &text);
+    Q_INVOKABLE bool deleteNote(const QString &uid);
+
     QDate today() const { return m_today; }
     QVariantList intervals() const;
     void setIntervals(const QVariantList &intervals);
@@ -66,16 +78,20 @@ signals:
     void errorChanged();
     void intervalsChanged();
     void todayChanged();
+    void notesChanged();
 
 private:
     void load(const QString &path);
+    void noteSaved(bool ok);
 
     std::unique_ptr<PracticeLog> m_log;
     QHash<QString, PracticeLog::Rating> m_latest;
     QHash<QString, QDate> m_first;
+    QHash<QString, PracticeLog::Note> m_lastNotes;
     QDate m_today = QDate::currentDate();
     QTimer m_dayTimer;
     QString m_error;
     bool m_open = false;
     int m_revision = 0;
+    int m_notesRevision = 0;
 };

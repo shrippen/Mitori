@@ -21,6 +21,19 @@ PracticeLog::Rating rating(const QSqlQuery &q)
     return r;
 }
 
+PracticeLog::Note note(const QSqlQuery &q)
+{
+    PracticeLog::Note n;
+    n.uid = q.value(0).toString();
+    n.entry = q.value(1).toString();
+    n.text = q.value(2).toString();
+    n.created = QDateTime::fromMSecsSinceEpoch(q.value(3).toLongLong(), QTimeZone::UTC);
+    n.changed = QDateTime::fromMSecsSinceEpoch(q.value(4).toLongLong(), QTimeZone::UTC);
+    n.device = q.value(5).toString();
+    n.deleted = q.value(6).toBool();
+    return n;
+}
+
 } // namespace
 
 PracticeLog::PracticeLog()
@@ -65,6 +78,19 @@ bool PracticeLog::migrate()
                             " at INTEGER NOT NULL, device TEXT NOT NULL)"))
             && q.exec(QStringLiteral("CREATE INDEX IF NOT EXISTS ratings_entry ON ratings (entry, at)"))
             && q.exec(QStringLiteral("PRAGMA user_version = 1"));
+        if (!ok) {
+            m_error = q.lastError().text();
+            return false;
+        }
+    }
+    if (version < 2) {
+        const bool ok = q.exec(QStringLiteral(
+                            "CREATE TABLE IF NOT EXISTS notes ("
+                            " uid TEXT PRIMARY KEY, entry TEXT NOT NULL, text TEXT NOT NULL,"
+                            " created INTEGER NOT NULL, changed INTEGER NOT NULL, device TEXT NOT NULL,"
+                            " deleted INTEGER NOT NULL DEFAULT 0)"))
+            && q.exec(QStringLiteral("CREATE INDEX IF NOT EXISTS notes_entry ON notes (entry, created)"))
+            && q.exec(QStringLiteral("PRAGMA user_version = 2"));
         if (!ok) {
             m_error = q.lastError().text();
             return false;
@@ -135,6 +161,86 @@ QList<PracticeLog::Rating> PracticeLog::history(const QString &entry) const
         if (r.level >= 1 && r.level <= 4) {
             result << r;
         }
+    }
+    return result;
+}
+
+PracticeLog::Note PracticeLog::addNote(const QString &entry, const QString &text, const QDateTime &at, const QString &device)
+{
+    Note n;
+    if (entry.isEmpty() || text.trimmed().isEmpty()) {
+        return n;
+    }
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("INSERT INTO notes (uid, entry, text, created, changed, device) VALUES (?, ?, ?, ?, ?, ?)"));
+    const QString uid = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    q.addBindValue(uid);
+    q.addBindValue(entry);
+    q.addBindValue(text.trimmed());
+    q.addBindValue(at.toMSecsSinceEpoch());
+    q.addBindValue(at.toMSecsSinceEpoch());
+    q.addBindValue(device);
+    if (!q.exec()) {
+        m_error = q.lastError().text();
+        return n;
+    }
+    n = {uid, entry, text.trimmed(), at.toUTC(), at.toUTC(), device, false};
+    return n;
+}
+
+bool PracticeLog::changeNote(const QString &uid, const QString &text, const QDateTime &at)
+{
+    if (text.trimmed().isEmpty()) {
+        return false;
+    }
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("UPDATE notes SET text = ?, changed = ? WHERE uid = ? AND deleted = 0"));
+    q.addBindValue(text.trimmed());
+    q.addBindValue(at.toMSecsSinceEpoch());
+    q.addBindValue(uid);
+    if (!q.exec()) {
+        m_error = q.lastError().text();
+        return false;
+    }
+    return q.numRowsAffected() == 1;
+}
+
+bool PracticeLog::deleteNote(const QString &uid, const QDateTime &at)
+{
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("UPDATE notes SET deleted = 1, changed = ? WHERE uid = ? AND deleted = 0"));
+    q.addBindValue(at.toMSecsSinceEpoch());
+    q.addBindValue(uid);
+    if (!q.exec()) {
+        m_error = q.lastError().text();
+        return false;
+    }
+    return q.numRowsAffected() == 1;
+}
+
+QList<PracticeLog::Note> PracticeLog::notes(const QString &entry) const
+{
+    QList<Note> result;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("SELECT uid, entry, text, created, changed, device, deleted FROM notes"
+                             " WHERE entry = ? AND deleted = 0 ORDER BY created, rowid"));
+    q.addBindValue(entry);
+    q.exec();
+    while (q.next()) {
+        result << note(q);
+    }
+    return result;
+}
+
+QHash<QString, PracticeLog::Note> PracticeLog::lastNotes() const
+{
+    QHash<QString, Note> result;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.exec(QStringLiteral("SELECT uid, entry, text, created, changed, device, deleted FROM notes"
+                          " WHERE deleted = 0 ORDER BY created, rowid"));
+    while (q.next()) {
+        const Note n = note(q);
+        result.insert(n.entry, n);
     }
     return result;
 }

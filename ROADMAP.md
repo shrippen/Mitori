@@ -26,7 +26,9 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
 - Schritt 2: Einschätzen 1–4 im Technik-Blatt und im Player (Übungsprotokoll in SQLite, jede Einschätzung ein
   Eintrag mit Zeit und Gerät), Stand als vier Punkte in der Programmliste, Stand je Grad als Leiste mit Legende.
   Heute üben (Wiederholen nach Plan, Abstände je Stufe einstellbar, Kachel im Startmenü) und Training (Playliste der
-  fälligen Techniken, Einschätzen schaltet weiter). Offen: Notizen mit Fotos und Sprachnotizen, Statistik, Suche.
+  fälligen Techniken, Einschätzen schaltet weiter). Notizen je Technik (Text; nach Tagen, lang drücken zum
+  Bearbeiten/Löschen, letzte Notiz im Blatt, Eingabe im Player). Offen: Fotos und Sprachnotizen an Notizen
+  (Plattform-Schicht), „Alle Notizen“, Statistik, Suche.
 
 ## Kante-Bedarf
 
