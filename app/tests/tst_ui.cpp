@@ -5,7 +5,6 @@
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QSettings>
-#include <QStandardPaths>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuickTest>
 
@@ -25,7 +24,11 @@ public slots:
         // compared that way; NotesPage once did).
         qputenv("TZ", "America/Los_Angeles");
         tzset();
-        QStandardPaths::setTestModeEnabled(true);
+        // Data and settings in the build directory, so that runs in different builds (worktrees,
+        // reviews) do not share ~/.qttest and delete each other's database.
+        qputenv("XDG_DATA_HOME", UI_DATA_DIR "/data");
+        qputenv("XDG_CONFIG_HOME", UI_DATA_DIR "/config");
+        qputenv("XDG_CACHE_HOME", UI_DATA_DIR "/cache");
         // Every run starts from the defaults (the video folder from MITORI_VIDEOS, not from the
         // setting a test wrote last time).
         QSettings().clear();
