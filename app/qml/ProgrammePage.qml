@@ -102,6 +102,7 @@ Kirigami.Page {
                 // Up and Down scroll (the page's keys) also from a focused row; the list has no
                 // current item of its own to move.
                 keyNavigationEnabled: false
+                Keys.onPressed: event => page.scrollKey(event)
 
                 // Scrolls with the list, so a small screen keeps room for the techniques.
                 header: ColumnLayout {
@@ -285,11 +286,13 @@ Kirigami.Page {
         }
         return false
     }
-    Keys.onUpPressed: event => inPlayer() ? event.accepted = false : scrollBy(-Kirigami.Units.gridUnit * 2)
-    Keys.onDownPressed: event => inPlayer() ? event.accepted = false : scrollBy(Kirigami.Units.gridUnit * 2)
-    Keys.onPressed: event => {
+    // From the page and from a focused row (the list passes them on before its ScrollView, which
+    // would scroll a whole screen).
+    function scrollKey(event) {
         if (inPlayer()) {
             return
+        } else if (event.key === Qt.Key_Up || event.key === Qt.Key_Down) {
+            scrollBy((event.key === Qt.Key_Down ? 1 : -1) * Kirigami.Units.gridUnit * 2)
         } else if (event.key === Qt.Key_PageUp || event.key === Qt.Key_PageDown) {
             scrollBy((event.key === Qt.Key_PageDown ? 1 : -1) * list.height * 0.9)
         } else if (event.key === Qt.Key_Home) {
@@ -301,6 +304,7 @@ Kirigami.Page {
         }
         event.accepted = true
     }
+    Keys.onPressed: event => scrollKey(event)
 
     // A row chosen in the list plays beside it; the list shows the row of the technique playing.
     onLastIdChanged: {
