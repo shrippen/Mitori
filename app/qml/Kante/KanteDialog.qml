@@ -126,14 +126,14 @@ QQC2.Dialog {
         property: "leftPadding"
         value: control.footer ? control.footer.padding + control.kanteFooterStart.implicitWidth + Kirigami.Units.largeSpacing : 0
         when: control.footer !== null && control.footerStart.length > 0 && !control.kanteFooterMirrored
-        restoreMode: Binding.RestoreBindingOrValue
+        restoreMode: control.kanteRestore
     }
     Binding {
         target: control.footer
         property: "rightPadding"
         value: control.footer ? control.footer.padding + control.kanteFooterStart.implicitWidth + Kirigami.Units.largeSpacing : 0
         when: control.footer !== null && control.footerStart.length > 0 && control.kanteFooterMirrored
-        restoreMode: Binding.RestoreBindingOrValue
+        restoreMode: control.kanteRestore
     }
     // The platform's footer hides without standard buttons: shown for them too.
     Binding {
@@ -141,7 +141,7 @@ QQC2.Dialog {
         property: "visible"
         value: true
         when: control.footer !== null && control.footerStart.length > 0
-        restoreMode: Binding.RestoreBindingOrValue
+        restoreMode: control.kanteRestore
     }
     // And the footer is as high as they are, also without a standard button.
     Binding {
@@ -151,7 +151,7 @@ QQC2.Dialog {
                                          Math.max(control.footer.implicitContentHeight, control.kanteFooterStart.implicitHeight)
                                          + control.footer.topPadding + control.footer.bottomPadding) : 0
         when: control.footer !== null && control.footerStart.length > 0
-        restoreMode: Binding.RestoreBindingOrValue
+        restoreMode: control.kanteRestore
     }
 
     /** The accept button of the footer shown now, or null. */
@@ -210,13 +210,35 @@ QQC2.Dialog {
     }
     onAcceptTextChanged: applyAccept()
     onAcceptEnabledChanged: applyAccept()
-    onStandardButtonsChanged: Qt.callLater(applyAccept)
+    onStandardButtonsChanged: applyAcceptLater.start()
+    // After the event (the button box makes its buttons first). When the garbage collector
+    // takes the window, the dialog's functions are gone before the dialog itself and its
+    // Timer (Component.onDestruction comes later): a pending call found no applyAccept
+    // ("… is not a function").
+    Timer {
+        id: applyAcceptLater
+        interval: 0
+        onTriggered: {
+            if (typeof control.applyAccept === "function") {
+                control.applyAccept()
+            }
+        }
+    }
     Component.onCompleted: {
         applyAccept()
         placeFooterStart()
     }
 
     KanteScope { target: control.contentItem }
+
+    // Torn down, the Bindings here give nothing back: the dialog goes anyway. They are
+    // children of its content item, which Qt deletes inside the popup's destructor; a
+    // background or header given back there went into the half-deleted popup (SIGSEGV
+    // in QQmlBind::~QQmlBind, a window with a dialog collected by the garbage collector,
+    // lmix). Component.onDestruction comes before that.
+    property bool kanteGoing: false
+    readonly property int kanteRestore: kanteGoing ? Binding.RestoreNone : Binding.RestoreBindingOrValue
+    Component.onDestruction: kanteGoing = true
 
     // Not children: only handed to background/header/footer while Kante is on.
     readonly property Item kanteBackground: KanteCard {
@@ -248,7 +270,7 @@ QQC2.Dialog {
         Binding on buttonLayout {
             when: control.destructive
             value: QQC2.DialogButtonBox.GnomeLayout
-            restoreMode: Binding.RestoreBindingOrValue
+            restoreMode: control.kanteRestore
         }
         // Yes accepts a yes/no question: red there too, as Ok.
         delegate: KanteButton {
@@ -282,7 +304,7 @@ QQC2.Dialog {
     onFooterChanged: {
         kanteRestored(footer, kanteFooter)
         // The other footer has its own buttons: name and lock them too.
-        Qt.callLater(applyAccept)
+        applyAcceptLater.start()
     }
 
     // The dim behind the dialog is Kante's scrim role (best effort: only when the style
@@ -292,7 +314,7 @@ QQC2.Dialog {
         property: "modal"
         value: control.kanteScrim
         when: KanteStyle.themed && control.QQC2.Overlay !== null
-        restoreMode: Binding.RestoreBindingOrValue
+        restoreMode: control.kanteRestore
     }
     readonly property Component kanteScrim: Component { Rectangle { color: KanteStyle.scrimColor } }
     Binding {
@@ -300,20 +322,20 @@ QQC2.Dialog {
         property: "background"
         value: control.kanteBackground
         when: KanteStyle.themed
-        restoreMode: Binding.RestoreBindingOrValue
+        restoreMode: control.kanteRestore
     }
     Binding {
         target: control
         property: "header"
         value: control.kanteHeader
         when: KanteStyle.themed
-        restoreMode: Binding.RestoreBindingOrValue
+        restoreMode: control.kanteRestore
     }
     Binding {
         target: control
         property: "footer"
         value: control.kanteFooter
         when: KanteStyle.themed
-        restoreMode: Binding.RestoreBindingOrValue
+        restoreMode: control.kanteRestore
     }
 }

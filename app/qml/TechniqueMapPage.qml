@@ -130,7 +130,7 @@ Kirigami.ScrollablePage {
                 const g = page.matrix && Practice.revision >= 0 ? page.shown : { rows: [], columns: [] }
                 return g.rows.map(r => r.cells.map((c, i) => c.ids ? page.place(c, r.title, page.attackName(g.columns[i])) : null))
             }
-            legendLabels: page.levelWords(true)
+            legendLabels: page.levelWords()
             noDataText: qsTr("no such combination")
             onActivated: (row, column) => page.open(rows[row].cells[column].entry)
         }
@@ -153,7 +153,7 @@ Kirigami.ScrollablePage {
             cells: {
                 const out = []
                 for (let i = 0; Practice.revision >= 0 && i < list.length; i += perRow) {
-                    const row = list.slice(i, i + perRow).map(f => page.place(f, String(f.entry.nr), f.entry.title, String(f.entry.nr)))
+                    const row = list.slice(i, i + perRow).map(f => page.place(f, String(f.entry.nr), f.entry.title, page.formLabel(f)))
                     while (row.length < perRow) {
                         row.push(null)
                     }
@@ -161,7 +161,7 @@ Kirigami.ScrollablePage {
                 }
                 return out
             }
-            legendLabels: page.levelWords(false)
+            legendLabels: page.levelWords()      // the number after the dot
             noDataText: ""
             onActivated: (row, column) => page.open(list[row * perRow + column].entry)
         }
@@ -170,7 +170,7 @@ Kirigami.ScrollablePage {
             visible: !!page.shown
             text: page.matrix
                   ? qsTr("Rows: technique, columns: attack. An empty place does not occur up to %1. Tap a place to open the technique.").arg(page.gradeName)
-                  : qsTr("A place per form, numbered. Tap a place to open the form.")
+                  : qsTr("A place per form: its number, after the dot its level (12·3). Tap a place to open the form.")
             color: KanteStyle.mutedTextColor
             font: KanteStyle.smallFont
             wrapMode: Text.Wrap
@@ -180,20 +180,27 @@ Kirigami.ScrollablePage {
     function attackName(column) {
         return column.extra ? column.title + " · " + column.extra : column.title
     }
-    // A cell of a grid: the best level of its entries, its tip "row · column · grade: level". The
-    // level as its number unless `label` is given (a form's number).
+    // A cell of a grid: the best level of its entries, its tip "row · column · grades: level" (every
+    // grade of its entries: "5. Kyu, 4. Kyu"). The level as its number unless `label` is given (a
+    // form's number).
     function place(cell, rowName, columnName, label) {
         const level = Practice.bestLevel(cell.ids)
         const more = cell.ids.length > 1 ? " · " + qsTr("%n entries", "", cell.ids.length) : ""
         return {
             value: level,
             label: label !== undefined ? label : (level > 0 ? String(level) : ""),
-            tip: qsTr("%1 · %2 · %3: %4").arg(rowName).arg(columnName).arg(cell.gradeName).arg(Practice.levelNames[level]) + more
+            tip: qsTr("%1 · %2 · %3: %4").arg(rowName).arg(columnName).arg(cell.gradeNames.join(", ")).arg(Practice.levelNames[level]) + more
         }
     }
-    // The legend's words by level; with `numbered` the number first, as the cells show it.
-    function levelWords(numbered) {
-        return Practice.levelNames.map((name, l) => numbered && l > 0 ? l + " " + name : name)
+    // A form's place: its number, and its level after a dot once rated ("12·3"), so the colour is
+    // not the only sign of the level.
+    function formLabel(form) {
+        const level = Practice.bestLevel(form.ids)
+        return level > 0 ? form.entry.nr + "·" + level : String(form.entry.nr)
+    }
+    // The legend's words by level, the number first, as the places show it.
+    function levelWords() {
+        return Practice.levelNames.map((name, l) => l > 0 ? l + " " + name : name)
     }
 
     function open(entry) {

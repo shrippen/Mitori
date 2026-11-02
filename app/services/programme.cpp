@@ -40,16 +40,19 @@ QVariantMap entryRow(const QVariantMap &item, const QString &title, const QStrin
     return r;
 }
 
-// A place on the technique map: every entry there, the first one's row and grade.
+// A place on the technique map: every entry there, the first one's row and grade, and the grades
+// of all of them (5. Kyu, 4. Kyu for Ikkyo and its variant ura).
 struct MapCell
 {
     QStringList ids;
     QVariantMap entry;
     QString gradeName;
+    QStringList gradeNames;
 
     QVariantMap toMap() const
     {
-        return {{QStringLiteral("ids"), ids}, {QStringLiteral("entry"), entry}, {QStringLiteral("gradeName"), gradeName}};
+        return {{QStringLiteral("ids"), ids}, {QStringLiteral("entry"), entry}, {QStringLiteral("gradeName"), gradeName},
+                {QStringLiteral("gradeNames"), gradeNames}};
     }
 };
 
@@ -95,6 +98,9 @@ struct MapGrid
             cell.gradeName = gradeName;
         }
         cell.ids << entry.value(QStringLiteral("id")).toString();
+        if (!cell.gradeNames.contains(gradeName)) {
+            cell.gradeNames << gradeName;
+        }
     }
 
     QVariantMap toMap() const
@@ -441,6 +447,20 @@ QVariantList Programme::techniqueMap(const QString &disciplineId, const QString 
         }
     }
 
+    // In the order of the discipline's groups: a title comes where its first group stands
+    // (Daitoryu's "Zatori · Yoko-seme" of the kyu grades before "Sonstige Techniken", which came
+    // first in a dan grade).
+    QStringList order;
+    for (const QVariant &g : findDiscipline(disciplineId).value(QStringLiteral("gruppen")).toList()) {
+        const QString title = g.toMap().value(QStringLiteral("titel")).toString();
+        if (!order.contains(title)) {
+            order << title;
+        }
+    }
+    std::stable_sort(grids.begin(), grids.end(), [&order](const MapGrid &a, const MapGrid &b) {
+        return order.indexOf(a.title) < order.indexOf(b.title);
+    });
+
     QVariantList result;
     for (const MapGrid &grid : grids) {
         result << grid.toMap();
@@ -468,7 +488,8 @@ QVariantList Programme::formMap(const QString &grade) const
             if (row.value(QStringLiteral("kind")) != QLatin1String("entry") || !forms.contains(id)) {
                 continue;
             }
-            cells << MapCell{{id}, row, gradeMap.value(QStringLiteral("name")).toString()}.toMap();
+            const QString gradeName = gradeMap.value(QStringLiteral("name")).toString();
+            cells << MapCell{{id}, row, gradeName, {gradeName}}.toMap();
         }
         if (gradeId == grade) {
             break;

@@ -402,79 +402,79 @@
 <context>
     <name>PlayerView</name>
     <message>
-        <location filename="../qml/PlayerView.qml" line="271"/>
         <location filename="../qml/PlayerView.qml" line="297"/>
+        <location filename="../qml/PlayerView.qml" line="323"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="290"/>
+        <location filename="../qml/PlayerView.qml" line="316"/>
         <source>Chapter start</source>
         <translation>Kapitelanfang</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="291"/>
+        <location filename="../qml/PlayerView.qml" line="317"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="292"/>
+        <location filename="../qml/PlayerView.qml" line="318"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="293"/>
+        <location filename="../qml/PlayerView.qml" line="319"/>
         <source>Loop</source>
         <translation>Schleife</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="294"/>
+        <location filename="../qml/PlayerView.qml" line="320"/>
         <source>Tempo</source>
         <translation>Tempo</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="295"/>
+        <location filename="../qml/PlayerView.qml" line="321"/>
         <source>Frame back</source>
         <translation>Bild zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="296"/>
+        <location filename="../qml/PlayerView.qml" line="322"/>
         <source>Frame on</source>
         <translation>Bild vor</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="298"/>
+        <location filename="../qml/PlayerView.qml" line="324"/>
         <source>Playback</source>
         <translation>Wiedergabe</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="317"/>
+        <location filename="../qml/PlayerView.qml" line="343"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="338"/>
+        <location filename="../qml/PlayerView.qml" line="271"/>
         <source>Done</source>
         <translation>Geschafft</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="339"/>
+        <location filename="../qml/PlayerView.qml" line="272"/>
         <source>Every technique of today&apos;s training is practised.</source>
         <translation>Alle Techniken des heutigen Trainings sind geübt.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="343"/>
-        <location filename="../qml/PlayerView.qml" line="373"/>
+        <location filename="../qml/PlayerView.qml" line="262"/>
+        <location filename="../qml/PlayerView.qml" line="276"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="355"/>
+        <location filename="../qml/PlayerView.qml" line="366"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="364"/>
+        <location filename="../qml/PlayerView.qml" line="375"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>
@@ -553,42 +553,42 @@
 <context>
     <name>ProgrammePage</name>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="38"/>
+        <location filename="../qml/ProgrammePage.qml" line="40"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="43"/>
+        <location filename="../qml/ProgrammePage.qml" line="45"/>
         <source>All notes</source>
         <translation>Alle Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="124"/>
+        <location filename="../qml/ProgrammePage.qml" line="126"/>
         <source>Exam videos</source>
         <translation>Prüfungsvideos</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="126"/>
+        <location filename="../qml/ProgrammePage.qml" line="128"/>
         <source>There is no video for this grade.</source>
         <translation>Zu diesem Grad gibt es kein Video.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="127"/>
+        <location filename="../qml/ProgrammePage.qml" line="129"/>
         <source>The videos are on the DVDs of the Shinkiryu association. Until Mitori can load them with the DVD&apos;s code, put them into the video folder (settings).</source>
         <translation>Die Videos gibt es als DVD beim Shinkiryu-Verband. Bis Mitori sie mit dem Code der DVD laden kann, gehören sie in den Videoordner (Einstellungen).</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="131"/>
+        <location filename="../qml/ProgrammePage.qml" line="133"/>
         <source>Video folder</source>
         <translation>Videoordner</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="136"/>
+        <location filename="../qml/ProgrammePage.qml" line="138"/>
         <source>Order on shinkiryu.de</source>
         <translation>Auf shinkiryu.de bestellen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="211"/>
+        <location filename="../qml/ProgrammePage.qml" line="213"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
@@ -966,11 +966,11 @@
     </message>
     <message>
         <location filename="../qml/TechniqueMapPage.qml" line="173"/>
-        <source>A place per form, numbered. Tap a place to open the form.</source>
-        <translation>Ein Platz je Form, nummeriert. Tippen öffnet die Form.</translation>
+        <source>A place per form: its number, after the dot its level (12·3). Tap a place to open the form.</source>
+        <translation>Ein Platz je Form: ihre Nummer, nach dem Punkt ihre Stufe (12·3). Tippen öffnet die Form.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TechniqueMapPage.qml" line="187"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="188"/>
         <source>%n entries</source>
         <translation>
             <numerusform>%n Eintrag</numerusform>
@@ -978,7 +978,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueMapPage.qml" line="191"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="192"/>
         <source>%1 · %2 · %3: %4</source>
         <translation>%1 · %2 · %3: %4</translation>
     </message>
@@ -986,22 +986,22 @@
 <context>
     <name>TechniqueSheet</name>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="97"/>
+        <location filename="../qml/TechniqueSheet.qml" line="100"/>
         <source>Last note: %1</source>
         <translation>Letzte Notiz: %1</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="111"/>
+        <location filename="../qml/TechniqueSheet.qml" line="114"/>
         <source>Watch video</source>
         <translation>Video ansehen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="116"/>
+        <location filename="../qml/TechniqueSheet.qml" line="119"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="125"/>
+        <location filename="../qml/TechniqueSheet.qml" line="128"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>

@@ -54,14 +54,15 @@ public:
     // One entry by id (the same map as in entries()), or an empty map.
     Q_INVOKABLE QVariantMap entry(const QString &id) const;
     // The technique map (clickdummy "Landkarte") of every grade up to `grade`: a grid per group
-    // with attacks, in programme order; groups of the same title (kyu and dan grades) are one.
+    // with attacks, in the order of the discipline's groups; groups of the same title (kyu and dan
+    // grades) are one.
     // Each grid: kind "matrix", title, jp,
     //   columns  [{title, extra, jp}]  the attacks (with addition), in order of appearance
     //   rows     [{title, jp, cells}]  the techniques by name, in order of appearance; one cell
     //            per column: {} where the technique does not answer the attack, else
-    //            {ids, entry, gradeName}: every entry of the combination (variants, a later
-    //            grade), the first one's row (as in entries()) and grade.
-    // Shinki Toho: one grid, kind "forms", title "Ô-dachi 1–N", jp, cells [{ids, entry, gradeName}]
+    //            {ids, entry, gradeName, gradeNames}: every entry of the combination (variants, a
+    //            later grade), the first one's row (as in entries()) and grade, the grades of all.
+    // Shinki Toho: one grid, kind "forms", title "Ô-dachi 1–N", jp, cells [{ids, entry, gradeName, gradeNames}]
     // one per form.
     Q_INVOKABLE QVariantList techniqueMap(const QString &discipline, const QString &grade) const;
 

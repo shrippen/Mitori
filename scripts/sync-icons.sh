@@ -11,7 +11,7 @@ cd "$(dirname "$0")/.."
 ICONS="configure data-error documentinfo go-next go-previous go-previous-view media-playback-pause
 media-playback-start media-playlist-repeat media-skip-backward media-skip-forward view-list-details
 application-menu dialog-close edit-clear go-up go-down open-menu-symbolic overflow-menu list-add edit-delete document-save view-pim-notes
-overflow-menu-left overflow-menu-right search arrow-left arrow-right"
+overflow-menu-left overflow-menu-right search arrow-left arrow-right window-close window-close-symbolic dialog-cancel"
 
 SRC="${BREEZE:-/usr/share/icons/breeze}"
 OUT=app/icons/breeze-mitori

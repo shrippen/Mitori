@@ -235,6 +235,8 @@ Item {
                                                 y - height + focusedField.height + Kirigami.Units.largeSpacing))
             }
             onHeightChanged: Qt.callLater(showFocusedField)
+            // Tab below the edge (the small player beside the list): the column follows the focus.
+            readonly property KanteFocusFollow focusFollow: KanteFocusFollow { flickable: controlsView }
 
             ColumnLayout {
                 id: controls
@@ -250,6 +252,30 @@ Item {
                     text: (page.current.nr ? page.current.nr + " · " : "") + (page.current.title || "")
                     font.bold: true
                     wrapMode: Text.Wrap
+                }
+
+                // First, so a phone held sideways shows them without scrolling the column.
+                KanteToolButton {
+                    objectName: "backButton"
+                    visible: page.landscape
+                    icon.name: "go-previous-view"
+                    text: qsTr("Back")
+                    onClicked: page.backRequested()
+                }
+
+                KanteHintCard {
+                    objectName: "trainingDone"
+                    Layout.fillWidth: true
+                    visible: page.trainingDone
+                    tier: KanteHintCard.Tier.Blue
+                    titleText: qsTr("Done")
+                    text: qsTr("Every technique of today's training is practised.")
+
+                    KanteButton {
+                        visible: !page.compact && !page.landscape     // sideways Back stands above
+                        text: qsTr("Back")
+                        onClicked: page.backRequested()
+                    }
                 }
 
                 QQC2.Label {
@@ -330,21 +356,6 @@ Item {
                     }
                 }
 
-                KanteHintCard {
-                    objectName: "trainingDone"
-                    Layout.fillWidth: true
-                    visible: page.trainingDone
-                    tier: KanteHintCard.Tier.Blue
-                    titleText: qsTr("Done")
-                    text: qsTr("Every technique of today's training is practised.")
-
-                    KanteButton {
-                        visible: !page.compact
-                        text: qsTr("Back")
-                        onClicked: page.backRequested()
-                    }
-                }
-
                 RowLayout {
                     Layout.fillWidth: true
                     visible: !page.landscape
@@ -364,14 +375,6 @@ Item {
                         text: qsTr("Next technique")
                         onClicked: page.go(1)
                     }
-                }
-
-                KanteToolButton {
-                    objectName: "backButton"
-                    visible: page.landscape
-                    icon.name: "go-previous-view"
-                    text: qsTr("Back")
-                    onClicked: page.backRequested()
                 }
 
                 // The positions of a sequence (Kamae exercise): beside the list on a tablet no
