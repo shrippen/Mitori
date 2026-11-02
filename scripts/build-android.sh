@@ -14,8 +14,9 @@ NDK_DIR="$SDK_ROOT/ndk"
 QT_VER="6.11.3"
 QT_ANDROID="$HOME/Qt/$QT_VER/android_arm64_v8a"
 QT_HOST="$HOME/Qt/$QT_VER/gcc_64"
-# Not in the base install: Kirigami needs ShaderTools, the player Multimedia.
-QT_MODULES="qtshadertools qtmultimedia"
+# Not in the base install: Kirigami needs ShaderTools, the player Multimedia, the glossary's
+# pronunciation Speech (TextToSpeech).
+QT_MODULES="qtshadertools qtmultimedia qtspeech"
 RED='\033[0;31m'; GREEN='\033[0;32m'; NC='\033[0m'
 info()  { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }
@@ -43,7 +44,7 @@ NDK_PATH=$(ls -d "$NDK_DIR"/27.2.* 2>/dev/null | head -1)
 info "NDK: $NDK_PATH"
 
 # ── 2. Qt host + Android ──
-[ -d "$QT_ANDROID/lib/cmake/Qt6Multimedia" ] && [ -d "$QT_HOST/lib/cmake/Qt6Multimedia" ] || {
+[ -d "$QT_ANDROID/lib/cmake/Qt6TextToSpeech" ] && [ -d "$QT_HOST/lib/cmake/Qt6Multimedia" ] || {
     info "Installing aqtinstall..."
     pip install --user --break-system-packages aqtinstall 2>/dev/null || true
     export PATH="$HOME/.local/bin:$PATH"
