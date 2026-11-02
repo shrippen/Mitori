@@ -91,6 +91,9 @@ Kirigami.Page {
                 objectName: "programmeList"
                 model: page.rows
                 reuseItems: true
+                // Up and Down scroll (the page's keys) also from a focused row; the list has no
+                // current item of its own to move.
+                keyNavigationEnabled: false
 
                 // Scrolls with the list, so a small screen keeps room for the techniques.
                 header: ColumnLayout {
@@ -262,13 +265,24 @@ Kirigami.Page {
         }
     }
     // The keys scroll the list as ScrollablePage did (Up, Down, Page Up, Page Down, Home, End).
+    // Keys the small player leaves (Up, Down, Page Up, Page Down, End) stay with it.
     function scrollBy(dy) {
         list.contentY = Math.max(list.originY, Math.min(list.originY + list.contentHeight - list.height, list.contentY + dy))
     }
-    Keys.onUpPressed: scrollBy(-Kirigami.Units.gridUnit * 2)
-    Keys.onDownPressed: scrollBy(Kirigami.Units.gridUnit * 2)
+    function inPlayer() {
+        for (let item = page.Window.activeFocusItem; item; item = item.parent) {
+            if (item === pane) {
+                return true
+            }
+        }
+        return false
+    }
+    Keys.onUpPressed: event => inPlayer() ? event.accepted = false : scrollBy(-Kirigami.Units.gridUnit * 2)
+    Keys.onDownPressed: event => inPlayer() ? event.accepted = false : scrollBy(Kirigami.Units.gridUnit * 2)
     Keys.onPressed: event => {
-        if (event.key === Qt.Key_PageUp || event.key === Qt.Key_PageDown) {
+        if (inPlayer()) {
+            return
+        } else if (event.key === Qt.Key_PageUp || event.key === Qt.Key_PageDown) {
             scrollBy((event.key === Qt.Key_PageDown ? 1 : -1) * list.height * 0.9)
         } else if (event.key === Qt.Key_Home) {
             list.positionViewAtBeginning()
