@@ -525,7 +525,7 @@ TestCase {
         shot("10-stats")
         window.pageStack.pop()
         // The start tile counts the practice days.
-        const tile = findChild(window.pageStack.currentItem, "statsTile")
+        const tile = findChild(window.pageStack.items[0], "statsTile")
         compare(tile.days, 1)
     }
 
