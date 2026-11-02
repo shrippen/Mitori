@@ -49,6 +49,8 @@ Kirigami.ScrollablePage {
                 required property var modelData
                 readonly property string discipline: modelData.id
                 readonly property var passed: page.grades.filter(g => g.discipline === discipline)
+                // The highest grade passed (by rank, not by day: a day may be entered later).
+                readonly property var highest: ladder.filter(g => g.passed).pop()
                 readonly property var ladder: Courses.revision >= 0 ? Courses.ladder(discipline) : []
                 readonly property string next: Courses.revision >= 0 ? Courses.nextGrade(discipline) : ""
                 readonly property var exam: Courses.revision >= 0 ? Courses.nextExam(discipline) : ({})
@@ -58,10 +60,11 @@ Kirigami.ScrollablePage {
                 spacing: Kirigami.Units.smallSpacing
 
                 KanteSectionLabel {
+                    objectName: "gradesHeading"
                     Layout.fillWidth: true
                     rule: true
                     text: block.modelData.kurzname + " · "
-                          + (block.passed.length > 0 ? qsTr("last %1").arg(block.passed[0].name) : qsTr("no grade yet"))
+                          + (block.highest ? qsTr("last %1").arg(block.highest.name) : qsTr("no grade yet"))
                 }
 
                 Repeater {
@@ -105,7 +108,8 @@ Kirigami.ScrollablePage {
                     wrapMode: Text.Wrap
                 }
 
-                // A passed grade: the next one is chosen, today's day.
+                // A passed grade: the next one is chosen, today's day; with all passed none (the
+                // same grade again would overwrite its day).
                 Flow {
                     Layout.fillWidth: true
                     spacing: Kirigami.Units.smallSpacing
@@ -115,7 +119,7 @@ Kirigami.ScrollablePage {
 
                         objectName: "gradeBox"
                         model: block.ladder.map(g => g.name)
-                        currentIndex: Math.max(0, block.ladder.findIndex(g => g.id === block.next))
+                        currentIndex: block.ladder.findIndex(g => g.id === block.next)
                         Accessible.name: qsTr("Grade")
                     }
                     KanteDateField {
@@ -139,7 +143,7 @@ Kirigami.ScrollablePage {
                         objectName: "addGrade"
                         icon.name: "list-add"
                         text: qsTr("Add")
-                        enabled: block.ladder.length > 0 && !!dayField.date && !dayField.invalid
+                        enabled: gradeBox.currentIndex >= 0 && !!dayField.date && !dayField.invalid
                         onClicked: {
                             const grade = block.ladder[gradeBox.currentIndex]
                             if (grade && Courses.addGrade(block.discipline, grade.id, CourseDays.iso(dayField.date), placeField.text)) {

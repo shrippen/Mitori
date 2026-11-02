@@ -713,9 +713,14 @@ TestCase {
         verify(findChild(aikido, "nextGrade").text.indexOf(qsTr("Next: %1").arg("5. Kyu")) === 0)
         findChild(aikido, "gradeDay").date = new Date(Date.now() - 400 * 86400000)
         findChild(aikido, "gradePlace").text = "Mainz"
-        wait(800)       // Kirigami slides the page in (disabled meanwhile)
-        mouseClick(findChild(aikido, "addGrade"))
-        tryVerify(() => Courses.grades.length === 1)
+        const add = findChild(aikido, "addGrade")
+        // Kirigami slides the page in, disabled meanwhile (longer under load than 800 ms).
+        wait(800)
+        tryVerify(() => add.enabled, 5000)
+        const at = add.mapToItem(page, 0, 0)
+        mouseClick(add)
+        tryVerify(() => Courses.grades.length === 1, 3000,
+                  "add at " + at.x + "," + at.y + " enabled " + add.enabled + " page " + page.width + "×" + page.height)
         tryVerify(() => findChildren(aikido, "passedRow").length === 1)
         compare(findChild(aikido, "gradePlace").text, "")
         const next = findChild(aikido, "nextGrade").text
@@ -759,9 +764,41 @@ TestCase {
         verify(!findChild(exam, "toExamGrade").visible)
         window.pageStack.pop()
 
+        // A planned grade without material in the exam mode (Shinki Toho Menkyo-Kaiden): no
+        // button that would open another grade.
+        verify(Courses.planExam(uid, "shinkitoho", "kaiden"))
+        Programme.discipline = "shinkitoho"
+        const today2 = push("TodayPage")
+        verify(findChild(today2, "plannedHint").visible)
+        verify(!findChild(today2, "toMockExam").visible, "Menkyo-Kaiden has no mock exam")
+        window.pageStack.pop()
+        const exam2 = push("ExamPage")
+        verify(findChild(exam2, "plannedHint").visible)
+        verify(!findChild(exam2, "toExamGrade").visible, "Menkyo-Kaiden has no mock exam")
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
+
         // Back as before for the other cases.
         verify(Courses.planExam(uid, "", ""))
         verify(Courses.removeGrade(Courses.grades[0].uid))
+
+        // Every grade passed: nothing is chosen, so "Add" cannot overwrite the first grade's day;
+        // the heading names the highest grade, also when a lower one has the later day.
+        const ladder = Courses.ladder("daitoryu")
+        ladder.forEach((g, i) => verify(Courses.addGrade("daitoryu", g.id, (2010 + i) + "-01-01", "")))
+        verify(Courses.addGrade("daitoryu", "k5", "2030-01-01", ""))
+        const all = push("GradesPage")
+        const daito = findChild(all, "grades_daitoryu")
+        tryVerify(() => findChild(daito, "addGrade"))
+        compare(findChild(daito, "gradeBox").currentIndex, -1)
+        verify(!findChild(daito, "addGrade").enabled)
+        verify(findChild(daito, "gradesHeading").text.indexOf(ladder[ladder.length - 1].name) > 0, findChild(daito, "gradesHeading").text)
+        window.pageStack.pop()
+        const uids = Courses.grades.filter(g => g.discipline === "daitoryu").map(g => g.uid)
+        compare(uids.length, ladder.length)
+        for (const u of uids) {
+            verify(Courses.removeGrade(u), "remove " + u + ": " + Courses.errorString)
+        }
     }
 
     // Technique map: from the start menu, a grid per group with empty places, a place coloured by

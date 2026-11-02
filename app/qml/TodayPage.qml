@@ -84,6 +84,8 @@ Kirigami.ScrollablePage {
 
             KanteButton {
                 objectName: "toMockExam"
+                // Only for a grade the exam mode has material for (not Shinki Toho Hon-Menkyo).
+                visible: !!page.exam.course && Exam.grades(page.exam.discipline).some(g => g.id === page.exam.grade)
                 text: qsTr("Mock exam")
                 onClicked: {
                     Programme.discipline = page.exam.discipline

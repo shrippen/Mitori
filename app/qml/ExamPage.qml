@@ -71,7 +71,8 @@ Kirigami.ScrollablePage {
 
             KanteButton {
                 objectName: "toExamGrade"
-                visible: page.exam.grade !== page.grade
+                // Only for a grade with material (Exam.grade falls back to the first one otherwise).
+                visible: page.exam.grade !== page.grade && page.grades.some(g => g.id === page.exam.grade)
                 text: qsTr("This grade")
                 onClicked: Programme.setGrade(page.discipline, page.exam.grade)
             }
