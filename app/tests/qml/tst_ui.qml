@@ -501,6 +501,7 @@ TestCase {
     // All notes: every technique's notes by day, a filter per discipline; a tap opens the
     // technique's notes, press and hold the editor.
     function test_8d_all_notes() {
+        failOnWarning(/ReferenceError|TypeError/)
         const daito = Programme.entries("daitoryu", Programme.grades("daitoryu")[0].id).find(r => r.kind === "entry")
         Practice.addNote(daito.id, "Daitoryu: Hüfte zuerst")
         Practice.addNote("not-in-the-programme", "verwaist")
@@ -622,6 +623,16 @@ TestCase {
                 if (String(clean.pixel(x, y)) !== String(scrolled.pixel(x, y)))
                     covered++
         compare(covered, 0, "the filter is not covered by the scrolled list")
+        // The filter in line with the notes.
+        compare(findChild(page, "filter").rightPadding, findChild(page, "notesView").rightPadding)
+        // End again after scrolling away: the last note comes back into view.
+        list.forceActiveFocus()
+        keyClick(Qt.Key_End)
+        tryVerify(() => list.atYEnd, 1000)
+        list.positionViewAtBeginning()
+        wait(50)
+        keyClick(Qt.Key_End)
+        tryVerify(() => list.atYEnd, 1000, "End shows the last note again")
         // The scroll bar at the window's edge, not over the notes.
         const bar = list.parent.QQC2.ScrollBar.vertical
         if (bar) {

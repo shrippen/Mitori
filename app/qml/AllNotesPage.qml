@@ -100,8 +100,9 @@ Kirigami.Page {
         Flow {
             Layout.fillWidth: true
             padding: Kirigami.Units.smallSpacing
+            objectName: "filter"
             leftPadding: Kirigami.Units.largeSpacing
-            rightPadding: Math.max(Kirigami.Units.largeSpacing, effectiveScrollBarWidth)
+            rightPadding: notesView.rightPadding        // in line with the notes
             spacing: Kirigami.Units.smallSpacing
 
             Repeater {
@@ -120,6 +121,9 @@ Kirigami.Page {
         }
 
         QQC2.ScrollView {
+            id: notesView
+
+            objectName: "notesView"
             Layout.fillWidth: true
             Layout.fillHeight: true
             // The notes keep a margin, the scroll bar stands at the window's edge.
@@ -139,14 +143,6 @@ Kirigami.Page {
                 activeFocusOnTab: true
                 keyNavigationEnabled: true
                 currentIndex: -1
-                // Only a key moves the view: a new or deleted note above shifts the index, not the view.
-                property bool byKey: false
-                onCurrentIndexChanged: {
-                    if (byKey && currentIndex >= 0) {
-                        positionViewAtIndex(currentIndex, ListView.Contain)
-                    }
-                    byKey = false
-                }
                 // Coming in with Tab: the first note in view, not one far away.
                 onActiveFocusChanged: {
                     if (activeFocus && (currentIndex < 0 || currentIndex < firstShown() || currentIndex > lastShown())) {
@@ -175,9 +171,12 @@ Kirigami.Page {
                 Keys.onReturnPressed: page.openCurrent(false)
                 Keys.onEnterPressed: page.openCurrent(false)
                 Keys.onMenuPressed: page.openCurrent(true)
+                // Only a key moves the view (a new or deleted note above shifts the index, not the
+                // view), also when the index stays (the last note again after scrolling away).
                 Keys.onPressed: event => {
-                    byKey = true                        // also Up and Down, which the list handles
-                    Qt.callLater(() => byKey = false)
+                    if ([Qt.Key_Up, Qt.Key_Down, Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_End].includes(event.key)) {
+                        Qt.callLater(() => positionViewAtIndex(currentIndex, ListView.Contain))
+                    }
                     const page_ = Math.max(1, lastShown() - firstShown())
                     if (event.key === Qt.Key_PageDown) {
                         currentIndex = Math.min(count - 1, currentIndex + page_)
