@@ -837,6 +837,10 @@ TestCase {
         round.index = 1
         compare(round.current.id, "shinkitoho/odachi/1")
         verify(!findChild(board, "boardAttack").visible)
+        // Only number, name and kanji: the addition (In · Seigan → Hidari-gote) is the answer.
+        verify(!!round.current.extra, "the form has an addition")
+        verify(!findChild(board, "boardExtra").visible, "the board keeps the addition back")
+        verify(findChild(board, "boardKanji").visible)
         shot("12b-exam-round-shinkitoho")
         // A tablet in landscape: the board grows.
         window.width = 1280

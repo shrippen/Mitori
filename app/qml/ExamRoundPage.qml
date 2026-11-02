@@ -86,7 +86,7 @@ Kirigami.Page {
                         objectName: "examBoard"
                         Layout.fillWidth: true
                         point: page.current
-                        attackShown: page.discipline !== "shinkitoho"
+                        techniqueOnly: page.discipline === "shinkitoho"
                         zoom: page.tablet ? 1.6 : 1
                     }
                     KanteChip {

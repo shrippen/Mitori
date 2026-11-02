@@ -5,17 +5,18 @@ import Kante
 
 // The board of an exam round (app-entscheidungen.md, Runde 4: design D): the group (standing,
 // sitting …), below it "Attack" and "Technique" labelled in two rows, each with its addition and
-// the Japanese. Shinki Toho shows only the technique.
+// the Japanese. Shinki Toho shows only the technique: number, name and kanji; its addition
+// (In · Seigan → Hidari-gote) would give the answer away.
 ColumnLayout {
     id: board
 
     required property var point
-    property bool attackShown: true
+    property bool techniqueOnly: false
     // Larger on a tablet or in landscape.
     property real zoom: 1
 
     readonly property real base: KanteStyle.defaultFont.pointSize > 0 ? KanteStyle.defaultFont.pointSize : 10
-    readonly property bool hasAttack: attackShown && !!point.attack
+    readonly property bool hasAttack: !techniqueOnly && !!point.attack
 
     function bigFont(factor) {
         return Qt.font({ family: KanteStyle.defaultFont.family, pointSize: board.base * factor * board.zoom, bold: true })
@@ -26,7 +27,7 @@ ColumnLayout {
     KanteSectionLabel {
         objectName: "boardGroup"
         Layout.alignment: Qt.AlignHCenter
-        visible: board.attackShown && !!board.point.group
+        visible: !board.techniqueOnly && !!board.point.group
         text: board.point.group || ""
     }
 
@@ -101,13 +102,15 @@ ColumnLayout {
                 wrapMode: Text.Wrap
             }
             QQC2.Label {
+                objectName: "boardExtra"
                 Layout.fillWidth: true
-                visible: !!board.point.extra
+                visible: !board.techniqueOnly && !!board.point.extra
                 text: board.point.extra || ""
                 color: KanteStyle.mutedTextColor
                 wrapMode: Text.Wrap
             }
             QQC2.Label {
+                objectName: "boardKanji"
                 Layout.fillWidth: true
                 visible: !!board.point.jp
                 text: board.point.jp || ""

@@ -1,5 +1,6 @@
 #include "exam.h"
 
+#include <QSet>
 #include <QSettings>
 
 #include <algorithm>
@@ -33,6 +34,18 @@ QVariantMap point(const QVariantMap &row, const QString &group, const QVariantMa
     p[QStringLiteral("sample")] = false;
     p[QStringLiteral("ids")] = QStringList{text(row, "id")};
     return p;
+}
+
+// What a point shows on the board. Grades ask some techniques again under their own id
+// (Daitoryu: Aiki-otoshi in the 5. and 3. Kyu); a round shows each content once.
+QString content(const QVariant &point)
+{
+    const QVariantMap map = point.toMap();
+    QStringList parts;
+    for (const char *key : {"group", "attack", "attackExtra", "title", "extra"}) {
+        parts << text(map, key);
+    }
+    return parts.join(u'|');
 }
 
 } // namespace
@@ -248,14 +261,26 @@ QVariantList Exam::draw(const QString &discipline, const QString &grade, int cou
     // Samples from earlier grades, always first (app-entscheidungen.md, Runde 4), marked.
     QVariantList result;
     const QVariantList earlier = samples == Samples::Earlier ? earlierMaterial(discipline, grade) : QVariantList();
-    if (!earlier.isEmpty()) {
-        const int n = qMin(int(earlier.size()), kMinSamples + int(m_random.bounded(kMaxSamples - kMinSamples + 1)));
-        const QVariantList chosen = shuffle(earlier).mid(0, n);
-        for (const QVariant &s : chosen) {
-            QVariantMap p = s.toMap();
-            p[QStringLiteral("sample")] = true;
-            result << p;
+    if (earlier.isEmpty()) {
+        return main;
+    }
+    // Nothing the main part asks, and no sample twice.
+    QSet<QString> shown;
+    for (const QVariant &p : main) {
+        shown.insert(content(p));
+    }
+    const int n = kMinSamples + int(m_random.bounded(kMaxSamples - kMinSamples + 1));
+    for (const QVariant &s : shuffle(earlier)) {
+        if (result.size() >= n) {
+            break;
         }
+        if (shown.contains(content(s))) {
+            continue;
+        }
+        shown.insert(content(s));
+        QVariantMap p = s.toMap();
+        p[QStringLiteral("sample")] = true;
+        result << p;
     }
     return result + main;
 }

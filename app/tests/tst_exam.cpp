@@ -21,6 +21,16 @@ QStringList ids(const QVariantList &points)
     return result;
 }
 
+// What a point shows: the same technique under another id (an earlier grade asks it again).
+QString content(const QVariant &point)
+{
+    QStringList parts;
+    for (const char *key : {"group", "attack", "attackExtra", "title", "extra"}) {
+        parts << field(point, key);
+    }
+    return parts.join(u'|');
+}
+
 const QString aikido = QStringLiteral("aikido");
 const QString shinkiToho = QStringLiteral("shinkitoho");
 
@@ -155,6 +165,32 @@ private slots:
 
         const QVariantList first = exam.draw(aikido, QStringLiteral("k5"), 0, Exam::Order::Programme, Exam::Samples::Earlier);
         QCOMPARE(ids(first), earlier);
+    }
+
+    // No technique twice in a round: samples skip what the grade asks again (Daitoryu 3. Kyu
+    // repeats Aiki-otoshi of the 5. Kyu, 1. Dan Aiki-nage of the 1. Kyu) and each other.
+    void samplesNotRepeated_data()
+    {
+        QTest::addColumn<QString>("discipline");
+        QTest::addColumn<QString>("grade");
+        QTest::newRow("daitoryu k3") << QStringLiteral("daitoryu") << QStringLiteral("k3");
+        QTest::newRow("daitoryu d1") << QStringLiteral("daitoryu") << QStringLiteral("d1");
+        QTest::newRow("aikido d4") << aikido << QStringLiteral("d4");
+    }
+
+    void samplesNotRepeated()
+    {
+        QFETCH(QString, discipline);
+        QFETCH(QString, grade);
+        for (quint32 seed = 1; seed <= 60; ++seed) {
+            Exam exam(loaded(), seed);
+            const QVariantList round = exam.draw(discipline, grade, 0, Exam::Order::Programme, Exam::Samples::Earlier);
+            QSet<QString> seen;
+            for (const QVariant &p : round) {
+                QVERIFY2(!seen.contains(content(p)), qPrintable(QStringLiteral("seed %1: %2 twice").arg(seed).arg(field(p, "id"))));
+                seen.insert(content(p));
+            }
+        }
     }
 
     // The settings stay across instances (starts).
