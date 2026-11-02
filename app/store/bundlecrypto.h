@@ -16,6 +16,8 @@ namespace BundleCrypto {
 
 // The 20 characters of a code as typed ("7kq2m-x9hdv …": case, hyphens and spaces do not matter;
 // O counts as 0, I and L as 1), or "" when length, characters or check do not fit.
+// Whether the code has the right length and characters (its check character may be wrong: a typo).
+bool complete(const QString &input);
 QString normalized(const QString &input);
 // "7KQ2M-X9HDV-3TAPR-WE6YC"
 QString grouped(const QString &code);

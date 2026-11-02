@@ -238,8 +238,9 @@ QString Bundles::grouped(const QString &code) const
 void Bundles::unlock(const QString &input)
 {
     const QString code = BundleCrypto::normalized(input);
+    // A whole code whose check character does not fit has a typo; anything else is no code.
     if (code.isEmpty()) {
-        emit unlockFailed(UnlockError::Invalid);
+        emit unlockFailed(BundleCrypto::complete(input) ? UnlockError::Typo : UnlockError::Invalid);
         return;
     }
     if (m_manifest.isEmpty()) {

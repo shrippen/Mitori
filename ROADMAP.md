@@ -122,6 +122,43 @@ Kleinigkeiten aus Reviews und Tests, je ein Folge-PR oder beim nächsten Bearbei
   WLAN“ startet beim Wechsel ins WLAN von selbst (oder anderer Text); HTTP-Status vor dem Entschlüsseln prüfen
   (sonst „beschädigt“ statt „nicht gefunden“); `tools/bundle.py hochladen` als Stream.
 
+## QA gegen den Clickdummy (02.11.2026)
+
+Vergleich jeder Ansicht mit `entwuerfe/clickdummy/` (Bilder beider Seiten, Code geprüft). Behoben: Kiriotoshi-
+Kommentar leer, Programmliste über den Grad-Chips, Tippfehler im DVD-Code als „unvollständig“ gemeldet,
+Reihenfolge der Kacheln. Offen, nach Gewicht:
+
+- **Training**: Playliste fehlt (nummeriert, ✓ für Geübtes, tippen springt; Telefon unter dem Player, Tablet
+  links), Position „Angriff · Grad · 1 / 8“, Abschlussseite „Geschafft“ mit Zahl; Techniken ohne Video kommen nicht
+  ins Training (Dummy: Karte mit Name und letzter Notiz, einschätzen).
+- **Player**: Schalter „Ton“ und „Bildschirm an“ fehlen (kein Wach-Halten des Bildschirms); Knopf ⤢ ins
+  Querformat; Titelzeile (Angriff · Zusatz · Grad · i / n, Name mit Kanji); quer die schmale Spalte nach Entwurf B,
+  Zeitleiste im Bild; unter dem Notizfeld „Heute notiert“ statt nur der letzten Notiz.
+- **Lehrgangsnotizbuch**: ⌗-Verknüpfung (Angriff, Technik, Waffe mit Vorschlägen; Chips, „↗ im Programm“, die
+  Notiz auch bei der Technik und in deren Notizen).
+- **Darstellung** (Einstellungen): Seite fehlt; Sprache wählen, Über Mitori (Version, Datenstand, Quellen),
+  Theme (mit Shinki). Einstellungen als drei Unterseiten (Videos, Sicherung, Darstellung).
+- **Startmenü**: Programm-Kachel mit Stand („Aikido · 5. Kyu · 7 von 20 prüfungsreif“ und Leiste, Kurzname);
+  Telefon groß + zwei Spalten statt einer; Tablet die große Kachel 2 × 2; Begrüßung; Heute mit Sparte; Bundle-
+  Update mit Namen.
+- **Programm**: Stand je Grad in den Chips; Shinki-Toho-Infokarte (Bedeutung, Inhalt, Mindestabstand);
+  Beschreibung von Suburi und Kiriotoshi; Lupe im Kopf; Rückkehr aus dem Player: kurz aufleuchten statt dauerhaft
+  markieren, auch am Telefon hinscrollen; Tablet-Liste schneidet lange Ô-dachi-Zeilen ab.
+- **Technik-Blatt**: Hinweis ohne Video („Video nicht geladen · Code eingeben“ / „Zu diesem Grad gibt es kein
+  Video“); Kopf mit Angriffszusatz und Grad, Formnummer; letzte Notiz mit Datum, „Notizen (n)“.
+- **Kommentar**: `##`-Überschriften, Fußnoten und Listen setzen; Titel, Gruppe und Kanji im Text.
+- **Heute üben**: Kalender 12 Wochen mit Legende; Hinweis „tippen öffnet das Blatt“.
+- **Videos**: Speicherbalken mit Legende (Videos, Fotos und Sprachnotizen, frei); Code-Seite mit Erklärung
+  (Schreibweise egal, was passiert, der Code bleibt auf dem Gerät).
+- **Sicherung**: Hinweis auf Android Auto Backup (ohne Medien); Konflikte als Hinweiszeile.
+- **Konflikte**: Kopf mit Angriff und Tag.
+- **Tablet zweispaltig**: Lehrgänge (Liste + Notizbuch), Einstellungen (Liste + Seite), Heute, Statistik.
+- **Kleiner**: Meine Grade Eingabezeile bricht um, Fußtext ohne „Statistik“; Prüfungsende eine Zeile je Technik;
+  Alle Jahre am Telefon zu kleine Tage (Dummy scrollt), Grade mit Datum unter dem Jahr; Suche: Programm vor
+  Glossar, Trefferzahl je Gruppe; Notizen: Tagesköpfe „· Training/Lehrgang“, Kopf mit Zusatz und Grad; Alle
+  Notizen: Uhrzeit bei Lehrgangseinträgen; Lehrgänge: „+ Lehrgang ohne Kalendereintrag“ als Zeile; Prüfung:
+  „keine Sprachausgabe“; Statistik-Bild im UI-Test zeigt das Startmenü.
+
 ## Kante-Bedarf
 
 Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutzt:

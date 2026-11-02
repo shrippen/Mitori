@@ -67,6 +67,15 @@ TestCase {
     function test_1_start() {
         compare(Programme.errorString, "")
         compare(window.pageStack.currentItem.title, "Mitori 見取り")
+        // The tiles in the decided order: Today, Exam, Statistics, Courses (clickdummy "Startmenü").
+        const start = window.pageStack.currentItem
+        const order = ["todayTile", "examTile", "statsTile", "coursesTile", "mapTile", "glossaryTile"]
+        const items = order.map(n => findChild(start, n))
+        const at = it => it.mapToItem(start, 0, 0)
+        for (let i = 1; i < items.length; i++) {
+            const a = at(items[i - 1]), b = at(items[i])
+            verify(b.y > a.y || (b.y === a.y && b.x > a.x), order[i - 1] + " before " + order[i])
+        }
         shot("1-start")
     }
 
@@ -76,6 +85,8 @@ TestCase {
         const page = push("ProgrammePage")
         compare(page.grade, "k5")
         verify(page.rows.filter(r => r.kind === "entry").length === 20)
+        // The list scrolls under the grade chips, not over them.
+        verify(findChild(page, "programmeScroll").clip, "the list is clipped")
         shot("2-programme-aikido")
 
         Programme.discipline = "shinkitoho"
@@ -739,7 +750,7 @@ TestCase {
         wait(800)       // Kirigami slides the page in (disabled meanwhile)
         mouseClick(findChild(page, "unlockButton"))
         tryVerify(() => message.visible)
-        compare(message.text, qsTr("This is not a complete code; check it for typing errors."))
+        compare(message.text, qsTr("This code has a typing error; check it character by character."))
         shot("15-videos-code-wrong")
         field.text = "7kq2m x9hdv 3tapr we6yt"
         mouseClick(findChild(page, "unlockButton"))
