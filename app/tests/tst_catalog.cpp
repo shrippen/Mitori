@@ -21,6 +21,17 @@ private slots:
         QCOMPARE(ids, (QStringList{QStringLiteral("aikido"), QStringLiteral("daitoryu"), QStringLiteral("shinkitoho")}));
     }
 
+    void loadsGlossary()
+    {
+        Catalog catalog;
+        QVERIFY(catalog.load(QStringLiteral(MITORI_DATEN_JSON)));
+        QVERIFY(catalog.glossary().size() > 219);       // the lexicon's words and more
+        QVERIFY(catalog.glossarySource().contains(QLatin1String("shinkiryu.de")));
+        const QVariantMap first = catalog.glossary().constFirst().toMap();
+        QCOMPARE(first.value(QStringLiteral("wort")).toString(), QStringLiteral("Ago"));
+        QCOMPARE(first.value(QStringLiteral("kana")).toString(), QStringLiteral("あご"));
+    }
+
     void missingFileFails()
     {
         Catalog catalog;

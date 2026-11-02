@@ -51,7 +51,7 @@ jobs:
       - name: Install Python, Qt, Kirigami, build tools
         run: |
           pacman -Syu --noconfirm --needed git python python-yaml python-pytest poppler poppler-data \
-            base-devel cmake ninja extra-cmake-modules qt6-declarative qt6-shadertools qt6-tools qt6-multimedia qt6-multimedia-ffmpeg kirigami
+            base-devel cmake ninja extra-cmake-modules qt6-declarative qt6-shadertools qt6-tools qt6-multimedia qt6-multimedia-ffmpeg qt6-speech kirigami
 
       - uses: actions/checkout@v7
 

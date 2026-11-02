@@ -425,45 +425,92 @@
 <context>
     <name>SearchPage</name>
     <message>
-        <location filename="../qml/SearchPage.qml" line="32"/>
-        <location filename="../qml/SearchPage.qml" line="41"/>
+        <location filename="../qml/SearchPage.qml" line="56"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="40"/>
-        <source>Technique, attack, Japanese or a word from your notes</source>
-        <translation>Technik, Angriff, Japanisch oder ein Wort aus deinen Notizen</translation>
+        <location filename="../qml/SearchPage.qml" line="43"/>
+        <source>Glossary &amp; search</source>
+        <translation>Glossar &amp; Suche</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="61"/>
+        <location filename="../qml/SearchPage.qml" line="55"/>
+        <source>Kiriotoshi, 切り落とし or Hüftwurf</source>
+        <translation>Kiriotoshi, 切り落とし oder Hüftwurf</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="144"/>
         <source>Nothing found for “%1”.</source>
         <translation>Nichts gefunden für „%1“.</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="68"/>
+        <location filename="../qml/SearchPage.qml" line="195"/>
         <source>Techniques</source>
         <translation>Techniken</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="97"/>
+        <location filename="../qml/SearchPage.qml" line="226"/>
         <source>More than %1 techniques found. Add a word to narrow the search.</source>
         <translation>Mehr als %1 Techniken gefunden. Ein weiteres Wort grenzt die Suche ein.</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="104"/>
+        <location filename="../qml/SearchPage.qml" line="152"/>
+        <source>Glossary</source>
+        <translation>Glossar</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/SearchPage.qml" line="121"/>
+        <source>%n Japanese term(s), with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</source>
+        <translation>
+            <numerusform>%n japanischer Begriff, mit Kanji und deutscher Übersetzung, wo Lexikon oder Programm sie haben. Die Suche findet auch deutsche Wörter, Techniken und deine Notizen.</numerusform>
+            <numerusform>%n japanische Begriffe, mit Kanji und deutscher Übersetzung, wo Lexikon oder Programm sie haben. Die Suche findet auch deutsche Wörter, Techniken und deine Notizen.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="133"/>
+        <source>This version of Mitori has no speech output, so there is no pronunciation.</source>
+        <translation>Diese Version von Mitori hat keine Sprachausgabe, die Aussprache fehlt.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="134"/>
+        <source>No Japanese voice for speech output found. Where the system offers one (Android: settings, text-to-speech output), install it to hear the pronunciation.</source>
+        <translation>Keine japanische Stimme für die Sprachausgabe gefunden. Wo das System eine anbietet (Android: Einstellungen, Sprachausgabe), sie für die Aussprache installieren.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="169"/>
+        <source>No translation in the lexicon</source>
+        <translation>Übersetzung fehlt im Lexikon</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="181"/>
+        <source>Pronunciation</source>
+        <translation>Aussprache</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="182"/>
+        <source>Pronounce %1</source>
+        <translation>%1 aussprechen</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="235"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="113"/>
+        <location filename="../qml/SearchPage.qml" line="244"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
     <message>
-        <location filename="../qml/SearchPage.qml" line="127"/>
+        <location filename="../qml/SearchPage.qml" line="260"/>
         <source>More than %1 notes found. Add a word to narrow the search.</source>
         <translation>Mehr als %1 Notizen gefunden. Ein weiteres Wort grenzt die Suche ein.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SearchPage.qml" line="270"/>
+        <source>Translations: %1</source>
+        <translation>Übersetzungen: %1</translation>
     </message>
 </context>
 <context>
@@ -556,6 +603,16 @@
         <location filename="../qml/StartPage.qml" line="124"/>
         <source>Attack × technique</source>
         <translation>Angriff × Technik</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="124"/>
+        <source>Glossary</source>
+        <translation>Glossar</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="125"/>
+        <source>Kanji · pronunciation</source>
+        <translation>Kanji · Aussprache</translation>
     </message>
 </context>
 <context>

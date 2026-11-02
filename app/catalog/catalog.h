@@ -18,6 +18,10 @@ public:
     QVariantList disciplines() const { return m_disciplines; }
     // Per video key ("aikido/k5"): datei (path in the video folder), beschnitt {hoehe, y, h, verhaeltnis}.
     QVariantMap videos() const { return m_videos; }
+    // The glossary, alphabetical: per word wort, jp (or null), de (or ""), kana (its reading).
+    QVariantList glossary() const { return m_glossary; }
+    // Where the glossary's translations come from (the lexicon of shinkiryu.de and its date).
+    QString glossarySource() const { return m_glossarySource; }
     QString errorString() const { return m_error; }
 
 private:
@@ -25,5 +29,7 @@ private:
 
     QVariantList m_disciplines;
     QVariantMap m_videos;
+    QVariantList m_glossary;
+    QString m_glossarySource;
     QString m_error;
 };

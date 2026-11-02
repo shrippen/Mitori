@@ -124,6 +124,20 @@ Kirigami.ScrollablePage {
                 hint: qsTr("Attack × technique")
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("TechniqueMapPage.qml"))
             }
+
+            KanteOptionTile {
+                objectName: "glossaryTile"
+
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1          // equal columns
+                visible: Programme.errorString === ""
+                checkable: false
+                autoExclusive: false
+                glyph: "辞"
+                text: qsTr("Glossary")
+                hint: qsTr("Kanji · pronunciation")
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("SearchPage.qml"))
+            }
         }
     }
 

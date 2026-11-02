@@ -605,7 +605,7 @@ const ausschreibung = k => (k.info || "").match(/Ausschreibung:\s*(https?:\/\/\S
 let STRUKTUR = false;
 function kursInhalt(key){
   const k = kurse()[key]; if (!k) return "";
-  const gl = Object.keys(D.glossar);
+  const gl = D.glossar.woerter.map(w => w.wort);
   return `<div class="page" style="flex:1">
     <div class="card2"><div class="k" style="font:700 11px var(--f-cond);letter-spacing:.1em;text-transform:uppercase;color:var(--pri)">${kursRange(k)}${k.uid ? " · aus dem Kalender" : " · eigener Eintrag"}</div>
      <div style="font:600 21px/1.15 var(--f-serif);margin:3px 0">${esc(k.titel)}</div><p>${esc(k.ort || "")}${lehrer(k) ? " · " + esc(lehrer(k)) : ""}</p>
@@ -709,16 +709,8 @@ function suchErgebnisse(q){
   out.Programm = out.Programm.slice(0, 30);
   return out;
 }
-/* Glossar: Begriffe mit Kanji aus den Programmdaten, Übersetzungen aus dem Aiki-Budo-Lexikon (shinkiryu.de) */
-const GLOSSAR = (() => {
-  const m = new Map();
-  for (const [k, v] of Object.entries(D.glossar)) m.set(norm(k), { t: k, jp: v, de: "" });
-  for (const w of D.lexikon.woerter) {
-    const k = norm(w.wort.replace(/\s*\(.*\)$/, "")), x = m.get(k);
-    if (x) { x.de = w.de; x.jp = x.jp || w.jp; } else m.set(k, { t: w.wort.charAt(0).toUpperCase() + w.wort.slice(1), jp: w.jp || "", de: w.de });
-  }
-  return [...m.values()].sort((a, b) => a.t.localeCompare(b.t, "de"));
-})();
+/* Glossar: Aiki-Budo-Lexikon (shinkiryu.de) und Begriffe mit Kanji aus den Programmdaten, zusammengeführt von tools/daten.py */
+const GLOSSAR = D.glossar.woerter.map(w => ({ t: w.wort, jp: w.jp || "", de: w.de }));
 V.glossar = () => {
   const r = suchErgebnisse(SUCHE), hat = Object.values(r).some(x => x.length);
   const resRow = x => `<div class="res" ${x.open ? `onclick="${x.open}"` : ""}><div class="n">${esc(x.t)} ${x.jp ? `<span class="jp muted">${esc(x.jp)}</span>` : ""}<small>${esc(x.s)}</small></div>${x.say ? `<button class="say" title="Aussprache" onclick="event.stopPropagation();toast('Sprachschnipsel (Sprachsynthese): ${esc(x.t)}')">▶</button>` : "<span></span>"}</div>`;

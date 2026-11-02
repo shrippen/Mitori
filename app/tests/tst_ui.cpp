@@ -33,6 +33,9 @@ public slots:
         // Every run starts from the defaults (the video folder from MITORI_VIDEOS, not from the
         // setting a test wrote last time).
         QSettings().clear();
+        // A speech engine without a Japanese voice, the same on every machine (the glossary
+        // hides its speaker buttons).
+        qputenv("MITORI_SPEECH_ENGINE", "mock");
         QFile::remove(Practice::defaultPath());
     }
 
