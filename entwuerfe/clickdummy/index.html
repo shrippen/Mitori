@@ -312,7 +312,7 @@ if (!S.ratings) {
     else if (d.id === "daitoryu" && t.grad === "k5") S.ratings[t.id] = r < .3 ? 2 : r < .6 ? 1 : 0;
   }
   for (let n = 1; n <= 11; n++) S.ratings["shinkitoho/odachi/" + n] = n <= 4 ? 3 : n <= 7 ? 2 : n <= 9 ? 1 : 0;
-  for (let n = 1; n <= 10; n++) S.ratings["shinkitoho/kamae/" + n] = n <= 6 ? 3 : 2;
+  S.ratings["shinkitoho/kamae"] = 3;
 }
 
 /* Welche Videos vorhanden sind (Szenario rechts umschaltbar) */
@@ -359,7 +359,8 @@ function eintraege(discId, g){
       d.suburi.forEach(s => out.push({ id: s.id, gruppe: "Suburi|素振り", title: s.name, jp: s.kanji, sub: s.text, grade: g, komm: s.kommentar }));
       const k = d.kiriotoshi;
       out.push({ id: k.id, gruppe: "Kiriotoshi|" + k.kanji, title: k.name, sub: k.text, grade: g, komm: { titel: "Grundübung: Kiriotoshi", text: k.kommentar } });
-      d.kamae.forEach((k, n) => out.push({ id: k.id, gruppe: "Kamae|構", nr: n + 1, title: k.name, jp: k.kanji, grade: g, komm: k.kommentar }));
+      const km = d.kamae;  /* eine Technik, die 26 Positionen sind ihre Beschreibung */
+      out.push({ id: km.id, gruppe: km.name + "|" + km.kanji, title: km.name, jp: km.kanji, sub: km.positionen.map(p => p.name).join(" · "), grade: g, komm: km.kommentar });
     }
     if (cur && cur.bis) {
       const kd = d.kumidachi;
@@ -726,7 +727,7 @@ const NOTES = {
       "Ein Grad zeigt nur seinen eigenen Stoff; kein Umschalter „alles bis hier“. Der Prüfungsmodus würfelt 2–3 Techniken aus früheren Graden dazu.",
       "Zeile antippen öffnet zuerst das Blatt.",
       "Stand als vier Punkte.",
-      "Shinki Toho: Kamae mit eigenem Stand und Video.",
+      "Shinki Toho: die Kamae-Übung ist eine Technik mit eigenem Stand und Video; die 26 Positionen stehen als Beschreibung im Blatt.",
       "Grade ohne Video normal zeigen, nur ▶ ausblenden und oben darauf hinweisen.",
       "Zurück aus dem Player zeigt die Liste an der vorherigen Stelle; die zuletzt angesehene Technik leuchtet kurz auf (auch wenn im Player weitergeschaltet wurde).",
       "Shinki Toho: Knopf „Kommentar“ im Blatt mit den Texten von shinkiryu.de (Kamae, Suburi, Kiriotoshi, Ô-dachi 1–43)."

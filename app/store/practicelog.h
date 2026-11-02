@@ -63,10 +63,11 @@ public:
     // The newest note of every entry that has one.
     QHash<QString, Note> lastNotes() const;
 
-    static constexpr int schemaVersion = 2;
+    static constexpr int schemaVersion = 3;
 
 private:
     bool migrate();
+    bool mergeKamae();
 
     QString m_connection;
     QString m_error;

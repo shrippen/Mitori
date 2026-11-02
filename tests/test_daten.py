@@ -22,8 +22,11 @@ def daten(tmp_path_factory):
 def alle_ids(daten):
     for d in daten["disziplinen"]:
         yield from (t["id"] for t in d.get("techniken", []))
-        for art in ("kamae", "suburi", "odachi"):
+        for art in ("suburi", "odachi"):
             yield from (e["id"] for e in d.get(art, []))
+        for art in ("kamae", "kiriotoshi"):
+            if art in d:
+                yield d[art]["id"]
 
 
 def test_format_und_disziplinen(daten):
@@ -56,8 +59,23 @@ def test_jeder_grad_hat_stoff(daten):
 
 def test_shinki_toho_kommentare(daten):
     st = daten["disziplinen"][2]
-    assert all(k.get("kommentar") for k in st["kamae"])
+    assert st["kamae"]["kommentar"]["text"].startswith("1. Rei\n")
     assert all(o.get("kommentar") for o in st["odachi"])
+
+
+def test_kamae_eine_technik(daten):
+    """Die Kamae-Übung ist ein Eintrag (ein Ablauf); die 26 Positionen sind seine Beschreibung (S-09, V-13)."""
+    kamae = daten["disziplinen"][2]["kamae"]
+    assert kamae["id"] == "shinkitoho/kamae"
+    assert (kamae["name"], kamae["kanji"]) == ("Kamae-Übung", "構")
+    namen = [p["name"] for p in kamae["positionen"]]
+    assert len(namen) == 26 and namen.count("Seigan") == 2
+    assert all(p["kanji"] for p in kamae["positionen"])
+    # Der Kommentar zählt wie das Blatt (1–26), nicht wie die Quelle (1–24).
+    text = kamae["kommentar"]["text"]
+    assert "\n\n2–3. Battô Seigan\n" in text and "\n\n4. " in text and "\n\n26. " in text
+    assert kamae["video"] == {"video": "shinkitoho/suburi", "von": 212.88, "bis": 593.3}
+    assert not any(i.startswith("shinkitoho/kamae/") for i in alle_ids(daten))
 
 
 def test_glossar(daten):

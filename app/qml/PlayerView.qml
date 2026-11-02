@@ -164,7 +164,7 @@ Item {
             Layout.fillHeight: page.landscape
             Layout.preferredHeight: page.landscape ? -1 : width / ratio
             // Beside the list the controls keep the room they need, on a small tablet half the height.
-            Layout.maximumHeight: page.compact ? Math.max(page.height / 2, page.height - controlsView.contentHeight)
+            Layout.maximumHeight: page.compact ? Math.max(page.height / 2, page.height - controlsView.neededHeight)
                                                : Number.POSITIVE_INFINITY
 
             Rectangle {
@@ -217,6 +217,9 @@ Item {
             Layout.fillHeight: true             // portrait: the picture stays at the top
             Layout.preferredWidth: page.landscape ? Kirigami.Units.gridUnit * 17 : -1     // room for the tempo row
             contentHeight: controls.implicitHeight + Kirigami.Units.largeSpacing * 2
+            // What the controls need without the positions of a sequence (they scroll below).
+            readonly property real neededHeight: contentHeight
+                                                 - (stepList.visible ? stepList.height + stepList.Layout.topMargin + controls.spacing : 0)
             boundsBehavior: Flickable.StopAtBounds
             clip: true
             QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
@@ -369,6 +372,17 @@ Item {
                     icon.name: "go-previous-view"
                     text: qsTr("Back")
                     onClicked: page.backRequested()
+                }
+
+                // The positions of a sequence (Kamae exercise): beside the list on a tablet no
+                // sheet opens, and in the player they go along with the video. Last, so "Done",
+                // the way on and Back stay in view; the picture does not give way to them.
+                StepList {
+                    id: stepList
+
+                    Layout.fillWidth: true
+                    Layout.topMargin: Kirigami.Units.largeSpacing
+                    steps: page.current.steps || []
                 }
             }
         }

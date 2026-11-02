@@ -14,7 +14,20 @@ QVariantMap row(const QString &kind, const QString &title, const QString &jp)
     return {{QStringLiteral("kind"), kind}, {QStringLiteral("title"), title}, {QStringLiteral("jp"), jp}};
 }
 
-// An entry row from a technique, kamae, suburi or form of the catalog.
+QString name(const QVariantMap &item) { return item.value(QStringLiteral("name")).toString(); }
+QString kanji(const QVariantMap &item) { return item.value(QStringLiteral("kanji")).toString(); }
+
+// The positions of a sequence (the Kamae exercise) as {title, jp}, in order; none for others.
+QVariantList steps(const QVariantMap &item)
+{
+    QVariantList result;
+    for (const QVariant &p : item.value(QStringLiteral("positionen")).toList()) {
+        result << row(QStringLiteral("step"), name(p.toMap()), kanji(p.toMap()));
+    }
+    return result;
+}
+
+// An entry row from a technique, the kamae exercise, suburi or form of the catalog.
 QVariantMap entryRow(const QVariantMap &item, const QString &title, const QString &jp)
 {
     QVariantMap r = row(QStringLiteral("entry"), title, jp);
@@ -23,11 +36,9 @@ QVariantMap entryRow(const QVariantMap &item, const QString &title, const QStrin
     r[QStringLiteral("nr")] = item.value(QStringLiteral("nr"));
     r[QStringLiteral("video")] = item.value(QStringLiteral("video"));
     r[QStringLiteral("comment")] = item.value(QStringLiteral("kommentar"));
+    r[QStringLiteral("steps")] = steps(item);
     return r;
 }
-
-QString name(const QVariantMap &item) { return item.value(QStringLiteral("name")).toString(); }
-QString kanji(const QVariantMap &item) { return item.value(QStringLiteral("kanji")).toString(); }
 
 // A place on the technique map: every entry there, the first one's row and grade.
 struct MapCell
@@ -280,10 +291,10 @@ QVariantList Programme::shinkiTohoEntries(const QVariantMap &d, const QString &g
         const QVariantMap kiriotoshi = d.value(QStringLiteral("kiriotoshi")).toMap();
         result << row(QStringLiteral("group"), name(kiriotoshi), kanji(kiriotoshi));
         result << entryRow(kiriotoshi, name(kiriotoshi), kanji(kiriotoshi));
+        // One entry: the positions are practised and shown in one flow.
+        const QVariantMap kamae = d.value(QStringLiteral("kamae")).toMap();
         result << section(QStringLiteral("kamae"));
-        for (const QVariant &k : d.value(QStringLiteral("kamae")).toList()) {
-            result << entryRow(k.toMap(), name(k.toMap()), kanji(k.toMap()));
-        }
+        result << entryRow(kamae, name(kamae), kanji(kamae));
     }
     if (to == 0) {
         return result;
@@ -345,7 +356,12 @@ QVariantList Programme::search(const QString &query, int limit) const
                                          row.value(QStringLiteral("attackExtra")).toString(),
                                          row.value(QStringLiteral("attackJp")).toString(),
                                          group};
-                if (!SearchText(fields.join(u' ')).matches(words)) {
+                // The Kamae exercise is found by its positions too (Seigan, Hongaku …).
+                QStringList stepFields;
+                for (const QVariant &step : row.value(QStringLiteral("steps")).toList()) {
+                    stepFields << step.toMap().value(QStringLiteral("title")).toString() << step.toMap().value(QStringLiteral("jp")).toString();
+                }
+                if (!SearchText((fields + stepFields).join(u' ')).matches(words)) {
                     continue;
                 }
                 seen.insert(id);

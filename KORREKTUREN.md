@@ -143,7 +143,7 @@ Die App spielt bis zur Klärung das zugeordnete Kapitel (Eintrag mit `pruefen: t
 | V-10 | Daitoryu 3. Dan Jô-dori · Kata-gime-nage, Ura-irimi-nodo-zuki | Angriff „Tsuki“, „Kata-gime“, „Ura-irimi-tenkan-Nodo-zuki“ | Daten prüfen | Angriff im Video anders | klären |
 | V-11 | Daitoryu Okugi Tsuki · Hiji-gime-nage; Ryôte-dori · Kakae-gime-nage; Ryô-morote-dori · Aiki-kôhô-otoshi | „Sotote-dori · Hiji-gime-nage“ (spät); „Ryôte-dori · Juji-Tekubi-gime-modoshi“; „Ryô-Morote-dori · Nikajô-kime-osae“ | Daten prüfen | Namen im Video anders | klären |
 | V-12 | Daitoryu ohne Kapitel: 1. Kyu Muna-dori-shômen-uchi · Jûji-garami; 3. Kyu Sotote-dori · Yonkajô-kime-osae, Ryôte-muna-dori · Kataude-shibori-kime-nage; 5. Kyu Yokomen-uchi · Yoko-nage; 1. Dan Tsuki · Kata-otoshi, Ryô-yokomen-uchi · Aiki-nage; 2. Dan Ryôte-dori · Tai-azuke; 3. Dan Tsuki · Ude-gatame | kein passendes Kapitel | im Video suchen | fehlt im Video oder anders benannt | klären |
-| V-13 | Shinki Toho, 26 Kamae | die Kamae-Übung am Stück (Video Suburi, Kapitel 5–7) | Stellen je Kamae von Hand setzen | ein Kapitel für alle | klären |
+| V-13 | Shinki Toho, 26 Kamae | die Kamae-Übung am Stück (Video Suburi, Kapitel 5–7) | eine Stelle für die ganze Übung; in der App eine Technik `shinkitoho/kamae`, die 26 Positionen als ihre Beschreibung | Owner 02.11.2026: die Übung ist ein Fluss, ein Punkt | erledigt |
 | V-14 | Shinki Toho, Kiriotoshi | in keinem der drei Videos | ohne Video lassen | kein Kapitel | sicher |
 
 ## Shinki Toho

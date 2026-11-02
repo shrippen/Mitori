@@ -181,11 +181,11 @@ def luecken_fuellen(paare, texte, m):
 
 def stoff_shinki_toho(st, video):
     """Was die Shinki-Toho-Videos zeigen: Shoden Ô-dachi 1–11, Chuden 12–21, Suburi die drei
-    Suburi und die Kamae-Übung (ein Kapitel für alle Kamae, `alle`). Kiriotoshi zeigt keins."""
+    Suburi und die Kamae-Übung (ein Kapitel, die Übung ist ein Ablauf). Kiriotoshi zeigt keins."""
     if video == "suburi":
-        kamae = st["abschnitte"]["kamae"]
+        kamae = st["kamae"]
         return ([{"id": s["id"], "name": s["name"]} for s in st["suburi"]]
-                + [{"id": st["kamae"][0]["id"], "name": kamae["name"].split("-")[0], "alle": [k["id"] for k in st["kamae"]]}])
+                + [{"id": kamae["id"], "name": kamae["name"].split("-")[0]}])
     bis = next(g["bis"] for g in st["grade"] if g["id"] == video)
     von = 1 if video == "shoden" else next(g["bis"] for g in st["grade"] if g["id"] == "shoden") + 1
     return [{"id": o["id"], "name": f"{o['nr']}. {o['name'].replace(' · ', ' ')}"} for o in st["odachi"] if von <= o["nr"] <= bis]
@@ -230,11 +230,10 @@ def main():
                 # Eine Form geht über ihre Titeltafel und die folgenden Kapitel ohne Tafel (zweite Ausführung).
                 naechste = next((k for k in range(i + 1, len(kap)) if texte[k]["tafel"]), len(kap))
                 bis = kap[naechste - 1][1]
-            for eid in e.get("alle", [e["id"]]):
-                eintrag = {"id": eid, "von": round(kap[i][0], 2), "bis": round(bis, 2)}
-                if w < SICHER or "alle" in e:
-                    eintrag["pruefen"] = True
-                eintraege.append(eintrag)
+            eintrag = {"id": e["id"], "von": round(kap[i][0], 2), "bis": round(bis, 2)}
+            if w < SICHER:
+                eintrag["pruefen"] = True
+            eintraege.append(eintrag)
             if args.zeigen:
                 t = texte[i]
                 erkannt = t["mitte"] if t["tafel"] else f"{t['oben']} | {t['unten']}"
