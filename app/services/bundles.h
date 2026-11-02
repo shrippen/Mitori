@@ -50,7 +50,7 @@ public:
     Q_ENUM(ManifestState)
     enum class State { Locked, Unlocked, Waiting, Downloading, Installed, Update, Failed };
     Q_ENUM(State)
-    enum class UnlockError { Invalid, Unknown, Wrong, NoManifest };
+    enum class UnlockError { Invalid, Unknown, Wrong, NoManifest, Typo };
     Q_ENUM(UnlockError)
     enum class Network { WifiOnly, Any };
     Q_ENUM(Network)

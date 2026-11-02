@@ -126,7 +126,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="157"/>
+        <location filename="../qml/StartPage.qml" line="174"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -134,7 +134,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="174"/>
+        <location filename="../qml/StartPage.qml" line="153"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>
@@ -195,7 +195,7 @@
 <context>
     <name>VideosPage</name>
     <message numerus="yes">
-        <location filename="../qml/VideosPage.qml" line="176"/>
+        <location filename="../qml/VideosPage.qml" line="177"/>
         <source>%n video(s)</source>
         <translation>
             <numerusform>%n video</numerusform>

@@ -58,7 +58,8 @@ const uint8_t *bytes(const QByteArray &a)
 
 namespace BundleCrypto {
 
-QString normalized(const QString &input)
+// The code as typed, cleaned: upper case, no dashes or spaces, O as 0, I and L as 1.
+static QString cleaned(const QString &input)
 {
     QString s = input.toUpper();
     s.remove(QLatin1Char('-'));
@@ -66,6 +67,12 @@ QString normalized(const QString &input)
     s.replace(QLatin1Char('O'), QLatin1Char('0'));
     s.replace(QLatin1Char('I'), QLatin1Char('1'));
     s.replace(QLatin1Char('L'), QLatin1Char('1'));
+    return s;
+}
+
+QString normalized(const QString &input)
+{
+    const QString s = cleaned(input);
     if (s.size() != kRandom + 1) {
         return {};
     }
@@ -75,6 +82,11 @@ QString normalized(const QString &input)
         }
     }
     return check(s.left(kRandom)) == s.at(kRandom) ? s : QString();
+}
+
+bool complete(const QString &input)
+{
+    return cleaned(input).size() == kRandom + 1;
 }
 
 QString grouped(const QString &code)

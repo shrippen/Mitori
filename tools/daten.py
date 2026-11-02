@@ -265,7 +265,7 @@ def shinki_toho(ids):
     # Kommentare von shinkiryu.de (tools/kommentare.py), nur für die App
     k = yaml.safe_load((DATEN / "shinki-toho-kommentare.yaml").read_text(encoding="utf-8"))
     app["kommentare_quelle"] = k["quelle"]
-    app["kiriotoshi"]["kommentar"] = k["kiriotoshi"]
+    app["kiriotoshi"]["kommentar"] = {"titel": f"Grundübung: {app['kiriotoshi']['name']}", "text": k["kiriotoshi"]}
     kumi = d["abschnitte"]["kumidachi"]
     app["kumidachi"] = dict(kumi, id="shinkitoho/kumidachi",
                             kommentar={"titel": f"{kumi['name']} · {kumi['text'].split(':')[0]}", "text": k["kumidachi"]})

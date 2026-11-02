@@ -92,6 +92,8 @@ Kirigami.Page {
         spacing: 0
 
         QQC2.ScrollView {
+            objectName: "programmeScroll"
+            clip: true                                  // the rows scroll under the grade chips, not over them
             Layout.fillHeight: true
             Layout.fillWidth: !page.split
             Layout.preferredWidth: page.split ? Kirigami.Units.gridUnit * 20 : -1

@@ -63,6 +63,21 @@ def test_shinki_toho_kommentare(daten):
     assert all(o.get("kommentar") for o in st["odachi"])
 
 
+def test_kommentare_mit_titel_und_text(daten):
+    """Every comment the app shows is {titel, text} (CommentPage reads both): Kiriotoshi too."""
+    def kommentare(x):
+        if isinstance(x, dict):
+            if "kommentar" in x:
+                yield x.get("id"), x["kommentar"]
+            for v in x.values():
+                yield from kommentare(v)
+        elif isinstance(x, list):
+            for v in x:
+                yield from kommentare(v)
+    falsch = [i for i, k in kommentare(daten) if not (isinstance(k, dict) and k.get("titel") and k.get("text"))]
+    assert not falsch, falsch
+
+
 def test_kamae_eine_technik(daten):
     """Die Kamae-Übung ist ein Eintrag (ein Ablauf); die 26 Positionen sind seine Beschreibung (S-09, V-13)."""
     kamae = daten["disziplinen"][2]["kamae"]

@@ -51,7 +51,8 @@ Kirigami.ScrollablePage {
         }
         function onUnlockFailed(reason) {
             page.codeOk = false
-            page.codeMessage = reason === Bundles.UnlockError.Invalid ? qsTr("This is not a complete code; check it for typing errors.")
+            page.codeMessage = reason === Bundles.UnlockError.Invalid ? qsTr("A code has 20 characters (letters and digits); check that none is missing or extra.")
+                             : reason === Bundles.UnlockError.Typo ? qsTr("This code has a typing error; check it character by character.")
                              : reason === Bundles.UnlockError.NoManifest ? qsTr("The list of videos is not loaded yet. Check the connection and try again.")
                              : reason === Bundles.UnlockError.Unknown ? qsTr("This code is not known (or no longer valid).")
                              : qsTr("This code does not open its bundle.")

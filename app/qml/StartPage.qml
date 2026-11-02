@@ -138,6 +138,23 @@ Kirigami.ScrollablePage {
             }
 
             KanteOptionTile {
+                objectName: "statsTile"
+
+                readonly property int days: Practice.revision >= 0 && Practice.today.getTime() > 0
+                                            ? Object.keys(Practice.practisedPerDay(30)).length : 0
+
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1          // equal columns
+                visible: Programme.errorString === ""
+                checkable: false
+                autoExclusive: false
+                glyph: "記"
+                text: qsTr("Statistics")
+                hint: qsTr("%n practice day(s) in 30 days", "", days)
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("StatsPage.qml"))
+            }
+
+            KanteOptionTile {
                 objectName: "coursesTile"
 
                 // A planned exam first ("Exam Aikido 4. Kyu in 30 days"), else the next coming
@@ -156,23 +173,6 @@ Kirigami.ScrollablePage {
                     : !next ? qsTr("Calendar and notebooks")
                             : (next.place || next.title) + " · " + (days > 0 ? qsTr("in %n day(s)", "", days) : qsTr("today"))
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("CoursesPage.qml"))
-            }
-
-            KanteOptionTile {
-                objectName: "statsTile"
-
-                readonly property int days: Practice.revision >= 0 && Practice.today.getTime() > 0
-                                            ? Object.keys(Practice.practisedPerDay(30)).length : 0
-
-                Layout.fillWidth: true
-                Layout.preferredWidth: 1          // equal columns
-                visible: Programme.errorString === ""
-                checkable: false
-                autoExclusive: false
-                glyph: "記"
-                text: qsTr("Statistics")
-                hint: qsTr("%n practice day(s) in 30 days", "", days)
-                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("StatsPage.qml"))
             }
 
             KanteOptionTile {

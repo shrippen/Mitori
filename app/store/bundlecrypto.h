@@ -17,6 +17,8 @@ namespace BundleCrypto {
 // The 20 characters of a code as typed ("7kq2m-x9hdv …": case, hyphens and spaces do not matter;
 // O counts as 0, I and L as 1), or "" when length, characters or check do not fit.
 QString normalized(const QString &input);
+// Whether the code has the right length (a wrong character or check character in it: a typo).
+bool complete(const QString &input);
 // "7KQ2M-X9HDV-3TAPR-WE6YC"
 QString grouped(const QString &code);
 // The code's entry in the manifest: hex(BLAKE2b-128("mitori-code:" + code)).
