@@ -224,12 +224,14 @@ QHash<QString, QDate> PracticeLog::firstRated() const
     return result;
 }
 
-QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from) const
+QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from, const QString &prefix) const
 {
     QHash<QDate, QSet<QString>> entries;
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ?"));
+    q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ? AND substr(entry, 1, ?) = ?"));
     q.addBindValue(from.toMSecsSinceEpoch());
+    q.addBindValue(prefix.size());
+    q.addBindValue(prefix.isNull() ? QStringLiteral("") : prefix);     // a null string binds NULL
     q.exec();
     while (q.next()) {
         const QDate day = QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC).toLocalTime().date();
@@ -240,6 +242,15 @@ QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from) const
         result.insert(it.key(), int(it.value().size()));
     }
     return result;
+}
+
+QDateTime PracticeLog::firstRating() const
+{
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    if (!q.exec(QStringLiteral("SELECT MIN(at) FROM ratings")) || !q.next() || q.value(0).isNull()) {
+        return {};
+    }
+    return QDateTime::fromMSecsSinceEpoch(q.value(0).toLongLong(), QTimeZone::UTC);
 }
 
 QList<PracticeLog::Rating> PracticeLog::history(const QString &entry) const

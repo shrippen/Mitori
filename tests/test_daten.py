@@ -157,6 +157,17 @@ def test_uebersetzungen_vollstaendig():
         assert not offen, f"{ts.name}: {offen}"
 
 
+def test_englisch_nicht_deutsch():
+    """mitori_en.ts holds English plural forms: none of them is the German one of the same text."""
+    import xml.etree.ElementTree as ET
+    i18n = WURZEL / "app" / "i18n"
+    deutsch = {m.findtext("source"): {f.text for f in m.iter("numerusform")}
+               for m in ET.parse(i18n / "mitori_de.ts").iter("message")}
+    falsch = [m.findtext("source") for m in ET.parse(i18n / "mitori_en.ts").iter("message")
+              if {f.text for f in m.iter("numerusform")} & deutsch.get(m.findtext("source"), set())]
+    assert not falsch, f"mitori_en.ts has German forms: {falsch}"
+
+
 # Waiting times (Meine Grade): every grade one can take has `wartezeit` {jahre, nach} from its
 # `abstand`: "nach" is "grad" (the previous grade) or "beginn" (the start of training).
 WARTEZEITEN = {

@@ -35,8 +35,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Akzente, ß, Bindestriche und Okurigana egal; auch Angriffszusatz und Gruppe) über die Lupe im Startmenü. Statistik
   (Kachel im Startmenü): letzte 30 Tage (Übungstage, Techniken geübt), Übungstage als Kalender (halbes Jahr,
   Legende, Tooltip je Tag), Stand je Grad einer Sparte. Fotos und Sprachnotizen an Notizen (mit Schritt 4).
-  Offen: in der Statistik „Meine Grade“
-  (mit Schritt 4), „alle Jahre“.
+  In der Statistik auch „Meine Grade“ der Sparte (mit „Meine Grade bearbeiten …“) und „Alle Jahre …“ (`YearsPage`:
+  ein Kalender je Jahr ab der ersten Einschätzung, alle Sparten oder eine, je Jahr Übungstage, Techniken und Grade).
 - Schritt 3: Prüfungsmodus (Kachel 試 im Startmenü, „Probe <Grad>“): Sparte, Grad (nur mit Prüfungsstoff, je
   Anzahl Punkte), Anzahl (alle / 8 / 12 / 15), zufällige Reihenfolge, 2–5 Stichproben aus früheren Graden am
   Anfang (markiert); Einstellungen bleiben. Shinki Toho: Shoden prüft die Kamae-Übung (ein Eintrag) und
@@ -76,11 +76,12 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   2048 px), mit der Notiz gelöscht. Übungsprotokoll Schema 5, Lehrgänge Schema 3 (Spalte `media`). Android fragt nach
   Kamera und Mikrofon beim ersten Mal. Offen: Test auf dem Telefon (Kamera, Mikrofon, Bild aus der Galerie).
 - Schritt 4: Meine Grade (in Lehrgänge oben): je Sparte die abgelegten Grade mit Tag und Ort, der nächste Grad mit
-  Wartezeit (`wartezeit` aus `abstand` der Programmdaten; Shinki Toho Shoden ab Trainingsbeginn, ohne Datum).
+  Wartezeit (`wartezeit` aus `abstand` der Programmdaten; Shinki Toho Shoden ab Trainingsbeginn).
   Im Notizbuch eines kommenden Lehrgangs „Prüfung hier ablegen …“ (Sparte, Grad, Wartezeit gegen den ersten Tag);
   Lehrgänge zeigen die geplanten Prüfungen, die Kachel 講, Heute üben und der Prüfungsmodus die nächste.
-  `lehrgaenge.sqlite` Schema 2 (Tabelle `grades`, Spalten `exam_*` an `courses`). Offen: „Meine Grade“ in der
-  Statistik, Trainingsbeginn für Shinki Toho.
+  `lehrgaenge.sqlite` Schema 2 (Tabelle `grades`, Spalten `exam_*` an `courses`). Trainingsbeginn je Sparte, wo eine
+  Wartezeit davon zählt (Shinki Toho Shoden: zwei Jahre), in „Meine Grade“; Schema 4 (Tabelle `starts`, die Sparte
+  als uid, mit Sicherung und Abgleich).
 - Schritt 4: Sicherung als Datei (Einstellungen → Sicherung): `mitori-sicherung-JJJJ-MM-TT.zip` mit beiden Datenbanken
   (`VACUUM INTO`), `medien/` und `manifest.json` (`store/backuparchive`, `store/zipreader`, `services/backup`).
   Einlesen führt zusammen (`store/tablemerge`): Einschätzungen und Prüfungsrunden als Vereinigung, Notizen,
@@ -96,7 +97,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Wunsch nach jeder Änderung. Konflikt nur, wenn dieselbe Notiz oder derselbe Eintrag seit dem letzten Abgleich auf
   zwei Geräten geändert wurde: bleibt bis zur Wahl (dieses Gerät, das andere, beide behalten; `ConflictsPage`).
   Konto, App-Passwort und Sync-Id in `sync/`, von Android Auto Backup und Geräteumzug ausgenommen.
-  Offen: Test gegen eine echte Nextcloud.
+  Offen: Test gegen eine echte Nextcloud; die Konfliktkarte zeigt zum aktuellen Text noch die Zeit des Abgleichs.
 - Schritt 4: Video-Bundles (Einstellungen → „Videos und DVD-Codes“, Hinweis im Programm „Code eingeben“): das öffentliche
   Manifest (Gitea-Paket `mitori-manifest`) listet die Bundles; der Code einer DVD (20 Zeichen, Prüfzeichen) schaltet
   eins frei, Mitori lädt, prüft (SHA-256, Blöcke mit Tag) und entschlüsselt seine Videos aufs Gerät

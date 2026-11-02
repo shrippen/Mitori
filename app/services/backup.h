@@ -12,7 +12,7 @@
 // come in, newer ones replace older, nothing on the device gets lost.
 //
 //   save(url)       ──► mitori-sicherung-2026-11-02.zip
-//   inspect(url)    ──► {created, device, ratings: {added}, notes: {added, changed}, …, media}
+//   inspect(url)    ──► {created, device, ratings: {added}, notes: {added, changed}, …, starts, media}
 //   restore()       merges what inspect() read, then restored() (Practice and Courses reload)
 class Backup : public QObject
 {

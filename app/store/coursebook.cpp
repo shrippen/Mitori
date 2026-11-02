@@ -179,6 +179,56 @@ bool CourseBook::migrate()
             return false;
         }
     }
+
+    // 4: when the user began training in a discipline (a grade's waiting time may count from it);
+    // the discipline is the uid, so two devices merge into one row.
+    if (version < 4) {
+        const bool ok = q.exec(QStringLiteral("CREATE TABLE IF NOT EXISTS starts (uid TEXT PRIMARY KEY, day TEXT NOT NULL,"
+                                              " created INTEGER NOT NULL, changed INTEGER NOT NULL, device TEXT NOT NULL,"
+                                              " deleted INTEGER NOT NULL DEFAULT 0)"))
+            && q.exec(QStringLiteral("PRAGMA user_version = 4"));
+        if (!ok) {
+            m_error = q.lastError().text();
+            return false;
+        }
+    }
+    return true;
+}
+
+QHash<QString, QDate> CourseBook::starts() const
+{
+    QHash<QString, QDate> result;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.exec(QStringLiteral("SELECT uid, day FROM starts WHERE deleted = 0"));
+    while (q.next()) {
+        result.insert(q.value(0).toString(), QDate::fromString(q.value(1).toString(), kDateFormat));
+    }
+    return result;
+}
+
+bool CourseBook::setStart(const QString &discipline, const QDate &day, const QDateTime &at, const QString &device)
+{
+    m_error.clear();
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    const qint64 now = at.toUTC().toMSecsSinceEpoch();
+    if (!day.isValid()) {
+        q.prepare(QStringLiteral("UPDATE starts SET deleted = 1, changed = ?, device = ? WHERE uid = ?"));
+        q.addBindValue(now);
+        q.addBindValue(device);
+        q.addBindValue(discipline);
+    } else {
+        q.prepare(QStringLiteral("INSERT INTO starts (uid, day, created, changed, device, deleted) VALUES (?, ?, ?, ?, ?, 0)"
+                                 " ON CONFLICT(uid) DO UPDATE SET day = excluded.day, changed = excluded.changed,"
+                                 " device = excluded.device, deleted = 0"));
+        for (const QVariant &v : {QVariant(discipline), QVariant(day.toString(kDateFormat)), QVariant(now), QVariant(now),
+                                  QVariant(device)}) {
+            q.addBindValue(v);
+        }
+    }
+    if (!q.exec()) {
+        m_error = q.lastError().text();
+        return false;
+    }
     return true;
 }
 
@@ -551,6 +601,8 @@ bool CourseBook::merge(const QString &otherPath, TableMerge::Mode mode, TableMer
         {QStringLiteral("grades"),
          {u"uid"_s, u"discipline"_s, u"grade"_s, u"day"_s, u"place"_s, u"created"_s, u"changed"_s, u"device"_s,
           u"deleted"_s},
+         Kind::Editable, {}},
+        {QStringLiteral("starts"), {u"uid"_s, u"day"_s, u"created"_s, u"changed"_s, u"device"_s, u"deleted"_s},
          Kind::Editable, {}},
     };
     m_error.clear();

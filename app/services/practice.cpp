@@ -148,6 +148,30 @@ QVariantMap Practice::practisedPerDay(int days) const
     return result;
 }
 
+QVariantMap Practice::practisedInYear(int year, const QString &discipline) const
+{
+    QVariantMap result;
+    if (!m_open) {
+        return result;
+    }
+    const QDate first(year, 1, 1);
+    const QDate last(year, 12, 31);
+    const QString prefix = discipline.isEmpty() ? QString() : discipline + QLatin1Char('/');
+    const QHash<QDate, int> perDay = m_log->practisedPerDay(first.startOfDay().toUTC(), prefix);
+    for (auto it = perDay.cbegin(); it != perDay.cend(); ++it) {
+        if (it.key() >= first && it.key() <= last) {
+            result.insert(it.key().toString(Qt::ISODate), it.value());
+        }
+    }
+    return result;
+}
+
+int Practice::firstYear() const
+{
+    const QDateTime first = m_open ? m_log->firstRating() : QDateTime();
+    return first.isValid() ? first.toLocalTime().date().year() : m_today.year();
+}
+
 bool Practice::ratedToday(const QString &entry) const
 {
     const QDateTime last = lastRated(entry);

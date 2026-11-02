@@ -173,6 +173,9 @@ private slots:
         QCOMPARE(book.entries(u"c1"_s).size(), 1);
         QCOMPARE(book.entries(u"c1"_s).first().media, QString());          // schema 3
         QVERIFY(book.grades().isEmpty());
+        QVERIFY(book.starts().isEmpty());                                     // schema 4
+        QVERIFY(book.setStart(u"shinkitoho"_s, QDate(2024, 9, 1), QDateTime::currentDateTimeUtc(), u"dev"_s));
+        QCOMPARE(book.starts().value(u"shinkitoho"_s), QDate(2024, 9, 1));
         QVERIFY(book.planExam(u"c1"_s, u"aikido"_s, u"k4"_s, QDateTime::currentDateTimeUtc()));
         QCOMPARE(book.courses().first().examGrade, u"k4"_s);
     }
@@ -329,6 +332,21 @@ private slots:
         QCOMPARE(c->waiting(u"aikido"_s, u"k4"_s).value(u"years"_s).toInt(), 1);
         QCOMPARE(state(u"shinkitoho"_s, u"shoden"_s), Courses::Wait::FromStart);
         QCOMPARE(c->waiting(u"shinkitoho"_s, u"shoden"_s).value(u"years"_s).toInt(), 2);
+        // With the start of training: 2 years after it; removed, unknown again.
+        QVERIFY(c->countsFromStart(u"shinkitoho"_s));
+        QVERIFY(!c->countsFromStart(u"aikido"_s));
+        QVERIFY(!c->setTrainingStart(u"shinkitoho"_s, u"1.9.2024"_s));
+        QVERIFY(!c->setTrainingStart(u"karate"_s, u"2024-09-01"_s));
+        QVERIFY(c->setTrainingStart(u"shinkitoho"_s, u"2024-09-01"_s));
+        QCOMPARE(c->trainingStart(u"shinkitoho"_s), u"2024-09-01"_s);
+        QCOMPARE(state(u"shinkitoho"_s, u"shoden"_s), Courses::Wait::Earliest);
+        QCOMPARE(c->waiting(u"shinkitoho"_s, u"shoden"_s).value(u"earliest"_s).toString(), u"2026-09-01"_s);
+        QCOMPARE(state(u"shinkitoho"_s, u"shoden"_s, u"2026-08-31"_s), Courses::Wait::TooEarly);
+        QVERIFY(c->setTrainingStart(u"shinkitoho"_s, u"2024-10-01"_s));     // corrected
+        QCOMPARE(c->trainingStart(u"shinkitoho"_s), u"2024-10-01"_s);
+        QVERIFY(c->setTrainingStart(u"shinkitoho"_s, {}));
+        QCOMPARE(c->trainingStart(u"shinkitoho"_s), QString());
+        QCOMPARE(state(u"shinkitoho"_s, u"shoden"_s), Courses::Wait::FromStart);
         QVERIFY(c->waiting(u"aikido"_s, u"x9"_s).isEmpty());
         const QVariantList ladder = c->ladder(u"shinkitoho"_s);
         QCOMPARE(ladder.size(), 6);                                 // no Hôshu

@@ -19,6 +19,7 @@
 //             exam_discipline, exam_grade (an exam planned there, "" for none; schema 2)
 //   entries   uid, course, text, created, changed, device, deleted, media (schema 3)
 //   grades    uid, discipline, grade, day, place, created, changed, device, deleted (schema 2)
+//   starts    uid (the discipline), day, created, changed, device, deleted (schema 4): training began
 class CourseBook
 {
 public:
@@ -118,7 +119,11 @@ public:
     bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result,
                const TableMerge::Watch &watch = {});
 
-    static constexpr int schemaVersion = 3;
+    // When training began, by discipline; an invalid day removes it.
+    QHash<QString, QDate> starts() const;
+    bool setStart(const QString &discipline, const QDate &day, const QDateTime &at, const QString &device);
+
+    static constexpr int schemaVersion = 4;
 
 private:
     bool migrate();

@@ -6,11 +6,12 @@ import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Kante
 import Mitori
+import "grades.js" as Grades
 
 // Statistics (clickdummy "Statistik"): the last 30 days in two figures, the practice days of the
 // last half year on a calendar, and how each grade of a discipline sits. A technique counts once
-// a day it was rated; the average of the last exam rounds of the discipline. "My grades" come
-// with their feature (ROADMAP.md).
+// a day it was rated; the average of the last exam rounds of the discipline; the grades passed
+// (My grades). "All years" shows every year on its own calendar (YearsPage).
 Kirigami.ScrollablePage {
     id: page
 
@@ -34,6 +35,9 @@ Kirigami.ScrollablePage {
         return { days: days.length, techniques: days.reduce((sum, d) => sum + page.perDay[d], 0) }
     }
     property string discipline: Programme.discipline
+    // The grades passed in the discipline, oldest first, and its next planned exam.
+    readonly property var passed: Courses.revision >= 0 ? Courses.grades.filter(g => g.discipline === discipline).reverse() : []
+    readonly property var exam: Courses.revision >= 0 ? Courses.nextExam(discipline) : ({})
     // The last eight exam rounds of the discipline, oldest first.
     readonly property var rounds: Practice.revision >= 0 ? Practice.rounds(discipline, 8) : []
 
@@ -119,6 +123,13 @@ Kirigami.ScrollablePage {
                 }
                 Accessible.name: qsTr("Practice days")
             }
+        }
+        KanteButton {
+            objectName: "allYears"
+            emphasis: KanteButton.Emphasis.Quiet
+            icon.name: "view-calendar"
+            text: qsTr("All years …")
+            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("YearsPage.qml"))
         }
         KanteLegend {
             Layout.fillWidth: true
@@ -222,6 +233,40 @@ Kirigami.ScrollablePage {
             color: KanteStyle.mutedTextColor
             font: KanteStyle.smallFont
             wrapMode: Text.Wrap
+        }
+
+        // My grades of the discipline, oldest first, and a planned exam.
+        KanteSectionLabel {
+            text: qsTr("My grades")
+        }
+        Repeater {
+            model: page.passed
+
+            KanteListRow {
+                required property var modelData
+
+                objectName: "statsGrade"
+                Layout.fillWidth: true
+                text: modelData.name
+                subtitle: [Grades.shortDate(modelData.day), modelData.place].filter(x => x).join(" · ")
+            }
+        }
+        QQC2.Label {
+            objectName: "statsGradesText"
+            Layout.fillWidth: true
+            text: (page.passed.length === 0 ? qsTr("No grade entered yet.") : "")
+                  + (page.exam.course ? (page.passed.length === 0 ? " " : "") + qsTr("Planned: %1, %2 in %3")
+                         .arg(page.exam.name).arg(Grades.shortDate(page.exam.first)).arg(page.exam.place || page.exam.title) : "")
+            visible: text !== ""
+            color: KanteStyle.mutedTextColor
+            wrapMode: Text.Wrap
+        }
+        KanteButton {
+            objectName: "editGrades"
+            emphasis: KanteButton.Emphasis.Quiet
+            icon.name: "document-edit"
+            text: qsTr("Edit my grades …")
+            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("GradesPage.qml"))
         }
     }
 }

@@ -10,7 +10,8 @@ import "coursedays.js" as CourseDays
 import "grades.js" as Grades
 
 // My grades (clickdummy "Meine Grade"): per discipline the grades passed with day and place, the
-// next grade with its waiting time (from the programme data) and a planned exam. They are the
+// next grade with its waiting time (from the programme data, Shinki Toho Shoden from the start of
+// training) and a planned exam. They are the
 // ground for the waiting times on a course and the hints before an exam.
 //
 //   AIKIDO · last 4. Kyu
@@ -85,6 +86,38 @@ Kirigami.ScrollablePage {
                             text: qsTr("Remove %1").arg(passedRow.modelData.name)
                             display: QQC2.AbstractButton.IconOnly
                             onClicked: Courses.removeGrade(passedRow.modelData.uid)
+                        }
+                    }
+                }
+
+                // Where a waiting time counts from the start of training (Shinki Toho Shoden): its day,
+                // saved as it is typed or picked; emptied, it goes.
+                RowLayout {
+                    Layout.fillWidth: true
+                    visible: Courses.countsFromStart(block.discipline)
+
+                    QQC2.Label {
+                        text: qsTr("Training since:")
+                    }
+                    KanteDateField {
+                        id: startField
+
+                        // The saved day; a pick sets `date` itself, so the binding comes back after
+                        // it (a sync or a failed save shows the day that counts).
+                        function saved() {
+                            const day = Courses.revision >= 0 ? Courses.trainingStart(block.discipline) : ""
+                            return day ? CourseDays.day(day) : null
+                        }
+
+                        objectName: "trainingStart"
+                        format: qsTr("yyyy-MM-dd", "date format")
+                        dayNames: [qsTr("MO"), qsTr("TU"), qsTr("WE"), qsTr("TH"), qsTr("FR"), qsTr("SA"), qsTr("SU")]
+                        todayText: qsTr("Today")
+                        date: saved()
+                        Accessible.name: qsTr("Start of training")
+                        onDateEdited: day => {
+                            Courses.setTrainingStart(block.discipline, day ? CourseDays.iso(day) : "")
+                            startField.date = Qt.binding(() => startField.saved())
                         }
                     }
                 }
