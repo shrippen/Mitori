@@ -16,8 +16,9 @@ Kirigami.ScrollablePage {
 
     title: "Mitori 見取り"
 
-    // A tablet in landscape (the shorter side as on a 600 dp tablet; not a phone held sideways).
-    readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 30
+    // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
+    // not a phone held sideways, about 20).
+    readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 26
 
     actions: [
         Kirigami.Action {
