@@ -23,6 +23,7 @@ Plan: [ROADMAP.md](ROADMAP.md). Regeln für die Arbeit am Repo: [agent.md](agent
 ## Bauen
 
 ```sh
+./start.sh                             # App bauen (falls nötig) und starten, Videos aus ../Mitori Videos
 python3 tools/daten.py                 # Daten prüfen (braucht PyYAML)
 heft/build.sh                          # Heft → heft/build/
 cmake -S app -B build-app -G Ninja && cmake --build build-app && build-app/mitori
