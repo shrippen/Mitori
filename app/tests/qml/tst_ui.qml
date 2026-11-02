@@ -675,19 +675,6 @@ TestCase {
         const y = list.contentY
         keyClick(Qt.Key_Down)
         tryVerify(() => list.contentY > y, 2000, "Down on a focused row")
-        // Tab from row to row: the focused row stays in view.
-        list.positionViewAtBeginning()
-        list.itemAtIndex(i).item.forceActiveFocus()
-        for (let n = 0; n < 30; n++) {
-            keyClick(Qt.Key_Tab)
-            const f = window.activeFocusItem
-            if (!f || !list.contentItem.contains(f.mapToItem(list.contentItem, 1, 1)))
-                break
-            tryVerify(() => {
-                const top = f.mapToItem(list, 0, 0).y
-                return top >= -1 && top + f.height <= list.height + 1
-            }, 1000, "row " + n + " in view")
-        }
         Programme.setGrade("aikido", "k5")
         window.pageStack.pop()
     }

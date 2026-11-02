@@ -134,7 +134,6 @@ Kirigami.Page {
                     id: rowLoader
 
                     required property var modelData
-                    required property int index
 
                     width: ListView.view.width
                     sourceComponent: modelData.kind === "group" ? groupRow
@@ -188,13 +187,6 @@ Kirigami.Page {
                             subtitle: [entry.jp, entry.nr ? entry.extra : (entry.kind === "info" ? entry.text : "")].filter(x => x).join(" · ")
                             selected: entry.id === page.lastId
                             onClicked: page.open(entry)
-                            // Tab from row to row: the list follows (once the row has its height).
-                            onActiveFocusChanged: {
-                                if (activeFocus) {
-                                    const i = rowLoader.index
-                                    Qt.callLater(() => list.positionViewAtIndex(i, ListView.Contain))
-                                }
-                            }
                             trailing: RowLayout {
                                 spacing: Kirigami.Units.smallSpacing
 
