@@ -205,7 +205,9 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
 - **Diagramme**
   - Balken und Kalender in den Stufenfarben, Achsen und Legende in 11 px `inkMuted`.
   - Gitterlinien in `line`. Jede Grafik hat Achsen oder Legende und Tooltips (Projektregel).
-- **Tooltip und Toast**: `ink` als Fläche mit 92 %, Text weiß 12 px, eckig.
+- **Tooltip und Toast**: `ink` als Fläche mit 92 %, Text weiß 12 px, eckig. Eine Warnung im Toast hat links 3 px Rot;
+  das Wort sagt, was geschah.
+- **Diagramm-Beschriftung**: Werte über Balken auf Papier mit 85 % (`chartLabel`), die Grundlinie in `ink`.
 
 ## 6 Umsetzung in Qt Quick
 

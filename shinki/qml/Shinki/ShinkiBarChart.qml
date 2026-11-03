@@ -255,7 +255,7 @@ Item {
             height: 1
             y: chart.axis ? chart.plotHeight - index * chart.axisStep / chart.scaleSpan * chart.plotHeight - (index === 0 ? 1 : 0)
                           : chart.plotHeight - index * chart.plotHeight / 3 - 1
-            color: index === 0 ? ShinkiStyle.line : ShinkiStyle.line
+            color: index === 0 ? ShinkiStyle.ink : ShinkiStyle.line          // the base line in ink
         }
     }
     Repeater {
@@ -455,7 +455,7 @@ Item {
                 y: marker.index * (height + ShinkiStyle.unit(2))
                 width: markerText.implicitWidth + ShinkiStyle.unit(8)
                 height: markerText.implicitHeight + ShinkiStyle.unit(2)
-                color: Qt.alpha(ShinkiStyle.paper, 0.85)
+                color: Qt.alpha(ShinkiStyle.paper, ShinkiStyle.chartLabelOpacity)
                 Text {
                     id: markerText
                     anchors.centerIn: parent
@@ -484,7 +484,7 @@ Item {
             z: 1
             width: rangeText.implicitWidth + ShinkiStyle.unit(8)
             height: rangeText.implicitHeight + ShinkiStyle.unit(2)
-            color: Qt.alpha(ShinkiStyle.paper, 0.85)
+            color: Qt.alpha(ShinkiStyle.paper, ShinkiStyle.chartLabelOpacity)
             Text {
                 id: rangeText
                 anchors.centerIn: parent
@@ -527,7 +527,7 @@ Item {
         z: 2
         width: lines.implicitWidth + ShinkiStyle.unit(16)
         height: lines.implicitHeight + ShinkiStyle.unit(10)
-        color: Qt.alpha(ShinkiStyle.paper, 0.92)
+        color: Qt.alpha(ShinkiStyle.paper, ShinkiStyle.tooltipOpacity)
         border.width: 1
         border.color: ShinkiStyle.line
         Column {
@@ -560,7 +560,7 @@ Item {
                     }
                     Text {
                         text: (parent.name !== "" ? parent.name + "  " : "") + chart.format(box.parts[parent.part])
-                        color: !box.stacked || chart.hoverPart === parent.part ? ShinkiStyle.ink : ShinkiStyle.ink
+                        color: !box.stacked || chart.hoverPart === parent.part ? ShinkiStyle.ink : ShinkiStyle.inkMuted
                         font: chart.figureFont(ShinkiStyle.smallSize, !box.stacked || chart.hoverPart === parent.part)
                     }
                 }
