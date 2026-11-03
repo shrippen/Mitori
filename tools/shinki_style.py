@@ -37,7 +37,11 @@ QtObject {
     }
 """
 
-QMLDIR = "module Shinki\nsingleton ShinkiStyle 1.0 ShinkiStyle.qml\n"
+def qmldir():
+    """The module's qmldir: the singleton and every component file beside it."""
+    lines = ["module Shinki", "singleton ShinkiStyle 1.0 ShinkiStyle.qml"]
+    lines += [f"{p.stem} 1.0 {p.name}" for p in sorted(OUT.glob("Shinki*.qml")) if p.name != "ShinkiStyle.qml"]
+    return "\n".join(lines) + "\n"
 
 
 def role(name):
@@ -113,7 +117,7 @@ def generate(tokens):
 
 def main():
     tokens = json.loads(TOKENS.read_text(encoding="utf-8"))
-    files = {OUT / "ShinkiStyle.qml": generate(tokens), OUT / "qmldir": QMLDIR}
+    files = {OUT / "ShinkiStyle.qml": generate(tokens), OUT / "qmldir": qmldir()}
     if "--check" in sys.argv:
         stale = [str(p.relative_to(ROOT)) for p, text in files.items()
                  if not p.exists() or p.read_text(encoding="utf-8") != text]

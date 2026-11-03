@@ -121,7 +121,7 @@
 <context>
     <name>StartPage</name>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="73"/>
+        <location filename="../qml/StartPage.qml" line="72"/>
         <source>%n video bundle(s) can be updated.</source>
         <translation>
             <numerusform>%n video bundle can be updated.</numerusform>
@@ -129,7 +129,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="118"/>
+        <location filename="../qml/StartPage.qml" line="114"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n due</numerusform>
@@ -137,7 +137,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="174"/>
+        <location filename="../qml/StartPage.qml" line="164"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -145,7 +145,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="153"/>
+        <location filename="../qml/StartPage.qml" line="145"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>

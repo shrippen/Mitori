@@ -13,6 +13,7 @@
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuickTest>
 
+#include "appearance.h"
 #include "courses.h"
 #include "bundleshelf.h"
 #include "mediastore.h"
@@ -90,8 +91,14 @@ public slots:
         // The app's bundled icons, as on Android (main.cpp).
         QIcon::setThemeSearchPaths({QStringLiteral(":/icons")});
         QIcon::setThemeName(QStringLiteral("breeze-mitori"));
-        QDir().mkpath(QStringLiteral(UI_SHOTS_DIR));
-        engine->rootContext()->setContextProperty(QStringLiteral("uiShotsDir"), QStringLiteral(UI_SHOTS_DIR));
+        const bool shinki = qEnvironmentVariable("MITORI_TEST_STYLE") == QLatin1String("shinki");
+        const QString shots = QStringLiteral(UI_SHOTS_DIR) + (shinki ? QStringLiteral("/shinki") : QString());
+        QDir().mkpath(shots);
+        engine->rootContext()->setContextProperty(QStringLiteral("uiShotsDir"), shots);
+        // The second run (ctest ui_shinki): the pages through Look as Shinki.
+        if (shinki) {
+            Appearance::prepare(Appearance::Style::Shinki, engine);
+        }
         engine->rootContext()->setContextProperty(QStringLiteral("testMediaDir"), QStringLiteral(TEST_MEDIA_DIR));
     }
 };

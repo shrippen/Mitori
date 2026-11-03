@@ -1,2 +1,6 @@
 module Shinki
 singleton ShinkiStyle 1.0 ShinkiStyle.qml
+ShinkiButton 1.0 ShinkiButton.qml
+ShinkiHint 1.0 ShinkiHint.qml
+ShinkiScope 1.0 ShinkiScope.qml
+ShinkiTile 1.0 ShinkiTile.qml

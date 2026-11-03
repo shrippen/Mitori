@@ -60,6 +60,9 @@ public:
     static Style startStyle(const QStringList &importPaths);
     static QString controlsStyle(Style style, const QStringList &importPaths);
     static QString startLocale();
+    // Before the first window: Shinki's fonts and the file selector "shinki", so that
+    // app/qml/Look answers with Shinki (its +shinki files); nothing for the other styles.
+    static void prepare(Style style, QQmlEngine *engine);
 
 signals:
     void changed();

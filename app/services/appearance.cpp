@@ -2,7 +2,10 @@
 
 #include <QDir>
 #include <QLocale>
+#include <QDirIterator>
+#include <QFontDatabase>
 #include <QQmlEngine>
+#include <QQmlFileSelector>
 #include <QSettings>
 
 namespace {
@@ -160,4 +163,21 @@ void Appearance::welcome()
     m_welcomed = true;
     QSettings().setValue(QLatin1String(kWelcomedKey), true);
     emit changed();
+}
+
+void Appearance::prepare(Style style, QQmlEngine *engine)
+{
+    if (style != Style::Shinki) {
+        return;
+    }
+#ifdef MITORI_SHINKI_FILES
+    QDirIterator fonts(QStringLiteral(":/shinki/fonts"), {QStringLiteral("*.ttf")});
+    while (fonts.hasNext()) {
+        QFontDatabase::addApplicationFont(fonts.next());
+    }
+    auto *selector = new QQmlFileSelector(engine, engine);
+    selector->setExtraSelectors({QStringLiteral("shinki")});
+#else
+    Q_UNUSED(engine)
+#endif
 }

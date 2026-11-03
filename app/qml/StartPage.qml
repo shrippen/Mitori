@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 import "coursedays.js" as CourseDays
 import "grades.js" as Grades
@@ -11,10 +10,10 @@ import "grades.js" as Grades
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's,
+    // and the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     title: "Mitori 見取り"
 
@@ -55,24 +54,24 @@ Kirigami.ScrollablePage {
             explanation: Programme.errorString
         }
 
-        KanteHintCard {
+        LookHint {
             Layout.fillWidth: true
             visible: Practice.errorString !== ""
-            tier: KanteHintCard.Tier.Red
+            importance: LookHint.Importance.Error
             titleText: qsTr("Ratings are not saved")
             text: Practice.errorString
         }
 
         // A new version of a loaded video bundle (its own hint, apart from the app's updates).
-        KanteHintCard {
+        LookHint {
             objectName: "bundleUpdate"
             Layout.fillWidth: true
             visible: Bundles.updates > 0
-            tier: KanteHintCard.Tier.Blue
+            importance: LookHint.Importance.Info
             titleText: qsTr("New video version")
             text: qsTr("%n video bundle(s) can be updated.", "", Bundles.updates)
 
-            KanteButton {
+            LookButton {
                 text: qsTr("Videos")
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
             }
@@ -86,7 +85,7 @@ Kirigami.ScrollablePage {
             rowSpacing: Kirigami.Units.largeSpacing
             columnSpacing: Kirigami.Units.largeSpacing
 
-            KanteOptionTile {
+            LookTile {
                 id: programmeTile
 
                 readonly property var current: page.disciplineInfo(Programme.discipline)
@@ -94,15 +93,14 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1          // equal columns
                 visible: Programme.errorString === ""
-                checkable: false
-                autoExclusive: false
+                big: true
                 glyph: "技"
                 text: qsTr("Programme")
                 hint: current.title + " · " + current.grade
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ProgrammePage.qml"))
             }
 
-            KanteOptionTile {
+            LookTile {
                 objectName: "todayTile"
 
                 readonly property int due: Practice.revision >= 0 && Practice.intervals.length === 4 && Practice.today.getTime() > 0
@@ -111,15 +109,13 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1          // equal columns
                 visible: Programme.errorString === ""
-                checkable: false
-                autoExclusive: false
                 glyph: "稽"
                 text: qsTr("Practice today")
                 hint: due > 0 ? qsTr("%n due", "", due) : qsTr("all practised")
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("TodayPage.qml"))
             }
 
-            KanteOptionTile {
+            LookTile {
                 objectName: "examTile"
 
                 // Programme.discipline notifies on a new grade too.
@@ -129,15 +125,13 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1          // equal columns
                 visible: Programme.errorString === ""
-                checkable: false
-                autoExclusive: false
                 glyph: "試"
                 text: qsTr("Exam mode")
                 hint: qsTr("Mock exam %1").arg(gradeName)
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ExamPage.qml"))
             }
 
-            KanteOptionTile {
+            LookTile {
                 objectName: "statsTile"
 
                 readonly property int days: Practice.revision >= 0 && Practice.today.getTime() > 0
@@ -146,15 +140,13 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1          // equal columns
                 visible: Programme.errorString === ""
-                checkable: false
-                autoExclusive: false
                 glyph: "記"
                 text: qsTr("Statistics")
                 hint: qsTr("%n practice day(s) in 30 days", "", days)
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("StatsPage.qml"))
             }
 
-            KanteOptionTile {
+            LookTile {
                 objectName: "coursesTile"
 
                 // A planned exam first ("Exam Aikido 4. Kyu in 30 days"), else the next coming
@@ -165,8 +157,6 @@ Kirigami.ScrollablePage {
 
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1          // equal columns
-                checkable: false
-                autoExclusive: false
                 glyph: "講"
                 text: qsTr("Courses")
                 hint: exam.course ? Grades.examText(exam)
@@ -175,27 +165,23 @@ Kirigami.ScrollablePage {
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("CoursesPage.qml"))
             }
 
-            KanteOptionTile {
+            LookTile {
                 objectName: "mapTile"
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1          // equal columns
                 visible: Programme.errorString === ""
-                checkable: false
-                autoExclusive: false
                 glyph: "図"
                 text: qsTr("Technique map")
                 hint: qsTr("Attack × technique")
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("TechniqueMapPage.qml"))
             }
 
-            KanteOptionTile {
+            LookTile {
                 objectName: "glossaryTile"
 
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1          // equal columns
                 visible: Programme.errorString === ""
-                checkable: false
-                autoExclusive: false
                 glyph: "辞"
                 text: qsTr("Glossary")
                 hint: qsTr("Kanji · pronunciation")

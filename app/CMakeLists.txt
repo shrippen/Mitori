@@ -34,12 +34,18 @@ add_custom_command(
     VERBATIM
 )
 
+# Shinki (shinki/README.md) offered in the style choice: only to check it, until every page
+# reaches it through app/qml/Look. Off in every published build.
+option(MITORI_SHINKI "Offer the Shinki style (development only, until the pages use Look)" OFF)
+option(MITORI_BUILD_TESTS "Build the C++ unit tests" OFF)
+
 # The app's QML module, services and resources as a static library: the app and the UI test
 # (tests/tst_ui.cpp) link the same.
 # The version for "About Mitori" (services/appearance) and the application.
 add_compile_definitions(MITORI_VERSION="${PROJECT_VERSION}")
 
 qt_add_library(mitori_app STATIC)
+set_source_files_properties(qml/Look/Look.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_add_qml_module(mitori_app
     URI Mitori
     QML_FILES
@@ -83,6 +89,11 @@ qt_add_qml_module(mitori_app
         qml/StyleChoice.qml
         qml/AppearancePage.qml
         qml/WelcomePage.qml
+        qml/Look/Look.qml
+        qml/Look/LookTile.qml
+        qml/Look/LookHint.qml
+        qml/Look/LookButton.qml
+        qml/Look/LookScope.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -187,6 +198,30 @@ qt_add_resources(mitori_app "kante"
     FILES ${KANTE_FILES}
 )
 
+# Shinki (shinki/, the club newspaper's style) as the QML module "Shinki" with its fonts, and the
+# Look layer's Shinki files (app/qml/Look/+shinki, chosen by the file selector "shinki" at start,
+# Appearance). Only where Shinki can be chosen or is tested: its fonts are 1.3 MB.
+if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
+    file(GLOB SHINKI_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS ../shinki/qml/Shinki/*)
+    qt_add_resources(mitori_app "shinki"
+        PREFIX "/qt/qml/Shinki"
+        BASE ../shinki/qml/Shinki
+        FILES ${SHINKI_FILES}
+    )
+    file(GLOB SHINKI_FONTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS ../shinki/fonts/*.ttf)
+    qt_add_resources(mitori_app "shinki_fonts"
+        PREFIX "/shinki/fonts"
+        BASE ../shinki/fonts
+        FILES ${SHINKI_FONTS}
+    )
+    file(GLOB LOOK_SHINKI RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS qml/Look/+shinki/*.qml)
+    qt_add_resources(mitori_app "look_shinki"
+        PREFIX "/qt/qml/Mitori"
+        FILES ${LOOK_SHINKI}
+    )
+    target_compile_definitions(mitori_app PRIVATE MITORI_SHINKI_FILES)
+endif()
+
 # Monocypher (app/third_party, BSD-2-Clause / CC0): Argon2id, BLAKE2b and XChaCha20-Poly1305 for the
 # video bundles (store/bundlecrypto).
 add_library(monocypher STATIC third_party/monocypher/monocypher.c third_party/monocypher/monocypher.h)
@@ -215,9 +250,6 @@ if(NOT ANDROID)
     set_target_properties(mitori PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
 endif()
 
-# Shinki (shinki/README.md) offered in the style choice: only to check it, until every page
-# reaches it through app/qml/Look. Off in every published build.
-option(MITORI_SHINKI "Offer the Shinki style (development only, until the pages use Look)" OFF)
 if(MITORI_SHINKI)
     target_compile_definitions(mitori_app PRIVATE MITORI_SHINKI)
 endif()
@@ -255,7 +287,6 @@ if(ANDROID)
     endif()
 endif()
 
-option(MITORI_BUILD_TESTS "Build the C++ unit tests" OFF)
 if(MITORI_BUILD_TESTS AND NOT ANDROID)
     enable_testing()
     find_package(Qt6 REQUIRED COMPONENTS Test)
@@ -418,7 +449,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
 
     qt_add_executable(tst_appearance tests/tst_appearance.cpp services/appearance.cpp services/appearance.h)
     target_include_directories(tst_appearance PRIVATE services)
-    target_link_libraries(tst_appearance PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
+    target_link_libraries(tst_appearance PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Test)
     set_target_properties(tst_appearance PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     if(MITORI_SHINKI)
         target_compile_definitions(tst_appearance PRIVATE MITORI_SHINKI)
@@ -437,6 +468,12 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     set_target_properties(tst_ui PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME ui COMMAND tst_ui)
     set_tests_properties(ui PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material")
+    # The same pages as Shinki (shinki/README.md, "Prüfen"); its shots in ui-shots/shinki.
+    add_test(NAME ui_shinki COMMAND tst_ui)
+    set_tests_properties(ui_shinki PROPERTIES ENVIRONMENT
+        "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material;MITORI_TEST_STYLE=shinki")
+    # Both runs share the test data (ui-data): never at the same time.
+    set_tests_properties(ui ui_shinki PROPERTIES RESOURCE_LOCK ui_data)
 endif()
 
 install(TARGETS mitori

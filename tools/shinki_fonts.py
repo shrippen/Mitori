@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Makes Shinki's fonts (shinki/README.md, section 3) for the app: shinki/fonts/*.ttf, each a subset.
+"""Makes Shinki's fonts (shinki/README.md, section 3) for the app: shinki/fonts/*.ttf.
 
   tools/shinki_fonts.py <folder with the fonts of google/fonts (ofl/…)>
 
@@ -21,8 +21,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "shinki" / "fonts"
 
-# Latin, Latin-1, Latin Extended-A/B, general punctuation, € and arrows (→ in texts).
-LATIN = "U+0000-024F,U+02C6-02DC,U+2000-206F,U+20AC,U+2190-21FF,U+2212,U+2264-2265,U+25A0-25FF"
+# Latin, Latin-1, Latin Extended-A/B, general punctuation and €. Crimson Pro has no arrows (→);
+# Qt takes them from a fallback font.
+LATIN = "U+0000-024F,U+02C6-02DC,U+2000-206F,U+20AC,U+2212,U+2264-2265,U+25A0-25FF"
 WHOLE_FONTS = {
     "PT_Sans-Web-Regular.ttf": "PTSans-Regular.ttf",
     "PT_Sans-Web-Bold.ttf": "PTSans-Bold.ttf",
