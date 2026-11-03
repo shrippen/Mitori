@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
-import org.kde.kirigami as Kirigami
 
 // Button (bible section 5, `.btn`): `primary` red, white, bold; else paper with a 1 px frame and
 // ink. Square. Keyboard focus: a 2 px frame in ink (on red: inset in white). `link`: the action
@@ -27,13 +26,10 @@ QQC2.Button {
     contentItem: RowLayout {
         spacing: ShinkiStyle.gridSpace * 2
 
-        Kirigami.Icon {
+        ShinkiIcon {
             visible: button.icon.name !== "" && button.display !== QQC2.AbstractButton.TextOnly
             source: button.icon.name
             color: button.primary ? ShinkiStyle.textOnRed : button.link ? ShinkiStyle.red : ShinkiStyle.ink
-            isMask: true
-            implicitWidth: ShinkiStyle.iconSize
-            implicitHeight: implicitWidth
         }
         QQC2.Label {
             Layout.fillWidth: true

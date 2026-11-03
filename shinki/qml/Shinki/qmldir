@@ -5,6 +5,7 @@ ShinkiChip 1.0 ShinkiChip.qml
 ShinkiGroupHead 1.0 ShinkiGroupHead.qml
 ShinkiHeading 1.0 ShinkiHeading.qml
 ShinkiHint 1.0 ShinkiHint.qml
+ShinkiIcon 1.0 ShinkiIcon.qml
 ShinkiLegend 1.0 ShinkiLegend.qml
 ShinkiLevelDots 1.0 ShinkiLevelDots.qml
 ShinkiLevelPicker 1.0 ShinkiLevelPicker.qml

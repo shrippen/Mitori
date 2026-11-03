@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
-import org.kde.kirigami as Kirigami
 
 // Transport (bible section 5, "Player", `.ctrl` and `.speeds`): back to the start, a frame back,
 // play as a red circle, a frame on, the loop; under it the tempi, the chosen one filled in ink
@@ -72,7 +71,7 @@ FocusScope {
         id: column
 
         anchors.fill: parent
-        spacing: ShinkiStyle.gridSpace * 2
+        spacing: ShinkiStyle.gridSpace
 
         RowLayout {
             Layout.alignment: Qt.AlignHCenter
@@ -110,13 +109,10 @@ FocusScope {
                 }
                 contentItem: Item {
                     // The icon as a mask, white on the red circle.
-                    Kirigami.Icon {
+                    ShinkiIcon {
                         anchors.centerIn: parent
                         source: bar.playing ? "media-playback-pause" : "media-playback-start"
-                        isMask: true
                         color: ShinkiStyle.textOnRed
-                        implicitWidth: ShinkiStyle.iconSize
-                        implicitHeight: implicitWidth
                     }
                 }
             }
@@ -163,6 +159,7 @@ FocusScope {
                     readonly property bool current: Math.abs(bar.speed - modelData) < 0.001
 
                     Layout.fillWidth: true
+                    Layout.preferredWidth: 1        // equal widths (`.speeds span{flex:1}`)
                     implicitHeight: ShinkiStyle.chipMinSpace
                     focusPolicy: Qt.NoFocus
                     text: bar.speedLabel(modelData)

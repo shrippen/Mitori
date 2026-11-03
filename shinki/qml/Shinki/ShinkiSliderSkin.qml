@@ -2,7 +2,7 @@ import QtQuick
 
 // Slider look (bible section 5, "Player"): placed inside a horizontal slider, it hides the
 // style's groove and handle and draws a track of 4 px in `line`, the part up to the value in red
-// and a round knob of 14 px.
+// and a round knob of 14 px. The slider is a row high (44 px, a finger), not the style's height.
 Item {
     id: skin
 
@@ -11,6 +11,13 @@ Item {
     anchors.fill: parent
     opacity: control && control.enabled ? 1 : ShinkiStyle.disabledOpacity
 
+    Binding {
+        target: skin.control
+        property: "implicitHeight"
+        value: ShinkiStyle.rowMinSpace
+        when: skin.control !== null
+        restoreMode: Binding.RestoreBindingOrValue
+    }
     Binding {
         target: skin.control ? skin.control.background : null
         property: "opacity"
