@@ -23,10 +23,10 @@ Kirigami.ScrollablePage {
 
     // The tour: what each part of the app does, in the start menu's order.
     readonly property var tour: [
-        { glyph: "技", title: qsTr("Programme"), text: qsTr("Tap a technique: its place in the exam video plays, slow, in a loop.") },
+        { glyph: "技", title: qsTr("Programme"), text: qsTr("Tap a technique: its place in the exam video plays, slow, in a loop. A note on each technique, with photos and voice notes.") },
         { glyph: "稽", title: qsTr("Practice today"), text: qsTr("The techniques due today, as a training with the videos. Rate each one: how well does it sit?") },
         { glyph: "試", title: qsTr("Exam mode"), text: qsTr("Techniques at random, as in the exam, with or without the video.") },
-        { glyph: "記", title: qsTr("Statistics"), text: qsTr("Your practice days per year and your grades; a note on each technique, with photos and voice notes.") },
+        { glyph: "記", title: qsTr("Statistics"), text: qsTr("Your practice days per year and your grades.") },
         { glyph: "講", title: qsTr("Courses"), text: qsTr("The seminars from the calendar, a notebook for each.") }
     ]
 

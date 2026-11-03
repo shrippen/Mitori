@@ -822,7 +822,6 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // Search: techniques across disciplines and own notes; a result opens the sheet.
     // The sheet from the search: "Enter code" leads to the videos (as from the programme).
     function test_9_search_sheet_code() {
         const page = push("SearchPage")
@@ -843,6 +842,7 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Search: techniques across disciplines and own notes; a result opens the sheet.
     function test_9_search() {
         Practice.addNote(Programme.entries("aikido", "k5").find(r => r.kind === "entry").id, "Kreis größer machen")
         const page = push("SearchPage")

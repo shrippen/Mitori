@@ -213,7 +213,6 @@ QVariantList Programme::practiceEntries(const QString &disciplineId) const
                 continue;
             }
             row[QStringLiteral("current")] = id == chosen;
-            row[QStringLiteral("gradeName")] = gradeMap.value(QStringLiteral("name"));
             result << row;
         }
         if (id == chosen) {
@@ -231,6 +230,7 @@ QVariantList Programme::entries(const QString &disciplineId, const QString &grad
     for (const QVariant &g : findDiscipline(disciplineId).value(QStringLiteral("grade")).toList()) {
         if (g.toMap().value(QStringLiteral("id")).toString() == grade) {
             gradeName = g.toMap().value(QStringLiteral("name")).toString();
+            break;
         }
     }
     QVariantList rows = gradeRows(disciplineId, grade);
