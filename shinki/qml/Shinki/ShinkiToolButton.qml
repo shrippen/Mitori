@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls as QQC2
-import org.kde.kirigami as Kirigami
 
 // Symbol button (bible section 4, `.iconbtn`): the symbol in ink, under the pointer a round
 // `chip` ground. Keyboard focus: a 2 px ring in ink.
@@ -25,14 +24,11 @@ QQC2.ToolButton {
     contentItem: Row {
         spacing: ShinkiStyle.gridSpace
 
-        Kirigami.Icon {
+        ShinkiIcon {
             anchors.verticalCenter: parent.verticalCenter
             visible: button.icon.name !== ""
             source: button.icon.name
-            isMask: true
             color: button.checked ? ShinkiStyle.textOnRed : ShinkiStyle.ink
-            implicitWidth: ShinkiStyle.iconSize
-            implicitHeight: implicitWidth
         }
         QQC2.Label {
             anchors.verticalCenter: parent.verticalCenter

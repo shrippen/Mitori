@@ -130,6 +130,35 @@ TestCase {
         shot("1-start")
     }
 
+    // Under Shinki the symbols on red and on ink are white (bible section 5), on every platform:
+    // the play button and a checked tool button (loop, sound).
+    function test_1c_icons_on_red() {
+        if (!uiShinki) {
+            skip("Shinki only")
+        }
+        const play = createTemporaryQmlObject("import Mitori; LookPlayButton {}", window.contentItem)
+        const loop = createTemporaryQmlObject(
+            "import QtQuick.Controls; import Mitori; LookToolButton { x: 100; checkable: true; checked: true; "
+            + "icon.name: 'media-playlist-repeat'; display: AbstractButton.IconOnly }", window.contentItem)
+        for (const button of [play, loop]) {
+            tryVerify(() => button.width > 0)
+            wait(100)
+            const image = grabImage(button)
+            // The brightest pixel inside the round ground (the corners show the page): white.
+            let lightest = 0
+            const cx = image.width / 2, cy = image.height / 2, r = Math.min(cx, cy) - 3
+            for (let x = 0; x < image.width; x++) {
+                for (let y = 0; y < image.height; y++) {
+                    const c = image.pixel(x, y)
+                    if ((x - cx) * (x - cx) + (y - cy) * (y - cy) < r * r) {
+                        lightest = Math.max(lightest, Math.min(c.r, c.g, c.b))
+                    }
+                }
+            }
+            verify(lightest > 0.9, button + ": the symbol is not white, lightest " + lightest)
+        }
+    }
+
     function test_2_programme() {
         Programme.discipline = "aikido"
         Programme.setGrade("aikido", "k5")
@@ -139,6 +168,16 @@ TestCase {
         // The list scrolls under the grade chips, not over them.
         verify(findChild(page, "programmeScroll").clip, "the list is clipped")
         shot("2-programme-aikido")
+
+        // A tap on the chosen grade keeps it chosen (the chip does not toggle off).
+        const chips = findChild(page, "gradeChips")
+        const k5 = chips.itemAt(page.grades.findIndex(g => g.id === "k5"))
+        mouseClick(k5)
+        compare(page.grade, "k5")
+        verify(k5.checked, "the chosen grade stays checked")
+        for (let i = 0; i < chips.count; i++) {
+            compare(chips.itemAt(i).checked, chips.itemAt(i) === k5, chips.itemAt(i).text)
+        }
 
         Programme.discipline = "shinkitoho"
         page.grade = Programme.grade("shinkitoho")
@@ -550,7 +589,7 @@ TestCase {
         tryVerify(() => page.playing, 10000)
         tryVerify(() => page.position >= page.from && page.position < page.to, 10000)
         wait(1500)
-        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor), "Kante's ground")
+        verify(Qt.colorEqual(page.background.color, Look.backgroundColor), "the style's ground")
         shot("5-player")
         window.width = 900
         window.height = 420

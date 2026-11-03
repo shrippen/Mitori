@@ -32,6 +32,10 @@ QtObject {
     function levelColor(level) {
         return KanteStyle.levelColor(level)
     }
+    // Figures that line up (times, counts).
+    function monoFont(pointSize) {
+        return KanteStyle.monoFont(pointSize)
+    }
     function titleFont(pointSize) {
         return KanteStyle.titleFont(pointSize)
     }

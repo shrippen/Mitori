@@ -67,6 +67,7 @@ Kirigami.Page {
             spacing: Kirigami.Units.smallSpacing
 
             Repeater {
+                objectName: "gradeChips"
                 model: page.grades
 
                 LookChip {
@@ -74,6 +75,8 @@ Kirigami.Page {
 
                     text: modelData.name
                     checkable: true
+                    choice: true        // the page holds the grade: a tap only reports it
+
                     checked: modelData.id === page.grade
                     onClicked: {
                         Programme.setGrade(page.discipline, modelData.id)
@@ -159,7 +162,7 @@ Kirigami.Page {
                         Item {
                             implicitHeight: heading.implicitHeight + Kirigami.Units.largeSpacing * 2
 
-                            LookHeading {
+                            LookGroupHead {
                                 id: heading
 
                                 anchors.left: parent.left
@@ -168,8 +171,8 @@ Kirigami.Page {
                                 anchors.leftMargin: Kirigami.Units.largeSpacing
                                 anchors.rightMargin: Kirigami.Units.largeSpacing
                                 anchors.bottomMargin: Kirigami.Units.smallSpacing
-                                level: 4
-                                text: rowLoader.modelData.title + "  " + rowLoader.modelData.jp
+                                title: rowLoader.modelData.title
+                                japanese: rowLoader.modelData.jp || ""
                             }
                         }
                     }
@@ -212,12 +215,10 @@ Kirigami.Page {
                                     names: Practice.levelNames
                                     color: Look.levelColor(value)     // as in the grade's bar and legend
                                 }
-                                LookToolButton {
+                                LookPlayButton {
                                     visible: entryItem.playable
                                     activeFocusOnTab: false     // Enter on the row: the sheet plays it
-                                    icon.name: "media-playback-start"
                                     text: qsTr("Play")
-                                    display: QQC2.AbstractButton.IconOnly
                                     onClicked: page.play(entryItem.entry)
                                 }
                             }

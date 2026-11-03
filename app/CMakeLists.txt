@@ -103,6 +103,13 @@ qt_add_qml_module(mitori_app
         qml/Look/LookProgressBar.qml
         qml/Look/LookLegend.qml
         qml/Look/LookHeading.qml
+        qml/Look/LookSectionLabel.qml
+        qml/Look/LookTextField.qml
+        qml/Look/LookSliderSkin.qml
+        qml/Look/LookTransportBar.qml
+        qml/Look/LookFocusFollow.qml
+        qml/Look/LookPlayButton.qml
+        qml/Look/LookGroupHead.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
