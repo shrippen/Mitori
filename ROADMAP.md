@@ -107,9 +107,58 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   `tools/bundles.yaml`, Geheimes in `../bundle-geheim`. Offen: Bundles bauen und hochladen (Owner: Zustimmung des
   Verbands), QR-Code scannen, Freischalten auf dem Telefon prüfen (Argon2id mit 64 MiB).
 
-## Offene Punkte (Stand 02.11.2026)
+## Offene Punkte (Stand 03.11.2026)
 
 Kleinigkeiten aus Reviews und Tests, je ein Folge-PR oder beim nächsten Bearbeiten der Datei.
+
+### Wartet auf den Owner
+- KORREKTUREN.md: Entscheidungen erst einarbeiten, wenn der Owner fertig ist (03.11.: „noch nicht fertig“).
+  Konkrete Antworten bisher: A-X-04 (Futari-/San'nin-gake ohne Zusatz, ändert IDs), A-D-11, D-D-01, D-D-07,
+  D-K-02; S-02 und S-12 ohne Antwort; viele „Als Frage an Sensei notieren“.
+- Android: „Bildschirm an“ (FLAG_KEEP_SCREEN_ON) nur gebaut, nicht am Telefon geprüft.
+- Landkarte: Varianten eines Platzes einzeln erreichbar? (unten, „Von früher“)
+- Bundle-Manifest auf Gitea fehlt (404 beim Start: `mitori-manifest/1/manifest.json`).
+
+### Fehler (Test zuerst)
+- Zurück-Taste (Android, Alt+Links → goBack) lässt den Player im Stapel, er spielt unsichtbar weiter (Review #64).
+  PlayerPage.onBackRequested: `event.accepted` kommt in Qt 6.12 nicht an (Kopie) → wie ExamEndPage per
+  callLater `leave()`.
+- Shinki, Tablet 1920×1080: Bedienelemente des Players scrollen 7 px (459 von 452), Regel „Bild mindestens halb“
+  (Review #64).
+- CoursePage-Fußleiste gelb in 16b/16c (beide Stile, #57).
+- `start.sh` beendete sich beim ersten Lauf am 03.11. nach <10 s mit Exit 0 ohne Meldung (zweiter Lauf normal);
+  beobachten.
+
+### Look / Shinki
+- TechniqueMapPage noch ohne Look: ShinkiHeatGrid nötig (KanteHeatGrid, 925 Zeilen).
+- LookPageTitle ungenutzt (seit dem Shinki-Kopf): entfernen oder einsetzen.
+- Tokens für Knopfgröße, Icon, deaktivierte Deckkraft, Titelschrift; Hinweis-Aktion rot fett; japaneseFont
+  pointSize/pixelSize; Bibel-Skizze Look.mutedText (#50).
+- Shinki: Chip, LevelPicker, Play-Kreis, Gruppenkopf jp, Stand im Chip (#52).
+- ExamBoard Grundgröße 10 unter Shinki (Größe aus ShinkiStyle); ShinkiSettingRow/KanteSettingRow resetText
+  deutsch fest (#55).
+- Karten-Innenabstand als Look-Rolle (Shinki cardSpace 12) statt largeSpacing (#57).
+- ShinkiBarChart: Grundlinie gleich Raster (Z. 258), gleiche Zweige (Z. 563), rohe Alphas 0.85/0.92 als Token;
+  Toast-Rotstreifen in die Bibel (#59).
+- Diagramm-Auslese hell (paper 92 %) gegen Bibel (Tooltip ink 92 %): angleichen (#60).
+- qmllint: Singleton-Meldungen; tst_ui prüft Look.shinki im ui_shinki-Lauf (#50).
+- ctest-Lauf ui_shinki zusätzlich unter org.kde.desktop + BreezeDark (Kontrast im Dialog, #56).
+
+### Kante
+- KanteChip `checked = !checked` bricht die Bindung (#52) → Kante-PR mit Test.
+- KanteHeading horizontalAlignment im Overlay (#117); Screenshots im Kante-Changelog fehlen seit 1.65.
+- KanteScope im KanteDialog erreicht ein eigenes contentItem nicht; Binding loop implicitWidth in tst_kante143
+  (Fusion, Dialog ohne Inhalt); KanteDialogSkin/SheetSkin Scope als Eigenschaft ohne Fenster (#119).
+
+### Aufräumen
+- ExamEndPage.qml:84 `contentHeight` am discardDialog überflüssig seit Kante 1.71 (#63).
+- daten.py `korrekturen()`: Tabelle mit ID-Kopf ohne Spalte „Status“ eigens melden (#65).
+- WelcomePage.qml:29 Notiz-Satz von „Statistics“ nach „Programme“ (#46).
+- shinki_fonts.py Docstring „each a subset“, Pfeil-Kommentar; ROADMAP „Schriften (Teilmengen)“ (#47).
+- tst_ui: Kommentar über test_9_search_sheet_code verschieben; programme.cpp practiceEntries gradeName doppelt,
+  break in entries() (#49).
+
+### Von früher
 
 - **Landkarte**: Varianten eines Platzes (z. B. Ikkyo und Ikkyo ura) sind nur über das erste Blatt erreichbar:
   Frage an den Owner, ob sie einzeln erreichbar sein sollen. Datenfragen A-X-04 und D-D-08 (`KORREKTUREN.md`):
