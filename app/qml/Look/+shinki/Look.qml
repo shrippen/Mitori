@@ -20,6 +20,9 @@ QtObject {
     readonly property color stageColor: ShinkiStyle.video
     readonly property color stageTextColor: ShinkiStyle.videoText
     readonly property int borderWidth: ShinkiStyle.lineWidth
+    // The keyboard focus frame: 2 px ink, apart from red (chosen).
+    readonly property color focusColor: ShinkiStyle.ink
+    readonly property int focusWidth: ShinkiStyle.focusWidth
 
     readonly property font defaultFont: Qt.font({ family: ShinkiStyle.uiFamily, pixelSize: ShinkiStyle.uiSize })
     readonly property font smallFont: Qt.font({ family: ShinkiStyle.uiFamily, pixelSize: ShinkiStyle.smallSize })

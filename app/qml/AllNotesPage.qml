@@ -229,8 +229,8 @@ Kirigami.Page {
                         padding: Kirigami.Units.smallSpacing
                         background: Rectangle {
                             color: Look.cardColor
-                            border.width: noteItem.current ? Look.borderWidth : 0
-                            border.color: Look.accentColor
+                            border.width: noteItem.current ? Look.focusWidth : 0
+                            border.color: Look.focusColor
                         }
                     }
 

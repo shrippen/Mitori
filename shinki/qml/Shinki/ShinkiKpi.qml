@@ -16,6 +16,8 @@ Column {
 
     readonly property int sense: trend * good
 
+    onTrendChanged: arrow.requestPaint()
+
     spacing: ShinkiStyle.gridSpace
 
     Accessible.role: Accessible.StaticText

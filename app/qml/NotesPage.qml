@@ -151,8 +151,8 @@ Kirigami.ScrollablePage {
                             activeFocusOnTab: true
                             background: Rectangle {
                                 color: Look.cardColor
-                                border.width: noteItemLabel.activeFocus ? Look.borderWidth : 0
-                                border.color: Look.accentColor
+                                border.width: noteItemLabel.activeFocus ? Look.focusWidth : 0
+                                border.color: Look.focusColor
                             }
                             Accessible.role: Accessible.Button
                             Accessible.name: text

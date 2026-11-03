@@ -839,6 +839,12 @@ TestCase {
         shot("8-notes")
         const note = findChild(page, "note")
         verify(note)
+        // Tab to a note: the style's focus frame (Shinki: 2 px ink, not red, which means chosen).
+        note.forceActiveFocus(Qt.TabFocusReason)
+        if (uiShinki) {
+            verify(Qt.colorEqual(note.background.border.color, Look.textColor), "focus in ink: " + note.background.border.color)
+            verify(note.background.border.width >= 2, "focus 2 px: " + note.background.border.width)
+        }
         mousePress(note, 20, note.height / 2)
         wait(1000)
         mouseRelease(note, 20, note.height / 2)

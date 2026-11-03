@@ -234,7 +234,7 @@ Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Contr
   beim Start setzt (der Stil wechselt ohnehin erst nach dem Neustart); kein Loader, keine Weiterleitung jeder
   Eigenschaft. Die `+shinki`-Dateien stehen in den Ressourcen, nicht als QML-Typen (sonst gälte die letzte
   Datei des qmldir). Dazu kommt das Singleton `Look` mit den Rollen und Schriften, die Seiten heute direkt aus
-  `KanteStyle` lesen: Grund, Karte, Bühne, Text, Nebentext, deaktiviert, Akzent, positiv, negativ, Linien,
+  `KanteStyle` lesen: Grund, Karte, Bühne, Text, Nebentext, deaktiviert, Akzent, Fokus, positiv, negativ, Linien,
   `levelColor`, die kleine, japanische und Titelschrift. Unter Shinki bildet `+shinki/Look.qml` sie auf
   `ShinkiStyle` ab.
 - **Übergang.** Die Seiten ziehen Baustein für Baustein von `Kante…` auf `Look…` um, angefangen bei
