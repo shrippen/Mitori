@@ -81,6 +81,8 @@ TestCase {
         const steps = findChild(page, "welcomeSteps")
         const next = findChild(page, "welcomeNext")
         compare(steps.currentIndex, 0)
+        // Screen readers hear the steps' states in the app's language, not Kante's German default.
+        compare(findChild(page, "welcomeStepper").stateNames.current, "current")
         shot("0-welcome")
         next.clicked()
         compare(steps.currentIndex, 1)

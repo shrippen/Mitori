@@ -109,6 +109,7 @@ QtObject {
     readonly property real sheetShadowOpacity: 0.18
     readonly property real inkMaxOpacity: 0.1
     readonly property real tooltipOpacity: 0.92
+    readonly property real chartLabelOpacity: 0.85
     readonly property real videoChipOpacity: 0.55
     readonly property real videoLineOpacity: 0.3
     readonly property real savedFlashOpacity: 0.14

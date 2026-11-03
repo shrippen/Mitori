@@ -2724,7 +2724,7 @@
     <name>WelcomePage</name>
     <message>
         <location filename="../qml/WelcomePage.qml" line="18"/>
-        <location filename="../qml/WelcomePage.qml" line="50"/>
+        <location filename="../qml/WelcomePage.qml" line="51"/>
         <source>Welcome</source>
         <translation>Willkommen</translation>
     </message>
@@ -2784,47 +2784,67 @@
         <translation>Überspringen</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="50"/>
+        <location filename="../qml/WelcomePage.qml" line="51"/>
         <source>Style</source>
         <translation>Stil</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="50"/>
+        <location filename="../qml/WelcomePage.qml" line="51"/>
         <source>Tour</source>
         <translation>Rundgang</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="52"/>
+        <location filename="../qml/WelcomePage.qml" line="53"/>
         <source>Step %1 of %2</source>
         <translation>Schritt %1 von %2</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="71"/>
+        <location filename="../qml/WelcomePage.qml" line="54"/>
+        <source>done</source>
+        <translation>erledigt</translation>
+    </message>
+    <message>
+        <location filename="../qml/WelcomePage.qml" line="54"/>
+        <source>current</source>
+        <translation>aktuell</translation>
+    </message>
+    <message>
+        <location filename="../qml/WelcomePage.qml" line="54"/>
+        <source>to come</source>
+        <translation>offen</translation>
+    </message>
+    <message>
+        <location filename="../qml/WelcomePage.qml" line="54"/>
+        <source>skipped</source>
+        <translation>übersprungen</translation>
+    </message>
+    <message>
+        <location filename="../qml/WelcomePage.qml" line="73"/>
         <source>Mitori means learning by watching. Here are the exam programmes of Aikido Shinki Rengo, Daitoryu and Itto-den Shinki Toho, with the exam videos of the DVDs: watch, practise, rate, note.</source>
         <translation>Mitori heißt Lernen durch Zuschauen. Hier stehen die Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho, mit den Prüfungsvideos der DVDs: zusehen, üben, einschätzen, notieren.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="81"/>
+        <location filename="../qml/WelcomePage.qml" line="83"/>
         <source>How should Mitori look? You can change it later in Settings → Appearance.</source>
         <translation>Wie soll Mitori aussehen? Später lässt es sich unter Einstellungen → Darstellung ändern.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="91"/>
+        <location filename="../qml/WelcomePage.qml" line="93"/>
         <source>The style changes when Mitori starts again.</source>
         <translation>Der Stil ändert sich, wenn Mitori neu startet.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="146"/>
+        <location filename="../qml/WelcomePage.qml" line="148"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="154"/>
+        <location filename="../qml/WelcomePage.qml" line="156"/>
         <source>Next</source>
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="154"/>
+        <location filename="../qml/WelcomePage.qml" line="156"/>
         <source>Start</source>
         <translation>Los</translation>
     </message>

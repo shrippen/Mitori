@@ -46,10 +46,12 @@ Kirigami.ScrollablePage {
         spacing: Look.unit(12)
 
         LookSteps {
+            objectName: "welcomeStepper"
             Layout.fillWidth: true
             model: [qsTr("Welcome"), qsTr("Style"), qsTr("Tour")]
             current: page.step
             stepText: qsTr("Step %1 of %2")
+            stateNames: ({ done: qsTr("done"), current: qsTr("current"), upcoming: qsTr("to come"), skipped: qsTr("skipped") })
         }
 
         StackLayout {
