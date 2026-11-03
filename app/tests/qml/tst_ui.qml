@@ -258,6 +258,13 @@ TestCase {
         shot("1f-shinki-head", true)
         mouseClick(back)
         tryCompare(window.pageStack, "depth", 1)
+
+        // Back by key (goBack) keeps the page ahead; the head names the page before the current.
+        push("CoursesPage")
+        window.pageStack.goBack()
+        tryCompare(window.pageStack, "currentIndex", 0)
+        compare(head.title, "Mitori")
+        verify(!back.enabled, "no way back from the start menu")
     }
 
     function test_2_programme() {
@@ -1919,7 +1926,11 @@ TestCase {
         const asked = findChild(end, "discardDialog")
         const before = Practice.rounds("aikido", 8).length
         end.rate(0, 4)
-        window.pageStack.goBack()
+        if (uiShinki) {
+            mouseClick(findChild(window, "headBack"))      // Shinki's head asks the page as well
+        } else {
+            window.pageStack.goBack()
+        }
         tryVerify(() => asked.opened)
         verify(window.pageStack.currentItem === end, "still rating")
         shot("13b-exam-discard", true)

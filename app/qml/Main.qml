@@ -39,11 +39,24 @@ Kirigami.ApplicationWindow {
     pageStack.globalToolBar.style: Look.shinki ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
     header: LookHead {
         objectName: "lookHead"
-        page: root.pageStack.currentItem
-        backTitle: root.pageStack.depth > 1 && root.pageStack.get(root.pageStack.depth - 2)
-                   ? root.pageStack.get(root.pageStack.depth - 2).title || "" : ""
+        page: root.pageStack.currentItem as Kirigami.Page
+        // The page before the current one (back by key keeps the pages ahead).
+        backTitle: root.pageStack.currentIndex > 0 ? root.pageStack.get(root.pageStack.currentIndex - 1).title || "" : ""
         moreText: qsTr("More")
-        onBack: root.pageStack.pop()
+        onBack: root.back()
+    }
+
+    // Back from Shinki's head: as the Back key (goBack, the page may ask first), then the page
+    // left is dropped (a player stops at once). A page that asks takes the stack back a moment
+    // later (ExamEndPage, Qt.callLater before this one); then it stays.
+    function back() {
+        const leaving = root.pageStack.currentIndex
+        root.pageStack.goBack()
+        Qt.callLater(() => {
+            if (root.pageStack.currentIndex < leaving) {
+                root.pageStack.pop(root.pageStack.currentItem)
+            }
+        })
     }
     pageStack.initialPage: StartPage {}
     // The first start: the wizard over the start menu (it goes back there).
