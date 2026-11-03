@@ -373,6 +373,17 @@ TestCase {
         verify(headings.every(h => !h.text.startsWith("#")), headings.map(h => h.text).join(" | "))
         verify(findChildren(page, "commentParagraph").every(p => !p.text.startsWith("#")))
         compare(findChild(page, "commentTitle").text, all[0].comment.titel)
+        // A long title wraps, also where Kante draws it (Kante 1.68), never ends in "…".
+        const long = Programme.entries("shinkitoho", Programme.grades("shinkitoho").find(g => Programme.entries("shinkitoho", g.id)
+                         .some(r => r.comment && r.comment.titel.length > 60)).id).find(r => r.comment && r.comment.titel.length > 60)
+        const longPage = push("CommentPage", { entry: long })
+        const title = findChild(longPage, "commentTitle")
+        // The text Kante draws over the hidden original: the child label with the same text.
+        const drawn = Array.from(title.children).find(c => c.text === title.text && c.lineCount !== undefined)
+        tryVerify(() => title.width <= longPage.width, 2000, "the title stays in the page: " + title.width)
+        verify(!drawn || !drawn.visible || (!drawn.truncated && drawn.lineCount > 1), long.comment.titel)
+        verify(!title.truncated)
+        window.pageStack.pop()
         shot("4-comment-headings")
         window.pageStack.pop()
     }
