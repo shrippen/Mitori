@@ -94,6 +94,15 @@ qt_add_qml_module(mitori_app
         qml/Look/LookHint.qml
         qml/Look/LookButton.qml
         qml/Look/LookScope.qml
+        qml/Look/LookSegmented.qml
+        qml/Look/LookChip.qml
+        qml/Look/LookListRow.qml
+        qml/Look/LookLevelDots.qml
+        qml/Look/LookToolButton.qml
+        qml/Look/LookLevelPicker.qml
+        qml/Look/LookProgressBar.qml
+        qml/Look/LookLegend.qml
+        qml/Look/LookHeading.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp

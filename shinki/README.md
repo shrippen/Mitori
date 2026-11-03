@@ -171,6 +171,7 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
 - **Knopf** (`.btn`)
   - Hauptknopf: rot gefüllt, weiß, 15 px fett, volle Breite im Blatt.
   - Zweitknopf: weiß mit 1 px Rahmen, Text `ink`.
+  - Symbol 18 px; deaktiviert mit 50 % Deckkraft.
 - **Feld** (`.qnote input`): `paperAlt`, 1 px Rahmen, Notizen in Crimson Pro 15 px. Im Fokus wird der Rahmen 2 px `ink`.
 - **Schalter**: eckige Bahn; aus heißt `line`, an heißt `red`, der Knopf ist weiß. An und Aus unterscheidet auch die Seite des Knopfes.
 - **Hinweis** (`.novid`, `.sheet .hint`): `chip`-Fläche, Text 12,5 px `inkMuted`, die Aktion rot und fett am Ende.
@@ -196,7 +197,7 @@ ab, und keiner wird für den anderen geändert. Dazwischen liegt in Mitori eine 
 oder Shinki.
 
 ```
-Seiten (app/qml)        Look.levelColor(3), Look.mutedText, LookTile { … }, LookSegmented { … }
+Seiten (app/qml)        Look.levelColor(3), Look.mutedTextColor, LookTile { … }, LookSegmented { … }
    │
 Look (app/qml/Look)     wählt je Stil:   Kante ─────────────── Shinki
    │                                     app/qml/Kante          shinki/qml/Shinki

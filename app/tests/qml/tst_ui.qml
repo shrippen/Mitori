@@ -115,6 +115,8 @@ TestCase {
 
     function test_1_start() {
         compare(Programme.errorString, "")
+        // The run's style reached Look (the file selector "shinki" in ui_shinki).
+        compare(Look.shinki, uiShinki)
         compare(window.pageStack.currentItem.title, "Mitori 見取り")
         // The tiles in the decided order: Today, Exam, Statistics, Courses (clickdummy "Startmenü").
         const start = window.pageStack.currentItem

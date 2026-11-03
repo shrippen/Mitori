@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // Technique sheet (clickdummy "Programm", row tapped): name, attack, kanji, how well it sits
@@ -36,7 +35,7 @@ Kirigami.Dialog {
     padding: Kirigami.Units.largeSpacing
 
     // Not a content child: the dialog's scroll view sizes itself by its only child, the column.
-    property Item kanteScope: KanteScope { target: sheet.contentItem }
+    property Item lookScope: LookScope { target: sheet.contentItem }
 
     // Up/Down, Page Up/Down, Home and End scroll a sheet taller than the window (the Kamae
     // exercise on a phone); the mouse wheel does already. From the content and from the header
@@ -80,10 +79,10 @@ Kirigami.Dialog {
             Layout.fillWidth: true
             text: [sheet.entry.attack, sheet.entry.attackExtra, sheet.entry.gradeName].filter(x => !!x).join(" · ")
             visible: text !== ""
-            color: KanteStyle.disabledTextColor
+            color: Look.disabledTextColor
             wrapMode: Text.Wrap
         }
-        KanteHeading {
+        LookHeading {
             Layout.fillWidth: true
             visible: !!sheet.entry.jp
             level: 2
@@ -108,13 +107,13 @@ Kirigami.Dialog {
                                : Media.kind(sheet.lastNote.media || "") === Media.Kind.Voice ? qsTr("Voice note") : ""))
             visible: shown !== ""
             text: shown === "" ? "" : qsTr("Last note, %1: %2").arg(sheet.lastNote.created.toLocaleDateString(Qt.locale(), Locale.ShortFormat)).arg(shown)
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
             maximumLineCount: 3
             elide: Text.ElideRight
         }
         // Without the video: no video for this grade at all, or one to load with the DVD's code.
-        KanteHintCard {
+        LookHint {
             objectName: "sheetNoVideo"
             Layout.fillWidth: true
             Layout.topMargin: Kirigami.Units.largeSpacing
@@ -122,7 +121,7 @@ Kirigami.Dialog {
             titleText: sheet.entry.video ? qsTr("Video not loaded. The DVD's code loads it onto the device.")
                                     : qsTr("There is no video of this technique.")
 
-            KanteButton {
+            LookButton {
                 objectName: "sheetCodeButton"
                 visible: !!sheet.entry.video
                 text: qsTr("Enter code")
@@ -136,14 +135,14 @@ Kirigami.Dialog {
             Layout.topMargin: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.smallSpacing
 
-            KanteButton {
+            LookButton {
                 visible: sheet.hasVideo
-                emphasis: KanteButton.Emphasis.Primary
+                role: LookButton.Role.Primary
                 icon.name: "media-playback-start"
                 text: qsTr("Watch video")
                 onClicked: sheet.playRequested(sheet.entry)
             }
-            KanteButton {
+            LookButton {
                 objectName: "sheetNotesButton"
                 icon.name: "view-pim-notes"
                 text: sheet.noteCount > 0 ? qsTr("Notes (%1)").arg(sheet.noteCount) : qsTr("Notes")
@@ -152,7 +151,7 @@ Kirigami.Dialog {
                     sheet.notesRequested(sheet.entry)
                 }
             }
-            KanteButton {
+            LookButton {
                 visible: sheet.hasComment
                 icon.name: "documentinfo"
                 text: qsTr("Comment")

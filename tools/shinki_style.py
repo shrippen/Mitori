@@ -102,6 +102,8 @@ def generate(tokens):
         else:
             lines.append(f"    readonly property int {name}Size: {scaled(value)}")
     lines.append(f"    readonly property int lineWidth: Math.max(1, {scaled(tokens['line'])})")
+    lines.append(f"    // The column's letter spacing, in em (\"Sperrung 0,1 em\").")
+    lines.append(f"    readonly property real columnTracking: {tokens['columnTracking']}")
     lines.append(f"    readonly property int selectedBarWidth: {scaled(tokens['selectedBar'])}")
     lines.append(f"    readonly property int focusWidth: {scaled(tokens['focusWidth'])}")
 

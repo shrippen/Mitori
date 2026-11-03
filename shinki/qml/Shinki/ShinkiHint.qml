@@ -60,11 +60,19 @@ Item {
             font.pixelSize: ShinkiStyle.hintSize
             wrapMode: Text.Wrap
         }
+        // The actions read as links: red and bold (`.novid b`).
         RowLayout {
             id: actionRow
 
             visible: children.length > 0
             spacing: ShinkiStyle.gridSpace * 2
+            onChildrenChanged: {
+                for (const child of children) {
+                    if (child.link !== undefined) {
+                        child.link = true
+                    }
+                }
+            }
         }
     }
 }
