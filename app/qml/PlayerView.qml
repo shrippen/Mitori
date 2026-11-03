@@ -5,11 +5,10 @@ import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import QtMultimedia
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // The player (clickdummy "Player" and "Querformat"): the technique's chapter of the exam video,
-// without the black bars, in a loop by default; Kante's transport bar with four tempi (sound off
+// without the black bars, in a loop by default; the style's transport bar with four tempi (sound off
 // below 100 %) and single frames; double tap left/right = 2 s back/on. Landscape: the controls in
 // a column on the right. PlayerPage shows it as a page; on a tablet the programme shows it beside
 // the list (`compact`: picture above the controls, no Back). Swipe up/down on the left half of
@@ -188,7 +187,7 @@ Item {
 
             Rectangle {
                 anchors.fill: parent
-                color: KanteStyle.stageColor
+                color: Look.stageColor
             }
 
             Item {
@@ -216,9 +215,9 @@ Item {
                 anchors.top: parent.top
                 anchors.margins: Kirigami.Units.largeSpacing
                 text: page.current.title + (page.current.attack ? "  ·  " + page.current.attack : "")
-                color: KanteStyle.stageTextColor
+                color: Look.stageTextColor
                 style: Text.Outline
-                styleColor: KanteStyle.stageColor
+                styleColor: Look.stageColor
             }
 
             // Swipe: brightness (left half) or volume (right half), shown while the finger moves.
@@ -259,11 +258,11 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     text: (swipe.level === Levels.Level.Brightness ? qsTr("Brightness %1 %") : qsTr("Volume %1 %"))
                           .arg(Math.round(parent.value * 100))
-                    color: KanteStyle.stageTextColor
+                    color: Look.stageTextColor
                     style: Text.Outline
-                    styleColor: KanteStyle.stageColor
+                    styleColor: Look.stageColor
                 }
-                KanteProgressBar {
+                LookProgressBar {
                     Layout.fillWidth: true
                     value: parent.value
                 }
@@ -303,7 +302,7 @@ Item {
             }
             onHeightChanged: Qt.callLater(showFocusedField)
             // Tab below the edge (the small player beside the list): the column follows the focus.
-            readonly property KanteFocusFollow focusFollow: KanteFocusFollow { flickable: controlsView }
+            readonly property LookFocusFollow focusFollow: LookFocusFollow { flickable: controlsView }
 
             ColumnLayout {
                 id: controls
@@ -322,7 +321,7 @@ Item {
                 }
 
                 // First, so a phone held sideways shows them without scrolling the column.
-                KanteToolButton {
+                LookToolButton {
                     objectName: "backButton"
                     visible: page.landscape
                     icon.name: "go-previous-view"
@@ -330,15 +329,15 @@ Item {
                     onClicked: page.backRequested()
                 }
 
-                KanteHintCard {
+                LookHint {
                     objectName: "trainingDone"
                     Layout.fillWidth: true
                     visible: page.trainingDone
-                    tier: KanteHintCard.Tier.Blue
+                    importance: LookHint.Importance.Info
                     titleText: qsTr("Done")
                     text: qsTr("%n technique(s) practised today. They count as a practice day in the statistics.", "", page.practisedCount)
 
-                    KanteButton {
+                    LookButton {
                         visible: !page.compact && !page.landscape     // sideways Back stands above
                         text: qsTr("Back")
                         onClicked: page.backRequested()
@@ -350,12 +349,12 @@ Item {
                     Layout.fillWidth: true
                     visible: !page.landscape && page.placeText !== ""
                     text: page.placeText
-                    color: KanteStyle.disabledTextColor
+                    color: Look.disabledTextColor
                     wrapMode: Text.Wrap
                 }
 
                 // Without a video: the technique's name and what to do (the training goes on).
-                KanteHintCard {
+                LookHint {
                     objectName: "noVideoCard"
                     Layout.fillWidth: true
                     visible: !page.hasVideo
@@ -376,10 +375,10 @@ Item {
                     onMoved: player.position = value
                     Accessible.name: qsTr("Position")
 
-                    KanteSliderSkin { control: timeline }
+                    LookSliderSkin { control: timeline }
                 }
 
-                KanteTransportBar {
+                LookTransportBar {
                     id: transport
 
                     objectName: "transportBar"
@@ -416,7 +415,7 @@ Item {
                     Layout.fillWidth: true
                     visible: page.hasVideo
 
-                    KanteToolButton {
+                    LookToolButton {
                         objectName: "soundSwitch"
                         // On only where it sounds: slow motion is always silent.
                         readonly property bool sounds: Levels.sound && player.playbackRate >= 1
@@ -430,7 +429,7 @@ Item {
                             Levels.setSound(Levels.sound ? Levels.Switch.Off : Levels.Switch.On)
                         }
                     }
-                    KanteToolButton {
+                    LookToolButton {
                         objectName: "awakeSwitch"
                         checkable: true
                         checked: Levels.awake
@@ -447,7 +446,7 @@ Item {
                 }
 
                 // Beside the list on a tablet the sheet does not open: the comment is here.
-                KanteButton {
+                LookButton {
                     objectName: "commentButton"
                     visible: page.compact && !!page.current.comment
                     icon.name: "documentinfo"
@@ -471,7 +470,7 @@ Item {
                     Layout.fillWidth: true
                     visible: !page.landscape
 
-                    KanteToolButton {
+                    LookToolButton {
                         enabled: page.index > 0
                         icon.name: "media-skip-backward"
                         text: qsTr("Previous technique")
@@ -480,7 +479,7 @@ Item {
                     Item {
                         Layout.fillWidth: true
                     }
-                    KanteToolButton {
+                    LookToolButton {
                         enabled: page.index < page.playlist.length - 1
                         icon.name: "media-skip-forward"
                         text: qsTr("Next technique")
@@ -495,7 +494,7 @@ Item {
                     visible: page.training
                     spacing: 0
 
-                    KanteSectionLabel {
+                    LookSectionLabel {
                         Layout.fillWidth: true
                         rule: true
                         text: qsTr("Today's playlist · %1 of %2 practised").arg(page.practisedCount).arg(page.playlist.length)
@@ -503,7 +502,7 @@ Item {
                     Repeater {
                         model: page.training ? page.playlist : []
 
-                        KanteListRow {
+                        LookListRow {
                             id: trainingRow
 
                             required property var modelData
@@ -518,7 +517,7 @@ Item {
                             subtitle: [modelData.attack, modelData.gradeName].filter(x => !!x).join(" · ")
                             trailing: QQC2.Label {
                                 text: trainingRow.done ? "✓" : ""
-                                color: KanteStyle.positiveTextColor
+                                color: Look.positiveTextColor
                                 Accessible.name: trainingRow.done ? qsTr("practised") : ""
                             }
                             onClicked: page.index = trainingRow.index

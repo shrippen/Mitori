@@ -18,6 +18,8 @@ import "."
  * the text colour and the square gets a frame (`nearGround`, as KanteSwatch). The cross has a
  * touch target of 32 units without making the chip bigger.
  *   interactive  false: a plain label (a state, a topic): no focus, no tap, no hover
+ *   choice       (1.69) one of a set the app holds (a grade): a tap only emits `clicked`, and
+ *                `checked` stays the app's binding (a filter toggles itself and breaks it)
  *   toolTip      shown on hover (a full path behind a short name); without it the name is the
  *                tooltip only while it is elided
  */
@@ -33,6 +35,7 @@ Item {
     property bool compact: false
     property string removeText: qsTr("Remove %1")
     property bool interactive: true
+    property bool choice: false
     property string toolTip: ""
     readonly property bool hovered: hover.hovered
     signal clicked()
@@ -65,7 +68,7 @@ Item {
     }
 
     function activate() {
-        if (checkable) {
+        if (checkable && !choice) {
             checked = !checked
         }
         clicked()

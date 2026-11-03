@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 
 // The description of a sequence (the Kamae exercise of Shinki Toho): its positions in order,
 // numbered, with their kanji. Seigan comes twice (KORREKTUREN S-09). Hidden without steps.
@@ -21,7 +20,7 @@ ColumnLayout {
     visible: steps.length > 0
     spacing: Kirigami.Units.smallSpacing
 
-    KanteSectionLabel {
+    LookSectionLabel {
         Layout.fillWidth: true
         rule: true
         text: qsTr("Positions in one flow")
@@ -45,8 +44,8 @@ ColumnLayout {
                 Layout.minimumWidth: Kirigami.Units.gridUnit * 1.5
                 horizontalAlignment: Text.AlignRight
                 text: step.index + 1
-                font: KanteStyle.monoFont(Kirigami.Theme.smallFont.pointSize)
-                color: KanteStyle.mutedTextColor
+                font: Look.monoFont(Kirigami.Theme.smallFont.pointSize)
+                color: Look.mutedTextColor
             }
             QQC2.Label {
                 Layout.fillWidth: true
@@ -55,8 +54,8 @@ ColumnLayout {
             }
             QQC2.Label {
                 text: step.modelData.jp
-                font: KanteStyle.japaneseFont()
-                color: KanteStyle.mutedTextColor
+                font: Look.japaneseFont()
+                color: Look.mutedTextColor
             }
         }
     }

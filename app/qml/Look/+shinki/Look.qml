@@ -30,6 +30,11 @@ QtObject {
     function levelColor(level) {
         return ShinkiStyle.levelColor(level)
     }
+    // Figures in the bible's face with table figures (Shinki has no mono face).
+    function monoFont(pointSize) {
+        return pointSize > 0 ? Qt.font({ family: ShinkiStyle.uiFamily, pointSize: pointSize, features: { "tnum": 1 } })
+                             : Qt.font({ family: ShinkiStyle.uiFamily, pixelSize: ShinkiStyle.smallSize, features: { "tnum": 1 } })
+    }
     // Titles in the book face (Crimson Pro), as the sheet and player titles of the bible; without
     // a size the player title's.
     function titleFont(pointSize) {

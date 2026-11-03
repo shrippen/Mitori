@@ -140,6 +140,16 @@ TestCase {
         verify(findChild(page, "programmeScroll").clip, "the list is clipped")
         shot("2-programme-aikido")
 
+        // A tap on the chosen grade keeps it chosen (the chip does not toggle off).
+        const chips = findChild(page, "gradeChips")
+        const k5 = chips.itemAt(page.grades.findIndex(g => g.id === "k5"))
+        mouseClick(k5)
+        compare(page.grade, "k5")
+        verify(k5.checked, "the chosen grade stays checked")
+        for (let i = 0; i < chips.count; i++) {
+            compare(chips.itemAt(i).checked, chips.itemAt(i) === k5, chips.itemAt(i).text)
+        }
+
         Programme.discipline = "shinkitoho"
         page.grade = Programme.grade("shinkitoho")
         compare(page.grade, "shoden")

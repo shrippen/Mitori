@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
-import Kante
 import Mitori
 
 // The last note on a technique and a field for a new one (player); "Notes" opens them all.
@@ -42,7 +41,7 @@ ColumnLayout {
     // Leaving the player (Back, the training's Done card) keeps the draft too.
     Component.onDestruction: keepDraft()
 
-    spacing: KanteStyle.unit(6)
+    spacing: Look.unit(6)
 
     // A photo or voice note without text is named as such.
     function noteText(note) {
@@ -61,7 +60,7 @@ ColumnLayout {
         Layout.fillWidth: true
         visible: noteRow.today.length > 0
         text: qsTr("Noted today: %1").arg(noteRow.today.map(n => noteRow.noteText(n)).join(" · "))
-        color: KanteStyle.mutedTextColor
+        color: Look.mutedTextColor
         wrapMode: Text.Wrap
         maximumLineCount: 4
         elide: Text.ElideRight
@@ -71,7 +70,7 @@ ColumnLayout {
         readonly property string shown: noteRow.today.length > 0 ? "" : noteRow.noteText(noteRow.last)
         visible: shown !== ""
         text: qsTr("Last note: %1").arg(shown)
-        color: KanteStyle.mutedTextColor
+        color: Look.mutedTextColor
         wrapMode: Text.Wrap
         maximumLineCount: 3
         elide: Text.ElideRight
@@ -79,7 +78,7 @@ ColumnLayout {
     RowLayout {
         Layout.fillWidth: true
 
-        KanteTextField {
+        LookTextField {
             id: field
 
             objectName: "noteField"
@@ -105,14 +104,14 @@ ColumnLayout {
                 }
             }
         }
-        KanteToolButton {
+        LookToolButton {
             enabled: field.text.trim() !== ""
             icon.name: "list-add"
             text: qsTr("Add note")
             display: QQC2.AbstractButton.IconOnly
             onClicked: field.add()
         }
-        KanteToolButton {
+        LookToolButton {
             icon.name: "view-pim-notes"
             text: qsTr("Notes")
             display: QQC2.AbstractButton.IconOnly

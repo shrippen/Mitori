@@ -1,6 +1,5 @@
 import QtQuick
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // The player as a page (PlayerView): from the programme, today's practice and the search; in
@@ -36,8 +35,8 @@ Kirigami.Page {
 
     title: view.current.title || ""
     padding: 0
-    // Kante's page ground (the window's scope gives Page the dialog colour).
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // The style's page ground (the window's scope gives Page the dialog colour).
+    background: Rectangle { color: Look.backgroundColor }
     globalToolBarStyle: view.landscape ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
 
     onIndexChanged: view.index = index

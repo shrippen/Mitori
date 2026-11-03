@@ -13,14 +13,17 @@ FocusScope {
     property int count: 4
     property int value: 0
     property var names: []
+    // The field the keys stand on; it follows the value (another technique, a training's next).
     property int focusLevel: Math.max(1, value)
     signal picked(int level)
+
+    onValueChanged: focusLevel = Math.max(1, value)
 
     implicitHeight: row.implicitHeight
     implicitWidth: row.implicitWidth
     activeFocusOnTab: true
 
-    Accessible.role: Accessible.RadioButton
+    Accessible.role: Accessible.Grouping
 
     Keys.onLeftPressed: picker.focusLevel = Math.max(1, picker.focusLevel - 1)
     Keys.onRightPressed: picker.focusLevel = Math.min(picker.count, picker.focusLevel + 1)
@@ -50,9 +53,14 @@ FocusScope {
                 focusPolicy: Qt.NoFocus
                 hoverEnabled: true
                 padding: ShinkiStyle.gridSpace * 2
+                Accessible.role: Accessible.RadioButton
                 Accessible.name: level + " " + (picker.names[level] || "")
                 Accessible.checked: chosen
-                onClicked: picker.picked(level)
+                Accessible.focused: focused
+                onClicked: {
+                    picker.focusLevel = level
+                    picker.picked(level)
+                }
 
                 background: Rectangle {
                     color: field.chosen ? ShinkiStyle.red : field.hovered ? ShinkiStyle.chip : ShinkiStyle.paper
