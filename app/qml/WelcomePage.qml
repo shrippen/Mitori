@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // The first-start wizard (and Settings → Appearance → "Show the introduction"): what Mitori
@@ -13,8 +12,8 @@ import Mitori
 Kirigami.ScrollablePage {
     id: page
 
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     title: qsTr("Welcome")
 
@@ -44,9 +43,9 @@ Kirigami.ScrollablePage {
     ]
 
     ColumnLayout {
-        spacing: KanteStyle.unit(12)
+        spacing: Look.unit(12)
 
-        KanteSteps {
+        LookSteps {
             Layout.fillWidth: true
             model: [qsTr("Welcome"), qsTr("Style"), qsTr("Tour")]
             current: page.step
@@ -59,9 +58,9 @@ Kirigami.ScrollablePage {
             currentIndex: page.step
 
             ColumnLayout {
-                spacing: KanteStyle.unit(8)
+                spacing: Look.unit(8)
 
-                KanteHeading {
+                LookHeading {
                     Layout.fillWidth: true
                     level: 1
                     text: "Mitori 見取り"
@@ -74,7 +73,7 @@ Kirigami.ScrollablePage {
             }
 
             ColumnLayout {
-                spacing: KanteStyle.unit(8)
+                spacing: Look.unit(8)
 
                 QQC2.Label {
                     Layout.fillWidth: true
@@ -88,13 +87,13 @@ Kirigami.ScrollablePage {
                     Layout.fillWidth: true
                     visible: Appearance.restartNeeded
                     wrapMode: Text.Wrap
-                    color: KanteStyle.mutedTextColor
+                    color: Look.mutedTextColor
                     text: qsTr("The style changes when Mitori starts again.")
                 }
             }
 
             ColumnLayout {
-                spacing: KanteStyle.unit(8)
+                spacing: Look.unit(8)
 
                 Repeater {
                     model: page.tour
@@ -107,13 +106,13 @@ Kirigami.ScrollablePage {
 
                         objectName: "tourRow"
                         Layout.fillWidth: true
-                        spacing: KanteStyle.unit(12)
+                        spacing: Look.unit(12)
 
                         QQC2.Label {
                             Layout.alignment: Qt.AlignTop
                             text: tourRow.modelData.glyph
-                            font: KanteStyle.japaneseFont(KanteStyle.titleFont())
-                            color: KanteStyle.focusColor
+                            font: Look.japaneseFont(Look.titleFont())
+                            color: Look.focusColor
                             Accessible.ignored: true
                         }
                         ColumnLayout {
@@ -129,7 +128,7 @@ Kirigami.ScrollablePage {
                             QQC2.Label {
                                 Layout.fillWidth: true
                                 text: tourRow.modelData.text
-                                color: KanteStyle.mutedTextColor
+                                color: Look.mutedTextColor
                                 wrapMode: Text.Wrap
                             }
                         }
@@ -141,16 +140,16 @@ Kirigami.ScrollablePage {
         RowLayout {
             Layout.fillWidth: true
 
-            KanteButton {
+            LookButton {
                 visible: page.step > 0
                 icon.name: "go-previous"
                 text: qsTr("Back")
                 onClicked: page.step -= 1
             }
             Item { Layout.fillWidth: true }
-            KanteButton {
+            LookButton {
                 objectName: "welcomeNext"
-                emphasis: KanteButton.Emphasis.Primary
+                role: LookButton.Role.Primary
                 icon.name: page.step < page.lastStep ? "go-next" : "media-playback-start"
                 text: page.step < page.lastStep ? qsTr("Next") : qsTr("Start")
                 onClicked: {

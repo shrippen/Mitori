@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtMultimedia
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // The camera for a note's photo: the picture fills the page, a button takes it; the photo goes
@@ -15,8 +14,8 @@ Kirigami.Page {
     property var done: null
     property string captureError: ""
 
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.stageColor }
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.stageColor }
 
     title: qsTr("Photo")
     padding: 0
@@ -63,17 +62,17 @@ Kirigami.Page {
         text: page.captureError !== "" ? page.captureError
               : camera.errorString !== "" ? camera.errorString
               : devices.videoInputs.length === 0 ? qsTr("No camera found.") : ""
-        color: KanteStyle.stageTextColor
+        color: Look.stageTextColor
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.Wrap
     }
 
-    KanteButton {
+    LookButton {
         objectName: "shutter"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Kirigami.Units.gridUnit
-        emphasis: KanteButton.Emphasis.Primary
+        role: LookButton.Role.Primary
         enabled: capture.readyForCapture
         icon.name: "camera-photo"
         text: qsTr("Take photo")

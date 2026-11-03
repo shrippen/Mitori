@@ -259,17 +259,17 @@
 <context>
     <name>CameraPage</name>
     <message>
-        <location filename="../qml/CameraPage.qml" line="21"/>
+        <location filename="../qml/CameraPage.qml" line="20"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/CameraPage.qml" line="65"/>
+        <location filename="../qml/CameraPage.qml" line="64"/>
         <source>No camera found.</source>
         <translation>Keine Kamera gefunden.</translation>
     </message>
     <message>
-        <location filename="../qml/CameraPage.qml" line="79"/>
+        <location filename="../qml/CameraPage.qml" line="78"/>
         <source>Take photo</source>
         <translation>Auslösen</translation>
     </message>
@@ -1175,62 +1175,62 @@
 <context>
     <name>MediaCompose</name>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="42"/>
+        <location filename="../qml/MediaCompose.qml" line="41"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="52"/>
+        <location filename="../qml/MediaCompose.qml" line="51"/>
         <source>Take a photo</source>
         <translation>Foto aufnehmen</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="58"/>
+        <location filename="../qml/MediaCompose.qml" line="57"/>
         <source>Choose a picture …</source>
         <translation>Bild auswählen …</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="67"/>
+        <location filename="../qml/MediaCompose.qml" line="66"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="78"/>
+        <location filename="../qml/MediaCompose.qml" line="77"/>
         <source>Recording</source>
         <translation>Aufnahme läuft</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="84"/>
+        <location filename="../qml/MediaCompose.qml" line="83"/>
         <source>Stop</source>
         <translation>Stopp</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="90"/>
+        <location filename="../qml/MediaCompose.qml" line="89"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="102"/>
+        <location filename="../qml/MediaCompose.qml" line="101"/>
         <source>Mitori may not use the camera. Allow it in the system settings.</source>
         <translation>Mitori darf die Kamera nicht nutzen. Das lässt sich in den Systemeinstellungen erlauben.</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="114"/>
+        <location filename="../qml/MediaCompose.qml" line="113"/>
         <source>Mitori may not use the microphone. Allow it in the system settings.</source>
         <translation>Mitori darf das Mikrofon nicht nutzen. Das lässt sich in den Systemeinstellungen erlauben.</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="131"/>
+        <location filename="../qml/MediaCompose.qml" line="130"/>
         <source>This file could not be read as a picture.</source>
         <translation>Diese Datei ließ sich nicht als Bild lesen.</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="178"/>
+        <location filename="../qml/MediaCompose.qml" line="177"/>
         <source>Choose a picture</source>
         <translation>Bild auswählen</translation>
     </message>
     <message>
-        <location filename="../qml/MediaCompose.qml" line="179"/>
+        <location filename="../qml/MediaCompose.qml" line="178"/>
         <source>Pictures (*.jpg *.jpeg *.png *.webp)</source>
         <translation>Bilder (*.jpg *.jpeg *.png *.webp)</translation>
     </message>
@@ -1238,37 +1238,37 @@
 <context>
     <name>MediaView</name>
     <message>
-        <location filename="../qml/MediaView.qml" line="33"/>
+        <location filename="../qml/MediaView.qml" line="32"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="40"/>
+        <location filename="../qml/MediaView.qml" line="39"/>
         <source>The photo is not on this device.</source>
         <translation>Das Foto ist nicht auf diesem Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="40"/>
+        <location filename="../qml/MediaView.qml" line="39"/>
         <source>The voice note is not on this device.</source>
         <translation>Die Sprachnotiz ist nicht auf diesem Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="53"/>
+        <location filename="../qml/MediaView.qml" line="52"/>
         <source>Stop</source>
         <translation>Stopp</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="53"/>
+        <location filename="../qml/MediaView.qml" line="52"/>
         <source>Play voice note</source>
         <translation>Sprachnotiz abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="66"/>
+        <location filename="../qml/MediaView.qml" line="65"/>
         <source>Voice note %1</source>
         <translation>Sprachnotiz %1</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="67"/>
+        <location filename="../qml/MediaView.qml" line="66"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
@@ -1276,18 +1276,18 @@
 <context>
     <name>NoteEditor</name>
     <message>
-        <location filename="../qml/NoteEditor.qml" line="24"/>
-        <location filename="../qml/NoteEditor.qml" line="58"/>
+        <location filename="../qml/NoteEditor.qml" line="23"/>
+        <location filename="../qml/NoteEditor.qml" line="57"/>
         <source>Note</source>
         <translation>Notiz</translation>
     </message>
     <message>
-        <location filename="../qml/NoteEditor.qml" line="31"/>
+        <location filename="../qml/NoteEditor.qml" line="30"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../qml/NoteEditor.qml" line="40"/>
+        <location filename="../qml/NoteEditor.qml" line="39"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
@@ -2166,39 +2166,39 @@
 <context>
     <name>StatsPage</name>
     <message>
-        <location filename="../qml/StatsPage.qml" line="60"/>
+        <location filename="../qml/StatsPage.qml" line="59"/>
         <source>Statistics</source>
         <translation>Statistik</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="66"/>
+        <location filename="../qml/StatsPage.qml" line="65"/>
         <source>Last 30 days</source>
         <translation>Letzte 30 Tage</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="75"/>
+        <location filename="../qml/StatsPage.qml" line="74"/>
         <source>practice days</source>
         <translation>Übungstage</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="80"/>
+        <location filename="../qml/StatsPage.qml" line="79"/>
         <source>techniques practised</source>
         <translation>Techniken geübt</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="85"/>
+        <location filename="../qml/StatsPage.qml" line="84"/>
         <source>A technique counts once on each day it is rated.</source>
         <translation>Eine Technik zählt an jedem Tag, an dem sie eingeschätzt wird, einmal.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="92"/>
-        <location filename="../qml/StatsPage.qml" line="124"/>
+        <location filename="../qml/StatsPage.qml" line="91"/>
+        <location filename="../qml/StatsPage.qml" line="123"/>
         <source>Practice days</source>
         <translation>Übungstage</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StatsPage.qml" line="50"/>
-        <location filename="../qml/StatsPage.qml" line="120"/>
+        <location filename="../qml/StatsPage.qml" line="49"/>
+        <location filename="../qml/StatsPage.qml" line="119"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n Technik</numerusform>
@@ -2206,89 +2206,89 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="50"/>
+        <location filename="../qml/StatsPage.qml" line="49"/>
         <source>average</source>
         <translation>Schnitt</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="120"/>
-        <location filename="../qml/StatsPage.qml" line="136"/>
+        <location filename="../qml/StatsPage.qml" line="119"/>
+        <location filename="../qml/StatsPage.qml" line="135"/>
         <source>no practice</source>
         <translation>kein Training</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="131"/>
+        <location filename="../qml/StatsPage.qml" line="130"/>
         <source>All years …</source>
         <translation>Alle Jahre …</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="137"/>
+        <location filename="../qml/StatsPage.qml" line="136"/>
         <source>1–2 techniques</source>
         <translation>1–2 Techniken</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="140"/>
+        <location filename="../qml/StatsPage.qml" line="139"/>
         <source>10 and more</source>
         <translation>10 und mehr</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="144"/>
+        <location filename="../qml/StatsPage.qml" line="143"/>
         <source>Rating by grade</source>
         <translation>Stand je Grad</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="176"/>
+        <location filename="../qml/StatsPage.qml" line="175"/>
         <source>%1 of %2 exam-ready</source>
         <translation>%1 von %2 prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="200"/>
+        <location filename="../qml/StatsPage.qml" line="199"/>
         <source>Exam mode · average per round</source>
         <translation>Prüfungsmodus · Schnitt je Runde</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="210"/>
+        <location filename="../qml/StatsPage.qml" line="209"/>
         <source>M/d</source>
         <comment>date under a bar</comment>
         <translation>d.M.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="215"/>
+        <location filename="../qml/StatsPage.qml" line="214"/>
         <source>Average</source>
         <translation>Schnitt</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="219"/>
+        <location filename="../qml/StatsPage.qml" line="218"/>
         <source>Exam mode, average per round</source>
         <translation>Prüfungsmodus, Schnitt je Runde</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="230"/>
+        <location filename="../qml/StatsPage.qml" line="229"/>
         <source>Vertical: average of the ratings (1 %1 … 4 %2). Horizontal: date of the round.</source>
         <translation>Senkrecht: Durchschnitt der Einschätzungen (1 %1 … 4 %2). Waagerecht: Datum der Runde.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="232"/>
+        <location filename="../qml/StatsPage.qml" line="231"/>
         <source>No round in the exam mode yet.</source>
         <translation>Noch keine Runde im Prüfungsmodus.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="240"/>
+        <location filename="../qml/StatsPage.qml" line="239"/>
         <source>My grades</source>
         <translation>Meine Grade</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="257"/>
+        <location filename="../qml/StatsPage.qml" line="256"/>
         <source>No grade entered yet.</source>
         <translation>Noch kein Grad eingetragen.</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="258"/>
+        <location filename="../qml/StatsPage.qml" line="257"/>
         <source>Planned: %1, %2 in %3</source>
         <translation>Vorgemerkt: %1, %2 in %3</translation>
     </message>
     <message>
-        <location filename="../qml/StatsPage.qml" line="268"/>
+        <location filename="../qml/StatsPage.qml" line="267"/>
         <source>Edit my grades …</source>
         <translation>Meine Grade bearbeiten …</translation>
     </message>
@@ -2723,108 +2723,108 @@
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="19"/>
-        <location filename="../qml/WelcomePage.qml" line="51"/>
+        <location filename="../qml/WelcomePage.qml" line="18"/>
+        <location filename="../qml/WelcomePage.qml" line="50"/>
         <source>Welcome</source>
         <translation>Willkommen</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="26"/>
+        <location filename="../qml/WelcomePage.qml" line="25"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="27"/>
+        <location filename="../qml/WelcomePage.qml" line="26"/>
         <source>Practice today</source>
         <translation>Heute üben</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="27"/>
+        <location filename="../qml/WelcomePage.qml" line="26"/>
         <source>The techniques due today, as a training with the videos. Rate each one: how well does it sit?</source>
         <translation>Die heute fälligen Techniken, als Training mit den Videos. Jede einschätzen: wie sitzt sie?</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="28"/>
+        <location filename="../qml/WelcomePage.qml" line="27"/>
         <source>Techniques at random, as in the exam, with or without the video.</source>
         <translation>Techniken in zufälliger Folge, wie in der Prüfung, mit oder ohne Video.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="28"/>
+        <location filename="../qml/WelcomePage.qml" line="27"/>
         <source>Exam mode</source>
         <translation>Prüfungsmodus</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="29"/>
+        <location filename="../qml/WelcomePage.qml" line="28"/>
         <source>Statistics</source>
         <translation>Statistik</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="26"/>
+        <location filename="../qml/WelcomePage.qml" line="25"/>
         <source>Tap a technique: its place in the exam video plays, slow, in a loop. A note on each technique, with photos and voice notes.</source>
         <translation>Technik antippen: ihre Stelle im Prüfungsvideo läuft, langsam, in der Schleife. Zu jeder Technik eine Notiz, mit Fotos und Sprachnotizen.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="29"/>
+        <location filename="../qml/WelcomePage.qml" line="28"/>
         <source>Your practice days per year and your grades.</source>
         <translation>Deine Übungstage je Jahr und deine Grade.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="30"/>
+        <location filename="../qml/WelcomePage.qml" line="29"/>
         <source>Courses</source>
         <translation>Lehrgänge</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="30"/>
+        <location filename="../qml/WelcomePage.qml" line="29"/>
         <source>The seminars from the calendar, a notebook for each.</source>
         <translation>Die Lehrgänge aus dem Kalender, zu jedem ein Notizbuch.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="40"/>
+        <location filename="../qml/WelcomePage.qml" line="39"/>
         <source>Skip</source>
         <translation>Überspringen</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="51"/>
+        <location filename="../qml/WelcomePage.qml" line="50"/>
         <source>Style</source>
         <translation>Stil</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="51"/>
+        <location filename="../qml/WelcomePage.qml" line="50"/>
         <source>Tour</source>
         <translation>Rundgang</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="53"/>
+        <location filename="../qml/WelcomePage.qml" line="52"/>
         <source>Step %1 of %2</source>
         <translation>Schritt %1 von %2</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="72"/>
+        <location filename="../qml/WelcomePage.qml" line="71"/>
         <source>Mitori means learning by watching. Here are the exam programmes of Aikido Shinki Rengo, Daitoryu and Itto-den Shinki Toho, with the exam videos of the DVDs: watch, practise, rate, note.</source>
         <translation>Mitori heißt Lernen durch Zuschauen. Hier stehen die Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho, mit den Prüfungsvideos der DVDs: zusehen, üben, einschätzen, notieren.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="82"/>
+        <location filename="../qml/WelcomePage.qml" line="81"/>
         <source>How should Mitori look? You can change it later in Settings → Appearance.</source>
         <translation>Wie soll Mitori aussehen? Später lässt es sich unter Einstellungen → Darstellung ändern.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="92"/>
+        <location filename="../qml/WelcomePage.qml" line="91"/>
         <source>The style changes when Mitori starts again.</source>
         <translation>Der Stil ändert sich, wenn Mitori neu startet.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="147"/>
+        <location filename="../qml/WelcomePage.qml" line="146"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="155"/>
+        <location filename="../qml/WelcomePage.qml" line="154"/>
         <source>Next</source>
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="155"/>
+        <location filename="../qml/WelcomePage.qml" line="154"/>
         <source>Start</source>
         <translation>Los</translation>
     </message>
@@ -2832,33 +2832,33 @@
 <context>
     <name>YearsPage</name>
     <message>
-        <location filename="../qml/YearsPage.qml" line="48"/>
+        <location filename="../qml/YearsPage.qml" line="47"/>
         <source>All years</source>
         <translation>Alle Jahre</translation>
     </message>
     <message>
-        <location filename="../qml/YearsPage.qml" line="56"/>
+        <location filename="../qml/YearsPage.qml" line="55"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="../qml/YearsPage.qml" line="62"/>
-        <location filename="../qml/YearsPage.qml" line="132"/>
+        <location filename="../qml/YearsPage.qml" line="61"/>
+        <location filename="../qml/YearsPage.qml" line="131"/>
         <source>no practice</source>
         <translation>kein Training</translation>
     </message>
     <message>
-        <location filename="../qml/YearsPage.qml" line="63"/>
+        <location filename="../qml/YearsPage.qml" line="62"/>
         <source>1–2 techniques</source>
         <translation>1–2 Techniken</translation>
     </message>
     <message>
-        <location filename="../qml/YearsPage.qml" line="66"/>
+        <location filename="../qml/YearsPage.qml" line="65"/>
         <source>10 and more</source>
         <translation>10 und mehr</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/YearsPage.qml" line="93"/>
+        <location filename="../qml/YearsPage.qml" line="92"/>
         <source>%n practice day(s)</source>
         <translation>
             <numerusform>%n Übungstag</numerusform>
@@ -2866,8 +2866,8 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/YearsPage.qml" line="94"/>
-        <location filename="../qml/YearsPage.qml" line="132"/>
+        <location filename="../qml/YearsPage.qml" line="93"/>
+        <location filename="../qml/YearsPage.qml" line="131"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n Technik</numerusform>
@@ -2875,12 +2875,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/YearsPage.qml" line="136"/>
+        <location filename="../qml/YearsPage.qml" line="135"/>
         <source>Practice days %1</source>
         <translation>Übungstage %1</translation>
     </message>
     <message>
-        <location filename="../qml/YearsPage.qml" line="144"/>
+        <location filename="../qml/YearsPage.qml" line="143"/>
         <source>Columns: weeks, rows: weekdays. A technique counts once on each day it is rated.</source>
         <translation>Spalten: Wochen, Zeilen: Wochentage. Eine Technik zählt einmal an jedem Tag, an dem sie eingeschätzt wird.</translation>
     </message>
