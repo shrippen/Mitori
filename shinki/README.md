@@ -153,6 +153,11 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
   - Optional ein Logo-Quadrat: 40 px, `red`, darauf 神氣 in Noto Serif JP, 15 px, weiß.
   - Darüber eine Eyebrow-Kolumne in Rot, etwa „‹ MENÜ“; sie ist zugleich der Zurück-Knopf.
   - Der Seitentitel steht in PT Sans fett, sein Kanji klein in `inkMuted` daneben.
+  - Rechts die Aktionen der Seite als Symbolknöpfe, die übrigen in einem Menü (⋮); unten eine Linie.
+  - Er ersetzt Kirigamis Leiste (`ShinkiHead`, in der App `LookHead` als Kopf des Fensters).
+  - Eine Höhe auf allen Seiten: Die Kolumne behält ihre Zeile, auch ohne Weg zurück. Ändert sich die Höhe während
+    des Seitenwechsels, hält Kirigami die abgehende Seite fest (ein Player spielte weiter).
+  - Eine Seite mit `headless: true` (der Player quer) hat keinen Kopf.
 - **Kachel** (`.tile`)
   - 1 px Rahmen, weiß; das Kanji 22 px rot, Titel 16 px fett, Unterzeile 12,5 px `inkMuted`.
   - Die große Kachel (Programm) geht über die ganze Breite, steht auf `paperAlt` und hat ein Kanji von 34 px.

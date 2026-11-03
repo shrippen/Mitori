@@ -34,6 +34,17 @@ Kirigami.ApplicationWindow {
     // One page at a time, also in landscape: the tablet gets its own page with list and player
     // (app-entscheidungen.md, "Tablet quer"), not Kirigami's columns.
     pageStack.columnView.columnResizeMode: Kirigami.ColumnView.SingleColumn
+    // Under Shinki the window carries Shinki's head in place of Kirigami's bar (bible section 5,
+    // Kopf); the other styles keep the bar (LookHead is empty there).
+    pageStack.globalToolBar.style: Look.shinki ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
+    header: LookHead {
+        objectName: "lookHead"
+        page: root.pageStack.currentItem
+        backTitle: root.pageStack.depth > 1 && root.pageStack.get(root.pageStack.depth - 2)
+                   ? root.pageStack.get(root.pageStack.depth - 2).title || "" : ""
+        moreText: qsTr("More")
+        onBack: root.pageStack.pop()
+    }
     pageStack.initialPage: StartPage {}
     // The first start: the wizard over the start menu (it goes back there).
     Component.onCompleted: {
