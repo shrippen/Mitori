@@ -5,7 +5,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // All notes (clickdummy "Alle Notizen"): the notes on every technique and the entries of every
@@ -15,9 +14,9 @@ import Mitori
 Kirigami.Page {
     id: page
 
-    // Kante's colours and page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // The style's colours and page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     // "" = all, a discipline's id, or "courses"; kept for the next time.
     property string filter: ""
@@ -84,7 +83,7 @@ Kirigami.Page {
                 model: [{ id: "", name: qsTr("All") }].concat(Programme.disciplines.map(d => ({ id: d.id, name: d.kurzname })))
                                                      .concat([{ id: page.coursesFilter, name: qsTr("Courses") }])
 
-                KanteChip {
+                LookChip {
                     required property var modelData
 
                     objectName: "filter_" + (modelData.id || "all")
@@ -175,7 +174,7 @@ Kirigami.Page {
                     event.accepted = true
                 }
                 section.property: "day"
-                section.delegate: KanteSectionLabel {
+                section.delegate: LookSectionLabel {
                     required property string section
                     Accessible.role: Accessible.Heading
                     width: ListView.view.width
@@ -192,7 +191,7 @@ Kirigami.Page {
                           : page.filter === page.coursesFilter ? qsTr("No entries in course notebooks yet.")
                           : page.filter !== "" && notesModel.total > 0 ? qsTr("No notes in this discipline.")
                           : qsTr("No notes yet. Notes are written on a technique or in the player.")
-                    color: KanteStyle.mutedTextColor
+                    color: Look.mutedTextColor
                     wrapMode: Text.Wrap
                 }
 
@@ -217,8 +216,8 @@ Kirigami.Page {
                         Layout.fillWidth: true
                         objectName: "noteTitle"
                         text: noteItem.row.title
-                        color: KanteStyle.mutedTextColor
-                        font: KanteStyle.smallFont
+                        color: Look.mutedTextColor
+                        font: Look.smallFont
                         elide: Text.ElideRight
                         leftPadding: Kirigami.Units.smallSpacing
                     }
@@ -229,9 +228,9 @@ Kirigami.Page {
                         wrapMode: Text.Wrap
                         padding: Kirigami.Units.smallSpacing
                         background: Rectangle {
-                            color: KanteStyle.cardColor
-                            border.width: noteItem.current ? KanteStyle.borderWidth : 0
-                            border.color: KanteStyle.focusColor
+                            color: Look.cardColor
+                            border.width: noteItem.current ? Look.borderWidth : 0
+                            border.color: Look.accentColor
                         }
                     }
 

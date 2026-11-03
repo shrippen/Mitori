@@ -727,7 +727,7 @@ TestCase {
         compare(page.due.length, 1 - newToday)
         verify(page.due.every(r => r.id !== first), "practised today: not due")
         compare(findChild(page, "dueCount").value, String(1 - newToday))
-        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor), "Kante's ground")
+        verify(Qt.colorEqual(page.background.color, Look.backgroundColor), "the style's ground")
         shot("7-today")
         if (page.due.length > 0) {
             Practice.rate(page.due[0].id, 1)

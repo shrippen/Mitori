@@ -4,7 +4,7 @@
 <context>
     <name>AllNotesPage</name>
     <message numerus="yes">
-        <location filename="../qml/AllNotesPage.qml" line="191"/>
+        <location filename="../qml/AllNotesPage.qml" line="190"/>
         <source>%n note(s). Tap one to open its technique or notebook, press and hold to change or delete it.</source>
         <translation>
             <numerusform>%n note. Tap it to open its technique or notebook, press and hold to change or delete it.</numerusform>
@@ -34,7 +34,7 @@
 <context>
     <name>CourseRow</name>
     <message numerus="yes">
-        <location filename="../qml/CourseRow.qml" line="28"/>
+        <location filename="../qml/CourseRow.qml" line="27"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -42,7 +42,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CourseRow.qml" line="35"/>
+        <location filename="../qml/CourseRow.qml" line="34"/>
         <source>%n note(s)</source>
         <translation>
             <numerusform>%n note</numerusform>
@@ -75,7 +75,7 @@
 <context>
     <name>SearchPage</name>
     <message numerus="yes">
-        <location filename="../qml/SearchPage.qml" line="121"/>
+        <location filename="../qml/SearchPage.qml" line="120"/>
         <source>%n Japanese term(s), with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</source>
         <translation>
             <numerusform>%n Japanese term, with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</numerusform>
@@ -179,7 +179,7 @@
 <context>
     <name>TodayPage</name>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="43"/>
+        <location filename="../qml/TodayPage.qml" line="42"/>
         <source>%1 · %n day(s) ago</source>
         <translation>
             <numerusform>%1 · %n day ago</numerusform>
@@ -187,7 +187,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="45"/>
+        <location filename="../qml/TodayPage.qml" line="44"/>
         <source>not practised for %n day(s)</source>
         <translation>
             <numerusform>not practised for %n day</numerusform>
@@ -195,7 +195,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="126"/>
+        <location filename="../qml/TodayPage.qml" line="125"/>
         <source>%n of them without a video on this device: the training shows their name, practise from memory.</source>
         <translation>
             <numerusform>%n of them has no video on this device: the training shows its name, practise it from memory.</numerusform>

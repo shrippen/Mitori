@@ -1,14 +1,14 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
-import Kante
+import Mitori
 import "coursedays.js" as CourseDays
 
 // A course in a list: the first day as a date block, title, place · days · teacher, and how
 // soon it is and how many notes its notebook has.
 //   [ 6 ]  Daitoryu Aiki Jujutsu                       in 12 days
 //    Jun   Siebeldingen · 06.06.26 – 07.06.26 · …       3 notes
-KanteListRow {
+LookListRow {
     id: row
 
     // {title, first, last, place, teacher, entries} as Courses gives an event or a notebook.
@@ -26,15 +26,15 @@ KanteListRow {
             Layout.alignment: Qt.AlignRight
             visible: row.daysAway > 0
             text: qsTr("in %n day(s)", "", row.daysAway)
-            color: KanteStyle.mutedTextColor
-            font: KanteStyle.smallFont
+            color: Look.mutedTextColor
+            font: Look.smallFont
         }
         QQC2.Label {
             Layout.alignment: Qt.AlignRight
             visible: row.course.entries > 0
             text: qsTr("%n note(s)", "", row.course.entries)
-            color: KanteStyle.mutedTextColor
-            font: KanteStyle.smallFont
+            color: Look.mutedTextColor
+            font: Look.smallFont
         }
     }
 }

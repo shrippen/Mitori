@@ -6,6 +6,7 @@ import QtQuick.Layouts
 // the right the trailing items (level dots, play). Selected: 3 px red on the left on `selected`.
 // Rows part by a line in paperAlt. At least 44 px high (a finger). Enter and Space click.
 //   leadingText  a figure before the name (a form's number)
+//   meta         a small figure on the right, before the trailing items ("in 3 weeks")
 //   trailing     items on the right
 //   focusOnClick false: a tap leaves the focus where it is
 QQC2.ItemDelegate {
@@ -13,6 +14,7 @@ QQC2.ItemDelegate {
 
     property string subtitle: ""
     property string leadingText: ""
+    property string meta: ""
     property bool selected: false
     property bool focusOnClick: true
     property alias trailing: trailingSlot.data
@@ -86,6 +88,15 @@ QQC2.ItemDelegate {
                 font.pixelSize: ShinkiStyle.smallSize
                 wrapMode: Text.Wrap
             }
+        }
+        QQC2.Label {
+            visible: row.meta !== ""
+            Layout.alignment: Qt.AlignVCenter
+            text: row.meta
+            color: ShinkiStyle.inkMuted
+            font.family: ShinkiStyle.uiFamily
+            font.pixelSize: ShinkiStyle.smallSize
+            font.features: { "tnum": 1 }
         }
         RowLayout {
             id: trailingSlot

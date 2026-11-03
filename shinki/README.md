@@ -168,6 +168,9 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
   - Oben Eyebrow, Titel 25 px Crimson Pro, Japanisch 16 px darunter.
   - Der Grund dahinter ist `scrim`.
 - **Einschätzen** (`.rate`): vier gleich breite Felder mit Zahl (17 px fett) und Wort (11 px); gewählt rot gefüllt.
+- **Kennzahl**: die Zahl 28 px fett in Tabellenziffern, `ink`; darunter das Wort als Kolumne (11 px, `inkMuted`).
+  Eine Änderung steht klein daneben, mit Pfeil als Form; besser ist `ink`, schlechter `red`.
+- **Zahlenfeld**: wie das Feld, die Zahl in Tabellenziffern; − und + als Felder mit 1 px Rahmen links und rechts.
 - **Knopf** (`.btn`)
   - Hauptknopf: rot gefüllt, weiß, 15 px fett, volle Breite im Blatt.
   - Zweitknopf: weiß mit 1 px Rahmen, Text `ink`.

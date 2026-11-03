@@ -4,17 +4,17 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
+import Mitori
 import "comment.js" as Comment
 
 // Comment of a Shinki Toho entry (texts of shinkiryu.de, shipped with the app), a reading column.
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     required property var entry
 
@@ -27,7 +27,7 @@ Kirigami.ScrollablePage {
         spacing: Kirigami.Units.largeSpacing
 
         // The whole title (the page header elides a long one: "Ichi-ban/ Ippon-me: …").
-        KanteHeading {
+        LookHeading {
             objectName: "commentTitle"
             Layout.fillWidth: true
             Layout.maximumWidth: page.measure
@@ -51,7 +51,7 @@ Kirigami.ScrollablePage {
                 Component {
                     id: headingBlock
 
-                    KanteSectionLabel {
+                    LookSectionLabel {
                         objectName: "commentHeading"
                         rule: true
                         text: block.modelData.text
@@ -71,7 +71,7 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             text: qsTr("Source: shinkiryu.de, Itto-den Shinki Toho")
-            color: KanteStyle.disabledTextColor
+            color: Look.disabledTextColor
             font.pointSize: Kirigami.Theme.smallFont.pointSize
         }
     }

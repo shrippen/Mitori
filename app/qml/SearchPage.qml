@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // Glossary and search (clickdummy "Glossar & Suche"). Without a query: the glossary A–Z (word,
@@ -20,10 +19,10 @@ import Mitori
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     // The query searched (follows the field after a short pause while typing).
     property string query: ""
@@ -47,7 +46,7 @@ Kirigami.ScrollablePage {
     onQueryChanged: Qt.callLater(list.positionViewAtBeginning)
 
     header: QQC2.ToolBar {
-        KanteTextField {
+        LookTextField {
             id: field
 
             objectName: "searchField"
@@ -82,7 +81,7 @@ Kirigami.ScrollablePage {
         activeFocusOnTab: true
         // A–Z headings in the whole glossary; words found stand under "Glossary".
         section.property: page.searching ? "" : "letter"
-        section.delegate: KanteSectionLabel {
+        section.delegate: LookSectionLabel {
             required property string section
 
             objectName: "letterHeading"
@@ -119,7 +118,7 @@ Kirigami.ScrollablePage {
                 Layout.rightMargin: Kirigami.Units.largeSpacing
                 visible: !page.searching
                 text: qsTr("%n Japanese term(s), with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.", "", Glossary.words.length)
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
 
@@ -132,7 +131,7 @@ Kirigami.ScrollablePage {
                 text: Glossary.speech === Glossary.Unsupported
                       ? qsTr("This version of Mitori has no speech output, so there is no pronunciation.")
                       : qsTr("No Japanese voice for speech output found. Where the system offers one (Android: settings, text-to-speech output), install it to hear the pronunciation.")
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
 
@@ -142,18 +141,18 @@ Kirigami.ScrollablePage {
                 Layout.rightMargin: Kirigami.Units.largeSpacing
                 visible: page.searching && page.techniques.length === 0 && page.notes.length === 0 && page.glossary.length === 0
                 text: qsTr("Nothing found for “%1”.").arg(page.query.trim())
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
 
-            KanteSectionLabel {
+            LookSectionLabel {
                 Layout.leftMargin: Kirigami.Units.largeSpacing
                 visible: page.searching && page.glossary.length > 0
                 text: qsTr("Glossary")
             }
         }
 
-        delegate: KanteListRow {
+        delegate: LookListRow {
             id: row
 
             required property var modelData
@@ -172,7 +171,7 @@ Kirigami.ScrollablePage {
                 list.currentIndex = index
                 Glossary.say(modelData.speech)
             }
-            trailing: KanteToolButton {
+            trailing: LookToolButton {
                 objectName: "sayButton"
                 visible: page.canSpeak
                 focusPolicy: Qt.NoFocus
@@ -188,7 +187,7 @@ Kirigami.ScrollablePage {
             width: ListView.view.width
             spacing: Kirigami.Units.largeSpacing
 
-            KanteSectionLabel {
+            LookSectionLabel {
                 Layout.topMargin: Kirigami.Units.largeSpacing
                 Layout.leftMargin: Kirigami.Units.largeSpacing
                 visible: page.techniques.length > 0
@@ -197,7 +196,7 @@ Kirigami.ScrollablePage {
             Repeater {
                 model: page.shown
 
-                KanteListRow {
+                LookListRow {
                     required property var modelData
 
                     objectName: "techniqueResult"
@@ -224,11 +223,11 @@ Kirigami.ScrollablePage {
                 Layout.rightMargin: Kirigami.Units.largeSpacing
                 visible: page.more
                 text: qsTr("More than %1 techniques found. Add a word to narrow the search.").arg(page.limit)
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
 
-            KanteSectionLabel {
+            LookSectionLabel {
                 Layout.topMargin: Kirigami.Units.largeSpacing
                 Layout.leftMargin: Kirigami.Units.largeSpacing
                 visible: page.notes.length > 0
@@ -237,7 +236,7 @@ Kirigami.ScrollablePage {
             Repeater {
                 model: page.notesShown
 
-                KanteListRow {
+                LookListRow {
                     required property var modelData
                     // A technique no longer in the programme (a newer catalogue) keeps its notes.
                     readonly property var found: Programme.entry(modelData.entry)
@@ -258,7 +257,7 @@ Kirigami.ScrollablePage {
                 Layout.rightMargin: Kirigami.Units.largeSpacing
                 visible: page.notesMore
                 text: qsTr("More than %1 notes found. Add a word to narrow the search.").arg(page.limit)
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
 
@@ -269,7 +268,7 @@ Kirigami.ScrollablePage {
                 visible: page.glossary.length > 0
                 text: qsTr("Translations: %1").arg(Glossary.source)
                 font: Kirigami.Theme.smallFont
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
         }

@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 import "coursedays.js" as CourseDays
 import "grades.js" as Grades
@@ -23,10 +22,10 @@ import "grades.js" as Grades
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     readonly property var upcoming: Courses.upcoming
     readonly property var notebooks: Courses.revision >= 0 ? Courses.notebooks : []
@@ -80,11 +79,11 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: Courses.errorString !== ""
             text: Courses.errorString
-            color: KanteStyle.negativeTextColor
+            color: Look.negativeTextColor
             wrapMode: Text.Wrap
         }
 
-        KanteListRow {
+        LookListRow {
             objectName: "myGrades"
             Layout.fillWidth: true
             leadingText: "段"
@@ -93,7 +92,7 @@ Kirigami.ScrollablePage {
             onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("GradesPage.qml"))
         }
 
-        KanteSectionLabel {
+        LookSectionLabel {
             Layout.fillWidth: true
             Layout.topMargin: Kirigami.Units.largeSpacing
             visible: page.planned.length > 0
@@ -103,7 +102,7 @@ Kirigami.ScrollablePage {
         Repeater {
             model: page.planned
 
-            KanteListRow {
+            LookListRow {
                 required property var modelData
                 readonly property var wait: Courses.waiting(modelData.examDiscipline, modelData.examGrade, modelData.first)
 
@@ -116,7 +115,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        KanteSectionLabel {
+        LookSectionLabel {
             Layout.fillWidth: true
             Layout.topMargin: Kirigami.Units.largeSpacing
             rule: true
@@ -142,7 +141,7 @@ Kirigami.ScrollablePage {
                     return qsTr("The course calendar is not loaded yet.")
                 }
             }
-            color: Courses.calendarState === Courses.CalendarState.Failed ? KanteStyle.neutralTextColor : KanteStyle.mutedTextColor
+            color: Courses.calendarState === Courses.CalendarState.Failed ? Look.neutralTextColor : Look.mutedTextColor
             wrapMode: Text.Wrap
         }
 
@@ -159,7 +158,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        KanteSectionLabel {
+        LookSectionLabel {
             Layout.fillWidth: true
             Layout.topMargin: Kirigami.Units.largeSpacing
             rule: true
@@ -169,7 +168,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: page.notebooks.length === 0
             text: qsTr("No notebooks yet. Tap a date above, or make a course of your own (+).")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
         Repeater {
