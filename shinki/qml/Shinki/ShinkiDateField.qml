@@ -187,11 +187,18 @@ FocusScope {
         padding: ShinkiStyle.cardSpace
         closePolicy: QQC2.Popup.CloseOnEscape | QQC2.Popup.CloseOnPressOutsideParent
 
+        // The month first, then its place: a month of six week rows is taller than one of five.
         onAboutToShow: {
-            place()
             const d = new Date(root.parse(input.text) || root.date || new Date())
             year = d.getFullYear()
             month = d.getMonth() + 1
+            place()
+        }
+        // Paging with ‹ › can change the rows too.
+        onImplicitHeightChanged: {
+            if (visible) {
+                place()
+            }
         }
         function step(delta) {
             const m = month - 1 + delta

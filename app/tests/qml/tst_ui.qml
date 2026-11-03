@@ -207,6 +207,26 @@ TestCase {
         const top = popup.contentItem.mapToItem(null, 0, 0).y - popup.topPadding
         verify(top >= 0 && top + popup.height <= window.height, "month inside the window: " + top + " + " + popup.height)
         field.close()
+        tryVerify(() => !popup.visible)
+
+        // A month of six week rows after one of five (January, then March 2026), at the bottom:
+        // still inside the window and off the field.
+        field.date = new Date(2026, 0, 5)
+        field.y = 0
+        field.open()
+        tryVerify(() => popup.opened)
+        field.close()
+        tryVerify(() => !popup.visible)
+        field.date = new Date(2026, 2, 30)
+        field.y = 392
+        field.open()
+        tryVerify(() => popup.opened)
+        wait(50)
+        const six = popup.contentItem.mapToItem(null, 0, 0).y - popup.topPadding
+        const fieldTop = field.mapToItem(null, 0, 0).y
+        verify(six >= 0 && six + popup.height <= window.height, "six rows inside the window: " + six + " + " + popup.height)
+        verify(six + popup.height <= fieldTop || six >= fieldTop + field.height, "the month leaves the field free")
+        field.close()
     }
 
     function test_2_programme() {
