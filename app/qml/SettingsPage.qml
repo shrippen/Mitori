@@ -4,7 +4,6 @@ import QtQuick.Controls as QQC2
 import QtQuick.Dialogs
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // Settings: the video bundles (codes of the DVDs), a folder with exam videos of one's own, and
@@ -13,29 +12,29 @@ import Mitori
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     title: qsTr("Settings")
 
     Kirigami.FormLayout {
-        KanteButton {
+        LookButton {
             objectName: "appearanceButton"
             Kirigami.FormData.label: qsTr("Appearance:")
             icon.name: "configure"
             text: qsTr("Style, language, about Mitori")
             onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("AppearancePage.qml"))
         }
-        KanteButton {
+        LookButton {
             objectName: "videosButton"
             Kirigami.FormData.label: qsTr("Exam videos:")
             icon.name: "media-playback-start"
             text: qsTr("Videos and DVD codes")
             onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
         }
-        KanteTextField {
+        LookTextField {
             id: folderField
 
             Kirigami.FormData.label: qsTr("Video folder:")
@@ -47,7 +46,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             wrapMode: Text.Wrap
-            color: KanteStyle.disabledTextColor
+            color: Look.disabledTextColor
             text: qsTr("Without a bundle: a folder with the videos, folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …")
                   + (Videos.sandboxed ? " " + qsTr("The Flatpak can read folders under ~/Videos only.") : "")
         }
@@ -56,7 +55,7 @@ Kirigami.ScrollablePage {
             Kirigami.FormData.isSection: true
             Kirigami.FormData.label: qsTr("Backup")
         }
-        KanteButton {
+        LookButton {
             objectName: "saveBackup"
             Kirigami.FormData.label: qsTr("Backup:")
             icon.name: "document-save"
@@ -66,7 +65,7 @@ Kirigami.ScrollablePage {
                 saveDialog.open()
             }
         }
-        KanteButton {
+        LookButton {
             objectName: "readBackup"
             icon.name: "document-open"
             text: qsTr("Read backup …")
@@ -76,7 +75,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             wrapMode: Text.Wrap
-            color: KanteStyle.disabledTextColor
+            color: Look.disabledTextColor
             text: qsTr("One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back merges it: what is newer stays, nothing gets lost. DVD codes are not in it.")
         }
         QQC2.Label {
@@ -85,7 +84,7 @@ Kirigami.ScrollablePage {
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             visible: page.done !== ""
             text: page.done
-            color: KanteStyle.positiveTextColor
+            color: Look.positiveTextColor
             wrapMode: Text.Wrap
         }
         QQC2.Label {
@@ -94,7 +93,7 @@ Kirigami.ScrollablePage {
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             visible: Backup.errorString !== ""
             text: Backup.errorString
-            color: KanteStyle.negativeTextColor
+            color: Look.negativeTextColor
             wrapMode: Text.Wrap
         }
 
@@ -103,14 +102,14 @@ Kirigami.ScrollablePage {
             Kirigami.FormData.isSection: true
             Kirigami.FormData.label: qsTr("Sync between devices")
         }
-        KanteSwitch {
+        LookSwitch {
             objectName: "syncEnabled"
             Kirigami.FormData.label: qsTr("WebDAV / Nextcloud:")
             text: qsTr("Sync")
             checked: Sync.enabled
             onToggled: Sync.enabled = checked
         }
-        KanteTextField {
+        LookTextField {
             id: serverField
 
             objectName: "syncServer"
@@ -122,7 +121,7 @@ Kirigami.ScrollablePage {
             inputMethodHints: Qt.ImhUrlCharactersOnly | Qt.ImhNoAutoUppercase
             onEditingFinished: page.saveAccount()
         }
-        KanteTextField {
+        LookTextField {
             id: userField
 
             Kirigami.FormData.label: qsTr("User:")
@@ -132,7 +131,7 @@ Kirigami.ScrollablePage {
             inputMethodHints: Qt.ImhNoAutoUppercase
             onEditingFinished: page.saveAccount()
         }
-        KanteTextField {
+        LookTextField {
             id: passwordField
 
             Kirigami.FormData.label: qsTr("App password:")
@@ -142,7 +141,7 @@ Kirigami.ScrollablePage {
             placeholderText: Sync.hasPassword ? qsTr("saved") : ""
             onEditingFinished: page.saveAccount()
         }
-        KanteTextField {
+        LookTextField {
             id: nameField
 
             Kirigami.FormData.label: qsTr("This device:")
@@ -151,7 +150,7 @@ Kirigami.ScrollablePage {
             text: Sync.deviceName
             onEditingFinished: page.saveAccount()
         }
-        KanteSwitch {
+        LookSwitch {
             visible: Sync.enabled
             text: qsTr("Sync after every change")
             checked: Sync.automatic
@@ -162,10 +161,10 @@ Kirigami.ScrollablePage {
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             visible: Sync.enabled
             wrapMode: Text.Wrap
-            color: KanteStyle.disabledTextColor
+            color: Look.disabledTextColor
             text: qsTr("Otherwise when Mitori starts and once a day. Every rating and note is an entry of its own with a time; changes from several devices are merged. Mitori asks only when the same note was changed on two devices.")
         }
-        KanteButton {
+        LookButton {
             objectName: "syncNow"
             visible: Sync.enabled
             enabled: !Sync.busy
@@ -182,7 +181,7 @@ Kirigami.ScrollablePage {
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             visible: Sync.enabled
             wrapMode: Text.Wrap
-            color: Sync.errorString !== "" ? KanteStyle.negativeTextColor : KanteStyle.textColor
+            color: Sync.errorString !== "" ? Look.negativeTextColor : Look.textColor
             text: Sync.errorString !== "" ? Sync.errorString
                   : Sync.lastSync.getTime() > 0 ? qsTr("Last synced: %1").arg(Sync.lastSync.toLocaleString(Qt.locale(), Locale.ShortFormat))
                   : qsTr("Not synced yet.")
@@ -194,10 +193,10 @@ Kirigami.ScrollablePage {
                 required property var modelData
 
                 text: qsTr("%1: %2").arg(modelData.name || qsTr("Device")).arg(modelData.synced.toLocaleString(Qt.locale(), Locale.ShortFormat))
-                color: KanteStyle.disabledTextColor
+                color: Look.disabledTextColor
             }
         }
-        KanteButton {
+        LookButton {
             objectName: "syncConflicts"
             visible: Sync.enabled && Sync.conflicts.length > 0
             icon.name: "dialog-warning"
@@ -269,14 +268,14 @@ Kirigami.ScrollablePage {
         return lines.length > 0 ? lines.join("\n") : qsTr("Nothing new: this device has everything in the backup.")
     }
 
-    KanteDialog {
+    LookDialog {
         id: mergeDialog
 
         objectName: "mergeBackup"
         parent: QQC2.Overlay.overlay
         anchors.centerIn: parent
         modal: true
-        size: KanteDialog.Size.Small
+        span: LookDialog.Span.Small
         title: qsTr("Merge backup?")
         acceptText: qsTr("Merge")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel

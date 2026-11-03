@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // Videos (clickdummy "Videos", "Code"): the code of a DVD unlocks its bundle, which then loads
@@ -17,10 +16,10 @@ import Mitori
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     // The answer to the last code: "" or what went wrong.
     property string codeMessage: ""
@@ -78,10 +77,10 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             text: qsTr("The exam videos come with the DVDs of the Shinkiryu association: each DVD has a code that loads its videos onto this device.")
             wrapMode: Text.Wrap
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
         }
 
-        KanteSectionLabel {
+        LookSectionLabel {
             Layout.fillWidth: true
             rule: true
             text: qsTr("Code of the DVD")
@@ -89,23 +88,23 @@ Kirigami.ScrollablePage {
         RowLayout {
             Layout.fillWidth: true
 
-            KanteTextField {
+            LookTextField {
                 id: codeField
 
                 objectName: "codeField"
                 Layout.fillWidth: true
                 placeholderText: "XXXXX-XXXXX-XXXXX-XXXXX"
-                font: KanteStyle.monoFont(Kirigami.Theme.defaultFont.pointSize)
+                font: Look.monoFont(Kirigami.Theme.defaultFont.pointSize)
                 inputMethodHints: Qt.ImhUppercaseOnly | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
                 Accessible.name: qsTr("Code of the DVD")
                 onAccepted: unlockButton.clicked()
                 onTextEdited: page.codeMessage = ""
             }
-            KanteButton {
+            LookButton {
                 id: unlockButton
 
                 objectName: "unlockButton"
-                emphasis: KanteButton.Emphasis.Primary
+                role: LookButton.Role.Primary
                 enabled: codeField.text.trim() !== "" && !Bundles.unlocking
                 text: Bundles.unlocking ? qsTr("Checking …") : qsTr("Unlock")
                 onClicked: Bundles.unlock(codeField.text)
@@ -116,22 +115,22 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: text !== ""
             text: page.codeMessage
-            color: page.codeOk ? KanteStyle.positiveTextColor : KanteStyle.negativeTextColor
+            color: page.codeOk ? Look.positiveTextColor : Look.negativeTextColor
             wrapMode: Text.Wrap
         }
-        KanteButton {
+        LookButton {
             text: qsTr("Order on shinkiryu.de")
             icon.name: "internet-services"
             onClicked: Qt.openUrlExternally("https://www.shinkiryu.de/shinkiryu/de/DVD.php")
         }
 
-        KanteSectionLabel {
+        LookSectionLabel {
             Layout.fillWidth: true
             Layout.topMargin: Kirigami.Units.largeSpacing
             rule: true
             text: qsTr("Bundles")
         }
-        KanteSwitch {
+        LookSwitch {
             objectName: "wifiOnly"
             Layout.fillWidth: true
             text: qsTr("Load only over Wi-Fi")
@@ -141,8 +140,8 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             text: qsTr("A bundle has 70–600 MB.")
-            color: KanteStyle.mutedTextColor
-            font: KanteStyle.smallFont
+            color: Look.mutedTextColor
+            font: Look.smallFont
             wrapMode: Text.Wrap
         }
         QQC2.Label {
@@ -151,21 +150,21 @@ Kirigami.ScrollablePage {
                 : Bundles.manifestState === Bundles.ManifestState.Failed && Bundles.bundles.length === 0
                   ? qsTr("The list of videos could not be loaded. Check the connection and reload.")
                 : qsTr("On this device: %1 of videos.").arg(page.megabytes(Bundles.size))
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
         QQC2.Label {
             Layout.fillWidth: true
             visible: Bundles.errorString !== ""
             text: Bundles.errorString
-            color: KanteStyle.negativeTextColor
+            color: Look.negativeTextColor
             wrapMode: Text.Wrap
         }
 
         Repeater {
             model: bundleModel
 
-            KanteListRow {
+            LookListRow {
                 id: bundleRow
 
                 required property var row
@@ -190,10 +189,10 @@ Kirigami.ScrollablePage {
                             : bundleRow.bundleState === Bundles.State.Installed ? qsTr("loaded")
                             : bundleRow.bundleState === Bundles.State.Update ? qsTr("update")
                             : qsTr("failed")
-                        color: bundleRow.bundleState === Bundles.State.Failed ? KanteStyle.negativeTextColor : KanteStyle.mutedTextColor
-                        font: KanteStyle.smallFont
+                        color: bundleRow.bundleState === Bundles.State.Failed ? Look.negativeTextColor : Look.mutedTextColor
+                        font: Look.smallFont
                     }
-                    KanteButton {
+                    LookButton {
                         objectName: "bundleAction"
                         visible: bundleRow.bundleState !== Bundles.State.Locked
                         text: bundleRow.bundleState === Bundles.State.Downloading ? qsTr("Cancel")
@@ -220,7 +219,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: Bundles.bundles.some(b => b.state === Bundles.State.Installed)
             text: qsTr("Removing frees the space; the code stays saved, so the videos load again without it.")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
     }

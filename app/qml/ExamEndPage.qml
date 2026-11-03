@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // The end of an exam round (clickdummy "Wie lief es?"): every point rated 1–4. "Apply" (once all
@@ -12,10 +11,10 @@ import Mitori
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     required property var points        // Exam.draw()
     required property string discipline
@@ -70,14 +69,14 @@ Kirigami.ScrollablePage {
         stack.push(Qt.resolvedUrl("StatsPage.qml"), { discipline: page.discipline })
     }
 
-    KanteDialog {
+    LookDialog {
         id: discardDialog
 
         objectName: "discardDialog"
         parent: QQC2.Overlay.overlay
         anchors.centerIn: parent
         modal: true
-        size: KanteDialog.Size.Small
+        span: LookDialog.Span.Small
         destructive: true
         title: qsTr("Discard the round?")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
@@ -108,7 +107,7 @@ Kirigami.ScrollablePage {
 
                 objectName: "ratedPoint"
                 Layout.fillWidth: true
-                spacing: KanteStyle.unit(4)
+                spacing: Look.unit(4)
 
                 QQC2.Label {
                     Layout.fillWidth: true
@@ -120,10 +119,10 @@ Kirigami.ScrollablePage {
                     Layout.fillWidth: true
                     visible: text !== ""
                     text: page.subtitle(pointRow.modelData)
-                    color: KanteStyle.mutedTextColor
+                    color: Look.mutedTextColor
                     wrapMode: Text.Wrap
                 }
-                KanteLevelPicker {
+                LookLevelPicker {
                     objectName: "pointPicker"
                     Layout.fillWidth: true
                     value: page.levels[pointRow.index]
@@ -138,20 +137,20 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             text: [1, 2, 3, 4].map(l => l + " " + Practice.levelNames[l]).join(" · ") + ". "
                   + qsTr("Apply sets the rating of the techniques and keeps the round in the statistics.")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
         QQC2.Label {
             Layout.fillWidth: true
             visible: Practice.errorString !== ""
             text: Practice.errorString
-            color: KanteStyle.negativeTextColor
+            color: Look.negativeTextColor
             wrapMode: Text.Wrap
         }
-        KanteButton {
+        LookButton {
             objectName: "applyRound"
             enabled: page.complete
-            emphasis: KanteButton.Emphasis.Primary
+            role: LookButton.Role.Primary
             text: qsTr("Apply")
             onClicked: page.apply()
         }

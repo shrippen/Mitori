@@ -86,7 +86,7 @@
 <context>
     <name>SettingsPage</name>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="204"/>
+        <location filename="../qml/SettingsPage.qml" line="203"/>
         <source>%n conflict(s): solve …</source>
         <translation>
             <numerusform>%n conflict: solve …</numerusform>
@@ -94,7 +94,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="257"/>
+        <location filename="../qml/SettingsPage.qml" line="256"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n new</numerusform>
@@ -102,7 +102,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="260"/>
+        <location filename="../qml/SettingsPage.qml" line="259"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n changed</numerusform>
@@ -110,7 +110,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="267"/>
+        <location filename="../qml/SettingsPage.qml" line="266"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>
@@ -206,7 +206,7 @@
 <context>
     <name>VideosPage</name>
     <message numerus="yes">
-        <location filename="../qml/VideosPage.qml" line="177"/>
+        <location filename="../qml/VideosPage.qml" line="176"/>
         <source>%n video(s)</source>
         <translation>
             <numerusform>%n video</numerusform>

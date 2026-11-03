@@ -472,12 +472,12 @@ TestCase {
     function test_3b_settings() {
         const page = push("SettingsPage")
         compare(page.title, "Settings")
-        // Kante's ground, not the platform's (ScrollablePage does not inherit the theme).
-        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor),
-               page.background.color + " is not " + KanteStyle.backgroundColor)
-        // and the scope reaches the page's controls: Kante's text colour, not the platform's.
-        verify(Qt.colorEqual(page.Kirigami.Theme.textColor, KanteStyle.textColor),
-               page.Kirigami.Theme.textColor + " is not " + KanteStyle.textColor)
+        // The style's ground, not the platform's (ScrollablePage does not inherit the theme).
+        verify(Qt.colorEqual(page.background.color, Look.backgroundColor),
+               page.background.color + " is not " + Look.backgroundColor)
+        // and the scope reaches the page's controls: the style's text colour, not the platform's.
+        verify(Qt.colorEqual(page.Kirigami.Theme.textColor, Look.textColor),
+               page.Kirigami.Theme.textColor + " is not " + Look.textColor)
         shot("4b-settings")
         window.pageStack.pop()
     }
