@@ -13,7 +13,8 @@ Bausteinen (Owner, 02.11.2026). Er ist eine Ausnahme von der GUI-Regel. `agent.m
 shinki/
   README.md        diese Bibel: Grundsätze, Farben, Schrift, Formen, Bausteine, Umsetzung
   tokens.json      die Werte der Bibel, maschinenlesbar (eine Quelle für QML und Web)
-  qml/Shinki/      der Stil für Qt Quick (Controls-Stil und eigene Bausteine)
+  qml/Shinki/      der Stil für Qt Quick: ShinkiStyle (erzeugt aus tokens.json von tools/shinki_style.py),
+                   später Controls-Stil und eigene Bausteine
   fonts/           die Schriften (OFL), Japanisch als Teilmenge
 ```
 
@@ -64,7 +65,8 @@ nimmt darum das etwas dunklere `#6B655F` (nahe an `--muted` der Clickdummy-Seite
 | `video` | `#111111` | Fläche hinter dem Video, Player quer | |
 
 **Stufen** (Einschätzung, Stand je Grad, Kalender, Landkarte). Es ist eine Reihe von Papier zu Rot. Die
-Zahl der Stufe steht immer dabei, so trägt die Farbe die Bedeutung nicht allein.
+Zahl der Stufe steht immer dabei, so trägt die Farbe die Bedeutung nicht allein. Auf der Stufenfarbe steht sie
+in `ink`, auf Stufe 4 in `onRed` (`levelText`; 4,6:1 auf Stufe 3, 5,6:1 auf Stufe 4).
 
 | Stufe | Wert | Bedeutung |
 |---|---|---|
@@ -97,7 +99,10 @@ Die Shinki News setzen Myriad und Minion. Mitori nimmt freie Schriften mit ähnl
 PT Sans Narrow ersetzen Myriad und Myriad Condensed, Crimson Pro ersetzt Minion. Alle stehen unter der SIL
 Open Font License, dürfen also mit der App ausgeliefert werden. Noto Serif JP kommt als Teilmenge: nur die
 Zeichen, die die App zeigt: Programmdaten, Glossar, QML und Übersetzungskataloge (die Kachel-Kanji 稽 試 講
-記 図 辞 stehen nur im QML). `tools/` erzeugt sie beim Build. Die ganze Schrift hat über 20 MB.
+記 図 辞 stehen nur im QML). `tools/shinki_fonts.py` erzeugt sie aus den Schriften von google/fonts (die ganze Schrift hat 13 MB); die
+Teilmengen liegen im Repo, auch die lateinischen (nur Latein, ein Drittel der Größe). `tests/test_shinki.py`
+prüft, dass jedes Kanji und Kana darin steht: Ein neues Zeichen in den Daten scheitert dort, bis das Werkzeug
+wieder läuft. Pfeile (→) haben die Schriften nicht; Qt nimmt sie aus einer Ersatzschrift.
 
 Größen (bei 96 dpi; die App rechnet sie in die Einheit der Plattform um):
 
@@ -206,7 +211,10 @@ Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Contr
   nur dort an, wo es den Stil gibt: in einer Plasma-Sitzung mit qqc2-desktop-style. AppImage, Flatpak ohne
   KDE-Laufzeit und Android haben nur Material.
 - **`ShinkiStyle`** ist ein Singleton mit den Rollen, Stufen, Schriften und Größen aus `tokens.json`. Es ist
-  die einzige Stelle mit Werten; jeder Wert dieser Bibel steht in `tokens.json`. Die Werte erzeugt ein Werkzeug aus der JSON-Datei, damit nichts doppelt gepflegt wird.
+  die einzige Stelle mit Werten; jeder Wert dieser Bibel steht in `tokens.json`. `tools/shinki_style.py`
+  erzeugt es, ein Test prüft, dass es aktuell ist. Die Namen: `paper`, `levelColor(3)`, `bookFamily`,
+  `listRowSize` (px der Bibel über `unit()`), `pageSpace`, `sheetDuration`, `scrimOpacity`; `onRed` heißt
+  `textOnRed` (QML liest „on“ + Großbuchstabe als Signal).
 - **Controls-Stil `Shinki`** für die Controls, die Mitori nutzt: Button, ToolButton, TextField, TextArea,
   ComboBox, Switch, CheckBox, RadioButton, Slider, ProgressBar, TabBar/TabButton, Dialog, Menu/MenuItem,
   ToolTip, ScrollBar, Popup, Drawer, ItemDelegate.
@@ -231,7 +239,7 @@ Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Contr
   aus Daten, QML und Katalogen darin steht.
 - **Prüfen.**
   - Der Oberflächentest (`tst_ui`, heute mit Material) bekommt einen zweiten Lauf mit Shinki. Seine Bilder vergleicht ein Mensch mit dem Clickdummy.
-  - Ein Test rechnet die Kontraste aus Abschnitt 2 aus `tokens.json` nach, für jede Paarung aus Text und Grund, die die Bibel erlaubt.
+  - Ein Test rechnet die Kontraste aus Abschnitt 2 aus `tokens.json` nach, für jede Paarung aus Text und Grund, die die Bibel erlaubt (`tests/test_shinki.py`).
 
 ## 7 Was Shinki nicht ist
 
