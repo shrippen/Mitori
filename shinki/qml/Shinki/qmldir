@@ -3,6 +3,8 @@ singleton ShinkiStyle 1.0 ShinkiStyle.qml
 ShinkiButton 1.0 ShinkiButton.qml
 ShinkiCard 1.0 ShinkiCard.qml
 ShinkiChip 1.0 ShinkiChip.qml
+ShinkiComboBox 1.0 ShinkiComboBox.qml
+ShinkiDateField 1.0 ShinkiDateField.qml
 ShinkiDialog 1.0 ShinkiDialog.qml
 ShinkiGroupHead 1.0 ShinkiGroupHead.qml
 ShinkiHeading 1.0 ShinkiHeading.qml

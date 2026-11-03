@@ -169,16 +169,64 @@ TestCase {
         }
     }
 
-    // A dialog of the content's size (Fit): its content measures the text. Shinki only: KanteDialog
-    // has its scope as a child too (Bestand, to fix in Kante).
+    // A dialog of the content's size (Fit): its content measures the text. Shinki only until
+    // Kante 1.70 (KanteDialog measures its content) is synced here.
     function test_1d_dialog_fit() {
         if (!uiShinki) {
-            skip("KanteDialog: scope as a child, fixed in Kante")
+            skip("KanteDialog measures its content from Kante 1.70 on")
         }
         const dialog = createTemporaryQmlObject(
             "import QtQuick.Controls; import Mitori; LookDialog { Label { text: 'Hello' } }", window.contentItem)
-        verify(dialog.implicitContentWidth > 0, "content width " + dialog.implicitContentWidth)
-        verify(dialog.implicitContentHeight > 0, "content height " + dialog.implicitContentHeight)
+        verify(dialog.contentWidth > 0, "content width " + dialog.contentWidth)
+        verify(dialog.contentHeight > 0, "content height " + dialog.contentHeight)
+    }
+
+    // A date field says when its text is no date (pages lock their button on it), and its month
+    // opens inside the window, also at the window's bottom.
+    function test_1e_date_field() {
+        const field = createTemporaryQmlObject(
+            "import Mitori; LookDateField { format: 'yyyy-MM-dd'; date: new Date(2026, 0, 5) }", window.contentItem)
+        field.forceActiveFocus()
+        keySequence("Ctrl+A")
+        keyClick(Qt.Key_Delete)
+        for (const c of "2026-02-31") {
+            keyClick(c)
+        }
+        keyClick(Qt.Key_Return)
+        compare(field.invalid, true, "31 February is no date")
+
+        // Opened once at the top, then the page scrolls it to the bottom (as on a phone).
+        const popup = findChild(field, "popup")
+        field.open()
+        tryVerify(() => popup.opened)
+        field.close()
+        tryVerify(() => !popup.visible)
+        field.y = window.height - field.height - 10
+        field.open()
+        tryVerify(() => popup.opened)
+        const top = popup.contentItem.mapToItem(null, 0, 0).y - popup.topPadding
+        verify(top >= 0 && top + popup.height <= window.height, "month inside the window: " + top + " + " + popup.height)
+        field.close()
+        tryVerify(() => !popup.visible)
+
+        // A month of six week rows after one of five (January, then March 2026), at the bottom:
+        // still inside the window and off the field.
+        field.date = new Date(2026, 0, 5)
+        field.y = 0
+        field.open()
+        tryVerify(() => popup.opened)
+        field.close()
+        tryVerify(() => !popup.visible)
+        field.date = new Date(2026, 2, 30)
+        field.y = 392
+        field.open()
+        tryVerify(() => popup.opened)
+        wait(50)
+        const six = popup.contentItem.mapToItem(null, 0, 0).y - popup.topPadding
+        const fieldTop = field.mapToItem(null, 0, 0).y
+        verify(six >= 0 && six + popup.height <= window.height, "six rows inside the window: " + six + " + " + popup.height)
+        verify(six + popup.height <= fieldTop || six >= fieldTop + field.height, "the month leaves the field free")
+        field.close()
     }
 
     function test_2_programme() {
