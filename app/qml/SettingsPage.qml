@@ -279,7 +279,6 @@ Kirigami.ScrollablePage {
         title: qsTr("Merge backup?")
         acceptText: qsTr("Merge")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
-        contentHeight: mergeText.implicitHeight
         onAccepted: page.done = Backup.restore() ? qsTr("Backup merged.") : ""
         onRejected: Backup.discard()
 

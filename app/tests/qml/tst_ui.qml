@@ -171,16 +171,12 @@ TestCase {
         }
     }
 
-    // A dialog of the content's size (Fit): its content measures the text. Shinki only until
-    // Kante 1.70 (KanteDialog measures its content) is synced here.
+    // A dialog of the content's size (Fit): its content measures the text.
     function test_1d_dialog_fit() {
-        if (!uiShinki) {
-            skip("KanteDialog measures its content from Kante 1.70 on")
-        }
         const dialog = createTemporaryQmlObject(
             "import QtQuick.Controls; import Mitori; LookDialog { Label { text: 'Hello' } }", window.contentItem)
         verify(dialog.contentWidth > 0, "content width " + dialog.contentWidth)
-        verify(dialog.contentHeight > 0, "content height " + dialog.contentHeight)
+        tryVerify(() => dialog.contentHeight > 0, 1000, "content height " + dialog.contentHeight)  // Kante: once built
     }
 
     // A date field says when its text is no date (pages lock their button on it), and its month
@@ -542,6 +538,7 @@ TestCase {
     }
 
     function test_3b_settings() {
+        failOnWarning(/Binding loop/)       // the merge dialog measured its text against itself
         const page = push("SettingsPage")
         compare(page.title, "Settings")
         // The style's ground, not the platform's (ScrollablePage does not inherit the theme).
@@ -582,7 +579,10 @@ TestCase {
         page.inspect(url)
         const dialog = findChild(page, "mergeBackup")
         tryVerify(() => dialog.opened)
-        verify(findChild(page, "mergeText").text.indexOf("Nothing new") >= 0, findChild(page, "mergeText").text)
+        const text = findChild(page, "mergeText")
+        verify(text.text.indexOf("Nothing new") >= 0, text.text)
+        tryVerify(() => dialog.contentHeight >= text.implicitHeight, 1000,
+                  "the text fits: " + dialog.contentHeight + " for " + text.implicitHeight)
         shot("4c-backup", true)
         dialog.accept()
         tryVerify(() => findChild(page, "backupDone").visible)
