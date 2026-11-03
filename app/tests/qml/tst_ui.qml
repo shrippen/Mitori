@@ -355,6 +355,28 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // A comment with headings ("## Rei-ho …" in the Kumidachi text): headings, not raw marks;
+    // the full title in the column (the header elides it).
+    function test_3_comment_headings() {
+        const all = []
+        for (const g of Programme.grades("shinkitoho")) {
+            for (const r of Programme.entries("shinkitoho", g.id)) {
+                if (r.comment && r.comment.text && r.comment.text.indexOf("\n## ") >= 0) {
+                    all.push(r)
+                }
+            }
+        }
+        verify(all.length > 0, "a comment with a heading")
+        const page = push("CommentPage", { entry: all[0] })
+        const headings = findChildren(page, "commentHeading")
+        verify(headings.length > 0)
+        verify(headings.every(h => !h.text.startsWith("#")), headings.map(h => h.text).join(" | "))
+        verify(findChildren(page, "commentParagraph").every(p => !p.text.startsWith("#")))
+        compare(findChild(page, "commentTitle").text, all[0].comment.titel)
+        shot("4-comment-headings")
+        window.pageStack.pop()
+    }
+
     function test_3b_settings() {
         const page = push("SettingsPage")
         compare(page.title, "Settings")

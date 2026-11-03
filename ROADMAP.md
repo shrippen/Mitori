@@ -142,7 +142,7 @@ Reihenfolge der Kacheln. Offen, nach Gewicht:
   markieren, auch am Telefon hinscrollen; Tablet-Liste schneidet lange Ô-dachi-Zeilen ab.
 - **Technik-Blatt**: Hinweis ohne Video („Video nicht geladen · Code eingeben“ / „Zu diesem Grad gibt es kein
   Video“); Kopf mit Angriffszusatz und Grad, Formnummer; letzte Notiz mit Datum, „Notizen (n)“.
-- **Kommentar**: `##`-Überschriften, Fußnoten und Listen setzen; Titel, Gruppe und Kanji im Text.
+- **Kommentar**: Fußnoten und Listen setzen; Gruppe und Kanji im Text (Überschriften und ganzer Titel: erledigt).
 - **Heute üben**: Kalender 12 Wochen mit Legende; Hinweis „tippen öffnet das Blatt“.
 - **Videos**: Speicherbalken mit Legende (Videos, Fotos und Sprachnotizen, frei); Code-Seite mit Erklärung
   (Schreibweise egal, was passiert, der Code bleibt auf dem Gerät).

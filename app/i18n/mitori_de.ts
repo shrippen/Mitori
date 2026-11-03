@@ -277,7 +277,7 @@
 <context>
     <name>CommentPage</name>
     <message>
-        <location filename="../qml/CommentPage.qml" line="31"/>
+        <location filename="../qml/CommentPage.qml" line="69"/>
         <source>Source: shinkiryu.de, Itto-den Shinki Toho</source>
         <translation>Quelle: shinkiryu.de, Itto-den Shinki Toho</translation>
     </message>
