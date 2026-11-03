@@ -6,8 +6,8 @@ import Kante
 import Mitori
 
 // The first-start wizard (and Settings → Appearance → "Show the introduction"): what Mitori
-// is, the style, a short tour of the functions. Finishing it (or skipping) marks it done, so it
-// does not come again.
+// is, the style, a short tour of the functions. Leaving it in any way (Start, Skip, Back) marks
+// it done, so it does not come again.
 //
 //   1 Welcome   →   2 Style (StyleChoice)   →   3 Tour   →   Start: back to the start menu
 Kirigami.ScrollablePage {
@@ -25,15 +25,15 @@ Kirigami.ScrollablePage {
     readonly property var tour: [
         { glyph: "技", title: qsTr("Programme"), text: qsTr("Tap a technique: its place in the exam video plays, slow, in a loop.") },
         { glyph: "稽", title: qsTr("Practice today"), text: qsTr("The techniques due today, as a training with the videos. Rate each one: how well does it sit?") },
-        { glyph: "試", title: qsTr("Mock exam"), text: qsTr("Techniques at random, as in the exam, with or without the video.") },
-        { glyph: "記", title: qsTr("Notes and statistics"), text: qsTr("A note on each technique, photos and voice notes; your practice days per year.") },
+        { glyph: "試", title: qsTr("Exam mode"), text: qsTr("Techniques at random, as in the exam, with or without the video.") },
+        { glyph: "記", title: qsTr("Statistics"), text: qsTr("Your practice days per year and your grades; a note on each technique, with photos and voice notes.") },
         { glyph: "講", title: qsTr("Courses"), text: qsTr("The seminars from the calendar, a notebook for each.") }
     ]
 
     function finish() {
-        Appearance.welcome()
         page.Kirigami.PageStack.pop()
     }
+    Component.onDestruction: Appearance.welcome()
 
     actions: [
         Kirigami.Action {

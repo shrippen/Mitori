@@ -78,7 +78,8 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
                 color: KanteStyle.mutedTextColor
-                text: modelData.titel + " · " + (modelData.stand || "")
+                // The programme's date as the data has it (German, as the programmes).
+                text: [modelData.titel, modelData.stand].filter(x => !!x).join(" · ")
             }
         }
         QQC2.Label {

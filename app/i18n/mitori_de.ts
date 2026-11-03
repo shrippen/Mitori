@@ -181,7 +181,7 @@
         <translation>Mitori %1. Die Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho, mit den Prüfungsvideos der DVDs.</translation>
     </message>
     <message>
-        <location filename="../qml/AppearancePage.qml" line="88"/>
+        <location filename="../qml/AppearancePage.qml" line="89"/>
         <source>Sources: the exam regulations and lists of the dojo, the comments of shinkiryu.de and the Aiki-Budo lexicon.</source>
         <translation>Quellen: die Prüfungsordnungen und Listen des Dojo, die Kommentare von shinkiryu.de und das Aiki-Budo-Lexikon.</translation>
     </message>
@@ -2730,23 +2730,23 @@
     </message>
     <message>
         <location filename="../qml/WelcomePage.qml" line="28"/>
-        <source>Mock exam</source>
-        <translation>Prüfung üben</translation>
-    </message>
-    <message>
-        <location filename="../qml/WelcomePage.qml" line="28"/>
         <source>Techniques at random, as in the exam, with or without the video.</source>
         <translation>Techniken in zufälliger Folge, wie in der Prüfung, mit oder ohne Video.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="29"/>
-        <source>Notes and statistics</source>
-        <translation>Notizen und Statistik</translation>
+        <location filename="../qml/WelcomePage.qml" line="28"/>
+        <source>Exam mode</source>
+        <translation>Prüfungsmodus</translation>
     </message>
     <message>
         <location filename="../qml/WelcomePage.qml" line="29"/>
-        <source>A note on each technique, photos and voice notes; your practice days per year.</source>
-        <translation>Eine Notiz zu jeder Technik, Fotos und Sprachnotizen; deine Übungstage je Jahr.</translation>
+        <source>Statistics</source>
+        <translation>Statistik</translation>
+    </message>
+    <message>
+        <location filename="../qml/WelcomePage.qml" line="29"/>
+        <source>Your practice days per year and your grades; a note on each technique, with photos and voice notes.</source>
+        <translation>Deine Übungstage je Jahr und deine Grade; zu jeder Technik eine Notiz, mit Fotos und Sprachnotizen.</translation>
     </message>
     <message>
         <location filename="../qml/WelcomePage.qml" line="30"/>

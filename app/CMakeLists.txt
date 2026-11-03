@@ -419,6 +419,9 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     target_include_directories(tst_appearance PRIVATE services)
     target_link_libraries(tst_appearance PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
     set_target_properties(tst_appearance PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    if(MITORI_SHINKI)
+        target_compile_definitions(tst_appearance PRIVATE MITORI_SHINKI)
+    endif()
     add_test(NAME appearance COMMAND tst_appearance)
 
     # The pages with Kirigami and Kante, offscreen; screenshots into <build>/ui-shots. Plays a video

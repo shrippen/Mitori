@@ -10,15 +10,15 @@ class QQmlEngine;
 // How Mitori looks and speaks: the style (shinki/README.md, section 6), the language and whether
 // the first-start wizard ran. Style and language apply at the next start: Qt sets the controls
 // style and the catalog before the first window (main.cpp reads them with `startStyle` and
-// `startLanguage`).
+// `startLocale`).
 //
 //   style      controls (QQC2)        KanteStyle
 //   Breeze     org.kde.desktop        System    (only where qqc2-desktop-style is, on Plasma)
 //   Material   Material               System
 //   Kante      Breeze or Material     Kante, dark
 //   Leinen     Breeze or Material     Kante, light ("Leinen")
-//   Shinki     Shinki                 –         (only with -DMITORI_SHINKI=ON, until every page
-//                                               reaches it through app/qml/Look)
+//   Shinki     Breeze or Material     Kante, light   (only with -DMITORI_SHINKI=ON; its own
+//                                               controls and look come with app/qml/Look)
 class Appearance : public QObject
 {
     Q_OBJECT
