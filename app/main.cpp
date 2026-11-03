@@ -7,22 +7,9 @@
 #include <QTranslator>
 #include <QtQml/QQmlExtensionPlugin>
 
-Q_IMPORT_QML_PLUGIN(MitoriPlugin)
+#include "appearance.h"
 
-// Kirigami's own style (qqc2-desktop-style) where it is installed, as on Plasma; an AppImage
-// or Android has only Material.
-static QString controlsStyle(const QQmlApplicationEngine &engine)
-{
-    if (!qEnvironmentVariableIsSet("KDE_FULL_SESSION")) {
-        return QStringLiteral("Material");
-    }
-    for (const QString &path : engine.importPathList()) {
-        if (QDir(path).exists(QStringLiteral("org/kde/desktop"))) {
-            return QStringLiteral("org.kde.desktop");
-        }
-    }
-    return QStringLiteral("Material");
-}
+Q_IMPORT_QML_PLUGIN(MitoriPlugin)
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +17,7 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationName(QStringLiteral("Mitori"));
     QGuiApplication::setOrganizationDomain(QStringLiteral("shrippen.github.io"));
     QGuiApplication::setDesktopFileName(QStringLiteral("io.github.shrippen.Mitori"));
+    QGuiApplication::setApplicationVersion(QStringLiteral(MITORI_VERSION));
     // The bundled Breeze subset (scripts/sync-icons.sh): the theme where there is none
     // (Android, AppImage), else the fallback behind the system theme.
     QIcon::setThemeSearchPaths(QIcon::themeSearchPaths() << QStringLiteral(":/icons"));
@@ -38,7 +26,12 @@ int main(int argc, char *argv[])
         QIcon::setThemeName(QStringLiteral("breeze-mitori"));
     }
 
-    // The first of the user's languages with a catalog (de, en); otherwise the English of the code.
+    // The language chosen in Appearance, else the first of the user's languages with a catalog
+    // (de, en); otherwise the English of the code. Dates follow the chosen language too.
+    const QString chosen = Appearance::startLocale();
+    if (!chosen.isEmpty()) {
+        QLocale::setDefault(QLocale(chosen));
+    }
     QTranslator translator;
     if (translator.load(QLocale(), QStringLiteral("mitori"), QStringLiteral("_"), QStringLiteral(":/i18n"))) {
         QCoreApplication::installTranslator(&translator);
@@ -51,8 +44,10 @@ int main(int argc, char *argv[])
 #endif
 
     QQmlApplicationEngine engine;
+    // The controls style of the chosen style (Appearance), before the first window.
+    const Appearance::Style style = Appearance::startStyle(engine.importPathList());
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
-        QQuickStyle::setStyle(controlsStyle(engine));
+        QQuickStyle::setStyle(Appearance::controlsStyle(style, engine.importPathList()));
     }
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
                      [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);

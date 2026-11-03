@@ -133,8 +133,7 @@ Reihenfolge der Kacheln. Offen, nach Gewicht:
   quer fehlt sie im Bild); quer die schmale Spalte nach Entwurf B, Zeitleiste im Bild.
 - **Lehrgangsnotizbuch**: ⌗-Verknüpfung (Angriff, Technik, Waffe mit Vorschlägen; Chips, „↗ im Programm“, die
   Notiz auch bei der Technik und in deren Notizen).
-- **Darstellung** (Einstellungen): Seite fehlt; Sprache wählen, Über Mitori (Version, Datenstand, Quellen),
-  Theme (mit Shinki). Einstellungen als drei Unterseiten (Videos, Sicherung, Darstellung).
+- **Einstellungen** als drei Unterseiten (Videos, Sicherung, Darstellung); Darstellung ist schon eine eigene Seite.
 - **Startmenü**: Programm-Kachel mit Stand („Aikido · 5. Kyu · 7 von 20 prüfungsreif“ und Leiste, Kurzname);
   Telefon groß + zwei Spalten statt einer; Tablet die große Kachel 2 × 2; Begrüßung; Heute mit Sparte; Bundle-
   Update mit Namen.
@@ -167,9 +166,10 @@ Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutz
 
 - **Stil Shinki** (Shinki News): eigener Stil neben Kante, kein Unterthema (Owner, 02.11.2026); Style-Bibel in
   `shinki/README.md`, Umsetzung als Qt-Quick-Controls-Stil `shinki/qml/Shinki` mit der Schicht `app/qml/Look`.
-- **Stil wählbar** (Owner, 03.11.2026): Breeze, Material, Kante (auch Leinen), Shinki; gefragt im
-  **Einrichtungsassistenten beim ersten Start** mit kurzem Tutorial zu den Funktionen, später in Einstellungen →
-  Darstellung.
+- **Stil wählbar** (Owner, 03.11.2026): Breeze, Material, Kante, Leinen, Shinki; gefragt im
+  **Einrichtungsassistenten beim ersten Start** mit kurzem Rundgang, später in Einstellungen → Darstellung
+  (`services/appearance`, gilt nach dem Neustart). Shinki steht nur mit `-DMITORI_SHINKI=ON` zur Wahl, bis alle
+  Seiten über `app/qml/Look` gehen; bis dahin sieht es aus wie Leinen.
 - **Videos ausliefern**: beschnitten (Aikido `crop=720:372:0:64`, Daitoryu `crop=720:374:0:50`,
   Shinki Toho ohne), HEVC, als versionierte Bundles im generischen Gitea-Paket.
 - **Übersetzungen** deutsch und englisch von Anfang an.

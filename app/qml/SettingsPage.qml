@@ -22,6 +22,13 @@ Kirigami.ScrollablePage {
 
     Kirigami.FormLayout {
         KanteButton {
+            objectName: "appearanceButton"
+            Kirigami.FormData.label: qsTr("Appearance:")
+            icon.name: "configure"
+            text: qsTr("Style, language, about Mitori")
+            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("AppearancePage.qml"))
+        }
+        KanteButton {
             objectName: "videosButton"
             Kirigami.FormData.label: qsTr("Exam videos:")
             icon.name: "media-playback-start"
