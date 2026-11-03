@@ -420,6 +420,7 @@ Item {
                         objectName: "soundSwitch"
                         // On only where it sounds: slow motion is always silent.
                         readonly property bool sounds: Levels.sound && player.playbackRate >= 1
+                        enabled: player.playbackRate >= 1     // a tap in slow motion would change it unseen
                         checkable: true
                         checked: sounds
                         icon.name: sounds ? "audio-volume-high" : "audio-volume-muted"

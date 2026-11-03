@@ -376,6 +376,7 @@ TestCase {
         verify(Levels.sound)
         findChild(page, "transportBar").speedChangeRequested(0.5)
         verify(!sound.checked, "slow motion is silent")
+        verify(!sound.enabled, "no unseen change in slow motion")
         findChild(page, "transportBar").speedChangeRequested(1)
         verify(sound.checked)
 
