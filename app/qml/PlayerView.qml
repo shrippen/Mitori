@@ -411,7 +411,7 @@ Item {
                 }
 
                 // The player's switches, kept for the next start: sound (always off in slow
-                // motion) and the screen staying on while the player is open.
+                // motion) and the screen staying on while a video plays.
                 RowLayout {
                     Layout.fillWidth: true
                     visible: page.hasVideo

@@ -2734,11 +2734,6 @@
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="26"/>
-        <source>Tap a technique: its place in the exam video plays, slow, in a loop.</source>
-        <translation>Technik antippen: ihre Stelle im Prüfungsvideo läuft, langsam, in der Schleife.</translation>
-    </message>
-    <message>
         <location filename="../qml/WelcomePage.qml" line="27"/>
         <source>Practice today</source>
         <translation>Heute üben</translation>
@@ -2764,9 +2759,14 @@
         <translation>Statistik</translation>
     </message>
     <message>
+        <location filename="../qml/WelcomePage.qml" line="26"/>
+        <source>Tap a technique: its place in the exam video plays, slow, in a loop. A note on each technique, with photos and voice notes.</source>
+        <translation>Technik antippen: ihre Stelle im Prüfungsvideo läuft, langsam, in der Schleife. Zu jeder Technik eine Notiz, mit Fotos und Sprachnotizen.</translation>
+    </message>
+    <message>
         <location filename="../qml/WelcomePage.qml" line="29"/>
-        <source>Your practice days per year and your grades; a note on each technique, with photos and voice notes.</source>
-        <translation>Deine Übungstage je Jahr und deine Grade; zu jeder Technik eine Notiz, mit Fotos und Sprachnotizen.</translation>
+        <source>Your practice days per year and your grades.</source>
+        <translation>Deine Übungstage je Jahr und deine Grade.</translation>
     </message>
     <message>
         <location filename="../qml/WelcomePage.qml" line="30"/>
