@@ -36,6 +36,9 @@ add_custom_command(
 
 # The app's QML module, services and resources as a static library: the app and the UI test
 # (tests/tst_ui.cpp) link the same.
+# The version for "About Mitori" (services/appearance) and the application.
+add_compile_definitions(MITORI_VERSION="${PROJECT_VERSION}")
+
 qt_add_library(mitori_app STATIC)
 qt_add_qml_module(mitori_app
     URI Mitori
@@ -76,6 +79,9 @@ qt_add_qml_module(mitori_app
         qml/CameraPage.qml
         qml/ConflictsPage.qml
         qml/YearsPage.qml
+        qml/StyleChoice.qml
+        qml/AppearancePage.qml
+        qml/WelcomePage.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
@@ -109,6 +115,8 @@ qt_add_qml_module(mitori_app
         platform/devicelevels.cpp
         services/levels.h
         services/levels.cpp
+        services/appearance.h
+        services/appearance.cpp
         store/bundlecrypto.h
         store/bundlecrypto.cpp
         store/bundleshelf.h
@@ -199,10 +207,18 @@ endif()
 
 qt_add_executable(mitori main.cpp)
 target_link_libraries(mitori PRIVATE mitori_app mitori_appplugin)
+target_include_directories(mitori PRIVATE services)
 # The QML import scan links static plugins; a shared Qt needs none, and Kirigami's plugin
 # targets are not exported (one warning per plugin). Android keeps it for androiddeployqt.
 if(NOT ANDROID)
     set_target_properties(mitori PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+endif()
+
+# Shinki (shinki/README.md) offered in the style choice: only to check it, until every page
+# reaches it through app/qml/Look. Off in every published build.
+option(MITORI_SHINKI "Offer the Shinki style (development only, until the pages use Look)" OFF)
+if(MITORI_SHINKI)
+    target_compile_definitions(mitori_app PRIVATE MITORI_SHINKI)
 endif()
 
 # Internal demo (Studio Weber data, screenshots only). Never in published builds.
@@ -398,6 +414,12 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     target_link_libraries(tst_levels PRIVATE Qt6::Core Qt6::Qml Qt6::DBus Qt6::Test)
     set_target_properties(tst_levels PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME levels COMMAND tst_levels)
+
+    qt_add_executable(tst_appearance tests/tst_appearance.cpp services/appearance.cpp services/appearance.h)
+    target_include_directories(tst_appearance PRIVATE services)
+    target_link_libraries(tst_appearance PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
+    set_target_properties(tst_appearance PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME appearance COMMAND tst_appearance)
 
     # The pages with Kirigami and Kante, offscreen; screenshots into <build>/ui-shots. Plays a video
     # only with MITORI_VIDEOS (the videos are not in the repository).

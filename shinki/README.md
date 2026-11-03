@@ -195,13 +195,16 @@ Seiten (app/qml)        Look.levelColor(3), Look.mutedText, LookTile { … }, Lo
 Look (app/qml/Look)     wählt je Stil:   Kante ─────────────── Shinki
    │                                     app/qml/Kante          shinki/qml/Shinki
    │                                     (KanteStyle, Kante*)    (ShinkiStyle, Shinki*, Controls-Stil)
-Controls (QQC2)         Breeze, Material, Kante wie heute      Shinki: der Controls-Stil „Shinki“
+Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Controls-Stil „Shinki“
+                        Material: Material
+                        Kante, Leinen: Breeze, wo es ihn gibt, sonst Material, mit Kantes Zeichnung
 ```
 
 - **Wahl.** Der Einrichtungsassistent beim ersten Start fragt nach dem Stil. Er zeigt dazu ein kleines
   Tutorial zu den Funktionen. Später lässt sich der Stil in Einstellungen → Darstellung ändern. Der Wechsel
   gilt nach dem Neustart, denn Qt setzt den Controls-Stil nur vor dem ersten Fenster. Breeze bietet Mitori
-  nur dort an, wo es den Stil gibt (Linux).
+  nur dort an, wo es den Stil gibt: in einer Plasma-Sitzung mit qqc2-desktop-style. AppImage, Flatpak ohne
+  KDE-Laufzeit und Android haben nur Material.
 - **`ShinkiStyle`** ist ein Singleton mit den Rollen, Stufen, Schriften und Größen aus `tokens.json`. Es ist
   die einzige Stelle mit Werten; jeder Wert dieser Bibel steht in `tokens.json`. Die Werte erzeugt ein Werkzeug aus der JSON-Datei, damit nichts doppelt gepflegt wird.
 - **Controls-Stil `Shinki`** für die Controls, die Mitori nutzt: Button, ToolButton, TextField, TextArea,
@@ -221,7 +224,8 @@ Controls (QQC2)         Breeze, Material, Kante wie heute      Shinki: der Contr
   Startmenü, Programm, Blatt und Player. Sobald es `app/qml/Look` gibt, nimmt jede neue oder geänderte Seite
   `Look`. Eine noch nicht umgezogene Seite liest ihre Farben aus `KanteStyle`, einem Singleton, das kein
   Scope erreicht; unter Shinki trüge sie Plattformfarben neben Shinki-Controls. Darum bietet Mitori Shinki
-  erst an, wenn alle Seiten umgezogen sind. Bis dahin gibt es Shinki nur im Entwicklerbuild, zum Prüfen.
+  erst an, wenn alle Seiten umgezogen sind. Bis dahin gibt es Shinki nur mit der
+  Build-Option `MITORI_SHINKI` (standardmäßig aus, in keiner Auslieferung), zum Prüfen.
 - **Schriften** liegen in `shinki/fonts` und kommen als Ressource in die App (Android und AppImage haben sie
   sonst nicht). Noto Serif JP ist eine Teilmenge (Abschnitt 3). Ein Test prüft, dass jedes Kanji und Kana
   aus Daten, QML und Katalogen darin steht.

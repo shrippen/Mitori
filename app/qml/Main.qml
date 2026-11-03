@@ -1,6 +1,7 @@
 import QtQuick
 import org.kde.kirigami as Kirigami
 import Kante
+import Mitori
 
 Kirigami.ApplicationWindow {
     id: root
@@ -9,10 +10,24 @@ Kirigami.ApplicationWindow {
     width: KanteStyle.unit(420)
     height: KanteStyle.unit(800)
 
+    // The style Mitori started with (Appearance): Breeze and Material are the platform's
+    // colours, Kante dark, Leinen light. Shinki stands in Leinen until app/qml/Look reaches it.
+    readonly property bool platformStyle: Appearance.running === Appearance.Style.Breeze
+                                          || Appearance.running === Appearance.Style.Material
     Binding {
         target: KanteStyle
         property: "kind"
-        value: KanteStyle.Kind.Kante
+        value: root.platformStyle ? KanteStyle.Kind.System : KanteStyle.Kind.Kante
+    }
+    Binding {
+        target: KanteStyle
+        property: "preferDark"
+        value: Appearance.running === Appearance.Style.Kante
+    }
+    Binding {
+        target: KanteStyle
+        property: "preferLight"
+        value: Appearance.running === Appearance.Style.Leinen || Appearance.running === Appearance.Style.Shinki
     }
     KanteScope { target: root.contentItem }
 
@@ -20,6 +35,12 @@ Kirigami.ApplicationWindow {
     // (app-entscheidungen.md, "Tablet quer"), not Kirigami's columns.
     pageStack.columnView.columnResizeMode: Kirigami.ColumnView.SingleColumn
     pageStack.initialPage: StartPage {}
+    // The first start: the wizard over the start menu (it goes back there).
+    Component.onCompleted: {
+        if (!Appearance.welcomed) {
+            pageStack.push(Qt.resolvedUrl("WelcomePage.qml"))
+        }
+    }
 
     // The sync: after it brought something the services read anew; a change asks for one soon.
     Connections {

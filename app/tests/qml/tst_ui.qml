@@ -64,6 +64,55 @@ TestCase {
         return window.pageStack.currentItem
     }
 
+    // The first-start wizard: welcome, style, tour; the style waits for the next start; Start
+    // marks it done and goes back to the start menu.
+    function test_0_welcome() {
+        const page = push("WelcomePage")
+        const steps = findChild(page, "welcomeSteps")
+        const next = findChild(page, "welcomeNext")
+        compare(steps.currentIndex, 0)
+        shot("0-welcome")
+        next.clicked()
+        compare(steps.currentIndex, 1)
+        const tiles = findChildren(page, "styleTile")
+        verify(tiles.length >= 3, "Material, Kante, Leinen at least")
+        const kante = tiles.find(t => t.text === "Kante")
+        verify(kante)
+        kante.clicked()
+        compare(Appearance.style, Appearance.Style.Kante)
+        verify(Appearance.restartNeeded)
+        shot("0-welcome-style")
+        next.clicked()
+        compare(steps.currentIndex, 2)
+        compare(findChildren(page, "tourRow").length, 5)
+        shot("0-welcome-tour")
+        next.clicked()
+        tryVerify(() => window.pageStack.depth === 1)
+        verify(Appearance.welcomed)
+        Appearance.setStyle(Appearance.running)
+        verify(!Appearance.restartNeeded)
+    }
+
+    // Settings → Appearance: the style tiles, the language, the restart hint, about Mitori.
+    function test_0b_appearance() {
+        const settings = push("SettingsPage")
+        findChild(settings, "appearanceButton").clicked()
+        tryVerify(() => window.pageStack.currentItem.title === "Appearance")
+        const page = window.pageStack.currentItem
+        const hint = findChild(page, "restartHint")
+        verify(!hint.visible)
+        const language = findChild(page, "languageChoice")
+        compare(language.currentIndex, Appearance.Language.System)
+        language.activated(Appearance.Language.German)
+        compare(Appearance.language, Appearance.Language.German)
+        verify(hint.visible)
+        verify(findChild(page, "aboutText").text.indexOf(Appearance.version) >= 0)
+        verify(Appearance.version !== "")
+        shot("0b-appearance")
+        language.activated(Appearance.Language.System)
+        verify(!hint.visible)
+    }
+
     function test_1_start() {
         compare(Programme.errorString, "")
         compare(window.pageStack.currentItem.title, "Mitori 見取り")

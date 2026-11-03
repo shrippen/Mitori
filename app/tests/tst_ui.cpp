@@ -41,6 +41,8 @@ public slots:
         // Every run starts from the defaults (the video folder from MITORI_VIDEOS, not from the
         // setting a test wrote last time).
         QSettings().clear();
+        // The first-start wizard has its own case (test_0_welcome); the others start on the menu.
+        QSettings().setValue(QStringLiteral("look/welcomed"), true);
         // A speech engine without a Japanese voice, the same on every machine (the glossary
         // hides its speaker buttons).
         qputenv("MITORI_SPEECH_ENGINE", "mock");
