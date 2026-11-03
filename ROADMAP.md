@@ -129,9 +129,8 @@ Kommentar leer, Programmliste über den Grad-Chips, Tippfehler im DVD-Code als �
 Reihenfolge der Kacheln. Offen, nach Gewicht:
 
 - **Training**: Playliste auf dem Tablet links neben dem Player (Telefon: darunter, erledigt).
-- **Player**: Schalter „Ton“ und „Bildschirm an“ fehlen (kein Wach-Halten des Bildschirms); Knopf ⤢ ins
-  Querformat; Titelzeile mit Kanji (Angriff · Zusatz · Grad · i / n steht hochkant schon, quer fehlt sie im Bild); quer die schmale Spalte nach Entwurf B,
-  Zeitleiste im Bild; unter dem Notizfeld „Heute notiert“ statt nur der letzten Notiz.
+- **Player**: Knopf ⤢ ins Querformat; Titelzeile mit Kanji (Angriff · Zusatz · Grad · i / n steht hochkant schon,
+  quer fehlt sie im Bild); quer die schmale Spalte nach Entwurf B, Zeitleiste im Bild.
 - **Lehrgangsnotizbuch**: ⌗-Verknüpfung (Angriff, Technik, Waffe mit Vorschlägen; Chips, „↗ im Programm“, die
   Notiz auch bei der Technik und in deren Notizen).
 - **Darstellung** (Einstellungen): Seite fehlt; Sprache wählen, Über Mitori (Version, Datenstand, Quellen),

@@ -355,6 +355,44 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // The player's switches: the screen stays on while a video plays (and the switch on);
+    // sound off mutes also at full tempo; both stay for the next start. "Noted today" lists
+    // the day's notes on the technique.
+    function test_4t_player_switches() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const page = push("PlayerPage", { playlist: rows, index: 0 })
+        verify(!Levels.held, "no video plays: the screen may sleep")
+        Levels.setPlayback(Levels.Playback.Playing)     // as the player does while it plays
+        const awake = findChild(page, "awakeSwitch")
+        const sound = findChild(page, "soundSwitch")
+        verify(awake.checked && sound.checked)
+        awake.clicked()
+        verify(!Levels.held && !Levels.awake)
+        awake.clicked()
+        verify(Levels.held)
+        sound.clicked()
+        verify(!Levels.sound && !sound.checked)
+        sound.clicked()
+        verify(Levels.sound)
+        findChild(page, "transportBar").speedChangeRequested(0.5)
+        verify(!sound.checked, "slow motion is silent")
+        verify(!sound.enabled, "no unseen change in slow motion")
+        findChild(page, "transportBar").speedChangeRequested(1)
+        verify(sound.checked)
+
+        const noted = findChild(page, "notedToday")
+        verify(!noted.visible)
+        Practice.addNote(page.current.id, "Schritt kleiner")
+        Practice.addNote(page.current.id, "Blick")
+        verify(noted.visible)
+        verify(noted.text.indexOf("Schritt kleiner") >= 0 && noted.text.indexOf("Blick") >= 0, noted.text)
+        for (const n of Practice.notes(page.current.id)) {
+            Practice.deleteNote(n.uid)
+        }
+        window.pageStack.pop()
+        tryVerify(() => !Levels.held, 2000, "the screen may sleep again")
+    }
+
     // Swipe on the picture: up on the left half brightens the screen, down on the right half
     // turns the sound down; leaving the player gives the screen its brightness back. The levels
     // stay in memory (MITORI_DEVICE_LEVELS), no video needed.

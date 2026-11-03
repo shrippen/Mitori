@@ -55,6 +55,38 @@ private slots:
         }
         QCOMPARE(Levels().playerVolume(), 0.6);
     }
+
+    // The player's switches: sound and "screen on" stay for the next start (on by default);
+    // the screen is held only while a video plays and the switch is on.
+    void switches()
+    {
+        qputenv("MITORI_DEVICE_LEVELS", "memory");
+        {
+            Levels l;
+            QVERIFY(l.sound());
+            QVERIFY(l.awake());
+            QVERIFY(!l.held());
+            l.setPlayback(Levels::Playback::Playing);
+            QVERIFY(l.held());
+            l.setAwake(Levels::Switch::Off);
+            QVERIFY(!l.held());
+            l.setAwake(Levels::Switch::On);
+            QVERIFY(l.held());
+            l.setPlayback(Levels::Playback::Stopped);
+            QVERIFY(!l.held());
+            l.setPlayback(Levels::Playback::Playing);
+            l.restore();                            // leaving the player
+            QVERIFY(!l.held());
+            l.setAwake(Levels::Switch::Off);
+            l.setSound(Levels::Switch::Off);
+        }
+        Levels l;
+        QVERIFY(!l.sound());
+        QVERIFY(!l.awake());
+        l.setPlayback(Levels::Playback::Playing);
+        QVERIFY(!l.held());
+        l.restore();
+    }
 };
 
 QTEST_GUILESS_MAIN(TstLevels)

@@ -258,6 +258,20 @@ QVariantList Practice::notes(const QString &entry) const
     return result;
 }
 
+QVariantList Practice::notesToday(const QString &entry) const
+{
+    QVariantList result;
+    if (!m_open) {
+        return result;
+    }
+    for (const PracticeLog::Note &n : m_log->notes(entry)) {
+        if (n.created.toLocalTime().date() == m_today) {
+            result << noteMap(n);
+        }
+    }
+    return result;
+}
+
 QVariantList Practice::allNotes() const
 {
     QVariantList result;

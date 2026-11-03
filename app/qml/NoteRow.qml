@@ -12,6 +12,8 @@ ColumnLayout {
 
     required property var entry
     readonly property var last: Practice.notesRevision >= 0 && entry.id ? Practice.lastNote(entry.id) : ({})
+    // Today's notes on it ("Noted today"); without one the last note stands there.
+    readonly property var today: Practice.notesRevision >= 0 && Practice.today && entry.id ? Practice.notesToday(entry.id) : []
     // The technique the field's text belongs to.
     property string draftFor: ""
 
@@ -42,11 +44,31 @@ ColumnLayout {
 
     spacing: KanteStyle.unit(6)
 
+    // A photo or voice note without text is named as such.
+    function noteText(note) {
+        if (note.text) {
+            return note.text
+        }
+        const kind = Media.kind(note.media || "")
+        if (kind === Media.Kind.Photo) {
+            return qsTr("Photo")
+        }
+        return kind === Media.Kind.Voice ? qsTr("Voice note") : ""
+    }
+
+    QQC2.Label {
+        objectName: "notedToday"
+        Layout.fillWidth: true
+        visible: noteRow.today.length > 0
+        text: qsTr("Noted today: %1").arg(noteRow.today.map(n => noteRow.noteText(n)).join(" · "))
+        color: KanteStyle.mutedTextColor
+        wrapMode: Text.Wrap
+        maximumLineCount: 4
+        elide: Text.ElideRight
+    }
     QQC2.Label {
         Layout.fillWidth: true
-        // A photo or voice note without text is named as such.
-        readonly property string shown: (noteRow.last.text || (Media.kind(noteRow.last.media || "") === Media.Kind.Photo ? qsTr("Photo")
-                               : Media.kind(noteRow.last.media || "") === Media.Kind.Voice ? qsTr("Voice note") : ""))
+        readonly property string shown: noteRow.today.length > 0 ? "" : noteRow.noteText(noteRow.last)
         visible: shown !== ""
         text: qsTr("Last note: %1").arg(shown)
         color: KanteStyle.mutedTextColor

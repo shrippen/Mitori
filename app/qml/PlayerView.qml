@@ -134,10 +134,12 @@ Item {
         source: Videos.source(page.video)
         videoOutput: output
         audioOutput: AudioOutput {
-            muted: player.playbackRate < 1
+            muted: player.playbackRate < 1 || !Levels.sound
             volume: Levels.playerVolume
         }
         playbackRate: 1
+        // The screen stays on while it plays (the switch "Screen on"), not while it stands.
+        onPlayingChanged: Levels.setPlayback(playing ? Levels.Playback.Playing : Levels.Playback.Stopped)
         onSourceChanged: page.startPending = true
         onMediaStatusChanged: {
             if (player.mediaStatus === MediaPlayer.LoadedMedia && page.startPending) {
@@ -406,6 +408,36 @@ Item {
                     onSpeedChangeRequested: speed => player.playbackRate = speed
                     onRewind: player.position = page.from
                     onFrameStepRequested: direction => page.step(direction)
+                }
+
+                // The player's switches, kept for the next start: sound (always off in slow
+                // motion) and the screen staying on while the player is open.
+                RowLayout {
+                    Layout.fillWidth: true
+                    visible: page.hasVideo
+
+                    KanteToolButton {
+                        objectName: "soundSwitch"
+                        // On only where it sounds: slow motion is always silent.
+                        readonly property bool sounds: Levels.sound && player.playbackRate >= 1
+                        enabled: player.playbackRate >= 1     // a tap in slow motion would change it unseen
+                        checkable: true
+                        checked: sounds
+                        icon.name: sounds ? "audio-volume-high" : "audio-volume-muted"
+                        text: player.playbackRate < 1 ? qsTr("Silent in slow motion") : qsTr("Sound")
+                        onClicked: {
+                            checked = Qt.binding(() => sounds)
+                            Levels.setSound(Levels.sound ? Levels.Switch.Off : Levels.Switch.On)
+                        }
+                    }
+                    KanteToolButton {
+                        objectName: "awakeSwitch"
+                        checkable: true
+                        checked: Levels.awake
+                        icon.name: "brightness-high"
+                        text: qsTr("Screen on")
+                        onClicked: Levels.setAwake(Levels.awake ? Levels.Switch.Off : Levels.Switch.On)
+                    }
                 }
 
                 RatingRow {
