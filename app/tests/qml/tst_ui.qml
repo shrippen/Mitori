@@ -181,6 +181,34 @@ TestCase {
         verify(dialog.contentHeight > 0, "content height " + dialog.contentHeight)
     }
 
+    // A date field says when its text is no date (pages lock their button on it), and its month
+    // opens inside the window, also at the window's bottom.
+    function test_1e_date_field() {
+        const field = createTemporaryQmlObject(
+            "import Mitori; LookDateField { format: 'yyyy-MM-dd'; date: new Date(2026, 0, 5) }", window.contentItem)
+        field.forceActiveFocus()
+        keySequence("Ctrl+A")
+        keyClick(Qt.Key_Delete)
+        for (const c of "2026-02-31") {
+            keyClick(c)
+        }
+        keyClick(Qt.Key_Return)
+        compare(field.invalid, true, "31 February is no date")
+
+        // Opened once at the top, then the page scrolls it to the bottom (as on a phone).
+        const popup = findChild(field, "popup")
+        field.open()
+        tryVerify(() => popup.opened)
+        field.close()
+        tryVerify(() => !popup.visible)
+        field.y = window.height - field.height - 10
+        field.open()
+        tryVerify(() => popup.opened)
+        const top = popup.contentItem.mapToItem(null, 0, 0).y - popup.topPadding
+        verify(top >= 0 && top + popup.height <= window.height, "month inside the window: " + top + " + " + popup.height)
+        field.close()
+    }
+
     function test_2_programme() {
         Programme.discipline = "aikido"
         Programme.setGrade("aikido", "k5")

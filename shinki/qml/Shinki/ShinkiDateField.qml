@@ -18,9 +18,13 @@ FocusScope {
     property string format: "dd.MM.yyyy"
     property string placeholderText: format.toUpperCase()
     property var dayNames: ["MO", "DI", "MI", "DO", "FR", "SA", "SO"]
-    property string todayText: "Heute"
+    property string todayText: "Today"
     property var popupAbove: undefined
     signal dateEdited(var date)
+
+    // The text is no date (a page locks its button on it), as KanteDateField.
+    readonly property bool invalid: input.invalid
+    readonly property alias popupOpen: monthPopup.visible
 
     // Years a two-digit year may lie ahead of today: "26" is 2026, "99" is 1999.
     readonly property int twoDigitYearsAhead: 20
@@ -162,16 +166,29 @@ FocusScope {
         readonly property var chosen: root.date ? new Date(root.date) : null
         readonly property var now: new Date()
 
-        // Below the field, above it when the window ends (or popupAbove says so).
-        readonly property bool above: root.popupAbove !== undefined ? root.popupAbove
-            : root.Window.window ? root.mapToItem(null, 0, root.height).y + implicitHeight > root.Window.height : false
-        y: above ? -implicitHeight - ShinkiStyle.gridSpace : root.height + ShinkiStyle.gridSpace
-        x: Math.min(0, (root.Window.window ? root.Window.width - root.mapToItem(null, 0, 0).x : width) - width)
+        // Below the field, above it when there is more room there (or popupAbove says so), and
+        // inside the window sideways; worked out on every opening (the page may have scrolled).
+        function place() {
+            const gap = ShinkiStyle.gridSpace
+            let top = root
+            while (top.parent) {
+                top = top.parent
+            }
+            const p = root.mapToItem(top, 0, 0)
+            const h = implicitHeight
+            const below = top.height - p.y - root.height - 2 * gap
+            const aboveRoom = p.y - 2 * gap
+            const up = root.popupAbove === true || root.popupAbove === false ? root.popupAbove
+                                                                            : h > below && aboveRoom > below
+            x = Math.max(gap - p.x, Math.min(0, top.width - gap - width - p.x))
+            y = up ? -Math.min(h, Math.max(0, aboveRoom)) - gap : root.height + gap
+        }
         width: 7 * ShinkiStyle.chipMinSpace + 2 * padding
         padding: ShinkiStyle.cardSpace
         closePolicy: QQC2.Popup.CloseOnEscape | QQC2.Popup.CloseOnPressOutsideParent
 
         onAboutToShow: {
+            place()
             const d = new Date(root.parse(input.text) || root.date || new Date())
             year = d.getFullYear()
             month = d.getMonth() + 1
@@ -199,6 +216,7 @@ FocusScope {
                     text: "‹"
                     display: QQC2.AbstractButton.IconOnly
                     focusPolicy: Qt.NoFocus
+                    Accessible.name: "previous month"
                     onClicked: monthPopup.step(-1)
                 }
                 QQC2.Label {
@@ -215,6 +233,7 @@ FocusScope {
                     text: "›"
                     display: QQC2.AbstractButton.IconOnly
                     focusPolicy: Qt.NoFocus
+                    Accessible.name: "next month"
                     onClicked: monthPopup.step(1)
                 }
             }
