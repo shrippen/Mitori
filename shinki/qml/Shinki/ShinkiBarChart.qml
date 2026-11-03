@@ -3,8 +3,9 @@ import QtQuick.Shapes
 
 /**
  * Bar chart (bible section 5, Diagramme): a port of KanteBarChart (Kante 1.69) with the same
- * interface, drawn in Shinki: bars in the level colours (one series: level 3, the highlight in
- * red), the grid in `line`, axes and labels 11 px inkMuted in table figures, the read-out on paper
+ * interface, drawn in Shinki: one series in muted ink (apart from the level colours a legend
+ * nearby may show), the parts of a stack in the level colours, the highlight in red, the grid
+ * in `line`, axes and labels 11 px inkMuted in table figures, the read-out on paper
  * with a 1 px frame. Kante's own text follows.
  * Bar chart in the data palette. `values` is a list of numbers (one series, colour
  * `series`) or of lists (stacked, one colour per part); `labels` sit under the bars.
@@ -205,8 +206,13 @@ Item {
     function figureFont(size, strong) {
         return Qt.font({ family: ShinkiStyle.uiFamily, pixelSize: size, bold: strong, features: { "tnum": 1 } })
     }
-    // One colour: the parts of a stack step down the level colours from 3.
+    // A single series in muted ink, so a bar never reads as a level (owner, 03.11.2026: the exam
+    // averages sit under the legend of the ratings); a further series steps down the levels.
     function seriesColor(k) {
+        return k === 0 ? ShinkiStyle.inkMuted : ShinkiStyle.levelColor(Math.max(1, 3 - k))
+    }
+    // The parts of a stack step down the level colours from 3.
+    function stackColor(k) {
         return ShinkiStyle.levelColor(Math.max(1, 3 - k))
     }
 
@@ -214,7 +220,7 @@ Item {
         if (stackColors && k < stackColors.length && stackColors[k] !== undefined) {
             return stackColors[k]
         }
-        return chart.seriesColor(k)
+        return chart.stackColor(k)
     }
 
     // Widest axis label, so the plot keeps room for it.

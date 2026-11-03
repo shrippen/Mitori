@@ -203,7 +203,8 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
   - Der Abspielknopf ist ein roter Kreis.
   - Das gewählte Tempo ist `ink` gefüllt und weiß beschriftet; so liegt es nicht in Konkurrenz zum Rot.
 - **Diagramme**
-  - Balken und Kalender in den Stufenfarben, Achsen und Legende in 11 px `inkMuted`.
+  - Kalender und gestapelte Balken in den Stufenfarben; eine einzelne Reihe (Durchschnitt im Prüfungsmodus) in
+    `inkMuted`, damit ein Balken nie als Stufe gelesen wird (Owner, 03.11.2026). Achsen und Legende in 11 px `inkMuted`.
   - Gitterlinien in `line`. Jede Grafik hat Achsen oder Legende und Tooltips (Projektregel).
 - **Tooltip und Toast**: `ink` als Fläche mit 92 %, Text weiß 12 px, eckig. Eine Warnung im Toast hat links 3 px Rot;
   das Wort sagt, was geschah.

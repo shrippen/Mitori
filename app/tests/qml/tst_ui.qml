@@ -1774,6 +1774,11 @@ TestCase {
         const stats = window.pageStack.currentItem
         compare(stats.discipline, "aikido")
         const chart = findChild(stats, "examChart")
+        // Under Shinki the bars are muted ink, apart from the level colours of the legend above
+        // (owner, 03.11.2026): an average of 2.3 does not read as "sure".
+        if (uiShinki) {
+            verify(Qt.colorEqual(chart.seriesColor(chart.series), Look.mutedTextColor), String(chart.seriesColor(chart.series)))
+        }
         verify(chart.visible)
         compare(chart.values.length, 1)
         fuzzyCompare(chart.values[0], sum / n, 0.001)
