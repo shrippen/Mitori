@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 import "grades.js" as Grades
 
@@ -18,8 +17,8 @@ import "grades.js" as Grades
 Kirigami.ScrollablePage {
     id: page
 
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     // "" all, else a discipline's id.
     property string discipline: ""
@@ -50,20 +49,20 @@ Kirigami.ScrollablePage {
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        KanteSegmented {
+        LookSegmented {
             objectName: "yearsDiscipline"
             Layout.fillWidth: true
             model: [qsTr("All")].concat(Programme.disciplines.map(d => d.kurzname))
             currentIndex: page.discipline === "" ? 0 : 1 + Programme.disciplines.findIndex(d => d.id === page.discipline)
             onActivated: index => page.discipline = index === 0 ? "" : Programme.disciplines[index - 1].id
         }
-        KanteLegend {
+        LookLegend {
             Layout.fillWidth: true
-            model: [{ color: KanteStyle.levelColor(0), text: qsTr("no practice") },
-                    { color: KanteStyle.levelColor(1), text: qsTr("1–2 techniques") },
-                    { color: KanteStyle.levelColor(2), text: "3–5" },
-                    { color: KanteStyle.levelColor(3), text: "6–9" },
-                    { color: KanteStyle.levelColor(4), text: qsTr("10 and more") }]
+            model: [{ color: Look.levelColor(0), text: qsTr("no practice") },
+                    { color: Look.levelColor(1), text: qsTr("1–2 techniques") },
+                    { color: Look.levelColor(2), text: "3–5" },
+                    { color: Look.levelColor(3), text: "6–9" },
+                    { color: Look.levelColor(4), text: qsTr("10 and more") }]
         }
 
         Repeater {
@@ -85,7 +84,7 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 spacing: Kirigami.Units.smallSpacing
 
-                KanteSectionLabel {
+                LookSectionLabel {
                     objectName: "yearHeading"
                     Layout.fillWidth: true
                     rule: true
@@ -102,11 +101,11 @@ Kirigami.ScrollablePage {
                     Layout.fillWidth: true
                     implicitHeight: heat.implicitHeight
 
-                    KanteCalendarHeatmap {
+                    LookCalendarHeatmap {
                         id: heat
 
                         objectName: "yearHeatmap"
-                        cellSize: Math.max(KanteStyle.unit(4), Math.min(KanteStyle.unit(12),
+                        cellSize: Math.max(Look.unit(4), Math.min(Look.unit(12),
                                                Math.floor((heatBox.width - labelWidth + spacing) / weeks) - spacing))
                         // From the week of 1 January to the last day.
                         weeks: {
@@ -142,8 +141,8 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             text: qsTr("Columns: weeks, rows: weekdays. A technique counts once on each day it is rated.")
-            color: KanteStyle.mutedTextColor
-            font: KanteStyle.smallFont
+            color: Look.mutedTextColor
+            font: Look.smallFont
             wrapMode: Text.Wrap
         }
     }

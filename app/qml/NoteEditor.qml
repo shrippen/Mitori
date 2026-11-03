@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // Change or delete one note (from the notes page, press and hold). A technique's note by
@@ -48,7 +47,7 @@ Kirigami.Dialog {
     ]
 
     // Not a content child: the dialog's scroll view sizes itself by its only child.
-    property Item kanteScope: KanteScope { target: editor.contentItem }
+    property Item lookScope: LookScope { target: editor.contentItem }
 
     QQC2.TextArea {
         id: area

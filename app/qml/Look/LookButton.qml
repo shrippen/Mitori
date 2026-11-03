@@ -6,9 +6,11 @@ import Kante
 KanteButton {
     enum Role {
         Normal,
-        Primary
+        Primary,
+        Quiet
     }
     property int role: LookButton.Role.Normal
 
-    emphasis: role === LookButton.Role.Primary ? KanteButton.Emphasis.Primary : KanteButton.Emphasis.Normal
+    emphasis: role === LookButton.Role.Primary ? KanteButton.Emphasis.Primary
+        : role === LookButton.Role.Quiet ? KanteButton.Emphasis.Quiet : KanteButton.Emphasis.Normal
 }

@@ -5,7 +5,6 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 import QtMultimedia
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // Photo and voice note beside a note field (clickdummy: 📷 🎤): a photo from the camera or a
@@ -35,7 +34,7 @@ Item {
         anchors.fill: parent
         spacing: Kirigami.Units.smallSpacing
 
-        KanteToolButton {
+        LookToolButton {
             objectName: "addPhoto"
             visible: !compose.recording
             icon.name: "camera-photo"
@@ -60,7 +59,7 @@ Item {
                 }
             }
         }
-        KanteToolButton {
+        LookToolButton {
             objectName: "recordVoice"
             visible: !compose.recording
             icon.name: "audio-input-microphone"
@@ -74,17 +73,17 @@ Item {
             objectName: "recordingTime"
             visible: compose.recording
             text: "● " + Math.floor(recorder.duration / 60000) + ":" + String(Math.floor(recorder.duration / 1000) % 60).padStart(2, "0")
-            color: KanteStyle.negativeTextColor
+            color: Look.negativeTextColor
             Accessible.name: qsTr("Recording")
         }
-        KanteButton {
+        LookButton {
             objectName: "stopRecording"
             visible: compose.recording
             icon.name: "media-playback-stop"
             text: qsTr("Stop")
             onClicked: recorder.stop()
         }
-        KanteButton {
+        LookButton {
             objectName: "cancelRecording"
             visible: compose.recording
             text: qsTr("Cancel")
@@ -140,13 +139,13 @@ Item {
     }
 
     // On the window's overlay, bottom right.
-    property KanteToast problem: KanteToast {
+    property LookToast problem: LookToast {
         objectName: "mediaProblem"
         parent: QQC2.Overlay.overlay
         anchors.right: parent ? parent.right : undefined
         anchors.bottom: parent ? parent.bottom : undefined
         anchors.margins: Kirigami.Units.largeSpacing
-        kind: KanteToast.Kind.Warn
+        importance: LookToast.Importance.Warning
     }
     // Asked once already this time: a refusal now is a lasting one (Android asks no more).
     property bool cameraAsked: false

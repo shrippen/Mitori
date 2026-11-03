@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 import "grades.js" as Grades
 
@@ -15,10 +14,10 @@ import "grades.js" as Grades
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     // {"YYYY-MM-DD": techniques} for half a year; re-read after a rating and on a new day.
     readonly property var perDay: Practice.revision >= 0 && Practice.today.getTime() > 0 ? Practice.practisedPerDay(26 * 7) : ({})
@@ -62,19 +61,19 @@ Kirigami.ScrollablePage {
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        KanteSectionLabel {
+        LookSectionLabel {
             text: qsTr("Last 30 days")
         }
         RowLayout {
             Layout.fillWidth: true
             spacing: Kirigami.Units.gridUnit * 2
 
-            KanteKpi {
+            LookKpi {
                 objectName: "practiceDays"
                 value: String(page.last30.days)
                 label: qsTr("practice days")
             }
-            KanteKpi {
+            LookKpi {
                 objectName: "techniquesPractised"
                 value: String(page.last30.techniques)
                 label: qsTr("techniques practised")
@@ -83,12 +82,12 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             text: qsTr("A technique counts once on each day it is rated.")
-            color: KanteStyle.mutedTextColor
-            font: KanteStyle.smallFont
+            color: Look.mutedTextColor
+            font: Look.smallFont
             wrapMode: Text.Wrap
         }
 
-        KanteSectionLabel {
+        LookSectionLabel {
             text: qsTr("Practice days")
         }
         Item {
@@ -97,7 +96,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             implicitHeight: heat.implicitHeight
 
-            KanteCalendarHeatmap {
+            LookCalendarHeatmap {
                 id: heat
 
                 objectName: "practiceHeatmap"
@@ -124,26 +123,26 @@ Kirigami.ScrollablePage {
                 Accessible.name: qsTr("Practice days")
             }
         }
-        KanteButton {
+        LookButton {
             objectName: "allYears"
-            emphasis: KanteButton.Emphasis.Quiet
+            role: LookButton.Role.Quiet
             icon.name: "view-calendar"
             text: qsTr("All years …")
             onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("YearsPage.qml"))
         }
-        KanteLegend {
+        LookLegend {
             Layout.fillWidth: true
-            model: [{ color: KanteStyle.levelColor(0), text: qsTr("no practice") },
-                    { color: KanteStyle.levelColor(1), text: qsTr("1–2 techniques") },
-                    { color: KanteStyle.levelColor(2), text: "3–5" },
-                    { color: KanteStyle.levelColor(3), text: "6–9" },
-                    { color: KanteStyle.levelColor(4), text: qsTr("10 and more") }]
+            model: [{ color: Look.levelColor(0), text: qsTr("no practice") },
+                    { color: Look.levelColor(1), text: qsTr("1–2 techniques") },
+                    { color: Look.levelColor(2), text: "3–5" },
+                    { color: Look.levelColor(3), text: "6–9" },
+                    { color: Look.levelColor(4), text: qsTr("10 and more") }]
         }
 
-        KanteSectionLabel {
+        LookSectionLabel {
             text: qsTr("Rating by grade")
         }
-        KanteSegmented {
+        LookSegmented {
             Layout.fillWidth: true
             model: Programme.disciplines.map(d => d.kurzname)
             currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
@@ -159,7 +158,7 @@ Kirigami.ScrollablePage {
                 readonly property var rows: Programme.entries(page.discipline, modelData.id)
 
                 Layout.fillWidth: true
-                spacing: KanteStyle.unit(4)
+                spacing: Look.unit(4)
                 visible: stand.ids.length > 0
 
                 RowLayout {
@@ -174,7 +173,7 @@ Kirigami.ScrollablePage {
                     QQC2.Label {
                         objectName: "gradeFigure"
                         text: qsTr("%1 of %2 exam-ready").arg(stand.counts[4]).arg(stand.ids.length)
-                        color: KanteStyle.mutedTextColor
+                        color: Look.mutedTextColor
                     }
                 }
                 GradeStand {
@@ -188,29 +187,29 @@ Kirigami.ScrollablePage {
                 }
             }
         }
-        KanteLegend {
+        LookLegend {
             Layout.fillWidth: true
-            model: [4, 3, 2, 1, 0].map(l => ({ color: KanteStyle.levelColor(l), text: Practice.levelNames[l] }))
+            model: [4, 3, 2, 1, 0].map(l => ({ color: Look.levelColor(l), text: Practice.levelNames[l] }))
         }
 
         // Exam mode: the average rating of each of the last rounds of the discipline, on a scale
         // from 1 (seen) to 4 (exam-ready). A round of all 1 keeps a sliver (minBarHeight), else it
         // would show no bar at all.
-        KanteSectionLabel {
+        LookSectionLabel {
             text: qsTr("Exam mode · average per round")
         }
-        KanteBarChart {
+        LookBarChart {
             id: examChart
 
             objectName: "examChart"
             Layout.fillWidth: true
-            Layout.preferredHeight: KanteStyle.unit(160)
+            Layout.preferredHeight: Look.unit(160)
             visible: page.rounds.length > 0
             values: page.rounds.map(r => r.average)
             labels: page.rounds.map(r => r.at.toLocaleDateString(Qt.locale(), qsTr("M/d", "date under a bar")))
             minValue: 1
             maxValue: 4
-            minBarHeight: KanteStyle.unit(3)
+            minBarHeight: Look.unit(3)
             axis: true
             axisTitle: qsTr("Average")
             formatter: v => page.averageText(v)
@@ -230,19 +229,19 @@ Kirigami.ScrollablePage {
                   ? qsTr("Vertical: average of the ratings (1 %1 … 4 %2). Horizontal: date of the round.")
                         .arg(Practice.levelNames[1]).arg(Practice.levelNames[4])
                   : qsTr("No round in the exam mode yet.")
-            color: KanteStyle.mutedTextColor
-            font: KanteStyle.smallFont
+            color: Look.mutedTextColor
+            font: Look.smallFont
             wrapMode: Text.Wrap
         }
 
         // My grades of the discipline, oldest first, and a planned exam.
-        KanteSectionLabel {
+        LookSectionLabel {
             text: qsTr("My grades")
         }
         Repeater {
             model: page.passed
 
-            KanteListRow {
+            LookListRow {
                 required property var modelData
 
                 objectName: "statsGrade"
@@ -258,12 +257,12 @@ Kirigami.ScrollablePage {
                   + (page.exam.course ? (page.passed.length === 0 ? " " : "") + qsTr("Planned: %1, %2 in %3")
                          .arg(page.exam.name).arg(Grades.shortDate(page.exam.first)).arg(page.exam.place || page.exam.title) : "")
             visible: text !== ""
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
-        KanteButton {
+        LookButton {
             objectName: "editGrades"
-            emphasis: KanteButton.Emphasis.Quiet
+            role: LookButton.Role.Quiet
             icon.name: "document-edit"
             text: qsTr("Edit my grades …")
             onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("GradesPage.qml"))

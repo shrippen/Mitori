@@ -156,8 +156,8 @@
 <context>
     <name>StatsPage</name>
     <message numerus="yes">
-        <location filename="../qml/StatsPage.qml" line="50"/>
-        <location filename="../qml/StatsPage.qml" line="120"/>
+        <location filename="../qml/StatsPage.qml" line="49"/>
+        <location filename="../qml/StatsPage.qml" line="119"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>
@@ -217,7 +217,7 @@
 <context>
     <name>YearsPage</name>
     <message numerus="yes">
-        <location filename="../qml/YearsPage.qml" line="93"/>
+        <location filename="../qml/YearsPage.qml" line="92"/>
         <source>%n practice day(s)</source>
         <translation>
             <numerusform>%n practice day</numerusform>
@@ -225,8 +225,8 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/YearsPage.qml" line="94"/>
-        <location filename="../qml/YearsPage.qml" line="132"/>
+        <location filename="../qml/YearsPage.qml" line="93"/>
+        <location filename="../qml/YearsPage.qml" line="131"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>

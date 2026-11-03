@@ -3,7 +3,6 @@ import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import QtMultimedia
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // A note's photo or voice note (Media): the photo fits the width; a voice note plays on a tap,
@@ -38,8 +37,8 @@ ColumnLayout {
         Layout.fillWidth: true
         visible: !view.here
         text: view.kind === Media.Kind.Photo ? qsTr("The photo is not on this device.") : qsTr("The voice note is not on this device.")
-        color: KanteStyle.mutedTextColor
-        font: KanteStyle.smallFont
+        color: Look.mutedTextColor
+        font: Look.smallFont
         wrapMode: Text.Wrap
     }
 
@@ -47,7 +46,7 @@ ColumnLayout {
         visible: view.here && view.kind === Media.Kind.Voice
         spacing: Kirigami.Units.smallSpacing
 
-        KanteToolButton {
+        LookToolButton {
             objectName: "playVoice"
             icon.name: player.playing ? "media-playback-stop" : "media-playback-start"
             text: player.playing ? qsTr("Stop") : qsTr("Play voice note")
@@ -65,7 +64,7 @@ ColumnLayout {
             objectName: "voiceLength"
             text: player.duration > 0 ? qsTr("Voice note %1").arg(view.clock(player.playing ? player.position : player.duration))
                                       : qsTr("Voice note")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
         }
     }
 
