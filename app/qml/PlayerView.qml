@@ -181,8 +181,10 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: page.landscape
             Layout.preferredHeight: page.landscape ? -1 : width / ratio
-            // Beside the list the controls keep the room they need, on a small tablet half the height.
-            Layout.maximumHeight: page.compact ? Math.max(page.height / 2, page.height - controlsView.neededHeight)
+            // Beside the list the controls keep the room they need, on a small tablet half the height,
+            // less if the transport bar would leave the view (a taller head, Shinki).
+            Layout.maximumHeight: page.compact ? Math.max(page.height - controlsView.neededHeight,
+                                                          Math.min(page.height / 2, page.height - controlsView.barHeight))
                                                : Number.POSITIVE_INFINITY
 
             Rectangle {
@@ -286,6 +288,8 @@ Item {
             // What the controls need without the positions of a sequence (they scroll below).
             readonly property real neededHeight: contentHeight
                                                  - (stepList.visible ? stepList.height + stepList.Layout.topMargin + controls.spacing : 0)
+            // Down to the transport bar, which stays in view.
+            readonly property real barHeight: controls.y + transport.y + transport.height + Kirigami.Units.largeSpacing
             boundsBehavior: Flickable.StopAtBounds
             clip: true
             QQC2.ScrollBar.vertical: QQC2.ScrollBar {}

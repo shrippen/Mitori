@@ -729,6 +729,21 @@ TestCase {
         return page
     }
 
+    // Back from the player held sideways: the page goes (it does not keep playing), in every
+    // style. Kirigami's pop() kept it once the window had turned.
+    function test_5a_back_sideways() {
+        let player = playerAt(0)
+        window.width = 800
+        window.height = 360
+        tryVerify(() => player.headless, 2000, "sideways")
+        const back = findChild(player, "backButton")
+        tryVerify(() => back.visible, 2000, "Back beside the video")
+        wait(800)
+        mouseClick(back)
+        tryCompare(window.pageStack, "depth", 1)
+        tryVerify(() => !player || player.visible !== true, 2000, "the player is gone")     // deleted: undefined
+    }
+
     // Steps and jumps stay where they land (the backend reports "loaded" after every seek).
     function test_5_step_and_jump_stay() {
         const page = playerAt(0)
@@ -2345,9 +2360,10 @@ TestCase {
             verify(top >= -1 && top + Math.min(f.height, controls.height) <= controls.height + 1,
                    "focus in view after " + (n + 1) + " Tab (" + top + ", " + f.height + " of " + controls.height + ")")
         }
-        // A large tablet keeps the whole picture: only as little height as the controls need.
+        // A large tablet keeps the whole picture: only as little height as the controls need
+        // (16:10; at 1080 Shinki's taller head and controls leave them just over half).
         window.width = 1920
-        window.height = 1080
+        window.height = 1200
         tryVerify(() => pane.item && pane.item.height > 900, 2000)
         const stage = findChild(pane.item, "stage")
         const controls2 = findChild(pane.item, "controlsView")

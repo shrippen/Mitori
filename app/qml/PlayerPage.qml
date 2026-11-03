@@ -43,6 +43,15 @@ Kirigami.Page {
 
     onIndexChanged: view.index = index
 
+    // Back: a step to the page before, then this one goes at once (it stops playing). Kirigami's
+    // pop() slides it out, and after the window turned (sideways) it stops that slide and keeps
+    // the page, still playing.
+    function leave() {
+        const stack = page.Kirigami.PageStack.pageStack
+        stack.currentIndex = page.Kirigami.ColumnView.index - 1
+        stack.pop(stack.currentItem)
+    }
+
     // Keys reach the view (Space, arrows, the transport bar's keys) as soon as the page opens.
     Keys.forwardTo: [view]
 
@@ -57,7 +66,7 @@ Kirigami.Page {
         index: page.index
         onIndexChanged: page.index = index
         onShown: id => page.shown(id)
-        onBackRequested: page.Kirigami.PageStack.pop()
+        onBackRequested: page.leave()
         onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
     }
 }
