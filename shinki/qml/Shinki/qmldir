@@ -1,0 +1,2 @@
+module Shinki
+singleton ShinkiStyle 1.0 ShinkiStyle.qml
