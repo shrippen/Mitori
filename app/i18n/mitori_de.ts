@@ -1173,6 +1173,14 @@
     </message>
 </context>
 <context>
+    <name>Main</name>
+    <message>
+        <location filename="../qml/Main.qml" line="45"/>
+        <source>More</source>
+        <translation>Mehr</translation>
+    </message>
+</context>
+<context>
     <name>MediaCompose</name>
     <message>
         <location filename="../qml/MediaCompose.qml" line="41"/>

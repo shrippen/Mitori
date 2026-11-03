@@ -37,7 +37,9 @@ Kirigami.Page {
     padding: 0
     // The style's page ground (the window's scope gives Page the dialog colour).
     background: Rectangle { color: Look.backgroundColor }
-    globalToolBarStyle: view.landscape ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
+    // Sideways the video takes the whole height: no head (Kirigami's bar, or Shinki's head).
+    readonly property bool headless: view.landscape
+    globalToolBarStyle: headless ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
 
     onIndexChanged: view.index = index
 

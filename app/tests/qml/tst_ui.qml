@@ -199,7 +199,7 @@ TestCase {
         tryVerify(() => popup.opened)
         field.close()
         tryVerify(() => !popup.visible)
-        field.y = window.height - field.height - 10
+        field.y = window.contentItem.height - field.height - 10     // below a head the content is shorter
         field.open()
         tryVerify(() => popup.opened)
         const top = popup.contentItem.mapToItem(null, 0, 0).y - popup.topPadding
@@ -225,6 +225,42 @@ TestCase {
         verify(six >= 0 && six + popup.height <= window.height, "six rows inside the window: " + six + " + " + popup.height)
         verify(six + popup.height <= fieldTop || six >= fieldTop + field.height, "the month leaves the field free")
         field.close()
+    }
+
+    // Under Shinki the window carries Shinki's own head (bible section 5, Kopf), not Kirigami's
+    // bar: back as a red column naming the page before, the title in PT Sans bold, the page's
+    // actions.
+    function test_1f_shinki_head() {
+        if (!uiShinki) {
+            skip("Shinki only")
+        }
+        compare(window.pageStack.globalToolBar.actualStyle, Kirigami.ApplicationHeaderStyle.None)
+        const head = findChild(window, "lookHead")
+        verify(head && head.visible, "Shinki's head")
+        compare(head.title, "Mitori")
+        compare(head.kanji, "見取り")
+        verify(!findChild(head, "headBack").enabled, "no way back from the start menu")
+        const height = head.height
+
+        // Same height on every page: Kirigami keeps a page that leaves while the view's height
+        // changes (test_4s_player_swipe).
+        const page = push("CoursesPage")
+        tryCompare(head, "title", page.title)
+        const back = findChild(head, "headBack")
+        verify(back.enabled)
+        compare(head.height, height, "the head keeps its height")
+        compare(back.text, "‹ MITORI", "the title before, without its Japanese")
+        verify(findChildren(head, "headAction").length >= 1, "the page's actions")
+        shot("1f-shinki-head", true)
+        mouseClick(back)
+        tryCompare(window.pageStack, "depth", 1)
+
+        // Back by key (goBack) keeps the page ahead; the head names the page before the current.
+        push("CoursesPage")
+        window.pageStack.goBack()
+        tryCompare(window.pageStack, "currentIndex", 0)
+        compare(head.title, "Mitori")
+        verify(!back.enabled, "no way back from the start menu")
     }
 
     function test_2_programme() {
@@ -1461,7 +1497,8 @@ TestCase {
         verify(total >= 2)
         compare(page.shown[0].text, "verwaist", "newest first")
         verify(page.shown.filter(n => n.day === page.shown[0].day).length >= 2, "both today")
-        wait(500)       // Kirigami slides the page in
+        tryVerify(() => page.enabled)   // Kirigami slides the page in (disabled while it loads) ...
+        wait(500)                       // ... and moves it
         mouseClick(findChild(page, "filter_daitoryu"))
         tryVerify(() => page.filter === "daitoryu")
         verify(page.shown.length >= 1 && page.shown.every(n => n.discipline === "daitoryu"))
@@ -1529,7 +1566,7 @@ TestCase {
             round.push(String(window.activeFocusItem))
         }
         verify(list.activeFocus, "back at the list: " + round.join(" > "))
-        verify(round.some(t => t.indexOf("NavButton") >= 0), "Tab reaches Back: " + round.join(" > "))
+        verify(round.some(t => t.indexOf("NavButton") >= 0 || t.indexOf("headBack") >= 0), "Tab reaches Back: " + round.join(" > "))
         compare(round.filter(t => t.indexOf("filter_") >= 0).length, chips, round.join(" > "))
         const cur = list.itemAtIndex(list.currentIndex)
         verify(cur && cur.y + cur.height > list.contentY && cur.y < list.contentY + list.height,
@@ -1889,7 +1926,11 @@ TestCase {
         const asked = findChild(end, "discardDialog")
         const before = Practice.rounds("aikido", 8).length
         end.rate(0, 4)
-        window.pageStack.goBack()
+        if (uiShinki) {
+            mouseClick(findChild(window, "headBack"))      // Shinki's head asks the page as well
+        } else {
+            window.pageStack.goBack()
+        }
         tryVerify(() => asked.opened)
         verify(window.pageStack.currentItem === end, "still rating")
         shot("13b-exam-discard", true)

@@ -124,6 +124,7 @@ qt_add_qml_module(mitori_app
         qml/Look/LookToast.qml
         qml/Look/LookCalendarHeatmap.qml
         qml/Look/LookBarChart.qml
+        qml/Look/LookHead.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp
