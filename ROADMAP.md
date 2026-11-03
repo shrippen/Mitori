@@ -107,9 +107,50 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   `tools/bundles.yaml`, Geheimes in `../bundle-geheim`. Offen: Bundles bauen und hochladen (Owner: Zustimmung des
   Verbands), QR-Code scannen, Freischalten auf dem Telefon prüfen (Argon2id mit 64 MiB).
 
-## Offene Punkte (Stand 02.11.2026)
+## Offene Punkte (Stand 03.11.2026)
 
 Kleinigkeiten aus Reviews und Tests, je ein Folge-PR oder beim nächsten Bearbeiten der Datei.
+
+### Wartet auf den Owner
+- KORREKTUREN.md: Entscheidungen erst einarbeiten, wenn der Owner fertig ist (03.11.: „noch nicht fertig“).
+  Konkrete Antworten bisher: A-X-04 (Futari-/San'nin-gake ohne Zusatz, ändert IDs), A-D-11, D-D-01, D-D-07,
+  D-K-02; S-02 und S-12 ohne Antwort; viele „Als Frage an Sensei notieren“.
+- Android: „Bildschirm an“ (FLAG_KEEP_SCREEN_ON) nur gebaut, nicht am Telefon geprüft.
+- Bundle-Manifest auf Gitea fehlt (404 beim Start: `mitori-manifest/1/manifest.json`).
+
+### Fehler (Test zuerst)
+- Zurück-Taste (Android, Alt+Links → goBack) lässt den Player im Stapel, er spielt unsichtbar weiter (Review #64).
+  Ausweg: PlayerPage bekommt ein `onBackRequested`, das wie ExamEndPage per callLater `leave()` ruft
+  (`event.accepted` kommt in Qt 6.12 nicht an, Kopie).
+- Shinki, Tablet 1920×1080: Bedienelemente des Players scrollen 7 px (459 von 452), Regel „Bild mindestens halb“
+  (Review #64).
+- CoursePage-Fußleiste gelb in 16b/16c (beide Stile, #57).
+- `start.sh` beendete sich beim ersten Lauf am 03.11. nach <10 s mit Exit 0 ohne Meldung (zweiter Lauf normal);
+  beobachten.
+
+### Look / Shinki
+- TechniqueMapPage noch ohne Look: ShinkiHeatGrid nötig (KanteHeatGrid, 925 Zeilen).
+- LookPageTitle ungenutzt (seit dem Shinki-Kopf): entfernen oder einsetzen.
+- Stand im Grad-Chip: Token `chipStandSize` nutzt noch kein Baustein (#52).
+- ExamBoard Grundgröße 10 unter Shinki (Größe aus ShinkiStyle); ShinkiSettingRow/KanteSettingRow resetText
+  deutsch fest (#55).
+- Karten-Innenabstand als Look-Rolle (Shinki cardSpace 12) statt largeSpacing (#57).
+- Diagramm-Auslese hell (paper 92 %) gegen Bibel (Tooltip ink 92 %): angleichen (#60).
+- qmllint: „not declared as singleton in qmldir“ für Look.qml, +shinki/Look.qml, ShinkiStyle.qml (#50).
+- ctest-Lauf ui_shinki zusätzlich unter org.kde.desktop + BreezeDark (Kontrast im Dialog, #56).
+
+### Kante
+- KanteChip `checked = !checked` (KanteChip.qml:72) bricht bei ankreuzbaren Chips ohne `choice` die Bindung
+  (Grad-Chips seit 1.69 `choice`, behoben) → Kante-PR mit Test.
+- KanteHeading horizontalAlignment im Overlay (#117); Screenshots im Kante-Changelog fehlen seit 1.65.
+- KanteScope im KanteDialog erreicht ein eigenes contentItem nicht; Binding loop implicitWidth in tst_kante143
+  (Fusion, Dialog ohne Inhalt); KanteDialogSkin/SheetSkin Scope als Eigenschaft ohne Fenster (#119).
+
+### Aufräumen
+- ExamEndPage.qml:84 `contentHeight` am discardDialog überflüssig seit Kante 1.71 (#63).
+- daten.py `korrekturen()`: Tabelle mit ID-Kopf ohne Spalte „Status“ eigens melden (#65).
+
+### Von früher
 
 - **Landkarte**: Varianten eines Platzes (z. B. Ikkyo und Ikkyo ura) sind nur über das erste Blatt erreichbar:
   Frage an den Owner, ob sie einzeln erreichbar sein sollen. Datenfragen A-X-04 und D-D-08 (`KORREKTUREN.md`):
@@ -166,7 +207,7 @@ Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutz
   `shinki/README.md`, Umsetzung als Qt-Quick-Controls-Stil `shinki/qml/Shinki` mit der Schicht `app/qml/Look`.
   Stand: `ShinkiStyle` aus `tokens.json`, Schriften (Japanisch und Crimson Pro als Teilmenge), Kontrasttest;
   `app/qml/Look` (Dateiselektor „shinki“) mit Rollen, Kachel, Hinweis, Knopf, Scope; das Startmenü geht über Look;
-  `ctest ui_shinki`. Offen: Controls-Stil, die übrigen Bausteine, alle Seiten umziehen, Kopfzeile.
+  `ctest ui_shinki`. Offen: Controls-Stil, die übrigen Bausteine, alle Seiten umziehen (Kopfzeile: erledigt, #62).
 - **Stil wählbar** (Owner, 03.11.2026): Breeze, Material, Kante, Leinen, Shinki; gefragt im
   **Einrichtungsassistenten beim ersten Start** mit kurzem Rundgang, später in Einstellungen → Darstellung
   (`services/appearance`, gilt nach dem Neustart). Shinki steht nur mit `-DMITORI_SHINKI=ON` zur Wahl, bis alle
