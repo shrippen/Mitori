@@ -34,6 +34,12 @@ QQC2.Dialog {
         border.color: ShinkiStyle.line
     }
 
+    // The dialog hangs on the overlay, outside the page's scope: its content gets Shinki's colours
+    // itself (ink on paper, also under a dark platform scheme).
+    ShinkiScope {
+        target: dialog.contentItem
+    }
+
     QQC2.Overlay.modal: Rectangle {
         color: Qt.alpha(ShinkiStyle.scrim, ShinkiStyle.scrimOpacity)
     }
@@ -55,6 +61,8 @@ QQC2.Dialog {
     footer: QQC2.DialogButtonBox {
         visible: count > 0
         alignment: Qt.AlignRight
+        // Fixed, not the platform's order (Windows and KDE put OK first).
+        buttonLayout: QQC2.DialogButtonBox.GnomeLayout
         spacing: ShinkiStyle.gridSpace * 2
         padding: ShinkiStyle.pageSpace
         topPadding: 0

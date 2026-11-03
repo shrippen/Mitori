@@ -87,6 +87,8 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             id: discardText
 
+            objectName: "discardText"
+
             width: parent.width
             wrapMode: Text.Wrap
             text: qsTr("Your ratings of this round are not kept.")

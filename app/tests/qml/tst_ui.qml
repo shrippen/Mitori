@@ -58,6 +58,16 @@ TestCase {
         mouseClick(tile)
     }
 
+    // WCAG contrast of two colours (text over ground, alpha laid on the ground).
+    function contrast(fore, back) {
+        const lin = c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+        const lum = c => 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b)
+        const laid = Qt.rgba(fore.r * fore.a + back.r * (1 - fore.a), fore.g * fore.a + back.g * (1 - fore.a),
+                             fore.b * fore.a + back.b * (1 - fore.a), 1)
+        const a = lum(laid), b = lum(back)
+        return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+    }
+
     function push(page, properties) {
         window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + page + ".qml"), properties || {})
         tryVerify(() => window.pageStack.currentItem && window.pageStack.currentItem.title !== undefined)
@@ -1816,6 +1826,15 @@ TestCase {
         tryVerify(() => asked.opened)
         verify(window.pageStack.currentItem === end, "still rating")
         shot("13b-exam-discard", true)
+        // The text readable on the dialog's ground (it hangs on the overlay, outside the page's
+        // scope; a dark platform scheme gave white on white), Cancel before the main button on
+        // every platform.
+        const question = findChild(asked.contentItem, "discardText")
+        const ratio = contrast(question.color, asked.background.color)
+        verify(ratio >= 4.5, question.color + " on " + asked.background.color + ": " + ratio.toFixed(1) + ":1")
+        const cancel = asked.standardButton(QQC2.Dialog.Cancel)
+        const discard = asked.standardButton(QQC2.Dialog.Ok)
+        verify(cancel.mapToItem(null, 0, 0).x < discard.mapToItem(null, 0, 0).x, "Cancel first")
         asked.reject()
         tryVerify(() => !asked.opened)
         verify(window.pageStack.currentItem === end, "still rating")
