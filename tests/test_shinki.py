@@ -108,3 +108,34 @@ def test_latin_covers_german():
     points = cmap(FONTS / "CrimsonPro.ttf") & cmap(FONTS / "PTSans-Regular.ttf")
     # The fonts have no arrows (→); Qt takes them from a fallback font.
     assert all(ord(ch) in points for ch in "AÄÖÜäöüßéèô€„“–—…·"), "German and the app's signs"
+
+
+def family(path):
+    """The font's family (name ID 16, else 1; Windows Unicode records), without fontTools."""
+    import struct
+    data = path.read_bytes()
+    count = struct.unpack(">H", data[4:6])[0]
+    tables = {data[12 + 16 * i:16 + 16 * i]: struct.unpack(">II", data[20 + 16 * i:28 + 16 * i])
+              for i in range(count)}
+    offset = tables[b"name"][0]
+    records, strings = struct.unpack(">HH", data[offset + 2:offset + 6])
+    names = {}
+    for i in range(records):
+        platform, _, _, name_id, length, start = struct.unpack(">6H", data[offset + 6 + 12 * i:offset + 18 + 12 * i])
+        if platform == 3:
+            names[name_id] = data[offset + strings + start:offset + strings + start + length].decode("utf-16-be")
+    return names.get(16, names.get(1))
+
+
+def test_font_families_match_tokens():
+    # Qt finds a font by its family: each file names one of the bible's families.
+    families = set(TOKENS["font"].values())
+    wrong = {p.name: family(p) for p in FONTS.glob("*.ttf") if family(p) not in families}
+    assert not wrong, wrong
+
+
+def test_reserved_names_unmodified():
+    # OFL: a font with a Reserved Font Name ships unmodified (no subset): PT Sans (ParaType).
+    # The whole PT Sans has Cyrillic; a Latin subset would not.
+    for name in ["PTSans-Regular.ttf", "PTSans-Bold.ttf", "PTSansNarrow-Bold.ttf"]:
+        assert 0x0416 in cmap(FONTS / name), f"{name} is a subset (OFL: Reserved Font Name)"

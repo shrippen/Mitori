@@ -100,7 +100,8 @@ PT Sans Narrow ersetzen Myriad und Myriad Condensed, Crimson Pro ersetzt Minion.
 Open Font License, dürfen also mit der App ausgeliefert werden. Noto Serif JP kommt als Teilmenge: nur die
 Zeichen, die die App zeigt: Programmdaten, Glossar, QML und Übersetzungskataloge (die Kachel-Kanji 稽 試 講
 記 図 辞 stehen nur im QML). `tools/shinki_fonts.py` erzeugt sie aus den Schriften von google/fonts (die ganze Schrift hat 13 MB); die
-Teilmengen liegen im Repo, auch die lateinischen (nur Latein, ein Drittel der Größe). `tests/test_shinki.py`
+Teilmengen liegen im Repo, Crimson Pro nur Latein (ein Drittel der Größe). PT Sans und PT Sans Narrow kommen
+unverändert: Ihre OFL reserviert den Namen „PT Sans“, eine Teilmenge dürfte ihn nicht tragen. `tests/test_shinki.py`
 prüft, dass jedes Kanji und Kana darin steht: Ein neues Zeichen in den Daten scheitert dort, bis das Werkzeug
 wieder läuft. Pfeile (→) haben die Schriften nicht; Qt nimmt sie aus einer Ersatzschrift.
 

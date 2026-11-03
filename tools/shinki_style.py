@@ -29,9 +29,11 @@ import org.kde.kirigami as Kirigami
 QtObject {
     id: style
 
-    // A size of the bible (px at 96 dpi) in the platform's units, as Kirigami scales.
+    // A size of the bible (px at 96 dpi) in the platform's units, as Kirigami scales: its
+    // gridUnit is gridUnitPx at 96 dpi.
+    readonly property int gridUnitPx: %d
     function unit(px) {
-        return Math.round(px * Kirigami.Units.gridUnit / 18)
+        return Math.round(px * Kirigami.Units.gridUnit / gridUnitPx)
     }
 """
 
@@ -52,7 +54,7 @@ def scaled(value):
 
 
 def generate(tokens):
-    lines = [HEADER]
+    lines = [HEADER % tokens["gridUnitPx"]]
 
     lines.append("    // Colours (section 2).")
     for name, value in tokens["color"].items():

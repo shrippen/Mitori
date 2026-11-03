@@ -7,9 +7,11 @@ import org.kde.kirigami as Kirigami
 QtObject {
     id: style
 
-    // A size of the bible (px at 96 dpi) in the platform's units, as Kirigami scales.
+    // A size of the bible (px at 96 dpi) in the platform's units, as Kirigami scales: its
+    // gridUnit is gridUnitPx at 96 dpi.
+    readonly property int gridUnitPx: 18
     function unit(px) {
-        return Math.round(px * Kirigami.Units.gridUnit / 18)
+        return Math.round(px * Kirigami.Units.gridUnit / gridUnitPx)
     }
 
     // Colours (section 2).
