@@ -181,6 +181,7 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
 - **Einstellungszeile**: Titel 14 px `ink`, darunter der Hinweis 12 px `inkMuted`, rechts das Steuerelement; unten eine
   Linie. Geändert: ein rotes Quadrat am Titel und „Zurücksetzen“ als Link. Ein Abschnitt darüber als Kolumne.
 - **Seitentitel** (Kopf): PT Sans fett 22 px, `ink`.
+- **Karte**: `paperAlt` mit 1 px Rahmen in `line`, eckig; Innenabstand 12–14 px.
 - **Dialog**: weiß mit 1 px Rahmen, eckig, auf `scrim`; Titel PT Sans fett 16 px, Text 14 px. Unten rechts Abbrechen
   (Zweitknopf) und der Hauptknopf, rot, mit dem, was er tut („Verwerfen“, nicht „OK“). Breiten 432, 648 und 864 px,
   höchstens 90 % des Fensters.

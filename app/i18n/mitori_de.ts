@@ -285,44 +285,44 @@
 <context>
     <name>ConflictsPage</name>
     <message>
-        <location filename="../qml/ConflictsPage.qml" line="17"/>
+        <location filename="../qml/ConflictsPage.qml" line="16"/>
         <source>Conflicts</source>
         <translation>Konflikte</translation>
     </message>
     <message>
-        <location filename="../qml/ConflictsPage.qml" line="41"/>
+        <location filename="../qml/ConflictsPage.qml" line="40"/>
         <source>Note</source>
         <translation>Notiz</translation>
     </message>
     <message>
-        <location filename="../qml/ConflictsPage.qml" line="41"/>
+        <location filename="../qml/ConflictsPage.qml" line="40"/>
         <source>Notebook entry</source>
         <translation>Eintrag im Notizbuch</translation>
     </message>
     <message>
-        <location filename="../qml/ConflictsPage.qml" line="46"/>
-        <location filename="../qml/ConflictsPage.qml" line="72"/>
+        <location filename="../qml/ConflictsPage.qml" line="45"/>
+        <location filename="../qml/ConflictsPage.qml" line="71"/>
         <source>This device</source>
         <translation>Dieses Gerät</translation>
     </message>
     <message>
-        <location filename="../qml/ConflictsPage.qml" line="47"/>
-        <location filename="../qml/ConflictsPage.qml" line="76"/>
+        <location filename="../qml/ConflictsPage.qml" line="46"/>
+        <location filename="../qml/ConflictsPage.qml" line="75"/>
         <source>Other device</source>
         <translation>Anderes Gerät</translation>
     </message>
     <message>
-        <location filename="../qml/ConflictsPage.qml" line="81"/>
+        <location filename="../qml/ConflictsPage.qml" line="80"/>
         <source>Keep both</source>
         <translation>Beide behalten</translation>
     </message>
     <message>
-        <location filename="../qml/ConflictsPage.qml" line="93"/>
+        <location filename="../qml/ConflictsPage.qml" line="92"/>
         <source>No conflicts. All devices are at the same state.</source>
         <translation>Keine Konflikte. Alle Geräte sind auf dem gleichen Stand.</translation>
     </message>
     <message>
-        <location filename="../qml/ConflictsPage.qml" line="98"/>
+        <location filename="../qml/ConflictsPage.qml" line="97"/>
         <source>Ratings need no choice: the newer counts, the other stays in the history.</source>
         <translation>Einschätzungen brauchen keine Wahl: die neuere gilt, die andere bleibt im Verlauf.</translation>
     </message>
@@ -457,47 +457,47 @@
 <context>
     <name>CoursePage</name>
     <message>
-        <location filename="../qml/CoursePage.qml" line="46"/>
+        <location filename="../qml/CoursePage.qml" line="45"/>
         <source>Notebook</source>
         <translation>Notizbuch</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="53"/>
+        <location filename="../qml/CoursePage.qml" line="52"/>
         <source>Export</source>
         <translation>Exportieren</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="62"/>
+        <location filename="../qml/CoursePage.qml" line="61"/>
         <source>Delete notebook</source>
         <translation>Notizbuch löschen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="103"/>
+        <location filename="../qml/CoursePage.qml" line="102"/>
         <source>from the calendar</source>
         <translation>aus dem Kalender</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="103"/>
+        <location filename="../qml/CoursePage.qml" line="102"/>
         <source>own entry</source>
         <translation>eigener Eintrag</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="124"/>
+        <location filename="../qml/CoursePage.qml" line="123"/>
         <source>In the calendar</source>
         <translation>In den Kalender</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="135"/>
+        <location filename="../qml/CoursePage.qml" line="134"/>
         <source>Announcement</source>
         <translation>Ausschreibung</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="143"/>
+        <location filename="../qml/CoursePage.qml" line="142"/>
         <source>Exported: %1 (notizbuch.md with the photos and voice notes)</source>
         <translation>Exportiert: %1 (notizbuch.md mit den Fotos und Sprachnotizen)</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="144"/>
+        <location filename="../qml/CoursePage.qml" line="143"/>
         <source>%n file(s) were not on this device and are missing.</source>
         <translation>
             <numerusform>%n Datei war nicht auf diesem Gerät und fehlt.</numerusform>
@@ -505,132 +505,132 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="153"/>
+        <location filename="../qml/CoursePage.qml" line="152"/>
         <source>No calendar app could be opened.</source>
         <translation>Es ließ sich keine Kalender-App öffnen.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="173"/>
+        <location filename="../qml/CoursePage.qml" line="172"/>
         <source>Exam %1</source>
         <translation>Prüfung %1</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="190"/>
+        <location filename="../qml/CoursePage.qml" line="189"/>
         <source>Change</source>
         <translation>Ändern</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="198"/>
+        <location filename="../qml/CoursePage.qml" line="197"/>
         <source>Plan an exam here …</source>
         <translation>Prüfung hier ablegen …</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="215"/>
+        <location filename="../qml/CoursePage.qml" line="214"/>
         <source>Plan an exam here</source>
         <translation>Prüfung hier ablegen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="225"/>
+        <location filename="../qml/CoursePage.qml" line="224"/>
         <source>Discipline</source>
         <translation>Sparte</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="239"/>
+        <location filename="../qml/CoursePage.qml" line="238"/>
         <source>next</source>
         <translation>nächster</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="239"/>
+        <location filename="../qml/CoursePage.qml" line="238"/>
         <source>passed</source>
         <translation>abgelegt</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="250"/>
+        <location filename="../qml/CoursePage.qml" line="249"/>
         <source>Waiting time: %1</source>
         <translation>Wartezeit: %1</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="250"/>
+        <location filename="../qml/CoursePage.qml" line="249"/>
         <source>All grades passed.</source>
         <translation>Alle Grade abgelegt.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="262"/>
+        <location filename="../qml/CoursePage.qml" line="261"/>
         <source>Plan</source>
         <translation>Vormerken</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="271"/>
+        <location filename="../qml/CoursePage.qml" line="270"/>
         <source>No exam</source>
         <translation>Keine Prüfung</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="279"/>
+        <location filename="../qml/CoursePage.qml" line="278"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="298"/>
+        <location filename="../qml/CoursePage.qml" line="297"/>
         <source>No entries yet. Write below what was shown.</source>
         <translation>Noch keine Einträge. Unten schreiben, was gezeigt wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="347"/>
+        <location filename="../qml/CoursePage.qml" line="346"/>
         <source>Change or delete</source>
         <translation>Ändern oder löschen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="380"/>
+        <location filename="../qml/CoursePage.qml" line="379"/>
         <source>What was shown?</source>
         <translation>Was wurde gezeigt?</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="381"/>
+        <location filename="../qml/CoursePage.qml" line="380"/>
         <source>New entry</source>
         <translation>Neuer Eintrag</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="400"/>
+        <location filename="../qml/CoursePage.qml" line="399"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="414"/>
+        <location filename="../qml/CoursePage.qml" line="413"/>
         <source>Export notebook</source>
         <translation>Notizbuch exportieren</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="417"/>
+        <location filename="../qml/CoursePage.qml" line="416"/>
         <source>ZIP archives (*.zip)</source>
         <translation>ZIP-Archive (*.zip)</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="434"/>
+        <location filename="../qml/CoursePage.qml" line="433"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="434"/>
+        <location filename="../qml/CoursePage.qml" line="433"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="440"/>
+        <location filename="../qml/CoursePage.qml" line="439"/>
         <source>Entry</source>
         <translation>Eintrag</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="452"/>
+        <location filename="../qml/CoursePage.qml" line="451"/>
         <source>Delete notebook?</source>
         <translation>Notizbuch löschen?</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="453"/>
+        <location filename="../qml/CoursePage.qml" line="452"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="463"/>
+        <location filename="../qml/CoursePage.qml" line="462"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>Das Notizbuch und sein %n Eintrag verschwinden von diesem Gerät.</numerusform>

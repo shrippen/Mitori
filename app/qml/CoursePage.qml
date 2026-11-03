@@ -6,7 +6,6 @@ import QtQuick.Controls as QQC2
 import QtQuick.Dialogs
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 import "coursedays.js" as CourseDays
 import "grades.js" as Grades
@@ -20,10 +19,10 @@ import "grades.js" as Grades
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     required property string uid
     readonly property var course: Courses.revision >= 0 ? Courses.notebook(uid) : ({})
@@ -92,17 +91,17 @@ Kirigami.ScrollablePage {
         QQC2.Control {
             Layout.fillWidth: true
             padding: Kirigami.Units.largeSpacing
-            background: KanteCard {}
+            background: LookCard {}
 
             contentItem: ColumnLayout {
                 spacing: Kirigami.Units.smallSpacing
 
-                KanteSectionLabel {
+                LookSectionLabel {
                     Layout.fillWidth: true
                     text: CourseDays.range(page.course.first, page.course.last) + " · "
                           + (page.course.calendarUid ? qsTr("from the calendar") : qsTr("own entry"))
                 }
-                KanteHeading {
+                LookHeading {
                     objectName: "courseTitle"
                     Layout.fillWidth: true
                     level: 2
@@ -118,7 +117,7 @@ Kirigami.ScrollablePage {
                     Layout.fillWidth: true
                     spacing: Kirigami.Units.smallSpacing
 
-                    KanteButton {
+                    LookButton {
                         objectName: "toCalendar"
                         icon.name: "view-calendar"
                         text: qsTr("In the calendar")
@@ -128,7 +127,7 @@ Kirigami.ScrollablePage {
                             }
                         }
                     }
-                    KanteButton {
+                    LookButton {
                         objectName: "announcement"
                         visible: !!page.course.announcement
                         icon.name: "internet-services"
@@ -142,7 +141,7 @@ Kirigami.ScrollablePage {
                     visible: page.exported !== ""
                     text: qsTr("Exported: %1 (notizbuch.md with the photos and voice notes)").arg(page.exported)
                           + (page.exportMissing > 0 ? " " + qsTr("%n file(s) were not on this device and are missing.", "", page.exportMissing) : "")
-                    color: KanteStyle.positiveTextColor
+                    color: Look.positiveTextColor
                     wrapMode: Text.Wrap
                 }
                 QQC2.Label {
@@ -151,7 +150,7 @@ Kirigami.ScrollablePage {
                     Layout.fillWidth: true
                     visible: false
                     text: qsTr("No calendar app could be opened.")
-                    color: KanteStyle.neutralTextColor
+                    color: Look.neutralTextColor
                     wrapMode: Text.Wrap
                 }
             }
@@ -168,7 +167,7 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 visible: page.planned && !page.choosing
 
-                KanteChip {
+                LookChip {
                     objectName: "examChip"
                     text: qsTr("Exam %1").arg(page.course.examName || "")
                     checkable: true
@@ -181,17 +180,17 @@ Kirigami.ScrollablePage {
                     readonly property var wait: Courses.revision >= 0 && page.planned
                                                 ? Courses.waiting(page.course.examDiscipline, page.course.examGrade, page.course.first) : ({})
                     text: Grades.waitText(wait)
-                    color: Grades.tooEarly(wait) ? KanteStyle.neutralTextColor : KanteStyle.mutedTextColor
+                    color: Grades.tooEarly(wait) ? Look.neutralTextColor : Look.mutedTextColor
                     wrapMode: Text.Wrap
                 }
-                KanteButton {
+                LookButton {
                     objectName: "changeExam"
                     visible: page.coming
                     text: qsTr("Change")
                     onClicked: page.choose()
                 }
             }
-            KanteButton {
+            LookButton {
                 objectName: "planExam"
                 visible: !page.planned && page.coming && !page.choosing
                 icon.name: "view-calendar"
@@ -204,17 +203,17 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 visible: page.choosing
                 padding: Kirigami.Units.largeSpacing
-                background: KanteCard {}
+                background: LookCard {}
 
                 contentItem: ColumnLayout {
                     spacing: Kirigami.Units.smallSpacing
 
-                    KanteHeading {
+                    LookHeading {
                         Layout.fillWidth: true
                         level: 3
                         text: qsTr("Plan an exam here")
                     }
-                    KanteSegmented {
+                    LookSegmented {
                         Layout.fillWidth: true
                         model: Programme.disciplines.map(d => d.kurzname)
                         currentIndex: Programme.disciplines.findIndex(d => d.id === page.examDiscipline)
@@ -231,7 +230,7 @@ Kirigami.ScrollablePage {
                         Repeater {
                             model: page.examLadder
 
-                            KanteChip {
+                            LookChip {
                                 required property var modelData
                                 readonly property bool next: modelData.id === Courses.nextGrade(page.examDiscipline)
 
@@ -248,16 +247,16 @@ Kirigami.ScrollablePage {
                         Layout.fillWidth: true
                         readonly property var wait: page.examGrade !== "" ? Courses.waiting(page.examDiscipline, page.examGrade, page.course.first) : ({})
                         text: page.examGrade !== "" ? qsTr("Waiting time: %1").arg(Grades.waitText(wait)) : qsTr("All grades passed.")
-                        color: Grades.tooEarly(wait) ? KanteStyle.neutralTextColor : KanteStyle.mutedTextColor
+                        color: Grades.tooEarly(wait) ? Look.neutralTextColor : Look.mutedTextColor
                         wrapMode: Text.Wrap
                     }
                     Flow {
                         Layout.fillWidth: true
                         spacing: Kirigami.Units.smallSpacing
 
-                        KanteButton {
+                        LookButton {
                             objectName: "examPlan"
-                            emphasis: KanteButton.Emphasis.Primary
+                            role: LookButton.Role.Primary
                             enabled: page.examGrade !== ""
                             text: qsTr("Plan")
                             onClicked: {
@@ -266,7 +265,7 @@ Kirigami.ScrollablePage {
                                 }
                             }
                         }
-                        KanteButton {
+                        LookButton {
                             objectName: "examNone"
                             text: qsTr("No exam")
                             onClicked: {
@@ -275,7 +274,7 @@ Kirigami.ScrollablePage {
                                 }
                             }
                         }
-                        KanteButton {
+                        LookButton {
                             text: qsTr("Cancel")
                             onClicked: page.choosing = false
                         }
@@ -288,7 +287,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: Courses.errorString !== ""
             text: Courses.errorString
-            color: KanteStyle.negativeTextColor
+            color: Look.negativeTextColor
             wrapMode: Text.Wrap
         }
 
@@ -296,7 +295,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: page.entries.length === 0
             text: qsTr("No entries yet. Write below what was shown.")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
 
@@ -311,7 +310,7 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 spacing: Kirigami.Units.smallSpacing
 
-                KanteSectionLabel {
+                LookSectionLabel {
                     text: dayBlock.modelData.day.toLocaleDateString(Qt.locale(), "dddd, " + Qt.locale().dateFormat(Locale.ShortFormat))
                 }
                 Repeater {
@@ -338,9 +337,9 @@ Kirigami.ScrollablePage {
                             padding: Kirigami.Units.smallSpacing
                             activeFocusOnTab: true
                             background: Rectangle {
-                                color: KanteStyle.cardColor
-                                border.width: entryItemLabel.activeFocus ? KanteStyle.borderWidth : 0
-                                border.color: KanteStyle.focusColor
+                                color: Look.cardColor
+                                border.width: entryItemLabel.activeFocus ? Look.focusWidth : 0
+                                border.color: Look.focusColor
                             }
                             Accessible.role: Accessible.Button
                             Accessible.name: entryItem.modelData.text || page.mediaWord(entryItem.modelData.media)
@@ -372,7 +371,7 @@ Kirigami.ScrollablePage {
         RowLayout {
             anchors.fill: parent
 
-            KanteTextField {
+            LookTextField {
                 id: compose
 
                 objectName: "courseCompose"
@@ -393,8 +392,8 @@ Kirigami.ScrollablePage {
                     }
                 }
             }
-            KanteButton {
-                emphasis: KanteButton.Emphasis.Primary
+            LookButton {
+                role: LookButton.Role.Primary
                 enabled: compose.text.trim() !== ""
                 icon.name: "list-add"
                 text: qsTr("Add")
@@ -442,13 +441,13 @@ Kirigami.ScrollablePage {
         remove: uid => Courses.deleteEntry(uid)
     }
 
-    KanteDialog {
+    LookDialog {
         id: removeDialog
 
         objectName: "removeCourse"
         modal: true
         destructive: true
-        size: KanteDialog.Size.Small
+        span: LookDialog.Span.Small
         title: qsTr("Delete notebook?")
         acceptText: qsTr("Delete")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel

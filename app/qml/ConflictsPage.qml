@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // The conflicts of the sync (clickdummy "Konflikte"): a note or notebook entry changed on two
@@ -11,8 +10,8 @@ import Mitori
 Kirigami.ScrollablePage {
     id: page
 
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     title: qsTr("Conflicts")
 
@@ -30,12 +29,12 @@ Kirigami.ScrollablePage {
                 objectName: "conflict"
                 Layout.fillWidth: true
                 padding: Kirigami.Units.largeSpacing
-                background: KanteCard {}
+                background: LookCard {}
 
                 contentItem: ColumnLayout {
                     spacing: Kirigami.Units.smallSpacing
 
-                    KanteHeading {
+                    LookHeading {
                         Layout.fillWidth: true
                         level: 3
                         text: (card.modelData.kind === "note" ? qsTr("Note") : qsTr("Notebook entry")) + " · " + page.where(card.modelData)
@@ -53,7 +52,7 @@ Kirigami.ScrollablePage {
                             Layout.fillWidth: true
                             spacing: 0
 
-                            KanteSectionLabel {
+                            LookSectionLabel {
                                 Layout.fillWidth: true
                                 text: modelData.who + ", " + modelData.at.toLocaleString(Qt.locale(), Locale.ShortFormat)
                             }
@@ -68,15 +67,15 @@ Kirigami.ScrollablePage {
                         Layout.fillWidth: true
                         spacing: Kirigami.Units.smallSpacing
 
-                        KanteButton {
+                        LookButton {
                             text: qsTr("This device")
                             onClicked: Sync.resolve(card.modelData.index, Sync.Mine)
                         }
-                        KanteButton {
+                        LookButton {
                             text: card.modelData.device || qsTr("Other device")
                             onClicked: Sync.resolve(card.modelData.index, Sync.Theirs)
                         }
-                        KanteButton {
+                        LookButton {
                             objectName: "keepBoth"
                             text: qsTr("Keep both")
                             onClicked: Sync.resolve(card.modelData.index, Sync.Both)
@@ -96,7 +95,7 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             text: qsTr("Ratings need no choice: the newer counts, the other stays in the history.")
-            color: KanteStyle.disabledTextColor
+            color: Look.disabledTextColor
             wrapMode: Text.Wrap
         }
     }
