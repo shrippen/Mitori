@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 import "coursedays.js" as CourseDays
 import "grades.js" as Grades
@@ -21,10 +20,10 @@ import "grades.js" as Grades
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     readonly property var grades: Courses.revision >= 0 ? Courses.grades : []
 
@@ -37,7 +36,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: Courses.errorString !== ""
             text: Courses.errorString
-            color: KanteStyle.negativeTextColor
+            color: Look.negativeTextColor
             wrapMode: Text.Wrap
         }
 
@@ -60,7 +59,7 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 spacing: Kirigami.Units.smallSpacing
 
-                KanteSectionLabel {
+                LookSectionLabel {
                     objectName: "gradesHeading"
                     Layout.fillWidth: true
                     rule: true
@@ -71,7 +70,7 @@ Kirigami.ScrollablePage {
                 Repeater {
                     model: block.passed
 
-                    KanteListRow {
+                    LookListRow {
                         id: passedRow
 
                         required property var modelData
@@ -80,7 +79,7 @@ Kirigami.ScrollablePage {
                         Layout.fillWidth: true
                         text: modelData.name
                         subtitle: [Grades.shortDate(modelData.day), modelData.place].filter(x => x).join(" · ")
-                        trailing: KanteToolButton {
+                        trailing: LookToolButton {
                             objectName: "removeGrade"
                             icon.name: "edit-delete"
                             text: qsTr("Remove %1").arg(passedRow.modelData.name)
@@ -99,7 +98,7 @@ Kirigami.ScrollablePage {
                     QQC2.Label {
                         text: qsTr("Training since:")
                     }
-                    KanteDateField {
+                    LookDateField {
                         id: startField
 
                         // The saved day; a pick sets `date` itself, so the binding comes back after
@@ -137,7 +136,7 @@ Kirigami.ScrollablePage {
                         }
                         return parts.join(" · ")
                     }
-                    color: KanteStyle.mutedTextColor
+                    color: Look.mutedTextColor
                     wrapMode: Text.Wrap
                 }
 
@@ -147,7 +146,7 @@ Kirigami.ScrollablePage {
                     Layout.fillWidth: true
                     spacing: Kirigami.Units.smallSpacing
 
-                    KanteComboBox {
+                    LookComboBox {
                         id: gradeBox
 
                         objectName: "gradeBox"
@@ -155,7 +154,7 @@ Kirigami.ScrollablePage {
                         currentIndex: block.ladder.findIndex(g => g.id === block.next)
                         Accessible.name: qsTr("Grade")
                     }
-                    KanteDateField {
+                    LookDateField {
                         id: dayField
 
                         objectName: "gradeDay"
@@ -165,14 +164,14 @@ Kirigami.ScrollablePage {
                         date: new Date()
                         Accessible.name: qsTr("Day of the exam")
                     }
-                    KanteTextField {
+                    LookTextField {
                         id: placeField
 
                         objectName: "gradePlace"
                         placeholderText: qsTr("Place")
                         Accessible.name: qsTr("Place")
                     }
-                    KanteButton {
+                    LookButton {
                         objectName: "addGrade"
                         icon.name: "list-add"
                         text: qsTr("Add")
@@ -191,7 +190,7 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             text: qsTr("The ground for waiting times and the hints before an exam. The same grade again corrects its day and place.")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
     }

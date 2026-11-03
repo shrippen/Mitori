@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 import "coursedays.js" as CourseDays
 
@@ -11,10 +10,10 @@ import "coursedays.js" as CourseDays
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     readonly property bool complete: titleField.text.trim() !== "" && !!firstField.date && !firstField.invalid
                                      && !lastField.invalid
@@ -39,14 +38,14 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             text: qsTr("For private trainings, guest teachers or dates that are not in the calendar.")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
 
         Kirigami.FormLayout {
             Layout.fillWidth: true
 
-            KanteTextField {
+            LookTextField {
                 id: titleField
 
                 objectName: "courseTitleField"
@@ -54,7 +53,7 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 placeholderText: qsTr("Training with a guest teacher")
             }
-            KanteDateField {
+            LookDateField {
                 id: firstField
 
                 objectName: "courseFirst"
@@ -64,7 +63,7 @@ Kirigami.ScrollablePage {
                 todayText: qsTr("Today")
                 date: new Date()
             }
-            KanteDateField {
+            LookDateField {
                 id: lastField
 
                 objectName: "courseLast"
@@ -74,7 +73,7 @@ Kirigami.ScrollablePage {
                 todayText: firstField.todayText
                 date: new Date()
             }
-            KanteTextField {
+            LookTextField {
                 id: placeField
 
                 objectName: "coursePlace"
@@ -82,7 +81,7 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 placeholderText: qsTr("Dojo, town")
             }
-            KanteTextField {
+            LookTextField {
                 id: teacherField
 
                 objectName: "courseTeacher"
@@ -93,9 +92,9 @@ Kirigami.ScrollablePage {
             }
         }
 
-        KanteButton {
+        LookButton {
             objectName: "makeCourse"
-            emphasis: KanteButton.Emphasis.Primary
+            role: LookButton.Role.Primary
             enabled: page.complete
             text: qsTr("Make")
             onClicked: page.make()

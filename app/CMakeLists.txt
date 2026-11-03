@@ -117,6 +117,8 @@ qt_add_qml_module(mitori_app
         qml/Look/LookPageTitle.qml
         qml/Look/LookDialog.qml
         qml/Look/LookCard.qml
+        qml/Look/LookDateField.qml
+        qml/Look/LookComboBox.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp

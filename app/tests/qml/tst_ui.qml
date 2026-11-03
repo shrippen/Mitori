@@ -169,16 +169,16 @@ TestCase {
         }
     }
 
-    // A dialog of the content's size (Fit): its content measures the text. Shinki only: KanteDialog
-    // has its scope as a child too (Bestand, to fix in Kante).
+    // A dialog of the content's size (Fit): its content measures the text. Shinki only until
+    // Kante 1.70 (KanteDialog measures its content) is synced here.
     function test_1d_dialog_fit() {
         if (!uiShinki) {
-            skip("KanteDialog: scope as a child, fixed in Kante")
+            skip("KanteDialog measures its content from Kante 1.70 on")
         }
         const dialog = createTemporaryQmlObject(
             "import QtQuick.Controls; import Mitori; LookDialog { Label { text: 'Hello' } }", window.contentItem)
-        verify(dialog.implicitContentWidth > 0, "content width " + dialog.implicitContentWidth)
-        verify(dialog.implicitContentHeight > 0, "content height " + dialog.implicitContentHeight)
+        verify(dialog.contentWidth > 0, "content width " + dialog.contentWidth)
+        verify(dialog.contentHeight > 0, "content height " + dialog.contentHeight)
     }
 
     function test_2_programme() {

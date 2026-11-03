@@ -18,6 +18,7 @@ QQC2.TextField {
     implicitHeight: Math.max(ShinkiStyle.rowMinSpace, contentHeight + topPadding + bottomPadding)
 
     background: Rectangle {
+        implicitWidth: ShinkiStyle.unit(170)        // a field easy to hit, also when empty
         color: ShinkiStyle.paperAlt
         opacity: field.enabled ? 1 : ShinkiStyle.disabledOpacity
         border.width: field.activeFocus ? ShinkiStyle.focusWidth : ShinkiStyle.lineWidth
