@@ -169,6 +169,18 @@ TestCase {
         }
     }
 
+    // A dialog of the content's size (Fit): its content measures the text. Shinki only: KanteDialog
+    // has its scope as a child too (Bestand, to fix in Kante).
+    function test_1d_dialog_fit() {
+        if (!uiShinki) {
+            skip("KanteDialog: scope as a child, fixed in Kante")
+        }
+        const dialog = createTemporaryQmlObject(
+            "import QtQuick.Controls; import Mitori; LookDialog { Label { text: 'Hello' } }", window.contentItem)
+        verify(dialog.implicitContentWidth > 0, "content width " + dialog.implicitContentWidth)
+        verify(dialog.implicitContentHeight > 0, "content height " + dialog.implicitContentHeight)
+    }
+
     function test_2_programme() {
         Programme.discipline = "aikido"
         Programme.setGrade("aikido", "k5")

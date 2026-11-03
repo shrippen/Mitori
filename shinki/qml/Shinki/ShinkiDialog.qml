@@ -36,7 +36,8 @@ QQC2.Dialog {
 
     // The dialog hangs on the overlay, outside the page's scope: its content gets Shinki's colours
     // itself (ink on paper, also under a dark platform scheme).
-    ShinkiScope {
+    // A property, not a child: a second child of the content would void its implicit size (Fit).
+    property Item scope: ShinkiScope {
         target: dialog.contentItem
     }
 
