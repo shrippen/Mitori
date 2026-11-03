@@ -95,6 +95,7 @@ public slots:
         const QString shots = QStringLiteral(UI_SHOTS_DIR) + (shinki ? QStringLiteral("/shinki") : QString());
         QDir().mkpath(shots);
         engine->rootContext()->setContextProperty(QStringLiteral("uiShotsDir"), shots);
+        engine->rootContext()->setContextProperty(QStringLiteral("uiShinki"), shinki);
         // The second run (ctest ui_shinki): the pages through Look as Shinki.
         if (shinki) {
             Appearance::prepare(Appearance::Style::Shinki, engine);

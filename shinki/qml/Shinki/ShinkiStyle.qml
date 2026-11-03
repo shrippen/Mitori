@@ -55,6 +55,9 @@ QtObject {
     readonly property int uiSize: unit(14)
     readonly property int smallSize: unit(12)
     readonly property int segmentSize: unit(13)
+    readonly property int buttonSize: unit(15)
+    readonly property int iconSize: unit(18)
+    readonly property int chipStandSize: unit(11)
     readonly property int rateNumberSize: unit(17)
     readonly property int rateWordSize: unit(11)
     readonly property int hintSize: unit(12.5)
@@ -72,6 +75,7 @@ QtObject {
     readonly property int tileGapSpace: unit(10)
     readonly property int cardSpace: unit(12)
     readonly property int rowMinSpace: unit(44)
+    readonly property int chipMinSpace: unit(36)
     readonly property int cardMaxSpace: unit(14)
     readonly property int playLargeSize: unit(52)
     readonly property int playListSize: unit(34)
@@ -86,6 +90,8 @@ QtObject {
     readonly property int inkWidth: unit(300)
     readonly property int inkHeight: unit(220)
     readonly property int lineWidth: Math.max(1, unit(1))
+    // The column's letter spacing, in em ("Sperrung 0,1 em").
+    readonly property real columnTracking: 0.1
     readonly property int selectedBarWidth: unit(3)
     readonly property int focusWidth: unit(2)
 
@@ -99,5 +105,6 @@ QtObject {
     readonly property real videoChipOpacity: 0.55
     readonly property real videoLineOpacity: 0.3
     readonly property real savedFlashOpacity: 0.14
+    readonly property real disabledOpacity: 0.5
     readonly property real inkMinOpacity: 0.06
 }

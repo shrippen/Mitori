@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // Programme (clickdummy "Programm"): discipline, grade, and the grade's own material. A row opens
@@ -14,10 +13,10 @@ import Mitori
 Kirigami.Page {
     id: page
 
-    // The page keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // The page keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     readonly property string discipline: Programme.discipline
     readonly property var grades: Programme.grades(discipline)
@@ -50,7 +49,7 @@ Kirigami.Page {
     header: ColumnLayout {
         spacing: Kirigami.Units.smallSpacing
 
-        KanteSegmented {
+        LookSegmented {
             Layout.fillWidth: true
             Layout.margins: Kirigami.Units.smallSpacing
             model: Programme.disciplines.map(d => d.kurzname)
@@ -70,7 +69,7 @@ Kirigami.Page {
             Repeater {
                 model: page.grades
 
-                KanteChip {
+                LookChip {
                     required property var modelData
 
                     text: modelData.name
@@ -120,23 +119,23 @@ Kirigami.Page {
                         entries: page.rows
                     }
 
-                    KanteHintCard {
+                    LookHint {
                         Layout.fillWidth: true
                         Layout.margins: Kirigami.Units.smallSpacing
                         visible: !page.hasVideo
-                        tier: KanteHintCard.Tier.Blue
+                        importance: LookHint.Importance.Info
                         titleText: qsTr("Exam videos")
                         text: !page.hasPositions
                               ? qsTr("There is no video for this grade.")
                               : qsTr("The videos are on the DVDs of the Shinkiryu association. With the DVD's code Mitori loads them onto this device.")
 
-                        KanteButton {
+                        LookButton {
                             objectName: "enterCode"
                             visible: page.hasPositions
                             text: qsTr("Enter code")
                             onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
                         }
-                        KanteButton {
+                        LookButton {
                             visible: page.hasPositions
                             text: qsTr("Order on shinkiryu.de")
                             onClicked: Qt.openUrlExternally("https://www.shinkiryu.de/shinkiryu/de/DVD.php")
@@ -160,7 +159,7 @@ Kirigami.Page {
                         Item {
                             implicitHeight: heading.implicitHeight + Kirigami.Units.largeSpacing * 2
 
-                            KanteHeading {
+                            LookHeading {
                                 id: heading
 
                                 anchors.left: parent.left
@@ -191,7 +190,7 @@ Kirigami.Page {
                     Component {
                         id: entryRow
 
-                        KanteListRow {
+                        LookListRow {
                             id: entryItem
 
                             readonly property var entry: rowLoader.modelData
@@ -207,13 +206,13 @@ Kirigami.Page {
                             trailing: RowLayout {
                                 spacing: Kirigami.Units.smallSpacing
 
-                                KanteLevelDots {
+                                LookLevelDots {
                                     visible: entryItem.entry.kind === "entry"
                                     value: Practice.revision >= 0 ? Practice.level(entryItem.entry.id) : 0
                                     names: Practice.levelNames
-                                    color: KanteStyle.levelColor(value)     // as in the grade's bar and legend
+                                    color: Look.levelColor(value)     // as in the grade's bar and legend
                                 }
-                                KanteToolButton {
+                                LookToolButton {
                                     visible: entryItem.playable
                                     activeFocusOnTab: false     // Enter on the row: the sheet plays it
                                     icon.name: "media-playback-start"

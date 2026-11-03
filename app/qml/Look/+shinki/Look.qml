@@ -30,14 +30,16 @@ QtObject {
     function levelColor(level) {
         return ShinkiStyle.levelColor(level)
     }
-    // Titles in the book face (Crimson Pro), as the sheet and player titles of the bible.
+    // Titles in the book face (Crimson Pro), as the sheet and player titles of the bible; without
+    // a size the player title's.
     function titleFont(pointSize) {
-        return Qt.font({ family: ShinkiStyle.bookFamily, weight: Font.DemiBold,
-                         pointSize: pointSize > 0 ? pointSize : defaultFont.pixelSize * 0.75 * 1.4 })
+        return pointSize > 0 ? Qt.font({ family: ShinkiStyle.bookFamily, weight: Font.DemiBold, pointSize: pointSize })
+                             : Qt.font({ family: ShinkiStyle.bookFamily, weight: Font.DemiBold, pixelSize: ShinkiStyle.playerTitleSize })
     }
+    // A font in the Mincho, its size as the base has it (points or pixels, never both).
     function japaneseFont(base) {
         const font = base ? base : defaultFont
-        return Qt.font({ family: ShinkiStyle.japaneseFamily, pointSize: font.pointSize, pixelSize: font.pixelSize,
-                         weight: font.weight })
+        return font.pointSize > 0 ? Qt.font({ family: ShinkiStyle.japaneseFamily, pointSize: font.pointSize, weight: font.weight })
+                                  : Qt.font({ family: ShinkiStyle.japaneseFamily, pixelSize: font.pixelSize, weight: font.weight })
     }
 }
