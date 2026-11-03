@@ -140,8 +140,6 @@ Reihenfolge der Kacheln. Offen, nach Gewicht:
 - **Programm**: Stand je Grad in den Chips; Shinki-Toho-Infokarte (Bedeutung, Inhalt, Mindestabstand);
   Beschreibung von Suburi und Kiriotoshi; Lupe im Kopf; Rückkehr aus dem Player: kurz aufleuchten statt dauerhaft
   markieren, auch am Telefon hinscrollen; Tablet-Liste schneidet lange Ô-dachi-Zeilen ab.
-- **Technik-Blatt**: Hinweis ohne Video („Video nicht geladen · Code eingeben“ / „Zu diesem Grad gibt es kein
-  Video“); Kopf mit Angriffszusatz und Grad, Formnummer; letzte Notiz mit Datum, „Notizen (n)“.
 - **Kommentar**: Fußnoten und Listen setzen; Gruppe und Kanji im Text (Überschriften und ganzer Titel: erledigt).
 - **Heute üben**: Kalender 12 Wochen mit Legende; Hinweis „tippen öffnet das Blatt“.
 - **Videos**: Speicherbalken mit Legende (Videos, Fotos und Sprachnotizen, frei); Code-Seite mit Erklärung
