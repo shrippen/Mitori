@@ -2394,8 +2394,8 @@
     </message>
     <message>
         <location filename="../qml/TechniqueSheet.qml" line="123"/>
-        <source>There is no video for this grade.</source>
-        <translation>Zu diesem Grad gibt es kein Video.</translation>
+        <source>There is no video of this technique.</source>
+        <translation>Zu dieser Technik gibt es kein Video.</translation>
     </message>
     <message>
         <location filename="../qml/TechniqueSheet.qml" line="128"/>

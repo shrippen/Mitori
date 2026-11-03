@@ -169,9 +169,8 @@ TestCase {
         Practice.addNote(entry.id, "Schritt kleiner")
         const notes = findChild(sheet.contentItem, "sheetNotesButton")
         verify(notes.text.indexOf("(1)") >= 0, notes.text)
-        verify(findChild(sheet.contentItem, "sheetLastNote").text.indexOf(Qt.formatDate(new Date(), "d MMM")) >= 0
-               || findChild(sheet.contentItem, "sheetLastNote").text.indexOf("Today") >= 0,
-               findChild(sheet.contentItem, "sheetLastNote").text)
+        const lastNote = findChild(sheet.contentItem, "sheetLastNote")
+        verify(lastNote.text.indexOf(new Date().toLocaleDateString(Qt.locale(), Locale.ShortFormat)) >= 0, lastNote.text)
         shot("2b-sheet", true)
         for (const n of Practice.notes(entry.id)) {
             Practice.deleteNote(n.uid)
@@ -180,11 +179,13 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // A grade without any video (Shinki Toho Okuden): the sheet says so, no code to enter.
+    // A technique without any video (Shinki Toho Jun-Menkyo, the last grade with forms): the
+    // sheet says so, no code to enter.
     function test_2b_sheet_no_video() {
         Programme.discipline = "shinkitoho"
         const grades = Programme.grades("shinkitoho")
         const last = grades[grades.length - 1]
+        const before = Programme.grade("shinkitoho")
         Programme.setGrade("shinkitoho", last.id)
         const page = push("ProgrammePage")
         const entry = page.rows.find(r => r.kind === "entry" && !r.video)
@@ -196,6 +197,7 @@ TestCase {
         verify(!findChild(sheet.contentItem, "sheetCodeButton").visible)
         sheet.close()
         window.pageStack.pop()
+        Programme.setGrade("shinkitoho", before)
         Programme.discipline = "aikido"
     }
 
@@ -821,6 +823,26 @@ TestCase {
     }
 
     // Search: techniques across disciplines and own notes; a result opens the sheet.
+    // The sheet from the search: "Enter code" leads to the videos (as from the programme).
+    function test_9_search_sheet_code() {
+        const page = push("SearchPage")
+        findChild(page, "searchField").text = "ikkyo shomen"
+        tryVerify(() => page.techniques.length > 0, 2000)
+        const result = page.techniques.find(r => !!r.video && !Videos.available(r.video.video))
+        if (!result) {
+            skip("every Ikkyo video is on this device")
+        }
+        const sheet = findChild(page, "techniqueSheet")
+        sheet.entry = result
+        sheet.playable = false
+        sheet.open()
+        tryVerify(() => sheet.opened)
+        findChild(sheet.contentItem, "sheetCodeButton").clicked()
+        tryVerify(() => window.pageStack.currentItem.title === "Videos", 2000, "the videos page opens")
+        window.pageStack.pop()
+        window.pageStack.pop()
+    }
+
     function test_9_search() {
         Practice.addNote(Programme.entries("aikido", "k5").find(r => r.kind === "entry").id, "Kreis größer machen")
         const page = push("SearchPage")

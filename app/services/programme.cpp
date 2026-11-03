@@ -226,8 +226,9 @@ QVariantList Programme::practiceEntries(const QString &disciplineId) const
 QVariantList Programme::entries(const QString &disciplineId, const QString &grade) const
 {
     // Every entry row names its grade (the sheet's head: "Shomen-uchi · 5. Kyu").
+    // From the discipline's grade list, not grades() (that builds every grade's rows to count).
     QString gradeName;
-    for (const QVariant &g : grades(disciplineId)) {
+    for (const QVariant &g : findDiscipline(disciplineId).value(QStringLiteral("grade")).toList()) {
         if (g.toMap().value(QStringLiteral("id")).toString() == grade) {
             gradeName = g.toMap().value(QStringLiteral("name")).toString();
         }

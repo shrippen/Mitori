@@ -107,7 +107,7 @@ Kirigami.Dialog {
             readonly property string shown: (sheet.lastNote.text || (Media.kind(sheet.lastNote.media || "") === Media.Kind.Photo ? qsTr("Photo")
                                : Media.kind(sheet.lastNote.media || "") === Media.Kind.Voice ? qsTr("Voice note") : ""))
             visible: shown !== ""
-            text: shown === "" ? "" : qsTr("Last note, %1: %2").arg(Qt.formatDate(sheet.lastNote.created, "d MMM")).arg(shown)
+            text: shown === "" ? "" : qsTr("Last note, %1: %2").arg(sheet.lastNote.created.toLocaleDateString(Qt.locale(), Locale.ShortFormat)).arg(shown)
             color: KanteStyle.mutedTextColor
             wrapMode: Text.Wrap
             maximumLineCount: 3
@@ -120,7 +120,7 @@ Kirigami.Dialog {
             Layout.topMargin: Kirigami.Units.largeSpacing
             visible: !sheet.hasVideo
             titleText: sheet.entry.video ? qsTr("Video not loaded. The DVD's code loads it onto the device.")
-                                    : qsTr("There is no video for this grade.")
+                                    : qsTr("There is no video of this technique.")
 
             KanteButton {
                 objectName: "sheetCodeButton"
