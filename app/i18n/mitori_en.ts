@@ -64,7 +64,7 @@
 <context>
     <name>PlayerView</name>
     <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="340"/>
+        <location filename="../qml/PlayerView.qml" line="339"/>
         <source>%n technique(s) practised today. They count as a practice day in the statistics.</source>
         <translation>
             <numerusform>%n technique practised today. It counts as a practice day in the statistics.</numerusform>

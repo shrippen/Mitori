@@ -13,7 +13,7 @@
 // Levels are 0..1; a negative value means "not available here".
 //
 // The screen may also be kept on (the player's "screen on"): Android sets FLAG_KEEP_SCREEN_ON on
-// the window, Linux inhibits the screen saver over org.freedesktop.ScreenSaver; in memory only
+// the window, Linux inhibits org.freedesktop.ScreenSaver (in the Flatpak over the Inhibit portal); in memory only
 // the state is kept.
 namespace DeviceLevels {
 

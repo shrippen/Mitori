@@ -9,6 +9,8 @@
 #include <QJniObject>
 #elif defined(Q_OS_LINUX)
 #include <QDBusInterface>
+#include <QDBusObjectPath>
+#include <QFile>
 #include <QDBusReply>
 #endif
 
@@ -33,7 +35,11 @@ double g_volume = 0.5;
 double g_original = -1;
 // Whether the screen is kept on; on Linux the screen saver's cookie for releasing it.
 bool g_held = false;
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
 uint g_cookie = 0;
+QString g_request;                              // the Inhibit portal's request; closing it releases
+constexpr uint kInhibitIdle = 8;                // org.freedesktop.portal.Inhibit: flag "idle"
+#endif
 
 double clamped(double level)
 {
@@ -225,18 +231,33 @@ void holdScreen(Hold hold)
         window.callMethod<void>(keep ? "addFlags" : "clearFlags", "(I)V", kKeepScreenOn);
     });
 #elif defined(Q_OS_LINUX)
+    // Inside the Flatpak the Inhibit portal (its bus proxy lets only org.freedesktop.portal.*
+    // through), elsewhere the screen saver itself, as video players do.
     QDBusInterface saver(QStringLiteral("org.freedesktop.ScreenSaver"), QStringLiteral("/org/freedesktop/ScreenSaver"),
                          QStringLiteral("org.freedesktop.ScreenSaver"));
     if (!keep) {
-        if (g_cookie != 0) {
+        if (!g_request.isEmpty()) {
+            QDBusInterface(QStringLiteral("org.freedesktop.portal.Desktop"), g_request,
+                           QStringLiteral("org.freedesktop.portal.Request"))
+                .call(QStringLiteral("Close"));
+        } else if (g_cookie != 0) {
             saver.call(QStringLiteral("UnInhibit"), g_cookie);
         }
+        g_request.clear();
         g_cookie = 0;
         return;
     }
-    const QDBusReply<uint> cookie = saver.call(QStringLiteral("Inhibit"), QStringLiteral("Mitori"),
-                                               QStringLiteral("Video"));
-    g_cookie = cookie.isValid() ? cookie.value() : 0;
+    if (!QFile::exists(QStringLiteral("/.flatpak-info"))) {
+        const QDBusReply<uint> cookie = saver.call(QStringLiteral("Inhibit"), QStringLiteral("Mitori"),
+                                                   QStringLiteral("Video"));
+        g_cookie = cookie.isValid() ? cookie.value() : 0;
+        return;
+    }
+    QDBusInterface portal(QStringLiteral("org.freedesktop.portal.Desktop"), QStringLiteral("/org/freedesktop/portal/desktop"),
+                          QStringLiteral("org.freedesktop.portal.Inhibit"));
+    const QDBusReply<QDBusObjectPath> request = portal.call(QStringLiteral("Inhibit"), QString(), kInhibitIdle,
+                                                            QVariantMap{{QStringLiteral("reason"), QStringLiteral("Video")}});
+    g_request = request.isValid() ? request.value().path() : QString();
 #endif
 }
 

@@ -9,11 +9,11 @@
 //
 //   swipe on the left half   change(Level::Brightness, ±share of the picture's height)
 //   swipe on the right half  change(Level::Volume, …)
-//   opening the player       enter()     (keeps the screen on, if `awake`)
+//   video plays / stops      setPlayback()  (keeps the screen on while it plays, if `awake`)
 //   leaving the player       restore()   (the screen as before)
 //
 // The player's switches stay for the next start: `sound` (off: silent also at full tempo) and
-// `awake` (the screen stays on while the player is open). Both are on by default.
+// `awake` (the screen stays on while a video plays). Both are on by default.
 class Levels : public QObject
 {
     Q_OBJECT
@@ -33,6 +33,8 @@ public:
     Q_ENUM(Level)
     enum class Switch { Off, On };
     Q_ENUM(Switch)
+    enum class Playback { Stopped, Playing };
+    Q_ENUM(Playback)
 
     explicit Levels(QObject *parent = nullptr);
 
@@ -47,7 +49,7 @@ public:
     Q_INVOKABLE void refresh();
     // Moves a level by `delta` (−1..1); false where the platform has none.
     Q_INVOKABLE bool change(Level level, double delta);
-    Q_INVOKABLE void enter();
+    Q_INVOKABLE void setPlayback(Playback state);
     Q_INVOKABLE void restore();
     Q_INVOKABLE void setSound(Switch state);
     Q_INVOKABLE void setAwake(Switch state);
@@ -61,7 +63,7 @@ private:
     double m_ownVolume = 1;
     bool m_sound = true;
     bool m_awake = true;
-    bool m_open = false;        // the player is open (between enter and restore)
+    bool m_playing = false;     // a video plays (until it stops or the player is left)
 
     void hold();
 };

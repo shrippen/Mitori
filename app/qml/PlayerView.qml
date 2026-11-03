@@ -73,10 +73,7 @@ Item {
             Qt.callLater(page.restart)
         }
     }
-    Component.onCompleted: {
-        shown(current.id)
-        Levels.enter()          // keeps the screen on, if the switch says so
-    }
+    Component.onCompleted: shown(current.id)
     Component.onDestruction: {
         player.stop()
         Levels.restore()
@@ -141,6 +138,8 @@ Item {
             volume: Levels.playerVolume
         }
         playbackRate: 1
+        // The screen stays on while it plays (the switch "Screen on"), not while it stands.
+        onPlayingChanged: Levels.setPlayback(playing ? Levels.Playback.Playing : Levels.Playback.Stopped)
         onSourceChanged: page.startPending = true
         onMediaStatusChanged: {
             if (player.mediaStatus === MediaPlayer.LoadedMedia && page.startPending) {
@@ -419,13 +418,16 @@ Item {
 
                     KanteToolButton {
                         objectName: "soundSwitch"
+                        // On only where it sounds: slow motion is always silent.
+                        readonly property bool sounds: Levels.sound && player.playbackRate >= 1
                         checkable: true
-                        checked: Levels.sound
-                        icon.name: Levels.sound ? "audio-volume-high" : "audio-volume-muted"
-                        text: qsTr("Sound")
-                        QQC2.ToolTip.text: qsTr("Always silent in slow motion")
-                        QQC2.ToolTip.visible: hovered
-                        onClicked: Levels.setSound(Levels.sound ? Levels.Switch.Off : Levels.Switch.On)
+                        checked: sounds
+                        icon.name: sounds ? "audio-volume-high" : "audio-volume-muted"
+                        text: player.playbackRate < 1 ? qsTr("Silent in slow motion") : qsTr("Sound")
+                        onClicked: {
+                            checked = Qt.binding(() => sounds)
+                            Levels.setSound(Levels.sound ? Levels.Switch.Off : Levels.Switch.On)
+                        }
                     }
                     KanteToolButton {
                         objectName: "awakeSwitch"

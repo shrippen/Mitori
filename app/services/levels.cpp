@@ -66,7 +66,7 @@ void Levels::restore()
 {
     DeviceLevels::restoreBrightness();
     m_brightness = DeviceLevels::brightness();
-    m_open = false;
+    m_playing = false;
     hold();
     emit changed();
 }
@@ -76,9 +76,9 @@ bool Levels::held() const
     return DeviceLevels::screenHeld();
 }
 
-void Levels::enter()
+void Levels::setPlayback(Playback state)
 {
-    m_open = true;
+    m_playing = state == Playback::Playing;
     hold();
     emit changed();
 }
@@ -98,8 +98,8 @@ void Levels::setAwake(Switch state)
     emit changed();
 }
 
-// The screen stays on while the player is open and the switch is on.
+// The screen stays on while a video plays and the switch is on.
 void Levels::hold()
 {
-    DeviceLevels::holdScreen(m_open && m_awake ? DeviceLevels::Hold::Keep : DeviceLevels::Hold::Release);
+    DeviceLevels::holdScreen(m_playing && m_awake ? DeviceLevels::Hold::Keep : DeviceLevels::Hold::Release);
 }

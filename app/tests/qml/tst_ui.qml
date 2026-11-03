@@ -355,13 +355,14 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // The player's switches: the screen stays on while the player is open (and the switch on);
+    // The player's switches: the screen stays on while a video plays (and the switch on);
     // sound off mutes also at full tempo; both stay for the next start. "Noted today" lists
     // the day's notes on the technique.
     function test_4t_player_switches() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
         const page = push("PlayerPage", { playlist: rows, index: 0 })
-        verify(Levels.held, "screen kept on in the player")
+        verify(!Levels.held, "no video plays: the screen may sleep")
+        Levels.setPlayback(Levels.Playback.Playing)     // as the player does while it plays
         const awake = findChild(page, "awakeSwitch")
         const sound = findChild(page, "soundSwitch")
         verify(awake.checked && sound.checked)
@@ -373,6 +374,10 @@ TestCase {
         verify(!Levels.sound && !sound.checked)
         sound.clicked()
         verify(Levels.sound)
+        findChild(page, "transportBar").speedChangeRequested(0.5)
+        verify(!sound.checked, "slow motion is silent")
+        findChild(page, "transportBar").speedChangeRequested(1)
+        verify(sound.checked)
 
         const noted = findChild(page, "notedToday")
         verify(!noted.visible)

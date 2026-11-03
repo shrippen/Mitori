@@ -57,7 +57,7 @@ private slots:
     }
 
     // The player's switches: sound and "screen on" stay for the next start (on by default);
-    // the screen is held only while the player is open and the switch is on.
+    // the screen is held only while a video plays and the switch is on.
     void switches()
     {
         qputenv("MITORI_DEVICE_LEVELS", "memory");
@@ -66,13 +66,16 @@ private slots:
             QVERIFY(l.sound());
             QVERIFY(l.awake());
             QVERIFY(!l.held());
-            l.enter();
+            l.setPlayback(Levels::Playback::Playing);
             QVERIFY(l.held());
             l.setAwake(Levels::Switch::Off);
             QVERIFY(!l.held());
             l.setAwake(Levels::Switch::On);
             QVERIFY(l.held());
-            l.restore();
+            l.setPlayback(Levels::Playback::Stopped);
+            QVERIFY(!l.held());
+            l.setPlayback(Levels::Playback::Playing);
+            l.restore();                            // leaving the player
             QVERIFY(!l.held());
             l.setAwake(Levels::Switch::Off);
             l.setSound(Levels::Switch::Off);
@@ -80,7 +83,7 @@ private slots:
         Levels l;
         QVERIFY(!l.sound());
         QVERIFY(!l.awake());
-        l.enter();
+        l.setPlayback(Levels::Playback::Playing);
         QVERIFY(!l.held());
         l.restore();
     }

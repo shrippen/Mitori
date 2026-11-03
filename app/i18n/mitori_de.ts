@@ -1318,114 +1318,109 @@
 <context>
     <name>PlayerView</name>
     <message>
-        <location filename="../qml/PlayerView.qml" line="365"/>
+        <location filename="../qml/PlayerView.qml" line="364"/>
         <source>There is no video of this technique. Practise it from memory, then rate it.</source>
         <translation>Zu dieser Technik gibt es kein Video. Aus dem Gedächtnis üben, dann einschätzen.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="366"/>
+        <location filename="../qml/PlayerView.qml" line="365"/>
         <source>Its video is not on this device. Practise it from memory, then rate it.</source>
         <translation>Ihr Video ist nicht auf diesem Gerät. Aus dem Gedächtnis üben, dann einschätzen.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="378"/>
-        <location filename="../qml/PlayerView.qml" line="405"/>
+        <location filename="../qml/PlayerView.qml" line="377"/>
+        <location filename="../qml/PlayerView.qml" line="404"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="398"/>
+        <location filename="../qml/PlayerView.qml" line="397"/>
         <source>Chapter start</source>
         <translation>Kapitelanfang</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="399"/>
+        <location filename="../qml/PlayerView.qml" line="398"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="400"/>
+        <location filename="../qml/PlayerView.qml" line="399"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="401"/>
+        <location filename="../qml/PlayerView.qml" line="400"/>
         <source>Loop</source>
         <translation>Schleife</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="402"/>
+        <location filename="../qml/PlayerView.qml" line="401"/>
         <source>Tempo</source>
         <translation>Tempo</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="403"/>
+        <location filename="../qml/PlayerView.qml" line="402"/>
         <source>Frame back</source>
         <translation>Bild zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="404"/>
+        <location filename="../qml/PlayerView.qml" line="403"/>
         <source>Frame on</source>
         <translation>Bild vor</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="406"/>
+        <location filename="../qml/PlayerView.qml" line="405"/>
         <source>Playback</source>
         <translation>Wiedergabe</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="425"/>
+        <location filename="../qml/PlayerView.qml" line="426"/>
         <source>Sound</source>
         <translation>Ton</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="426"/>
-        <source>Always silent in slow motion</source>
-        <translation>In Zeitlupe immer stumm</translation>
-    </message>
-    <message>
-        <location filename="../qml/PlayerView.qml" line="435"/>
+        <location filename="../qml/PlayerView.qml" line="437"/>
         <source>Screen on</source>
         <translation>Bildschirm an</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="451"/>
+        <location filename="../qml/PlayerView.qml" line="453"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="498"/>
+        <location filename="../qml/PlayerView.qml" line="500"/>
         <source>Today&apos;s playlist · %1 of %2 practised</source>
         <translation>Heutige Playliste · %1 von %2 geübt</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="519"/>
+        <location filename="../qml/PlayerView.qml" line="521"/>
         <source>practised</source>
         <translation>geübt</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="339"/>
+        <location filename="../qml/PlayerView.qml" line="338"/>
         <source>Done</source>
         <translation>Geschafft</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="330"/>
-        <location filename="../qml/PlayerView.qml" line="344"/>
+        <location filename="../qml/PlayerView.qml" line="329"/>
+        <location filename="../qml/PlayerView.qml" line="343"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="261"/>
+        <location filename="../qml/PlayerView.qml" line="260"/>
         <source>Brightness %1 %</source>
         <translation>Helligkeit %1 %</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="261"/>
+        <location filename="../qml/PlayerView.qml" line="260"/>
         <source>Volume %1 %</source>
         <translation>Lautstärke %1 %</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="340"/>
+        <location filename="../qml/PlayerView.qml" line="339"/>
         <source>%n technique(s) practised today. They count as a practice day in the statistics.</source>
         <translation>
             <numerusform>%n Technik heute geübt. Das zählt als Übungstag in der Statistik.</numerusform>
@@ -1433,12 +1428,17 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="474"/>
+        <location filename="../qml/PlayerView.qml" line="426"/>
+        <source>Silent in slow motion</source>
+        <translation>In Zeitlupe stumm</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerView.qml" line="476"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="483"/>
+        <location filename="../qml/PlayerView.qml" line="485"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>
