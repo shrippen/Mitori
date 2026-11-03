@@ -108,13 +108,22 @@ def eintrag(text):
 
 # --- Korrekturliste ----------------------------------------------------------
 
-def korrekturen():
-    datei = WURZEL / "KORREKTUREN.md"
+def korrekturen(datei=WURZEL / "KORREKTUREN.md"):
+    """Status je Frage-ID. Die Spalte heißt in jeder Tabelle „Status“; danach dürfen weitere
+    folgen (z. B. „Entscheidung vom Owner“)."""
     ids = {}
+    spalte = None
     for zeile in datei.read_text(encoding="utf-8").splitlines():
-        m = re.match(r"^\| ([ADS]-[A-Z0-9-]+) \|.*\| ([^|]+) \|$", zeile)
-        if m:
-            ids[m.group(1)] = m.group(2).strip()
+        zellen = [z.strip() for z in zeile.strip().strip("|").split("|")]
+
+        # Kopfzeile einer Tabelle: dort steht, die wievielte Spalte der Status ist.
+        if zellen and zellen[0] == "ID":
+            spalte = zellen.index("Status") if "Status" in zellen else None
+            continue
+
+        if spalte is None or not re.fullmatch(r"[ADS]-[A-Z0-9-]+", zellen[0]) or len(zellen) <= spalte:
+            continue
+        ids[zellen[0]] = zellen[spalte]
     return ids
 
 
