@@ -268,6 +268,7 @@ Kirigami.Page {
         onPlayRequested: entry => page.play(entry)
         onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
         onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
+        onVideosRequested: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
     }
 
     // Another grade or discipline: the technique shown last if it is in it, else its first.

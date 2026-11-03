@@ -22,9 +22,13 @@ Kirigami.Dialog {
     signal playRequested(var entry)
     signal commentRequested(var entry)
     signal notesRequested(var entry)
+    // Without the video on the device: to the videos and DVD codes.
+    signal videosRequested()
     readonly property var lastNote: Practice.notesRevision >= 0 && entry.id ? Practice.lastNote(entry.id) : ({})
 
-    title: entry.title || ""
+    // The form's number before the name, as in the list ("3 · Kote-gaeshi").
+    title: (entry.nr ? entry.nr + " · " : "") + (entry.title || "")
+    readonly property int noteCount: Practice.notesRevision >= 0 && entry.id ? Practice.notes(entry.id).length : 0
     preferredWidth: Kirigami.Units.gridUnit * 24
     // Centred without Kirigami's move on opening (y follows the opacity): with the Kamae exercise
     // the sheet grows while it fades in, and y ran into a binding loop.
@@ -70,10 +74,12 @@ Kirigami.Dialog {
         spacing: Kirigami.Units.smallSpacing
         Keys.onPressed: event => sheet.scrollKey(event)
 
+        // Where it stands: attack, its addition, grade ("Shomen-uchi · Irimi · 5. Kyu").
         QQC2.Label {
+            objectName: "sheetEyebrow"
             Layout.fillWidth: true
-            visible: !!sheet.entry.attack
-            text: sheet.entry.attack || ""
+            text: [sheet.entry.attack, sheet.entry.attackExtra, sheet.entry.gradeName].filter(x => !!x).join(" · ")
+            visible: text !== ""
             color: KanteStyle.disabledTextColor
             wrapMode: Text.Wrap
         }
@@ -101,11 +107,30 @@ Kirigami.Dialog {
             readonly property string shown: (sheet.lastNote.text || (Media.kind(sheet.lastNote.media || "") === Media.Kind.Photo ? qsTr("Photo")
                                : Media.kind(sheet.lastNote.media || "") === Media.Kind.Voice ? qsTr("Voice note") : ""))
             visible: shown !== ""
-            text: qsTr("Last note: %1").arg(shown)
+            text: shown === "" ? "" : qsTr("Last note, %1: %2").arg(Qt.formatDate(sheet.lastNote.created, "d MMM")).arg(shown)
             color: KanteStyle.mutedTextColor
             wrapMode: Text.Wrap
             maximumLineCount: 3
             elide: Text.ElideRight
+        }
+        // Without the video: no video for this grade at all, or one to load with the DVD's code.
+        KanteHintCard {
+            objectName: "sheetNoVideo"
+            Layout.fillWidth: true
+            Layout.topMargin: Kirigami.Units.largeSpacing
+            visible: !sheet.hasVideo
+            titleText: sheet.entry.video ? qsTr("Video not loaded. The DVD's code loads it onto the device.")
+                                    : qsTr("There is no video for this grade.")
+
+            KanteButton {
+                objectName: "sheetCodeButton"
+                visible: !!sheet.entry.video
+                text: qsTr("Enter code")
+                onClicked: {
+                    sheet.close()
+                    sheet.videosRequested()
+                }
+            }
         }
         RowLayout {
             Layout.topMargin: Kirigami.Units.largeSpacing
@@ -119,8 +144,9 @@ Kirigami.Dialog {
                 onClicked: sheet.playRequested(sheet.entry)
             }
             KanteButton {
+                objectName: "sheetNotesButton"
                 icon.name: "view-pim-notes"
-                text: qsTr("Notes")
+                text: sheet.noteCount > 0 ? qsTr("Notes (%1)").arg(sheet.noteCount) : qsTr("Notes")
                 onClicked: {
                     sheet.close()
                     sheet.notesRequested(sheet.entry)

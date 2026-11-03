@@ -2373,32 +2373,52 @@
 <context>
     <name>TechniqueSheet</name>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="101"/>
+        <location filename="../qml/TechniqueSheet.qml" line="107"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="102"/>
+        <location filename="../qml/TechniqueSheet.qml" line="108"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="104"/>
-        <source>Last note: %1</source>
-        <translation>Letzte Notiz: %1</translation>
+        <location filename="../qml/TechniqueSheet.qml" line="110"/>
+        <source>Last note, %1: %2</source>
+        <translation>Letzte Notiz, %1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="118"/>
+        <location filename="../qml/TechniqueSheet.qml" line="122"/>
+        <source>Video not loaded. The DVD&apos;s code loads it onto the device.</source>
+        <translation>Video nicht geladen. Der Code der DVD lädt es aufs Gerät.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueSheet.qml" line="123"/>
+        <source>There is no video for this grade.</source>
+        <translation>Zu diesem Grad gibt es kein Video.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueSheet.qml" line="128"/>
+        <source>Enter code</source>
+        <translation>Code eingeben</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueSheet.qml" line="143"/>
         <source>Watch video</source>
         <translation>Video ansehen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="123"/>
+        <location filename="../qml/TechniqueSheet.qml" line="149"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="132"/>
+        <location filename="../qml/TechniqueSheet.qml" line="149"/>
+        <source>Notes (%1)</source>
+        <translation>Notizen (%1)</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueSheet.qml" line="158"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>

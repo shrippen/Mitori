@@ -156,9 +156,47 @@ TestCase {
         verify(sheet)
         tryVerify(() => sheet.opened)
         compare(sheet.entry.id, entry.id)
+        // The head: attack, addition and grade above the name (clickdummy "Blatt").
+        const eyebrow = findChild(sheet.contentItem, "sheetEyebrow")
+        verify(eyebrow.text.indexOf(entry.attack) >= 0 && eyebrow.text.indexOf("5. Kyu") >= 0, eyebrow.text)
+        // Without the video on the device: what to do (the grade has a video: enter the code).
+        const hint = findChild(sheet.contentItem, "sheetNoVideo")
+        compare(hint.visible, !sheet.hasVideo)
+        if (!sheet.hasVideo) {
+            verify(findChild(sheet.contentItem, "sheetCodeButton").visible)
+        }
+        // The notes button counts them, the last note has its date.
+        Practice.addNote(entry.id, "Schritt kleiner")
+        const notes = findChild(sheet.contentItem, "sheetNotesButton")
+        verify(notes.text.indexOf("(1)") >= 0, notes.text)
+        verify(findChild(sheet.contentItem, "sheetLastNote").text.indexOf(Qt.formatDate(new Date(), "d MMM")) >= 0
+               || findChild(sheet.contentItem, "sheetLastNote").text.indexOf("Today") >= 0,
+               findChild(sheet.contentItem, "sheetLastNote").text)
         shot("2b-sheet", true)
+        for (const n of Practice.notes(entry.id)) {
+            Practice.deleteNote(n.uid)
+        }
         sheet.close()
         window.pageStack.pop()
+    }
+
+    // A grade without any video (Shinki Toho Okuden): the sheet says so, no code to enter.
+    function test_2b_sheet_no_video() {
+        Programme.discipline = "shinkitoho"
+        const grades = Programme.grades("shinkitoho")
+        const last = grades[grades.length - 1]
+        Programme.setGrade("shinkitoho", last.id)
+        const page = push("ProgrammePage")
+        const entry = page.rows.find(r => r.kind === "entry" && !r.video)
+        verify(entry, "an entry without a video in " + last.name)
+        page.open(entry)
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        verify(findChild(sheet.contentItem, "sheetNoVideo").visible)
+        verify(!findChild(sheet.contentItem, "sheetCodeButton").visible)
+        sheet.close()
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
     }
 
     // Shinki Toho Shoden: the Kamae exercise is one row; its sheet lists the 26 positions.
@@ -2210,7 +2248,7 @@ TestCase {
         tryVerify(() => sheet.opened)
         const last = findChild(sheet.contentItem, "sheetLastNote")
         verify(last.visible, "a voice note is a last note too")
-        compare(last.text, qsTr("Last note: %1").arg(qsTr("Voice note")))
+        verify(last.text.endsWith(": " + qsTr("Voice note")), last.text)
         sheet.close()
         tryVerify(() => !sheet.opened)
         window.pageStack.pop()

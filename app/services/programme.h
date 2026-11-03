@@ -70,6 +70,8 @@ signals:
     void selectionChanged();
 
 private:
+    // The rows of a grade without the grade's name (entries() adds it).
+    QVariantList gradeRows(const QString &disciplineId, const QString &grade) const;
     QVariantMap findDiscipline(const QString &id) const;
     QVariantList shinkiTohoEntries(const QVariantMap &discipline, const QString &grade) const;
     QVariantList formMap(const QString &grade) const;
