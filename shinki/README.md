@@ -176,7 +176,11 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
   - Zweitknopf: weiß mit 1 px Rahmen, Text `ink`.
   - Symbol 18 px; deaktiviert mit 50 % Deckkraft.
 - **Feld** (`.qnote input`): `paperAlt`, 1 px Rahmen, Notizen in Crimson Pro 15 px. Im Fokus wird der Rahmen 2 px `ink`.
-- **Schalter**: eckige Bahn; aus heißt `line`, an heißt `red`, der Knopf ist weiß. An und Aus unterscheidet auch die Seite des Knopfes.
+- **Schalter**: eckige Bahn 40 × 22 px; aus heißt `line`, an heißt `red`, der Knopf (16 px) ist weiß. An und Aus
+  unterscheidet auch die Seite des Knopfes.
+- **Einstellungszeile**: Titel 14 px `ink`, darunter der Hinweis 12 px `inkMuted`, rechts das Steuerelement; unten eine
+  Linie. Geändert: ein rotes Quadrat am Titel und „Zurücksetzen“ als Link. Ein Abschnitt darüber als Kolumne.
+- **Seitentitel** (Kopf): PT Sans fett 22 px, `ink`.
 - **Hinweis** (`.novid`, `.sheet .hint`): `chip`-Fläche, Text 12,5 px `inkMuted`, die Aktion rot und fett am Ende.
   Wichtiger Hinweis: `paperAlt` mit 1 px Rahmen und 3 px Rot links.
 - **Letzte Notiz** (`.lastnote`): `paperAlt`, darüber Datum und Gerät 11 px, der Text in Crimson Pro.

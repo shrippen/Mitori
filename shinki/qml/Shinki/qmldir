@@ -11,13 +11,16 @@ ShinkiLegend 1.0 ShinkiLegend.qml
 ShinkiLevelDots 1.0 ShinkiLevelDots.qml
 ShinkiLevelPicker 1.0 ShinkiLevelPicker.qml
 ShinkiListRow 1.0 ShinkiListRow.qml
+ShinkiPageTitle 1.0 ShinkiPageTitle.qml
 ShinkiPlayButton 1.0 ShinkiPlayButton.qml
 ShinkiProgressBar 1.0 ShinkiProgressBar.qml
 ShinkiScope 1.0 ShinkiScope.qml
 ShinkiSectionLabel 1.0 ShinkiSectionLabel.qml
 ShinkiSegmented 1.0 ShinkiSegmented.qml
+ShinkiSettingRow 1.0 ShinkiSettingRow.qml
 ShinkiSliderSkin 1.0 ShinkiSliderSkin.qml
 ShinkiSpinBox 1.0 ShinkiSpinBox.qml
+ShinkiSwitch 1.0 ShinkiSwitch.qml
 ShinkiTextField 1.0 ShinkiTextField.qml
 ShinkiTile 1.0 ShinkiTile.qml
 ShinkiToolButton 1.0 ShinkiToolButton.qml

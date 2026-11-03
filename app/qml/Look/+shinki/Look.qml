@@ -44,6 +44,10 @@ QtObject {
         return pointSize > 0 ? Qt.font({ family: ShinkiStyle.bookFamily, weight: Font.DemiBold, pointSize: pointSize })
                              : Qt.font({ family: ShinkiStyle.bookFamily, weight: Font.DemiBold, pixelSize: ShinkiStyle.playerTitleSize })
     }
+    // Large display text (a mock exam's technique): the book face, as technique names are set.
+    function headingFont(pointSize) {
+        return Qt.font({ family: ShinkiStyle.bookFamily, weight: Font.DemiBold, pointSize: pointSize })
+    }
     // A font in the Mincho, its size as the base has it (points or pixels, never both).
     function japaneseFont(base) {
         const font = base ? base : defaultFont

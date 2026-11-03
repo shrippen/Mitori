@@ -277,7 +277,7 @@
 <context>
     <name>CommentPage</name>
     <message>
-        <location filename="../qml/CommentPage.qml" line="72"/>
+        <location filename="../qml/CommentPage.qml" line="73"/>
         <source>Source: shinkiryu.de, Itto-den Shinki Toho</source>
         <translation>Quelle: shinkiryu.de, Itto-den Shinki Toho</translation>
     </message>
@@ -641,7 +641,7 @@
 <context>
     <name>CourseRow</name>
     <message numerus="yes">
-        <location filename="../qml/CourseRow.qml" line="27"/>
+        <location filename="../qml/CourseRow.qml" line="28"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n Tag</numerusform>
@@ -649,7 +649,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CourseRow.qml" line="34"/>
+        <location filename="../qml/CourseRow.qml" line="35"/>
         <source>%n note(s)</source>
         <translation>
             <numerusform>%n Notiz</numerusform>
@@ -849,27 +849,27 @@
 <context>
     <name>ExamPage</name>
     <message>
-        <location filename="../qml/ExamPage.qml" line="37"/>
+        <location filename="../qml/ExamPage.qml" line="36"/>
         <source>Exam mode</source>
         <translation>Prüfungsmodus</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="60"/>
+        <location filename="../qml/ExamPage.qml" line="59"/>
         <source>Discipline</source>
         <translation>Sparte</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="69"/>
+        <location filename="../qml/ExamPage.qml" line="68"/>
         <source>Planned: %1</source>
         <translation>Geplant: %1</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="76"/>
+        <location filename="../qml/ExamPage.qml" line="75"/>
         <source>This grade</source>
         <translation>Diesen Grad</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/ExamPage.qml" line="92"/>
+        <location filename="../qml/ExamPage.qml" line="91"/>
         <source>%n point(s)</source>
         <translation>
             <numerusform>%n Punkt</numerusform>
@@ -877,64 +877,64 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="102"/>
+        <location filename="../qml/ExamPage.qml" line="101"/>
         <source>Mock exam %1</source>
         <translation>Probe %1</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="103"/>
+        <location filename="../qml/ExamPage.qml" line="102"/>
         <source>Points from the %1</source>
         <translation>Anzahl aus dem %1</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="107"/>
+        <location filename="../qml/ExamPage.qml" line="106"/>
         <source>all %1</source>
         <translation>alle %1</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="110"/>
+        <location filename="../qml/ExamPage.qml" line="109"/>
         <source>Number of points</source>
         <translation>Anzahl</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="115"/>
-        <location filename="../qml/ExamPage.qml" line="122"/>
+        <location filename="../qml/ExamPage.qml" line="114"/>
+        <location filename="../qml/ExamPage.qml" line="121"/>
         <source>Random order</source>
         <translation>Zufällige Reihenfolge</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="116"/>
+        <location filename="../qml/ExamPage.qml" line="115"/>
         <source>off: as in the exam programme</source>
         <translation>aus: wie in der Prüfungsordnung</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="127"/>
-        <location filename="../qml/ExamPage.qml" line="135"/>
+        <location filename="../qml/ExamPage.qml" line="126"/>
+        <location filename="../qml/ExamPage.qml" line="134"/>
         <source>Techniques from earlier grades</source>
         <translation>Techniken aus früheren Graden</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="128"/>
+        <location filename="../qml/ExamPage.qml" line="127"/>
         <source>2–5 samples, always first</source>
         <translation>2–5 Stichproben, immer am Anfang</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="128"/>
+        <location filename="../qml/ExamPage.qml" line="127"/>
         <source>first grade, none before</source>
         <translation>erster Grad, keine früheren</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="142"/>
+        <location filename="../qml/ExamPage.qml" line="141"/>
         <source>Only what is asked is shown (for Shinki Toho only the technique): no video, no time limit. At the end you rate each technique; that sets its rating and goes into the statistics.</source>
         <translation>Eingeblendet wird nur, was geprüft wird (bei Shinki Toho nur die Technik), kein Video, kein Zeitdruck. Am Ende schätzt du jede Technik ein; das setzt ihren Stand und geht in die Statistik.</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="143"/>
+        <location filename="../qml/ExamPage.qml" line="142"/>
         <source>Last round: %1, average %2.</source>
         <translation>Letzte Runde: %1, Schnitt %2.</translation>
     </message>
     <message>
-        <location filename="../qml/ExamPage.qml" line="155"/>
+        <location filename="../qml/ExamPage.qml" line="154"/>
         <source>Start round</source>
         <translation>Runde starten</translation>
     </message>
@@ -942,37 +942,37 @@
 <context>
     <name>ExamRoundPage</name>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="28"/>
+        <location filename="../qml/ExamRoundPage.qml" line="27"/>
         <source>Mock exam</source>
         <translation>Probeprüfung</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="33"/>
+        <location filename="../qml/ExamRoundPage.qml" line="32"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="65"/>
+        <location filename="../qml/ExamRoundPage.qml" line="64"/>
         <source>Point %1 of %2</source>
         <translation>Punkt %1 von %2</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="97"/>
+        <location filename="../qml/ExamRoundPage.qml" line="96"/>
         <source>Sample %1</source>
         <translation>Stichprobe %1</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="108"/>
+        <location filename="../qml/ExamRoundPage.qml" line="107"/>
         <source>Next</source>
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="108"/>
+        <location filename="../qml/ExamRoundPage.qml" line="107"/>
         <source>Rate the round</source>
         <translation>Runde einschätzen</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="115"/>
+        <location filename="../qml/ExamRoundPage.qml" line="114"/>
         <source>You rate every technique at the end of the round.</source>
         <translation>Am Ende der Runde schätzt du jede Technik ein.</translation>
     </message>
@@ -2296,7 +2296,7 @@
 <context>
     <name>StepList</name>
     <message>
-        <location filename="../qml/StepList.qml" line="26"/>
+        <location filename="../qml/StepList.qml" line="27"/>
         <source>Positions in one flow</source>
         <translation>Positionen in einem Ablauf</translation>
     </message>
