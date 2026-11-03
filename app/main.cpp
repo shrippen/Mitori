@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     // The controls style of the chosen style (Appearance), before the first window.
     const Appearance::Style style = Appearance::startStyle(engine.importPathList());
+    Appearance::prepare(style, &engine);
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
         QQuickStyle::setStyle(Appearance::controlsStyle(style, engine.importPathList()));
     }

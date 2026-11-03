@@ -224,11 +224,15 @@ Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Contr
   Grad-Chip, Gruppenkopf (statt `KanteSectionLabel`), Listenzeile, Stufenpunkte und -wahl, Stand-Leiste,
   Kalender, Raster der Landkarte, Säulen, Legende, Karte, Kennzahl, Hinweis (statt `KanteHintCard`),
   Transportleiste des Players, Toast, Tuschelavierung (`ShinkiInk`), Logo (`ShinkiLogo`).
-- **Look** hat für jeden dieser Bausteine einen `Look…`-Baustein, der per Loader den Kante- oder
-  Shinki-Baustein lädt, mit derselben Schnittstelle. Dazu kommen alle Rollen und Schriften, die Seiten heute
-  direkt aus `KanteStyle` lesen: Grund, Karte, Bühne, Text, Nebentext, deaktiviert, positiv, negativ, Fokus,
-  Linien, `levelColor`, die kleine, Mono-, japanische, Überschrift- und Titelschrift. `Look` bildet sie unter
-  Shinki auf `ShinkiStyle` ab.
+- **Look** hat für jeden dieser Bausteine einen `Look…`-Baustein mit derselben Schnittstelle unter Kante und
+  Shinki: `app/qml/Look/LookTile.qml` ist der Kante-Baustein, `app/qml/Look/+shinki/LookTile.qml` der
+  Shinki-Baustein. Welche Datei gilt, entscheidet der QML-Dateiselektor „shinki“, den `Appearance::prepare`
+  beim Start setzt (der Stil wechselt ohnehin erst nach dem Neustart); kein Loader, keine Weiterleitung jeder
+  Eigenschaft. Die `+shinki`-Dateien stehen in den Ressourcen, nicht als QML-Typen (sonst gälte die letzte
+  Datei des qmldir). Dazu kommt das Singleton `Look` mit den Rollen und Schriften, die Seiten heute direkt aus
+  `KanteStyle` lesen: Grund, Karte, Bühne, Text, Nebentext, deaktiviert, Akzent, positiv, negativ, Linien,
+  `levelColor`, die kleine, japanische und Titelschrift. Unter Shinki bildet `+shinki/Look.qml` sie auf
+  `ShinkiStyle` ab.
 - **Übergang.** Die Seiten ziehen Baustein für Baustein von `Kante…` auf `Look…` um, angefangen bei
   Startmenü, Programm, Blatt und Player. Sobald es `app/qml/Look` gibt, nimmt jede neue oder geänderte Seite
   `Look`. Eine noch nicht umgezogene Seite liest ihre Farben aus `KanteStyle`, einem Singleton, das kein
@@ -239,7 +243,8 @@ Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Contr
   sonst nicht). Noto Serif JP ist eine Teilmenge (Abschnitt 3). Ein Test prüft, dass jedes Kanji und Kana
   aus Daten, QML und Katalogen darin steht.
 - **Prüfen.**
-  - Der Oberflächentest (`tst_ui`, heute mit Material) bekommt einen zweiten Lauf mit Shinki. Seine Bilder vergleicht ein Mensch mit dem Clickdummy.
+  - Der Oberflächentest läuft zweimal: `ui` (Kante, Material) und `ui_shinki` (`MITORI_TEST_STYLE=shinki`, Bilder
+    in `ui-shots/shinki`). Seine Bilder vergleicht ein Mensch mit dem Clickdummy.
   - Ein Test rechnet die Kontraste aus Abschnitt 2 aus `tokens.json` nach, für jede Paarung aus Text und Grund, die die Bibel erlaubt (`tests/test_shinki.py`).
 
 ## 7 Was Shinki nicht ist

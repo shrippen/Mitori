@@ -83,52 +83,52 @@
 <context>
     <name>Appearance</name>
     <message>
-        <location filename="../services/appearance.cpp" line="125"/>
+        <location filename="../services/appearance.cpp" line="128"/>
         <source>Breeze</source>
         <translation>Breeze</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="125"/>
+        <location filename="../services/appearance.cpp" line="128"/>
         <source>Plasma&apos;s own look, with its colours</source>
         <translation>Plasmas eigenes Aussehen, mit seinen Farben</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="126"/>
+        <location filename="../services/appearance.cpp" line="129"/>
         <source>Material</source>
         <translation>Material</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="126"/>
+        <location filename="../services/appearance.cpp" line="129"/>
         <source>Android&apos;s look, light</source>
         <translation>Das Aussehen von Android, hell</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="127"/>
+        <location filename="../services/appearance.cpp" line="130"/>
         <source>Kante</source>
         <translation>Kante</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="127"/>
+        <location filename="../services/appearance.cpp" line="130"/>
         <source>Dark, sharp edges, yellow accent</source>
         <translation>Dunkel, scharfe Kanten, gelber Akzent</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="128"/>
+        <location filename="../services/appearance.cpp" line="131"/>
         <source>Leinen</source>
         <translation>Leinen</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="128"/>
+        <location filename="../services/appearance.cpp" line="131"/>
         <source>Kante in light linen</source>
         <translation>Kante in hellem Leinen</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="129"/>
+        <location filename="../services/appearance.cpp" line="132"/>
         <source>Shinki</source>
         <translation>Shinki</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="129"/>
+        <location filename="../services/appearance.cpp" line="132"/>
         <source>Paper, ink and one red, as the Shinki News</source>
         <translation>Papier, Tusche und ein Rot, wie die Shinki News</translation>
     </message>
@@ -277,7 +277,7 @@
 <context>
     <name>CommentPage</name>
     <message>
-        <location filename="../qml/CommentPage.qml" line="69"/>
+        <location filename="../qml/CommentPage.qml" line="73"/>
         <source>Source: shinkiryu.de, Itto-den Shinki Toho</source>
         <translation>Quelle: shinkiryu.de, Itto-den Shinki Toho</translation>
     </message>
@@ -2036,32 +2036,32 @@
 <context>
     <name>StartPage</name>
     <message>
-        <location filename="../qml/StartPage.qml" line="35"/>
+        <location filename="../qml/StartPage.qml" line="34"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="41"/>
+        <location filename="../qml/StartPage.qml" line="40"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="54"/>
+        <location filename="../qml/StartPage.qml" line="53"/>
         <source>Programme data missing</source>
         <translation>Programmdaten fehlen</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="62"/>
+        <location filename="../qml/StartPage.qml" line="61"/>
         <source>Ratings are not saved</source>
         <translation>Einschätzungen werden nicht gespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="72"/>
+        <location filename="../qml/StartPage.qml" line="71"/>
         <source>New video version</source>
         <translation>Neue Videoversion</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="73"/>
+        <location filename="../qml/StartPage.qml" line="72"/>
         <source>%n video bundle(s) can be updated.</source>
         <translation>
             <numerusform>%n Video-Bundle lässt sich aktualisieren.</numerusform>
@@ -2069,22 +2069,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="76"/>
+        <location filename="../qml/StartPage.qml" line="75"/>
         <source>Videos</source>
         <translation>Videos</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="100"/>
+        <location filename="../qml/StartPage.qml" line="98"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="117"/>
+        <location filename="../qml/StartPage.qml" line="113"/>
         <source>Practice today</source>
         <translation>Heute üben</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="118"/>
+        <location filename="../qml/StartPage.qml" line="114"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n fällig</numerusform>
@@ -2092,32 +2092,32 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="118"/>
+        <location filename="../qml/StartPage.qml" line="114"/>
         <source>all practised</source>
         <translation>alles geübt</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="135"/>
+        <location filename="../qml/StartPage.qml" line="129"/>
         <source>Exam mode</source>
         <translation>Prüfungsmodus</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="136"/>
+        <location filename="../qml/StartPage.qml" line="130"/>
         <source>Mock exam %1</source>
         <translation>Probe %1</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="171"/>
+        <location filename="../qml/StartPage.qml" line="161"/>
         <source>Courses</source>
         <translation>Lehrgänge</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="173"/>
+        <location filename="../qml/StartPage.qml" line="163"/>
         <source>Calendar and notebooks</source>
         <translation>Kalender und Notizbücher</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="174"/>
+        <location filename="../qml/StartPage.qml" line="164"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n Tag</numerusform>
@@ -2125,17 +2125,17 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="174"/>
+        <location filename="../qml/StartPage.qml" line="164"/>
         <source>today</source>
         <translation>heute</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="152"/>
+        <location filename="../qml/StartPage.qml" line="144"/>
         <source>Statistics</source>
         <translation>Statistik</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="153"/>
+        <location filename="../qml/StartPage.qml" line="145"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n Übungstag in 30 Tagen</numerusform>
@@ -2143,22 +2143,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="186"/>
+        <location filename="../qml/StartPage.qml" line="174"/>
         <source>Technique map</source>
         <translation>Landkarte</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="187"/>
+        <location filename="../qml/StartPage.qml" line="175"/>
         <source>Attack × technique</source>
         <translation>Angriff × Technik</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="200"/>
+        <location filename="../qml/StartPage.qml" line="186"/>
         <source>Glossary</source>
         <translation>Glossar</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="201"/>
+        <location filename="../qml/StartPage.qml" line="187"/>
         <source>Kanji · pronunciation</source>
         <translation>Kanji · Aussprache</translation>
     </message>

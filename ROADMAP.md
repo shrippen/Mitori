@@ -164,8 +164,9 @@ Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutz
 
 - **Stil Shinki** (Shinki News): eigener Stil neben Kante, kein Unterthema (Owner, 02.11.2026); Style-Bibel in
   `shinki/README.md`, Umsetzung als Qt-Quick-Controls-Stil `shinki/qml/Shinki` mit der Schicht `app/qml/Look`.
-  Stand: `ShinkiStyle` aus `tokens.json`, Schriften (Teilmengen), Kontrasttest. Offen: Controls-Stil, eigene
-  Bausteine, `app/qml/Look`, alle Seiten umziehen, Lauf von `tst_ui` mit Shinki.
+  Stand: `ShinkiStyle` aus `tokens.json`, Schriften (Japanisch und Crimson Pro als Teilmenge), Kontrasttest;
+  `app/qml/Look` (Dateiselektor „shinki“) mit Rollen, Kachel, Hinweis, Knopf, Scope; das Startmenü geht über Look;
+  `ctest ui_shinki`. Offen: Controls-Stil, die übrigen Bausteine, alle Seiten umziehen, Kopfzeile.
 - **Stil wählbar** (Owner, 03.11.2026): Breeze, Material, Kante, Leinen, Shinki; gefragt im
   **Einrichtungsassistenten beim ersten Start** mit kurzem Rundgang, später in Einstellungen → Darstellung
   (`services/appearance`, gilt nach dem Neustart). Shinki steht nur mit `-DMITORI_SHINKI=ON` zur Wahl, bis alle
