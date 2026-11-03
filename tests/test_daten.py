@@ -202,3 +202,18 @@ def test_wartezeiten(daten):
         assert nach == erwartet, d["id"]
     hoshu = [g for g in daten["disziplinen"][2]["grade"] if g["id"] == "hoshu"]
     assert hoshu and hoshu[0]["pruefbar"] is False
+
+
+def test_korrekturen_status_nach_kopfzeile(tmp_path):
+    """The status comes from the column named Status, also with more columns after it (the owner's
+    decisions)."""
+    sys.path.insert(0, str(WURZEL / "tools"))
+    import daten as werkzeug
+    datei = tmp_path / "KORREKTUREN.md"
+    datei.write_text(
+        "| ID | Stelle | Status | Entscheidung vom Owner |\n"
+        "|---|---|---|---|\n"
+        "| A-K-01 | PO | klären | Als Frage an Sensei notieren |\n"
+        "| A-K-02 | PO | erledigt | |\n",
+        encoding="utf-8")
+    assert werkzeug.korrekturen(datei) == {"A-K-01": "klären", "A-K-02": "erledigt"}
