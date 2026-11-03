@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // Notes on a technique (clickdummy "Notizen"): by day, newest day first; a field at the foot
@@ -13,10 +12,10 @@ import Mitori
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     required property var entry
     // Opened from "All notes": its action goes back there instead of stacking another list.
@@ -83,14 +82,14 @@ Kirigami.ScrollablePage {
                     Layout.fillWidth: true
                     visible: text !== ""
                     text: [page.entry.attack, page.entry.jp].filter(x => x).join(" · ")
-                    color: KanteStyle.mutedTextColor
+                    color: Look.mutedTextColor
                     wrapMode: Text.Wrap
                 }
             }
-            KanteLevelDots {
+            LookLevelDots {
                 value: Practice.revision >= 0 ? Practice.level(page.entry.id) : 0
                 names: Practice.levelNames
-                color: KanteStyle.levelColor(value)
+                color: Look.levelColor(value)
             }
         }
 
@@ -98,7 +97,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: Practice.errorString !== ""
             text: Practice.errorString
-            color: KanteStyle.negativeTextColor
+            color: Look.negativeTextColor
             wrapMode: Text.Wrap
         }
 
@@ -106,7 +105,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: page.notes.length === 0
             text: qsTr("No notes on this technique yet.")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
 
@@ -121,7 +120,7 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 spacing: Kirigami.Units.smallSpacing
 
-                KanteSectionLabel {
+                LookSectionLabel {
                     objectName: "dayName"
                     text: page.dayName(dayBlock.modelData.day)
                 }
@@ -151,9 +150,9 @@ Kirigami.ScrollablePage {
                             // opens the editor.
                             activeFocusOnTab: true
                             background: Rectangle {
-                                color: KanteStyle.cardColor
-                                border.width: noteItemLabel.activeFocus ? KanteStyle.borderWidth : 0
-                                border.color: KanteStyle.focusColor
+                                color: Look.cardColor
+                                border.width: noteItemLabel.activeFocus ? Look.focusWidth : 0
+                                border.color: Look.focusColor
                             }
                             Accessible.role: Accessible.Button
                             Accessible.name: text
@@ -184,7 +183,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: page.notes.length > 0
             text: qsTr("Press and hold a note (or Enter on it) to change or delete it.")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
     }
@@ -193,7 +192,7 @@ Kirigami.ScrollablePage {
         RowLayout {
             anchors.fill: parent
 
-            KanteTextField {
+            LookTextField {
                 id: compose
 
                 objectName: "compose"
@@ -214,8 +213,8 @@ Kirigami.ScrollablePage {
                     }
                 }
             }
-            KanteButton {
-                emphasis: KanteButton.Emphasis.Primary
+            LookButton {
+                role: LookButton.Role.Primary
                 enabled: compose.text.trim() !== ""
                 icon.name: "list-add"
                 text: qsTr("Add")

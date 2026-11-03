@@ -5,10 +5,8 @@ import QtQuick.Controls.impl
 // isMask colours only where the platform theme does it (KIconLoader on Plasma); Android, the
 // AppImage and the tests drew the icon as it is (dark on red). The Controls' IconImage colours it
 // on every platform, as the Controls styles do.
+// Use: ShinkiIcon { name: "media-playback-start"; color: ShinkiStyle.textOnRed }
 IconImage {
-    property string source: ""
-
-    name: source
     color: ShinkiStyle.ink
     sourceSize.width: ShinkiStyle.iconSize
     sourceSize.height: ShinkiStyle.iconSize

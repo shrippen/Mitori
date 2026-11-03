@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
+import Mitori
 
 // The description of a sequence (the Kamae exercise of Shinki Toho): its positions in order,
 // numbered, with their kanji. Seigan comes twice (KORREKTUREN S-09). Hidden without steps.

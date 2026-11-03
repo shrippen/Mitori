@@ -28,7 +28,7 @@ QQC2.Button {
 
         ShinkiIcon {
             visible: button.icon.name !== "" && button.display !== QQC2.AbstractButton.TextOnly
-            source: button.icon.name
+            name: button.icon.name
             color: button.primary ? ShinkiStyle.textOnRed : button.link ? ShinkiStyle.red : ShinkiStyle.ink
         }
         QQC2.Label {

@@ -111,7 +111,7 @@ FocusScope {
                     // The icon as a mask, white on the red circle.
                     ShinkiIcon {
                         anchors.centerIn: parent
-                        source: bar.playing ? "media-playback-pause" : "media-playback-start"
+                        name: bar.playing ? "media-playback-pause" : "media-playback-start"
                         color: ShinkiStyle.textOnRed
                     }
                 }

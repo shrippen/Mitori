@@ -27,7 +27,7 @@ QQC2.ToolButton {
         ShinkiIcon {
             anchors.verticalCenter: parent.verticalCenter
             visible: button.icon.name !== ""
-            source: button.icon.name
+            name: button.icon.name
             color: button.checked ? ShinkiStyle.textOnRed : ShinkiStyle.ink
         }
         QQC2.Label {

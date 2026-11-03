@@ -110,6 +110,8 @@ qt_add_qml_module(mitori_app
         qml/Look/LookFocusFollow.qml
         qml/Look/LookPlayButton.qml
         qml/Look/LookGroupHead.qml
+        qml/Look/LookKpi.qml
+        qml/Look/LookSpinBox.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp

@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 import "grades.js" as Grades
 
@@ -14,10 +13,10 @@ import "grades.js" as Grades
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     property string discipline: Programme.discipline
     readonly property var disciplineInfo: Programme.disciplines.find(d => d.id === discipline) || ({})
@@ -58,10 +57,10 @@ Kirigami.ScrollablePage {
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        KanteSectionLabel {
+        LookSectionLabel {
             text: qsTr("Today I practise")
         }
-        KanteSegmented {
+        LookSegmented {
             Layout.fillWidth: true
             model: Programme.disciplines.map(d => d.kurzname)
             currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
@@ -71,19 +70,19 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             text: qsTr("up to %1 (as chosen in the programme)").arg(page.gradeName)
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
-        KanteHintCard {
+        LookHint {
             objectName: "plannedHint"
             Layout.fillWidth: true
             visible: !!page.exam.course
             compact: true
-            tier: KanteHintCard.Tier.Primary
+            importance: LookHint.Importance.Important
             titleText: page.exam.course ? Grades.examText(page.exam) : ""
             meta: page.exam.place || page.exam.title || ""
 
-            KanteButton {
+            LookButton {
                 objectName: "toMockExam"
                 // Only for a grade the exam mode has material for (not Shinki Toho Hon-Menkyo).
                 visible: !!page.exam.course && Exam.grades(page.exam.discipline).some(g => g.id === page.exam.grade)
@@ -100,7 +99,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             spacing: Kirigami.Units.largeSpacing
 
-            KanteKpi {
+            LookKpi {
                 objectName: "dueCount"
                 value: String(page.due.length)
                 label: qsTr("due")
@@ -109,13 +108,13 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 text: page.due.length === 0 ? qsTr("Everything is practised for today.")
                       : qsTr("%1 unsure · %2 long ago · %3 new").arg(page.unsure).arg(page.longAgo).arg(page.fresh)
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
         }
-        KanteButton {
+        LookButton {
             visible: page.due.length > 0
-            emphasis: KanteButton.Emphasis.Primary
+            role: LookButton.Role.Primary
             icon.name: "media-playback-start"
             text: qsTr("Start training")
             onClicked: page.startTraining()
@@ -124,18 +123,18 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             visible: page.due.length > 0 && page.playable.length < page.due.length
             text: qsTr("%n of them without a video on this device: the training shows their name, practise from memory.", "", page.due.length - page.playable.length)
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
 
-        KanteSectionLabel {
+        LookSectionLabel {
             visible: page.due.length > 0
             text: qsTr("Due")
         }
         Repeater {
             model: page.due
 
-            KanteListRow {
+            LookListRow {
                 id: dueRow
 
                 required property var modelData
@@ -149,15 +148,15 @@ Kirigami.ScrollablePage {
                     sheet.playable = !!modelData.video && Videos.available(modelData.video.video)
                     sheet.open()
                 }
-                trailing: KanteLevelDots {
+                trailing: LookLevelDots {
                     value: dueRow.modelData.level
                     names: Practice.levelNames
-                    color: KanteStyle.levelColor(dueRow.modelData.level)
+                    color: Look.levelColor(dueRow.modelData.level)
                 }
             }
         }
 
-        KanteSectionLabel {
+        LookSectionLabel {
             text: qsTr("Intervals · days until due again")
         }
         GridLayout {
@@ -175,9 +174,9 @@ Kirigami.ScrollablePage {
 
                     QQC2.Label {
                         text: (interval.index + 1) + " " + Practice.levelNames[interval.index + 1]
-                        color: KanteStyle.mutedTextColor
+                        color: Look.mutedTextColor
                     }
-                    KanteSpinBox {
+                    LookSpinBox {
                         from: 1
                         to: 365
                         value: Practice.intervals[interval.index]
@@ -195,7 +194,7 @@ Kirigami.ScrollablePage {
         QQC2.Label {
             Layout.fillWidth: true
             text: qsTr("New techniques of the current grade come on top, at most two a day.")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
     }

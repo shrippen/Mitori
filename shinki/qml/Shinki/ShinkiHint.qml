@@ -4,7 +4,8 @@ import QtQuick.Layouts
 
 // Hint (bible section 5, `.novid`): Info on `chip`, text inkMuted; Important on paperAlt with a
 // 1 px frame and 3 px red on the left (`.novid.buy`); Error: the title in red, with its word.
-// Actions (buttons) go in as children, after the text.
+// Actions (buttons) go in as children, after the text. `meta` a small line below the title (place,
+// date); `compact` the tighter padding for a hint among other content.
 Item {
     id: hint
 
@@ -16,10 +17,14 @@ Item {
     property int kind: ShinkiHint.Kind.Info
     property string titleText: ""
     property string text: ""
+    property string meta: ""
+    property bool compact: false
     default property alias actions: actionRow.data
 
-    implicitWidth: column.implicitWidth + 2 * ShinkiStyle.cardSpace
-    implicitHeight: column.implicitHeight + 2 * ShinkiStyle.cardSpace
+    readonly property int padding: compact ? ShinkiStyle.gridSpace * 2 : ShinkiStyle.cardSpace
+
+    implicitWidth: column.implicitWidth + 2 * padding
+    implicitHeight: column.implicitHeight + 2 * padding
 
     Rectangle {
         anchors.fill: parent
@@ -38,7 +43,7 @@ Item {
         id: column
 
         anchors.fill: parent
-        anchors.margins: ShinkiStyle.cardSpace
+        anchors.margins: hint.padding
         spacing: ShinkiStyle.gridSpace
 
         QQC2.Label {
@@ -49,6 +54,15 @@ Item {
             font.family: ShinkiStyle.uiFamily
             font.bold: true
             font.pixelSize: ShinkiStyle.uiSize
+            wrapMode: Text.Wrap
+        }
+        QQC2.Label {
+            Layout.fillWidth: true
+            visible: hint.meta !== ""
+            text: hint.meta
+            color: ShinkiStyle.inkMuted
+            font.family: ShinkiStyle.uiFamily
+            font.pixelSize: ShinkiStyle.smallSize
             wrapMode: Text.Wrap
         }
         QQC2.Label {

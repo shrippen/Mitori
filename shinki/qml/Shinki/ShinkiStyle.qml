@@ -60,6 +60,7 @@ QtObject {
     readonly property int chipStandSize: unit(11)
     readonly property int rateNumberSize: unit(17)
     readonly property int rateWordSize: unit(11)
+    readonly property int kpiSize: unit(28)
     readonly property int hintSize: unit(12.5)
     readonly property int tileTitleSize: unit(16)
     readonly property int tileTitleBigSize: unit(21)

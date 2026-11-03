@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls as QQC2
 
 // Slider look (bible section 5, "Player"): placed inside a horizontal slider, it hides the
 // style's groove and handle and draws a track of 4 px in `line`, the part up to the value in red
@@ -6,7 +7,7 @@ import QtQuick
 Item {
     id: skin
 
-    required property Item control
+    required property QQC2.Slider control
 
     anchors.fill: parent
     opacity: control && control.enabled ? 1 : ShinkiStyle.disabledOpacity

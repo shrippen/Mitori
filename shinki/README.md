@@ -168,6 +168,9 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
   - Oben Eyebrow, Titel 25 px Crimson Pro, Japanisch 16 px darunter.
   - Der Grund dahinter ist `scrim`.
 - **Einschätzen** (`.rate`): vier gleich breite Felder mit Zahl (17 px fett) und Wort (11 px); gewählt rot gefüllt.
+- **Kennzahl**: die Zahl 28 px fett in Tabellenziffern, `ink`; darunter das Wort als Kolumne (11 px, `inkMuted`).
+  Eine Änderung steht klein daneben, mit Pfeil als Form; besser ist `ink`, schlechter `red`.
+- **Zahlenfeld**: wie das Feld, die Zahl in Tabellenziffern; − und + als Felder mit 1 px Rahmen links und rechts.
 - **Knopf** (`.btn`)
   - Hauptknopf: rot gefüllt, weiß, 15 px fett, volle Breite im Blatt.
   - Zweitknopf: weiß mit 1 px Rahmen, Text `ink`.
@@ -231,7 +234,7 @@ Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Contr
   beim Start setzt (der Stil wechselt ohnehin erst nach dem Neustart); kein Loader, keine Weiterleitung jeder
   Eigenschaft. Die `+shinki`-Dateien stehen in den Ressourcen, nicht als QML-Typen (sonst gälte die letzte
   Datei des qmldir). Dazu kommt das Singleton `Look` mit den Rollen und Schriften, die Seiten heute direkt aus
-  `KanteStyle` lesen: Grund, Karte, Bühne, Text, Nebentext, deaktiviert, Akzent, positiv, negativ, Linien,
+  `KanteStyle` lesen: Grund, Karte, Bühne, Text, Nebentext, deaktiviert, Akzent, Fokus, positiv, negativ, Linien,
   `levelColor`, die kleine, japanische und Titelschrift. Unter Shinki bildet `+shinki/Look.qml` sie auf
   `ShinkiStyle` ab.
 - **Übergang.** Die Seiten ziehen Baustein für Baustein von `Kante…` auf `Look…` um, angefangen bei

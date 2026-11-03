@@ -21,6 +21,9 @@ QtObject {
     readonly property color stageColor: KanteStyle.stageColor
     readonly property color stageTextColor: KanteStyle.stageTextColor
     readonly property int borderWidth: KanteStyle.borderWidth
+    // The keyboard focus frame.
+    readonly property color focusColor: KanteStyle.focusColor
+    readonly property int focusWidth: KanteStyle.borderWidth
 
     readonly property font defaultFont: KanteStyle.defaultFont
     readonly property font smallFont: KanteStyle.smallFont

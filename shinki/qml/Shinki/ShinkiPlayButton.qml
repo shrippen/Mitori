@@ -23,7 +23,7 @@ QQC2.AbstractButton {
     contentItem: Item {
         ShinkiIcon {
             anchors.centerIn: parent
-            source: "media-playback-start"
+            name: "media-playback-start"
             color: ShinkiStyle.textOnRed
         }
     }

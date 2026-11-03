@@ -727,7 +727,7 @@ TestCase {
         compare(page.due.length, 1 - newToday)
         verify(page.due.every(r => r.id !== first), "practised today: not due")
         compare(findChild(page, "dueCount").value, String(1 - newToday))
-        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor), "Kante's ground")
+        verify(Qt.colorEqual(page.background.color, Look.backgroundColor), "the style's ground")
         shot("7-today")
         if (page.due.length > 0) {
             Practice.rate(page.due[0].id, 1)
@@ -839,6 +839,12 @@ TestCase {
         shot("8-notes")
         const note = findChild(page, "note")
         verify(note)
+        // Tab to a note: the style's focus frame (Shinki: 2 px ink, not red, which means chosen).
+        note.forceActiveFocus(Qt.TabFocusReason)
+        if (uiShinki) {
+            verify(Qt.colorEqual(note.background.border.color, Look.textColor), "focus in ink: " + note.background.border.color)
+            verify(note.background.border.width >= 2, "focus 2 px: " + note.background.border.width)
+        }
         mousePress(note, 20, note.height / 2)
         wait(1000)
         mouseRelease(note, 20, note.height / 2)
