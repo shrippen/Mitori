@@ -181,6 +181,9 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
 - **Einstellungszeile**: Titel 14 px `ink`, darunter der Hinweis 12 px `inkMuted`, rechts das Steuerelement; unten eine
   Linie. Geändert: ein rotes Quadrat am Titel und „Zurücksetzen“ als Link. Ein Abschnitt darüber als Kolumne.
 - **Seitentitel** (Kopf): PT Sans fett 22 px, `ink`.
+- **Dialog**: weiß mit 1 px Rahmen, eckig, auf `scrim`; Titel PT Sans fett 16 px, Text 14 px. Unten rechts Abbrechen
+  (Zweitknopf) und der Hauptknopf, rot, mit dem, was er tut („Verwerfen“, nicht „OK“). Breiten 432, 648 und 864 px,
+  höchstens 90 % des Fensters.
 - **Hinweis** (`.novid`, `.sheet .hint`): `chip`-Fläche, Text 12,5 px `inkMuted`, die Aktion rot und fett am Ende.
   Wichtiger Hinweis: `paperAlt` mit 1 px Rahmen und 3 px Rot links.
 - **Letzte Notiz** (`.lastnote`): `paperAlt`, darüber Datum und Gerät 11 px, der Text in Crimson Pro.

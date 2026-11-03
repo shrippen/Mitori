@@ -58,6 +58,16 @@ TestCase {
         mouseClick(tile)
     }
 
+    // WCAG contrast of two colours (text over ground, alpha laid on the ground).
+    function contrast(fore, back) {
+        const lin = c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+        const lum = c => 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b)
+        const laid = Qt.rgba(fore.r * fore.a + back.r * (1 - fore.a), fore.g * fore.a + back.g * (1 - fore.a),
+                             fore.b * fore.a + back.b * (1 - fore.a), 1)
+        const a = lum(laid), b = lum(back)
+        return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+    }
+
     function push(page, properties) {
         window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + page + ".qml"), properties || {})
         tryVerify(() => window.pageStack.currentItem && window.pageStack.currentItem.title !== undefined)
@@ -157,6 +167,18 @@ TestCase {
             }
             verify(lightest > 0.9, button + ": the symbol is not white, lightest " + lightest)
         }
+    }
+
+    // A dialog of the content's size (Fit): its content measures the text. Shinki only: KanteDialog
+    // has its scope as a child too (Bestand, to fix in Kante).
+    function test_1d_dialog_fit() {
+        if (!uiShinki) {
+            skip("KanteDialog: scope as a child, fixed in Kante")
+        }
+        const dialog = createTemporaryQmlObject(
+            "import QtQuick.Controls; import Mitori; LookDialog { Label { text: 'Hello' } }", window.contentItem)
+        verify(dialog.implicitContentWidth > 0, "content width " + dialog.implicitContentWidth)
+        verify(dialog.implicitContentHeight > 0, "content height " + dialog.implicitContentHeight)
     }
 
     function test_2_programme() {
@@ -472,12 +494,12 @@ TestCase {
     function test_3b_settings() {
         const page = push("SettingsPage")
         compare(page.title, "Settings")
-        // Kante's ground, not the platform's (ScrollablePage does not inherit the theme).
-        verify(Qt.colorEqual(page.background.color, KanteStyle.backgroundColor),
-               page.background.color + " is not " + KanteStyle.backgroundColor)
-        // and the scope reaches the page's controls: Kante's text colour, not the platform's.
-        verify(Qt.colorEqual(page.Kirigami.Theme.textColor, KanteStyle.textColor),
-               page.Kirigami.Theme.textColor + " is not " + KanteStyle.textColor)
+        // The style's ground, not the platform's (ScrollablePage does not inherit the theme).
+        verify(Qt.colorEqual(page.background.color, Look.backgroundColor),
+               page.background.color + " is not " + Look.backgroundColor)
+        // and the scope reaches the page's controls: the style's text colour, not the platform's.
+        verify(Qt.colorEqual(page.Kirigami.Theme.textColor, Look.textColor),
+               page.Kirigami.Theme.textColor + " is not " + Look.textColor)
         shot("4b-settings")
         window.pageStack.pop()
     }
@@ -1816,6 +1838,15 @@ TestCase {
         tryVerify(() => asked.opened)
         verify(window.pageStack.currentItem === end, "still rating")
         shot("13b-exam-discard", true)
+        // The text readable on the dialog's ground (it hangs on the overlay, outside the page's
+        // scope; a dark platform scheme gave white on white), Cancel before the main button on
+        // every platform.
+        const question = findChild(asked.contentItem, "discardText")
+        const ratio = contrast(question.color, asked.background.color)
+        verify(ratio >= 4.5, question.color + " on " + asked.background.color + ": " + ratio.toFixed(1) + ":1")
+        const cancel = asked.standardButton(QQC2.Dialog.Cancel)
+        const discard = asked.standardButton(QQC2.Dialog.Ok)
+        verify(cancel.mapToItem(null, 0, 0).x < discard.mapToItem(null, 0, 0).x, "Cancel first")
         asked.reject()
         tryVerify(() => !asked.opened)
         verify(window.pageStack.currentItem === end, "still rating")
