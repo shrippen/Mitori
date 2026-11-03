@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
@@ -14,8 +16,10 @@ FocusScope {
     property int currentIndex: 0
     signal activated(int index)
 
+    // Equal fields, each as wide as the longest label needs (a segmented control beside a
+    // setting's title takes that width, not the row's).
     implicitHeight: ShinkiStyle.rowMinSpace
-    implicitWidth: row.implicitWidth
+    implicitWidth: seg.model.length * (widest.advanceWidth + 4 * ShinkiStyle.gridSpace) + 2 * ShinkiStyle.lineWidth
     activeFocusOnTab: true
 
     Accessible.role: Accessible.PageTabList
@@ -28,6 +32,15 @@ FocusScope {
             return
         }
         seg.activated(index)
+    }
+
+    TextMetrics {
+        id: widest
+
+        font.family: ShinkiStyle.uiFamily
+        font.bold: true
+        font.pixelSize: ShinkiStyle.segmentSize
+        text: seg.model.reduce((a, b) => String(b).length > a.length ? String(b) : a, "")
     }
 
     Rectangle {

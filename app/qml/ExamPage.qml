@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 import "grades.js" as Grades
 
@@ -14,10 +13,10 @@ import "grades.js" as Grades
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     // Programme.discipline notifies on a new grade too, so `grade` follows both.
     readonly property string discipline: Programme.discipline
@@ -52,7 +51,7 @@ Kirigami.ScrollablePage {
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        KanteSegmented {
+        LookSegmented {
             Layout.fillWidth: true
             model: Programme.disciplines.map(d => d.kurzname)
             currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
@@ -60,16 +59,16 @@ Kirigami.ScrollablePage {
             Accessible.name: qsTr("Discipline")
         }
 
-        KanteHintCard {
+        LookHint {
             objectName: "plannedHint"
             Layout.fillWidth: true
             visible: !!page.exam.course
             compact: true
-            tier: KanteHintCard.Tier.Primary
+            importance: LookHint.Importance.Important
             titleText: page.exam.course ? qsTr("Planned: %1").arg(Grades.examText(page.exam)) : ""
             meta: page.exam.place || page.exam.title || ""
 
-            KanteButton {
+            LookButton {
                 objectName: "toExamGrade"
                 // Only for a grade with material (Exam.grade falls back to the first one otherwise).
                 visible: page.exam.grade !== page.grade && page.grades.some(g => g.id === page.exam.grade)
@@ -85,7 +84,7 @@ Kirigami.ScrollablePage {
             Repeater {
                 model: page.grades
 
-                KanteChip {
+                LookChip {
                     required property var modelData
 
                     objectName: "grade_" + modelData.id
@@ -97,12 +96,12 @@ Kirigami.ScrollablePage {
             }
         }
 
-        KanteSettingRow {
+        LookSettingRow {
             Layout.fillWidth: true
             section: qsTr("Mock exam %1").arg(page.gradeName)
             title: qsTr("Points from the %1").arg(page.gradeName)
 
-            KanteSegmented {
+            LookSegmented {
                 objectName: "countChoice"
                 model: page.counts.map(n => n === 0 ? qsTr("all %1").arg(page.size) : String(n))
                 currentIndex: page.countIndex
@@ -110,24 +109,24 @@ Kirigami.ScrollablePage {
                 Accessible.name: qsTr("Number of points")
             }
         }
-        KanteSettingRow {
+        LookSettingRow {
             Layout.fillWidth: true
             title: qsTr("Random order")
             hint: qsTr("off: as in the exam programme")
 
-            KanteSwitch {
+            LookSwitch {
                 objectName: "shuffledSwitch"
                 checked: Exam.shuffled
                 onToggled: Exam.shuffled = checked
                 Accessible.name: qsTr("Random order")
             }
         }
-        KanteSettingRow {
+        LookSettingRow {
             Layout.fillWidth: true
             title: qsTr("Techniques from earlier grades")
             hint: page.hasEarlier ? qsTr("2–5 samples, always first") : qsTr("first grade, none before")
 
-            KanteSwitch {
+            LookSwitch {
                 objectName: "samplesSwitch"
                 enabled: page.hasEarlier
                 checked: Exam.samples && page.hasEarlier
@@ -143,14 +142,14 @@ Kirigami.ScrollablePage {
                   + (page.lastRound ? " " + qsTr("Last round: %1, average %2.")
                                                 .arg(page.lastRound.at.toLocaleDateString(Qt.locale(), Locale.ShortFormat))
                                                 .arg(page.averageText(page.lastRound.average)) : "")
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
 
-        KanteButton {
+        LookButton {
             objectName: "startRound"
             enabled: page.size > 0
-            emphasis: KanteButton.Emphasis.Primary
+            role: LookButton.Role.Primary
             icon.name: "media-playback-start"
             text: qsTr("Start round")
             onClicked: page.start()

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
-import Kante
+import Mitori
 
 // The board of an exam round (app-entscheidungen.md, Runde 4: design D): the group (standing,
 // sitting …), below it "Attack" and "Technique" labelled in two rows, each with its addition and
@@ -15,17 +15,17 @@ ColumnLayout {
     // Larger on a tablet or in landscape.
     property real zoom: 1
 
-    readonly property real base: KanteStyle.defaultFont.pointSize > 0 ? KanteStyle.defaultFont.pointSize : 10
+    readonly property real base: Look.defaultFont.pointSize > 0 ? Look.defaultFont.pointSize : 10
     readonly property bool hasAttack: !techniqueOnly && !!point.attack
-    // Kante's heading font in the sizes Kante itself uses: the technique as large as a KanteKpi
-    // figure, the attack and the Japanese as a KantePageTitle.
-    readonly property font techniqueFont: KanteStyle.headingFont(base * 2.6 * zoom)
-    readonly property font attackFont: KanteStyle.headingFont(base * 1.35 * zoom)
-    readonly property font kanjiFont: KanteStyle.japaneseFont(KanteStyle.titleFont(base * 1.35 * zoom))
+    // The style's heading font in Kante's sizes: the technique as large as a Kpi figure, the
+    // attack and the Japanese as a page title.
+    readonly property font techniqueFont: Look.headingFont(base * 2.6 * zoom)
+    readonly property font attackFont: Look.headingFont(base * 1.35 * zoom)
+    readonly property font kanjiFont: Look.japaneseFont(Look.titleFont(base * 1.35 * zoom))
 
-    spacing: KanteStyle.unit(10) * zoom
+    spacing: Look.unit(10) * zoom
 
-    KanteSectionLabel {
+    LookSectionLabel {
         objectName: "boardGroup"
         Layout.alignment: Qt.AlignHCenter
         visible: !board.techniqueOnly && !!board.point.group
@@ -35,19 +35,19 @@ ColumnLayout {
     GridLayout {
         Layout.fillWidth: true
         columns: 2
-        columnSpacing: KanteStyle.unit(12) * board.zoom
-        rowSpacing: KanteStyle.unit(10) * board.zoom
+        columnSpacing: Look.unit(12) * board.zoom
+        rowSpacing: Look.unit(10) * board.zoom
 
         Rectangle {
             Layout.columnSpan: 2
             Layout.fillWidth: true
             implicitHeight: 1
             visible: board.hasAttack
-            color: KanteStyle.ruleColor
+            color: Look.ruleColor
         }
-        KanteSectionLabel {
+        LookSectionLabel {
             Layout.alignment: Qt.AlignTop
-            Layout.topMargin: KanteStyle.unit(6) * board.zoom
+            Layout.topMargin: Look.unit(6) * board.zoom
             visible: board.hasAttack
             text: qsTr("Attack")
         }
@@ -67,14 +67,14 @@ ColumnLayout {
                 Layout.fillWidth: true
                 visible: !!board.point.attackExtra
                 text: board.point.attackExtra || ""
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
             QQC2.Label {
                 Layout.fillWidth: true
                 visible: !!board.point.attackJp
                 text: board.point.attackJp || ""
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 font: board.kanjiFont
                 wrapMode: Text.Wrap
             }
@@ -84,11 +84,11 @@ ColumnLayout {
             Layout.columnSpan: 2
             Layout.fillWidth: true
             implicitHeight: 1
-            color: KanteStyle.ruleColor
+            color: Look.ruleColor
         }
-        KanteSectionLabel {
+        LookSectionLabel {
             Layout.alignment: Qt.AlignTop
-            Layout.topMargin: KanteStyle.unit(8) * board.zoom
+            Layout.topMargin: Look.unit(8) * board.zoom
             text: qsTr("Technique")
         }
         ColumnLayout {
@@ -107,7 +107,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 visible: !board.techniqueOnly && !!board.point.extra
                 text: board.point.extra || ""
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
             QQC2.Label {
@@ -115,7 +115,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 visible: !!board.point.jp
                 text: board.point.jp || ""
-                color: KanteStyle.mutedTextColor
+                color: Look.mutedTextColor
                 font: board.kanjiFont
                 wrapMode: Text.Wrap
             }

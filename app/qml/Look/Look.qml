@@ -39,6 +39,10 @@ QtObject {
     function monoFont(pointSize) {
         return KanteStyle.monoFont(pointSize)
     }
+    // Large display text (a mock exam's technique).
+    function headingFont(pointSize) {
+        return KanteStyle.headingFont(pointSize)
+    }
     function titleFont(pointSize) {
         return KanteStyle.titleFont(pointSize)
     }

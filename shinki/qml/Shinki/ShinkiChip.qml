@@ -4,7 +4,8 @@ import QtQuick.Controls as QQC2
 // Grade chip (bible section 5, `.gchip`): the name bold in a 1 px frame; chosen: a red frame and
 // 3 px red inside at the bottom (not colour alone: the bar). As KanteChip: `checkable` toggles on
 // a tap, `choice` (one of a set the app holds) only reports the tap and keeps the app's binding
-// of `checked`. Return and Space act as a tap.
+// of `checked`. Return and Space act as a tap. `interactive` false: a plain label (a state, a
+// mark): no focus, no tap, no hover.
 Item {
     id: chip
 
@@ -12,6 +13,7 @@ Item {
     property bool checkable: false
     property bool checked: false
     property bool choice: false
+    property bool interactive: true
     readonly property bool hovered: hover.hovered
     signal clicked()
 
@@ -24,12 +26,12 @@ Item {
 
     implicitWidth: label.implicitWidth + 4 * ShinkiStyle.gridSpace
     implicitHeight: Math.max(ShinkiStyle.chipMinSpace, label.implicitHeight + 2 * ShinkiStyle.gridSpace)
-    activeFocusOnTab: true
+    activeFocusOnTab: interactive
 
-    Accessible.role: checkable ? Accessible.RadioButton : Accessible.Button
+    Accessible.role: !interactive ? Accessible.StaticText : checkable ? Accessible.RadioButton : Accessible.Button
     Accessible.name: text
     Accessible.checked: checked
-    Accessible.focusable: true
+    Accessible.focusable: interactive
     Accessible.onPressAction: chip.activate()
 
     Keys.onReturnPressed: chip.activate()
@@ -38,7 +40,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: chip.hovered ? ShinkiStyle.chip : ShinkiStyle.paper
+        color: chip.hovered && chip.interactive ? ShinkiStyle.chip : ShinkiStyle.paper
         border.width: chip.activeFocus ? ShinkiStyle.focusWidth : ShinkiStyle.lineWidth
         border.color: chip.activeFocus ? ShinkiStyle.ink : chip.checked ? ShinkiStyle.red : ShinkiStyle.line
 
@@ -65,8 +67,11 @@ Item {
 
     HoverHandler {
         id: hover
+
+        cursorShape: chip.interactive ? Qt.PointingHandCursor : Qt.ArrowCursor
     }
     TapHandler {
+        enabled: chip.interactive
         onTapped: chip.activate()
     }
 }

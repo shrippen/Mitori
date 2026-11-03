@@ -34,7 +34,7 @@
 <context>
     <name>CourseRow</name>
     <message numerus="yes">
-        <location filename="../qml/CourseRow.qml" line="27"/>
+        <location filename="../qml/CourseRow.qml" line="28"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -42,7 +42,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CourseRow.qml" line="34"/>
+        <location filename="../qml/CourseRow.qml" line="35"/>
         <source>%n note(s)</source>
         <translation>
             <numerusform>%n note</numerusform>
@@ -53,7 +53,7 @@
 <context>
     <name>ExamPage</name>
     <message numerus="yes">
-        <location filename="../qml/ExamPage.qml" line="92"/>
+        <location filename="../qml/ExamPage.qml" line="91"/>
         <source>%n point(s)</source>
         <translation>
             <numerusform>%n point</numerusform>

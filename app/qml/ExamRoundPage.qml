@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // An exam round (clickdummy "Prüfungsrunde"): one point at a time on the board, samples from
@@ -11,10 +10,10 @@ import Mitori
 Kirigami.Page {
     id: page
 
-    // The page keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // The page keeps the platform's colours (Theme.inherit: false): give it the style's, and
+    // the style's page ground (Look: Kante or Shinki).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
 
     required property var points        // Exam.draw()
     required property string discipline
@@ -60,8 +59,8 @@ Kirigami.Page {
             objectName: "counter"
             Layout.alignment: Qt.AlignRight
             text: (page.index + 1) + " / " + page.points.length
-            color: KanteStyle.mutedTextColor
-            font: KanteStyle.monoFont(0, false)
+            color: Look.mutedTextColor
+            font: Look.monoFont(0, false)
             Accessible.name: qsTr("Point %1 of %2").arg(page.index + 1).arg(page.points.length)
         }
 
@@ -89,7 +88,7 @@ Kirigami.Page {
                         techniqueOnly: page.discipline === "shinkitoho"
                         zoom: page.tablet ? 1.6 : 1
                     }
-                    KanteChip {
+                    LookChip {
                         objectName: "sampleMark"
                         Layout.alignment: Qt.AlignHCenter
                         visible: !!page.current.sample
@@ -100,11 +99,11 @@ Kirigami.Page {
             }
         }
 
-        KanteButton {
+        LookButton {
             objectName: "nextButton"
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: Math.min(parent.width, Kirigami.Units.gridUnit * 20)
-            emphasis: KanteButton.Emphasis.Primary
+            role: LookButton.Role.Primary
             text: page.index < page.points.length - 1 ? qsTr("Next") : qsTr("Rate the round")
             onClicked: page.next()
         }
@@ -113,8 +112,8 @@ Kirigami.Page {
             visible: !page.wide || page.tablet
             horizontalAlignment: Text.AlignHCenter
             text: qsTr("You rate every technique at the end of the round.")
-            color: KanteStyle.mutedTextColor
-            font: KanteStyle.smallFont
+            color: Look.mutedTextColor
+            font: Look.smallFont
             wrapMode: Text.Wrap
         }
     }
