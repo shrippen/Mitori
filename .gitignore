@@ -15,6 +15,7 @@ dist/
 app/build*/
 build-app/
 build-app-migr/
+build-test/
 .flatpak-builder/
 **/__pycache__/
 *.pyc
