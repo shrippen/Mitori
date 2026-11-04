@@ -95,7 +95,7 @@ Kirigami.Page {
             }
         }
 
-        QQC2.ScrollView {
+        LookScrollView {
             id: notesView
 
             objectName: "notesView"
@@ -182,7 +182,7 @@ Kirigami.Page {
                     text: page.dayName(section)
                 }
 
-                header: QQC2.Label {
+                header: LookLabel {
                     objectName: "count"
                     width: ListView.view.width
                     bottomPadding: Kirigami.Units.largeSpacing
@@ -212,7 +212,7 @@ Kirigami.Page {
                                                                   : qsTr("Opens the technique's notes; press and hold or the menu key to change or delete")
                     Accessible.onPressAction: page.open(row)
 
-                    QQC2.Label {
+                    LookLabel {
                         Layout.fillWidth: true
                         objectName: "noteTitle"
                         text: noteItem.row.title
@@ -221,7 +221,7 @@ Kirigami.Page {
                         elide: Text.ElideRight
                         leftPadding: Kirigami.Units.smallSpacing
                     }
-                    QQC2.Label {
+                    LookLabel {
                         Layout.fillWidth: true
                         text: noteItem.row.text || (Media.kind(noteItem.row.media || "") === Media.Kind.Photo ? qsTr("Photo")
                                                     : Media.kind(noteItem.row.media || "") === Media.Kind.Voice ? qsTr("Voice note") : "")

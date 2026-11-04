@@ -32,7 +32,7 @@ ColumnLayout {
         Accessible.name: qsTr("Photo")
     }
 
-    QQC2.Label {
+    LookLabel {
         objectName: "mediaMissing"
         Layout.fillWidth: true
         visible: !view.here
@@ -60,7 +60,7 @@ ColumnLayout {
                 player.play()
             }
         }
-        QQC2.Label {
+        LookLabel {
             objectName: "voiceLength"
             text: player.duration > 0 ? qsTr("Voice note %1").arg(view.clock(player.playing ? player.position : player.duration))
                                       : qsTr("Voice note")

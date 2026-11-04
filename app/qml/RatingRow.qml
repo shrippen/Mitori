@@ -17,7 +17,7 @@ ColumnLayout {
 
     spacing: Look.unit(6)
 
-    QQC2.Label {
+    LookLabel {
         Layout.fillWidth: true
         text: rating.level > 0
               ? qsTr("How well does it sit? Last: %1, %2.").arg(Practice.levelNames[rating.level])
@@ -26,7 +26,7 @@ ColumnLayout {
         color: Look.mutedTextColor
         wrapMode: Text.Wrap
     }
-    QQC2.Label {
+    LookLabel {
         Layout.fillWidth: true
         visible: Practice.errorString !== ""
         text: Practice.errorString

@@ -67,7 +67,7 @@ Kirigami.ScrollablePage {
             onActivated: index => page.discipline = Programme.disciplines[index].id
             Accessible.name: qsTr("Discipline")
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: qsTr("up to %1 (as chosen in the programme)").arg(page.gradeName)
             color: Look.mutedTextColor
@@ -104,7 +104,7 @@ Kirigami.ScrollablePage {
                 value: String(page.due.length)
                 label: qsTr("due")
             }
-            QQC2.Label {
+            LookLabel {
                 Layout.fillWidth: true
                 text: page.due.length === 0 ? qsTr("Everything is practised for today.")
                       : qsTr("%1 unsure · %2 long ago · %3 new").arg(page.unsure).arg(page.longAgo).arg(page.fresh)
@@ -119,7 +119,7 @@ Kirigami.ScrollablePage {
             text: qsTr("Start training")
             onClicked: page.startTraining()
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: page.due.length > 0 && page.playable.length < page.due.length
             text: qsTr("%n of them without a video on this device: the training shows their name, practise from memory.", "", page.due.length - page.playable.length)
@@ -172,7 +172,7 @@ Kirigami.ScrollablePage {
 
                     required property int index
 
-                    QQC2.Label {
+                    LookLabel {
                         text: (interval.index + 1) + " " + Practice.levelNames[interval.index + 1]
                         color: Look.mutedTextColor
                     }
@@ -191,7 +191,7 @@ Kirigami.ScrollablePage {
                 }
             }
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: qsTr("New techniques of the current grade come on top, at most two a day.")
             color: Look.mutedTextColor

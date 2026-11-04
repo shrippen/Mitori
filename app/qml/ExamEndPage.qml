@@ -84,7 +84,7 @@ Kirigami.ScrollablePage {
         contentHeight: discardText.implicitHeight
         onAccepted: page.Kirigami.PageStack.pop()
 
-        QQC2.Label {
+        LookLabel {
             id: discardText
 
             objectName: "discardText"
@@ -111,13 +111,13 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 spacing: Look.unit(4)
 
-                QQC2.Label {
+                LookLabel {
                     Layout.fillWidth: true
                     text: (pointRow.modelData.nr ? pointRow.modelData.nr + " · " : "") + pointRow.modelData.title
                     font.bold: true
                     wrapMode: Text.Wrap
                 }
-                QQC2.Label {
+                LookLabel {
                     Layout.fillWidth: true
                     visible: text !== ""
                     text: page.subtitle(pointRow.modelData)
@@ -135,14 +135,14 @@ Kirigami.ScrollablePage {
             }
         }
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: [1, 2, 3, 4].map(l => l + " " + Practice.levelNames[l]).join(" · ") + ". "
                   + qsTr("Apply sets the rating of the techniques and keeps the round in the statistics.")
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: Practice.errorString !== ""
             text: Practice.errorString

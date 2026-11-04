@@ -73,7 +73,7 @@ Kirigami.ScrollablePage {
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: qsTr("The exam videos come with the DVDs of the Shinkiryu association: each DVD has a code that loads its videos onto this device.")
             wrapMode: Text.Wrap
@@ -94,7 +94,7 @@ Kirigami.ScrollablePage {
                 objectName: "codeField"
                 Layout.fillWidth: true
                 placeholderText: "XXXXX-XXXXX-XXXXX-XXXXX"
-                font: Look.monoFont(Kirigami.Theme.defaultFont.pointSize)
+                font: Look.monoFont(Look.defaultFont.pointSize)
                 inputMethodHints: Qt.ImhUppercaseOnly | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
                 Accessible.name: qsTr("Code of the DVD")
                 onAccepted: unlockButton.clicked()
@@ -110,7 +110,7 @@ Kirigami.ScrollablePage {
                 onClicked: Bundles.unlock(codeField.text)
             }
         }
-        QQC2.Label {
+        LookLabel {
             objectName: "codeMessage"
             Layout.fillWidth: true
             visible: text !== ""
@@ -137,14 +137,14 @@ Kirigami.ScrollablePage {
             checked: Bundles.wifiOnly
             onToggled: Bundles.wifiOnly = checked
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: qsTr("A bundle has 70–600 MB.")
             color: Look.mutedTextColor
             font: Look.smallFont
             wrapMode: Text.Wrap
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: Bundles.manifestState === Bundles.ManifestState.Loading ? qsTr("Loading the list of videos …")
                 : Bundles.manifestState === Bundles.ManifestState.Failed && Bundles.bundles.length === 0
@@ -153,7 +153,7 @@ Kirigami.ScrollablePage {
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: Bundles.errorString !== ""
             text: Bundles.errorString
@@ -180,7 +180,7 @@ Kirigami.ScrollablePage {
                 trailing: RowLayout {
                     spacing: Kirigami.Units.smallSpacing
 
-                    QQC2.Label {
+                    LookLabel {
                         objectName: "bundleState"
                         text: bundleRow.bundleState === Bundles.State.Locked ? qsTr("not unlocked")
                             : bundleRow.bundleState === Bundles.State.Unlocked ? qsTr("code saved")
@@ -215,7 +215,7 @@ Kirigami.ScrollablePage {
                 }
             }
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: Bundles.bundles.some(b => b.state === Bundles.State.Installed)
             text: qsTr("Removing frees the space; the code stays saved, so the videos load again without it.")

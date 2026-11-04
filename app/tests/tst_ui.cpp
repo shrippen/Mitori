@@ -96,8 +96,11 @@ public slots:
         QDir().mkpath(shots);
         engine->rootContext()->setContextProperty(QStringLiteral("uiShotsDir"), shots);
         engine->rootContext()->setContextProperty(QStringLiteral("uiShinki"), shinki);
-        // The second run (ctest ui_shinki): the pages through Look as Shinki.
+        // The second run (ctest ui_shinki): the pages through Look as Shinki. The running style
+        // belongs to it too: the window's head and the global tool bar follow it (as after a
+        // start with Shinki).
         if (shinki) {
+            QSettings().setValue(QStringLiteral("look/running"), int(Appearance::Style::Shinki));
             Appearance::prepare(Appearance::Style::Shinki, engine);
         }
         engine->rootContext()->setContextProperty(QStringLiteral("testMediaDir"), QStringLiteral(TEST_MEDIA_DIR));

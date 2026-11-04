@@ -56,7 +56,7 @@ Kirigami.ScrollablePage {
                                 Layout.fillWidth: true
                                 text: modelData.who + ", " + modelData.at.toLocaleString(Qt.locale(), Locale.ShortFormat)
                             }
-                            QQC2.Label {
+                            LookLabel {
                                 Layout.fillWidth: true
                                 text: modelData.text
                                 wrapMode: Text.Wrap
@@ -85,14 +85,14 @@ Kirigami.ScrollablePage {
             }
         }
 
-        QQC2.Label {
+        LookLabel {
             objectName: "noConflicts"
             Layout.fillWidth: true
             visible: Sync.conflicts.length === 0
             text: qsTr("No conflicts. All devices are at the same state.")
             wrapMode: Text.Wrap
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: qsTr("Ratings need no choice: the newer counts, the other stays in the history.")
             color: Look.disabledTextColor

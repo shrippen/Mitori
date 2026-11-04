@@ -45,7 +45,7 @@ Kirigami.ScrollablePage {
     // with the techniques found changes height, which left it above the first row).
     onQueryChanged: Qt.callLater(list.positionViewAtBeginning)
 
-    header: QQC2.ToolBar {
+    header: LookToolBar {
         LookTextField {
             id: field
 
@@ -110,7 +110,7 @@ Kirigami.ScrollablePage {
             spacing: Kirigami.Units.largeSpacing
             onHeightChanged: Qt.callLater(list.positionViewAtBeginning)
 
-            QQC2.Label {
+            LookLabel {
                 objectName: "glossaryIntro"
                 Layout.fillWidth: true
                 Layout.topMargin: Kirigami.Units.largeSpacing
@@ -122,7 +122,7 @@ Kirigami.ScrollablePage {
                 wrapMode: Text.Wrap
             }
 
-            QQC2.Label {
+            LookLabel {
                 objectName: "speechHint"
                 Layout.fillWidth: true
                 Layout.leftMargin: Kirigami.Units.largeSpacing
@@ -135,7 +135,7 @@ Kirigami.ScrollablePage {
                 wrapMode: Text.Wrap
             }
 
-            QQC2.Label {
+            LookLabel {
                 Layout.fillWidth: true
                 Layout.leftMargin: Kirigami.Units.largeSpacing
                 Layout.rightMargin: Kirigami.Units.largeSpacing
@@ -216,7 +216,7 @@ Kirigami.ScrollablePage {
                 }
             }
 
-            QQC2.Label {
+            LookLabel {
                 objectName: "moreHint"
                 Layout.fillWidth: true
                 Layout.leftMargin: Kirigami.Units.largeSpacing
@@ -250,7 +250,7 @@ Kirigami.ScrollablePage {
                 }
             }
 
-            QQC2.Label {
+            LookLabel {
                 objectName: "notesMoreHint"
                 Layout.fillWidth: true
                 Layout.leftMargin: Kirigami.Units.largeSpacing
@@ -261,13 +261,13 @@ Kirigami.ScrollablePage {
                 wrapMode: Text.Wrap
             }
 
-            QQC2.Label {
+            LookLabel {
                 objectName: "glossarySource"
                 Layout.fillWidth: true
                 Layout.margins: Kirigami.Units.largeSpacing
                 visible: page.glossary.length > 0
                 text: qsTr("Translations: %1").arg(Glossary.source)
-                font: Kirigami.Theme.smallFont
+                font: Look.smallFont
                 color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }

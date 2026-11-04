@@ -62,7 +62,7 @@ Kirigami.ScrollablePage {
             rule: true
             text: qsTr("About Mitori")
         }
-        QQC2.Label {
+        LookLabel {
             objectName: "aboutText"
             Layout.fillWidth: true
             wrapMode: Text.Wrap
@@ -71,7 +71,7 @@ Kirigami.ScrollablePage {
         Repeater {
             model: Programme.disciplines
 
-            QQC2.Label {
+            LookLabel {
                 required property var modelData
 
                 Layout.fillWidth: true
@@ -81,7 +81,7 @@ Kirigami.ScrollablePage {
                 text: [modelData.titel, modelData.stand].filter(x => !!x).join(" · ")
             }
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             wrapMode: Text.Wrap
             color: Look.mutedTextColor

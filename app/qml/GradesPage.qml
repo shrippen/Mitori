@@ -32,7 +32,7 @@ Kirigami.ScrollablePage {
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: Courses.errorString !== ""
             text: Courses.errorString
@@ -95,7 +95,7 @@ Kirigami.ScrollablePage {
                     Layout.fillWidth: true
                     visible: Courses.countsFromStart(block.discipline)
 
-                    QQC2.Label {
+                    LookLabel {
                         text: qsTr("Training since:")
                     }
                     LookDateField {
@@ -121,7 +121,7 @@ Kirigami.ScrollablePage {
                     }
                 }
 
-                QQC2.Label {
+                LookLabel {
                     objectName: "nextGrade"
                     Layout.fillWidth: true
                     visible: block.next !== ""
@@ -187,7 +187,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: qsTr("The ground for waiting times and the hints before an exam. The same grade again corrects its day and place.")
             color: Look.mutedTextColor

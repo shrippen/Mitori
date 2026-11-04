@@ -55,7 +55,7 @@ ColumnLayout {
         return kind === Media.Kind.Voice ? qsTr("Voice note") : ""
     }
 
-    QQC2.Label {
+    LookLabel {
         objectName: "notedToday"
         Layout.fillWidth: true
         visible: noteRow.today.length > 0
@@ -65,7 +65,7 @@ ColumnLayout {
         maximumLineCount: 4
         elide: Text.ElideRight
     }
-    QQC2.Label {
+    LookLabel {
         Layout.fillWidth: true
         readonly property string shown: noteRow.today.length > 0 ? "" : noteRow.noteText(noteRow.last)
         visible: shown !== ""
@@ -104,11 +104,13 @@ ColumnLayout {
                 }
             }
         }
-        LookToolButton {
+        // The send button (clickdummy `.qnote button`): red, filled, white text; only when the
+        // field has something to send.
+        LookButton {
+            objectName: "addNote"
             enabled: field.text.trim() !== ""
-            icon.name: "list-add"
-            text: qsTr("Add note")
-            display: QQC2.AbstractButton.IconOnly
+            role: LookButton.Role.Primary
+            text: qsTr("Add")
             onClicked: field.add()
         }
         LookToolButton {

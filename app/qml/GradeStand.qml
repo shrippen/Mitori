@@ -18,6 +18,14 @@ ColumnLayout {
     spacing: Look.unit(6)
     visible: ids.length > 0
 
+    // How many are exam-ready (the clickdummy's programme page: "3 of 8 exam-ready").
+    LookLabel {
+        objectName: "readyText"
+        Layout.fillWidth: true
+        text: qsTr("%1 of %2 exam-ready").arg(stand.counts[4]).arg(stand.ids.length)
+        color: Look.mutedTextColor
+    }
+
     LookProgressBar {
         Layout.fillWidth: true
         parts: stand.order.map(l => ({

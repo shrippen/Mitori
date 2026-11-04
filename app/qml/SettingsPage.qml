@@ -19,30 +19,40 @@ Kirigami.ScrollablePage {
 
     title: qsTr("Settings")
 
-    Kirigami.FormLayout {
-        LookButton {
-            objectName: "appearanceButton"
-            Kirigami.FormData.label: qsTr("Appearance:")
-            icon.name: "configure"
-            text: qsTr("Style, language, about Mitori")
-            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("AppearancePage.qml"))
-        }
-        LookButton {
-            objectName: "videosButton"
-            Kirigami.FormData.label: qsTr("Exam videos:")
-            icon.name: "media-playback-start"
-            text: qsTr("Videos and DVD codes")
-            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
-        }
-        LookTextField {
-            id: folderField
+    // The settings as rows of its own: the name of the setting as a small caps line above its
+    // field (the clickdummy's forms), not the desktop's form layout.
+    ColumnLayout {
+        spacing: Look.unit(16)
 
-            Kirigami.FormData.label: qsTr("Video folder:")
-            Layout.fillWidth: true
-            text: Videos.folder
-            onEditingFinished: Videos.folder = text
+        LookFormRow {
+            label: qsTr("Appearance:")
+            LookButton {
+                objectName: "appearanceButton"
+                icon.name: "configure"
+                text: qsTr("Style, language, about Mitori")
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("AppearancePage.qml"))
+            }
         }
-        QQC2.Label {
+        LookFormRow {
+            label: qsTr("Exam videos:")
+            LookButton {
+                objectName: "videosButton"
+                icon.name: "media-playback-start"
+                text: qsTr("Videos and DVD codes")
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
+            }
+        }
+        LookFormRow {
+            label: qsTr("Video folder:")
+            LookTextField {
+                id: folderField
+
+                Layout.fillWidth: true
+                text: Videos.folder
+                onEditingFinished: Videos.folder = text
+            }
+        }
+        LookLabel {
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             wrapMode: Text.Wrap
@@ -51,18 +61,20 @@ Kirigami.ScrollablePage {
                   + (Videos.sandboxed ? " " + qsTr("The Flatpak can read folders under ~/Videos only.") : "")
         }
 
-        Kirigami.Separator {
-            Kirigami.FormData.isSection: true
-            Kirigami.FormData.label: qsTr("Backup")
+        LookSectionLabel {
+            objectName: "backupSection"
+            text: qsTr("Backup")
         }
-        LookButton {
-            objectName: "saveBackup"
-            Kirigami.FormData.label: qsTr("Backup:")
-            icon.name: "document-save"
-            text: qsTr("Save backup …")
-            onClicked: {
-                saveDialog.selectedFile = saveDialog.currentFolder + "/" + Backup.fileName()
-                saveDialog.open()
+        LookFormRow {
+            label: qsTr("Backup:")
+            LookButton {
+                objectName: "saveBackup"
+                icon.name: "document-save"
+                text: qsTr("Save backup …")
+                onClicked: {
+                    saveDialog.selectedFile = saveDialog.currentFolder + "/" + Backup.fileName()
+                    saveDialog.open()
+                }
             }
         }
         LookButton {
@@ -71,14 +83,14 @@ Kirigami.ScrollablePage {
             text: qsTr("Read backup …")
             onClicked: openDialog.open()
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             wrapMode: Text.Wrap
             color: Look.disabledTextColor
             text: qsTr("One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back merges it: what is newer stays, nothing gets lost. DVD codes are not in it.")
         }
-        QQC2.Label {
+        LookLabel {
             objectName: "backupDone"
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
@@ -87,7 +99,7 @@ Kirigami.ScrollablePage {
             color: Look.positiveTextColor
             wrapMode: Text.Wrap
         }
-        QQC2.Label {
+        LookLabel {
             objectName: "backupError"
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
@@ -98,57 +110,67 @@ Kirigami.ScrollablePage {
         }
 
         // Sync over WebDAV / Nextcloud (Sync): account, state, devices, conflicts.
-        Kirigami.Separator {
-            Kirigami.FormData.isSection: true
-            Kirigami.FormData.label: qsTr("Sync between devices")
+        LookSectionLabel {
+            objectName: "syncSection"
+            text: qsTr("Sync between devices")
         }
-        LookSwitch {
-            objectName: "syncEnabled"
-            Kirigami.FormData.label: qsTr("WebDAV / Nextcloud:")
-            text: qsTr("Sync")
-            checked: Sync.enabled
-            onToggled: Sync.enabled = checked
+        LookFormRow {
+            label: qsTr("WebDAV / Nextcloud:")
+            LookSwitch {
+                objectName: "syncEnabled"
+                text: qsTr("Sync")
+                checked: Sync.enabled
+                onToggled: Sync.enabled = checked
+            }
         }
-        LookTextField {
-            id: serverField
+        LookFormRow {
+            label: qsTr("Folder on the server:")
+            LookTextField {
+                id: serverField
 
-            objectName: "syncServer"
-            Kirigami.FormData.label: qsTr("Folder on the server:")
-            Layout.fillWidth: true
-            visible: Sync.enabled
-            text: Sync.server
-            placeholderText: "https://cloud.example.org/remote.php/dav/files/ich/Mitori/"
-            inputMethodHints: Qt.ImhUrlCharactersOnly | Qt.ImhNoAutoUppercase
-            onEditingFinished: page.saveAccount()
+                objectName: "syncServer"
+                Layout.fillWidth: true
+                visible: Sync.enabled
+                text: Sync.server
+                placeholderText: "https://cloud.example.org/remote.php/dav/files/ich/Mitori/"
+                inputMethodHints: Qt.ImhUrlCharactersOnly | Qt.ImhNoAutoUppercase
+                onEditingFinished: page.saveAccount()
+            }
         }
-        LookTextField {
-            id: userField
+        LookFormRow {
+            label: qsTr("User:")
+            LookTextField {
+                id: userField
 
-            Kirigami.FormData.label: qsTr("User:")
-            Layout.fillWidth: true
-            visible: Sync.enabled
-            text: Sync.user
-            inputMethodHints: Qt.ImhNoAutoUppercase
-            onEditingFinished: page.saveAccount()
+                Layout.fillWidth: true
+                visible: Sync.enabled
+                text: Sync.user
+                inputMethodHints: Qt.ImhNoAutoUppercase
+                onEditingFinished: page.saveAccount()
+            }
         }
-        LookTextField {
-            id: passwordField
+        LookFormRow {
+            label: qsTr("App password:")
+            LookTextField {
+                id: passwordField
 
-            Kirigami.FormData.label: qsTr("App password:")
-            Layout.fillWidth: true
-            visible: Sync.enabled
-            echoMode: TextInput.Password
-            placeholderText: Sync.hasPassword ? qsTr("saved") : ""
-            onEditingFinished: page.saveAccount()
+                Layout.fillWidth: true
+                visible: Sync.enabled
+                echoMode: TextInput.Password
+                placeholderText: Sync.hasPassword ? qsTr("saved") : ""
+                onEditingFinished: page.saveAccount()
+            }
         }
-        LookTextField {
-            id: nameField
+        LookFormRow {
+            label: qsTr("This device:")
+            LookTextField {
+                id: nameField
 
-            Kirigami.FormData.label: qsTr("This device:")
-            Layout.fillWidth: true
-            visible: Sync.enabled
-            text: Sync.deviceName
-            onEditingFinished: page.saveAccount()
+                Layout.fillWidth: true
+                visible: Sync.enabled
+                text: Sync.deviceName
+                onEditingFinished: page.saveAccount()
+            }
         }
         LookSwitch {
             visible: Sync.enabled
@@ -156,7 +178,7 @@ Kirigami.ScrollablePage {
             checked: Sync.automatic
             onToggled: Sync.automatic = checked
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             visible: Sync.enabled
@@ -175,7 +197,7 @@ Kirigami.ScrollablePage {
                 Sync.syncNow()
             }
         }
-        QQC2.Label {
+        LookLabel {
             objectName: "syncState"
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
@@ -189,7 +211,7 @@ Kirigami.ScrollablePage {
         Repeater {
             model: Sync.enabled ? Sync.devices : []
 
-            QQC2.Label {
+            LookLabel {
                 required property var modelData
 
                 text: qsTr("%1: %2").arg(modelData.name || qsTr("Device")).arg(modelData.synced.toLocaleString(Qt.locale(), Locale.ShortFormat))
@@ -282,7 +304,7 @@ Kirigami.ScrollablePage {
         onAccepted: page.done = Backup.restore() ? qsTr("Backup merged.") : ""
         onRejected: Backup.discard()
 
-        QQC2.Label {
+        LookLabel {
             id: mergeText
 
             objectName: "mergeText"

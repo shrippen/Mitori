@@ -277,7 +277,7 @@
 <context>
     <name>CommentPage</name>
     <message>
-        <location filename="../qml/CommentPage.qml" line="73"/>
+        <location filename="../qml/CommentPage.qml" line="76"/>
         <source>Source: shinkiryu.de, Itto-den Shinki Toho</source>
         <translation>Quelle: shinkiryu.de, Itto-den Shinki Toho</translation>
     </message>
@@ -363,93 +363,93 @@
         <translation>Für private Trainings, Gastlehrer oder Termine, die nicht im Kalender stehen.</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="52"/>
+        <location filename="../qml/CourseNewPage.qml" line="51"/>
         <source>Title</source>
         <translation>Titel</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="54"/>
+        <location filename="../qml/CourseNewPage.qml" line="57"/>
         <source>Training with a guest teacher</source>
         <translation>Training mit Gastlehrer</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="60"/>
+        <location filename="../qml/CourseNewPage.qml" line="61"/>
         <source>From</source>
         <translation>Von</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="61"/>
+        <location filename="../qml/CourseNewPage.qml" line="66"/>
         <source>yyyy-MM-dd</source>
         <comment>date format</comment>
         <translation>dd.MM.yyyy</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <location filename="../qml/CourseNewPage.qml" line="67"/>
         <source>MO</source>
         <translation>MO</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <location filename="../qml/CourseNewPage.qml" line="67"/>
         <source>TU</source>
         <translation>DI</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <location filename="../qml/CourseNewPage.qml" line="67"/>
         <source>WE</source>
         <translation>MI</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <location filename="../qml/CourseNewPage.qml" line="67"/>
         <source>TH</source>
         <translation>DO</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <location filename="../qml/CourseNewPage.qml" line="67"/>
         <source>FR</source>
         <translation>FR</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <location filename="../qml/CourseNewPage.qml" line="67"/>
         <source>SA</source>
         <translation>SA</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="62"/>
+        <location filename="../qml/CourseNewPage.qml" line="67"/>
         <source>SU</source>
         <translation>SO</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="63"/>
+        <location filename="../qml/CourseNewPage.qml" line="68"/>
         <source>Today</source>
         <translation>Heute</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="70"/>
+        <location filename="../qml/CourseNewPage.qml" line="73"/>
         <source>To</source>
         <translation>Bis</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="80"/>
+        <location filename="../qml/CourseNewPage.qml" line="85"/>
         <source>Place</source>
         <translation>Ort</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="82"/>
+        <location filename="../qml/CourseNewPage.qml" line="91"/>
         <source>Dojo, town</source>
         <translation>Dojo, Stadt</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="88"/>
+        <location filename="../qml/CourseNewPage.qml" line="95"/>
         <source>Teacher</source>
         <translation>Lehrer</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="90"/>
+        <location filename="../qml/CourseNewPage.qml" line="101"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../qml/CourseNewPage.qml" line="99"/>
+        <location filename="../qml/CourseNewPage.qml" line="111"/>
         <source>Make</source>
         <translation>Anlegen</translation>
     </message>
@@ -980,12 +980,17 @@
 <context>
     <name>GradeStand</name>
     <message>
-        <location filename="../qml/GradeStand.qml" line="28"/>
+        <location filename="../qml/GradeStand.qml" line="25"/>
+        <source>%1 of %2 exam-ready</source>
+        <translation>%1 von %2 prüfungsreif</translation>
+    </message>
+    <message>
+        <location filename="../qml/GradeStand.qml" line="36"/>
         <source>Rating of the grade</source>
         <translation>Stand des Grades</translation>
     </message>
     <message>
-        <location filename="../qml/GradeStand.qml" line="28"/>
+        <location filename="../qml/GradeStand.qml" line="36"/>
         <source>Rating of %1</source>
         <translation>Stand %1</translation>
     </message>
@@ -1175,7 +1180,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="45"/>
+        <location filename="../qml/Main.qml" line="51"/>
         <source>More</source>
         <translation>Mehr</translation>
     </message>
@@ -1333,12 +1338,12 @@
         <translation>Neue Notiz</translation>
     </message>
     <message>
-        <location filename="../qml/NoteRow.qml" line="110"/>
-        <source>Add note</source>
-        <translation>Notiz hinzufügen</translation>
+        <location filename="../qml/NoteRow.qml" line="113"/>
+        <source>Add</source>
+        <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/NoteRow.qml" line="116"/>
+        <location filename="../qml/NoteRow.qml" line="118"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
@@ -1432,109 +1437,114 @@
 <context>
     <name>PlayerView</name>
     <message>
-        <location filename="../qml/PlayerView.qml" line="363"/>
+        <location filename="../qml/PlayerView.qml" line="512"/>
         <source>There is no video of this technique. Practise it from memory, then rate it.</source>
         <translation>Zu dieser Technik gibt es kein Video. Aus dem Gedächtnis üben, dann einschätzen.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="364"/>
+        <location filename="../qml/PlayerView.qml" line="513"/>
         <source>Its video is not on this device. Practise it from memory, then rate it.</source>
         <translation>Ihr Video ist nicht auf diesem Gerät. Aus dem Gedächtnis üben, dann einschätzen.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="376"/>
-        <location filename="../qml/PlayerView.qml" line="403"/>
+        <location filename="../qml/PlayerView.qml" line="525"/>
+        <location filename="../qml/PlayerView.qml" line="552"/>
+        <location filename="../qml/PlayerView.qml" line="709"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="396"/>
+        <location filename="../qml/PlayerView.qml" line="545"/>
         <source>Chapter start</source>
         <translation>Kapitelanfang</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="397"/>
+        <location filename="../qml/PlayerView.qml" line="546"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="398"/>
+        <location filename="../qml/PlayerView.qml" line="547"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="399"/>
+        <location filename="../qml/PlayerView.qml" line="417"/>
+        <location filename="../qml/PlayerView.qml" line="548"/>
         <source>Loop</source>
         <translation>Schleife</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="400"/>
+        <location filename="../qml/PlayerView.qml" line="549"/>
         <source>Tempo</source>
         <translation>Tempo</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="401"/>
+        <location filename="../qml/PlayerView.qml" line="361"/>
+        <location filename="../qml/PlayerView.qml" line="550"/>
         <source>Frame back</source>
         <translation>Bild zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="402"/>
+        <location filename="../qml/PlayerView.qml" line="390"/>
+        <location filename="../qml/PlayerView.qml" line="551"/>
         <source>Frame on</source>
         <translation>Bild vor</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="404"/>
+        <location filename="../qml/PlayerView.qml" line="553"/>
         <source>Playback</source>
         <translation>Wiedergabe</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="426"/>
+        <location filename="../qml/PlayerView.qml" line="575"/>
         <source>Sound</source>
         <translation>Ton</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="437"/>
+        <location filename="../qml/PlayerView.qml" line="586"/>
         <source>Screen on</source>
         <translation>Bildschirm an</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="453"/>
+        <location filename="../qml/PlayerView.qml" line="602"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="500"/>
+        <location filename="../qml/PlayerView.qml" line="649"/>
         <source>Today&apos;s playlist · %1 of %2 practised</source>
         <translation>Heutige Playliste · %1 von %2 geübt</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="521"/>
+        <location filename="../qml/PlayerView.qml" line="670"/>
         <source>practised</source>
         <translation>geübt</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="337"/>
+        <location filename="../qml/PlayerView.qml" line="486"/>
         <source>Done</source>
         <translation>Geschafft</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="328"/>
-        <location filename="../qml/PlayerView.qml" line="342"/>
+        <location filename="../qml/PlayerView.qml" line="353"/>
+        <location filename="../qml/PlayerView.qml" line="477"/>
+        <location filename="../qml/PlayerView.qml" line="491"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="259"/>
+        <location filename="../qml/PlayerView.qml" line="280"/>
         <source>Brightness %1 %</source>
         <translation>Helligkeit %1 %</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="259"/>
+        <location filename="../qml/PlayerView.qml" line="280"/>
         <source>Volume %1 %</source>
         <translation>Lautstärke %1 %</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="338"/>
+        <location filename="../qml/PlayerView.qml" line="487"/>
         <source>%n technique(s) practised today. They count as a practice day in the statistics.</source>
         <translation>
             <numerusform>%n Technik heute geübt. Das zählt als Übungstag in der Statistik.</numerusform>
@@ -1542,17 +1552,17 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="426"/>
+        <location filename="../qml/PlayerView.qml" line="575"/>
         <source>Silent in slow motion</source>
         <translation>In Zeitlupe stumm</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="476"/>
+        <location filename="../qml/PlayerView.qml" line="625"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="485"/>
+        <location filename="../qml/PlayerView.qml" line="634"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>
@@ -1788,147 +1798,147 @@
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="25"/>
+        <location filename="../qml/SettingsPage.qml" line="28"/>
         <source>Appearance:</source>
         <translation>Darstellung:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="27"/>
+        <location filename="../qml/SettingsPage.qml" line="32"/>
         <source>Style, language, about Mitori</source>
         <translation>Stil, Sprache, über Mitori</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="32"/>
+        <location filename="../qml/SettingsPage.qml" line="37"/>
         <source>Exam videos:</source>
         <translation>Prüfungsvideos:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="34"/>
+        <location filename="../qml/SettingsPage.qml" line="41"/>
         <source>Videos and DVD codes</source>
         <translation>Videos und DVD-Codes</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="40"/>
+        <location filename="../qml/SettingsPage.qml" line="46"/>
         <source>Video folder:</source>
         <translation>Videoordner:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="50"/>
+        <location filename="../qml/SettingsPage.qml" line="60"/>
         <source>Without a bundle: a folder with the videos, folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</source>
         <translation>Ohne Bundle: ein Ordner mit den Videos, Ordner und Namen wie auf den DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="51"/>
+        <location filename="../qml/SettingsPage.qml" line="61"/>
         <source>The Flatpak can read folders under ~/Videos only.</source>
         <translation>Das Flatpak liest nur Ordner unter ~/Videos.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="56"/>
+        <location filename="../qml/SettingsPage.qml" line="66"/>
         <source>Backup</source>
         <translation>Sicherung</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="60"/>
+        <location filename="../qml/SettingsPage.qml" line="69"/>
         <source>Backup:</source>
         <translation>Sicherung:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="62"/>
+        <location filename="../qml/SettingsPage.qml" line="73"/>
         <source>Save backup …</source>
         <translation>Sicherung speichern …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="71"/>
+        <location filename="../qml/SettingsPage.qml" line="83"/>
         <source>Read backup …</source>
         <translation>Sicherung einlesen …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="79"/>
+        <location filename="../qml/SettingsPage.qml" line="91"/>
         <source>One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back merges it: what is newer stays, nothing gets lost. DVD codes are not in it.</source>
         <translation>Eine Datei mit Einschätzungen, Notizen, Prüfungsrunden, Notizbüchern, Graden, Fotos und Sprachnotizen. Beim Einlesen wird zusammengeführt: das Neuere bleibt, nichts geht verloren. DVD-Codes sind nicht enthalten.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="103"/>
+        <location filename="../qml/SettingsPage.qml" line="115"/>
         <source>Sync between devices</source>
         <translation>Abgleich zwischen Geräten</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="107"/>
+        <location filename="../qml/SettingsPage.qml" line="118"/>
         <source>WebDAV / Nextcloud:</source>
         <translation>WebDAV / Nextcloud:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="108"/>
+        <location filename="../qml/SettingsPage.qml" line="121"/>
         <source>Sync</source>
         <translation>Abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="116"/>
+        <location filename="../qml/SettingsPage.qml" line="127"/>
         <source>Folder on the server:</source>
         <translation>Ordner auf dem Server:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="127"/>
+        <location filename="../qml/SettingsPage.qml" line="141"/>
         <source>User:</source>
         <translation>Benutzer:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="137"/>
+        <location filename="../qml/SettingsPage.qml" line="153"/>
         <source>App password:</source>
         <translation>App-Passwort:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="141"/>
+        <location filename="../qml/SettingsPage.qml" line="160"/>
         <source>saved</source>
         <translation>gespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="147"/>
+        <location filename="../qml/SettingsPage.qml" line="165"/>
         <source>This device:</source>
         <translation>Dieses Gerät:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="155"/>
+        <location filename="../qml/SettingsPage.qml" line="177"/>
         <source>Sync after every change</source>
         <translation>Nach jeder Änderung abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="165"/>
+        <location filename="../qml/SettingsPage.qml" line="187"/>
         <source>Otherwise when Mitori starts and once a day. Every rating and note is an entry of its own with a time; changes from several devices are merged. Mitori asks only when the same note was changed on two devices.</source>
         <translation>Sonst beim Start und einmal am Tag. Jede Einschätzung und jede Notiz ist ein eigener Eintrag mit Zeitstempel; Änderungen von mehreren Geräten werden zusammengeführt. Mitori fragt nur nach, wenn dieselbe Notiz auf zwei Geräten geändert wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="172"/>
+        <location filename="../qml/SettingsPage.qml" line="194"/>
         <source>Syncing …</source>
         <translation>Gleiche ab …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="172"/>
+        <location filename="../qml/SettingsPage.qml" line="194"/>
         <source>Sync now</source>
         <translation>Jetzt abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="186"/>
+        <location filename="../qml/SettingsPage.qml" line="208"/>
         <source>Last synced: %1</source>
         <translation>Zuletzt abgeglichen: %1</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="187"/>
+        <location filename="../qml/SettingsPage.qml" line="209"/>
         <source>Not synced yet.</source>
         <translation>Noch nicht abgeglichen.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="195"/>
+        <location filename="../qml/SettingsPage.qml" line="217"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="195"/>
+        <location filename="../qml/SettingsPage.qml" line="217"/>
         <source>Device</source>
         <translation>Gerät</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="203"/>
+        <location filename="../qml/SettingsPage.qml" line="225"/>
         <source>%n conflict(s): solve …</source>
         <translation>
             <numerusform>%n Konflikt: lösen …</numerusform>
@@ -1936,63 +1946,63 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="220"/>
+        <location filename="../qml/SettingsPage.qml" line="242"/>
         <source>Save backup</source>
         <translation>Sicherung speichern</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="223"/>
-        <location filename="../qml/SettingsPage.qml" line="233"/>
+        <location filename="../qml/SettingsPage.qml" line="245"/>
+        <location filename="../qml/SettingsPage.qml" line="255"/>
         <source>ZIP archives (*.zip)</source>
         <translation>ZIP-Archive (*.zip)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="225"/>
+        <location filename="../qml/SettingsPage.qml" line="247"/>
         <source>Backup saved.</source>
         <translation>Sicherung gespeichert.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="231"/>
+        <location filename="../qml/SettingsPage.qml" line="253"/>
         <source>Read backup</source>
         <translation>Sicherung einlesen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="248"/>
+        <location filename="../qml/SettingsPage.qml" line="270"/>
         <source>Ratings</source>
         <translation>Einschätzungen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="248"/>
+        <location filename="../qml/SettingsPage.qml" line="270"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="248"/>
+        <location filename="../qml/SettingsPage.qml" line="270"/>
         <source>Exam rounds</source>
         <translation>Prüfungsrunden</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="249"/>
+        <location filename="../qml/SettingsPage.qml" line="271"/>
         <source>Notebooks</source>
         <translation>Notizbücher</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="249"/>
+        <location filename="../qml/SettingsPage.qml" line="271"/>
         <source>Notebook entries</source>
         <translation>Einträge in Notizbüchern</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="249"/>
+        <location filename="../qml/SettingsPage.qml" line="271"/>
         <source>Grades</source>
         <translation>Grade</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="250"/>
+        <location filename="../qml/SettingsPage.qml" line="272"/>
         <source>Start of training</source>
         <translation>Trainingsbeginn</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="256"/>
+        <location filename="../qml/SettingsPage.qml" line="278"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n neu</numerusform>
@@ -2000,7 +2010,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="259"/>
+        <location filename="../qml/SettingsPage.qml" line="281"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n geändert</numerusform>
@@ -2008,7 +2018,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="266"/>
+        <location filename="../qml/SettingsPage.qml" line="288"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Fotos und Sprachnotizen: %n neu</numerusform>
@@ -2016,27 +2026,27 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="268"/>
+        <location filename="../qml/SettingsPage.qml" line="290"/>
         <source>Nothing new: this device has everything in the backup.</source>
         <translation>Nichts Neues: dieses Gerät hat schon alles aus der Sicherung.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="279"/>
+        <location filename="../qml/SettingsPage.qml" line="301"/>
         <source>Merge backup?</source>
         <translation>Sicherung zusammenführen?</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="280"/>
+        <location filename="../qml/SettingsPage.qml" line="302"/>
         <source>Merge</source>
         <translation>Zusammenführen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="283"/>
+        <location filename="../qml/SettingsPage.qml" line="304"/>
         <source>Backup merged.</source>
         <translation>Sicherung zusammengeführt.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="292"/>
+        <location filename="../qml/SettingsPage.qml" line="313"/>
         <source>Backup of %1.</source>
         <translation>Sicherung vom %1.</translation>
     </message>
@@ -2044,32 +2054,32 @@
 <context>
     <name>StartPage</name>
     <message>
-        <location filename="../qml/StartPage.qml" line="34"/>
+        <location filename="../qml/StartPage.qml" line="53"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="40"/>
+        <location filename="../qml/StartPage.qml" line="59"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="53"/>
+        <location filename="../qml/StartPage.qml" line="72"/>
         <source>Programme data missing</source>
         <translation>Programmdaten fehlen</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="61"/>
+        <location filename="../qml/StartPage.qml" line="80"/>
         <source>Ratings are not saved</source>
         <translation>Einschätzungen werden nicht gespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="71"/>
+        <location filename="../qml/StartPage.qml" line="90"/>
         <source>New video version</source>
         <translation>Neue Videoversion</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="72"/>
+        <location filename="../qml/StartPage.qml" line="91"/>
         <source>%n video bundle(s) can be updated.</source>
         <translation>
             <numerusform>%n Video-Bundle lässt sich aktualisieren.</numerusform>
@@ -2077,22 +2087,32 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="75"/>
+        <location filename="../qml/StartPage.qml" line="94"/>
         <source>Videos</source>
         <translation>Videos</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="98"/>
+        <location filename="../qml/StartPage.qml" line="105"/>
+        <source>Planned exam</source>
+        <translation>Prüfung geplant</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="137"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="113"/>
+        <location filename="../qml/StartPage.qml" line="139"/>
+        <source>%1 of %2 exam-ready</source>
+        <translation>%1 von %2 prüfungsreif</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="153"/>
         <source>Practice today</source>
         <translation>Heute üben</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="114"/>
+        <location filename="../qml/StartPage.qml" line="154"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n fällig</numerusform>
@@ -2100,32 +2120,32 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="114"/>
+        <location filename="../qml/StartPage.qml" line="154"/>
         <source>all practised</source>
         <translation>alles geübt</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="129"/>
+        <location filename="../qml/StartPage.qml" line="169"/>
         <source>Exam mode</source>
         <translation>Prüfungsmodus</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="130"/>
+        <location filename="../qml/StartPage.qml" line="170"/>
         <source>Mock exam %1</source>
         <translation>Probe %1</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="161"/>
+        <location filename="../qml/StartPage.qml" line="200"/>
         <source>Courses</source>
         <translation>Lehrgänge</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="163"/>
+        <location filename="../qml/StartPage.qml" line="201"/>
         <source>Calendar and notebooks</source>
         <translation>Kalender und Notizbücher</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="164"/>
+        <location filename="../qml/StartPage.qml" line="202"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n Tag</numerusform>
@@ -2133,17 +2153,32 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="164"/>
+        <location filename="../qml/StartPage.qml" line="202"/>
         <source>today</source>
         <translation>heute</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="144"/>
+        <location filename="../qml/StartPage.qml" line="184"/>
         <source>Statistics</source>
         <translation>Statistik</translation>
     </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="35"/>
+        <source>Good morning</source>
+        <translation>Guten Morgen</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="35"/>
+        <source>Good day</source>
+        <translation>Guten Tag</translation>
+    </message>
+    <message>
+        <location filename="../qml/StartPage.qml" line="35"/>
+        <source>Good evening</source>
+        <translation>Guten Abend</translation>
+    </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="145"/>
+        <location filename="../qml/StartPage.qml" line="185"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n Übungstag in 30 Tagen</numerusform>
@@ -2151,22 +2186,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="174"/>
+        <location filename="../qml/StartPage.qml" line="212"/>
         <source>Technique map</source>
         <translation>Landkarte</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="175"/>
+        <location filename="../qml/StartPage.qml" line="213"/>
         <source>Attack × technique</source>
         <translation>Angriff × Technik</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="186"/>
+        <location filename="../qml/StartPage.qml" line="224"/>
         <source>Glossary</source>
         <translation>Glossar</translation>
     </message>
     <message>
-        <location filename="../qml/StartPage.qml" line="187"/>
+        <location filename="../qml/StartPage.qml" line="225"/>
         <source>Kanji · pronunciation</source>
         <translation>Kanji · Aussprache</translation>
     </message>
@@ -2325,47 +2360,47 @@
 <context>
     <name>TechniqueMapPage</name>
     <message>
-        <location filename="../qml/TechniqueMapPage.qml" line="36"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="35"/>
         <source>Technique map</source>
         <translation>Landkarte</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueMapPage.qml" line="62"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="61"/>
         <source>up to %1</source>
         <translation>bis %1</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueMapPage.qml" line="94"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="93"/>
         <source>No techniques with an attack up to %1.</source>
         <translation>Keine Techniken mit Angriff bis %1.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueMapPage.qml" line="123"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="122"/>
         <source>Technique</source>
         <translation>Technik</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueMapPage.qml" line="124"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="123"/>
         <source>Attack</source>
         <translation>Angriff</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueMapPage.qml" line="134"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="133"/>
         <source>no such combination</source>
         <translation>keine solche Kombination</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueMapPage.qml" line="172"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="171"/>
         <source>Rows: technique, columns: attack. An empty place does not occur up to %1. Tap a place to open the technique.</source>
         <translation>Zeilen: Technik, Spalten: Angriff. Ein leerer Platz kommt bis %1 nicht vor. Tippen öffnet die Technik.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueMapPage.qml" line="173"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="172"/>
         <source>A place per form: its number, after the dot its level (12·3). Tap a place to open the form.</source>
         <translation>Ein Platz je Form: ihre Nummer, nach dem Punkt ihre Stufe (12·3). Tippen öffnet die Form.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TechniqueMapPage.qml" line="188"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="187"/>
         <source>%n entries</source>
         <translation>
             <numerusform>%n Eintrag</numerusform>
@@ -2373,7 +2408,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueMapPage.qml" line="192"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="191"/>
         <source>%1 · %2 · %3: %4</source>
         <translation>%1 · %2 · %3: %4</translation>
     </message>
@@ -2381,52 +2416,57 @@
 <context>
     <name>TechniqueSheet</name>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="106"/>
+        <location filename="../qml/TechniqueSheet.qml" line="142"/>
+        <source>Close</source>
+        <translation>Schließen</translation>
+    </message>
+    <message>
+        <location filename="../qml/TechniqueSheet.qml" line="178"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="107"/>
+        <location filename="../qml/TechniqueSheet.qml" line="179"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="109"/>
+        <location filename="../qml/TechniqueSheet.qml" line="181"/>
         <source>Last note, %1: %2</source>
         <translation>Letzte Notiz, %1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="121"/>
+        <location filename="../qml/TechniqueSheet.qml" line="193"/>
         <source>Video not loaded. The DVD&apos;s code loads it onto the device.</source>
         <translation>Video nicht geladen. Der Code der DVD lädt es aufs Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="122"/>
+        <location filename="../qml/TechniqueSheet.qml" line="194"/>
         <source>There is no video of this technique.</source>
         <translation>Zu dieser Technik gibt es kein Video.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="127"/>
+        <location filename="../qml/TechniqueSheet.qml" line="199"/>
         <source>Enter code</source>
         <translation>Code eingeben</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="142"/>
+        <location filename="../qml/TechniqueSheet.qml" line="214"/>
         <source>Watch video</source>
         <translation>Video ansehen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="148"/>
+        <location filename="../qml/TechniqueSheet.qml" line="220"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="148"/>
+        <location filename="../qml/TechniqueSheet.qml" line="220"/>
         <source>Notes (%1)</source>
         <translation>Notizen (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="157"/>
+        <location filename="../qml/TechniqueSheet.qml" line="229"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>

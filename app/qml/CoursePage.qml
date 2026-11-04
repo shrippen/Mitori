@@ -107,7 +107,7 @@ Kirigami.ScrollablePage {
                     level: 2
                     text: page.course.title || ""
                 }
-                QQC2.Label {
+                LookLabel {
                     Layout.fillWidth: true
                     visible: text !== ""
                     text: [page.course.place, page.course.teacher].filter(x => x).join(" · ")
@@ -135,7 +135,7 @@ Kirigami.ScrollablePage {
                         onClicked: Qt.openUrlExternally(page.course.announcement)
                     }
                 }
-                QQC2.Label {
+                LookLabel {
                     objectName: "exportedTo"
                     Layout.fillWidth: true
                     visible: page.exported !== ""
@@ -144,7 +144,7 @@ Kirigami.ScrollablePage {
                     color: Look.positiveTextColor
                     wrapMode: Text.Wrap
                 }
-                QQC2.Label {
+                LookLabel {
                     id: calendarFailed
 
                     Layout.fillWidth: true
@@ -174,7 +174,7 @@ Kirigami.ScrollablePage {
                     checked: true
                     interactive: false
                 }
-                QQC2.Label {
+                LookLabel {
                     objectName: "examWait"
                     Layout.fillWidth: true
                     readonly property var wait: Courses.revision >= 0 && page.planned
@@ -242,7 +242,7 @@ Kirigami.ScrollablePage {
                             }
                         }
                     }
-                    QQC2.Label {
+                    LookLabel {
                         objectName: "choiceWait"
                         Layout.fillWidth: true
                         readonly property var wait: page.examGrade !== "" ? Courses.waiting(page.examDiscipline, page.examGrade, page.course.first) : ({})
@@ -283,7 +283,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: Courses.errorString !== ""
             text: Courses.errorString
@@ -291,7 +291,7 @@ Kirigami.ScrollablePage {
             wrapMode: Text.Wrap
         }
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: page.entries.length === 0
             text: qsTr("No entries yet. Write below what was shown.")
@@ -324,7 +324,7 @@ Kirigami.ScrollablePage {
                         Layout.fillWidth: true
                         spacing: Kirigami.Units.smallSpacing
 
-                        QQC2.Label {
+                        LookLabel {
                             id: entryItemLabel
 
                             // The note, also for tests that find the label.
@@ -367,7 +367,7 @@ Kirigami.ScrollablePage {
         }
     }
 
-    footer: QQC2.ToolBar {
+    footer: LookToolBar {
         RowLayout {
             anchors.fill: parent
 
@@ -457,7 +457,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        QQC2.Label {
+        LookLabel {
             width: parent.width
             text: qsTr("The notebook and its %n entry(s) go from this device.", "", page.entries.length)
             wrapMode: Text.Wrap

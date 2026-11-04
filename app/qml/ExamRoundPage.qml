@@ -22,7 +22,7 @@ Kirigami.Page {
     readonly property var current: points[index] || ({})
     // A tablet or a phone held sideways: the board grows with the room.
     readonly property bool wide: width > height
-    readonly property bool tablet: Math.min(width, height) >= Kirigami.Units.gridUnit * 26
+    readonly property bool tablet: Math.min(width, height) >= 460     // a tablet, not a phone
 
     title: qsTr("Mock exam")
 
@@ -55,7 +55,7 @@ Kirigami.Page {
         anchors.margins: Kirigami.Units.largeSpacing
         spacing: Kirigami.Units.largeSpacing
 
-        QQC2.Label {
+        LookLabel {
             objectName: "counter"
             Layout.alignment: Qt.AlignRight
             text: (page.index + 1) + " / " + page.points.length
@@ -65,7 +65,7 @@ Kirigami.Page {
         }
 
         // The board in the middle of the free room; it scrolls if a long name does not fit.
-        QQC2.ScrollView {
+        LookScrollView {
             Layout.fillWidth: true
             Layout.fillHeight: true
             contentWidth: availableWidth
@@ -107,7 +107,7 @@ Kirigami.Page {
             text: page.index < page.points.length - 1 ? qsTr("Next") : qsTr("Rate the round")
             onClicked: page.next()
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: !page.wide || page.tablet
             horizontalAlignment: Text.AlignHCenter

@@ -39,10 +39,31 @@ Item {
     readonly property var crop: Videos.crop(video)
     // Sideways only with a picture; without a video the card and the controls stand as upright.
     readonly property bool landscape: !compact && width > height && hasVideo
+    // On the rail: 62 px on the phone (CD .qrail), 84 px on a tablet in landscape (CD .tab .qrail).
+    // The phone held sideways is about 360 dp tall, a tablet sideways 720 dp.
+    readonly property bool tabletSideways: page.landscape && height >= 460
     readonly property var tempi: [0.25, 0.5, 0.75, 1]
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
     readonly property int jumpMs: 2000      // double tap
     property bool looping: true
+    // The double tap shows what it did, for a moment (the clickdummy): "2 s ››" on the side that
+    // was tapped. The text is a symbol, not a word: it stays the same in every language.
+    property string jumpHint: ""
+    property bool jumpRight: true
+    // The tempo (the rail's fields).
+    function setSpeed(rate) {
+        player.playbackRate = rate
+    }
+    function showJump(right) {
+        jumpRight = right
+        jumpHint = right ? "2 s \u203A\u203A" : "\u2039\u2039 2 s"
+        jumpTimer.restart()
+    }
+    Timer {
+        id: jumpTimer
+        interval: 500
+        onTriggered: page.jumpHint = ""
+    }
     // Training (today's practice): rating a technique moves on to the next one not yet
     // practised today.
     property bool training: false
@@ -211,7 +232,7 @@ Item {
                 }
             }
 
-            QQC2.Label {
+            LookLabel {
                 visible: page.landscape
                 anchors.left: parent.left
                 anchors.top: parent.top
@@ -222,31 +243,29 @@ Item {
                 styleColor: Look.stageColor
             }
 
-            // Swipe: brightness (left half) or volume (right half), shown while the finger moves.
-            DragHandler {
-                id: swipe
+            // What the double tap did, on the side that was tapped (the clickdummy).
+            Rectangle {
+                objectName: "jumpHintArea"
 
-                property int level: Levels.Level.Brightness
-                property real lastY: 0
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: parent.width / 2
+                anchors.left: page.jumpRight ? parent.right : parent.left
+                anchors.right: page.jumpRight ? parent.right : undefined
+                visible: page.jumpHint !== ""
+                color: Look.stageColor
+                opacity: 0.45
+                z: 4
+            }
+            LookLabel {
+                objectName: "jumpHintText"
 
-                target: null
-                xAxis.enabled: false
-                onActiveChanged: {
-                    if (!active) {
-                        return
-                    }
-                    Levels.refresh()
-                    level = centroid.pressPosition.x < stage.width / 2 ? Levels.Level.Brightness : Levels.Level.Volume
-                    lastY = 0
-                }
-                onTranslationChanged: {
-                    if (!active) {
-                        return
-                    }
-                    const dy = translation.y - lastY
-                    lastY = translation.y
-                    Levels.change(level, -dy / stage.height)
-                }
+                anchors.centerIn: parent
+                visible: page.jumpHint !== ""
+                text: page.jumpHint
+                color: Look.stageTextColor
+                font.bold: true
+                z: 5
             }
 
             ColumnLayout {
@@ -256,7 +275,7 @@ Item {
                 visible: swipe.active && value >= 0
                 readonly property real value: swipe.level === Levels.Level.Brightness ? Levels.brightness : Levels.volume
 
-                QQC2.Label {
+                LookLabel {
                     Layout.alignment: Qt.AlignHCenter
                     text: (swipe.level === Levels.Level.Brightness ? qsTr("Brightness %1 %") : qsTr("Volume %1 %"))
                           .arg(Math.round(parent.value * 100))
@@ -270,9 +289,134 @@ Item {
                 }
             }
 
-            TapHandler {
-                onTapped: page.togglePlay()
-                onDoubleTapped: (eventPoint, button) => page.jump(eventPoint.position.x < stage.width / 2 ? -page.jumpMs : page.jumpMs)
+            // The gestures above the picture: they take the events, the picture would swallow
+            // them (the swipe on the picture changes the brightness and the volume). Both handlers
+            // in one item: they share the events (the tap and the swipe must not fight).
+            Item {
+                anchors.fill: parent
+                z: 10
+
+                TapHandler {
+                    onTapped: page.togglePlay()
+                    onDoubleTapped: (eventPoint, button) => {
+                        const right = eventPoint.position.x >= stage.width / 2
+                        page.showJump(right)
+                        page.jump(right ? page.jumpMs : -page.jumpMs)
+                    }
+                }
+
+                // Swipe: brightness (left half) or volume (right half), shown while the finger moves.
+                DragHandler {
+                    id: swipe
+
+                    property int level: Levels.Level.Brightness
+                    property real lastY: 0
+
+                    target: null
+                    xAxis.enabled: false
+                    onActiveChanged: {
+                        if (!active) {
+                            return
+                        }
+                        Levels.refresh()
+                        level = centroid.pressPosition.x < stage.width / 2 ? Levels.Level.Brightness : Levels.Level.Volume
+                        lastY = 0
+                    }
+                    onTranslationChanged: {
+                        if (!active) {
+                            return
+                        }
+                        const dy = translation.y - lastY
+                        lastY = translation.y
+                        Levels.change(level, -dy / stage.height)
+                    }
+                }
+            }
+        }
+
+        // Sideways: a narrow rail on the right with the buttons (the clickdummy). Upright: the
+        // controls under the picture, which scroll when they do not fit. Phone sideways: 62 px
+        // (CD .qrail); tablet sideways: 84 px (CD .tab .qrail).
+        ColumnLayout {
+            id: rail
+
+            objectName: "rail"
+            visible: page.landscape
+            Layout.preferredWidth: page.tabletSideways ? Look.unit(84) : Look.unit(62)
+            Layout.fillHeight: true
+            spacing: Look.unit(6)
+
+            LookToolButton {
+                objectName: "railBack"
+                Layout.alignment: Qt.AlignHCenter
+                icon.name: "go-previous-view"
+                text: qsTr("Back")
+                display: QQC2.AbstractButton.IconOnly
+                onClicked: page.backRequested()
+            }
+            LookToolButton {
+                objectName: "railFrameBack"
+                Layout.alignment: Qt.AlignHCenter
+                icon.name: "media-skip-backward"
+                text: qsTr("Frame back")
+                display: QQC2.AbstractButton.IconOnly
+                onClicked: page.step(-1)
+            }
+            // The play button: a red circle with the sign in it (the clickdummy).
+            Rectangle {
+                objectName: "railPlay"
+
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: Look.unit(44)
+                Layout.preferredHeight: Look.unit(44)
+                radius: width / 2
+                color: Look.accentColor
+
+                LookLabel {
+                    anchors.centerIn: parent
+                    text: player.playing ? "\u23F8" : "\u25B6"
+                    color: Look.onAccentColor
+                    font.pixelSize: Look.unit(16)
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: page.togglePlay()
+                }
+            }
+            LookToolButton {
+                objectName: "railFrameOn"
+                Layout.alignment: Qt.AlignHCenter
+                icon.name: "media-skip-forward"
+                text: qsTr("Frame on")
+                display: QQC2.AbstractButton.IconOnly
+                onClicked: page.step(1)
+            }
+            // The four tempi, as small fields (the clickdummy's tempo row).
+            ColumnLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: Look.unit(4)
+
+                Repeater {
+                    model: page.tempi
+
+                    LookToggle {
+                        required property var modelData
+
+                        objectName: "railTempo"
+                        Layout.preferredWidth: Look.unit(60)
+                        text: modelData === 1 ? "1\u00D7" : String(modelData)
+                        checked: player.playbackRate === modelData
+                        onClicked: page.setSpeed(modelData)
+                    }
+                }
+            }
+            LookToggle {
+                objectName: "railLoop"
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: Look.unit(60)
+                text: qsTr("Loop")
+                checked: page.looping
+                onClicked: page.looping = !page.looping
             }
         }
 
@@ -281,6 +425,7 @@ Item {
             id: controlsView
 
             objectName: "controlsView"
+            visible: !page.landscape
             Layout.fillWidth: !page.landscape
             Layout.fillHeight: true             // portrait: the picture stays at the top
             Layout.preferredWidth: page.landscape ? Kirigami.Units.gridUnit * 17 : -1     // room for the tempo row
@@ -316,7 +461,7 @@ Item {
                 width: controlsView.width - Kirigami.Units.largeSpacing * 2
                 spacing: Kirigami.Units.largeSpacing
 
-                QQC2.Label {
+                LookLabel {
                     Layout.fillWidth: true
                     visible: page.compact
                     text: (page.current.nr ? page.current.nr + " · " : "") + (page.current.title || "")
@@ -348,7 +493,7 @@ Item {
                     }
                 }
 
-                QQC2.Label {
+                LookLabel {
                     objectName: "placeText"
                     Layout.fillWidth: true
                     visible: !page.landscape && page.placeText !== ""
@@ -372,7 +517,7 @@ Item {
                     id: timeline
 
                     Layout.fillWidth: true
-                    visible: page.hasVideo
+                    visible: page.hasVideo && !page.landscape
                     from: page.from
                     to: page.to > page.from ? page.to : page.from + 1
                     value: player.position
@@ -419,7 +564,7 @@ Item {
                     Layout.fillWidth: true
                     visible: page.hasVideo
 
-                    LookToolButton {
+                    LookToggle {
                         objectName: "soundSwitch"
                         // On only where it sounds: slow motion is always silent.
                         readonly property bool sounds: Levels.sound && player.playbackRate >= 1
@@ -433,7 +578,7 @@ Item {
                             Levels.setSound(Levels.sound ? Levels.Switch.Off : Levels.Switch.On)
                         }
                     }
-                    LookToolButton {
+                    LookToggle {
                         objectName: "awakeSwitch"
                         checkable: true
                         checked: Levels.awake
@@ -519,7 +664,7 @@ Item {
                             selected: trainingRow.index === page.index
                             text: (trainingRow.index + 1) + ". " + (modelData.title || "")
                             subtitle: [modelData.attack, modelData.gradeName].filter(x => !!x).join(" · ")
-                            trailing: QQC2.Label {
+                            trailing: LookLabel {
                                 text: trainingRow.done ? "✓" : ""
                                 color: Look.positiveTextColor
                                 Accessible.name: trainingRow.done ? qsTr("practised") : ""
@@ -541,5 +686,28 @@ Item {
                 }
             }
         }
+    }
+
+    // The timeline in landscape (the clickdummy's `.qb .qtrk`): over the whole page, picture and
+    // rail. The grid lays out stage and rail; the slider is a sibling of the grid so it can span
+    // both. Anchors fill the page in own height; z above the stage so a tap on the track lands
+    // on the slider and not on a gesture.
+    QQC2.Slider {
+        id: railTimeline
+
+        objectName: "railTimeline"
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: Look.unit(10)
+        visible: page.landscape
+        z: 20
+        from: page.from
+        to: page.to > page.from ? page.to : page.from + 1
+        value: player.position
+        onMoved: player.position = value
+        Accessible.name: qsTr("Position")
+
+        LookSliderSkin { control: railTimeline }
     }
 }

@@ -67,7 +67,7 @@ Kirigami.ScrollablePage {
                     level: 1
                     text: "Mitori 見取り"
                 }
-                QQC2.Label {
+                LookLabel {
                     Layout.fillWidth: true
                     wrapMode: Text.Wrap
                     text: qsTr("Mitori means learning by watching. Here are the exam programmes of Aikido Shinki Rengo, Daitoryu and Itto-den Shinki Toho, with the exam videos of the DVDs: watch, practise, rate, note.")
@@ -77,7 +77,7 @@ Kirigami.ScrollablePage {
             ColumnLayout {
                 spacing: Look.unit(8)
 
-                QQC2.Label {
+                LookLabel {
                     Layout.fillWidth: true
                     wrapMode: Text.Wrap
                     text: qsTr("How should Mitori look? You can change it later in Settings → Appearance.")
@@ -85,7 +85,7 @@ Kirigami.ScrollablePage {
                 StyleChoice {
                     Layout.fillWidth: true
                 }
-                QQC2.Label {
+                LookLabel {
                     Layout.fillWidth: true
                     visible: Appearance.restartNeeded
                     wrapMode: Text.Wrap
@@ -110,7 +110,7 @@ Kirigami.ScrollablePage {
                         Layout.fillWidth: true
                         spacing: Look.unit(12)
 
-                        QQC2.Label {
+                        LookLabel {
                             Layout.alignment: Qt.AlignTop
                             text: tourRow.modelData.glyph
                             font: Look.japaneseFont(Look.titleFont())
@@ -121,13 +121,13 @@ Kirigami.ScrollablePage {
                             Layout.fillWidth: true
                             spacing: 0
 
-                            QQC2.Label {
+                            LookLabel {
                                 Layout.fillWidth: true
                                 text: tourRow.modelData.title
                                 font.bold: true
                                 wrapMode: Text.Wrap
                             }
-                            QQC2.Label {
+                            LookLabel {
                                 Layout.fillWidth: true
                                 text: tourRow.modelData.text
                                 color: Look.mutedTextColor

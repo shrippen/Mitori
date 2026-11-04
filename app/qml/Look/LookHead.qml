@@ -7,6 +7,8 @@ Item {
     property Kirigami.Page page: null
     property string backTitle: ""
     property string moreText: ""
+    // The mark of the app (Shinki's head has it).
+    property string logo: ""
     signal back()
 
     visible: false

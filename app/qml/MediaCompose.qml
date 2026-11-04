@@ -42,16 +42,16 @@ Item {
             display: QQC2.AbstractButton.IconOnly
             onClicked: photoMenu.open()
 
-            QQC2.Menu {
+            LookMenu {
                 id: photoMenu
 
-                QQC2.MenuItem {
+                LookMenuItem {
                     objectName: "takePhoto"
                     icon.name: "camera-photo"
                     text: qsTr("Take a photo")
                     onTriggered: compose.takePhoto()
                 }
-                QQC2.MenuItem {
+                LookMenuItem {
                     objectName: "choosePicture"
                     icon.name: "insert-image"
                     text: qsTr("Choose a picture …")
@@ -69,7 +69,7 @@ Item {
         }
 
         // While recording: time, Stop (keeps it), Cancel.
-        QQC2.Label {
+        LookLabel {
             objectName: "recordingTime"
             visible: compose.recording
             text: "● " + Math.floor(recorder.duration / 60000) + ":" + String(Math.floor(recorder.duration / 1000) % 60).padStart(2, "0")
