@@ -54,9 +54,24 @@ jobs:
             base-devel cmake ninja extra-cmake-modules qt6-declarative qt6-shadertools qt6-tools qt6-multimedia qt6-multimedia-ffmpeg qt6-speech kirigami
 
       - uses: actions/checkout@v7
-        with:
-          # mitori-daten lives as a submodul at third_party/mitori-daten/.
-          submodules: recursive
+
+      # The mitori-daten submodule at third_party/mitori-daten/. actions/checkout
+      # cannot pull from git.arianw.de on GitHub's runner (no Gitea credentials);
+      # clone it manually with the configured GITEA_TOKEN.
+      - name: Clone mitori-daten submodule
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+        run: |
+          set -euo pipefail
+          # git on GitHub's runners refuses to operate on paths it can't prove are safe
+          # (dubious ownership); mark each expected workspace as safe first.
+          git config --global --add safe.directory '*'
+          git submodule sync --recursive
+          # Pin the URL with the Gitea token so the submodule clone authenticates.
+          git config --global url."https://oauth2:${GITEA_TOKEN}@git.arianw.de/".insteadOf "https://git.arianw.de/"
+          git submodule update --init --force --depth=1 --recursive
+          # Drop the credential from the working config so flat tests don't see it.
+          git config --local --unset url."https://oauth2:${GITEA_TOKEN}@git.arianw.de/".insteadOf 2>/dev/null || true
 
       # Release headings "## [X.Y.Z] — YYYY-MM-DD": a wrong one shows up here, not at the tag.
       - name: CHANGELOG.md headings
