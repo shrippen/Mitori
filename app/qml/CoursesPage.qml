@@ -75,7 +75,7 @@ Kirigami.ScrollablePage {
     ColumnLayout {
         spacing: Kirigami.Units.smallSpacing
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: Courses.errorString !== ""
             text: Courses.errorString
@@ -121,7 +121,7 @@ Kirigami.ScrollablePage {
             rule: true
             text: qsTr("Next dates")
         }
-        QQC2.Label {
+        LookLabel {
             objectName: "calendarState"
             Layout.fillWidth: true
             text: {
@@ -164,7 +164,7 @@ Kirigami.ScrollablePage {
             rule: true
             text: qsTr("My notebooks")
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: page.notebooks.length === 0
             text: qsTr("No notebooks yet. Tap a date above, or make a course of your own (+).")

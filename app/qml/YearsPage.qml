@@ -138,7 +138,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: qsTr("Columns: weeks, rows: weekdays. A technique counts once on each day it is rated.")
             color: Look.mutedTextColor

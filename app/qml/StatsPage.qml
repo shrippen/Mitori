@@ -79,7 +79,7 @@ Kirigami.ScrollablePage {
                 label: qsTr("techniques practised")
             }
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: qsTr("A technique counts once on each day it is rated.")
             color: Look.mutedTextColor
@@ -164,13 +164,13 @@ Kirigami.ScrollablePage {
                 RowLayout {
                     Layout.fillWidth: true
 
-                    QQC2.Label {
+                    LookLabel {
                         Layout.fillWidth: true
                         text: gradeItem.modelData.name
                         font.bold: true
                     }
                     // The figures without hovering (touch): exam-ready of all techniques.
-                    QQC2.Label {
+                    LookLabel {
                         objectName: "gradeFigure"
                         text: qsTr("%1 of %2 exam-ready").arg(stand.counts[4]).arg(stand.ids.length)
                         color: Look.mutedTextColor
@@ -222,7 +222,7 @@ Kirigami.ScrollablePage {
                 onTapped: point => examChart.hoverIndex = examChart.barAt(point.position.x)
             }
         }
-        QQC2.Label {
+        LookLabel {
             objectName: "examRoundsText"
             Layout.fillWidth: true
             text: page.rounds.length > 0
@@ -250,7 +250,7 @@ Kirigami.ScrollablePage {
                 subtitle: [Grades.shortDate(modelData.day), modelData.place].filter(x => x).join(" · ")
             }
         }
-        QQC2.Label {
+        LookLabel {
             objectName: "statsGradesText"
             Layout.fillWidth: true
             text: (page.passed.length === 0 ? qsTr("No grade entered yet.") : "")

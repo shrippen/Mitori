@@ -60,19 +60,22 @@ Kirigami.ScrollablePage {
                 Component {
                     id: paragraphBlock
 
-                    QQC2.Label {
+                    LookLabel {
                         objectName: "commentParagraph"
                         text: block.modelData.text
                         wrapMode: Text.Wrap
+                        // Running text in the style's reading face (the book face under Shinki).
+                        font: Look.readingFont
+                        lineHeight: 1.45
                     }
                 }
             }
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: qsTr("Source: shinkiryu.de, Itto-den Shinki Toho")
             color: Look.disabledTextColor
-            font.pointSize: Kirigami.Theme.smallFont.pointSize
+            font: Look.smallFont
         }
     }
 }

@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import Kante
 import Mitori
 
 // Technique map (clickdummy "Landkarte"): every grade up to the chosen one, one group at a time
@@ -13,12 +12,12 @@ import Mitori
 Kirigami.ScrollablePage {
     id: page
 
-    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it Kante's, and
-    // Kante's page ground (the scope's background role is the dialog colour).
-    property Item kanteScope: KanteScope { target: page }
-    background: Rectangle { color: KanteStyle.backgroundColor }
+    // ScrollablePage keeps the platform's colours (Theme.inherit: false): give it the style's,
+    // and the style's page ground (the scope's background role is the dialog colour).
+    property Item lookScope: LookScope { target: page }
+    background: Rectangle { color: Look.backgroundColor }
     // Tab and the arrow keys keep the focused place in view.
-    property KanteFocusFollow focusFollow: KanteFocusFollow { flickable: page.flickable }
+    property LookFocusFollow focusFollow: LookFocusFollow { flickable: page.flickable }
 
     property string discipline: Programme.discipline
     readonly property var grades: Programme.grades(discipline)
@@ -31,14 +30,14 @@ Kirigami.ScrollablePage {
     readonly property var shown: grids.find(g => g.title === group) || grids[0] || null
     readonly property bool matrix: !!shown && shown.kind === "matrix"
     // A tablet in landscape: a page at least 26 grid units high (a phone held sideways has about 20).
-    readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 26
+    readonly property bool wide: width > height && height >= 460     // a tablet sideways, not a phone
 
     title: qsTr("Technique map")
 
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        KanteSegmented {
+        LookSegmented {
             Layout.fillWidth: true
             model: Programme.disciplines.map(d => d.kurzname)
             currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
@@ -55,7 +54,7 @@ Kirigami.ScrollablePage {
             Repeater {
                 model: page.grades
 
-                KanteChip {
+                LookChip {
                     required property var modelData
 
                     objectName: "gradeChip"
@@ -76,7 +75,7 @@ Kirigami.ScrollablePage {
             Repeater {
                 model: page.matrix ? page.grids : []
 
-                KanteChip {
+                LookChip {
                     required property var modelData
 
                     objectName: "groupChip"
@@ -88,22 +87,22 @@ Kirigami.ScrollablePage {
             }
         }
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: !page.shown
             text: qsTr("No techniques with an attack up to %1.").arg(page.gradeName)
-            color: KanteStyle.mutedTextColor
+            color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
 
-        KanteSectionLabel {
+        LookSectionLabel {
             visible: !!page.shown
             text: page.shown ? page.shown.title + (page.shown.jp ? "  " + page.shown.jp : "") : ""
         }
 
-        // Techniques × attacks of one group (KanteHeatGrid); a blank gap where a
+        // Techniques × attacks of one group (LookHeatGrid); a blank gap where a
         // technique does not answer an attack up to the grade.
-        KanteHeatGrid {
+        LookHeatGrid {
             id: heat
 
             readonly property var rows: page.matrix ? page.shown.rows : []
@@ -118,8 +117,8 @@ Kirigami.ScrollablePage {
             columnLabelsVertical: true
             columnLabelMaxLength: Kirigami.Units.gridUnit * 9
             rowLabelWidth: page.width * 0.4
-            rowLabelFont: KanteStyle.smallFont     // long technique names, readable on a phone
-            cellSize: page.wide ? KanteStyle.unit(34) : KanteStyle.unit(26)
+            rowLabelFont: Look.smallFont     // long technique names, readable on a phone
+            cellSize: page.wide ? Look.unit(34) : Look.unit(26)
             rowTitle: qsTr("Technique")
             columnTitle: qsTr("Attack")
             rowLabels: rows.map(r => r.title)
@@ -136,7 +135,7 @@ Kirigami.ScrollablePage {
         }
 
         // Shinki Toho: the Ô-dachi forms, numbered, a fixed number per row filling the width.
-        KanteHeatGrid {
+        LookHeatGrid {
             id: forms
 
             readonly property var list: page.shown && !page.matrix ? page.shown.cells : []
@@ -165,14 +164,14 @@ Kirigami.ScrollablePage {
             noDataText: ""
             onActivated: (row, column) => page.open(list[row * perRow + column].entry)
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: !!page.shown
             text: page.matrix
                   ? qsTr("Rows: technique, columns: attack. An empty place does not occur up to %1. Tap a place to open the technique.").arg(page.gradeName)
                   : qsTr("A place per form: its number, after the dot its level (12·3). Tap a place to open the form.")
-            color: KanteStyle.mutedTextColor
-            font: KanteStyle.smallFont
+            color: Look.mutedTextColor
+            font: Look.smallFont
             wrapMode: Text.Wrap
         }
     }

@@ -41,19 +41,19 @@ ColumnLayout {
             Layout.fillWidth: true
             spacing: Kirigami.Units.smallSpacing
 
-            QQC2.Label {
+            LookLabel {
                 Layout.minimumWidth: Kirigami.Units.gridUnit * 1.5
                 horizontalAlignment: Text.AlignRight
                 text: step.index + 1
-                font: Look.monoFont(Kirigami.Theme.smallFont.pointSize)
+                font: Look.monoFont(Look.smallFont.pointSize)
                 color: Look.mutedTextColor
             }
-            QQC2.Label {
+            LookLabel {
                 Layout.fillWidth: true
                 text: step.modelData.title
                 wrapMode: Text.Wrap
             }
-            QQC2.Label {
+            LookLabel {
                 text: step.modelData.jp
                 font: Look.japaneseFont()
                 color: Look.mutedTextColor

@@ -52,7 +52,7 @@ Kirigami.Page {
         fillMode: VideoOutput.PreserveAspectFit
     }
 
-    QQC2.Label {
+    LookLabel {
         id: failed
 
         objectName: "cameraError"

@@ -30,7 +30,7 @@ Kirigami.Page {
     property string lastId: ""
     // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
     // a phone held sideways has about 20) keeps the list and the small player side by side.
-    readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 26
+    readonly property bool wide: width > height && height >= 460     // a tablet sideways, not a phone
     readonly property var playlist: rows.filter(r => page.playable(r))
     readonly property bool split: wide && playlist.length > 0
     // The small player beside the list (tablet), typed for the calls below.
@@ -93,7 +93,7 @@ Kirigami.Page {
         anchors.fill: parent
         spacing: 0
 
-        QQC2.ScrollView {
+        LookScrollView {
             objectName: "programmeScroll"
             clip: true                                  // the rows scroll under the grade chips, not over them
             Layout.fillHeight: true
@@ -180,7 +180,7 @@ Kirigami.Page {
                     Component {
                         id: attackRow
 
-                        QQC2.Label {
+                        LookLabel {
                             text: rowLoader.modelData.title + (rowLoader.modelData.extra ? " (" + rowLoader.modelData.extra + ")" : "")
                                   + "  " + (rowLoader.modelData.jp || "")
                             font.bold: rowLoader.modelData.kind === "attack"

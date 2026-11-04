@@ -11,13 +11,17 @@ Kirigami.ApplicationWindow {
     height: KanteStyle.unit(800)
 
     // The style Mitori started with (Appearance): Breeze and Material are the platform's
-    // colours, Kante dark, Leinen light. Shinki stands in Leinen until app/qml/Look reaches it.
+    // colours, Kante dark, Leinen light, Shinki the club newspaper's (paper, ink, one red).
+    // Shinki and Kante are two themes of their own: neither takes the other's colours.
     readonly property bool platformStyle: Appearance.running === Appearance.Style.Breeze
                                           || Appearance.running === Appearance.Style.Material
+    readonly property bool shinkiStyle: Appearance.running === Appearance.Style.Shinki
     Binding {
         target: KanteStyle
         property: "kind"
-        value: root.platformStyle ? KanteStyle.Kind.System : KanteStyle.Kind.Kante
+        // Under Shinki the Kante components (the few that are left) follow the window's theme,
+        // which carries Shinki's roles; Kante's own palette is only for Kante and Leinen.
+        value: root.platformStyle || root.shinkiStyle ? KanteStyle.Kind.System : KanteStyle.Kind.Kante
     }
     Binding {
         target: KanteStyle
@@ -27,23 +31,34 @@ Kirigami.ApplicationWindow {
     Binding {
         target: KanteStyle
         property: "preferLight"
-        value: Appearance.running === Appearance.Style.Leinen || Appearance.running === Appearance.Style.Shinki
+        value: Appearance.running === Appearance.Style.Leinen
     }
-    KanteScope { target: root.contentItem }
+    // The scope gives the window's controls the colours of the style: Kante's under Kante and
+    // Leinen, Shinki's under Shinki (LookScope). Never both.
+    LookScope { target: root.contentItem }
 
     // One page at a time, also in landscape: the tablet gets its own page with list and player
     // (app-entscheidungen.md, "Tablet quer"), not Kirigami's columns.
     pageStack.columnView.columnResizeMode: Kirigami.ColumnView.SingleColumn
     // Under Shinki the window carries Shinki's head in place of Kirigami's bar (bible section 5,
     // Kopf); the other styles keep the bar (LookHead is empty there).
-    pageStack.globalToolBar.style: Look.shinki ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
+    pageStack.globalToolBar.style: root.shinkiStyle ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
     header: LookHead {
         objectName: "lookHead"
         page: root.pageStack.currentItem as Kirigami.Page
         // The page before the current one (back by key keeps the pages ahead).
         backTitle: root.pageStack.currentIndex > 0 ? root.pageStack.get(root.pageStack.currentIndex - 1).title || "" : ""
         moreText: qsTr("More")
+        logo: root.pageLogo(root.pageStack.currentItem)
         onBack: root.back()
+    }
+
+    // The mark of the app: the page names it (the start menu has one), the head shows it.
+    function pageLogo(page) {
+        // The index, not the property: the page is a C++ type, a direct access to a property it
+        // does not have would fail.
+        const logo = page ? page["headLogo"] : ""
+        return logo !== undefined ? logo : ""
     }
 
     // Back from Shinki's head: as the Back key (goBack, the page may ask first), then the page

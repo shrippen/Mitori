@@ -72,13 +72,13 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 spacing: 0
 
-                QQC2.Label {
+                LookLabel {
                     Layout.fillWidth: true
                     text: (page.entry.nr ? page.entry.nr + " · " : "") + (page.entry.title || "")
                     font.bold: true
                     wrapMode: Text.Wrap
                 }
-                QQC2.Label {
+                LookLabel {
                     Layout.fillWidth: true
                     visible: text !== ""
                     text: [page.entry.attack, page.entry.jp].filter(x => x).join(" · ")
@@ -93,7 +93,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: Practice.errorString !== ""
             text: Practice.errorString
@@ -101,7 +101,7 @@ Kirigami.ScrollablePage {
             wrapMode: Text.Wrap
         }
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: page.notes.length === 0
             text: qsTr("No notes on this technique yet.")
@@ -135,7 +135,7 @@ Kirigami.ScrollablePage {
                         Layout.fillWidth: true
                         spacing: Kirigami.Units.smallSpacing
 
-                        QQC2.Label {
+                        LookLabel {
                             id: noteItemLabel
 
                             // The note, also for tests that find the label.
@@ -179,7 +179,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: page.notes.length > 0
             text: qsTr("Press and hold a note (or Enter on it) to change or delete it.")
@@ -188,7 +188,7 @@ Kirigami.ScrollablePage {
         }
     }
 
-    footer: QQC2.ToolBar {
+    footer: LookToolBar {
         RowLayout {
             anchors.fill: parent
 

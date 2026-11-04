@@ -28,6 +28,8 @@ Rectangle {
     property Kirigami.Page page: null
     property string backTitle: ""
     property string moreText: ""
+    // The mark of the app (the start menu has one, the other pages the way back instead).
+    property string logo: ""
     signal back()
 
     // A title split at its first Japanese character: "Mitori 見取り" → "Mitori", "見取り".
@@ -91,12 +93,35 @@ Rectangle {
             font.pixelSize: ShinkiStyle.pageTitleSize
         }
 
+        // The mark of the app: the club's sign in a red square, with the small caps line beside
+        // it (the start menu).
+        RowLayout {
+            visible: head.logo !== ""
+            spacing: ShinkiStyle.gridSpace * 2
+
+            Rectangle {
+                objectName: "headLogo"
+
+                Layout.preferredWidth: ShinkiStyle.logoSize
+                Layout.preferredHeight: ShinkiStyle.logoSize
+                color: ShinkiStyle.red
+
+                QQC2.Label {
+                    anchors.centerIn: parent
+                    text: head.logo
+                    color: ShinkiStyle.textOnRed
+                    font.family: ShinkiStyle.japaneseFamily
+                    font.pixelSize: ShinkiStyle.logoKanjiSize
+                }
+            }
+        }
+
         // The way back: a column in red, its own button.
         QQC2.AbstractButton {
             id: backButton
 
             objectName: "headBack"
-            enabled: head.backTitle !== ""
+            enabled: head.backTitle !== "" && head.logo === ""
             opacity: enabled ? 1 : 0
             Accessible.ignored: !enabled
             text: "‹ " + head.split(head.backTitle)[0].toUpperCase()

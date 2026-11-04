@@ -35,60 +35,72 @@ Kirigami.ScrollablePage {
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             text: qsTr("For private trainings, guest teachers or dates that are not in the calendar.")
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
 
-        Kirigami.FormLayout {
+        // The fields as rows of their own: the name of the field as a small caps line above it.
+        ColumnLayout {
             Layout.fillWidth: true
+            spacing: Look.unit(16)
 
-            LookTextField {
-                id: titleField
+            LookFormRow {
+                label: qsTr("Title")
+                LookTextField {
+                    id: titleField
 
-                objectName: "courseTitleField"
-                Kirigami.FormData.label: qsTr("Title")
-                Layout.fillWidth: true
-                placeholderText: qsTr("Training with a guest teacher")
+                    objectName: "courseTitleField"
+                    Layout.fillWidth: true
+                    placeholderText: qsTr("Training with a guest teacher")
+                }
             }
-            LookDateField {
-                id: firstField
+            LookFormRow {
+                label: qsTr("From")
+                LookDateField {
+                    id: firstField
 
-                objectName: "courseFirst"
-                Kirigami.FormData.label: qsTr("From")
-                format: qsTr("yyyy-MM-dd", "date format")
-                dayNames: [qsTr("MO"), qsTr("TU"), qsTr("WE"), qsTr("TH"), qsTr("FR"), qsTr("SA"), qsTr("SU")]
-                todayText: qsTr("Today")
-                date: new Date()
+                    objectName: "courseFirst"
+                    format: qsTr("yyyy-MM-dd", "date format")
+                    dayNames: [qsTr("MO"), qsTr("TU"), qsTr("WE"), qsTr("TH"), qsTr("FR"), qsTr("SA"), qsTr("SU")]
+                    todayText: qsTr("Today")
+                    date: new Date()
+                }
             }
-            LookDateField {
-                id: lastField
+            LookFormRow {
+                label: qsTr("To")
+                LookDateField {
+                    id: lastField
 
-                objectName: "courseLast"
-                Kirigami.FormData.label: qsTr("To")
-                format: firstField.format
-                dayNames: firstField.dayNames
-                todayText: firstField.todayText
-                date: new Date()
+                    objectName: "courseLast"
+                    format: firstField.format
+                    dayNames: firstField.dayNames
+                    todayText: firstField.todayText
+                    date: new Date()
+                }
             }
-            LookTextField {
-                id: placeField
+            LookFormRow {
+                label: qsTr("Place")
+                LookTextField {
+                    id: placeField
 
-                objectName: "coursePlace"
-                Kirigami.FormData.label: qsTr("Place")
-                Layout.fillWidth: true
-                placeholderText: qsTr("Dojo, town")
+                    objectName: "coursePlace"
+                    Layout.fillWidth: true
+                    placeholderText: qsTr("Dojo, town")
+                }
             }
-            LookTextField {
-                id: teacherField
+            LookFormRow {
+                label: qsTr("Teacher")
+                LookTextField {
+                    id: teacherField
 
-                objectName: "courseTeacher"
-                Kirigami.FormData.label: qsTr("Teacher")
-                Layout.fillWidth: true
-                placeholderText: qsTr("Name")
-                onAccepted: page.make()
+                    objectName: "courseTeacher"
+                    Layout.fillWidth: true
+                    placeholderText: qsTr("Name")
+                    onAccepted: page.make()
+                }
             }
         }
 

@@ -34,9 +34,9 @@ add_custom_command(
     VERBATIM
 )
 
-# Shinki (shinki/README.md) offered in the style choice: only to check it, until every page
-# reaches it through app/qml/Look. Off in every published build.
-option(MITORI_SHINKI "Offer the Shinki style (development only, until the pages use Look)" OFF)
+# Shinki (shinki/README.md): always offered in the style choice, the pages now reach it through
+# app/qml/Look. The build still ships without it (MITORI_SHINKI=OFF) for a stripped-down binary.
+option(MITORI_SHINKI "Offer the Shinki style (default; OFF strips it out)" ON)
 option(MITORI_BUILD_TESTS "Build the C++ unit tests" OFF)
 
 # The app's QML module, services and resources as a static library: the app and the UI test
@@ -125,6 +125,17 @@ qt_add_qml_module(mitori_app
         qml/Look/LookCalendarHeatmap.qml
         qml/Look/LookBarChart.qml
         qml/Look/LookHead.qml
+        qml/Look/LookHeatGrid.qml
+        qml/Look/LookLabel.qml
+        qml/Look/LookKicker.qml
+        qml/Look/LookToggle.qml
+        qml/Look/LookFormRow.qml
+        qml/Look/LookEmptyState.qml
+        qml/Look/LookTextArea.qml
+        qml/Look/LookMenu.qml
+        qml/Look/LookMenuItem.qml
+        qml/Look/LookScrollView.qml
+        qml/Look/LookToolBar.qml
     SOURCES
         catalog/catalog.h
         catalog/catalog.cpp

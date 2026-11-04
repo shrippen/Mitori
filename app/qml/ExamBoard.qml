@@ -56,21 +56,21 @@ ColumnLayout {
             visible: board.hasAttack
             spacing: 0
 
-            QQC2.Label {
+            LookLabel {
                 objectName: "boardAttack"
                 Layout.fillWidth: true
                 text: board.point.attack || ""
                 font: board.attackFont
                 wrapMode: Text.Wrap
             }
-            QQC2.Label {
+            LookLabel {
                 Layout.fillWidth: true
                 visible: !!board.point.attackExtra
                 text: board.point.attackExtra || ""
                 color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
-            QQC2.Label {
+            LookLabel {
                 Layout.fillWidth: true
                 visible: !!board.point.attackJp
                 text: board.point.attackJp || ""
@@ -95,14 +95,14 @@ ColumnLayout {
             Layout.fillWidth: true
             spacing: 0
 
-            QQC2.Label {
+            LookLabel {
                 objectName: "boardTechnique"
                 Layout.fillWidth: true
                 text: (board.point.nr ? board.point.nr + " · " : "") + (board.point.title || "")
                 font: board.techniqueFont
                 wrapMode: Text.Wrap
             }
-            QQC2.Label {
+            LookLabel {
                 objectName: "boardExtra"
                 Layout.fillWidth: true
                 visible: !board.techniqueOnly && !!board.point.extra
@@ -110,7 +110,7 @@ ColumnLayout {
                 color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
-            QQC2.Label {
+            LookLabel {
                 objectName: "boardKanji"
                 Layout.fillWidth: true
                 visible: !!board.point.jp

@@ -15,6 +15,26 @@ Kirigami.ScrollablePage {
     property Item lookScope: LookScope { target: page }
     background: Rectangle { color: Look.backgroundColor }
 
+    // The mark of the app and the small caps line (the head shows them; the other pages have
+    // the way back instead).
+    readonly property string headLogo: "神氣"
+
+    // How many of the grade's techniques are exam-ready (the clickdummy's start menu: "3 of 8
+    // exam-ready" under the programme tile).
+    readonly property var gradeRows: Programme.entries(Programme.discipline, Programme.grade(Programme.discipline))
+    readonly property var gradeIds: gradeRows.filter(r => r.kind === "entry").map(r => r.id)
+    readonly property var gradeCounts: Practice.revision >= 0 ? Practice.counts(gradeIds) : [0, 0, 0, 0, 0]
+
+    // The next exam on the calendar (clickdummy: its hint box above the tiles; the courses tile
+    // repeats the same text in its hint).
+    readonly property var exam: Courses.revision >= 0 ? Courses.nextExam() : ({})
+
+    // The greeting of the day (the clickdummy's start menu).
+    readonly property string greeting: {
+        const hour = new Date().getHours()
+        return hour < 11 ? qsTr("Good morning") : hour < 18 ? qsTr("Good day") : qsTr("Good evening")
+    }
+
     title: "Mitori 見取り"
 
     // The course tile names the next date, and updates of the video bundles show here: calendar and
@@ -24,9 +44,8 @@ Kirigami.ScrollablePage {
         Bundles.reload(Bundles.Reload.Older)
     }
 
-    // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
-    // not a phone held sideways, about 20).
-    readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 26
+    // A tablet in landscape: the page is high enough (a phone held sideways is about 410).
+    readonly property bool wide: width > height && height >= 460     // a tablet sideways, not a phone
 
     actions: [
         Kirigami.Action {
@@ -46,11 +65,11 @@ Kirigami.ScrollablePage {
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        Kirigami.PlaceholderMessage {
+        LookEmptyState {
             Layout.fillWidth: true
             visible: Programme.errorString !== ""
-            icon.name: "data-error"
-            text: qsTr("Programme data missing")
+            iconName: "data-error"
+            title: qsTr("Programme data missing")
             explanation: Programme.errorString
         }
 
@@ -77,11 +96,30 @@ Kirigami.ScrollablePage {
             }
         }
 
-        // A column on the phone, a grid of four on a tablet in landscape (app-entscheidungen.md).
+        // A planned exam on the calendar: a hint above the tiles (clickdummy).
+        LookHint {
+            objectName: "plannedExam"
+            Layout.fillWidth: true
+            visible: page.exam.course !== undefined && page.exam.course !== null
+            importance: LookHint.Importance.Info
+            titleText: qsTr("Planned exam")
+            text: Grades.examText(page.exam)
+        }
+
+        // The greeting of the day (the clickdummy's start menu).
+        LookHeading {
+            objectName: "greeting"
+            Layout.fillWidth: true
+            level: 1
+            text: page.greeting
+        }
+
+        // Two columns on the phone, four on a tablet in landscape (the clickdummy: a grid of
+        // tiles, app-entscheidungen.md).
         GridLayout {
             objectName: "tiles"
             Layout.fillWidth: true
-            columns: page.wide ? 4 : 1
+            columns: page.wide ? 4 : 2
             rowSpacing: Kirigami.Units.largeSpacing
             columnSpacing: Kirigami.Units.largeSpacing
 
@@ -92,11 +130,13 @@ Kirigami.ScrollablePage {
 
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1          // equal columns
+                Layout.columnSpan: page.wide ? 1 : 2    // on the phone over the whole width
                 visible: Programme.errorString === ""
                 big: true
                 glyph: "技"
                 text: qsTr("Programme")
-                hint: current.title + " · " + current.grade
+                hint: current.title + " · " + current.grade + " · "
+                      + qsTr("%1 of %2 exam-ready").arg(page.gradeCounts[4]).arg(page.gradeIds.length)
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ProgrammePage.qml"))
             }
 
@@ -149,9 +189,8 @@ Kirigami.ScrollablePage {
             LookTile {
                 objectName: "coursesTile"
 
-                // A planned exam first ("Exam Aikido 4. Kyu in 30 days"), else the next coming
-                // date: "Siebeldingen · in 12 days", "today".
-                readonly property var exam: Courses.revision >= 0 ? Courses.nextExam() : ({})
+                // Standing alone (no hint box): the next coming date. The hint box above keeps
+                // the planned exam; for that, the tile's hint stays the upcoming course.
                 readonly property var next: Courses.upcoming.length > 0 ? Courses.upcoming[0] : null
                 readonly property int days: next ? Math.max(0, CourseDays.fromToday(next.first)) : 0
 
@@ -159,8 +198,7 @@ Kirigami.ScrollablePage {
                 Layout.preferredWidth: 1          // equal columns
                 glyph: "講"
                 text: qsTr("Courses")
-                hint: exam.course ? Grades.examText(exam)
-                    : !next ? qsTr("Calendar and notebooks")
+                hint: !next ? qsTr("Calendar and notebooks")
                             : (next.place || next.title) + " · " + (days > 0 ? qsTr("in %n day(s)", "", days) : qsTr("today"))
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("CoursesPage.qml"))
             }

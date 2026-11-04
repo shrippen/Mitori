@@ -22,14 +22,14 @@ LookListRow {
     trailing: ColumnLayout {
         spacing: 0
 
-        QQC2.Label {
+        LookLabel {
             Layout.alignment: Qt.AlignRight
             visible: row.daysAway > 0
             text: qsTr("in %n day(s)", "", row.daysAway)
             color: Look.mutedTextColor
             font: Look.smallFont
         }
-        QQC2.Label {
+        LookLabel {
             Layout.alignment: Qt.AlignRight
             visible: row.course.entries > 0
             text: qsTr("%n note(s)", "", row.course.entries)

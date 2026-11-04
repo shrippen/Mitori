@@ -19,6 +19,12 @@ QtObject {
     readonly property color ruleColor: ShinkiStyle.line
     readonly property color stageColor: ShinkiStyle.video
     readonly property color stageTextColor: ShinkiStyle.videoText
+    // The grounds of the areas a page names: the chip, the selected row, the scrim behind a
+    // sheet, the text on the accent.
+    readonly property color chipColor: ShinkiStyle.chip
+    readonly property color selectedColor: ShinkiStyle.selected
+    readonly property color scrimColor: ShinkiStyle.scrim
+    readonly property color onAccentColor: ShinkiStyle.textOnRed
     readonly property int borderWidth: ShinkiStyle.lineWidth
     // The keyboard focus frame: 2 px ink, apart from red (chosen).
     readonly property color focusColor: ShinkiStyle.ink
@@ -26,12 +32,25 @@ QtObject {
 
     readonly property font defaultFont: Qt.font({ family: ShinkiStyle.uiFamily, pixelSize: ShinkiStyle.uiSize })
     readonly property font smallFont: Qt.font({ family: ShinkiStyle.uiFamily, pixelSize: ShinkiStyle.smallSize })
+    // Running text in the book face (Crimson Pro), as the bible's reading text.
+    readonly property font readingFont: Qt.font({ family: ShinkiStyle.bookFamily, pixelSize: ShinkiStyle.readingSize })
+    // The title of a sheet: the book face in the bible's size for it.
+    readonly property font sheetTitleFont: Qt.font({ family: ShinkiStyle.bookFamily, weight: Font.DemiBold,
+                                                     pixelSize: ShinkiStyle.sheetTitleSize })
+    // The face of a column: the narrow one (PT Sans Narrow), as the bible's small caps lines.
+    readonly property font narrowFont: Qt.font({ family: ShinkiStyle.narrowFamily, pixelSize: ShinkiStyle.columnSize, bold: true })
+    // The letter spacing of a column, in em ("Sperrung 0,1 em").
+    readonly property real columnTracking: ShinkiStyle.columnTracking
 
     function unit(px) {
         return ShinkiStyle.unit(px)
     }
     function levelColor(level) {
         return ShinkiStyle.levelColor(level)
+    }
+    // The text on a level's ground: the ink the bible names for it.
+    function levelTextColor(level) {
+        return ShinkiStyle.levelTextColor(level)
     }
     // Figures in the bible's face with table figures (Shinki has no mono face).
     function monoFont(pointSize) {

@@ -135,7 +135,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        QQC2.Label {
+        LookLabel {
             objectName: "examHint"
             Layout.fillWidth: true
             text: qsTr("Only what is asked is shown (for Shinki Toho only the technique): no video, no time limit. At the end you rate each technique; that sets its rating and goes into the statistics.")

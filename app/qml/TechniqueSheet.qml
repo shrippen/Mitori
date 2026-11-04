@@ -29,10 +29,21 @@ Kirigami.Dialog {
     title: (entry.nr ? entry.nr + " · " : "") + (entry.title || "")
     readonly property int noteCount: Practice.notesRevision >= 0 && entry.id ? Practice.notes(entry.id).length : 0
     preferredWidth: Kirigami.Units.gridUnit * 24
+    // Under Shinki the sheet is a sheet from the bottom, the whole width (the clickdummy); under
+    // the other styles it stays the centred dialog.
+    readonly property bool shinkiSheet: Look.shinki
+    width: shinkiSheet && parent ? parent.width : preferredWidth
     // Centred without Kirigami's move on opening (y follows the opacity): with the Kamae exercise
     // the sheet grows while it fades in, and y ran into a binding loop.
-    y: parent ? Math.round((parent.height - height) / 2) : 0
-    padding: Kirigami.Units.largeSpacing
+    y: parent ? (shinkiSheet ? Math.round(parent.height - height) : Math.round((parent.height - height) / 2)) : 0
+    padding: shinkiSheet ? Look.unit(16) : Kirigami.Units.largeSpacing
+
+    // The panel: the style's ground, its frame, no rounding (the clickdummy's sheet).
+    background: Rectangle {
+        color: Look.backgroundColor
+        border.width: Look.borderWidth
+        border.color: Look.ruleColor
+    }
 
     // Not a content child: the dialog's scroll view sizes itself by its only child, the column.
     property Item lookScope: LookScope { target: sheet.contentItem }
@@ -55,9 +66,14 @@ Kirigami.Dialog {
         event.accepted = true
     }
 
-    // Kirigami's header, with the keys above.
+    // The header: Kirigami's, with the keys above; under Shinki the sheet's own (a grip, the name
+    // in the book face, its Japanese below it).
     header: Kirigami.DialogHeader {
         dialog: sheet
+        // Under Shinki the sheet has its own head (in the content): the grip, the name in the book
+        // face, its Japanese.
+        visible: !sheet.shinkiSheet
+        height: sheet.shinkiSheet ? 0 : implicitHeight
         contentItem: Kirigami.DialogHeaderTopContent {
             dialog: sheet
         }
@@ -73,8 +89,64 @@ Kirigami.Dialog {
         spacing: Kirigami.Units.smallSpacing
         Keys.onPressed: event => sheet.scrollKey(event)
 
+        // The head of the sheet under Shinki (the clickdummy): the grip, the name in the book face,
+        // its Japanese below it.
+        Item {
+            objectName: "shinkiSheetHead"
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: sheetHead.implicitHeight + Look.unit(16)
+            visible: sheet.shinkiSheet
+
+            // The keys above (Page Down, Home, End) scroll the sheet, as in Kirigami's header.
+            Keys.onPressed: event => sheet.scrollKey(event)
+
+            // The grip: the sheet is pulled up from the bottom.
+            Rectangle {
+                anchors.top: parent.top
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: Look.unit(40)
+                height: Look.unit(4)
+                color: Look.ruleColor
+            }
+
+            ColumnLayout {
+                id: sheetHead
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: Look.unit(8)
+                spacing: 0
+
+                LookLabel {
+                    Layout.fillWidth: true
+                    text: sheet.entry.title || ""
+                    font: Look.sheetTitleFont
+                    wrapMode: Text.Wrap
+                }
+                LookLabel {
+                    Layout.fillWidth: true
+                    visible: !!sheet.entry.jp
+                    text: sheet.entry.jp || ""
+                    font: Look.japaneseFont(Look.defaultFont)
+                    color: Look.mutedTextColor
+                }
+            }
+
+            LookToolButton {
+                objectName: "sheetClose"
+                anchors.top: parent.top
+                anchors.right: parent.right
+                icon.name: "window-close"
+                text: qsTr("Close")
+                display: QQC2.AbstractButton.IconOnly
+                onClicked: sheet.close()
+            }
+        }
+
         // Where it stands: attack, its addition, grade ("Shomen-uchi · Irimi · 5. Kyu").
-        QQC2.Label {
+        LookLabel {
             objectName: "sheetEyebrow"
             Layout.fillWidth: true
             text: [sheet.entry.attack, sheet.entry.attackExtra, sheet.entry.gradeName].filter(x => !!x).join(" · ")
@@ -88,7 +160,7 @@ Kirigami.Dialog {
             level: 2
             text: sheet.entry.jp || ""
         }
-        QQC2.Label {
+        LookLabel {
             Layout.fillWidth: true
             visible: !!sheet.entry.extra
             text: sheet.entry.extra || ""
@@ -99,7 +171,7 @@ Kirigami.Dialog {
             Layout.topMargin: Kirigami.Units.largeSpacing
             entry: sheet.entry.id || ""
         }
-        QQC2.Label {
+        LookLabel {
             objectName: "sheetLastNote"
             Layout.fillWidth: true
             // A photo or voice note without text is named as such.
