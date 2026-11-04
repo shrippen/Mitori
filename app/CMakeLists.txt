@@ -237,21 +237,34 @@ qt_add_resources(mitori_app "kante"
     FILES ${KANTE_FILES}
 )
 
-# Shinki (mitori-daten/shinki/, the club newspaper's style) as the QML module "Shinki" with its
-# fonts, and the Look layer's Shinki files (app/qml/Look/+shinki, chosen by the file selector
+# Shinki (mitori-daten/shinki/, the club newspaper's style) as a separate QML module "Shinki" with
+# its fonts, and the Look layer's Shinki files (app/qml/Look/+shinki, chosen by the file selector
 # "shinki" at start, Appearance). Only where Shinki can be chosen or is tested: its fonts are
-# 1.3 MB. The QML_Files and fonts come from the mitori-daten submodul.
+# 1.3 MB. The QML files and fonts come from the mitori-daten submodul; `app/qml/Look/+shinki/*.qml`
+# imports "Shinki", which the import scanner finds in the separate module target.
 if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
-    file(GLOB SHINKI_FILES RELATIVE ${MITORI_DATA_DIR}/shinki/qml/Shinki
-        CONFIGURE_DEPENDS ${MITORI_DATA_DIR}/shinki/qml/Shinki/*)
-    qt_add_resources(mitori_app "shinki"
-        PREFIX "/qt/qml/Shinki"
-        BASE ${MITORI_DATA_DIR}/shinki/qml/Shinki
-        FILES ${SHINKI_FILES}
+    qt_add_library(mitori_shinki STATIC)
+    file(GLOB SHINKI_QML_FILES CONFIGURE_DEPENDS
+        ${MITORI_DATA_DIR}/shinki/qml/Shinki/*.qml)
+    # qt_add_qml_module needs each file as a relative path or with QT_RESOURCE_ALIAS set; the
+    # files live in the submodul, so each gets its basename as alias.
+    foreach(file ${SHINKI_QML_FILES})
+        get_filename_component(_alias "${file}" NAME)
+        set_source_files_properties(${file}
+            PROPERTIES QT_RESOURCE_ALIAS "${_alias}")
+    endforeach()
+    qt_add_qml_module(mitori_shinki
+        URI Shinki
+        VERSION 1.0
+        QML_FILES ${SHINKI_QML_FILES}
     )
-    file(GLOB SHINKI_FONTS RELATIVE ${MITORI_DATA_DIR}/shinki/fonts
-        CONFIGURE_DEPENDS ${MITORI_DATA_DIR}/shinki/fonts/*.ttf)
-    qt_add_resources(mitori_app "shinki_fonts"
+    file(GLOB SHINKI_FONTS ${MITORI_DATA_DIR}/shinki/fonts/*.ttf)
+    foreach(font ${SHINKI_FONTS})
+        get_filename_component(_font_alias "${font}" NAME)
+        set_source_files_properties(${font}
+            PROPERTIES QT_RESOURCE_ALIAS "${_font_alias}")
+    endforeach()
+    qt_add_resources(mitori_shinki "shinki_fonts"
         PREFIX "/shinki/fonts"
         BASE ${MITORI_DATA_DIR}/shinki/fonts
         FILES ${SHINKI_FONTS}
@@ -261,6 +274,7 @@ if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
         PREFIX "/qt/qml/Mitori"
         FILES ${LOOK_SHINKI}
     )
+    target_link_libraries(mitori_app PRIVATE mitori_shinki)
     target_compile_definitions(mitori_app PRIVATE MITORI_SHINKI_FILES)
 endif()
 
