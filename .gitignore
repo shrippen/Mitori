@@ -14,6 +14,7 @@ entwuerfe/clickdummy/lehrgaenge.js
 dist/
 app/build*/
 build-app/
+build-app-migr/
 .flatpak-builder/
 **/__pycache__/
 *.pyc

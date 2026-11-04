@@ -57,14 +57,16 @@ Vorlage der Oberfläche: der Clickdummy `entwuerfe/clickdummy/index.html` (Telef
 
 ## Aufbau
 ```
-quellen/      Originale (Prüfungsordnungen, Listen des Sensei, PDFs von shinkiryu.de, Shinki News). Nur lesen.
-daten/*.yaml  die eine Quelle der Programmdaten       ← von Hand (Ausnahme: erzeugte Dateien, s. u.)
-tools/        daten.py prüft und erzeugt build/daten/ (Lua fürs Heft, mitori-daten.json für die App)
-              kommentare.py, lexikon.py lesen PDFs aus quellen/ nach daten/*.yaml (erzeugt)
-heft/         LaTeX-Heft (heft/build.sh), Renderer heft/lua/mitori-heft.lua
-app/          die App (CMake, C++, QML); app/qml/Kante ist eine Kopie aus ../Kante
-entwuerfe/    Konzept, Entscheidungen, Clickdummy (Vorlage, kein Produktcode)
-KORREKTUREN.md  offene und geklärte Fragen zu den Daten (IDs A-…, D-…, S-…)
+mitori-daten/   Submodul: daten/*.yaml die eine Quelle, tools/daten.py, KORREKTUREN.md
+  (Schwester-Repo, third_party/mitori-daten/)
+                kommentare.py, lexikon.py lesen PDFs aus quellen/ → daten/*.yaml (erzeugt)
+                shinki/ (Stil), shinki_fonts.py / shinki_style.py / shinki_chars.py
+                bundle.py (Video-Bundle-Encoder)
+app/           die App (CMake, C++, QML); app/qml/Kante ist eine Kopie aus ../Kante
+                Look-Schicht über Kante und Shinki aus dem Submodul
+entwuerfe/     Konzept, Entscheidungen, Clickdummy (Vorlage, kein Produktcode)
+mitori-heft/   Schwester-Repo: das gedruckte Heft (LuaLaTeX)
+KORREKTUREN.md  liegt im Submodul: offene und geklärte Fragen zu den Daten (IDs A-…, D-…, S-…)
 ```
 
 ## Schichten der App (nur zum direkten Nachbarn darunter)
@@ -78,12 +80,15 @@ store/          SQLite (Übungsprotokoll, Notizen, Einschätzungen)   catalog/  
 platform/       eine Implementierung je Plattform (Bildschirm wach, Helligkeit, Lautstärke, Dateien)
 ```
 - QML ruft nie SQLite, Dateien oder Netz direkt auf, immer über einen Service.
-- Programmdaten nur aus `mitori-daten.json` (Build aus `daten/`), nie im Code.
+- Programmdaten nur aus `mitori-daten.json` (Build aus `third_party/mitori-daten/` über `-DMITORI_DATA_DIR=…`), nie im Code.
+- Eine Datenversion wird durch das Submodul-Pin festgelegt. Neuer Datenstand: im Submodul-Repo PR, dann hier Submodul-Pointer erhöhen (PR). Heft- und App-Release hängen am selben Tag.
 
 ## Konventionen
-- Programmdaten nur in `daten/*.yaml` ändern, dann `python3 tools/daten.py`; offene Fragen als `[ID]`, jede ID
-  steht in `KORREKTUREN.md`. `daten/shinki-toho-kommentare.yaml` und `daten/lexikon.yaml` sind erzeugt
-  (`tools/kommentare.py`, `tools/lexikon.py`), nie von Hand bearbeiten.
+- Programmdaten nur in `third_party/mitori-daten/daten/*.yaml` ändern, dann
+  `python3 third_party/mitori-daten/tools/daten.py`; offene Fragen als `[ID]`, jede ID
+  steht in `third_party/mitori-daten/KORREKTUREN.md`.
+  `daten/shinki-toho-kommentare.yaml` und `daten/lexikon.yaml` sind erzeugt
+  (`third_party/mitori-daten/tools/kommentare.py`, `…/lexikon.py`), nie von Hand bearbeiten.
 - **Videos kommen nie ins Repo**, weder roh noch verschlüsselt, auch keine Ausschnitte. Ebenso keine
   Inhaltsschlüssel und Codes der Bundles (`bundle-geheim/` außerhalb des Repos).
 - Texte der App deutsch und englisch, nur über Übersetzungskataloge.
@@ -94,8 +99,9 @@ platform/       eine Implementierung je Plattform (Bildschirm wach, Helligkeit, 
   angeschlossenes Telefon, `.dev`-ID), bevor sie gepusht wird. Die CI läuft zusätzlich bei jedem Push.
 - Icons: nur Breeze-Namen; ein neuer Name kommt in `scripts/sync-icons.sh` (Android und AppImage haben kein
   Icon-Theme, die App bringt die verwendeten mit).
-- Videostellen: `tools/kapitel.py` liest die Kapitel der Videos (`../Mitori Videos`) nach `daten/videos.yaml`;
-  Einträge mit `pruefen: true` sind von Hand zu prüfen. Die CI kann das nicht (keine Videos im Repo).
+- Videostellen: `python3 third_party/mitori-daten/tools/kapitel.py` liest die Kapitel der Videos
+  (`../Mitori Videos`) nach `third_party/mitori-daten/daten/videos.yaml`; Einträge mit `pruefen: true`
+  sind von Hand zu prüfen. Die CI kann das nicht (keine Videos im Repo).
 - Oberflächentest `app/tests/qml/tst_ui.qml` (ctest `ui`): lädt jede Seite offscreen und legt Bilder nach
   `<build>/ui-shots`; mit `MITORI_VIDEOS` spielt er auch ein Video. Neue Seiten bekommen dort einen Fall.
 - Texte: Englisch im Code (`qsTr`), Deutsch in `app/i18n/mitori_de.ts` (`--target update_translations`); ein Test
@@ -104,7 +110,8 @@ platform/       eine Implementierung je Plattform (Bildschirm wach, Helligkeit, 
 
 ## Gelernte Fehler
 - LuaLaTeX: `require` findet keine lokalen Module, der Renderer lädt per `dofile`.
-- pdftotext entfernt Trennstriche am Zeilenende, auch in Komposita; `tools/kommentare.py` setzt sie wieder.
+- pdftotext entfernt Trennstriche am Zeilenende, auch in Komposita; `third_party/mitori-daten/tools/kommentare.py`
+  setzt sie wieder.
 - Browser spielen HEVC meist nicht; die Videos der DVDs sind HEVC (Android dekodiert in Hardware).
 
 ## Release rule

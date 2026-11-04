@@ -21,16 +21,24 @@ qt_standard_project_setup(REQUIRES 6.8)
 # Module output in <build>/qml: scripts/qmllint.sh finds the Mitori module there.
 set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
 
-# Programme data: tools/daten.py checks daten/*.yaml and writes mitori-daten.json into the build.
-set(MITORI_REPO ${CMAKE_CURRENT_SOURCE_DIR}/..)
+# Programme data: tools/daten.py (mitori-daten, Submodul) checks daten/*.yaml and writes
+# mitori-daten.json into the build. Override with -DMITORI_DATA_DIR=/path/to/mitori-daten
+# when the submodul lives elsewhere or you want a different data revision.
+# Default: ../third_party/mitori-daten (relative to the app/CMakeLists.txt).
+set(MITORI_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../third_party/mitori-daten"
+    CACHE PATH "Pfad zum mitori-daten-Repo (Submodul oder Checkout)")
+get_filename_component(MITORI_DATA_DIR "${MITORI_DATA_DIR}" ABSOLUTE)
+if(NOT EXISTS "${MITORI_DATA_DIR}/tools/daten.py")
+    message(FATAL_ERROR "mitori-daten nicht unter ${MITORI_DATA_DIR} (oder tools/daten.py fehlt); git submodule update --init laufen lassen")
+endif()
 set(MITORI_DATEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/daten)
 set(MITORI_DATEN_JSON ${MITORI_DATEN_DIR}/mitori-daten.json)
-file(GLOB MITORI_DATEN_YAML CONFIGURE_DEPENDS ${MITORI_REPO}/daten/*.yaml)
+file(GLOB MITORI_DATEN_YAML CONFIGURE_DEPENDS ${MITORI_DATA_DIR}/daten/*.yaml)
 add_custom_command(
     OUTPUT ${MITORI_DATEN_JSON}
-    COMMAND Python3::Interpreter ${MITORI_REPO}/tools/daten.py --ausgabe ${MITORI_DATEN_DIR}
-    DEPENDS ${MITORI_REPO}/tools/daten.py ${MITORI_REPO}/KORREKTUREN.md ${MITORI_DATEN_YAML}
-    COMMENT "Checking programme data (tools/daten.py)"
+    COMMAND Python3::Interpreter ${MITORI_DATA_DIR}/tools/daten.py --ausgabe ${MITORI_DATEN_DIR}
+    DEPENDS ${MITORI_DATA_DIR}/tools/daten.py ${MITORI_DATA_DIR}/KORREKTUREN.md ${MITORI_DATEN_YAML}
+    COMMENT "Checking programme data (mitori-daten/tools/daten.py)"
     VERBATIM
 )
 
@@ -229,20 +237,23 @@ qt_add_resources(mitori_app "kante"
     FILES ${KANTE_FILES}
 )
 
-# Shinki (shinki/, the club newspaper's style) as the QML module "Shinki" with its fonts, and the
-# Look layer's Shinki files (app/qml/Look/+shinki, chosen by the file selector "shinki" at start,
-# Appearance). Only where Shinki can be chosen or is tested: its fonts are 1.3 MB.
+# Shinki (mitori-daten/shinki/, the club newspaper's style) as the QML module "Shinki" with its
+# fonts, and the Look layer's Shinki files (app/qml/Look/+shinki, chosen by the file selector
+# "shinki" at start, Appearance). Only where Shinki can be chosen or is tested: its fonts are
+# 1.3 MB. The QML_Files and fonts come from the mitori-daten submodul.
 if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
-    file(GLOB SHINKI_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS ../shinki/qml/Shinki/*)
+    file(GLOB SHINKI_FILES RELATIVE ${MITORI_DATA_DIR}/shinki/qml/Shinki
+        CONFIGURE_DEPENDS ${MITORI_DATA_DIR}/shinki/qml/Shinki/*)
     qt_add_resources(mitori_app "shinki"
         PREFIX "/qt/qml/Shinki"
-        BASE ../shinki/qml/Shinki
+        BASE ${MITORI_DATA_DIR}/shinki/qml/Shinki
         FILES ${SHINKI_FILES}
     )
-    file(GLOB SHINKI_FONTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS ../shinki/fonts/*.ttf)
+    file(GLOB SHINKI_FONTS RELATIVE ${MITORI_DATA_DIR}/shinki/fonts
+        CONFIGURE_DEPENDS ${MITORI_DATA_DIR}/shinki/fonts/*.ttf)
     qt_add_resources(mitori_app "shinki_fonts"
         PREFIX "/shinki/fonts"
-        BASE ../shinki/fonts
+        BASE ${MITORI_DATA_DIR}/shinki/fonts
         FILES ${SHINKI_FONTS}
     )
     file(GLOB LOOK_SHINKI RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS qml/Look/+shinki/*.qml)

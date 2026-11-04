@@ -54,26 +54,32 @@ jobs:
             base-devel cmake ninja extra-cmake-modules qt6-declarative qt6-shadertools qt6-tools qt6-multimedia qt6-multimedia-ffmpeg qt6-speech kirigami
 
       - uses: actions/checkout@v7
+        with:
+          # mitori-daten lives as a submodul at third_party/mitori-daten/.
+          submodules: recursive
 
       # Release headings "## [X.Y.Z] — YYYY-MM-DD": a wrong one shows up here, not at the tag.
       - name: CHANGELOG.md headings
         run: scripts/release-notes.sh --check
 
-      - name: Programme data
-        run: python3 tools/daten.py
+      # The programme data lives in the mitori-daten submodul. Its own checks run there.
+      - name: Programme data (this revision)
+        run: python3 third_party/mitori-daten/tools/daten.py
 
-      - name: pytest
-        run: python3 -m pytest -q tests
-
-      # daten/shinki-toho-kommentare.yaml and daten/lexikon.yaml come from the PDFs in quellen/
-      # (poppler-data: the CJK tables pdftotext needs for the Japanese column of the lexicon):
-      # a hand edit or a changed tool without a new run shows up as a diff.
-      - name: Generated data up to date
+      - name: Programme data submodul checks
         run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          python3 tools/kommentare.py
-          python3 tools/lexikon.py
+          cd third_party/mitori-daten
+          python3 -m pytest -q tests
+          python3 tools/daten.py
+          # daten/shinki-toho-kommentare.yaml and daten/lexikon.yaml come from the PDFs in
+          # quellen/ (poppler-data: the CJK tables pdftotext needs for the Japanese column
+          # of the lexicon): a hand edit or a changed tool without a new run shows up here.
+          python3 tools/kommentare.py > /dev/null
+          python3 tools/lexikon.py > /dev/null
           git diff --exit-code -- daten/
+
+      - name: App pytest (icons, android)
+        run: python3 -m pytest -q tests
 
       - name: Build the app and its C++ tests
         run: |

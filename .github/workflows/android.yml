@@ -7,8 +7,7 @@ on:
     branches: [main]
     paths:
       - 'app/**'
-      - 'daten/**'
-      - 'tools/daten.py'
+      - 'third_party/mitori-daten/**'
       - 'scripts/build-android.sh'
       - 'scripts/build-kf6-android.sh'
       - '.github/actions/android-setup/**'
@@ -28,6 +27,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - uses: ./.github/actions/android-setup
 

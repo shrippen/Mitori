@@ -2,7 +2,7 @@
 # Build the Mitori APK: Qt via aqtinstall, KF6 (Kirigami) from source, Android NDK, Gradle.
 # Usage: ./scripts/build-android.sh [debug|release]   → dist/android/mitori-<mode>.apk
 # Release signing: MITORI_KEYSTORE_PATH, MITORI_KEYSTORE_PASSWORD, MITORI_KEY_ALIAS, MITORI_KEY_PASSWORD.
-# Needs python3 with PyYAML (tools/daten.py runs in the build).
+# Needs python3 with PyYAML (third_party/mitori-daten/tools/daten.py runs in the build).
 set -euo pipefail
 MODE="${1:-debug}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
