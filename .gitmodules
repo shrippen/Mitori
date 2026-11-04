@@ -1,0 +1,3 @@
+[submodule "third_party/mitori-daten"]
+	path = third_party/mitori-daten
+	url = file:///home/arian/Hacking/eigene/mitori-daten
