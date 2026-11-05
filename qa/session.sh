@@ -103,7 +103,7 @@ if [ -z "$win" ]; then
 fi
 w="${size%x*}"; h="${size#*x}"
 xdotool windowmove "$win" 0 0 windowsize "$win" "$w" "$h" windowfocus "$win"
-sleep 1
+sleep 2     # the new size has reached the layout
 
 if [ -z "$run" ]; then
     wait "$app_pid"
