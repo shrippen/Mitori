@@ -64,7 +64,7 @@ public:
     // How many entries were rated on each local day from `from` (UTC) on; an entry rated several
     // times on a day counts once (statistics: practice days).
     // `prefix` keeps a discipline's entries only ("aikido/").
-    QHash<QDate, int> practisedPerDay(const QDateTime &from, const QString &prefix = {}) const;
+    QHash<QDate, int> practisedPerDay(const QDateTime &from, const QString &prefix = {}, const QDateTime &to = {}) const;
     // The first rating's time (UTC), or invalid without one.
     QDateTime firstRating() const;
     // All ratings of one entry, oldest first.
@@ -108,7 +108,7 @@ public:
     bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result,
                const TableMerge::Watch &watch = {});
 
-    static constexpr int schemaVersion = 5;
+    static constexpr int schemaVersion = 6;
 
 private:
     bool migrate();

@@ -90,6 +90,7 @@ qt_add_qml_module(mitori_app
         qml/GradesPage.qml
         qml/grades.js
         qml/MediaView.qml
+        qml/MediaVoice.qml
         qml/MediaCompose.qml
         qml/CameraPage.qml
         qml/ConflictsPage.qml
@@ -544,6 +545,15 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME ui_shinki COMMAND tst_ui)
     set_tests_properties(ui_shinki PROPERTIES ENVIRONMENT
         "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material;MITORI_TEST_STYLE=shinki")
+    # The pages' times with five years of use (budgets catch what became slow).
+    qt_add_executable(tst_perf tests/tst_perf.cpp)
+    target_link_libraries(tst_perf PRIVATE mitori_app mitori_appplugin Qt6::QuickTest Qt6::Sql)
+    target_include_directories(tst_perf PRIVATE services store)
+    target_compile_definitions(tst_perf PRIVATE QUICK_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/perf"
+        PERF_DATA_DIR="${CMAKE_BINARY_DIR}/perf-data" MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
+    set_target_properties(tst_perf PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME perf COMMAND tst_perf)
+    set_tests_properties(perf PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material")
     # Both runs share the test data (ui-data): never at the same time.
     set_tests_properties(ui ui_shinki PROPERTIES RESOURCE_LOCK ui_data)
 endif()

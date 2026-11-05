@@ -64,6 +64,46 @@ private slots:
         QCOMPARE(model.rows().size(), 0);
     }
 
+    // Thousands of notes: a view gets one signal per run of rows, not one per row (with 3000 notes
+    // the first fill took seconds with the list attached).
+    void changesInRuns()
+    {
+        KeyedListModel model;
+        QAbstractItemModelTester tester(&model, QAbstractItemModelTester::FailureReportingMode::QtTest);
+        QVariantList all;
+        for (int i = 0; i < 100; ++i) {
+            all << row(QString::number(i), u"t"_s);
+        }
+        QSignalSpy removed(&model, &QAbstractItemModel::rowsRemoved);
+        QSignalSpy inserted(&model, &QAbstractItemModel::rowsInserted);
+        model.setRows(all);
+        QCOMPARE(inserted.size(), 1);
+        QCOMPARE(model.rowCount(), 100);
+
+        // A filter: gaps go in runs.
+        QVariantList some = all.mid(10, 10) + all.mid(50, 10);
+        model.setRows(some);
+        QCOMPARE(removed.size(), 3);
+        QCOMPARE(uids(model).first(), u"10"_s);
+        QCOMPARE(model.rowCount(), 20);
+
+        // And back.
+        inserted.clear();
+        model.setRows(all);
+        QCOMPARE(inserted.size(), 3);
+        QCOMPARE(uids(model).size(), 100);
+        for (int i = 0; i < 100; ++i) {
+            QCOMPARE(uids(model).at(i), QString::number(i));
+        }
+
+        // A row moved: inserted again, the old place goes.
+        QVariantList moved = all;
+        moved.move(5, 0);
+        model.setRows(moved);
+        QCOMPARE(uids(model).first(), u"5"_s);
+        QCOMPARE(model.rowCount(), 100);
+    }
+
     void roleNames()
     {
         KeyedListModel model;
