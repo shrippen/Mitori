@@ -2912,6 +2912,42 @@ TestCase {
         verify(Courses.remove(course))
     }
 
+    // Found by the QA round of 5 Nov 2026 (qa/PERSONAS.md).
+    // What the data knows and the screen left out: Zanshin, open questions, proposals, a grade's
+    // meaning and waiting time, the Suburi texts (QA round P5; the booklet p. 44 f.).
+    function test_8p_data_on_the_screen() {
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        const page = push("ProgrammePage")
+        const form = page.rows.find(r => r.id === "shinkitoho/odachi/5")
+        verify(form.open, "S-02 is an open question")
+        page.open(form)
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        const facts = findChild(sheet.contentItem, "sheetFacts")
+        verify(facts.visible)
+        verify(allChildren(facts).some(c => c.text === "Jôdan"), "Zanshin")
+        verify(findChild(sheet.contentItem, "sheetOpenQuestion").visible)
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+        const suburi = page.rows.find(r => r.id === "shinkitoho/suburi/1")
+        verify(suburi.text.length > 10)
+        const info = findChild(page, "gradeInfo")
+        verify(info.visible)
+        verify(info.text.indexOf("Erste Überlieferung") >= 0, info.text)
+        verify(info.text.indexOf("2 Jahre") >= 0, info.text)
+        verify(!findChild(page, "kanjiProposal").visible)
+        window.pageStack.pop()
+        Programme.discipline = "daitoryu"
+        const daito = push("ProgrammePage")
+        verify(findChild(daito, "kanjiProposal").visible)
+        verify(!findChild(daito, "gradeInfo").visible)
+        // The lens in the head, as the clickdummy has it.
+        verify(daito.actions.some(a => a.icon.name === "search"))
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
+    }
+
     function test_8q_search_row_without_attack() {
         const page = push("SearchPage")
         const field = findChild(page, "searchField")

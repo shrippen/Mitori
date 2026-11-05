@@ -37,6 +37,8 @@ QVariantMap entryRow(const QVariantMap &item, const QString &title, const QStrin
     r[QStringLiteral("video")] = item.value(QStringLiteral("video"));
     r[QStringLiteral("comment")] = item.value(QStringLiteral("kommentar"));
     r[QStringLiteral("steps")] = steps(item);
+    r[QStringLiteral("text")] = item.value(QStringLiteral("text"));
+    r[QStringLiteral("open")] = !item.value(QStringLiteral("fragen")).toList().isEmpty();
     return r;
 }
 
@@ -345,6 +347,10 @@ QVariantList Programme::shinkiTohoEntries(const QVariantMap &d, const QString &g
             continue;
         }
         QVariantMap r = entryRow(form, name(form), kanji(form));
+        r[QStringLiteral("zanshin")] = form.value(QStringLiteral("zanshin"));
+        r[QStringLiteral("uchidachi")] = form.value(QStringLiteral("uchidachi"));
+        r[QStringLiteral("shidachi")] = form.value(QStringLiteral("shidachi"));
+        r[QStringLiteral("treffer")] = form.value(QStringLiteral("treffer"));
         r[QStringLiteral("extra")] = QStringLiteral("%1 · %2 → %3").arg(form.value(QStringLiteral("uchidachi")).toString(),
                                                                       form.value(QStringLiteral("shidachi")).toString(),
                                                                       form.value(QStringLiteral("treffer")).toString());

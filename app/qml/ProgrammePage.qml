@@ -40,6 +40,11 @@ Kirigami.Page {
 
     actions: [
         Kirigami.Action {
+            icon.name: "search"
+            text: qsTr("Search")
+            onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("SearchPage.qml"))
+        },
+        Kirigami.Action {
             icon.name: "view-list-details"
             text: qsTr("All notes")
             onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("AllNotesPage.qml"))
@@ -115,6 +120,28 @@ Kirigami.Page {
                     width: ListView.view.width
                     spacing: Kirigami.Units.smallSpacing
 
+                    // A grade's meaning, content and waiting time (Shinki Toho has them).
+                    LookLabel {
+                        objectName: "gradeInfo"
+                        Layout.fillWidth: true
+                        Layout.margins: Kirigami.Units.smallSpacing
+                        readonly property var grade: page.grades.find(g => g.id === page.grade) || ({})
+                        visible: !!grade.bedeutung
+                        text: [grade.bedeutung, grade.inhalt, grade.abstand ? qsTr("Waiting time: %1").arg(grade.abstand) : ""]
+                              .filter(x => x).join(" · ")
+                        color: Look.mutedTextColor
+                        wrapMode: Text.Wrap
+                    }
+                    LookLabel {
+                        objectName: "kanjiProposal"
+                        Layout.fillWidth: true
+                        Layout.margins: Kirigami.Units.smallSpacing
+                        visible: !!(Programme.disciplines.find(d => d.id === page.discipline) || {}).kanji_vorschlag
+                        text: qsTr("The Japanese writing of these names is a proposal, not yet confirmed.")
+                        color: Look.mutedTextColor
+                        font: Look.smallFont
+                        wrapMode: Text.Wrap
+                    }
                     GradeStand {
                         objectName: "gradeStand"
                         Layout.fillWidth: true
@@ -201,7 +228,7 @@ Kirigami.Page {
 
                             leadingText: entry.nr ? String(entry.nr) : ""
                             text: entry.title + (entry.kind === "entry" && entry.extra && !entry.nr ? " (" + entry.extra + ")" : "")
-                            subtitle: [entry.jp, entry.nr ? entry.extra : (entry.kind === "info" ? entry.text : "")].filter(x => x).join(" · ")
+                            subtitle: [entry.jp, entry.nr ? entry.extra : entry.text].filter(x => x).join(" · ")
                             selected: entry.id === page.lastId
                             onClicked: page.open(entry)
                             Keys.onTabPressed: event => page.tabRow(rowLoader.index, 1, event)

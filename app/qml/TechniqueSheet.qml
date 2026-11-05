@@ -166,8 +166,42 @@ Kirigami.Dialog {
         }
         LookLabel {
             Layout.fillWidth: true
-            visible: !!sheet.entry.extra
+            visible: !!sheet.entry.extra && !sheet.entry.uchidachi
             text: sheet.entry.extra || ""
+            wrapMode: Text.Wrap
+        }
+        // A form: who stands how, what is hit and how it ends (the booklet's columns).
+        GridLayout {
+            objectName: "sheetFacts"
+            Layout.fillWidth: true
+            visible: !!sheet.entry.uchidachi
+            columns: 2
+            columnSpacing: Kirigami.Units.largeSpacing
+            rowSpacing: Look.unit(2)
+
+            Repeater {
+                model: !sheet.entry.uchidachi ? [] : [
+                    qsTr("Uchidachi"), sheet.entry.uchidachi, qsTr("Shidachi"), sheet.entry.shidachi,
+                    qsTr("Hit"), sheet.entry.treffer, qsTr("Zanshin"), sheet.entry.zanshin]
+
+                LookLabel {
+                    required property string modelData
+                    required property int index
+
+                    Layout.fillWidth: index % 2 === 1
+                    text: modelData
+                    color: index % 2 === 0 ? Look.mutedTextColor : Look.textColor
+                    wrapMode: Text.Wrap
+                }
+            }
+        }
+        LookLabel {
+            objectName: "sheetOpenQuestion"
+            Layout.fillWidth: true
+            visible: !!sheet.entry.open
+            text: qsTr("Open question: its name or writing is not yet confirmed.")
+            color: Look.mutedTextColor
+            font: Look.smallFont
             wrapMode: Text.Wrap
         }
         RatingRow {
