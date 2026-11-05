@@ -50,7 +50,7 @@ jobs:
 
       - name: Install Python, Qt, Kirigami, build tools
         run: |
-          pacman -Syu --noconfirm --needed git python python-yaml python-pytest python-pynacl python-fonttools poppler poppler-data \
+          pacman -Syu --noconfirm --needed git python python-yaml python-pytest python-pynacl poppler poppler-data \
             base-devel cmake ninja extra-cmake-modules qt6-declarative qt6-shadertools qt6-tools qt6-multimedia qt6-multimedia-ffmpeg qt6-speech kirigami
 
       - uses: actions/checkout@v7
@@ -78,7 +78,17 @@ jobs:
           python3 tools/lexikon.py > /dev/null
           git diff --exit-code -- daten/
 
-      - name: App pytest (icons, android)
+      # On main the pin is a released data state: the tag v<STAND> of mitori-daten is this commit.
+      # Pull requests may pin a commit that is not tagged yet (the tag comes after the merge there).
+      - name: Data pin is a tag
+        if: github.ref == 'refs/heads/main'
+        working-directory: third_party/mitori-daten
+        run: |
+          tag="v$(cat STAND)"
+          tagged=$(git ls-remote --tags origin "refs/tags/$tag" "refs/tags/$tag^{}" | tail -1 | cut -f1)
+          [ "$tagged" = "$(git rev-parse HEAD)" ] || { echo "::error::mitori-daten is pinned to $(git rev-parse --short HEAD), not to its tag $tag"; exit 1; }
+
+      - name: App pytest (Shinki, i18n, icons, android)
         run: python3 -m pytest -q tests
 
       - name: Build the app and its C++ tests

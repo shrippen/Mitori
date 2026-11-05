@@ -1,3 +1,5 @@
+#include <QFile>
+#include <QRegularExpression>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -19,6 +21,22 @@ private slots:
             QVERIFY(!map.value(QStringLiteral("grade")).toList().isEmpty());
         }
         QCOMPARE(ids, (QStringList{QStringLiteral("aikido"), QStringLiteral("daitoryu"), QStringLiteral("shinkitoho")}));
+    }
+
+    void dataVersionIsThere()
+    {
+        Catalog catalog;
+        QVERIFY(catalog.load(QStringLiteral(MITORI_DATEN_JSON)));
+        QVERIFY(QRegularExpression(QStringLiteral("^\\d{4}\\.\\d{1,2}\\.\\d+$")).match(catalog.dataVersion()).hasMatch());
+
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("alt.json"));
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(R"({"format": 1, "disziplinen": [{"id": "aikido"}]})");
+        file.close();
+        QVERIFY(!catalog.load(path));
+        QVERIFY(catalog.errorString().contains(QLatin1String("data version")));
     }
 
     void loadsGlossary()

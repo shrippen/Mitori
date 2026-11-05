@@ -176,6 +176,11 @@
         <translation>Über Mitori</translation>
     </message>
     <message>
+        <location filename="../qml/AppearancePage.qml" line="74"/>
+        <source>Programme data %1</source>
+        <translation>Programmdaten %1</translation>
+    </message>
+    <message>
         <location filename="../qml/AppearancePage.qml" line="69"/>
         <source>Mitori %1. The exam programmes of Aikido Shinki Rengo, Daitoryu and Itto-den Shinki Toho, with the exam videos of the DVDs.</source>
         <translation>Mitori %1. Die Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho, mit den Prüfungsvideos der DVDs.</translation>

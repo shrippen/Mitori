@@ -68,6 +68,13 @@ Kirigami.ScrollablePage {
             wrapMode: Text.Wrap
             text: qsTr("Mitori %1. The exam programmes of Aikido Shinki Rengo, Daitoryu and Itto-den Shinki Toho, with the exam videos of the DVDs.").arg(Appearance.version)
         }
+        LookLabel {
+            objectName: "dataVersion"
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+            color: Look.mutedTextColor
+            text: qsTr("Programme data %1").arg(Programme.dataVersion)
+        }
         Repeater {
             model: Programme.disciplines
 

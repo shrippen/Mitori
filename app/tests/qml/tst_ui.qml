@@ -130,6 +130,7 @@ TestCase {
         verify(hint.visible)
         verify(findChild(page, "aboutText").text.indexOf(Appearance.version) >= 0)
         verify(Appearance.version !== "")
+        verify(/^\D*\d{4}\.\d{1,2}\.\d+$/.test(findChild(page, "dataVersion").text))
         shot("0b-appearance")
         language.activated(Appearance.Language.System)
         verify(!hint.visible)

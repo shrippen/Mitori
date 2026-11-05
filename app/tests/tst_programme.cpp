@@ -33,7 +33,7 @@ QStringList ids(const QVariantList &rows)
 
 // A small discipline for the technique map: a kata without attack, one group title in kyu and dan
 // grades, a variant of a combination in a later grade, an attack with and without addition, theory.
-const char *const kMapCatalog = R"({"format": 1, "disziplinen": [{"id": "test", "kurzname": "Test",
+const char *const kMapCatalog = R"({"format": 1, "stand": "2026.11.0", "disziplinen": [{"id": "test", "kurzname": "Test",
   "grade": [{"id": "k5", "name": "5. Kyu"}, {"id": "k4", "name": "4. Kyu"}, {"id": "d1", "name": "1. Dan"}],
   "gruppen": [{"id": "kyu/kata", "titel": "Kata", "art": "ohne_angriff"},
               {"id": "kyu/tachi", "titel": "Tachi-waza", "jp": "立技", "art": "angriffe"},

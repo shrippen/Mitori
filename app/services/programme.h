@@ -15,6 +15,7 @@ class Programme : public QObject
     QML_SINGLETON
     Q_PROPERTY(QVariantList disciplines READ disciplines CONSTANT)
     Q_PROPERTY(QString errorString READ errorString CONSTANT)
+    Q_PROPERTY(QString dataVersion READ dataVersion CONSTANT)
     // The discipline chosen last (start menu tile, programme page); kept across starts.
     Q_PROPERTY(QString discipline READ discipline WRITE setDiscipline NOTIFY selectionChanged)
 
@@ -25,6 +26,7 @@ public:
 
     QVariantList disciplines() const { return m_catalog.disciplines(); }
     QString errorString() const { return m_catalog.errorString(); }
+    QString dataVersion() const { return m_catalog.dataVersion(); }
 
     QString discipline() const;
     void setDiscipline(const QString &discipline);
