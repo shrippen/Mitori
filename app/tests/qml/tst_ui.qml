@@ -327,6 +327,11 @@ TestCase {
         verify(notes.text.indexOf("(1)") >= 0, notes.text)
         const lastNote = findChild(sheet.contentItem, "sheetLastNote")
         verify(lastNote.text.indexOf(new Date().toLocaleDateString(Qt.locale(), Locale.ShortFormat)) >= 0, lastNote.text)
+        // The sheet grows with what it shows (a new last note): the buttons stay in it, unscrolled.
+        wait(500)       // the layout takes the new row a frame later
+        verify(sheet.flickable.contentHeight <= sheet.flickable.height + 0.5,
+               "content " + sheet.flickable.contentHeight + " of " + sheet.flickable.height)
+        verify(sheet.y + sheet.height <= sheet.parent.height + 0.5)
         shot("2b-sheet", true)
         for (const n of Practice.notes(entry.id)) {
             Practice.deleteNote(n.uid)
@@ -837,6 +842,70 @@ TestCase {
         window.height = height
         window.back()      // as the head does (Kirigami's pop() may keep the page, PlayerPage.leave)
         tryCompare(window.pageStack, "depth", 1)
+    }
+
+    // What the eye sees and no behaviour test would: symbols in the middle of their buttons, the
+    // bars with their margins, no bar without anything to scroll, hints inside their fields.
+    function test_4u_shapes() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        if (player.hasVideo) {
+            const bar = findChild(player, "transportBar")
+            const buttons = allChildren(bar).filter(c => c.visible && c.width > 0 && c.checkable !== undefined
+                                                    && c.display === 0)
+            verify(buttons.length > 0 || !uiShinki, "the bar's symbol buttons")
+            for (const button of buttons) {
+                for (const icon of allChildren(button).filter(c => c.visible && c.width > 0 && /Icon/.test(c.toString()))) {
+                    const centre = icon.mapToItem(button, icon.width / 2, icon.height / 2)
+                    verify(Math.abs(centre.x - button.width / 2) < 1.5, button.text + " dx " + (centre.x - button.width / 2))
+                    verify(Math.abs(centre.y - button.height / 2) < 1.5, button.text + " dy " + (centre.y - button.height / 2))
+                }
+            }
+        }
+        window.back()
+        tryCompare(window.pageStack, "depth", 1)
+
+        const notes = push("NotesPage", { entry: rows[0] })
+        const compose = findChild(notes, "compose")
+        tryVerify(() => compose.mapToItem(notes, 0, 0).x >= Look.unit(8) - 0.5, 2000, "the field's margin")
+        const add = allChildren(compose.parent).filter(c => c.text === qsTr("Add"))[0]
+        const right = notes.width - add.mapToItem(notes, add.width, 0).x
+        verify(right >= Look.unit(8) - 0.5, "the button's margin: " + right)
+        window.pageStack.pop()
+
+        const all = push("AllNotesPage")
+        const scroll = findChild(all, "lookScrollBar")
+        if (scroll.size >= 1) {
+            verify(!scroll.contentItem.visible, "nothing to scroll: no bar")
+        }
+        window.pageStack.pop()
+
+        const search = push("SearchPage")
+        const field = findChild(search, "searchField")
+        tryVerify(() => field.activeFocus)
+        const hint = findChild(field, "fieldHint")
+        verify(hint.visible, "the hint in the empty field with the focus")
+        verify(hint.y >= 0 && hint.y + hint.height <= field.height + 0.5, "inside the field")
+        compare(field.placeholderText, "", "Material would float it above the field")
+        field.text = "x"
+        verify(!hint.visible)
+        window.pageStack.pop()
+
+        const settings = push("SettingsPage")
+        const label = allChildren(settings).filter(c => c.text === qsTr("Video folder") && c.font !== undefined)[0]
+        compare(label.font.capitalization, Font.AllUppercase)
+        window.pageStack.pop()
+
+        // Rows without a video keep the place of the button: the dots stay in line.
+        const programme = push("ProgrammePage")
+        Programme.discipline = "shinkitoho"
+        wait(500)
+        const dots = allChildren(programme).filter(c => c.visible && c.width > 0 && c.names !== undefined && c.value !== undefined)
+        verify(dots.length > 3, "dots: " + dots.length)
+        const edges = new Set(dots.map(d => Math.round(d.mapToItem(programme, d.width, 0).x)))
+        compare(edges.size, 1, "the dots end in line: " + Array.from(edges))
+        Programme.discipline = "aikido"
+        window.pageStack.pop()
     }
 
     function playerAt(index) {

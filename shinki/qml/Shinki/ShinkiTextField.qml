@@ -7,6 +7,9 @@ QQC2.TextField {
     id: field
 
     property bool invalid: false
+    // What to type, inside the field. Not placeholderText: Material floats that above the field
+    // when it has the focus, cut off at the edge of a bar and across the frame.
+    property string hint: ""
 
     color: ShinkiStyle.ink
     placeholderTextColor: ShinkiStyle.inkMuted
@@ -16,6 +19,18 @@ QQC2.TextField {
     font.pixelSize: ShinkiStyle.readingSize
     padding: ShinkiStyle.gridSpace * 2
     implicitHeight: Math.max(ShinkiStyle.rowMinSpace, contentHeight + topPadding + bottomPadding)
+
+    QQC2.Label {
+        objectName: "fieldHint"
+        x: field.leftPadding
+        anchors.verticalCenter: parent.verticalCenter
+        width: field.availableWidth
+        visible: field.hint !== "" && field.text === "" && field.preeditText === ""
+        text: field.hint
+        elide: Text.ElideRight
+        color: field.placeholderTextColor
+        font: field.font
+    }
 
     background: Rectangle {
         implicitWidth: ShinkiStyle.unit(170)        // a field easy to hit, also when empty

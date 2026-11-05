@@ -21,22 +21,30 @@ QQC2.ToolButton {
         border.width: button.visualFocus ? ShinkiStyle.focusWidth : 0
         border.color: ShinkiStyle.ink
     }
-    contentItem: Row {
-        spacing: ShinkiStyle.gridSpace
+    contentItem: Item {
+        implicitWidth: row.implicitWidth
+        implicitHeight: row.implicitHeight
 
-        ShinkiIcon {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: button.icon.name !== ""
-            name: button.icon.name
-            color: button.checked ? ShinkiStyle.textOnRed : ShinkiStyle.ink
-        }
-        QQC2.Label {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: button.display !== QQC2.AbstractButton.IconOnly && button.text !== ""
-            text: button.text
-            color: button.checked ? ShinkiStyle.textOnRed : ShinkiStyle.ink
-            font.family: ShinkiStyle.uiFamily
-            font.pixelSize: ShinkiStyle.uiSize
+        Row {
+            id: row
+
+            anchors.centerIn: parent
+            spacing: ShinkiStyle.gridSpace
+
+            ShinkiIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: button.icon.name !== ""
+                name: button.icon.name
+                color: button.checked ? ShinkiStyle.textOnRed : ShinkiStyle.ink
+            }
+            QQC2.Label {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: button.display !== QQC2.AbstractButton.IconOnly && button.text !== ""
+                text: button.text
+                color: button.checked ? ShinkiStyle.textOnRed : ShinkiStyle.ink
+                font.family: ShinkiStyle.uiFamily
+                font.pixelSize: ShinkiStyle.uiSize
+            }
         }
     }
 }

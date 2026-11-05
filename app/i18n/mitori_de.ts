@@ -1814,8 +1814,8 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="28"/>
-        <source>Appearance:</source>
-        <translation>Darstellung:</translation>
+        <source>Appearance</source>
+        <translation>Darstellung</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="32"/>
@@ -1824,8 +1824,8 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="37"/>
-        <source>Exam videos:</source>
-        <translation>Prüfungsvideos:</translation>
+        <source>Exam videos</source>
+        <translation>Prüfungsvideos</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="41"/>
@@ -1834,8 +1834,8 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="46"/>
-        <source>Video folder:</source>
-        <translation>Videoordner:</translation>
+        <source>Video folder</source>
+        <translation>Videoordner</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="60"/>
@@ -1854,8 +1854,8 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="69"/>
-        <source>Backup:</source>
-        <translation>Sicherung:</translation>
+        <source>Backup</source>
+        <translation>Sicherung</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="73"/>
@@ -1879,8 +1879,8 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="118"/>
-        <source>WebDAV / Nextcloud:</source>
-        <translation>WebDAV / Nextcloud:</translation>
+        <source>WebDAV / Nextcloud</source>
+        <translation>WebDAV / Nextcloud</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="121"/>
@@ -1889,18 +1889,18 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="127"/>
-        <source>Folder on the server:</source>
-        <translation>Ordner auf dem Server:</translation>
+        <source>Folder on the server</source>
+        <translation>Ordner auf dem Server</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="141"/>
-        <source>User:</source>
-        <translation>Benutzer:</translation>
+        <source>User</source>
+        <translation>Benutzer</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="153"/>
-        <source>App password:</source>
-        <translation>App-Passwort:</translation>
+        <source>App password</source>
+        <translation>App-Passwort</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="160"/>
@@ -1909,8 +1909,8 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="165"/>
-        <source>This device:</source>
-        <translation>Dieses Gerät:</translation>
+        <source>This device</source>
+        <translation>Dieses Gerät</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="177"/>

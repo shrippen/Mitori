@@ -269,7 +269,7 @@ Item {
 
                     LookLabel {
                         objectName: "bandTitle"
-                        Layout.maximumWidth: parent.width * 0.75
+                        Layout.maximumWidth: page.current.jp ? parent.width * 0.75 : parent.width
                         elide: Text.ElideRight
                         text: page.titleText
                         color: Look.stageTextColor
@@ -841,13 +841,14 @@ Item {
 
         LookSliderSkin { control: railTimeline }
 
-        // The way still to play, on the dark ground: Kante's track is too dark to see there.
+        // The way still to play, on the dark ground: Kante's track is too dark to see there. On
+        // top of that track, from the handle on (the played part keeps its colour).
         Rectangle {
-            z: -1
             visible: !Look.shinki
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-            height: Look.unit(3)
+            x: railTimeline.leftPadding + railTimeline.visualPosition * railTimeline.availableWidth
+            width: (1 - railTimeline.visualPosition) * railTimeline.availableWidth
+            height: Look.unit(4)
             color: Look.stageTextColor
             opacity: 0.3
         }

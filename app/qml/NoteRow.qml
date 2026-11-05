@@ -83,7 +83,7 @@ ColumnLayout {
 
             objectName: "noteField"
             Layout.fillWidth: true
-            placeholderText: qsTr("Note for today …")
+            hint: qsTr("Note for today …")
             Accessible.name: qsTr("New note")
             onAccepted: add()
             onTextChanged: {

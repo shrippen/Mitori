@@ -54,7 +54,7 @@ Kirigami.ScrollablePage {
 
                     objectName: "courseTitleField"
                     Layout.fillWidth: true
-                    placeholderText: qsTr("Training with a guest teacher")
+                    hint: qsTr("Training with a guest teacher")
                 }
             }
             LookFormRow {
@@ -88,7 +88,7 @@ Kirigami.ScrollablePage {
 
                     objectName: "coursePlace"
                     Layout.fillWidth: true
-                    placeholderText: qsTr("Dojo, town")
+                    hint: qsTr("Dojo, town")
                 }
             }
             LookFormRow {
@@ -98,7 +98,7 @@ Kirigami.ScrollablePage {
 
                     objectName: "courseTeacher"
                     Layout.fillWidth: true
-                    placeholderText: qsTr("Name")
+                    hint: qsTr("Name")
                     onAccepted: page.make()
                 }
             }

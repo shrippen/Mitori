@@ -51,7 +51,7 @@ Kirigami.ScrollablePage {
 
             objectName: "searchField"
             anchors.fill: parent
-            placeholderText: qsTr("Kiriotoshi, 切り落とし or Hüftwurf")
+            hint: qsTr("Kiriotoshi, 切り落とし or Hüftwurf")
             Accessible.name: qsTr("Search")
             Component.onCompleted: forceActiveFocus()
             onTextChanged: pause.restart()
