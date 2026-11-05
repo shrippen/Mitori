@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Controls.impl
-import QtQuick.Layouts
 
 // A switch as a button (the player's sound and the screen): a flat field with a frame, the frame
 // and the word in the accent while it is on (the clickdummy's `.toggles`). No rounding, no
@@ -31,24 +30,31 @@ QQC2.Button {
                : toggle.checked ? Look.accentColor : Look.ruleColor
     }
 
-    contentItem: RowLayout {
-        spacing: Look.unit(6)
+    contentItem: Item {
+        implicitWidth: row.implicitWidth
+        implicitHeight: row.implicitHeight
 
-        IconImage {
-            Layout.preferredWidth: Look.unit(16)
-            Layout.preferredHeight: Look.unit(16)
-            visible: toggle.icon.name !== ""
-            name: toggle.icon.name
-            color: toggle.ink
-        }
-        LookLabel {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            text: toggle.text
-            color: toggle.ink
-            font: Look.defaultFont
+        Row {
+            id: row
+
+            anchors.centerIn: parent
+            spacing: Look.unit(6)
+
+            IconImage {
+                anchors.verticalCenter: parent.verticalCenter
+                width: Look.unit(16)
+                height: Look.unit(16)
+                visible: toggle.icon.name !== ""
+                name: toggle.icon.name
+                color: toggle.ink
+            }
+            LookLabel {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: toggle.text !== ""
+                text: toggle.text
+                color: toggle.ink
+                font: Look.defaultFont
+            }
         }
     }
 }

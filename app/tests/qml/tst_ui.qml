@@ -807,7 +807,7 @@ TestCase {
         window.height = 360
         tryVerify(() => findChild(page, "railTime").visible, 2000)
         verify(!findChild(page, "bandTitle").visible)
-        verify(findChild(page, "railLoop").width >= findChild(page, "railLoop").implicitContentWidth)
+        compare(findChild(page, "railLoop").text, "", "only the symbol on the rail")
         window.width = 1280
         window.height = 800
         tryVerify(() => findChild(page, "bandTitle").visible, 2000, "bands")
@@ -818,6 +818,8 @@ TestCase {
         verify(!findChild(page, "railTime").visible)
         verify(findChild(page, "bandTime").visible)
         verify(findChild(page, "bandTitle").text.indexOf(rows[0].title) >= 0)
+        compare(findChild(page, "railLoop").icon.name, "media-playlist-repeat")
+        verify(findChild(page, "railLoop").text !== "", "the word in the row")
         const stage = findChild(page, "stage")
         const stageTop = stage.mapToItem(page, 0, 0).y
         const stageBottom = stageTop + stage.height

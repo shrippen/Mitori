@@ -1485,6 +1485,16 @@
         <translation>Tempo</translation>
     </message>
     <message>
+        <location filename="../qml/PlayerView.qml" line="490"/>
+        <source>1 frame</source>
+        <translation>1 Bild</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerView.qml" line="490"/>
+        <source>Frame</source>
+        <translation>Bild</translation>
+    </message>
+    <message>
         <location filename="../qml/PlayerView.qml" line="361"/>
         <location filename="../qml/PlayerView.qml" line="550"/>
         <source>Frame back</source>

@@ -11,7 +11,7 @@ import Mitori
 // The player (clickdummy "Player" and "Querformat"): the technique's chapter of the exam video,
 // without the black bars, in a loop by default; the style's transport bar with four tempi (sound off
 // below 100 %) and single frames; double tap left/right = 2 s back/on. Landscape: the controls in
-// a column on the right. PlayerPage shows it as a page; on a tablet the programme shows it beside
+// a column on the right, or around the picture when there is room. PlayerPage shows it as a page; on a tablet the programme shows it beside
 // the list (`compact`: picture above the controls, no Back). Swipe up/down on the left half of
 // the picture: the screen's brightness, on the right half: the volume (Levels); the picture's
 // height is the whole range. Leaving the player gives the screen its brightness back.
@@ -204,9 +204,22 @@ Item {
     }
     component RailButton: LookToolButton {
         property string symbol
+        property string caption
 
         display: QQC2.AbstractButton.IconOnly
-        StageIcon { name: parent.symbol }
+        StageIcon {
+            anchors.verticalCenterOffset: parent.caption !== "" ? -Look.unit(6) : 0
+            name: parent.symbol
+        }
+        LookLabel {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            visible: parent.caption !== ""
+            text: parent.caption
+            color: Look.stageTextColor
+            opacity: 0.7
+            font: Look.smallFont
+        }
     }
 
     // Sideways everything stands on the dark ground (the clickdummy's `.qrail`, `.qbands`).
@@ -250,13 +263,27 @@ Item {
                     color: Look.stageTextColor
                     opacity: 0.7
                 }
-                LookLabel {
-                    objectName: "bandTitle"
+                RowLayout {
                     Layout.fillWidth: true
-                    elide: Text.ElideRight
-                    text: page.titleText + (page.current.jp ? "  " + page.current.jp : "")
-                    color: Look.stageTextColor
-                    font: Look.sheetTitleFont
+                    spacing: Look.unit(10)
+
+                    LookLabel {
+                        objectName: "bandTitle"
+                        Layout.maximumWidth: parent.width * 0.75
+                        elide: Text.ElideRight
+                        text: page.titleText
+                        color: Look.stageTextColor
+                        font: Look.sheetTitleFont
+                    }
+                    LookLabel {
+                        objectName: "bandJapanese"
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        text: page.current.jp || ""
+                        font: Look.japaneseFont(Look.defaultFont)
+                        color: Look.stageTextColor
+                        opacity: 0.7
+                    }
                 }
             }
         }
@@ -464,6 +491,7 @@ Item {
             }
             RailButton {
                 objectName: "railFrameBack"
+                caption: page.bands ? qsTr("1 frame") : qsTr("Frame")
                 Layout.alignment: Qt.AlignCenter
                 symbol: "media-skip-backward"
                 text: qsTr("Frame back")
@@ -474,7 +502,7 @@ Item {
                 objectName: "railPlay"
                 readonly property string symbol: player.playing ? "media-playback-pause" : "media-playback-start"
                 Layout.alignment: Qt.AlignCenter
-                Layout.preferredWidth: page.bands ? Math.min(Look.unit(56), page.bandHeight - railTimeline.height - Look.unit(2)) : Look.unit(40)
+                Layout.preferredWidth: page.bands ? Math.min(Look.unit(56), page.bandHeight - railTimeline.height - Look.unit(2)) : page.tabletSideways ? Look.unit(52) : Look.unit(40)
                 Layout.preferredHeight: Layout.preferredWidth
                 // Under Shinki its own icon on the red circle; Kante's button would draw it dark.
                 icon.name: Look.shinki ? symbol : ""
@@ -488,6 +516,7 @@ Item {
             }
             RailButton {
                 objectName: "railFrameOn"
+                caption: page.bands ? qsTr("1 frame") : qsTr("Frame")
                 Layout.alignment: Qt.AlignCenter
                 symbol: "media-skip-forward"
                 text: qsTr("Frame on")
@@ -516,13 +545,15 @@ Item {
                     Accessible.name: qsTr("Tempo")
                     onClicked: page.setSpeed(page.tempi[(page.tempi.indexOf(player.playbackRate) + 1) % page.tempi.length])
                 }
-                // A symbol, as in the clickdummy: no word fits the rail in every language.
+                // On the rail only the symbol (no word fits it in every language), in the row with
+                // the word (the clickdummy).
                 LookToggle {
                     objectName: "railLoop"
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.preferredWidth: Look.unit(52)
+                    Layout.preferredWidth: page.bands ? -1 : Look.unit(52)
                     onStage: true
-                    text: "\u21BB"
+                    icon.name: "media-playlist-repeat"
+                    text: page.bands ? qsTr("Loop") : ""
                     Accessible.name: qsTr("Loop")
                     checkable: false
                     checked: page.looping
@@ -809,5 +840,16 @@ Item {
         Accessible.name: qsTr("Position")
 
         LookSliderSkin { control: railTimeline }
+
+        // The way still to play, on the dark ground: Kante's track is too dark to see there.
+        Rectangle {
+            z: -1
+            visible: !Look.shinki
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width
+            height: Look.unit(3)
+            color: Look.stageTextColor
+            opacity: 0.3
+        }
     }
 }
