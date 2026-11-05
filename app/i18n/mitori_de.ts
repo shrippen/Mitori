@@ -1703,7 +1703,7 @@
     <message>
         <location filename="../qml/ProgrammePage.qml" line="44"/>
         <source>Search</source>
-        <translation>Search</translation>
+        <translation>Suche</translation>
     </message>
     <message>
         <location filename="../qml/ProgrammePage.qml" line="49"/>
@@ -2668,17 +2668,17 @@
     <message>
         <location filename="../qml/TodayPage.qml" line="156"/>
         <source>no practice</source>
-        <translation>no practice</translation>
+        <translation>kein Training</translation>
     </message>
     <message>
         <location filename="../qml/TodayPage.qml" line="157"/>
         <source>1–2 techniques</source>
-        <translation>1–2 techniques</translation>
+        <translation>1–2 Techniken</translation>
     </message>
     <message>
         <location filename="../qml/TodayPage.qml" line="160"/>
         <source>10 and more</source>
-        <translation>10 and more</translation>
+        <translation>10 und mehr</translation>
     </message>
     <message>
         <location filename="../qml/TodayPage.qml" line="165"/>
