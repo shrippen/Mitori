@@ -3,6 +3,9 @@
 *.mp4
 *.webm
 *.m4v
+*.mvb
+# Die winzige Testdatei der Bundle-Tests (kein Video)
+!app/tests/data/bundle/test.mvb
 # Link auf ../Mitori Videos/Arbeitskopien (kein Ordner, darum ohne Schrägstrich)
 entwuerfe/clickdummy/video
 
@@ -24,6 +27,7 @@ build-test/
 # Schlüssel und Codes der Bundles liegen außerhalb des Repos
 *.keystore
 *.jks
+*.key
 bundle-geheim/
 
 *~
