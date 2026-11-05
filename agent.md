@@ -57,15 +57,14 @@ Vorlage der Oberfläche: der Clickdummy `entwuerfe/clickdummy/index.html` (Telef
 
 ## Aufbau
 ```
-mitori-daten/   Submodul: daten/*.yaml die eine Quelle, tools/daten.py, KORREKTUREN.md
-  (Schwester-Repo, third_party/mitori-daten/)
+third_party/mitori-daten/   Submodul: daten/*.yaml die eine Quelle, tools/daten.py, KORREKTUREN.md
                 kommentare.py, lexikon.py lesen PDFs aus quellen/ → daten/*.yaml (erzeugt)
                 shinki/ (Stil), shinki_fonts.py / shinki_style.py / shinki_chars.py
                 bundle.py (Video-Bundle-Encoder)
 app/           die App (CMake, C++, QML); app/qml/Kante ist eine Kopie aus ../Kante
                 Look-Schicht über Kante und Shinki aus dem Submodul
 entwuerfe/     Konzept, Entscheidungen, Clickdummy (Vorlage, kein Produktcode)
-mitori-heft/   Schwester-Repo: das gedruckte Heft (LuaLaTeX)
+(mitori-heft: eigenes Repo, das gedruckte Heft; pinnt ebenfalls mitori-daten)
 KORREKTUREN.md  liegt im Submodul: offene und geklärte Fragen zu den Daten (IDs A-…, D-…, S-…)
 ```
 
@@ -154,7 +153,7 @@ For now releases go out on GitHub only (APK, AppImage, Flatpak); stores (F-Droid
   as it is, and add missing elements to Knust.
 - Exception (owner, 02.11.2026): Mitori's second style **Shinki** (the club's newspaper) is
   separate from Kante, not a variant of it. Its values live in `shinki/tokens.json`, its
-  components in `shinki/qml/Shinki`, its rules in `shinki/README.md`. Pages move to reach
+  components in `shinki/qml/Shinki`, its rules in `shinki/README.md` (all in the `mitori-daten` submodule). Pages move to reach
   Kante and Shinki through `app/qml/Look`; once `app/qml/Look` exists, a new or changed page
   uses it (the bible's section 6). The styles: Breeze, Material, Kante (also Leinen), Shinki. Kante stays as it is; Shinki follows its own bible.
 - A project without a GUI (library, CLI, scripts) has nothing to do here.
