@@ -243,7 +243,9 @@ Kirigami.ScrollablePage {
         defaultSuffix: "zip"
         nameFilters: [qsTr("ZIP archives (*.zip)")]
         currentFolder: StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]
-        onAccepted: page.done = Backup.save(selectedFile) ? qsTr("Backup saved.") : ""
+        onAccepted: page.done = Backup.save(selectedFile)
+                                ? (Backup.savedTo() !== "" ? qsTr("Backup saved: %1").arg(Backup.savedTo()) : qsTr("Backup saved."))
+                                : ""
     }
 
     FileDialog {

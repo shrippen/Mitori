@@ -158,6 +158,8 @@ Item {
         onStatusChanged: {
             if (status === Qt.PermissionStatus.Granted) {
                 compose.takePhoto()
+            } else if (status === Qt.PermissionStatus.Denied) {
+                compose.tell(qsTr("Mitori may not use the camera. Allow it in the system settings."))
             }
         }
     }
@@ -167,6 +169,8 @@ Item {
         onStatusChanged: {
             if (status === Qt.PermissionStatus.Granted) {
                 compose.record()
+            } else if (status === Qt.PermissionStatus.Denied) {
+                compose.tell(qsTr("Mitori may not use the microphone. Allow it in the system settings."))
             }
         }
     }

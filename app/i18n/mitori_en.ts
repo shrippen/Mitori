@@ -75,7 +75,7 @@
 <context>
     <name>PlayerView</name>
     <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="675"/>
+        <location filename="../qml/PlayerView.qml" line="681"/>
         <source>%n technique(s) practised today. They count as a practice day in the statistics.</source>
         <translation>
             <numerusform>%n technique practised today. It counts as a practice day in the statistics.</numerusform>
@@ -105,7 +105,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="277"/>
+        <location filename="../qml/SettingsPage.qml" line="279"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n new</numerusform>
@@ -113,7 +113,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="280"/>
+        <location filename="../qml/SettingsPage.qml" line="282"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n changed</numerusform>
@@ -121,7 +121,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="287"/>
+        <location filename="../qml/SettingsPage.qml" line="289"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>
