@@ -967,12 +967,12 @@
     <message>
         <location filename="../qml/ExamRoundPage.qml" line="67"/>
         <source>Discard the round?</source>
-        <translation type="unfinished">Runde verwerfen?</translation>
+        <translation>Runde verwerfen?</translation>
     </message>
     <message>
         <location filename="../qml/ExamRoundPage.qml" line="69"/>
         <source>Discard</source>
-        <translation type="unfinished">Verwerfen</translation>
+        <translation>Verwerfen</translation>
     </message>
     <message>
         <location filename="../qml/ExamRoundPage.qml" line="74"/>
