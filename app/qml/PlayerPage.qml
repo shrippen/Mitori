@@ -1,4 +1,6 @@
 import QtQuick
+import QtQuick.Controls as QQC2
+import QtQuick.Layouts
 import QtQuick.Window
 import org.kde.kirigami as Kirigami
 import Mitori
@@ -46,7 +48,7 @@ Kirigami.Page {
     // Full screen ended (bigOnly): where the small player goes on.
     signal bigEnded(real position, real rate, bool looping)
 
-    title: view.current.title || ""
+    title: view.titleWithAddition
     padding: 0
     // The style's page ground (the window's scope gives Page the dialog colour).
     background: Rectangle { color: Look.backgroundColor }
@@ -54,7 +56,10 @@ Kirigami.Page {
     readonly property bool headless: view.landscape
     globalToolBarStyle: headless ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
 
-    onIndexChanged: view.index = index
+    onIndexChanged: {
+        view.index = index
+        trainingList.positionViewAtIndex(index, ListView.Contain)    // the training moves on
+    }
 
     // The window as it was (a maximised desktop window stays maximised afterwards).
     property var bigWindow: null
@@ -112,10 +117,48 @@ Kirigami.Page {
     // Keys reach the view (Space, arrows, the transport bar's keys) as soon as the page opens.
     Keys.forwardTo: [view]
 
+    // Sideways the training has its list beside the small player (clickdummy "session"): the
+    // picture alone would leave no way to rate or go on.
+    readonly property bool split: view.training && !big && width > height
+
+    RowLayout {
+        anchors.fill: parent
+        spacing: 0
+
+    ListView {
+        id: trainingList
+
+        objectName: "trainingList"
+        Layout.fillHeight: true
+        Layout.preferredWidth: Math.min(page.width * 0.38, Kirigami.Units.gridUnit * 24)
+        visible: page.split
+        model: page.split ? page.playlist : []
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
+
+        delegate: LookListRow {
+            required property var modelData
+            required property int index
+
+            width: ListView.view.width
+            leadingText: modelData.nr ? String(modelData.nr) : ""
+            text: modelData.title + (modelData.extra && !modelData.nr ? " (" + modelData.extra + ")" : "")
+            subtitle: [modelData.jp, modelData.nr ? modelData.extra : modelData.attack].filter(x => x).join(" · ")
+            selected: index === view.index
+            onClicked: view.index = index
+            trailing: LookLevelDots {
+                value: Practice.revision >= 0 ? Practice.level(modelData.id) : 0
+            }
+        }
+    }
+
     PlayerView {
         id: view
 
-        anchors.fill: parent
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        compact: page.split
         focus: true
         playlist: page.playlist
         // Both ways: the view moves on (next, training), a caller may set the page's index. Bound
@@ -139,5 +182,6 @@ Kirigami.Page {
             view.pause()
             page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
         }
+    }
     }
 }

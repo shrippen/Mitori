@@ -1258,6 +1258,59 @@ TestCase {
 
     // Training without videos (CI): every due technique comes in, shown as a card, with the
     // playlist (✓, tap jumps), the position and an end hint with the count.
+    // Sideways the training keeps its ratings: the list beside the small player (clickdummy
+    // "session"). It was a dead end on a tablet: the picture and no way to rate or go on.
+    function test_7b_training_sideways() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry").slice(0, 3)
+        const width = window.width, height = window.height
+        window.width = 1280
+        window.height = 800
+        wait(200)
+        const player = push("PlayerPage", { playlist: rows, index: 0, training: true })
+        tryVerify(() => player.split)
+        const list = findChild(player, "trainingList")
+        verify(list.visible)
+        compare(list.count, 3)
+        verify(findChild(player, "ratingRow").visible)
+        verify(!player.headless, "the head with its Back stays")
+        // A row goes to its technique; the current one is marked.
+        tryVerify(() => list.width > 100 && list.height > 100, 2000, list.width + " × " + list.height)
+        tryVerify(() => list.itemAtIndex(2) !== null)
+        list.itemAtIndex(2).clicked()
+        compare(player.index, 2)
+        verify(list.itemAtIndex(2).selected)
+        // Full screen has no list; back it is there again.
+        player.big = true
+        verify(!player.split)
+        player.big = false
+        tryVerify(() => player.split)
+        window.back()
+        tryVerify(() => window.pageStack.currentItem !== player)
+        window.width = width
+        window.height = height
+        wait(200)
+    }
+
+    // The title says which variant it is: as the list does.
+    function test_7b_player_title_has_the_addition() {
+        const rows = ["k5", "k4", "k3", "k2", "k1"].reduce((all, g) => all.concat(Programme.entries("aikido", g)), []).filter(r => r.kind === "entry" && r.extra && !r.nr)
+        verify(rows.length > 0)
+        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        verify(player.title.indexOf(rows[0].extra) >= 0, player.title)
+        window.back()
+        tryVerify(() => window.pageStack.currentItem !== player)
+    }
+
+    // Esc leaves the player as Back does, upright too.
+    function test_7b_escape_leaves() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        tryVerify(() => player.activeFocus || player.isCurrentPage)
+        wait(300)
+        keyClick(Qt.Key_Escape)
+        tryVerify(() => window.pageStack.currentItem !== player, 2000)
+    }
+
     function test_7c_training_list() {
         Programme.discipline = "daitoryu"
         Programme.setGrade("daitoryu", "k4")
