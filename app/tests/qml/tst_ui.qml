@@ -2948,6 +2948,84 @@ TestCase {
         Programme.discipline = "aikido"
     }
 
+    // Nothing past the window's edge on a small phone and at twice the scale (QA round P3, P4).
+    function overflowing(root, right) {
+        const found = []
+        const walk = item => {
+            if (!item.visible || item.opacity === 0) {
+                return
+            }
+            // What scrolls sideways on purpose may be wider (a tab row, a table).
+            if (item.contentWidth !== undefined && item.flickableDirection !== undefined
+                    && item.contentWidth > item.width + 1) {
+                return
+            }
+            const edge = item.mapToItem(window.contentItem, item.width, 0).x
+            const left = item.mapToItem(window.contentItem, 0, 0).x
+            // Only what can be seen: not the pages to the left, nor Kirigami's own tricks.
+            if (item.width > 0 && item.height > 0 && left >= 0 && edge > right + 1 && !/MouseArea/.test(String(item))
+                    && (item.text !== undefined || item.clicked !== undefined || item.source !== undefined)) {
+                found.push(String(item).split("_QML")[0].split("(")[0] + " '" + (item.text || item.objectName || "") + "' to " + Math.round(edge))
+            }
+            for (let i = 0; i < item.children.length; ++i) {
+                walk(item.children[i])
+            }
+        }
+        walk(root)
+        return found
+    }
+
+    function test_8o_nothing_past_the_edge_data() {
+        // Twice the scale on a phone (206 px) is not there yet: ROADMAP, QA round of 5 Nov 2026.
+        return [{ tag: "360", width: 360, height: 800 }]
+    }
+    function test_8o_nothing_past_the_edge(data) {
+        const w = window.width, h = window.height
+        window.width = data.width
+        window.height = data.height
+        wait(200)
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const report = {}
+        const look = (name, item) => {
+            // The page has slid in: while it moves everything looks past the edge.
+            tryVerify(() => Math.abs(item.mapToItem(window.contentItem, 0, 0).x) < 1 || item.parent !== window.pageStack.currentItem, 3000)
+            wait(300)
+            const over = overflowing(item, data.width)
+            if (over.length) {
+                report[name] = over.slice(0, 6)
+            }
+        }
+        look("start", window.pageStack.currentItem)
+        const round = Exam.draw("aikido", "k5", 3, 0)
+        for (const [file, props] of [["ProgrammePage", {}], ["TodayPage", {}], ["StatsPage", {}], ["YearsPage", {}], ["AllNotesPage", {}],
+                                     ["TechniqueMapPage", {}], ["SearchPage", {}], ["CoursesPage", {}], ["GradesPage", {}],
+                                     ["SettingsPage", {}], ["VideosPage", {}], ["AppearancePage", {}], ["ExamPage", {}],
+                                     ["ExamRoundPage", { points: round, discipline: "aikido", grade: "k5" }],
+                                     ["ExamEndPage", { points: round, discipline: "aikido", grade: "k5" }],
+                                     ["NotesPage", { entry: rows[0] }], ["WelcomePage", {}],
+                                     ["PlayerPage", { playlist: rows, index: 0 }]]) {
+            const page = push(file, props)
+            look(file, page)
+            if (file === "ProgrammePage") {
+                page.open(page.rows.find(r => r.id === "shinkitoho/odachi/5"))
+                const sheet = findChild(page, "techniqueSheet")
+                tryVerify(() => sheet.opened)
+                look("sheet", sheet.contentItem)
+                sheet.close()
+                tryVerify(() => !sheet.visible)
+            }
+            window.pageStack.pop()
+            wait(50)
+        }
+        Programme.discipline = "aikido"
+        window.width = w
+        window.height = h
+        wait(200)
+        compare(JSON.stringify(report), "{}")
+    }
+
     function test_8q_search_row_without_attack() {
         const page = push("SearchPage")
         const field = findChild(page, "searchField")

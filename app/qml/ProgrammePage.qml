@@ -159,16 +159,22 @@ Kirigami.Page {
                               ? qsTr("There is no video for this grade.")
                               : qsTr("The videos are on the DVDs of the Shinkiryu association. With the DVD's code Mitori loads them onto this device.")
 
-                        LookButton {
-                            objectName: "enterCode"
-                            visible: page.hasPositions
-                            text: qsTr("Enter code")
-                            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
-                        }
-                        LookButton {
-                            visible: page.hasPositions
-                            text: qsTr("Order on shinkiryu.de")
-                            onClicked: Qt.openUrlExternally("https://www.shinkiryu.de/shinkiryu/de/DVD.php")
+                        // One below the other on a small phone: side by side they would widen the list.
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: page.width < Kirigami.Units.gridUnit * 24 ? 1 : 2
+
+                            LookButton {
+                                objectName: "enterCode"
+                                visible: page.hasPositions
+                                text: qsTr("Enter code")
+                                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
+                            }
+                            LookButton {
+                                visible: page.hasPositions
+                                text: qsTr("Order on shinkiryu.de")
+                                onClicked: Qt.openUrlExternally("https://www.shinkiryu.de/shinkiryu/de/DVD.php")
+                            }
                         }
                     }
                 }
