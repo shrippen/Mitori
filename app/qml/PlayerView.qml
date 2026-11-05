@@ -230,6 +230,7 @@ Item {
         property string symbol
         property string caption
 
+        focusPolicy: Qt.TabFocus    // Space stays with the player
         display: QQC2.AbstractButton.IconOnly
         StageIcon {
             anchors.verticalCenterOffset: parent.caption !== "" ? -Look.unit(6) : 0
@@ -474,7 +475,6 @@ Item {
             RailButton {
                 objectName: "fullButton"
 
-                focusPolicy: Qt.TabFocus    // Space stays with the player
                 visible: !page.big
                 z: 11
                 anchors.right: parent.right

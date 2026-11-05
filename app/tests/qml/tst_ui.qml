@@ -871,6 +871,13 @@ TestCase {
         compare(window.visibility, before)
         verify(full.visible, "⤢ again")
 
+        // Space after ⤡ stops the video: the button does not keep the focus (and would mean Back).
+        tryVerify(() => page.playing, 5000)
+        keyClick(Qt.Key_Space)
+        tryCompare(page, "playing", false)
+        compare(window.pageStack.currentItem, page)
+        page.togglePlay()
+
         // Esc leaves it as well, and the page stays.
         const depth = window.pageStack.depth
         wait(500)       // the window has its size back
