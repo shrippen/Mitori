@@ -193,6 +193,29 @@ Reihenfolge der Kacheln. Offen, nach Gewicht:
   Notizen: Uhrzeit bei Lehrgangseinträgen; Lehrgänge: „+ Lehrgang ohne Kalendereintrag“ als Zeile; Prüfung:
   „keine Sprachausgabe“; Statistik-Bild im UI-Test zeigt das Startmenü.
 
+## QA-Runde 05.11.2026
+
+Drei Runden mit sieben Personen (`qa/PERSONAS.md`, `qa/QA.md`), Abgleich mit dem Clickdummy, Performancetest
+(`app/tests/perf`). Behoben: Blatt bei 360 px, Assistent, Video unter den Notizen, Vollbild verliert die Stelle,
+Training quer (Liste neben dem kleinen Player), Probeprüfung ohne Rückfrage, Zanshin und offene Fragen im Blatt,
+Sicherung ohne Endung, konto.ini 600, Alle Notizen und Alle Jahre schneller.
+
+Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
+- Telefon bei doppelter Anzeigegröße (206 px): Test `test_8o` auf diese Breite ausweiten; Segmente, lange Knöpfe,
+  Bewertung und Steuerzeilen des Players brauchen eine schmale Form.
+- Übungsgrad getrennt vom Blättern im Programm.
+- Lehrgangsnotizen mit Technik verbinden (⌗, Eintrag auch bei der Technik), QR-Code, Tablet nach Vorlage (Blatt
+  rechts, zwei Spalten, Lehrgänge und Einstellungen als Liste und Seite), Export als Blatt.
+- Programmdaten auf Englisch, App-Passwort im Schlüsselbund, Abschlussseite des Trainings.
+- Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).
+
+Offen, klein:
+- Grad-Chips mit Stand, Rückkehr in die Liste leuchtet kurz auf, Treffer in Kommentaren und Lehrgangsnotizen,
+  Speicherbalken bei den Videos, Heute merkt die Sparte, Kurzname auf der Kachel, Kommentar mit Gruppe und Kanji.
+- Barrierefreiheit: Kontrast der leeren Bewertungskästchen 1,36:1, Fortschrittsspur 1,07:1, Fokusring 2,05:1;
+  Fokus nach Dialogen und Zurück, Tastaturweg zum Player (29 Tabs), Ursache für den eingetippten Exportpfad.
+- Daten: „Ago: Kin“ (Lexikon, vermutlich „Kinn“), Glossar Kiri-otoshi ohne Übersetzung, „Kote“ ohne Kanji.
+
 ## Kante-Bedarf
 
 Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutzt:

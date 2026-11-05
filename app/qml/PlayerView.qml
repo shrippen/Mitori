@@ -835,7 +835,7 @@ Item {
                 ColumnLayout {
                     objectName: "trainingList"
                     Layout.fillWidth: true
-                    visible: page.training
+                    visible: page.training && !page.compact
                     spacing: 0
 
                     LookSectionLabel {

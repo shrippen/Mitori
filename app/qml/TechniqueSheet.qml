@@ -199,7 +199,7 @@ Kirigami.Dialog {
             objectName: "sheetOpenQuestion"
             Layout.fillWidth: true
             visible: !!sheet.entry.open
-            text: qsTr("Open question: its name or writing is not yet confirmed.")
+            text: qsTr("Open question: the sources do not agree here, it is not settled yet.")
             color: Look.mutedTextColor
             font: Look.smallFont
             wrapMode: Text.Wrap

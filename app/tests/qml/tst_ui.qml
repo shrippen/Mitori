@@ -1256,8 +1256,6 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // Training without videos (CI): every due technique comes in, shown as a card, with the
-    // playlist (✓, tap jumps), the position and an end hint with the count.
     // Sideways the training keeps its ratings: the list beside the small player (clickdummy
     // "session"). It was a dead end on a tablet: the picture and no way to rate or go on.
     function test_7b_training_sideways() {
@@ -1276,6 +1274,7 @@ TestCase {
         // A row goes to its technique; the current one is marked.
         tryVerify(() => list.width > 100 && list.height > 100, 2000, list.width + " × " + list.height)
         tryVerify(() => list.itemAtIndex(2) !== null)
+        verify(!list.itemAtIndex(2).focusOnClick, "Space stays with the player")
         list.itemAtIndex(2).clicked()
         compare(player.index, 2)
         verify(list.itemAtIndex(2).selected)
@@ -1311,6 +1310,8 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem !== player, 2000)
     }
 
+    // Training without videos (CI): every due technique comes in, shown as a card, with the
+    // playlist (✓, tap jumps), the position and an end hint with the count.
     function test_7c_training_list() {
         Programme.discipline = "daitoryu"
         Programme.setGrade("daitoryu", "k4")

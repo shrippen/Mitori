@@ -120,6 +120,8 @@ Kirigami.Page {
     // Sideways the training has its list beside the small player (clickdummy "session"): the
     // picture alone would leave no way to rate or go on.
     readonly property bool split: view.training && !big && width > height
+    // The list opens at the current technique, not at the top.
+    onSplitChanged: Qt.callLater(trainingList.positionViewAtIndex, view.index, ListView.Contain)
 
     RowLayout {
         anchors.fill: parent
@@ -143,9 +145,12 @@ Kirigami.Page {
 
             width: ListView.view.width
             leadingText: modelData.nr ? String(modelData.nr) : ""
-            text: modelData.title + (modelData.extra && !modelData.nr ? " (" + modelData.extra + ")" : "")
+            // ✓ what is done today, as the list under the player has it.
+            text: (Practice.revision >= 0 && Practice.ratedToday(modelData.id) ? "✓ " : "")
+                  + modelData.title + (modelData.extra && !modelData.nr ? " (" + modelData.extra + ")" : "")
             subtitle: [modelData.jp, modelData.nr ? modelData.extra : modelData.attack].filter(x => x).join(" · ")
             selected: index === view.index
+            focusOnClick: false         // Space stays with the player
             onClicked: view.index = index
             trailing: LookLevelDots {
                 value: Practice.revision >= 0 ? Practice.level(modelData.id) : 0

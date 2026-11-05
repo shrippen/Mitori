@@ -216,7 +216,7 @@
     <message numerus="yes">
         <location filename="../qml/TodayPage.qml" line="147"/>
         <source>%n technique(s)</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n technique</numerusform>
             <numerusform>%n techniques</numerusform>
         </translation>

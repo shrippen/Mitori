@@ -368,8 +368,6 @@ private slots:
         QVERIFY(!media.has(u"x.jpg"_s));
     }
 
-    // A file that is no backup, and one of a newer format, are refused with a reason.
-    // A name typed without the suffix: the open dialog's filter would never show the file again.
     void addsTheSuffix()
     {
         const Device d = device(u"endung"_s);
@@ -382,6 +380,8 @@ private slots:
         QVERIFY(QFile::exists(m_dir.filePath(u"b.ZIP"_s)));
     }
 
+    // A file that is no backup, and one of a newer format, are refused with a reason.
+    // A name typed without the suffix: the open dialog's filter would never show the file again.
     void refused()
     {
         const Device d = device(u"fremd"_s);

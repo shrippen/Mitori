@@ -2517,8 +2517,8 @@
     </message>
     <message>
         <location filename="../qml/TechniqueSheet.qml" line="202"/>
-        <source>Open question: its name or writing is not yet confirmed.</source>
-        <translation>Offene Frage: Name oder Schreibweise sind noch nicht bestätigt.</translation>
+        <source>Open question: the sources do not agree here, it is not settled yet.</source>
+        <translation>Offene Frage: Die Vorlagen sind sich hier nicht einig, das ist noch nicht geklärt.</translation>
     </message>
     <message>
         <location filename="../qml/TechniqueSheet.qml" line="216"/>
@@ -2655,7 +2655,7 @@
     <message numerus="yes">
         <location filename="../qml/TodayPage.qml" line="147"/>
         <source>%n technique(s)</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n Technik</numerusform>
             <numerusform>%n Techniken</numerusform>
         </translation>

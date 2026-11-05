@@ -22,9 +22,9 @@ Kirigami.ScrollablePage {
     property string discipline: Programme.discipline
     readonly property var disciplineInfo: Programme.disciplines.find(d => d.id === discipline) || ({})
     readonly property string gradeName: (Programme.grades(discipline).find(g => g.id === Programme.grade(discipline)) || {}).name || ""
-    // Re-read after every rating and when the intervals change.
     // The calendar of the last 12 weeks (clickdummy "Heute"); the levels as in the statistics.
     readonly property var perDay: Practice.revision >= 0 && Practice.today.getTime() > 0 ? Practice.practisedPerDay(84) : ({})
+    // Re-read after every rating and when the intervals change.
     readonly property var due: Practice.revision >= 0 && Practice.intervals.length === 4 && Practice.today.getTime() > 0
                                ? Practice.due(Programme.practiceEntries(discipline)) : []
     readonly property int unsure: due.filter(r => r.level === 1 || r.level === 2).length
