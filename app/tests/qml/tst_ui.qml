@@ -3026,6 +3026,67 @@ TestCase {
         compare(JSON.stringify(report), "{}")
     }
 
+    // From anywhere the player has the whole grade around the technique: previous and next work.
+    function test_8n_player_has_the_grade() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const page = push("SearchPage")
+        const sheet = findChild(page, "techniqueSheet")
+        sheet.entry = rows[1]
+        sheet.playRequested(rows[1])
+        tryVerify(() => window.pageStack.currentItem.playlist !== undefined)
+        const player = window.pageStack.currentItem
+        verify(player.playlist.length > 1, player.playlist.length)
+        compare(player.playlist[player.index].id, rows[1].id)
+        window.back()
+        tryVerify(() => window.pageStack.currentItem === page)
+        window.pageStack.pop()
+    }
+
+    function test_8m_today_has_its_calendar() {
+        const page = push("TodayPage")
+        const heat = findChild(page, "todayHeatmap")
+        verify(heat.visible)
+        compare(heat.weeks, 12)
+        verify(findChild(page, "todayLegend").visible, "no diagram without a legend")
+        window.pageStack.pop()
+    }
+
+    function test_8l_glossary_letters_jump() {
+        const page = push("SearchPage")
+        const list = findChild(page, "glossaryList")
+        const bar = findChild(page, "letterBar")
+        tryVerify(() => bar.visible)
+        const letters = allChildren(bar).filter(c => c.objectName === "letterJump")
+        verify(letters.length > 10)
+        const far = letters[letters.length - 1]
+        far.clicked()
+        wait(100)
+        const first = page.glossary.findIndex(w => w.letter === far.text)
+        verify(list.indexAt(10, list.contentY + 5) >= first - 1 || list.atYEnd, "jumped to " + far.text)
+        findChild(page, "searchField").text = "ko"
+        tryCompare(page, "searching", true)
+        verify(!bar.visible, "words found have no letters")
+        window.pageStack.pop()
+    }
+
+    function test_8k_sheet_says_where_the_dvd_is() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        page.open(page.rows.find(r => r.kind === "entry" && r.video))
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        if (!sheet.hasVideo) {
+            verify(findChild(sheet.contentItem, "sheetDvdButton").visible)
+        }
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+        window.pageStack.pop()
+    }
+
     function test_8q_search_row_without_attack() {
         const page = push("SearchPage")
         const field = findChild(page, "searchField")

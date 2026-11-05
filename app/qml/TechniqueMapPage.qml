@@ -5,6 +5,7 @@ import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Mitori
+import "playlists.js" as Playlists
 
 // Technique map (clickdummy "Landkarte"): every grade up to the chosen one, one group at a time
 // (app-entscheidungen.md: groups apart), techniques against attacks, each place coloured by how
@@ -215,7 +216,7 @@ Kirigami.ScrollablePage {
         onPlayRequested: entry => {
             sheet.close()
             const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
-            window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), { playlist: [entry], index: 0 })
+            window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), Playlists.around(Programme, Videos, entry))
         }
         onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
         onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })

@@ -240,6 +240,12 @@ Kirigami.Dialog {
                     sheet.videosRequested()
                 }
             }
+            LookButton {
+                objectName: "sheetDvdButton"
+                visible: !!sheet.entry.video
+                text: qsTr("DVD on shinkiryu.de")
+                onClicked: Qt.openUrlExternally("https://www.shinkiryu.de/shinkiryu/de/DVD.php")
+            }
         }
         // Wraps on a small phone: a row would make the whole sheet wider than the screen.
         Flow {

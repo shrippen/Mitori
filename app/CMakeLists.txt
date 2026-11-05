@@ -85,6 +85,7 @@ qt_add_qml_module(mitori_app
         qml/CoursePage.qml
         qml/CourseNewPage.qml
         qml/coursedays.js
+        qml/playlists.js
         qml/comment.js
         qml/VideosPage.qml
         qml/GradesPage.qml
