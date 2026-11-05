@@ -2272,6 +2272,11 @@ TestCase {
         compare(board.zoom, 1.6)
         shot("12c-exam-round-tablet")
         round.actions[0].trigger()
+        if (round.index > 0) {
+            const asked = findChild(round, "cancelRoundDialog")
+            tryVerify(() => asked.opened)
+            asked.accept()
+        }
         tryVerify(() => window.pageStack.currentItem === page)
         window.pageStack.pop()
     }
@@ -2946,10 +2951,12 @@ TestCase {
         tryVerify(() => !big.playing, 2000)
         const reached = big.position
         big.bigEnded(big.position, big.rate, true)
-        compare(small.rate, 0.25)
-        compare(small.looping, true)
-        verify(Math.abs(small.position - reached) < 1500, small.position + " against " + reached)
-        small.setSpeed(1)
+        // The pane may have been made anew while the window was full screen.
+        const after = page.player
+        compare(after.rate, 0.25)
+        compare(after.looping, true)
+        verify(Math.abs(after.position - reached) < 1500, after.position + " against " + reached)
+        after.setSpeed(1)
         big.leave()
         tryVerify(() => window.pageStack.currentItem === page)
         window.pageStack.pop()
@@ -2989,7 +2996,7 @@ TestCase {
         verify(open.text.indexOf(String(points.length)) >= 0, open.text)
         points.forEach((p, i) => page.rate(i, 3))
         verify(!open.visible)
-        verify(findChild(page, "applyRound").enabled)
+        tryVerify(() => findChild(page, "applyRound").enabled)
         window.pageStack.pop()
     }
 

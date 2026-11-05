@@ -417,9 +417,13 @@ Kirigami.Page {
         player.big = true
         // Back in the small player: the same place, tempo and loop.
         player.bigEnded.connect((position, rate, looping) => {
-            small.looping = looping
-            small.setSpeed(rate)
-            small.seek(position)
+            const now = page.player     // the pane may have been made anew while the window was full
+            if (!now) {
+                return
+            }
+            now.looping = looping
+            now.setSpeed(rate)
+            now.seek(position)
         })
         player.shown.connect(id => page.lastId = id)
     }
