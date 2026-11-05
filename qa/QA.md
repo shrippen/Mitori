@@ -68,5 +68,5 @@ läuft), Ton, Mikrofon und Kamera; Sprachausgabe nur als Attrappe. Wischen ist M
 (Listen mit dem Mausrad scrollen), Drehen und Bildschirmtastatur gibt es nicht, `xdotool` verliert
 manche Umlaute und das Ô. All das bleibt am Gerät zu prüfen. Die Termine kommen vom echten Server.
 
-Ohne `--videos` hat das Gerät keine Videos; für den Player ein Ordner mit Testvideos gleichen Namens
-(`ffmpeg -f lavfi`). Mit den echten Videos: Bilder nicht ansehen, sie verlassen sonst den Rechner.
+Ohne `--videos` hat das Gerät keine Videos; für den Player ein Ordner mit Testvideos gleicher
+Unterordner, Namen und Länge (`ffmpeg -f lavfi`; zu kurz bleibt der Player ohne Meldung stehen). Mit den echten Videos: Bilder nicht ansehen, sie verlassen sonst den Rechner.

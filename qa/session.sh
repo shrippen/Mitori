@@ -85,7 +85,8 @@ clean=(env -i PATH="$PATH" QT_QPA_PLATFORM=xcb DISPLAY=":$display" XDG_RUNTIME_D
     XDG_DATA_HOME="$profile/data" XDG_CONFIG_HOME="$profile/config" XDG_CACHE_HOME="$profile/cache"
     QT_SCALE_FACTOR="$scale" LANGUAGE="$lang" LANG="${lang}_DE.UTF-8" QT_QUICK_BACKEND=software
     MITORI_DEVICE_LEVELS=memory MITORI_SPEECH_ENGINE=mock)
-if [ "$style" = breeze ]; then
+# Breeze only follows a Plasma session; a kept profile says what it was made with.
+if grep -q '^style=0$' "$conf" 2>/dev/null || { [ ! -e "$conf" ] && [ "$style" = breeze ]; }; then
     clean+=(KDE_FULL_SESSION=true)
 fi
 if [ -n "$videos" ]; then
