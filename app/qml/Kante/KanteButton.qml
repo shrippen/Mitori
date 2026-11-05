@@ -151,12 +151,12 @@ QQC2.Button {
         readonly property real leftEdge: Math.max(control.leftPadding, KanteStyle.unit(8))
         readonly property real rightEdge: Math.max(control.rightPadding, KanteStyle.unit(8))
         readonly property real room: control.width - leftEdge - rightEdge
-        // A lone symbol stays in the middle: on a narrow button the margin gives way, not the centre.
-        readonly property bool loneIcon: control.display === T.AbstractButton.IconOnly
-        x: loneIcon ? control.leftPadding + Math.max(0, (control.availableWidth - width) / 2)
-                    : leftEdge + Math.max(0, (room - width) / 2)
+        // A lone symbol stands in the middle of the whole button: on a narrow one the margin and the
+        // style's padding give way, and it is not squeezed.
+        readonly property bool loneIcon: control.display === T.AbstractButton.IconOnly || control.text.length === 0
+        x: loneIcon ? (control.width - width) / 2 : leftEdge + Math.max(0, (room - width) / 2)
         y: (control.height - height) / 2    // the middle: the style's padding may be uneven
-        width: Math.max(0, Math.min(implicitWidth, loneIcon ? control.availableWidth : room))
+        width: loneIcon ? implicitWidth : Math.max(0, Math.min(implicitWidth, room))
         height: control.availableHeight
         spacing: Math.max(control.spacing, Kirigami.Units.smallSpacing)
         opacity: control.enabled ? 1 : 0.5
