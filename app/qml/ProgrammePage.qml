@@ -411,9 +411,20 @@ Kirigami.Page {
         const small = page.player
         const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
         const player = window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), {
-            playlist: small.playlist, index: small.index, bigOnly: true, startAt: small.position
+            playlist: small.playlist, index: small.index, bigOnly: true, startAt: small.position, looping: small.looping
         }) as PlayerPage
+        player.setSpeed(small.rate)
         player.big = true
+        // Back in the small player: the same place, tempo and loop.
+        player.bigEnded.connect((position, rate, looping) => {
+            const now = page.player     // the pane may have been made anew while the window was full
+            if (!now) {
+                return
+            }
+            now.looping = looping
+            now.setSpeed(rate)
+            now.seek(position)
+        })
         player.shown.connect(id => page.lastId = id)
     }
 

@@ -178,6 +178,7 @@ Kirigami.ScrollablePage {
                 }
                 GradeStand {
                     id: stand
+                    readyShown: false
 
                     objectName: "statsGradeStand"
                     Layout.fillWidth: true

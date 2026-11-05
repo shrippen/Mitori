@@ -102,7 +102,7 @@ Kirigami.ScrollablePage {
             LookKpi {
                 objectName: "dueCount"
                 value: String(page.due.length)
-                label: qsTr("due")
+                label: qsTr("techniques due")
             }
             LookLabel {
                 Layout.fillWidth: true

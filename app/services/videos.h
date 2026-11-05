@@ -34,7 +34,7 @@ public:
     // Picture area without the black bars: {hoehe, y, h, verhaeltnis} (see tools/kapitel.py).
     Q_INVOKABLE QVariantMap crop(const QString &video) const;
 
-    static QString defaultFolder();
+    Q_INVOKABLE static QString defaultFolder();
 
 signals:
     void folderChanged();

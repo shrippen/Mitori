@@ -117,6 +117,7 @@ ColumnLayout {
             icon.name: "view-pim-notes"
             text: qsTr("Notes")
             display: QQC2.AbstractButton.IconOnly
+            objectName: "openNotes"
             onClicked: noteRow.notesRequested()
         }
     }

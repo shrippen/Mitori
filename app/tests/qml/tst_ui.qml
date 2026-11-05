@@ -2271,6 +2271,11 @@ TestCase {
         compare(board.zoom, 1.6)
         shot("12c-exam-round-tablet")
         round.actions[0].trigger()
+        if (round.index > 0) {
+            const asked = findChild(round, "cancelRoundDialog")
+            tryVerify(() => asked.opened)
+            asked.accept()
+        }
         tryVerify(() => window.pageStack.currentItem === page)
         window.pageStack.pop()
     }
@@ -2846,14 +2851,210 @@ TestCase {
         const target = "file://" + uiShotsDir + "/" + Courses.exportName(course)
         book.exportTo(target)
         tryVerify(() => findChild(book, "exportedTo").visible)
+        verify(findChild(book, "exportedTo").text.indexOf(uiShotsDir) > 0, "says where: " + findChild(book, "exportedTo").text)
         verify(findChild(book, "exportedTo").text.indexOf("Fotolehrgang") > 0, findChild(book, "exportedTo").text)
         shot("14d-course-exported")
         window.pageStack.pop()
         verify(Courses.remove(course))
     }
 
+    function test_8q_search_row_without_attack() {
+        const page = push("SearchPage")
+        const field = findChild(page, "searchField")
+        field.text = "odachi"
+        tryVerify(() => findChildren(page, "techniqueResult").length > 0, 3000)
+        for (const row of findChildren(page, "techniqueResult")) {
+            verify(row.subtitle.indexOf("undefined") < 0, row.subtitle)
+        }
+        window.pageStack.pop()
+    }
+
+    // 360 px: the sheet's buttons wrap, nothing runs off the screen.
+    function test_8r_sheet_fits_small_phone() {
+        const width = window.width
+        window.width = 360
+        wait(100)
+        Programme.discipline = "shinkitoho"
+        const page = push("ProgrammePage")
+        page.open(page.rows.find(r => r.kind === "entry"))
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        const notes = findChild(sheet, "sheetNotesButton")
+        const edge = notes.mapToItem(sheet.parent, notes.width, 0).x
+        verify(edge <= sheet.parent.width + 0.5, "the button ends at " + edge)
+        verify(sheet.width <= sheet.parent.width + 0.5, "the sheet is " + sheet.width)
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
+        window.width = width
+        wait(100)
+    }
+
+    function test_8s_welcome_counts_when_finished() {
+        const page = push("WelcomePage")
+        const steps = findChild(page, "welcomeSteps")
+        page.step = 1
+        // The arrow in the head goes one step, not out of the wizard.
+        window.back()
+        tryCompare(page, "step", 0)
+        wait(50)
+        verify(window.pageStack.currentItem === page, "still in the wizard")
+        page.finish()
+        verify(Appearance.welcomed, "without waiting for the page to be destroyed")
+        tryCompare(window.pageStack, "depth", 1)
+    }
+
+    function test_8t_player_rests_under_the_notes() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video && Videos.available(r.video.video))
+        if (rows.length === 0) {
+            skip("no videos")
+        }
+        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        tryVerify(() => player.playing, 5000)
+        findChild(player, "openNotes").clicked()
+        tryVerify(() => !player.playing, 2000)
+        window.pageStack.pop()
+        window.pageStack.pop()
+    }
+
+    // Tablet: the small player goes on where full screen ended, with its tempo and loop.
+    function test_8t_small_player_keeps_place_after_full_screen() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const width = window.width
+        window.width = 1280
+        window.height = 800
+        wait(200)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        page.play(rows[0])
+        tryVerify(() => page.player && page.player.hasVideo && page.player.duration > 0, 5000)
+        const small = page.player
+        small.looping = false
+        small.setSpeed(0.5)
+        page.openBig()
+        const big = window.pageStack.currentItem
+        tryVerify(() => big.big && big.duration > 0, 5000)
+        compare(big.rate, 0.5)
+        compare(big.looping, false)
+        const place = Math.min(big.to - 500, big.from + 3000)
+        big.seek(place)
+        big.setSpeed(0.25)
+        big.togglePlay()
+        tryVerify(() => !big.playing, 2000)
+        const reached = big.position
+        // Back ends it too (the Android key), not only the button.
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem === page)
+        wait(100)
+        // The pane may have been made anew while the window was full screen.
+        const after = page.player
+        compare(after.rate, 0.25)
+        compare(after.looping, false)
+        verify(Math.abs(after.position - reached) < 1500, after.position + " against " + reached)
+        after.setSpeed(1)
+        after.looping = true
+        window.pageStack.pop()
+        window.width = width
+        wait(200)
+    }
+
+    function test_8u_exam_cancel_at_first_point() {
+        const points = Exam.draw("aikido", "k5", 3, 0)
+        const page = push("ExamRoundPage", { points: points, discipline: "aikido", grade: "k5" })
+        page.cancel()
+        tryVerify(() => window.pageStack.currentItem !== page, 2000, "at point 1 there is nothing to lose")
+    }
+
+    function test_8u_exam_cancel_asks_after_first_point() {
+        const points = Exam.draw("aikido", "k5", 3, 0)
+        const page = push("ExamRoundPage", { points: points, discipline: "aikido", grade: "k5" })
+        page.next()
+        page.cancel()
+        const dialog = findChild(page, "cancelRoundDialog")
+        tryVerify(() => dialog.opened)
+        compare(window.pageStack.currentItem, page)
+        compare(dialog.acceptText, qsTr("Discard"), "Cancel in a dialog about cancelling says nothing")
+        dialog.reject()
+        tryVerify(() => !dialog.visible)
+        window.back()
+        tryVerify(() => dialog.opened, 2000, "Back too")
+        dialog.accept()
+        tryVerify(() => window.pageStack.currentItem !== page)
+        wait(50)
+    }
+
+    function test_8v_exam_end_says_what_is_open() {
+        const points = Exam.draw("aikido", "k5", 3, 0)
+        const page = push("ExamEndPage", { points: points, discipline: "aikido", grade: "k5" })
+        const open = findChild(page, "openPoints")
+        verify(open.visible)
+        verify(open.text.indexOf(String(points.length)) >= 0, open.text)
+        points.forEach((p, i) => page.rate(i, 3))
+        verify(!open.visible)
+        tryVerify(() => findChild(page, "applyRound").enabled)
+        window.pageStack.pop()
+    }
+
+    // Not a system folder (Linux lists /usr/share last, where nobody can put videos).
+    function test_8w_default_video_folder_is_the_users() {
+        verify(!/^\/(usr|etc|opt)\//.test(Videos.defaultFolder()), Videos.defaultFolder())
+    }
+
+    function test_8w_voice_hint_only_with_the_glossary() {
+        const page = push("SearchPage")
+        const hint = findChild(page, "speechHint")
+        const shown = hint.visible
+        findChild(page, "searchField").text = "ko"
+        tryCompare(page, "searching", true)
+        verify(!hint.visible, "not above every result")
+        window.pageStack.pop()
+        verify(shown !== undefined)
+    }
+
+    function test_8x_stats_say_it_once() {
+        const page = push("StatsPage")
+        for (const text of findChildren(page, "readyText")) {
+            verify(!text.visible, "the figure stands beside the grade")
+        }
+        window.pageStack.pop()
+    }
+
+    function test_8y_tempo_stays_and_speaks_the_locale() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        player.setSpeed(0.5)
+        compare(player.tempoText, (0.5).toLocaleString(Qt.locale(), "f", 1) + "\u00D7")
+        window.back()
+        tryVerify(() => window.pageStack.currentItem !== player)
+        wait(50)
+        const again = push("PlayerPage", { playlist: rows, index: 0 })
+        compare(again.rate, 0.5, "the clickdummy keeps it")
+        again.setSpeed(1)
+        window.back()
+        wait(50)
+    }
+
+    function test_8z_frame_buttons_are_not_the_technique_buttons() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        for (const name of ["railFrameBack", "railFrameOn"]) {
+            const b = findChild(player, name)
+            if (b) {
+                verify(!/skip/.test(b.symbol), b.symbol)
+            }
+        }
+        window.back()
+        wait(50)
+    }
+
     // A note begun in the player belongs to the technique it was typed for, also when the player
     // moves on before it is added (training moves on after a rating).
+    // Found by the QA round of 5 Nov 2026 (qa/PERSONAS.md).
     function test_8b_note_draft_stays_with_its_technique() {
         const page = playerAt(1)
         const first = page.current.id

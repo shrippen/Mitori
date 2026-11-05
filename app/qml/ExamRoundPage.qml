@@ -30,9 +30,51 @@ Kirigami.Page {
         Kirigami.Action {
             icon.name: "dialog-cancel"
             text: qsTr("Cancel")
-            onTriggered: page.Kirigami.PageStack.pop()
+            objectName: "cancelRound"
+            onTriggered: page.cancel()
         }
     ]
+
+    // Past the first point there is something to lose: ask (the action and Back).
+    function cancel() {
+        if (page.index === 0) {
+            page.Kirigami.PageStack.pop()
+            return
+        }
+        cancelDialog.open()
+    }
+    onBackRequested: event => {
+        if (page.index === 0) {
+            return
+        }
+        event.accepted = true
+        const stack = (page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow).pageStack
+        const place = page.Kirigami.ColumnView.index
+        Qt.callLater(() => {
+            stack.currentIndex = place
+            cancelDialog.open()
+        })
+    }
+    LookDialog {
+        id: cancelDialog
+
+        objectName: "cancelRoundDialog"
+        parent: QQC2.Overlay.overlay
+        anchors.centerIn: parent
+        modal: true
+        span: LookDialog.Span.Small
+        destructive: true
+        title: qsTr("Discard the round?")
+        standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
+        acceptText: qsTr("Discard")
+        onAccepted: page.Kirigami.PageStack.pop(page.Kirigami.PageStack.pageStack.items[page.Kirigami.ColumnView.index - 1])
+
+        LookLabel {
+            width: parent.width
+            text: qsTr("You are at point %1 of %2. Nothing has been rated yet, the round is simply dropped.").arg(page.index + 1).arg(page.points.length)
+            wrapMode: Text.Wrap
+        }
+    }
 
     function next() {
         if (page.index < page.points.length - 1) {

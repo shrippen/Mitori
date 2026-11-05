@@ -23,7 +23,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="462"/>
+        <location filename="../qml/CoursePage.qml" line="463"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>The notebook and its %n entry go from this device.</numerusform>
@@ -51,6 +51,17 @@
     </message>
 </context>
 <context>
+    <name>ExamEndPage</name>
+    <message numerus="yes">
+        <location filename="../qml/ExamEndPage.qml" line="156"/>
+        <source>%n point(s) still to rate.</source>
+        <translation>
+            <numerusform>%n point still to rate.</numerusform>
+            <numerusform>%n points still to rate.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>ExamPage</name>
     <message numerus="yes">
         <location filename="../qml/ExamPage.qml" line="91"/>
@@ -64,7 +75,7 @@
 <context>
     <name>PlayerView</name>
     <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="661"/>
+        <location filename="../qml/PlayerView.qml" line="675"/>
         <source>%n technique(s) practised today. They count as a practice day in the statistics.</source>
         <translation>
             <numerusform>%n technique practised today. It counts as a practice day in the statistics.</numerusform>

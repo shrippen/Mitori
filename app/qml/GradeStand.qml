@@ -15,6 +15,9 @@ ColumnLayout {
     // Levels 4 … 1, then not rated: the order of the bar and the legend.
     readonly property var order: [4, 3, 2, 1]
 
+    // The statistics name the figure beside the grade already.
+    property bool readyShown: true
+
     spacing: Look.unit(6)
     visible: ids.length > 0
 
@@ -22,6 +25,7 @@ ColumnLayout {
     LookLabel {
         objectName: "readyText"
         Layout.fillWidth: true
+        visible: stand.readyShown
         text: qsTr("%1 of %2 exam-ready").arg(stand.counts[4]).arg(stand.ids.length)
         color: Look.mutedTextColor
     }
