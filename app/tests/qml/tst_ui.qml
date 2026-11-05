@@ -781,9 +781,60 @@ TestCase {
         const loop = findChild(page, "railLoop")
         const bottom = loop.mapToItem(page, 0, loop.height).y
         verify(bottom <= page.height, "the rail ends at " + bottom + " of " + page.height)
+        // The rail's play button says what a tap does (under Shinki its own icon, the red circle).
+        const play = findChild(page, "railPlay")
+        verify(page.playing)
+        compare(play.symbol, "media-playback-pause")
+        if (uiShinki) {
+            compare(play.contentItem.children[0].name, "media-playback-pause")
+        }
         window.width = 420
         window.height = 800
         window.pageStack.pop()
+    }
+
+    // A tablet sideways with a wide video: title above, controls below, no rail (the clickdummy's
+    // "Player groß"). A phone has the time on the picture and no word on the rail.
+    function test_4t_player_bands() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const width = window.width
+        const height = window.height
+        const page = push("PlayerPage", { playlist: rows, index: 0 })
+        window.width = 800
+        window.height = 360
+        tryVerify(() => findChild(page, "railTime").visible, 2000)
+        verify(!findChild(page, "bandTitle").visible)
+        verify(findChild(page, "railLoop").width >= findChild(page, "railLoop").implicitContentWidth)
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => findChild(page, "bandTitle").visible, 2000, "bands")
+        wait(300)
+        shot("6b-player-bands")
+        verify(findChild(page, "bandBack").visible)
+        verify(!findChild(page, "railBack").visible)
+        verify(!findChild(page, "railTime").visible)
+        verify(findChild(page, "bandTime").visible)
+        verify(findChild(page, "bandTitle").text.indexOf(rows[0].title) >= 0)
+        const stage = findChild(page, "stage")
+        const stageTop = stage.mapToItem(page, 0, 0).y
+        const stageBottom = stageTop + stage.height
+        verify(stageTop > 0, "the title stands above the picture")
+        const timeline = findChild(page, "railTimeline")
+        verify(timeline.mapToItem(page, 0, 0).y >= stageBottom, "the timeline stands below it")
+        const play = findChild(page, "railPlay")
+        const playY = play.mapToItem(page, 0, 0).y
+        verify(playY >= timeline.mapToItem(page, 0, timeline.height).y, "the row below the timeline")
+        verify(playY + play.height <= page.height, "in view")
+        verify(Math.abs(play.mapToItem(page, play.width / 2, 0).x - page.width / 2) < 2, "the transport in the middle")
+        const loop = findChild(page, "railLoop")
+        verify(loop.mapToItem(page, loop.width, 0).x <= page.width, "the row ends in view")
+        window.width = width
+        window.height = height
+        window.back()      // as the head does (Kirigami's pop() may keep the page, PlayerPage.leave)
+        tryCompare(window.pageStack, "depth", 1)
     }
 
     function playerAt(index) {

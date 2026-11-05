@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls as QQC2
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 import QtMultimedia
 import org.kde.kirigami as Kirigami
@@ -42,6 +43,13 @@ Item {
     // On the rail: 62 px on the phone (CD .qrail), 84 px on a tablet in landscape (CD .tab .qrail).
     // The phone held sideways is about 360 dp tall, a tablet sideways 720 dp.
     readonly property bool tabletSideways: page.landscape && height >= Kirigami.Units.gridUnit * 26
+    // Enough room above and below the picture (a tablet 16:10, a wide video): the title and the
+    // controls stand there instead of on the rail (the clickdummy's `.qbands`).
+    readonly property bool bands: landscape && bandHeight * 2 >= Look.unit(120)
+    readonly property real bandHeight: (height - width / stage.ratio) / 2
+    readonly property bool onRail: landscape && !bands
+    readonly property string titleText: (current.nr ? current.nr + " · " : "") + (current.title || "")
+    readonly property string timeText2: timeText(player.position - from) + " / " + timeText(to - from)
     readonly property var tempi: [0.25, 0.5, 0.75, 1]
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
     readonly property int jumpMs: 2000      // double tap
@@ -186,11 +194,72 @@ Item {
     Keys.onLeftPressed: page.step(-1)
     Keys.onRightPressed: page.step(1)
 
+    // A symbol on the dark ground, drawn here: Kante's button leaves its colour to the platform
+    // theme, and Android, the AppImage and the tests draw the icon as it is (dark).
+    component StageIcon: IconImage {
+        anchors.centerIn: parent
+        sourceSize.width: Look.unit(22)
+        sourceSize.height: Look.unit(22)
+        color: Look.stageTextColor
+    }
+    component RailButton: LookToolButton {
+        property string symbol
+
+        display: QQC2.AbstractButton.IconOnly
+        StageIcon { name: parent.symbol }
+    }
+
+    // Sideways everything stands on the dark ground (the clickdummy's `.qrail`, `.qbands`).
+    Rectangle {
+        anchors.fill: parent
+        visible: page.landscape
+        color: Look.stageColor
+    }
+
     GridLayout {
         anchors.fill: parent
-        columns: page.landscape ? 2 : 1
+        columns: page.onRail ? 2 : 1
         rowSpacing: 0
         columnSpacing: 0
+
+        // Above the picture when there is room: back, where the technique stands, its name.
+        RowLayout {
+            objectName: "bandTop"
+            visible: page.bands
+            Layout.fillWidth: true
+            Layout.preferredHeight: page.bandHeight
+            Layout.leftMargin: Look.unit(24)
+            Layout.rightMargin: Look.unit(24)
+            spacing: Look.unit(14)
+
+            RailButton {
+                objectName: "bandBack"
+                symbol: "go-previous-view"
+                text: qsTr("Back")
+                onClicked: page.backRequested()
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 0
+
+                LookLabel {
+                    Layout.fillWidth: true
+                    visible: page.placeText !== ""
+                    elide: Text.ElideRight
+                    text: page.placeText
+                    color: Look.stageTextColor
+                    opacity: 0.7
+                }
+                LookLabel {
+                    objectName: "bandTitle"
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    text: page.titleText + (page.current.jp ? "  " + page.current.jp : "")
+                    color: Look.stageTextColor
+                    font: Look.sheetTitleFont
+                }
+            }
+        }
 
         // The picture: VideoOutput taller than the stage and shifted up, the stage clips the bars.
         Item {
@@ -200,8 +269,8 @@ Item {
             visible: page.hasVideo
             readonly property real ratio: page.crop.verhaeltnis || 16 / 9
             Layout.fillWidth: true
-            Layout.fillHeight: page.landscape
-            Layout.preferredHeight: page.landscape ? -1 : width / ratio
+            Layout.fillHeight: page.onRail
+            Layout.preferredHeight: page.onRail ? -1 : width / ratio
             // Beside the list the controls keep the room they need, on a small tablet half the height,
             // less if the transport bar would leave the view (a taller head, Shinki).
             Layout.maximumHeight: page.compact ? Math.max(page.height - controlsView.neededHeight,
@@ -233,11 +302,27 @@ Item {
             }
 
             LookLabel {
-                visible: page.landscape
+                objectName: "railTitle"
+                visible: page.onRail
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.margins: Kirigami.Units.largeSpacing
-                text: page.current.title + (page.current.attack ? "  ·  " + page.current.attack : "")
+                text: page.titleText + (page.current.attack ? "  ·  " + page.current.attack : "")
+                color: Look.stageTextColor
+                style: Text.Outline
+                styleColor: Look.stageColor
+            }
+
+            // The time at the foot of the picture, above the timeline (the clickdummy's `.qtb`).
+            LookLabel {
+                objectName: "railTime"
+                visible: page.onRail
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: Look.unit(14)
+                anchors.bottomMargin: Look.unit(34)
+                z: 4
+                text: page.timeText2
                 color: Look.stageTextColor
                 style: Text.Outline
                 styleColor: Look.stageColor
@@ -334,72 +419,119 @@ Item {
             }
         }
 
-        // Sideways: a narrow rail on the right with the buttons (the clickdummy). Upright: the
-        // controls under the picture, which scroll when they do not fit. Phone sideways: 62 px
-        // (CD .qrail); tablet sideways: 84 px (CD .tab .qrail).
-        ColumnLayout {
+        // Sideways: a narrow rail on the right with the buttons (the clickdummy). Phone 62 px (CD
+        // .qrail), tablet 84 px (CD .tab .qrail). With room around the picture the same buttons
+        // stand in a row below it (CD .qrow2), the time on the left. Upright: the controls below.
+        GridLayout {
             id: rail
 
             objectName: "rail"
             visible: page.landscape
-            Layout.preferredWidth: page.tabletSideways ? Look.unit(84) : Look.unit(62)
-            Layout.fillHeight: true
-            spacing: Look.unit(6)
+            columns: page.bands ? 5 : 1
+            Layout.preferredWidth: page.bands ? -1 : page.tabletSideways ? Look.unit(84) : Look.unit(62)
+            Layout.fillWidth: page.bands
+            Layout.fillHeight: page.onRail
+            Layout.preferredHeight: page.bands ? page.bandHeight - Layout.topMargin : -1
+            Layout.topMargin: page.bands ? railTimeline.height + Look.unit(2) : 0
+            Layout.leftMargin: page.bands ? Look.unit(24) : 0
+            Layout.rightMargin: page.bands ? Look.unit(24) : 0
+            rowSpacing: Look.unit(6)
+            columnSpacing: page.bands ? Look.unit(18) : 0
 
-            LookToolButton {
+            // A third of the row each side, so the transport stands in the middle.
+            Item {
+                visible: page.bands
+                Layout.fillWidth: true
+                Layout.preferredWidth: 0
+                Layout.preferredHeight: bandTime.implicitHeight
+
+                LookLabel {
+                    id: bandTime
+
+                    objectName: "bandTime"
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: page.timeText2
+                    color: Look.stageTextColor
+                }
+            }
+            RailButton {
                 objectName: "railBack"
+                visible: !page.bands
                 Layout.alignment: Qt.AlignHCenter
-                icon.name: "go-previous-view"
+                symbol: "go-previous-view"
                 text: qsTr("Back")
-                display: QQC2.AbstractButton.IconOnly
                 onClicked: page.backRequested()
             }
-            LookToolButton {
+            RailButton {
                 objectName: "railFrameBack"
-                Layout.alignment: Qt.AlignHCenter
-                icon.name: "media-skip-backward"
+                Layout.alignment: Qt.AlignCenter
+                symbol: "media-skip-backward"
                 text: qsTr("Frame back")
-                display: QQC2.AbstractButton.IconOnly
                 onClicked: page.step(-1)
             }
             // The play button: under Shinki the red circle (the clickdummy).
             LookPlayButton {
                 objectName: "railPlay"
-                Layout.alignment: Qt.AlignHCenter
-                icon.name: player.playing ? "media-playback-pause" : "media-playback-start"
+                readonly property string symbol: player.playing ? "media-playback-pause" : "media-playback-start"
+                Layout.alignment: Qt.AlignCenter
+                Layout.preferredWidth: page.bands ? Math.min(Look.unit(56), page.bandHeight - railTimeline.height - Look.unit(2)) : Look.unit(40)
+                Layout.preferredHeight: Layout.preferredWidth
+                // Under Shinki its own icon on the red circle; Kante's button would draw it dark.
+                icon.name: Look.shinki ? symbol : ""
                 text: player.playing ? qsTr("Pause") : qsTr("Play")
                 onClicked: page.togglePlay()
+
+                StageIcon {
+                    visible: !Look.shinki
+                    name: parent.symbol
+                }
             }
-            LookToolButton {
+            RailButton {
                 objectName: "railFrameOn"
-                Layout.alignment: Qt.AlignHCenter
-                icon.name: "media-skip-forward"
+                Layout.alignment: Qt.AlignCenter
+                symbol: "media-skip-forward"
                 text: qsTr("Frame on")
-                display: QQC2.AbstractButton.IconOnly
                 onClicked: page.step(1)
             }
-            // The tempo: a tap goes on to the next (the clickdummy; four fields do not fit a phone).
-            LookToggle {
-                objectName: "railTempo"
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: Look.unit(52)
-                checkable: false
-                text: player.playbackRate + "\u00D7"
-                Accessible.name: qsTr("Tempo")
-                onClicked: page.setSpeed(page.tempi[(page.tempi.indexOf(player.playbackRate) + 1) % page.tempi.length])
-            }
-            LookToggle {
-                objectName: "railLoop"
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: Look.unit(52)
-                text: qsTr("Loop")
-                checkable: false
-                checked: page.looping
-                onClicked: page.looping = !page.looping
+            GridLayout {
+                columns: page.bands ? 3 : 1
+                Layout.alignment: Qt.AlignCenter
+                Layout.fillWidth: page.bands
+                Layout.preferredWidth: page.bands ? 0 : -1
+                rowSpacing: rail.rowSpacing
+                columnSpacing: Look.unit(8)
+
+                Item {
+                    visible: page.bands
+                    Layout.fillWidth: true
+                }
+                // The tempo: a tap goes on to the next (the clickdummy; four fields do not fit a phone).
+                LookToggle {
+                    objectName: "railTempo"
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Look.unit(52)
+                    onStage: true
+                    checkable: false
+                    text: player.playbackRate + "\u00D7"
+                    Accessible.name: qsTr("Tempo")
+                    onClicked: page.setSpeed(page.tempi[(page.tempi.indexOf(player.playbackRate) + 1) % page.tempi.length])
+                }
+                // A symbol, as in the clickdummy: no word fits the rail in every language.
+                LookToggle {
+                    objectName: "railLoop"
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Look.unit(52)
+                    onStage: true
+                    text: "\u21BB"
+                    Accessible.name: qsTr("Loop")
+                    checkable: false
+                    checked: page.looping
+                    onClicked: page.looping = !page.looping
+                }
             }
         }
 
-        // The controls scroll when they do not fit (a phone held sideways: rating and Back).
+        // The controls scroll when they do not fit.
         Flickable {
             id: controlsView
 
@@ -447,15 +579,6 @@ Item {
                     wrapMode: Text.Wrap
                 }
 
-                // First, so a phone held sideways shows them without scrolling the column.
-                LookToolButton {
-                    objectName: "backButton"
-                    visible: page.landscape
-                    icon.name: "go-previous-view"
-                    text: qsTr("Back")
-                    onClicked: page.backRequested()
-                }
-
                 LookHint {
                     objectName: "trainingDone"
                     Layout.fillWidth: true
@@ -465,7 +588,7 @@ Item {
                     text: qsTr("%n technique(s) practised today. They count as a practice day in the statistics.", "", page.practisedCount)
 
                     LookButton {
-                        visible: !page.compact && !page.landscape     // sideways Back stands above
+                        visible: !page.compact
                         text: qsTr("Back")
                         onClicked: page.backRequested()
                     }
@@ -519,7 +642,7 @@ Item {
                     metronomeVisible: false
                     countInVisible: false
                     frameStep: true
-                    positionText: page.timeText(player.position - page.from) + " / " + page.timeText(page.to - page.from)
+                    positionText: page.timeText2
                     rewindText: qsTr("Chapter start")
                     playText: qsTr("Play")
                     pauseText: qsTr("Pause")
@@ -666,18 +789,17 @@ Item {
         }
     }
 
-    // The timeline in landscape (the clickdummy's `.qb .qtrk`): at the foot of the picture, beside
-    // the rail; z above the stage so a tap on the track lands on the slider and not on a gesture.
+    // The timeline in landscape: at the foot of the picture beside the rail (the clickdummy's
+    // `.qb .qtrk`), or under the picture above the row (`.qbot`); z above the stage so a tap on the
+    // track lands on the slider and not on a gesture.
     QQC2.Slider {
         id: railTimeline
 
         objectName: "railTimeline"
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.rightMargin: rail.width + Look.unit(10)
-        anchors.bottom: parent.bottom
-        anchors.leftMargin: Look.unit(10)
-        anchors.bottomMargin: Look.unit(10)
+        x: page.bands ? Look.unit(24) : Look.unit(10)
+        width: page.bands ? parent.width - 2 * x : parent.width - rail.width - 2 * x
+        height: page.bands ? Look.unit(20) : implicitHeight
+        y: page.bands ? stage.y + stage.height + Look.unit(2) : parent.height - height - Look.unit(10)
         visible: page.landscape
         z: 20
         from: page.from

@@ -260,7 +260,7 @@ if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
         ${MITORI_SHINKI_DIR}/qml/Shinki/*.qml)
     # qt_add_qml_module needs each file as a relative path or with QT_RESOURCE_ALIAS set; the
     # files live outside app/, so each gets its basename as alias. ShinkiStyle is a
-    # singleton in the submodul qmldir; mark it so Qt generates the qmldir accordingly.
+    # singleton in shinki/qml/Shinki/qmldir; mark it so Qt generates the qmldir accordingly.
     foreach(file ${SHINKI_QML_FILES})
         get_filename_component(_alias "${file}" NAME)
         set_source_files_properties(${file}

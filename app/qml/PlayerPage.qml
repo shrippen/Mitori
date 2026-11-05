@@ -3,7 +3,7 @@ import org.kde.kirigami as Kirigami
 import Mitori
 
 // The player as a page (PlayerView): from the programme, today's practice and the search; in
-// landscape without the page header (the controls stand in a column on the right).
+// landscape without the page header (the rail or the bands of PlayerView have its controls).
 Kirigami.Page {
     id: page
 
