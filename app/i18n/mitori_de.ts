@@ -1306,12 +1306,12 @@
     <message>
         <location filename="../qml/MediaVoice.qml" line="18"/>
         <source>Play voice note</source>
-        <translation>Play voice note</translation>
+        <translation>Sprachnotiz abspielen</translation>
     </message>
     <message>
         <location filename="../qml/MediaVoice.qml" line="31"/>
         <source>Voice note %1</source>
-        <translation>Voice note %1</translation>
+        <translation>Sprachnotiz %1</translation>
     </message>
     <message>
         <location filename="../qml/MediaVoice.qml" line="32"/>
