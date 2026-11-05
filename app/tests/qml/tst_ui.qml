@@ -3152,6 +3152,49 @@ TestCase {
     }
 
     // Tablet: the small player goes on where full screen ended, with its tempo and loop.
+    // A window turned for full screen is no longer wide: the pane comes back only afterwards, and
+    // then takes up the place, tempo and loop; a technique played since then outdates them.
+    function test_8t_pane_made_anew_after_full_screen() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const width = window.width, height = window.height
+        window.width = 700
+        window.height = 800
+        wait(100)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        tryVerify(() => !page.split)
+        page.lastId = rows[0].id
+        // What full screen left while there is no pane.
+        page.bigResume = { position: 3000, rate: 0.5, looping: false }
+        page.resumeFromBig()
+        verify(page.bigResume !== null, "kept until the pane is there")
+        window.width = 1280
+        tryVerify(() => page.player && page.player.duration > 0, 5000)
+        compare(page.player.looping, false)
+        compare(page.player.rate, 0.5)
+        verify(page.player.position >= page.player.from, page.player.position)
+        verify(Math.abs(page.player.position - Math.max(page.player.from, Math.min(page.player.to, 3000))) < 1500,
+               page.player.position + " from " + page.player.from + " to " + page.player.to)
+        verify(page.bigResume === null, "taken up once")
+        page.player.setSpeed(1)
+        page.player.looping = true
+
+        // Another technique in between: nothing is left to take up.
+        window.width = 700
+        tryVerify(() => !page.split)
+        page.bigResume = { position: 3000, rate: 0.5, looping: false }
+        page.lastId = rows[1].id
+        verify(page.bigResume === null)
+        window.pageStack.pop()
+        window.width = width
+        window.height = height
+        wait(100)
+    }
+
     function test_8t_small_player_keeps_place_after_full_screen() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
         if (rows.length === 0 || !Videos.available(rows[0].video.video)) {

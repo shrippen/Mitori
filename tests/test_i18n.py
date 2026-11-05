@@ -34,7 +34,7 @@ def test_every_text_is_in_its_context():
     contexts = {c.findtext("name"): {m.findtext("source") for m in c.iter("message")
                                      if m.find("translation").get("type") not in ("vanished", "obsolete")}
                 for c in ET.parse(I18N / "mitori_de.ts").iter("context")}
-    missing = [f"{qml.stem}: {text}" for qml in (APP / "qml").glob("*.qml")
+    missing = [f"{qml.stem}: {text}" for qml in (APP / "qml").rglob("*.qml")
                for text in QSTR.findall(qml.read_text(encoding="utf-8"))
                if "\\" not in text and text not in contexts.get(qml.stem, set())]
     assert not missing, f"cmake --build <dir> --target update_translations: {missing[:8]}"
