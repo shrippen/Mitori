@@ -3,8 +3,11 @@
 # Starts until the window is there, then reads RSS after 3 s (with five years of data if the
 # tst_perf run left them: MITORI_PERF_DATA=<build>/perf-data/data).
 set -euo pipefail
-repo="$(cd "$(dirname "$0")/.." && pwd)"
-app="${MITORI_BIN:-$HOME/.cache/claude/mitori-qa-bin}"
+app="${MITORI_BIN:-$HOME/.cache/claude/mitori-qa-build/mitori}"
+if [ ! -x "$app" ]; then
+    echo "perf: $app not found; qa/build.sh first" >&2
+    exit 2
+fi
 runs="${1:-5}"
 base="$HOME/.cache/claude/mitori-qa"
 mkdir -p "$base"
@@ -21,12 +24,18 @@ read -r display < "$work/display"
 trap 'kill "$xvfb" 2>/dev/null || true; rm -rf "$work"' EXIT
 for i in $(seq "$runs"); do
     started="$(date +%s%N)"
-    env -u WAYLAND_DISPLAY -u DBUS_SESSION_BUS_ADDRESS QT_QPA_PLATFORM=xcb DISPLAY=":$display" HOME="$work/home" \
+    env -i PATH="$PATH" QT_QPA_PLATFORM=xcb DISPLAY=":$display" HOME="$work/home" \
         XDG_RUNTIME_DIR="$work/runtime" XDG_CONFIG_HOME="$work/config" XDG_DATA_HOME="$data" \
         XDG_CACHE_HOME="$work/cache" QT_QUICK_BACKEND=software MITORI_DEVICE_LEVELS=memory \
         MITORI_SPEECH_ENGINE=mock "$app" > /dev/null 2>&1 &
     pid="$!"
-    until DISPLAY=":$display" xdotool search --onlyvisible --pid "$pid" > /dev/null 2>&1; do sleep 0.02; done
+    until DISPLAY=":$display" xdotool search --onlyvisible --pid "$pid" > /dev/null 2>&1; do
+        if ! kill -0 "$pid" 2>/dev/null; then
+            echo "perf: the app ended before its window" >&2
+            exit 1
+        fi
+        sleep 0.02
+    done
     ms="$(( ($(date +%s%N) - started) / 1000000 ))"
     sleep 3
     rss="$(awk '/VmRSS/ {print int($2 / 1024)}' "/proc/$pid/status")"

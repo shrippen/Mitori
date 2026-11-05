@@ -21,7 +21,7 @@ Feste Journeys je Persona ([`PERSONAS.md`](PERSONAS.md)). Wer einen Ablauf ände
 **J-A1 Erster Start** · P1, P6. `--new`: Assistent, Stil wählen, Rundgang, Startmenü.
 Erwartet: unter einer Minute zum Startmenü, jeder Begriff erklärt, zurück jederzeit möglich.
 
-**J-A2 Ohne Videos** · P6. `--no-videos --lang en`: Programm, Technik, Video, Einstellungen → Videos, Code eingeben (falsch).
+**J-A2 Ohne Videos** · P6. `--lang en` (ohne `--videos`): Programm, Technik, Video, Einstellungen → Videos, Code eingeben (falsch).
 Erwartet: sagt, warum nichts läuft und was zu tun ist; alles auf Englisch; ein falscher Code hat eine klare Meldung.
 
 **J-B1 Technik nachschlagen** · P1, P2. Startmenü → Programm → Grad → Technik → Blatt → Video.
@@ -63,8 +63,10 @@ Erwartet: klare Meldung bei jedem Fehler; Daten bleiben; sagt, wo die Datei lieg
 
 ## Grenzen der Sitzung
 
-Xvfb ohne Fenstermanager und mit Software-Backend: das Videobild bleibt schwarz, Wischen ist Maus,
-nicht Touch (Listen mit dem Mausrad scrollen), Drehen und Bildschirmtastatur gibt es nicht, `xdotool`
-verliert manche Umlaute. All das bleibt am Gerät zu prüfen. Prüfbilder können Videobilder zeigen:
-sie bleiben auf dem Rechner und werden nicht angesehen, wenn echte Videos laufen (`--no-videos`
-oder `MITORI_QA_VIDEOS` auf einen Ordner mit Testvideos).
+Xvfb ohne Fenstermanager und mit Software-Backend, also ohne Videobild (es bleibt schwarz, die Zeit
+läuft), Ton, Mikrofon und Kamera; Sprachausgabe nur als Attrappe. Wischen ist Maus, nicht Touch
+(Listen mit dem Mausrad scrollen), Drehen und Bildschirmtastatur gibt es nicht, `xdotool` verliert
+manche Umlaute und das Ô. All das bleibt am Gerät zu prüfen. Die Termine kommen vom echten Server.
+
+Ohne `--videos` hat das Gerät keine Videos; für den Player ein Ordner mit Testvideos gleichen Namens
+(`ffmpeg -f lavfi`). Mit den echten Videos: Bilder nicht ansehen, sie verlassen sonst den Rechner.
