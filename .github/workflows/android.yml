@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - 'app/**'
+      - 'shinki/**'
       - 'third_party/mitori-daten'    # the submodule's pin
       - 'scripts/build-android.sh'
       - 'scripts/build-kf6-android.sh'

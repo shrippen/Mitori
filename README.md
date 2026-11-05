@@ -16,15 +16,17 @@ in der App mit dem Code der DVD freigeschaltet.
 | `entwuerfe/` | Konzept, Entscheidungen und Clickdummy der App |
 | `packaging/` | Flatpak (`io.github.shrippen.Mitori.yml`), AppImage, metainfo, icons |
 | `scripts/` | Build-Skripte: App, Android-App, AppImage, Flatpak, qmllint, Release-Notes, sync-kante |
-| `third_party/mitori-daten/` | Submodul: Programmdaten, Quellen, Video-Bundle-Encoder, Shinki-Stil |
-| `tests/` | Python-Tests für App-Spezifisches (Android, Icons) |
+| `shinki/` | der Stil Shinki: Bibel, Tokens, QML-Bausteine, Schriften |
+| `tools/` | Werkzeuge von Shinki (Singleton, Schriften) |
+| `third_party/mitori-daten/` | Submodul: Programmdaten, Quellen, Video-Bundle-Encoder |
+| `tests/` | Python-Tests (Shinki, Übersetzungen, Android, Icons) |
 
 Andere Repos:
 
 | Repo | Inhalt |
 |---|---|
 | `mitori-heft` (Schwester) | gedrucktes Heft (LuaLaTeX) |
-| `third_party/mitori-daten` (Submodul) | Daten, Quellen, Werkzeuge, Bundle-Encoder, Shinki |
+| `third_party/mitori-daten` (Submodul) | Daten, Quellen, Werkzeuge, Bundle-Encoder; Pin auf ein Datentag |
 
 Plan: [ROADMAP.md](ROADMAP.md). Regeln für die Arbeit am Repo: [agent.md](agent.md).
 Daten-Submodul: [mitori-daten](third_party/mitori-daten/README.md).
