@@ -45,10 +45,7 @@ Kirigami.Page {
     // The style's page ground (the window's scope gives Page the dialog colour).
     background: Rectangle { color: Look.backgroundColor }
     // Sideways the video takes the whole height: no head (Kirigami's bar, or Shinki's head).
-    // A step later: the head going changes the page's height, which `landscape` reads (a binding loop).
-    property bool headless: false
-    function syncHead() { headless = view.landscape }
-    Component.onCompleted: syncHead()
+    readonly property bool headless: view.landscape
     globalToolBarStyle: headless ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
 
     onIndexChanged: view.index = index
@@ -70,7 +67,10 @@ Kirigami.Page {
         Levels.setSideways(Levels.Switch.Off)
         bigWindow.visibility = windowBefore
     }
-    onBigChanged: showBig()
+    onBigChanged: {
+        showBig()
+        view.forceActiveFocus()     // the button just hidden would keep the keys
+    }
     // The Back key only moves the stack on and keeps this page: it ends full screen and the video.
     onIsCurrentPageChanged: {
         // Not while it is being made (index -1), nor under a page above it (the notes).
@@ -112,7 +112,6 @@ Kirigami.Page {
         onIndexChanged: page.index = index
         onShown: id => page.shown(id)
         big: page.big
-        onLandscapeChanged: Qt.callLater(page.syncHead)
         onBackRequested: page.leave()
         onBigRequested: page.big = true
         onBigLeft: {

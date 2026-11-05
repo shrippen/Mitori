@@ -890,6 +890,34 @@ TestCase {
         compare(window.pageStack.depth, depth)
         window.pageStack.pop()
 
+        // By keyboard the hidden button gives the focus back: Space pauses, it does not press it.
+        const typed = push("PlayerPage", { playlist: rows, index: 0 })
+        tryVerify(() => typed.playing, 5000)
+        wait(500)
+        findChild(typed, "fullButton").forceActiveFocus()
+        keyClick(Qt.Key_Space)
+        compare(typed.big, true)
+        keyClick(Qt.Key_Space)
+        compare(typed.big, true, "still full screen")
+        tryCompare(typed, "playing", false)
+        keyClick(Qt.Key_Escape)
+        window.pageStack.pop()
+
+        // A nearly square window: the head does not turn the page back and forth (Shinki).
+        const squareWidth = window.width
+        const square = push("PlayerPage", { playlist: rows, index: 0 })
+        wait(500)
+        window.width = window.height - Look.unit(20)
+        wait(300)
+        let turns = 0
+        const count = () => turns++
+        square.heightChanged.connect(count)
+        wait(500)
+        square.heightChanged.disconnect(count)
+        compare(turns, 0, "page height stands still")
+        window.width = squareWidth
+        window.pageStack.pop()
+
         // Space still plays and stops: ⤢ does not keep the focus.
         const spaced = push("PlayerPage", { playlist: rows, index: 0 })
         const spacedFull = findChild(spaced, "fullButton")

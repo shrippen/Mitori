@@ -43,7 +43,8 @@ Item {
     readonly property real end: player.duration > 0 ? Math.min(to, player.duration - 250) : to
     readonly property var crop: Videos.crop(video)
     // Sideways only with a picture; without a video the card and the controls stand as upright.
-    readonly property bool landscape: !compact && hasVideo && (width > height || big)
+    // By the window's height: the page's own changes with the head that this property hides.
+    readonly property bool landscape: !compact && hasVideo && (big || width > Window.height)
     // On the rail: 62 px on the phone (CD .qrail), 84 px on a tablet in landscape (CD .tab .qrail).
     // The phone held sideways is about 360 dp tall, a tablet sideways 720 dp.
     readonly property bool tabletSideways: page.landscape && height >= Kirigami.Units.gridUnit * 26
