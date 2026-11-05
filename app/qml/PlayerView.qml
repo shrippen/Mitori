@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import QtCore
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Controls.impl
@@ -59,6 +60,12 @@ Item {
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
     readonly property int jumpMs: 2000      // double tap
     property bool looping: true
+    // The tempo stays for the next time (the clickdummy keeps it).
+    Settings {
+        id: tempoStore
+
+        category: "player"
+    }
     // The double tap shows what it did, for a moment (the clickdummy): "2 s ››" on the side that
     // was tapped. The text is a symbol, not a word: it stays the same in every language.
     property string jumpHint: ""
@@ -67,6 +74,8 @@ Item {
     function setSpeed(rate) {
         player.playbackRate = rate
     }
+    // "0,25×": the tempo in the locale's numbers.
+    readonly property string tempoText: String(player.playbackRate).replace(".", Qt.locale().decimalPoint) + "\u00D7"
     function showJump(right) {
         jumpRight = right
         jumpHint = right ? "2 s \u203A\u203A" : "\u2039\u2039 2 s"
@@ -135,6 +144,9 @@ Item {
     function pause() {
         player.pause()
     }
+    function seek(ms) {
+        player.position = Math.max(page.from, Math.min(page.end, ms))
+    }
     function step(direction) {
         player.pause()
         player.position = Math.max(from, Math.min(to, player.position + direction * frameMs))
@@ -184,7 +196,8 @@ Item {
             muted: player.playbackRate < 1 || !Levels.sound
             volume: Levels.playerVolume
         }
-        playbackRate: 1
+        playbackRate: page.tempi.indexOf(tempoStore.value("tempo", 1) * 1) >= 0 ? tempoStore.value("tempo", 1) * 1 : 1
+        onPlaybackRateChanged: tempoStore.setValue("tempo", playbackRate)
         // The screen stays on while it plays (the switch "Screen on"), not while it stands.
         onPlayingChanged: Levels.setPlayback(playing ? Levels.Playback.Playing : Levels.Playback.Stopped)
         onSourceChanged: page.startPending = true
@@ -541,7 +554,7 @@ Item {
                 objectName: "railFrameBack"
                 caption: page.bands ? qsTr("1 frame") : qsTr("Frame")
                 Layout.alignment: Qt.AlignCenter
-                symbol: "media-skip-backward"
+                symbol: "go-previous"
                 text: qsTr("Frame back")
                 onClicked: page.step(-1)
             }
@@ -561,7 +574,7 @@ Item {
                 objectName: "railFrameOn"
                 caption: page.bands ? qsTr("1 frame") : qsTr("Frame")
                 Layout.alignment: Qt.AlignCenter
-                symbol: "media-skip-forward"
+                symbol: "go-next"
                 text: qsTr("Frame on")
                 onClicked: page.step(1)
             }
@@ -584,7 +597,7 @@ Item {
                     Layout.preferredWidth: Look.unit(52)
                     onStage: true
                     checkable: false
-                    text: player.playbackRate + "\u00D7"
+                    text: page.tempoText
                     Accessible.name: qsTr("Tempo")
                     onClicked: page.setSpeed(page.tempi[(page.tempi.indexOf(player.playbackRate) + 1) % page.tempi.length])
                 }

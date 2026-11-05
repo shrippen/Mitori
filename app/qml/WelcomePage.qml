@@ -29,10 +29,25 @@ Kirigami.ScrollablePage {
         { glyph: "講", title: qsTr("Courses"), text: qsTr("The seminars from the calendar, a notebook for each.") }
     ]
 
+    // At once: a page popped may live on for the forward arrow, and the style asks for a restart.
     function finish() {
+        Appearance.welcome()
         page.Kirigami.PageStack.pop()
     }
     Component.onDestruction: Appearance.welcome()
+
+    // Back goes a step, as the button below does. As on ExamEndPage: Qt 6.12 hands `event` over as
+    // a copy, so the page takes the stack back right after Kirigami's step.
+    onBackRequested: event => {
+        if (page.step === 0) {
+            return
+        }
+        event.accepted = true
+        page.step -= 1
+        const stack = (page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow).pageStack
+        const index = page.Kirigami.ColumnView.index
+        Qt.callLater(() => stack.currentIndex = index)
+    }
 
     actions: [
         Kirigami.Action {

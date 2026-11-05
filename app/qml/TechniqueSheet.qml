@@ -207,7 +207,9 @@ Kirigami.Dialog {
                 }
             }
         }
-        RowLayout {
+        // Wraps on a small phone: a row would make the whole sheet wider than the screen.
+        Flow {
+            Layout.fillWidth: true
             Layout.topMargin: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.smallSpacing
 

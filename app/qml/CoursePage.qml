@@ -139,7 +139,7 @@ Kirigami.ScrollablePage {
                     objectName: "exportedTo"
                     Layout.fillWidth: true
                     visible: page.exported !== ""
-                    text: qsTr("Exported: %1 (notizbuch.md with the photos and voice notes)").arg(page.exported)
+                    text: qsTr("Exported: %1").arg(page.exported)
                           + (page.exportMissing > 0 ? " " + qsTr("%n file(s) were not on this device and are missing.", "", page.exportMissing) : "")
                     color: Look.positiveTextColor
                     wrapMode: Text.Wrap
@@ -397,6 +397,7 @@ Kirigami.ScrollablePage {
                 enabled: compose.text.trim() !== ""
                 icon.name: "list-add"
                 text: qsTr("Add")
+                display: page.width < Kirigami.Units.gridUnit * 26 ? QQC2.AbstractButton.IconOnly : QQC2.AbstractButton.TextBesideIcon
                 onClicked: page.add()
             }
         }
@@ -424,7 +425,7 @@ Kirigami.ScrollablePage {
         const missing = Courses.exportNotebook(page.uid, url)
         const local = String(url).startsWith("file:")
         page.exportMissing = Math.max(0, missing)
-        page.exported = missing < 0 ? "" : local ? decodeURIComponent(String(url).split("/").pop()) : Courses.exportName(page.uid)
+        page.exported = missing < 0 ? "" : local ? decodeURIComponent(String(url).replace(/^file:\/\//, "")) : Courses.exportName(page.uid)
     }
 
     // A note without text says what it holds.

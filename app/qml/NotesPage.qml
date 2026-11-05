@@ -218,6 +218,7 @@ Kirigami.ScrollablePage {
                 enabled: compose.text.trim() !== ""
                 icon.name: "list-add"
                 text: qsTr("Add")
+                display: page.width < Kirigami.Units.gridUnit * 26 ? QQC2.AbstractButton.IconOnly : QQC2.AbstractButton.TextBesideIcon
                 onClicked: page.add()
             }
         }

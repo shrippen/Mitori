@@ -123,11 +123,12 @@ Kirigami.ScrollablePage {
             }
 
             LookLabel {
-                objectName: "speechHint"
                 Layout.fillWidth: true
                 Layout.leftMargin: Kirigami.Units.largeSpacing
                 Layout.rightMargin: Kirigami.Units.largeSpacing
-                visible: Glossary.speech === Glossary.NoVoice || Glossary.speech === Glossary.Unsupported
+                objectName: "speechHint"
+                // Once with the glossary, not above every result.
+                visible: !page.searching && (Glossary.speech === Glossary.NoVoice || Glossary.speech === Glossary.Unsupported)
                 text: Glossary.speech === Glossary.Unsupported
                       ? qsTr("This version of Mitori has no speech output, so there is no pronunciation.")
                       : qsTr("No Japanese voice for speech output found. Where the system offers one (Android: settings, text-to-speech output), install it to hear the pronunciation.")
@@ -206,7 +207,7 @@ Kirigami.ScrollablePage {
                     text: modelData.title + (modelData.extra && !modelData.nr ? " (" + modelData.extra + ")" : "")
                           + (modelData.jp ? "  " + modelData.jp : "")
                     subtitle: [modelData.disciplineName + " " + modelData.gradeName, modelData.groupName,
-                               modelData.attack + (modelData.attackExtra ? " (" + modelData.attackExtra + ")" : ""),
+                               (modelData.attack || "") + (modelData.attackExtra ? " (" + modelData.attackExtra + ")" : ""),
                                modelData.nr ? modelData.extra : ""].filter(x => x).join(" · ")
                     onClicked: {
                         sheet.entry = modelData

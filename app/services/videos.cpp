@@ -38,8 +38,13 @@ QString Videos::defaultFolder()
             return candidate;
         }
     }
+#ifdef Q_OS_ANDROID
     // Android lists the external files folder last: there adb can put the videos.
     return locations.isEmpty() ? QString() : QDir(locations.last()).filePath(QStringLiteral("videos"));
+#else
+    // The first is the user's own (the others are the system's, say /usr/share).
+    return locations.isEmpty() ? QString() : QDir(locations.first()).filePath(QStringLiteral("videos"));
+#endif
 }
 
 void Videos::setFolder(const QString &folder)

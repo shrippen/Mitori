@@ -149,6 +149,14 @@ Kirigami.ScrollablePage {
             color: Look.negativeTextColor
             wrapMode: Text.Wrap
         }
+        LookLabel {
+            objectName: "openPoints"
+            Layout.fillWidth: true
+            visible: !page.complete
+            text: qsTr("%n point(s) still to rate.", "", page.levels.filter(l => l === 0).length)
+            color: Look.mutedTextColor
+            wrapMode: Text.Wrap
+        }
         LookButton {
             objectName: "applyRound"
             enabled: page.complete

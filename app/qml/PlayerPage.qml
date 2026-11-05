@@ -28,6 +28,10 @@ Kirigami.Page {
     readonly property alias playing: view.playing
     readonly property alias duration: view.duration
     readonly property alias rate: view.rate
+    readonly property alias tempoText: view.tempoText
+    property alias looping: view.looping
+    function setSpeed(rate) { view.setSpeed(rate) }
+    function seek(ms) { view.seek(ms) }
     readonly property alias trainingDone: view.trainingDone
     readonly property alias practisedCount: view.practisedCount
     readonly property alias hasVideo: view.hasVideo
@@ -39,6 +43,8 @@ Kirigami.Page {
 
     // The entry on screen, for the programme list to mark it when the user comes back.
     signal shown(string id)
+    // Full screen ended (bigOnly): where the small player goes on.
+    signal bigEnded(real position, real rate, bool looping)
 
     title: view.current.title || ""
     padding: 0
@@ -119,11 +125,16 @@ Kirigami.Page {
         onBigRequested: page.big = true
         onBigLeft: {
             if (page.bigOnly) {
+                page.bigEnded(view.position, view.rate, view.looping)
                 page.leave()
                 return
             }
             page.big = false
         }
-        onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
+        // It rests under the notes: no sound over the reading, and none into a voice note.
+        onNotesRequested: entry => {
+            view.pause()
+            page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
+        }
     }
 }
