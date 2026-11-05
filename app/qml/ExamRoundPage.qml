@@ -64,8 +64,9 @@ Kirigami.Page {
         modal: true
         span: LookDialog.Span.Small
         destructive: true
-        title: qsTr("Cancel the round?")
+        title: qsTr("Discard the round?")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
+        acceptText: qsTr("Discard")
         onAccepted: page.Kirigami.PageStack.pop(page.Kirigami.PageStack.pageStack.items[page.Kirigami.ColumnView.index - 1])
 
         LookLabel {

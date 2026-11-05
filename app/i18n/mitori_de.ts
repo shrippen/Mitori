@@ -966,36 +966,41 @@
     </message>
     <message>
         <location filename="../qml/ExamRoundPage.qml" line="67"/>
-        <source>Cancel the round?</source>
-        <translation>Runde abbrechen?</translation>
+        <source>Discard the round?</source>
+        <translation type="unfinished">Runde verwerfen?</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="73"/>
+        <location filename="../qml/ExamRoundPage.qml" line="69"/>
+        <source>Discard</source>
+        <translation type="unfinished">Verwerfen</translation>
+    </message>
+    <message>
+        <location filename="../qml/ExamRoundPage.qml" line="74"/>
         <source>You are at point %1 of %2. Nothing has been rated yet, the round is simply dropped.</source>
         <translation>Du bist bei Punkt %1 von %2. Eingeschätzt ist noch nichts, die Runde fällt einfach weg.</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="105"/>
+        <location filename="../qml/ExamRoundPage.qml" line="106"/>
         <source>Point %1 of %2</source>
         <translation>Punkt %1 von %2</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="137"/>
+        <location filename="../qml/ExamRoundPage.qml" line="138"/>
         <source>Sample %1</source>
         <translation>Stichprobe %1</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="148"/>
+        <location filename="../qml/ExamRoundPage.qml" line="149"/>
         <source>Next</source>
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="148"/>
+        <location filename="../qml/ExamRoundPage.qml" line="149"/>
         <source>Rate the round</source>
         <translation>Runde einschätzen</translation>
     </message>
     <message>
-        <location filename="../qml/ExamRoundPage.qml" line="155"/>
+        <location filename="../qml/ExamRoundPage.qml" line="156"/>
         <source>You rate every technique at the end of the round.</source>
         <translation>Am Ende der Runde schätzt du jede Technik ein.</translation>
     </message>

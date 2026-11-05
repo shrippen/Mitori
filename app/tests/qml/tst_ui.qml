@@ -2852,15 +2852,13 @@ TestCase {
         const target = "file://" + uiShotsDir + "/" + Courses.exportName(course)
         book.exportTo(target)
         tryVerify(() => findChild(book, "exportedTo").visible)
+        verify(findChild(book, "exportedTo").text.indexOf(uiShotsDir) > 0, "says where: " + findChild(book, "exportedTo").text)
         verify(findChild(book, "exportedTo").text.indexOf("Fotolehrgang") > 0, findChild(book, "exportedTo").text)
         shot("14d-course-exported")
         window.pageStack.pop()
         verify(Courses.remove(course))
     }
 
-    // A note begun in the player belongs to the technique it was typed for, also when the player
-    // moves on before it is added (training moves on after a rating).
-    // Found by the QA round of 5 Nov 2026 (qa/PERSONAS.md).
     function test_8q_search_row_without_attack() {
         const page = push("SearchPage")
         const field = findChild(page, "searchField")
@@ -2950,15 +2948,17 @@ TestCase {
         big.togglePlay()
         tryVerify(() => !big.playing, 2000)
         const reached = big.position
-        big.bigEnded(big.position, big.rate, true)
+        // Back ends it too (the Android key), not only the button.
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem === page)
+        wait(100)
         // The pane may have been made anew while the window was full screen.
         const after = page.player
         compare(after.rate, 0.25)
-        compare(after.looping, true)
+        compare(after.looping, false)
         verify(Math.abs(after.position - reached) < 1500, after.position + " against " + reached)
         after.setSpeed(1)
-        big.leave()
-        tryVerify(() => window.pageStack.currentItem === page)
+        after.looping = true
         window.pageStack.pop()
         window.width = width
         wait(200)
@@ -2979,6 +2979,7 @@ TestCase {
         const dialog = findChild(page, "cancelRoundDialog")
         tryVerify(() => dialog.opened)
         compare(window.pageStack.currentItem, page)
+        compare(dialog.acceptText, qsTr("Discard"), "Cancel in a dialog about cancelling says nothing")
         dialog.reject()
         tryVerify(() => !dialog.visible)
         window.back()
@@ -2998,6 +2999,11 @@ TestCase {
         verify(!open.visible)
         tryVerify(() => findChild(page, "applyRound").enabled)
         window.pageStack.pop()
+    }
+
+    // Not a system folder (Linux lists /usr/share last, where nobody can put videos).
+    function test_8w_default_video_folder_is_the_users() {
+        verify(!/^\/(usr|etc|opt)\//.test(Videos.defaultFolder()), Videos.defaultFolder())
     }
 
     function test_8w_voice_hint_only_with_the_glossary() {
@@ -3047,6 +3053,9 @@ TestCase {
         wait(50)
     }
 
+    // A note begun in the player belongs to the technique it was typed for, also when the player
+    // moves on before it is added (training moves on after a rating).
+    // Found by the QA round of 5 Nov 2026 (qa/PERSONAS.md).
     function test_8b_note_draft_stays_with_its_technique() {
         const page = playerAt(1)
         const first = page.current.id

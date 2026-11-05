@@ -87,6 +87,9 @@ Kirigami.Page {
         if (isCurrentPage || place < 0 || page.Kirigami.PageStack.pageStack.currentIndex >= place) {
             return
         }
+        if (bigOnly && big) {
+            bigEnded(view.position, view.rate, view.looping)
+        }
         big = false
         view.pause()
     }
