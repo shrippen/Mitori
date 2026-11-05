@@ -49,6 +49,8 @@ double clamped(double level)
 #ifdef Q_OS_ANDROID
 constexpr int kStreamMusic = 3;                 // AudioManager.STREAM_MUSIC
 constexpr jint kKeepScreenOn = 128;             // WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+constexpr jint kOrientationFree = -1;           // ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+constexpr jint kOrientationSideways = 6;        // ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
 constexpr float kSystemBrightness = -1.0f;      // WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
 
 QJniObject audioManager()
@@ -207,6 +209,22 @@ bool setVolume(double level)
     return true;
 #else
     return false;
+#endif
+}
+
+void turnScreen(Turn turn)
+{
+#ifdef Q_OS_ANDROID
+    if (inMemory()) {
+        return;
+    }
+    const jint orientation = turn == Turn::Sideways ? kOrientationSideways : kOrientationFree;
+    QNativeInterface::QAndroidApplication::runOnAndroidMainThread([orientation] {
+        const QJniObject activity = QNativeInterface::QAndroidApplication::context();
+        activity.callMethod<void>("setRequestedOrientation", "(I)V", orientation);
+    });
+#else
+    Q_UNUSED(turn)
 #endif
 }
 

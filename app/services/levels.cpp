@@ -98,6 +98,11 @@ void Levels::setAwake(Switch state)
     emit changed();
 }
 
+void Levels::setSideways(Switch state)
+{
+    DeviceLevels::turnScreen(state == Switch::On ? DeviceLevels::Turn::Sideways : DeviceLevels::Turn::Free);
+}
+
 // The screen stays on while a video plays and the switch is on.
 void Levels::hold()
 {

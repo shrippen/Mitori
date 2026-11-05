@@ -18,6 +18,7 @@
 namespace DeviceLevels {
 
 enum class Hold { Release, Keep };
+enum class Turn { Free, Sideways };
 
 double brightness();
 // False when the platform has no brightness to set.
@@ -30,5 +31,8 @@ bool setVolume(double level);
 
 void holdScreen(Hold hold);
 bool screenHeld();
+
+// Android turns the screen sideways; elsewhere the user turns the device.
+void turnScreen(Turn turn);
 
 }

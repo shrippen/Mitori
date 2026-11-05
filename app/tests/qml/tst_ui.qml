@@ -844,6 +844,172 @@ TestCase {
         tryCompare(window.pageStack, "depth", 1)
     }
 
+    // A click lands only once the page has slid in: again until it did what it should.
+    function clickUntil(item, done) {
+        tryVerify(() => {
+            if (!done()) {
+                mouseClick(item)
+            }
+            return done()
+        }, 5000)
+    }
+
+    function test_4v_full_screen() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const before = window.visibility
+        failOnWarning(/Binding loop/)
+
+        // Upright: ⤢ on the picture, full screen in place, ⤡ at the band brings it back.
+        const page = push("PlayerPage", { playlist: rows, index: 0 })
+        const full = findChild(page, "fullButton")
+        tryVerify(() => full.visible && full.width > 0)
+        wait(500)       // the page has slid in
+        clickUntil(full, () => page.big)
+        compare(window.visibility, Window.FullScreen)
+        wait(300)
+        shot("6b-full-screen")
+        verify(!full.visible, "⤢ is gone in full screen")
+        const leave = findChild(page, "bandBack")
+        tryVerify(() => leave.visible && leave.width > 0)
+        wait(300)
+        compare(leave.symbol, "view-restore")
+        clickUntil(leave, () => !page.big)
+        compare(window.visibility, before)
+        verify(full.visible, "⤢ again")
+
+        // Space after ⤡ stops the video: the button does not keep the focus (and would mean Back).
+        tryVerify(() => page.playing, 5000)
+        keyClick(Qt.Key_Space)
+        tryCompare(page, "playing", false)
+        compare(window.pageStack.currentItem, page)
+        page.togglePlay()
+
+        // Esc leaves it as well, and the page stays.
+        const depth = window.pageStack.depth
+        wait(500)       // the window has its size back
+        clickUntil(full, () => page.big)
+        page.forceActiveFocus()
+        keyClick(Qt.Key_Escape)
+        compare(page.big, false)
+        compare(window.pageStack.depth, depth)
+        window.pageStack.pop()
+
+        // By keyboard the hidden button gives the focus back: Space pauses, it does not press it.
+        const typed = push("PlayerPage", { playlist: rows, index: 0 })
+        tryVerify(() => typed.playing, 5000)
+        wait(500)
+        findChild(typed, "fullButton").forceActiveFocus()
+        keyClick(Qt.Key_Space)
+        compare(typed.big, true)
+        keyClick(Qt.Key_Space)
+        compare(typed.big, true, "still full screen")
+        tryCompare(typed, "playing", false)
+        keyClick(Qt.Key_Escape)
+        window.pageStack.pop()
+
+        // A nearly square window: the head does not turn the page back and forth (Shinki).
+        const squareWidth = window.width
+        const square = push("PlayerPage", { playlist: rows, index: 0 })
+        wait(500)
+        window.width = window.height - Look.unit(20)
+        wait(300)
+        let turns = 0
+        const count = () => turns++
+        square.heightChanged.connect(count)
+        wait(500)
+        square.heightChanged.disconnect(count)
+        compare(turns, 0, "page height stands still")
+        window.width = squareWidth
+        window.pageStack.pop()
+
+        // Space still plays and stops: ⤢ does not keep the focus.
+        const spaced = push("PlayerPage", { playlist: rows, index: 0 })
+        const spacedFull = findChild(spaced, "fullButton")
+        tryVerify(() => spaced.playing, 5000)
+        wait(500)
+        clickUntil(spacedFull, () => spaced.big)
+        keyClick(Qt.Key_Space)
+        compare(spaced.playing, false, "paused by Space")
+        compare(spaced.big, true)
+
+        // The Back key ends full screen too, and the video stops.
+        keyClick(Qt.Key_Back)
+        tryCompare(window.pageStack, "currentIndex", 0)
+        tryCompare(window, "visibility", before)
+        compare(spaced.big, false)
+        window.pageStack.pop(window.pageStack.currentItem)
+        const hidden = push("PlayerPage", { playlist: rows, index: 0 })
+        tryVerify(() => hidden.playing, 5000)
+        wait(500)
+        keyClick(Qt.Key_Back)
+        tryCompare(window.pageStack, "currentIndex", 0)
+        tryCompare(hidden, "playing", false, 2000, "no sound from a page left")
+        window.pageStack.pop(window.pageStack.currentItem)
+
+        // Back from full screen leaves the keys with the page before: the search goes on.
+        const search = push("SearchPage")
+        const searchField = findChild(search, "searchField")
+        tryVerify(() => searchField.activeFocus)
+        searchField.text = ""
+        const above = push("PlayerPage", { playlist: rows, index: 0 })
+        wait(500)
+        clickUntil(findChild(above, "fullButton"), () => above.big)
+        keyClick(Qt.Key_Back)
+        tryCompare(window.pageStack, "currentItem", search)
+        tryVerify(() => !above.big)
+        wait(200)
+        keyClick(Qt.Key_A)
+        compare(searchField.text, "a", "typed into the search")
+        window.pageStack.pop(window.pageStack.currentItem)
+        window.pageStack.pop()
+
+        // A place outside the chapter (the small player was still loading): the chapter start.
+        const chapter = rows.findIndex(r => r.video.von > 60)
+        verify(chapter >= 0)
+        const early = push("PlayerPage", { playlist: rows, index: chapter, startAt: 0 })
+        tryVerify(() => early.duration > 0 && early.playing, 5000)
+        wait(300)
+        verify(early.position >= early.from - 500, "at " + early.position + ", chapter at " + early.from)
+        window.pageStack.pop()
+
+        // Beside the list: ⤢ opens the big player where the small one stands; ⤡ closes that page.
+        const width = window.width
+        const height = window.height
+        window.width = 1280
+        window.height = 800
+        const programme = push("ProgrammePage")
+        tryVerify(() => programme.split)
+        programme.open(programme.rows.find(r => r.id === rows[0].id))
+        const pane = findChild(programme, "playerPane")
+        tryVerify(() => pane.item && pane.item.duration > 0, 5000)
+        pane.item.pause()
+        const place = pane.item.from + 1000
+        pane.item.jump(1000)
+        wait(500)
+        const small = findChild(pane.item, "fullButton")
+        verify(small.visible, "⤢ on the small player")
+        const before2 = window.pageStack.depth
+        clickUntil(small, () => window.pageStack.depth === before2 + 1)
+        tryCompare(window.pageStack, "depth", before2 + 1)
+        const bigPage = window.pageStack.currentItem
+        compare(bigPage.big, true)
+        wait(500)
+        tryVerify(() => bigPage.duration > 0, 5000)
+        tryVerify(() => Math.abs(bigPage.position - place) < 500, 3000, "at " + bigPage.position)
+        compare(window.visibility, Window.FullScreen)
+        const close = findChild(bigPage, "bandBack")
+        tryVerify(() => close.visible && close.width > 0)
+        clickUntil(close, () => window.pageStack.depth === before2)
+        tryCompare(window.pageStack, "depth", before2)
+        tryCompare(window, "visibility", before)
+        window.pageStack.pop()
+        window.width = width
+        window.height = height
+    }
+
     // What the eye sees and no behaviour test would: symbols in the middle of their buttons, the
     // bars with their margins, no bar without anything to scroll, hints inside their fields.
     function test_4u_shapes() {

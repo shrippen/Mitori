@@ -22,6 +22,10 @@ Item {
     property int index: 0
     // Beside the list on a tablet: always the picture above the controls, no Back button.
     property bool compact: false
+    // Full screen (the clickdummy's ⤢ "Player groß"): the page decides what that means.
+    property bool big: false
+    // Where the first chapter starts, once (the small player's place when it goes full screen).
+    property real startAt: -1
     readonly property var current: playlist[index] || ({})
     readonly property string video: current.video ? current.video.video : ""
     // A technique of the training may have no video on the device: a card stands for the picture.
@@ -39,7 +43,8 @@ Item {
     readonly property real end: player.duration > 0 ? Math.min(to, player.duration - 250) : to
     readonly property var crop: Videos.crop(video)
     // Sideways only with a picture; without a video the card and the controls stand as upright.
-    readonly property bool landscape: !compact && width > height && hasVideo
+    // By the window's height: the page's own changes with the head that this property hides.
+    readonly property bool landscape: !compact && hasVideo && (big || width > Window.height)
     // On the rail: 62 px on the phone (CD .qrail), 84 px on a tablet in landscape (CD .tab .qrail).
     // The phone held sideways is about 360 dp tall, a tablet sideways 720 dp.
     readonly property bool tabletSideways: page.landscape && height >= Kirigami.Units.gridUnit * 26
@@ -93,6 +98,8 @@ Item {
     signal backRequested()
     signal notesRequested(var entry)
     signal commentRequested(var entry)
+    signal bigRequested()
+    signal bigLeft()
 
     onCurrentChanged: {
         shown(current.id)
@@ -108,7 +115,9 @@ Item {
     }
 
     function restart() {
-        player.position = from
+        // Outside the chapter: the small player was still loading.
+        player.position = startAt >= from && startAt <= to ? startAt : from
+        startAt = -1
         if (autoPlay) {
             player.play()
         }
@@ -150,6 +159,16 @@ Item {
         if (next >= 0 && next < playlist.length) {
             index = next
         }
+    }
+    // The button at the rail or the band: out of full screen, else back.
+    readonly property string leaveSymbol: big ? "view-restore" : "go-previous-view"
+    readonly property string leaveText: big ? qsTr("Exit full screen") : qsTr("Back")
+    function leave() {
+        if (big) {
+            bigLeft()
+            return
+        }
+        backRequested()
     }
     function timeText(ms) {
         const s = Math.max(0, Math.round(ms / 100) / 10)
@@ -193,6 +212,12 @@ Item {
     Keys.onSpacePressed: page.togglePlay()
     Keys.onLeftPressed: page.step(-1)
     Keys.onRightPressed: page.step(1)
+    Keys.onEscapePressed: event => {
+        event.accepted = page.big
+        if (page.big) {
+            page.bigLeft()
+        }
+    }
 
     // A symbol on the dark ground, drawn here with room for its caption below (the buttons draw
     // theirs in the middle, in their own ink).
@@ -206,6 +231,7 @@ Item {
         property string symbol
         property string caption
 
+        focusPolicy: Qt.TabFocus    // Space stays with the player
         display: QQC2.AbstractButton.IconOnly
         StageIcon {
             anchors.verticalCenterOffset: parent.caption !== "" ? -Look.unit(6) : 0
@@ -247,9 +273,9 @@ Item {
 
             RailButton {
                 objectName: "bandBack"
-                symbol: "go-previous-view"
-                text: qsTr("Back")
-                onClicked: page.backRequested()
+                symbol: page.leaveSymbol
+                text: page.leaveText
+                onClicked: page.leave()
             }
             ColumnLayout {
                 Layout.fillWidth: true
@@ -269,7 +295,8 @@ Item {
 
                     LookLabel {
                         objectName: "bandTitle"
-                        Layout.maximumWidth: page.current.jp ? parent.width * 0.75 : parent.width
+                        // Of the page: the row's own width would feed back into its layout (upright, narrow).
+                        Layout.maximumWidth: page.current.jp ? page.width * 0.6 : page.width
                         elide: Text.ElideRight
                         text: page.titleText
                         color: Look.stageTextColor
@@ -444,6 +471,27 @@ Item {
                     }
                 }
             }
+
+            // Into full screen (the clickdummy's `.fs`); on the rail the time holds that corner.
+            RailButton {
+                objectName: "fullButton"
+
+                visible: !page.big
+                z: 11
+                anchors.right: parent.right
+                anchors.margins: Look.unit(8)
+                y: page.onRail ? Look.unit(8) : parent.height - height - Look.unit(8)
+                symbol: "view-fullscreen"
+                text: qsTr("Full screen")
+                onClicked: page.bigRequested()
+
+                Rectangle {
+                    anchors.fill: parent
+                    z: -1
+                    color: Look.stageColor
+                    opacity: 0.45
+                }
+            }
         }
 
         // Sideways: a narrow rail on the right with the buttons (the clickdummy). Phone 62 px (CD
@@ -485,9 +533,9 @@ Item {
                 objectName: "railBack"
                 visible: !page.bands
                 Layout.alignment: Qt.AlignHCenter
-                symbol: "go-previous-view"
-                text: qsTr("Back")
-                onClicked: page.backRequested()
+                symbol: page.leaveSymbol
+                text: page.leaveText
+                onClicked: page.leave()
             }
             RailButton {
                 objectName: "railFrameBack"
