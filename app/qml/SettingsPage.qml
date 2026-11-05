@@ -125,12 +125,12 @@ Kirigami.ScrollablePage {
         }
         LookFormRow {
             label: qsTr("Folder on the server:")
+            visible: Sync.enabled
             LookTextField {
                 id: serverField
 
                 objectName: "syncServer"
                 Layout.fillWidth: true
-                visible: Sync.enabled
                 text: Sync.server
                 placeholderText: "https://cloud.example.org/remote.php/dav/files/ich/Mitori/"
                 inputMethodHints: Qt.ImhUrlCharactersOnly | Qt.ImhNoAutoUppercase
@@ -139,11 +139,11 @@ Kirigami.ScrollablePage {
         }
         LookFormRow {
             label: qsTr("User:")
+            visible: Sync.enabled
             LookTextField {
                 id: userField
 
                 Layout.fillWidth: true
-                visible: Sync.enabled
                 text: Sync.user
                 inputMethodHints: Qt.ImhNoAutoUppercase
                 onEditingFinished: page.saveAccount()
@@ -151,11 +151,11 @@ Kirigami.ScrollablePage {
         }
         LookFormRow {
             label: qsTr("App password:")
+            visible: Sync.enabled
             LookTextField {
                 id: passwordField
 
                 Layout.fillWidth: true
-                visible: Sync.enabled
                 echoMode: TextInput.Password
                 placeholderText: Sync.hasPassword ? qsTr("saved") : ""
                 onEditingFinished: page.saveAccount()
@@ -163,11 +163,11 @@ Kirigami.ScrollablePage {
         }
         LookFormRow {
             label: qsTr("This device:")
+            visible: Sync.enabled
             LookTextField {
                 id: nameField
 
                 Layout.fillWidth: true
-                visible: Sync.enabled
                 text: Sync.deviceName
                 onEditingFinished: page.saveAccount()
             }

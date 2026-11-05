@@ -41,7 +41,7 @@ Item {
     readonly property bool landscape: !compact && width > height && hasVideo
     // On the rail: 62 px on the phone (CD .qrail), 84 px on a tablet in landscape (CD .tab .qrail).
     // The phone held sideways is about 360 dp tall, a tablet sideways 720 dp.
-    readonly property bool tabletSideways: page.landscape && height >= 460
+    readonly property bool tabletSideways: page.landscape && height >= Kirigami.Units.gridUnit * 26
     readonly property var tempi: [0.25, 0.5, 0.75, 1]
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
     readonly property int jumpMs: 2000      // double tap
@@ -250,8 +250,7 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 width: parent.width / 2
-                anchors.left: page.jumpRight ? parent.right : parent.left
-                anchors.right: page.jumpRight ? parent.right : undefined
+                x: page.jumpRight ? parent.width / 2 : 0
                 visible: page.jumpHint !== ""
                 color: Look.stageColor
                 opacity: 0.45
@@ -260,7 +259,8 @@ Item {
             LookLabel {
                 objectName: "jumpHintText"
 
-                anchors.centerIn: parent
+                anchors.verticalCenter: parent.verticalCenter
+                x: (parent.width / 2 - width) / 2 + (page.jumpRight ? parent.width / 2 : 0)
                 visible: page.jumpHint !== ""
                 text: page.jumpHint
                 color: Look.stageTextColor
@@ -362,26 +362,13 @@ Item {
                 display: QQC2.AbstractButton.IconOnly
                 onClicked: page.step(-1)
             }
-            // The play button: a red circle with the sign in it (the clickdummy).
-            Rectangle {
+            // The play button: under Shinki the red circle (the clickdummy).
+            LookPlayButton {
                 objectName: "railPlay"
-
                 Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: Look.unit(44)
-                Layout.preferredHeight: Look.unit(44)
-                radius: width / 2
-                color: Look.accentColor
-
-                LookLabel {
-                    anchors.centerIn: parent
-                    text: player.playing ? "\u23F8" : "\u25B6"
-                    color: Look.onAccentColor
-                    font.pixelSize: Look.unit(16)
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: page.togglePlay()
-                }
+                icon.name: player.playing ? "media-playback-pause" : "media-playback-start"
+                text: player.playing ? qsTr("Pause") : qsTr("Play")
+                onClicked: page.togglePlay()
             }
             LookToolButton {
                 objectName: "railFrameOn"
@@ -391,30 +378,22 @@ Item {
                 display: QQC2.AbstractButton.IconOnly
                 onClicked: page.step(1)
             }
-            // The four tempi, as small fields (the clickdummy's tempo row).
-            ColumnLayout {
+            // The tempo: a tap goes on to the next (the clickdummy; four fields do not fit a phone).
+            LookToggle {
+                objectName: "railTempo"
                 Layout.alignment: Qt.AlignHCenter
-                spacing: Look.unit(4)
-
-                Repeater {
-                    model: page.tempi
-
-                    LookToggle {
-                        required property var modelData
-
-                        objectName: "railTempo"
-                        Layout.preferredWidth: Look.unit(60)
-                        text: modelData === 1 ? "1\u00D7" : String(modelData)
-                        checked: player.playbackRate === modelData
-                        onClicked: page.setSpeed(modelData)
-                    }
-                }
+                Layout.preferredWidth: Look.unit(52)
+                checkable: false
+                text: player.playbackRate + "\u00D7"
+                Accessible.name: qsTr("Tempo")
+                onClicked: page.setSpeed(page.tempi[(page.tempi.indexOf(player.playbackRate) + 1) % page.tempi.length])
             }
             LookToggle {
                 objectName: "railLoop"
                 Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: Look.unit(60)
+                Layout.preferredWidth: Look.unit(52)
                 text: qsTr("Loop")
+                checkable: false
                 checked: page.looping
                 onClicked: page.looping = !page.looping
             }
@@ -428,7 +407,6 @@ Item {
             visible: !page.landscape
             Layout.fillWidth: !page.landscape
             Layout.fillHeight: true             // portrait: the picture stays at the top
-            Layout.preferredWidth: page.landscape ? Kirigami.Units.gridUnit * 17 : -1     // room for the tempo row
             contentHeight: controls.implicitHeight + Kirigami.Units.largeSpacing * 2
             // What the controls need without the positions of a sequence (they scroll below).
             readonly property real neededHeight: contentHeight
@@ -688,18 +666,18 @@ Item {
         }
     }
 
-    // The timeline in landscape (the clickdummy's `.qb .qtrk`): over the whole page, picture and
-    // rail. The grid lays out stage and rail; the slider is a sibling of the grid so it can span
-    // both. Anchors fill the page in own height; z above the stage so a tap on the track lands
-    // on the slider and not on a gesture.
+    // The timeline in landscape (the clickdummy's `.qb .qtrk`): at the foot of the picture, beside
+    // the rail; z above the stage so a tap on the track lands on the slider and not on a gesture.
     QQC2.Slider {
         id: railTimeline
 
         objectName: "railTimeline"
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.rightMargin: rail.width + Look.unit(10)
         anchors.bottom: parent.bottom
-        anchors.margins: Look.unit(10)
+        anchors.leftMargin: Look.unit(10)
+        anchors.bottomMargin: Look.unit(10)
         visible: page.landscape
         z: 20
         from: page.from

@@ -17,8 +17,8 @@ QQC2.Button {
 
     background: Rectangle {
         color: "transparent"
-        border.width: Look.borderWidth
-        border.color: toggle.checked ? Look.accentColor : Look.ruleColor
+        border.width: toggle.visualFocus ? Look.focusWidth : Look.borderWidth
+        border.color: toggle.visualFocus ? Look.focusColor : toggle.checked ? Look.accentColor : Look.ruleColor
     }
 
     contentItem: RowLayout {

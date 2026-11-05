@@ -29,6 +29,7 @@ Kirigami.Page {
     function jump(ms) { view.jump(ms) }
     function step(direction) { view.step(direction) }
     function togglePlay() { view.togglePlay() }
+    function showJump(right) { view.showJump(right) }
 
     // The entry on screen, for the programme list to mark it when the user comes back.
     signal shown(string id)

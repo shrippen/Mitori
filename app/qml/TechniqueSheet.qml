@@ -32,7 +32,7 @@ Kirigami.Dialog {
     // Under Shinki the sheet is a sheet from the bottom, the whole width (the clickdummy); under
     // the other styles it stays the centred dialog.
     readonly property bool shinkiSheet: Look.shinki
-    width: shinkiSheet && parent ? parent.width : preferredWidth
+    width: shinkiSheet && parent ? parent.width : Math.min(preferredWidth, absoluteMaximumWidth)
     // Centred without Kirigami's move on opening (y follows the opacity): with the Kamae exercise
     // the sheet grows while it fades in, and y ran into a binding loop.
     y: parent ? (shinkiSheet ? Math.round(parent.height - height) : Math.round((parent.height - height) / 2)) : 0
@@ -121,7 +121,7 @@ Kirigami.Dialog {
 
                 LookLabel {
                     Layout.fillWidth: true
-                    text: sheet.entry.title || ""
+                    text: sheet.title
                     font: Look.sheetTitleFont
                     wrapMode: Text.Wrap
                 }
@@ -156,7 +156,7 @@ Kirigami.Dialog {
         }
         LookHeading {
             Layout.fillWidth: true
-            visible: !!sheet.entry.jp
+            visible: !sheet.shinkiSheet && !!sheet.entry.jp      // Shinki's head has it
             level: 2
             text: sheet.entry.jp || ""
         }
