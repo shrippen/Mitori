@@ -7,7 +7,8 @@ import QtQuick.Controls.impl
  * dark Kante ground. The Controls' IconImage colours it on every platform.
  *   iconSource  a theme name ("go-next") or a url
  *   color       the colour of the symbol
- * Give it a size (width and height, or the Layout's preferred ones): without one it shows nothing.
+ * A theme name needs a size (width and height, or both of the Layout's preferred ones): without one
+ * it shows nothing. Set iconSource, not name: pick() writes name.
  */
 IconImage {
     property var iconSource: ""

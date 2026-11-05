@@ -147,9 +147,13 @@ QQC2.Button {
     RowLayout {
         id: kanteContent
         visible: control.drawn
-        x: control.leftPadding + Math.max(0, (control.availableWidth - width) / 2)
+        // At least 8 px each side: the desktop style's padding is 0, its native button draws its own margin.
+        readonly property real leftEdge: Math.max(control.leftPadding, KanteStyle.unit(8))
+        readonly property real rightEdge: Math.max(control.rightPadding, KanteStyle.unit(8))
+        readonly property real room: control.width - leftEdge - rightEdge
+        x: leftEdge + Math.max(0, (room - width) / 2)
         y: (control.height - height) / 2    // the middle: the style's padding may be uneven
-        width: Math.min(implicitWidth, control.availableWidth)
+        width: Math.max(0, Math.min(implicitWidth, room))
         height: control.availableHeight
         spacing: Math.max(control.spacing, Kirigami.Units.smallSpacing)
         opacity: control.enabled ? 1 : 0.5
@@ -186,9 +190,7 @@ QQC2.Button {
         target: control
         property: "implicitWidth"
         value: Math.max(control.implicitBackgroundWidth + control.leftInset + control.rightInset,
-                        kanteContent.implicitWidth
-                        // The desktop style's padding is 0, its native button draws its own margin.
-                        + Math.max(control.leftPadding + control.rightPadding, 2 * KanteStyle.unit(8)))
+                        kanteContent.implicitWidth + kanteContent.leftEdge + kanteContent.rightEdge)
         when: control.drawn
         restoreMode: Binding.RestoreBindingOrValue
     }
