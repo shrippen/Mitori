@@ -157,7 +157,7 @@ QVariantMap Practice::practisedInYear(int year, const QString &discipline) const
     const QDate first(year, 1, 1);
     const QDate last(year, 12, 31);
     const QString prefix = discipline.isEmpty() ? QString() : discipline + QLatin1Char('/');
-    const QHash<QDate, int> perDay = m_log->practisedPerDay(first.startOfDay().toUTC(), prefix);
+    const QHash<QDate, int> perDay = m_log->practisedPerDay(first.startOfDay().toUTC(), prefix, last.addDays(1).startOfDay().toUTC());
     for (auto it = perDay.cbegin(); it != perDay.cend(); ++it) {
         if (it.key() >= first && it.key() <= last) {
             result.insert(it.key().toString(Qt::ISODate), it.value());

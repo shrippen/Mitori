@@ -15,25 +15,41 @@ void KeyedListModel::setRows(const QVariantList &rows)
     for (const QVariant &r : rows) {
         next.insert(uidOf(r));
     }
-    // Walk both lists in order: drop what is gone, keep or update what stays, insert what is new.
+    // Walk both lists in order: drop what is gone, keep or update what stays, insert what is new;
+    // a run of rows gets one signal (a view redoes its layout on each).
     qsizetype i = 0;
-    for (const QVariant &r : rows) {
-        while (i < m_rows.size() && !next.contains(uidOf(m_rows.at(i)))) {
-            beginRemoveRows({}, int(i), int(i));
-            m_rows.removeAt(i);
+    for (qsizetype r = 0; r < rows.size(); ++r) {
+        qsizetype gone = 0;
+        while (i + gone < m_rows.size() && !next.contains(uidOf(m_rows.at(i + gone)))) {
+            ++gone;
+        }
+        if (gone > 0) {
+            beginRemoveRows({}, int(i), int(i + gone - 1));
+            m_rows.remove(i, gone);
             endRemoveRows();
         }
-        if (i < m_rows.size() && uidOf(m_rows.at(i)) == uidOf(r)) {
-            if (m_rows.at(i) != r) {
-                m_rows[i] = r;
+        if (i < m_rows.size() && uidOf(m_rows.at(i)) == uidOf(rows.at(r))) {
+            if (m_rows.at(i) != rows.at(r)) {
+                m_rows[i] = rows.at(r);
                 emit dataChanged(index(int(i)), index(int(i)));
             }
-        } else {
-            beginInsertRows({}, int(i), int(i));
-            m_rows.insert(i, r);
-            endInsertRows();
+            ++i;
+            continue;
         }
-        ++i;
+        // New up to the row that stands here.
+        const QString here = i < m_rows.size() ? uidOf(m_rows.at(i)) : QString();
+        qsizetype end = r + 1;
+        while (end < rows.size() && uidOf(rows.at(end)) != here) {
+            ++end;
+        }
+        beginInsertRows({}, int(i), int(i + end - r - 1));
+        m_rows.insert(i, end - r, QVariant());
+        for (qsizetype k = r; k < end; ++k) {
+            m_rows[i + k - r] = rows.at(k);
+        }
+        endInsertRows();
+        i += end - r;
+        r = end - 1;
     }
     if (i < m_rows.size()) {
         beginRemoveRows({}, int(i), int(m_rows.size() - 1));

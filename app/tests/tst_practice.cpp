@@ -71,6 +71,8 @@ private slots:
 
         // A discipline's entries only ("aikido/"), and a calendar year (All years).
         QCOMPARE(log.practisedPerDay(t.addDays(-30), QStringLiteral("a")).value(t.toLocalTime().date()), 1);
+        // Up to a day: what came later is not read at all (All years asks per year).
+        QCOMPARE(log.practisedPerDay(t.addDays(-30), {}, t.addDays(1)).size(), 1);
         QCOMPARE(log.firstRating(), t.addDays(-40));
         practice.rate(QStringLiteral("aikido/k5/x"), 3);
         const int year = QDate::currentDate().year();

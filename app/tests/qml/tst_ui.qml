@@ -1608,9 +1608,8 @@ TestCase {
         const exam = push("ExamPage")
         verify(findChild(exam, "plannedHint").visible)
         verify(findChild(exam, "toExamGrade").visible)
-        wait(800)
-        mouseClick(findChild(exam, "toExamGrade"))
-        tryCompare(exam, "grade", "k4")
+        wait(1000)      // the page has slid in (a click during the slide can land beside the button)
+        clickUntil(findChild(exam, "toExamGrade"), () => exam.grade === "k4")
         verify(!findChild(exam, "toExamGrade").visible)
         window.pageStack.pop()
 

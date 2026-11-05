@@ -1,5 +1,7 @@
 #include "practicelog.h"
 
+#include <limits>
+
 #include <QCoreApplication>
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -138,6 +140,15 @@ bool PracticeLog::migrate()
             return false;
         }
     }
+    // 6: the ratings by time (the calendars ask for a year of them; 100000 ratings are a real user).
+    if (version < 6) {
+        const bool ok = q.exec(QStringLiteral("CREATE INDEX IF NOT EXISTS ratings_at ON ratings (at)"))
+            && q.exec(QStringLiteral("PRAGMA user_version = 6"));
+        if (!ok) {
+            m_error = q.lastError().text();
+            return false;
+        }
+    }
     return true;
 }
 
@@ -224,12 +235,13 @@ QHash<QString, QDate> PracticeLog::firstRated() const
     return result;
 }
 
-QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from, const QString &prefix) const
+QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from, const QString &prefix, const QDateTime &to) const
 {
     QHash<QDate, QSet<QString>> entries;
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ? AND substr(entry, 1, ?) = ?"));
+    q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ? AND at < ? AND substr(entry, 1, ?) = ?"));
     q.addBindValue(from.toMSecsSinceEpoch());
+    q.addBindValue(to.isValid() ? to.toMSecsSinceEpoch() : std::numeric_limits<qint64>::max());
     q.addBindValue(prefix.size());
     q.addBindValue(prefix.isNull() ? QStringLiteral("") : prefix);     // a null string binds NULL
     q.exec();

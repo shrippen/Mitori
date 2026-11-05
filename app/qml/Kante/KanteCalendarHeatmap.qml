@@ -131,39 +131,108 @@ Item {
         }
     }
 
+    // The days as one list, read once: a year of cells, several years on a page (All years in
+    // Mitori): a Date per binding and per cell took twice the time.
+    readonly property var cells: {
+        const list = []
+        const first = firstDay
+        const last = lastDay
+        for (let i = 0; i < weeks * 7; i++) {
+            const date = new Date(first.getFullYear(), first.getMonth(), first.getDate() + i, 12)
+            list.push({ date: date, iso: isoDay(date), shown: date <= last })
+        }
+        return list
+    }
+
     Repeater {
         model: heat.weeks * 7
-        delegate: Item {
-            id: cell
+        delegate: Rectangle {
             required property int index
-            readonly property int week: Math.floor(index / 7)
-            readonly property int row: index % 7
-            readonly property date day: heat.dayAt(week, row)
-            readonly property int level: heat.levelOf(day)
-            readonly property string tip: heat.tipOf(day)
+            // Not the model: a new end date in the same year would make every cell anew.
+            readonly property var modelData: heat.cells[index] || { date: new Date(NaN), iso: "", shown: false }
+            readonly property int level: Math.max(0, Math.min(4, Number(heat.levels[modelData.iso]) || 0))
 
-            visible: heat.shown(week, row)
-            x: heat.lead(heat.labelWidth + week * heat.step, heat.cellSize)
-            y: heat.labelHeight + row * heat.step
+            visible: modelData.shown
+            x: heat.lead(heat.labelWidth + Math.floor(index / 7) * heat.step, heat.cellSize)
+            y: heat.labelHeight + index % 7 * heat.step
             width: heat.cellSize
             height: heat.cellSize
+            color: heat.levelColors[level]
             Accessible.role: Accessible.StaticText
-            Accessible.name: heat.tipOf(day, Locale.LongFormat)
-
-            Rectangle { anchors.fill: parent; color: KanteStyle.sunkenColor }
-            Rectangle { anchors.fill: parent; color: cell.level > 0 ? KanteStyle.levelColor(cell.level, 4) : "transparent" }
-
-            HoverHandler { id: hover }
-            TapHandler {
-                onTapped: {
-                    heat.tappedIndex = cell.index
-                    tipTimer.restart()
-                }
-            }
-            QQC2.ToolTip.text: tip
-            QQC2.ToolTip.visible: hover.hovered || heat.tappedIndex === index
-            QQC2.ToolTip.delay: heat.tappedIndex === index ? 0 : 300
+            Accessible.name: heat.tipOf(modelData.date, Locale.LongFormat)
         }
+    }
+
+    // The colours of the levels over the sunken ground, once: both may be translucent.
+    readonly property var levelColors: {
+        const under = KanteStyle.sunkenColor
+        return [0, 1, 2, 3, 4].map(l => {
+            if (l === 0) {
+                return under
+            }
+            const c = KanteStyle.levelColor(l, 4)
+            const rest = under.a * (1 - c.a)
+            const a = c.a + rest
+            return Qt.rgba((c.r * c.a + under.r * rest) / a, (c.g * c.a + under.g * rest) / a,
+                           (c.b * c.a + under.b * rest) / a, a)
+        })
+    }
+
+    // The index of the day at a point of this item, -1 outside the days.
+    function cellAt(px, py) {
+        const across = (mirrored ? width - px : px) - labelWidth
+        const down = py - labelHeight
+        const week = Math.floor(across / step)
+        const row = Math.floor(down / step)
+        if (week < 0 || week >= weeks || row < 0 || row > 6 || across - week * step > cellSize || down - row * step > cellSize) {
+            return -1
+        }
+        const i = week * 7 + row
+        return cells[i] && cells[i].shown ? i : -1
+    }
+
+    // One tooltip and one pair of handlers for all days.
+    HoverHandler {
+        id: hover
+        // Not touch: a press would start the hover's delay, and the tooltip it waits for would
+        // not take the tap's delay of 0 any more.
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad | PointerDevice.Stylus
+    }
+    TapHandler {
+        onTapped: eventPoint => {
+            const i = heat.cellAt(eventPoint.position.x, eventPoint.position.y)
+            heat.tappedIndex = i
+            if (i >= 0) {
+                tipTimer.restart()
+            }
+        }
+    }
+    readonly property int hoveredIndex: hover.hovered ? cellAt(hover.point.position.x, hover.point.position.y) : -1
+    readonly property int tipIndex: tappedIndex >= 0 ? tappedIndex : hoveredIndex
+    // The day the tooltip names: kept while it fades out, or it would fade at the corner, empty.
+    property int tipDay: 0
+    onTipIndexChanged: {
+        if (tipIndex >= 0) {
+            tipDay = tipIndex
+        }
+    }
+    // Fewer weeks (a turned phone) may take the tapped day away.
+    onCellsChanged: {
+        if (tappedIndex >= cells.length) {
+            tappedIndex = -1
+        }
+    }
+    Item {
+        id: tipPlace
+        objectName: "dayTip"
+        x: heat.lead(heat.labelWidth + Math.floor(heat.tipDay / 7) * heat.step, heat.cellSize)
+        y: heat.labelHeight + heat.tipDay % 7 * heat.step
+        width: heat.cellSize
+        height: heat.cellSize
+        QQC2.ToolTip.text: heat.cells[heat.tipDay] ? heat.tipOf(heat.cells[heat.tipDay].date) : ""
+        // A tap shows it at once.
+        QQC2.ToolTip.delay: heat.tappedIndex >= 0 ? 0 : 300
+        QQC2.ToolTip.visible: heat.tipIndex >= 0
     }
 
     Timer {
