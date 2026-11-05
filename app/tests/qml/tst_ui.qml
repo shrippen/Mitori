@@ -2993,7 +2993,10 @@ TestCase {
             const onStack = window.pageStack.currentItem === item
             tryVerify(() => !onStack || Math.abs(item.mapToItem(window.contentItem, 0, 0).x) < 1, 3000)
             wait(300)
-            const over = overflowing(item, data.width)
+            // A slow machine (the CI's first player) may still be moving it by a few pixels: what
+            // counts is the edge of the page, wherever the page is just now.
+            const moved = onStack ? item.mapToItem(window.contentItem, 0, 0).x : 0
+            const over = overflowing(item, data.width + moved)
             if (over.length) {
                 report[name] = over.slice(0, 6)
             }

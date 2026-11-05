@@ -278,6 +278,7 @@ Kirigami.Page {
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
+            onLoaded: page.resumeFromBig()
 
             sourceComponent: PlayerView {
                 compact: true
@@ -439,7 +440,24 @@ Kirigami.Page {
         player.shown.connect(id => page.lastId = id)
     }
 
-    // The small player goes full screen where it stands; back here it stays where it was.
+    // The small player goes full screen where it stands; back here it stays where it was. The
+    // pane may be gone by then (a window turned for full screen is no longer wide): the values
+    // wait until it is made anew.
+    property var bigResume: null
+    function resumeFromBig() {
+        const now = page.player
+        if (!now || !bigResume) {
+            return
+        }
+        now.looping = bigResume.looping
+        now.setSpeed(bigResume.rate)
+        if (now.duration > 0) {
+            now.seek(bigResume.position)
+        } else {
+            now.startAt = bigResume.position    // still loading: restart() would go to the start
+        }
+        bigResume = null
+    }
     function openBig() {
         const small = page.player
         const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
@@ -450,13 +468,8 @@ Kirigami.Page {
         player.big = true
         // Back in the small player: the same place, tempo and loop.
         player.bigEnded.connect((position, rate, looping) => {
-            const now = page.player     // the pane may have been made anew while the window was full
-            if (!now) {
-                return
-            }
-            now.looping = looping
-            now.setSpeed(rate)
-            now.seek(position)
+            bigResume = { position: position, rate: rate, looping: looping }
+            resumeFromBig()
         })
         player.shown.connect(id => page.lastId = id)
     }
