@@ -22,6 +22,8 @@ public:
     QVariantList glossary() const { return m_glossary; }
     // Where the glossary's translations come from (the lexicon of shinkiryu.de and its date).
     QString glossarySource() const { return m_glossarySource; }
+    // The data's release (STAND in mitori-daten), shown under "About Mitori" and on the booklet's title.
+    QString dataVersion() const { return m_dataVersion; }
     QString errorString() const { return m_error; }
 
 private:
@@ -31,5 +33,6 @@ private:
     QVariantMap m_videos;
     QVariantList m_glossary;
     QString m_glossarySource;
+    QString m_dataVersion;
     QString m_error;
 };

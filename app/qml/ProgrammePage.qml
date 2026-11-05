@@ -216,7 +216,10 @@ Kirigami.Page {
                                     color: Look.levelColor(value)     // as in the grade's bar and legend
                                 }
                                 LookPlayButton {
-                                    visible: entryItem.playable
+                                    // Without a video the place stays empty: the dots stay in line.
+                                    objectName: "rowPlay"
+                                    opacity: entryItem.playable ? 1 : 0
+                                    enabled: entryItem.playable
                                     activeFocusOnTab: false     // Enter on the row: the sheet plays it
                                     text: qsTr("Play")
                                     onClicked: page.play(entryItem.entry)

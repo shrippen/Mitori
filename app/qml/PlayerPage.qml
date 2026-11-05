@@ -3,7 +3,7 @@ import org.kde.kirigami as Kirigami
 import Mitori
 
 // The player as a page (PlayerView): from the programme, today's practice and the search; in
-// landscape without the page header (the controls stand in a column on the right).
+// landscape without the page header (the rail or the bands of PlayerView have its controls).
 Kirigami.Page {
     id: page
 
@@ -29,6 +29,7 @@ Kirigami.Page {
     function jump(ms) { view.jump(ms) }
     function step(direction) { view.step(direction) }
     function togglePlay() { view.togglePlay() }
+    function showJump(right) { view.showJump(right) }
 
     // The entry on screen, for the programme list to mark it when the user comes back.
     signal shown(string id)

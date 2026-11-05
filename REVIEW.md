@@ -16,7 +16,7 @@ costs data or trust:
 - **Wrong programme:** a technique missing, doubled, in the wrong grade or
   order, a wrong name or attack, a video that starts at the wrong place;
   booklet and app disagreeing; data that differs from `quellen/` without an
-  entry in `KORREKTUREN.md`.
+  entry in `KORREKTUREN.md` (all three in the `mitori-daten` submodule).
 - **Loses data:** practice log, ratings, notes, photos or voice notes lost
   on an update, a migration, sync (WebDAV conflict), export or import.
 - **Leaks:** videos, bundle keys or codes in the repository, notes leaving
@@ -29,15 +29,15 @@ costs data or trust:
 
 ## What to check in particular
 
-- Data flow: programme data only in `daten/*.yaml`, checked by
-  `tools/daten.py`; generated files (`daten/shinki-toho-kommentare.yaml`,
+- Data flow (`third_party/mitori-daten/`): programme data only in `daten/*.yaml`,
+  checked by `tools/daten.py`; generated files (`daten/shinki-toho-kommentare.yaml`,
   `daten/lexikon.yaml`, `build/`) not edited by hand; every `[ID]` in the
   data has an entry in `KORREKTUREN.md`.
 - Layers: QML only through services; services own SQLite, files, network.
   Database changes come with a migration and a test on an old database.
 - Texts in both catalogs (de, en). GUI rule: Kante as it is, no hex or
   `px` outside `app/qml/Kante` and `shinki/`, no local copy of a Kante component. Shinki
-  (`shinki/`) follows `shinki/README.md`: values only from `shinki/tokens.json`.
+  follows `shinki/README.md`: values only from `shinki/tokens.json`.
 - Bug fixes: a test that failed before the fix, and the cause removed, not
   one case hidden. A release follows the release rule (`CHANGELOG.md`, the
   same text in `docs/index.html` `#changes` and the Gitea release notes,
@@ -46,7 +46,7 @@ costs data or trust:
 ## Skip
 
 - `app/qml/Kante/` (`scripts/sync-kante.sh`), `scripts/release-notes.sh`
-  (copy from Kante), `quellen/`, `docs/shots/` and other images, the
+  (copy from Kante), `third_party/mitori-daten/`, `docs/shots/` and other images, the
   clickdummy in `entwuerfe/` (a design draft, not product code).
 
 ## How to report

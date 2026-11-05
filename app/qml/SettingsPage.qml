@@ -25,7 +25,7 @@ Kirigami.ScrollablePage {
         spacing: Look.unit(16)
 
         LookFormRow {
-            label: qsTr("Appearance:")
+            label: qsTr("Appearance")
             LookButton {
                 objectName: "appearanceButton"
                 icon.name: "configure"
@@ -34,7 +34,7 @@ Kirigami.ScrollablePage {
             }
         }
         LookFormRow {
-            label: qsTr("Exam videos:")
+            label: qsTr("Exam videos")
             LookButton {
                 objectName: "videosButton"
                 icon.name: "media-playback-start"
@@ -43,7 +43,7 @@ Kirigami.ScrollablePage {
             }
         }
         LookFormRow {
-            label: qsTr("Video folder:")
+            label: qsTr("Video folder")
             LookTextField {
                 id: folderField
 
@@ -66,7 +66,6 @@ Kirigami.ScrollablePage {
             text: qsTr("Backup")
         }
         LookFormRow {
-            label: qsTr("Backup:")
             LookButton {
                 objectName: "saveBackup"
                 icon.name: "document-save"
@@ -115,7 +114,7 @@ Kirigami.ScrollablePage {
             text: qsTr("Sync between devices")
         }
         LookFormRow {
-            label: qsTr("WebDAV / Nextcloud:")
+            label: qsTr("WebDAV / Nextcloud")
             LookSwitch {
                 objectName: "syncEnabled"
                 text: qsTr("Sync")
@@ -124,13 +123,13 @@ Kirigami.ScrollablePage {
             }
         }
         LookFormRow {
-            label: qsTr("Folder on the server:")
+            label: qsTr("Folder on the server")
+            visible: Sync.enabled
             LookTextField {
                 id: serverField
 
                 objectName: "syncServer"
                 Layout.fillWidth: true
-                visible: Sync.enabled
                 text: Sync.server
                 placeholderText: "https://cloud.example.org/remote.php/dav/files/ich/Mitori/"
                 inputMethodHints: Qt.ImhUrlCharactersOnly | Qt.ImhNoAutoUppercase
@@ -138,36 +137,36 @@ Kirigami.ScrollablePage {
             }
         }
         LookFormRow {
-            label: qsTr("User:")
+            label: qsTr("User")
+            visible: Sync.enabled
             LookTextField {
                 id: userField
 
                 Layout.fillWidth: true
-                visible: Sync.enabled
                 text: Sync.user
                 inputMethodHints: Qt.ImhNoAutoUppercase
                 onEditingFinished: page.saveAccount()
             }
         }
         LookFormRow {
-            label: qsTr("App password:")
+            label: qsTr("App password")
+            visible: Sync.enabled
             LookTextField {
                 id: passwordField
 
                 Layout.fillWidth: true
-                visible: Sync.enabled
                 echoMode: TextInput.Password
                 placeholderText: Sync.hasPassword ? qsTr("saved") : ""
                 onEditingFinished: page.saveAccount()
             }
         }
         LookFormRow {
-            label: qsTr("This device:")
+            label: qsTr("This device")
+            visible: Sync.enabled
             LookTextField {
                 id: nameField
 
                 Layout.fillWidth: true
-                visible: Sync.enabled
                 text: Sync.deviceName
                 onEditingFinished: page.saveAccount()
             }

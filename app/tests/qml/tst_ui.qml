@@ -68,6 +68,16 @@ TestCase {
         return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
     }
 
+    // Every item below `item`, for what no objectName marks.
+    function allChildren(item) {
+        let all = []
+        for (let i = 0; i < item.children.length; i++) {
+            all.push(item.children[i])
+            all = all.concat(allChildren(item.children[i]))
+        }
+        return all
+    }
+
     function push(page, properties) {
         window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + page + ".qml"), properties || {})
         tryVerify(() => window.pageStack.currentItem && window.pageStack.currentItem.title !== undefined)
@@ -120,6 +130,7 @@ TestCase {
         verify(hint.visible)
         verify(findChild(page, "aboutText").text.indexOf(Appearance.version) >= 0)
         verify(Appearance.version !== "")
+        verify(/^\D*\d{4}\.\d{1,2}\.\d+$/.test(findChild(page, "dataVersion").text))
         shot("0b-appearance")
         language.activated(Appearance.Language.System)
         verify(!hint.visible)
@@ -316,12 +327,36 @@ TestCase {
         verify(notes.text.indexOf("(1)") >= 0, notes.text)
         const lastNote = findChild(sheet.contentItem, "sheetLastNote")
         verify(lastNote.text.indexOf(new Date().toLocaleDateString(Qt.locale(), Locale.ShortFormat)) >= 0, lastNote.text)
+        // The sheet grows with what it shows (a new last note): the buttons stay in it, unscrolled.
+        wait(500)       // the layout takes the new row a frame later
+        verify(sheet.flickable.contentHeight <= sheet.flickable.height + 0.5,
+               "content " + sheet.flickable.contentHeight + " of " + sheet.flickable.height)
+        verify(sheet.y + sheet.height <= sheet.parent.height + 0.5)
         shot("2b-sheet", true)
         for (const n of Practice.notes(entry.id)) {
             Practice.deleteNote(n.uid)
         }
         sheet.close()
         window.pageStack.pop()
+    }
+
+    // The sheet stays inside a narrow phone, and names the Japanese once.
+    function test_2b_sheet_fits() {
+        const width = window.width
+        window.width = 360
+        const page = push("ProgrammePage")
+        page.open(page.rows.find(r => r.kind === "entry" && r.jp))
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        verify(sheet.x >= 0 && sheet.x + sheet.width <= window.width + 0.5,
+               "sheet " + sheet.x + " + " + sheet.width + " of " + window.width)
+        if (Look.shinki) {
+            const japanese = allChildren(sheet.contentItem).filter(c => c.visible && c.text === sheet.entry.jp)
+            compare(japanese.length, 1, "the Japanese once")
+        }
+        sheet.close()
+        window.pageStack.pop()
+        window.width = width
     }
 
     // A technique without any video (Shinki Toho Jun-Menkyo, the last grade with forms): the
@@ -427,12 +462,6 @@ TestCase {
             }
         }
         return null
-    }
-
-    // A child of the sheet (header or content) with the window-close icon: under Shinki the
-    // sheet has its own head inside the content, not in sheet.header.
-    function findSheetClose(sheet) {
-        return findCloseButton(sheet)
     }
 
     // Rating in the sheet: the list row shows the level as dots, the sheet the last rating.
@@ -594,6 +623,16 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Sync off: its rows go with their fields, no name stands over nothing.
+    function test_3b_settings_sync_off() {
+        Sync.enabled = false
+        const page = push("SettingsPage")
+        const names = ["Folder on the server:", "User:", "App password:", "This device:"].map(t => qsTr(t))
+        const shown = allChildren(page.contentItem).filter(c => names.indexOf(c.text) >= 0 && c.visible)
+        compare(shown.length, 0, "rows without a field: " + shown.map(c => c.text))
+        window.pageStack.pop()
+    }
+
     // Sync: switched on it shows the account; without one "Sync now" says what is missing. The
     // conflicts page without conflicts says so.
     function test_3d_sync() {
@@ -691,12 +730,24 @@ TestCase {
         mouseDrag(stage, stage.width * 3 / 4, stage.height * 0.2, 0, stage.height / 4)
         tryVerify(() => Levels.volume < volume - 0.1, 2000, "volume " + Levels.volume)
         verify(!findChild(page, "levelShown").visible, "shown only while swiping")
-        // Component.onDestruction under Shinki sometimes fires after the page is gone from
-        // the stack but the destruction queue has not run while the test moves on. Force the
-        // restore here so the post-pop check sees the saved level.
-        Levels.restore()
-        window.pageStack.pop()
+        window.back()      // as the head does (Kirigami's pop() may keep the page, PlayerPage.leave)
         tryCompare(Levels, "brightness", brightness)
+    }
+
+    // The double tap's hint stands on the side that was tapped.
+    function test_4s_jump_hint() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const page = push("PlayerPage", { playlist: rows, index: 0 })
+        const stage = findChild(page, "stage")
+        stage.visible = true
+        wait(800)
+        const area = findChild(page, "jumpHintArea")
+        page.showJump(true)
+        tryVerify(() => area.visible)
+        verify(area.width > stage.width / 3, "width " + area.width)
+        verify(area.mapToItem(stage, 0, 0).x >= stage.width / 2 - 1, "x " + area.mapToItem(stage, 0, 0).x)
+        window.back()
+        tryVerify(() => window.pageStack.depth === 1)
     }
 
     // Player layout screens (no video needed): the player renders a card for a missing video.
@@ -725,19 +776,140 @@ TestCase {
         wait(1500)
         verify(Qt.colorEqual(page.background.color, Look.backgroundColor), "the style's ground")
         shot("5-player")
-        window.width = 900
-        window.height = 420
+        // Sideways the rail has what the player needs, all of it in view on a phone.
+        window.width = 800
         window.height = 360
         wait(500)
-        const view = findChild(page, "controlsView")
-        const back = findChild(page, "backButton")
-        verify(view && back)
-        verify(back.visible)
-        compare(view.contentY, 0)
-        const at = back.mapToItem(view, 0, 0)
-        verify(at.y >= 0 && at.y + back.height <= view.height + 1, "Back in view (" + at.y + ", " + view.height + ")")
+        shot("6-player-landscape")
+        verify(page.headless, "sideways")
+        verify(findChild(page, "railBack").visible)
+        const loop = findChild(page, "railLoop")
+        const bottom = loop.mapToItem(page, 0, loop.height).y
+        verify(bottom <= page.height, "the rail ends at " + bottom + " of " + page.height)
+        // The rail's play button says what a tap does (under Shinki its own icon, the red circle).
+        const play = findChild(page, "railPlay")
+        verify(page.playing)
+        compare(play.symbol, "media-playback-pause")
+        if (uiShinki) {
+            compare(play.contentItem.children[0].name, "media-playback-pause")
+        }
         window.width = 420
         window.height = 800
+        window.pageStack.pop()
+    }
+
+    // A tablet sideways with a wide video: title above, controls below, no rail (the clickdummy's
+    // "Player groß"). A phone has the time on the picture and no word on the rail.
+    function test_4t_player_bands() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const width = window.width
+        const height = window.height
+        const page = push("PlayerPage", { playlist: rows, index: 0 })
+        window.width = 800
+        window.height = 360
+        tryVerify(() => findChild(page, "railTime").visible, 2000)
+        verify(!findChild(page, "bandTitle").visible)
+        compare(findChild(page, "railLoop").text, "", "only the symbol on the rail")
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => findChild(page, "bandTitle").visible, 2000, "bands")
+        wait(300)
+        shot("6b-player-bands")
+        verify(findChild(page, "bandBack").visible)
+        verify(!findChild(page, "railBack").visible)
+        verify(!findChild(page, "railTime").visible)
+        verify(findChild(page, "bandTime").visible)
+        verify(findChild(page, "bandTitle").text.indexOf(rows[0].title) >= 0)
+        compare(findChild(page, "railLoop").icon.name, "media-playlist-repeat")
+        verify(findChild(page, "railLoop").text !== "", "the word in the row")
+        const stage = findChild(page, "stage")
+        const stageTop = stage.mapToItem(page, 0, 0).y
+        const stageBottom = stageTop + stage.height
+        verify(stageTop > 0, "the title stands above the picture")
+        const timeline = findChild(page, "railTimeline")
+        verify(timeline.mapToItem(page, 0, 0).y >= stageBottom, "the timeline stands below it")
+        const play = findChild(page, "railPlay")
+        const playY = play.mapToItem(page, 0, 0).y
+        verify(playY >= timeline.mapToItem(page, 0, timeline.height).y, "the row below the timeline")
+        verify(playY + play.height <= page.height, "in view")
+        verify(Math.abs(play.mapToItem(page, play.width / 2, 0).x - page.width / 2) < 2, "the transport in the middle")
+        const loop = findChild(page, "railLoop")
+        verify(loop.mapToItem(page, loop.width, 0).x <= page.width, "the row ends in view")
+        window.width = width
+        window.height = height
+        window.back()      // as the head does (Kirigami's pop() may keep the page, PlayerPage.leave)
+        tryCompare(window.pageStack, "depth", 1)
+    }
+
+    // What the eye sees and no behaviour test would: symbols in the middle of their buttons, the
+    // bars with their margins, no bar without anything to scroll, hints inside their fields.
+    function test_4u_shapes() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        if (player.hasVideo) {
+            const bar = findChild(player, "transportBar")
+            const buttons = allChildren(bar).filter(c => c.visible && c.width > 0 && c.checkable !== undefined
+                                                    && c.display === 0)
+            verify(buttons.length > 0 || !uiShinki, "the bar's symbol buttons")
+            for (const button of buttons) {
+                for (const icon of allChildren(button).filter(c => c.visible && c.width > 0 && /Icon/.test(c.toString()))) {
+                    const centre = icon.mapToItem(button, icon.width / 2, icon.height / 2)
+                    verify(Math.abs(centre.x - button.width / 2) < 1.5, button.text + " dx " + (centre.x - button.width / 2))
+                    verify(Math.abs(centre.y - button.height / 2) < 1.5, button.text + " dy " + (centre.y - button.height / 2))
+                }
+            }
+        }
+        window.back()
+        tryCompare(window.pageStack, "depth", 1)
+
+        const notes = push("NotesPage", { entry: rows[0] })
+        const compose = findChild(notes, "compose")
+        tryVerify(() => compose.mapToItem(notes, 0, 0).x >= Look.unit(8) - 0.5, 2000, "the field's margin")
+        const add = allChildren(compose.parent).filter(c => c.text === qsTr("Add"))[0]
+        const right = notes.width - add.mapToItem(notes, add.width, 0).x
+        verify(right >= Look.unit(8) - 0.5, "the button's margin: " + right)
+        window.pageStack.pop()
+
+        const all = push("AllNotesPage")
+        const scroll = findChild(all, "lookScrollBar")
+        if (scroll.size >= 1) {
+            verify(!scroll.contentItem.visible, "nothing to scroll: no bar")
+        }
+        window.pageStack.pop()
+
+        const search = push("SearchPage")
+        const field = findChild(search, "searchField")
+        tryVerify(() => field.activeFocus)
+        const hint = findChild(field, uiShinki ? "fieldHint" : "kantePlaceholder")
+        verify(hint.visible, "the hint in the empty field with the focus")
+        verify(hint.y >= 0 && hint.y + hint.height <= field.height + 0.5, "inside the field")
+        const hintText = field.placeholderText
+        field.placeholderText = hintText + " " + hintText + " " + hintText + " " + hintText
+        verify(hint.truncated, "a long hint is cut")
+        verify(hint.x + hint.width <= field.width + 0.5, "and ends in the field: " + hint.width)
+        field.placeholderText = hintText
+        compare(field.placeholderTextColor.a, 0, "Material would float its own above the field")
+        field.text = "x"
+        verify(!hint.visible)
+        window.pageStack.pop()
+
+        const settings = push("SettingsPage")
+        const label = allChildren(settings).filter(c => c.text === qsTr("Video folder") && c.font !== undefined)[0]
+        compare(label.font.capitalization, Font.AllUppercase)
+        window.pageStack.pop()
+
+        // Rows without a video keep the place of the button: the dots stay in line.
+        const programme = push("ProgrammePage")
+        Programme.discipline = "shinkitoho"
+        wait(500)
+        const dots = allChildren(programme).filter(c => c.visible && c.width > 0 && c.names !== undefined && c.value !== undefined)
+        verify(dots.length > 3, "dots: " + dots.length)
+        const edges = new Set(dots.map(d => Math.round(d.mapToItem(programme, d.width, 0).x)))
+        compare(edges.size, 1, "the dots end in line: " + Array.from(edges))
+        Programme.discipline = "aikido"
         window.pageStack.pop()
     }
 
@@ -758,7 +930,7 @@ TestCase {
         window.width = 800
         window.height = 360
         tryVerify(() => player.headless, 2000, "sideways")
-        const back = findChild(player, "backButton")
+        const back = findChild(player, "railBack")
         tryVerify(() => back.visible, 2000, "Back beside the video")
         wait(800)
         mouseClick(back)
@@ -1334,30 +1506,29 @@ TestCase {
 
         // Techniques × attacks (KanteHeatGrid); combinations not in the programme are gaps.
         const heat = findChild(page, "techniqueMatrix")
-        tryVerify(() => Object.keys(heat.cellItems).length > 0, 2000,
-                  "no cells registered: " + Object.keys(heat.cellItems).length + " of "
-                  + heat.rowCount + " rows")
         compare(heat.rowCount, page.shown.rows.length)
         compare(heat.columnCount, page.shown.columns.length)
         // Technique names in the text font, not the small mono labels.
         compare(heat.rowLabelFont.family, Look.smallFont.family)
+        compare(heat.rowLabelFont.pointSize, Look.smallFont.pointSize)
         let gap = null, target = null
         for (let r = 0; r < heat.rowCount; r++) {
             for (let c = 0; c < heat.columnCount; c++) {
                 if (heat.isEmpty(r, c))
                     gap = gap || { r: r, c: c }
-                else if (!target && heat.valueAt(r, c) === 0)
+                else if (!target && heat.valueOf(r, c) === 0)
                     target = { r: r, c: c }
             }
         }
         verify(gap, "combinations not in the programme stay empty")
-        verify(!heat.shownAt(gap.r, gap.c), "a gap is not drawn")
+        verify(!heat.cellAt(gap.r, gap.c).shown)
         verify(target)
 
         // A rating colours the place; its tip names technique, attack, grade and level.
         const data = page.shown.rows[target.r].cells[target.c]
         verify(Practice.rate(data.ids[0], 4))
-        compare(heat.levelAt(target.r, target.c), 4)
+        const cell = heat.cellAt(target.r, target.c)
+        tryCompare(cell, "level", 4)
         compare(heat.entryOf(target.r, target.c).label, "4")
         const tip = heat.tipOf(target.r, target.c)
         verify(tip.indexOf(data.gradeName) > 0, tip)
@@ -1366,17 +1537,14 @@ TestCase {
 
         // A tap opens the technique sheet.
         const sheet = findChild(page, "techniqueSheet")
-        // Trigger the matrix's activated signal the way a tap would.
-        heat.currentRow = target.r
-        heat.currentColumn = target.c
-        heat.activated(target.r, target.c)
-        tryVerify(() => sheet.opened, 2000)
+        mouseClick(cell)
+        tryVerify(() => sheet.opened)
         compare(sheet.entry.id, data.entry.id)
         sheet.close()
         tryVerify(() => !sheet.visible)
 
         // The keys: Right moves to the next place of the row (over gaps), Enter opens it.
-        heat.forceActiveFocus(Qt.TabFocusReason)
+        cell.forceActiveFocus(Qt.TabFocusReason)
         let next = target.c + 1
         while (next < heat.columnCount && heat.isEmpty(target.r, next))
             next++
@@ -1404,13 +1572,11 @@ TestCase {
         verify(forms.visible)
         compare(forms.perRow, 8)
         compare(forms.rowCount, 3)
-        // The forms fill the width: the last of a row ends at the right edge. Stretching by an
-        // integer factor may leave a few pixels of slack on either side; allow one cell's
-        // width on either end.
+        // The forms fill the width: the last of a row ends at the right edge.
         const fills = () => {
             const last = forms.cellAt(0, forms.perRow - 1)
             const right = last.mapToItem(forms, last.width, 0).x
-            return Math.abs(right - forms.width) <= forms.cellSide
+            return right <= forms.width + 0.5 && right > forms.width - forms.cellSide / 2
         }
         tryVerify(fills, 2000, "the forms fill the width")
         compare(forms.entryOf(1, 3).label, "12")
@@ -1420,12 +1586,9 @@ TestCase {
         tryCompare(form, "level", 2)
         // The level also as a number, not only as the colour.
         compare(forms.entryOf(1, 3).label, "12·2")
-        sheet.close()
-        tryVerify(() => !sheet.visible)
-        forms.currentRow = 1
-        forms.currentColumn = 3
-        forms.activated(1, 3)
-        tryVerify(() => sheet.opened, 2000, "form opens the sheet")
+        waitForRendering(forms)       // the page lays out the forms in the next frame
+        mouseClick(form)
+        tryVerify(() => sheet.opened)
         compare(sheet.entry.id, "shinkitoho/odachi/12")
         sheet.close()
         tryVerify(() => !sheet.visible)
@@ -2012,9 +2175,9 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // The Kamae player: its 26 positions come last, so "Done" and Back stay where they are for a
-    // technique without positions (in view without scrolling, also sideways), and a large
-    // tablet keeps the picture as large.
+    // The Kamae player: its 26 positions come last, so "Done" stays where it is for a technique
+    // without positions (in view without scrolling), and a large tablet keeps the picture as large.
+    // Sideways there is only the rail (test_4_player).
     function test_9y_kamae_player() {
         failOnWarning(/ReferenceError|TypeError/)
         const kamae = Programme.entry("shinkitoho/kamae")
@@ -2025,7 +2188,7 @@ TestCase {
         verify(Practice.rate(kamae.id, 2))      // rated today: the training is done at once
         verify(Practice.rate(suburi.id, 2))
         // [width, height, training, the item that must be in view]
-        for (const c of [[420, 800, true, "trainingDone"], [915, 412, false, "backButton"], [915, 412, true, "trainingDone"]]) {
+        for (const c of [[420, 800, true, "trainingDone"]]) {
             window.width = c[0]
             window.height = c[1]
             const at = entry => {
@@ -2539,7 +2702,7 @@ TestCase {
         // Leaving the player keeps a draft as well.
         const second = page.current.id
         field.text = "beim Verlassen"
-        window.pageStack.pop()
+        window.back()
         tryVerify(() => Practice.lastNote(second).text === "beim Verlassen", 3000, "saved when the player closes")
     }
 

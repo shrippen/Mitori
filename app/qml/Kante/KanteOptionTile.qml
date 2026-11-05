@@ -91,12 +91,11 @@ QQC2.AbstractButton {
     contentItem: ColumnLayout {
         spacing: KanteStyle.unit(4)
 
-        Kirigami.Icon {
+        KanteIcon {
             Layout.preferredWidth: Kirigami.Units.iconSizes.smallMedium
             Layout.preferredHeight: Kirigami.Units.iconSizes.smallMedium
-            source: tile.icon.name !== "" ? tile.icon.name : tile.icon.source
+            iconSource: tile.icon.name !== "" ? tile.icon.name : tile.icon.source
             color: tile.checked ? KanteStyle.focusColor : KanteStyle.textColor
-            isMask: true
             visible: tile.glyph === "" && (tile.icon.name !== "" || tile.icon.source.toString() !== "")
         }
         Text {

@@ -15,6 +15,7 @@ ColumnLayout {
 
     LookKicker {
         Layout.fillWidth: true
+        color: Look.mutedTextColor      // the clickdummy's `.field label`
         text: row.label
         visible: row.label !== ""
     }

@@ -122,15 +122,14 @@ Item {
             border.width: chip.nearGround && !chip.checked ? 1 : 0
             border.color: KanteStyle.textColor
         }
-        Kirigami.Icon {
+        KanteIcon {
             id: icon
             visible: chip.iconName !== ""
             Layout.preferredWidth: chip.iconSize
             Layout.preferredHeight: chip.iconSize
             Layout.minimumWidth: chip.iconSize
-            source: chip.iconName
+            iconSource: chip.iconName
             color: chip.ink
-            isMask: true
         }
         Text {
             id: label

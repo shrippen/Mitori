@@ -2,7 +2,7 @@
 # Build the Mitori APK: Qt via aqtinstall, KF6 (Kirigami) from source, Android NDK, Gradle.
 # Usage: ./scripts/build-android.sh [debug|release]   → dist/android/mitori-<mode>.apk
 # Release signing: MITORI_KEYSTORE_PATH, MITORI_KEYSTORE_PASSWORD, MITORI_KEY_ALIAS, MITORI_KEY_PASSWORD.
-# MITORI_SHINKI=ON offers the Shinki style in the settings (off by default: development only).
+# MITORI_SHINKI=OFF leaves the Shinki style out.
 # Needs python3 with PyYAML (third_party/mitori-daten/tools/daten.py runs in the build).
 set -euo pipefail
 MODE="${1:-debug}"
@@ -18,8 +18,7 @@ QT_HOST="$HOME/Qt/$QT_VER/gcc_64"
 # Not in the base install: Kirigami needs ShaderTools, the player Multimedia, the glossary's
 # pronunciation Speech (TextToSpeech).
 QT_MODULES="qtshadertools qtmultimedia qtspeech"
-# The Shinki style (shinki/) with its QML and fonts: only where it can be chosen.
-SHINKI="${MITORI_SHINKI:-OFF}"
+SHINKI="${MITORI_SHINKI:-ON}"
 RED='\033[0;31m'; GREEN='\033[0;32m'; NC='\033[0m'
 info()  { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }

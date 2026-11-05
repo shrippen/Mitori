@@ -6,11 +6,16 @@ import QtQuick.Controls as QQC2
 // under Shinki, the style's own face elsewhere.
 QQC2.Label {
     color: Look.accentColor
+    // Qt.font: writing to a copy of Look.narrowFont changes nothing (no capitals, no spacing).
     font: {
         const f = Look.narrowFont
-        f.letterSpacing = (f.pixelSize > 0 ? f.pixelSize : f.pointSize) * Look.columnTracking
-        f.capitalization = Font.AllUppercase
-        return f
+        const size = f.pixelSize > 0 ? { pixelSize: f.pixelSize } : { pointSize: f.pointSize }
+        return Qt.font(Object.assign(size, {
+            family: f.family,
+            weight: f.weight,
+            letterSpacing: (f.pixelSize > 0 ? f.pixelSize : f.pointSize) * Look.columnTracking,
+            capitalization: Font.AllUppercase
+        }))
     }
     elide: Text.ElideRight
 }

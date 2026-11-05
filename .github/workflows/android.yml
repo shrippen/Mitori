@@ -7,7 +7,8 @@ on:
     branches: [main]
     paths:
       - 'app/**'
-      - 'third_party/mitori-daten/**'
+      - 'shinki/**'
+      - 'third_party/mitori-daten'    # the submodule's pin
       - 'scripts/build-android.sh'
       - 'scripts/build-kf6-android.sh'
       - '.github/actions/android-setup/**'
@@ -27,19 +28,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
-
-      # The mitori-daten submodule at third_party/mitori-daten/: actions/checkout
-      # cannot pull from git.arianw.de on GitHub's runner (no Gitea credentials).
-      - name: Clone mitori-daten submodule
-        env:
-          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
-        run: |
-          set -euo pipefail
-          git config --global --add safe.directory '*'
-          git submodule sync --recursive
-          git config --global url."https://oauth2:${GITEA_TOKEN}@git.arianw.de/".insteadOf "https://git.arianw.de/"
-          git submodule update --init --force --depth=1 --recursive
-          git config --local --unset url."https://oauth2:${GITEA_TOKEN}@git.arianw.de/".insteadOf 2>/dev/null || true
+        with:
+          submodules: recursive   # relative URL: the public mirror of mitori-daten
 
       - uses: ./.github/actions/android-setup
 

@@ -148,7 +148,7 @@ QQC2.Button {
         id: kanteContent
         visible: control.drawn
         x: control.leftPadding + Math.max(0, (control.availableWidth - width) / 2)
-        y: control.topPadding
+        y: (control.height - height) / 2    // the middle: the style's padding may be uneven
         width: Math.min(implicitWidth, control.availableWidth)
         height: control.availableHeight
         spacing: Math.max(control.spacing, Kirigami.Units.smallSpacing)
@@ -161,15 +161,13 @@ QQC2.Button {
             size: KanteStyle.unit(5)
         }
 
-        Kirigami.Icon {
-            readonly property var iconSource: control.icon.name !== "" ? control.icon.name : control.icon.source
+        KanteIcon {
             visible: !control.busy && control.display !== T.AbstractButton.TextOnly && String(iconSource).length > 0
             Layout.preferredWidth: Kirigami.Units.iconSizes.small
             Layout.preferredHeight: Kirigami.Units.iconSizes.small
             Layout.alignment: Qt.AlignVCenter
-            source: iconSource
+            iconSource: control.icon.name !== "" ? control.icon.name : control.icon.source
             color: control.kanteInk
-            isMask: true
         }
 
         QQC2.Label {

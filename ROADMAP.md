@@ -129,7 +129,6 @@ Kleinigkeiten aus Reviews und Tests, je ein Folge-PR oder beim nächsten Bearbei
   beobachten.
 
 ### Look / Shinki
-- TechniqueMapPage noch ohne Look: ShinkiHeatGrid nötig (KanteHeatGrid, 925 Zeilen).
 - LookPageTitle ungenutzt (seit dem Shinki-Kopf): entfernen oder einsetzen.
 - Stand im Grad-Chip: Token `chipStandSize` nutzt noch kein Baustein (#52).
 - ExamBoard Grundgröße 10 unter Shinki (Größe aus ShinkiStyle); ShinkiSettingRow/KanteSettingRow resetText

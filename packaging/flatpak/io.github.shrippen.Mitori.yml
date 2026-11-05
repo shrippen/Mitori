@@ -21,7 +21,7 @@ finish-args:
   - --filesystem=xdg-videos:ro   # the video folder (settings) under ~/Videos until the bundles come
 
 modules:
-  # tools/daten.py (run by the build) reads daten/*.yaml; build time only.
+  # tools/daten.py (run by the build); build time only.
   - name: pyyaml
     buildsystem: simple
     cleanup: ['*']
@@ -34,7 +34,7 @@ modules:
 
   - name: mitori
     buildsystem: cmake-ninja
-    # The build reads daten/, tools/ and KORREKTUREN.md, so the whole repo is the source.
+    # The build reads the mitori-daten submodule, so the whole repo is the source.
     subdir: app
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release

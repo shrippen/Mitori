@@ -37,7 +37,7 @@ file(GLOB MITORI_DATEN_YAML CONFIGURE_DEPENDS ${MITORI_DATA_DIR}/daten/*.yaml)
 add_custom_command(
     OUTPUT ${MITORI_DATEN_JSON}
     COMMAND Python3::Interpreter ${MITORI_DATA_DIR}/tools/daten.py --ausgabe ${MITORI_DATEN_DIR}
-    DEPENDS ${MITORI_DATA_DIR}/tools/daten.py ${MITORI_DATA_DIR}/KORREKTUREN.md ${MITORI_DATEN_YAML}
+    DEPENDS ${MITORI_DATA_DIR}/tools/daten.py ${MITORI_DATA_DIR}/STAND ${MITORI_DATA_DIR}/KORREKTUREN.md ${MITORI_DATEN_YAML}
     COMMENT "Checking programme data (mitori-daten/tools/daten.py)"
     VERBATIM
 )
@@ -248,24 +248,25 @@ qt_add_resources(mitori_app "kante"
     FILES ${KANTE_FILES}
 )
 
-# Shinki (mitori-daten/shinki/, the club newspaper's style) as a separate QML module "Shinki" with
+# Shinki (shinki/, the club newspaper's style) as a separate QML module "Shinki" with
 # its fonts, and the Look layer's Shinki files (app/qml/Look/+shinki, chosen by the file selector
 # "shinki" at start, Appearance). Only where Shinki can be chosen or is tested: its fonts are
-# 1.3 MB. The QML files and fonts come from the mitori-daten submodul; `app/qml/Look/+shinki/*.qml`
+# 1.3 MB. `app/qml/Look/+shinki/*.qml`
 # imports "Shinki", which the import scanner finds in the separate module target.
 if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
+    get_filename_component(MITORI_SHINKI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../shinki" ABSOLUTE)
     qt_add_library(mitori_shinki STATIC)
     file(GLOB SHINKI_QML_FILES CONFIGURE_DEPENDS
-        ${MITORI_DATA_DIR}/shinki/qml/Shinki/*.qml)
+        ${MITORI_SHINKI_DIR}/qml/Shinki/*.qml)
     # qt_add_qml_module needs each file as a relative path or with QT_RESOURCE_ALIAS set; the
-    # files live in the submodul, so each gets its basename as alias. ShinkiStyle is a
-    # singleton in the submodul qmldir; mark it so Qt generates the qmldir accordingly.
+    # files live outside app/, so each gets its basename as alias. ShinkiStyle is a
+    # singleton in shinki/qml/Shinki/qmldir; mark it so Qt generates the qmldir accordingly.
     foreach(file ${SHINKI_QML_FILES})
         get_filename_component(_alias "${file}" NAME)
         set_source_files_properties(${file}
             PROPERTIES QT_RESOURCE_ALIAS "${_alias}")
     endforeach()
-    set_source_files_properties(${MITORI_DATA_DIR}/shinki/qml/Shinki/ShinkiStyle.qml
+    set_source_files_properties(${MITORI_SHINKI_DIR}/qml/Shinki/ShinkiStyle.qml
         PROPERTIES QT_RESOURCE_ALIAS "ShinkiStyle.qml"
         QT_QML_SINGLETON_TYPE TRUE)
     qt_add_qml_module(mitori_shinki
@@ -273,7 +274,7 @@ if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
         VERSION 1.0
         QML_FILES ${SHINKI_QML_FILES}
     )
-    file(GLOB SHINKI_FONTS ${MITORI_DATA_DIR}/shinki/fonts/*.ttf)
+    file(GLOB SHINKI_FONTS ${MITORI_SHINKI_DIR}/fonts/*.ttf)
     foreach(font ${SHINKI_FONTS})
         get_filename_component(_font_alias "${font}" NAME)
         set_source_files_properties(${font}
@@ -281,7 +282,7 @@ if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
     endforeach()
     qt_add_resources(mitori_shinki "shinki_fonts"
         PREFIX "/shinki/fonts"
-        BASE ${MITORI_DATA_DIR}/shinki/fonts
+        BASE ${MITORI_SHINKI_DIR}/fonts
         FILES ${SHINKI_FONTS}
     )
     file(GLOB LOOK_SHINKI RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS qml/Look/+shinki/*.qml)

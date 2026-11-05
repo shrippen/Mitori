@@ -21,6 +21,7 @@ bool Catalog::load(const QString &path)
     m_videos.clear();
     m_glossary.clear();
     m_glossarySource.clear();
+    m_dataVersion.clear();
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
         return fail(QStringLiteral("%1: %2").arg(path, file.errorString()));
@@ -39,6 +40,11 @@ bool Catalog::load(const QString &path)
     if (disciplines.isEmpty()) {
         return fail(QStringLiteral("%1: no disciplines").arg(path));
     }
+    const QString dataVersion = root.value(QLatin1String("stand")).toString();
+    if (dataVersion.isEmpty()) {
+        return fail(QStringLiteral("%1: no data version").arg(path));
+    }
+    m_dataVersion = dataVersion;
     m_disciplines = disciplines.toVariantList();
     m_videos = root.value(QLatin1String("videos")).toObject().toVariantMap();
     const QJsonObject glossary = root.value(QLatin1String("glossar")).toObject();

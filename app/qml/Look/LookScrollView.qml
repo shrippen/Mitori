@@ -6,12 +6,20 @@ import QtQuick.Controls as QQC2
 // style's rule colour.
 QQC2.ScrollView {
     QQC2.ScrollBar.vertical: QQC2.ScrollBar {
+        id: bar
+
+        objectName: "lookScrollBar"
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         policy: QQC2.ScrollBar.AsNeeded
+        padding: 0
+        width: Look.unit(4)     // org.kde.desktop takes its own width otherwise (21 px)
+        background: null
         contentItem: Rectangle {
             implicitWidth: Look.unit(4)
+            // The style's own bar hides itself; this one replaces it and has to do so too.
+            visible: bar.size < 1
             radius: width / 2
             color: Look.ruleColor
         }
