@@ -883,10 +883,11 @@ TestCase {
         const search = push("SearchPage")
         const field = findChild(search, "searchField")
         tryVerify(() => field.activeFocus)
-        const hint = findChild(field, "fieldHint")
+        const hint = findChild(field, uiShinki ? "fieldHint" : "kantePlaceholder")
         verify(hint.visible, "the hint in the empty field with the focus")
         verify(hint.y >= 0 && hint.y + hint.height <= field.height + 0.5, "inside the field")
-        compare(field.placeholderText, "", "Material would float it above the field")
+        verify(hint.x + hint.width <= field.width + 0.5, "a long hint ends in the field: " + hint.width)
+        compare(field.placeholderTextColor.a, 0, "Material would float its own above the field")
         field.text = "x"
         verify(!hint.visible)
         window.pageStack.pop()

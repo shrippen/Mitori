@@ -8,6 +8,8 @@ Item {
     id: skin
 
     required property QQC2.Slider control
+    // The way still to play (as KanteSliderSkin): on the player's dark ground the page sets it.
+    property color trackColor: ShinkiStyle.line
 
     anchors.fill: parent
     opacity: control && control.enabled ? 1 : ShinkiStyle.disabledOpacity
@@ -41,7 +43,7 @@ Item {
         width: skin.control ? skin.control.availableWidth : 0
         height: ShinkiStyle.sliderTrackSize
         anchors.verticalCenter: parent.verticalCenter
-        color: ShinkiStyle.line
+        color: skin.trackColor
 
         Rectangle {
             width: Math.round(track.width * (skin.control ? skin.control.visualPosition : 0))

@@ -5,10 +5,10 @@ import QtQuick.Controls as QQC2
 // (the buttons themselves are the style's).
 QQC2.ToolBar {
     // All four: Material sets each side itself (the safe area), so `padding` would not reach them.
-    leftPadding: Look.unit(8)
-    rightPadding: Look.unit(8)
-    topPadding: Look.unit(8)
-    bottomPadding: Look.unit(8)
+    leftPadding: Look.unit(8) + SafeArea.margins.left
+    rightPadding: Look.unit(8) + SafeArea.margins.right
+    topPadding: Look.unit(8) + SafeArea.margins.top
+    bottomPadding: Look.unit(8) + SafeArea.margins.bottom
 
     background: Rectangle {
         color: Look.backgroundColor

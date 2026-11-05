@@ -131,7 +131,7 @@ Kirigami.ScrollablePage {
                 objectName: "syncServer"
                 Layout.fillWidth: true
                 text: Sync.server
-                hint: "https://cloud.example.org/remote.php/dav/files/ich/Mitori/"
+                placeholderText: "https://cloud.example.org/remote.php/dav/files/ich/Mitori/"
                 inputMethodHints: Qt.ImhUrlCharactersOnly | Qt.ImhNoAutoUppercase
                 onEditingFinished: page.saveAccount()
             }
@@ -156,7 +156,7 @@ Kirigami.ScrollablePage {
 
                 Layout.fillWidth: true
                 echoMode: TextInput.Password
-                hint: Sync.hasPassword ? qsTr("saved") : ""
+                placeholderText: Sync.hasPassword ? qsTr("saved") : ""
                 onEditingFinished: page.saveAccount()
             }
         }

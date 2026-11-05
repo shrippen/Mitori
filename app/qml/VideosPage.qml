@@ -93,7 +93,7 @@ Kirigami.ScrollablePage {
 
                 objectName: "codeField"
                 Layout.fillWidth: true
-                hint: "XXXXX-XXXXX-XXXXX-XXXXX"
+                placeholderText: "XXXXX-XXXXX-XXXXX-XXXXX"
                 font: Look.monoFont(Look.defaultFont.pointSize)
                 inputMethodHints: Qt.ImhUppercaseOnly | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
                 Accessible.name: qsTr("Code of the DVD")

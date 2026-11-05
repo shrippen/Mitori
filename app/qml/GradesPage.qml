@@ -168,7 +168,7 @@ Kirigami.ScrollablePage {
                         id: placeField
 
                         objectName: "gradePlace"
-                        hint: qsTr("Place")
+                        placeholderText: qsTr("Place")
                         Accessible.name: qsTr("Place")
                     }
                     LookButton {

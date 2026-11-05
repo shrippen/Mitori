@@ -1853,11 +1853,6 @@
         <translation>Sicherung</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="69"/>
-        <source>Backup</source>
-        <translation>Sicherung</translation>
-    </message>
-    <message>
         <location filename="../qml/SettingsPage.qml" line="73"/>
         <source>Save backup …</source>
         <translation>Sicherung speichern …</translation>

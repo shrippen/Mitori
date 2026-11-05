@@ -7,12 +7,11 @@ QQC2.TextField {
     id: field
 
     property bool invalid: false
-    // What to type, inside the field. Not placeholderText: Material floats that above the field
-    // when it has the focus, cut off at the edge of a bar and across the frame.
-    property string hint: ""
 
     color: ShinkiStyle.ink
-    placeholderTextColor: ShinkiStyle.inkMuted
+    // The placeholder stays inside the box. Material floats its own above a focused field, across the
+    // frame and cut off at the edge of a bar: that one is transparent, the Label below is the one seen.
+    placeholderTextColor: "transparent"
     selectionColor: ShinkiStyle.red
     selectedTextColor: ShinkiStyle.textOnRed
     font.family: ShinkiStyle.bookFamily
@@ -24,11 +23,11 @@ QQC2.TextField {
         objectName: "fieldHint"
         x: field.leftPadding
         anchors.verticalCenter: parent.verticalCenter
-        width: field.availableWidth
-        visible: field.hint !== "" && field.text === "" && field.preeditText === ""
-        text: field.hint
+        width: field.width - field.leftPadding - field.rightPadding
+        visible: field.placeholderText !== "" && field.text === "" && field.preeditText === ""
+        text: field.placeholderText
         elide: Text.ElideRight
-        color: field.placeholderTextColor
+        color: ShinkiStyle.inkMuted
         font: field.font
     }
 

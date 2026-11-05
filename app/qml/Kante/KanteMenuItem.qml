@@ -61,14 +61,13 @@ QQC2.MenuItem {
             Layout.preferredWidth: item.checkable && item.indicator ? item.indicator.width : 0
             visible: item.checkable
         }
-        Kirigami.Icon {
+        KanteIcon {
             Layout.alignment: Qt.AlignVCenter
             Layout.preferredWidth: Kirigami.Units.iconSizes.small
             Layout.preferredHeight: Kirigami.Units.iconSizes.small
             visible: item.hasIcon || item.iconRoom
-            source: item.icon.name !== "" ? item.icon.name : item.icon.source
+            iconSource: item.icon.name !== "" ? item.icon.name : item.icon.source
             color: item.ink
-            isMask: true
         }
         QQC2.Label {
             Layout.fillWidth: true

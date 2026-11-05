@@ -14,6 +14,7 @@ QQC2.ScrollView {
         anchors.bottom: parent.bottom
         policy: QQC2.ScrollBar.AsNeeded
         padding: 0
+        width: Look.unit(4)     // org.kde.desktop takes its own width otherwise (21 px)
         background: null
         contentItem: Rectangle {
             implicitWidth: Look.unit(4)

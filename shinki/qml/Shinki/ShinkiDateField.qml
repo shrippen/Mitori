@@ -124,8 +124,7 @@ FocusScope {
         rightPadding: button.width + ShinkiStyle.gridSpace
         focus: true
         text: root.textOf(root.date)
-        // Only while empty: Material floats a placeholder over a filled field.
-        placeholderText: text === "" ? root.placeholderText : ""
+        placeholderText: root.placeholderText
         inputMethodHints: Qt.ImhDate | Qt.ImhNoPredictiveText
         font.family: ShinkiStyle.uiFamily
         font.features: { "tnum": 1 }

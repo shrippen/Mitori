@@ -376,7 +376,7 @@ Kirigami.ScrollablePage {
 
                 objectName: "courseCompose"
                 Layout.fillWidth: true
-                hint: qsTr("What was shown?")
+                placeholderText: qsTr("What was shown?")
                 Accessible.name: qsTr("New entry")
                 onAccepted: page.add()
             }

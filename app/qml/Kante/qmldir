@@ -41,6 +41,7 @@ KanteHeatGrid 1.0 KanteHeatGrid.qml
 KanteHeatmap 1.0 KanteHeatmap.qml
 KanteHintCard 1.0 KanteHintCard.qml
 KanteHud 1.0 KanteHud.qml
+KanteIcon 1.0 KanteIcon.qml
 KanteInfoTip 1.0 KanteInfoTip.qml
 KanteKeyLane 1.0 KanteKeyLane.qml
 KanteKeyLayout 1.0 KanteKeyLayout.qml

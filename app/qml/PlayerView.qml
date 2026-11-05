@@ -194,8 +194,8 @@ Item {
     Keys.onLeftPressed: page.step(-1)
     Keys.onRightPressed: page.step(1)
 
-    // A symbol on the dark ground, drawn here: Kante's button leaves its colour to the platform
-    // theme, and Android, the AppImage and the tests draw the icon as it is (dark).
+    // A symbol on the dark ground, drawn here with room for its caption below (the buttons draw
+    // theirs in the middle, in their own ink).
     component StageIcon: IconImage {
         anchors.centerIn: parent
         sourceSize.width: Look.unit(22)
@@ -504,15 +504,10 @@ Item {
                 Layout.alignment: Qt.AlignCenter
                 Layout.preferredWidth: page.bands ? Math.min(Look.unit(56), page.bandHeight - railTimeline.height - Look.unit(2)) : page.tabletSideways ? Look.unit(52) : Look.unit(40)
                 Layout.preferredHeight: Layout.preferredWidth
-                // Under Shinki its own icon on the red circle; Kante's button would draw it dark.
-                icon.name: Look.shinki ? symbol : ""
+                icon.name: symbol
+                icon.color: Look.shinki ? "transparent" : Look.stageTextColor   // Shinki: white on red
                 text: player.playing ? qsTr("Pause") : qsTr("Play")
                 onClicked: page.togglePlay()
-
-                StageIcon {
-                    visible: !Look.shinki
-                    name: parent.symbol
-                }
             }
             RailButton {
                 objectName: "railFrameOn"
@@ -839,18 +834,9 @@ Item {
         onMoved: player.position = value
         Accessible.name: qsTr("Position")
 
-        LookSliderSkin { control: railTimeline }
-
-        // The way still to play, on the dark ground: Kante's track is too dark to see there. On
-        // top of that track, from the handle on (the played part keeps its colour).
-        Rectangle {
-            visible: !Look.shinki
-            anchors.verticalCenter: parent.verticalCenter
-            x: railTimeline.leftPadding + railTimeline.visualPosition * railTimeline.availableWidth
-            width: (1 - railTimeline.visualPosition) * railTimeline.availableWidth
-            height: Look.unit(4)
-            color: Look.stageTextColor
-            opacity: 0.3
+        LookSliderSkin {
+            control: railTimeline
+            trackColor: Qt.alpha(Look.stageTextColor, 0.3)      // the clickdummy's `.qtrk`
         }
     }
 }
