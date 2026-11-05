@@ -146,7 +146,7 @@ jobs:
           sudo apt-get install -y -q ninja-build python3-yaml libgl1-mesa-dev libegl1-mesa-dev \
             libxkbcommon-dev libxkbcommon-x11-0 libfontconfig1 libxcb-cursor0 libxcb-icccm4 libxcb-image0 \
             libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1 libxcb-shape0 libwayland-client0 \
-            libwayland-cursor0 libwayland-egl1 libdbus-1-3 libspeechd2 file > /dev/null
+            libwayland-cursor0 libwayland-egl1 libdbus-1-3 libspeechd2 libpulse0 libpulse-mainloop-glib0 file > /dev/null
 
       - name: Build AppImage
         env:
