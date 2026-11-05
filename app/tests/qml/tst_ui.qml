@@ -942,6 +942,24 @@ TestCase {
         tryCompare(hidden, "playing", false, 2000, "no sound from a page left")
         window.pageStack.pop(window.pageStack.currentItem)
 
+        // Back from full screen leaves the keys with the page before: the search goes on.
+        const search = push("SearchPage")
+        const searchField = findChild(search, "searchField")
+        tryVerify(() => searchField.activeFocus)
+        searchField.text = ""
+        const above = push("PlayerPage", { playlist: rows, index: 0 })
+        wait(500)
+        mouseClick(findChild(above, "fullButton"))
+        compare(above.big, true)
+        keyClick(Qt.Key_Back)
+        tryCompare(window.pageStack, "currentItem", search)
+        tryVerify(() => !above.big)
+        wait(200)
+        keyClick(Qt.Key_A)
+        compare(searchField.text, "a", "typed into the search")
+        window.pageStack.pop(window.pageStack.currentItem)
+        window.pageStack.pop()
+
         // A place outside the chapter (the small player was still loading): the chapter start.
         const chapter = rows.findIndex(r => r.video.von > 60)
         verify(chapter >= 0)

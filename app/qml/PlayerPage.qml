@@ -69,7 +69,10 @@ Kirigami.Page {
     }
     onBigChanged: {
         showBig()
-        view.forceActiveFocus()     // the button just hidden would keep the keys
+        // The button just hidden would keep the keys; a page left has none to give.
+        if (isCurrentPage) {
+            view.forceActiveFocus()
+        }
     }
     // The Back key only moves the stack on and keeps this page: it ends full screen and the video.
     onIsCurrentPageChanged: {
