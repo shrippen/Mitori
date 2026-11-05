@@ -68,7 +68,17 @@ Kirigami.Page {
         bigWindow.visibility = windowBefore
     }
     onBigChanged: showBig()
-    // Left by Back or the Back key while full screen.
+    // The Back key only moves the stack on and keeps this page: it ends full screen and the video.
+    onIsCurrentPageChanged: {
+        // Not while it is being made (index -1), nor under a page above it (the notes).
+        const place = page.Kirigami.ColumnView.index
+        if (isCurrentPage || place < 0 || page.Kirigami.PageStack.pageStack.currentIndex >= place) {
+            return
+        }
+        big = false
+        view.pause()
+    }
+    // Popped while full screen.
     Component.onDestruction: {
         if (big) {
             endBig()

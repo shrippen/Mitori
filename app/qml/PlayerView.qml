@@ -114,7 +114,8 @@ Item {
     }
 
     function restart() {
-        player.position = startAt >= 0 ? startAt : from
+        // Outside the chapter: the small player was still loading.
+        player.position = startAt >= from && startAt <= to ? startAt : from
         startAt = -1
         if (autoPlay) {
             player.play()
@@ -473,6 +474,7 @@ Item {
             RailButton {
                 objectName: "fullButton"
 
+                focusPolicy: Qt.TabFocus    // Space stays with the player
                 visible: !page.big
                 z: 11
                 anchors.right: parent.right

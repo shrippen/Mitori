@@ -844,8 +844,6 @@ TestCase {
         tryCompare(window.pageStack, "depth", 1)
     }
 
-    // What the eye sees and no behaviour test would: symbols in the middle of their buttons, the
-    // bars with their margins, no bar without anything to scroll, hints inside their fields.
     function test_4v_full_screen() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
         if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
@@ -884,6 +882,39 @@ TestCase {
         compare(window.pageStack.depth, depth)
         window.pageStack.pop()
 
+        // Space still plays and stops: ⤢ does not keep the focus.
+        const spaced = push("PlayerPage", { playlist: rows, index: 0 })
+        const spacedFull = findChild(spaced, "fullButton")
+        tryVerify(() => spaced.playing, 5000)
+        wait(500)
+        mouseClick(spacedFull)
+        keyClick(Qt.Key_Space)
+        compare(spaced.playing, false, "paused by Space")
+        compare(spaced.big, true)
+
+        // The Back key ends full screen too, and the video stops.
+        keyClick(Qt.Key_Back)
+        tryCompare(window.pageStack, "currentIndex", 0)
+        tryCompare(window, "visibility", before)
+        compare(spaced.big, false)
+        window.pageStack.pop(window.pageStack.currentItem)
+        const hidden = push("PlayerPage", { playlist: rows, index: 0 })
+        tryVerify(() => hidden.playing, 5000)
+        wait(500)
+        keyClick(Qt.Key_Back)
+        tryCompare(window.pageStack, "currentIndex", 0)
+        tryCompare(hidden, "playing", false, 2000, "no sound from a page left")
+        window.pageStack.pop(window.pageStack.currentItem)
+
+        // A place outside the chapter (the small player was still loading): the chapter start.
+        const chapter = rows.findIndex(r => r.video.von > 60)
+        verify(chapter >= 0)
+        const early = push("PlayerPage", { playlist: rows, index: chapter, startAt: 0 })
+        tryVerify(() => early.duration > 0 && early.playing, 5000)
+        wait(300)
+        verify(early.position >= early.from - 500, "at " + early.position + ", chapter at " + early.from)
+        window.pageStack.pop()
+
         // Beside the list: ⤢ opens the big player where the small one stands; ⤡ closes that page.
         const width = window.width
         const height = window.height
@@ -919,6 +950,8 @@ TestCase {
         window.height = height
     }
 
+    // What the eye sees and no behaviour test would: symbols in the middle of their buttons, the
+    // bars with their margins, no bar without anything to scroll, hints inside their fields.
     function test_4u_shapes() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
         const player = push("PlayerPage", { playlist: rows, index: 0 })
