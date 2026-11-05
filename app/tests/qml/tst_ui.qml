@@ -886,7 +886,11 @@ TestCase {
         const hint = findChild(field, uiShinki ? "fieldHint" : "kantePlaceholder")
         verify(hint.visible, "the hint in the empty field with the focus")
         verify(hint.y >= 0 && hint.y + hint.height <= field.height + 0.5, "inside the field")
-        verify(hint.x + hint.width <= field.width + 0.5, "a long hint ends in the field: " + hint.width)
+        const hintText = field.placeholderText
+        field.placeholderText = hintText + " " + hintText + " " + hintText + " " + hintText
+        verify(hint.truncated, "a long hint is cut")
+        verify(hint.x + hint.width <= field.width + 0.5, "and ends in the field: " + hint.width)
+        field.placeholderText = hintText
         compare(field.placeholderTextColor.a, 0, "Material would float its own above the field")
         field.text = "x"
         verify(!hint.visible)

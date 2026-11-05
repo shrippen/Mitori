@@ -8,7 +8,7 @@ import "."
  * Menu item (Kante 1.43, from lmix): a QQC2.MenuItem with an icon, the text, a value on the
  * right and the shortcut as a keycap. Put it in a menu with `KantePopupSkin`; group items
  * under a `KanteMenuSection`.
- *   icon.name / icon.source  the icon (Kirigami.Icon, drawn in the text colour)
+ *   icon.name / icon.source  the icon (KanteIcon, drawn in the text colour)
  *   iconRoom      an item without icon keeps the icon's room (texts of a menu line up)
  *   valueText     the current value of a setting the item opens, e.g. "Hold last frame"
  *   shortcutText  the shortcut as shown; empty: the action's shortcut (native text)

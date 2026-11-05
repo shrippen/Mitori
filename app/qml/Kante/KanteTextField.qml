@@ -57,7 +57,8 @@ QQC2.TextField {
         when: KanteStyle.themed
         restoreMode: Binding.RestoreBindingOrValue
     }
-    // The placeholder stays inside the box, in every style (1.73). Material floats its own above a
+    // The placeholder stays inside the box under Kante's own look (1.73), on every platform; the
+    // System look keeps the style's, Material's floating one too. Material floats its own above a
     // focused or filled field, across the frame and cut off at the edge of a bar: that one is
     // transparent, this one is the one seen.
     QQC2.Label {
@@ -67,6 +68,7 @@ QQC2.TextField {
         anchors.verticalCenter: parent.verticalCenter
         width: control.width - control.leftPadding - control.rightPadding
         text: control.placeholderText
+        horizontalAlignment: control.horizontalAlignment
         elide: Text.ElideRight
         font: control.font
         color: KanteStyle.disabledTextColor

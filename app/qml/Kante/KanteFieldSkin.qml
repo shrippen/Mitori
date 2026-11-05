@@ -149,9 +149,11 @@ Item {
         visible: KanteStyle.themed && skin.textArea && skin.control.placeholderText !== ""
                  && skin.control.text === "" && skin.control.preeditText === ""
         x: skin.control ? skin.control.leftPadding : 0
-        y: skin.control ? skin.control.topPadding : 0
+        // A text area starts at the top, a one-line field in its middle.
+        y: !skin.control ? 0 : skin.control.wrapMode !== undefined ? skin.control.topPadding : (skin.control.height - height) / 2
         width: skin.control ? skin.control.width - skin.control.leftPadding - skin.control.rightPadding : 0
         text: skin.textArea ? skin.control.placeholderText : ""
+        horizontalAlignment: skin.control ? skin.control.horizontalAlignment : Text.AlignLeft
         elide: Text.ElideRight
         font: skin.control ? skin.control.font : Qt.application.font
         color: KanteStyle.disabledTextColor
