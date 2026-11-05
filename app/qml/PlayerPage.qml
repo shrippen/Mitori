@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import org.kde.kirigami as Kirigami
 import Mitori
 
@@ -10,6 +11,11 @@ Kirigami.Page {
     required property var playlist
     required property int index
     property alias training: view.training
+    // Full screen: the window without bars, the screen sideways. Opened that way (from the small
+    // player) the page goes when it ends.
+    property bool big: false
+    property bool bigOnly: false
+    property alias startAt: view.startAt
 
     // For the callers and the UI test: the view's state and actions.
     readonly property alias current: view.current
@@ -44,6 +50,31 @@ Kirigami.Page {
 
     onIndexChanged: view.index = index
 
+    // The window as it was (a maximised desktop window stays maximised afterwards).
+    property var bigWindow: null
+    property int windowBefore: Window.AutomaticVisibility
+    function showBig() {
+        if (big) {
+            bigWindow = page.Window.window
+            windowBefore = bigWindow.visibility
+            bigWindow.visibility = Window.FullScreen
+            Levels.setSideways(Levels.Switch.On)
+            return
+        }
+        endBig()
+    }
+    function endBig() {
+        Levels.setSideways(Levels.Switch.Off)
+        bigWindow.visibility = windowBefore
+    }
+    onBigChanged: showBig()
+    // Left by Back or the Back key while full screen.
+    Component.onDestruction: {
+        if (big) {
+            endBig()
+        }
+    }
+
     // Back: a step to the page before, then this one goes at once (it stops playing). Kirigami's
     // pop() slides it out, and after the window turned (sideways) it stops that slide and keeps
     // the page, still playing.
@@ -67,7 +98,16 @@ Kirigami.Page {
         index: page.index
         onIndexChanged: page.index = index
         onShown: id => page.shown(id)
+        big: page.big
         onBackRequested: page.leave()
+        onBigRequested: page.big = true
+        onBigLeft: {
+            if (page.bigOnly) {
+                page.leave()
+                return
+            }
+            page.big = false
+        }
         onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
     }
 }

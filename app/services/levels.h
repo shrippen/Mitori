@@ -53,6 +53,8 @@ public:
     Q_INVOKABLE void restore();
     Q_INVOKABLE void setSound(Switch state);
     Q_INVOKABLE void setAwake(Switch state);
+    // Full screen player: the screen sideways (Android).
+    Q_INVOKABLE void setSideways(Switch state);
 
 signals:
     void changed();

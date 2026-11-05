@@ -846,6 +846,79 @@ TestCase {
 
     // What the eye sees and no behaviour test would: symbols in the middle of their buttons, the
     // bars with their margins, no bar without anything to scroll, hints inside their fields.
+    function test_4v_full_screen() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const before = window.visibility
+
+        // Upright: ⤢ on the picture, full screen in place, ⤡ at the band brings it back.
+        const page = push("PlayerPage", { playlist: rows, index: 0 })
+        const full = findChild(page, "fullButton")
+        tryVerify(() => full.visible && full.width > 0)
+        wait(500)       // the page has slid in
+        mouseClick(full)
+        compare(page.big, true)
+        compare(window.visibility, Window.FullScreen)
+        wait(300)
+        shot("6b-full-screen")
+        verify(!full.visible, "⤢ is gone in full screen")
+        const leave = findChild(page, "bandBack")
+        tryVerify(() => leave.visible && leave.width > 0)
+        wait(300)
+        compare(leave.symbol, "view-restore")
+        mouseClick(leave)
+        compare(page.big, false)
+        compare(window.visibility, before)
+        verify(full.visible, "⤢ again")
+
+        // Esc leaves it as well, and the page stays.
+        const depth = window.pageStack.depth
+        wait(500)       // the window has its size back
+        mouseClick(full)
+        compare(page.big, true)
+        page.forceActiveFocus()
+        keyClick(Qt.Key_Escape)
+        compare(page.big, false)
+        compare(window.pageStack.depth, depth)
+        window.pageStack.pop()
+
+        // Beside the list: ⤢ opens the big player where the small one stands; ⤡ closes that page.
+        const width = window.width
+        const height = window.height
+        window.width = 1280
+        window.height = 800
+        const programme = push("ProgrammePage")
+        tryVerify(() => programme.split)
+        programme.open(programme.rows.find(r => r.id === rows[0].id))
+        const pane = findChild(programme, "playerPane")
+        tryVerify(() => pane.item && pane.item.duration > 0, 5000)
+        pane.item.pause()
+        const place = pane.item.from + 1000
+        pane.item.jump(1000)
+        wait(500)
+        const small = findChild(pane.item, "fullButton")
+        verify(small.visible, "⤢ on the small player")
+        const before2 = window.pageStack.depth
+        mouseClick(small)
+        tryCompare(window.pageStack, "depth", before2 + 1)
+        const bigPage = window.pageStack.currentItem
+        compare(bigPage.big, true)
+        wait(500)
+        tryVerify(() => bigPage.duration > 0, 5000)
+        tryVerify(() => Math.abs(bigPage.position - place) < 500, 3000, "at " + bigPage.position)
+        compare(window.visibility, Window.FullScreen)
+        const close = findChild(bigPage, "bandBack")
+        tryVerify(() => close.visible && close.width > 0)
+        mouseClick(close)
+        tryCompare(window.pageStack, "depth", before2)
+        tryCompare(window, "visibility", before)
+        window.pageStack.pop()
+        window.width = width
+        window.height = height
+    }
+
     function test_4u_shapes() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
         const player = push("PlayerPage", { playlist: rows, index: 0 })

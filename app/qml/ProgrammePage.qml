@@ -258,6 +258,7 @@ Kirigami.Page {
                         page.lastId = id
                     }
                 }
+                onBigRequested: page.openBig()
                 onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
                 onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
             }
@@ -402,6 +403,17 @@ Kirigami.Page {
             playlist: playlist, index: playlist.findIndex(r => r.id === entry.id)
         }) as PlayerPage
         page.lastId = entry.id
+        player.shown.connect(id => page.lastId = id)
+    }
+
+    // The small player goes full screen where it stands; back here it stays where it was.
+    function openBig() {
+        const small = page.player
+        const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
+        const player = window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), {
+            playlist: small.playlist, index: small.index, bigOnly: true, startAt: small.position
+        }) as PlayerPage
+        player.big = true
         player.shown.connect(id => page.lastId = id)
     }
 
