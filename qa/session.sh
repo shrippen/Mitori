@@ -44,7 +44,8 @@ base="$HOME/.cache/claude/mitori-qa"
 mkdir -p "$base"
 work="$(mktemp -d -p "$base" run.XXXXXX)"
 profile="${keep:-$work/profile}"
-mkdir -p "$work/runtime" "$profile/data" "$profile/config/shrippen.github.io" "$profile/cache"
+# Its own HOME too: file dialogs must not show the real folders.
+mkdir -p "$work/runtime" "$profile/data" "$profile/config/shrippen.github.io" "$profile/cache" "$profile/home/Documents"
 chmod 700 "$work/runtime"
 
 # The look's number and the wizard, as the first start would leave them.
@@ -53,11 +54,6 @@ conf="$profile/config/shrippen.github.io/Mitori.conf"
 if [ ! -e "$conf" ] && [ "$new" = 0 ]; then
     printf '[look]\nstyle=%s\nwelcomed=true\n' "${styles[$style]}" > "$conf"
 fi
-
-display=120
-while [ -e "/tmp/.X11-unix/X$display" ] || [ -e "/tmp/.X$display-lock" ]; do
-    display=$((display + 1))
-done
 
 xvfb_pid="" app_pid=""
 cleanup() {
@@ -68,15 +64,14 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-Xvfb ":$display" -screen 0 "${size}x24" -nolisten tcp > /dev/null 2>&1 &
+# Xvfb picks a free display itself: two sessions started together cannot meet on one.
+mkfifo "$work/display"
+Xvfb -displayfd 3 -screen 0 "${size}x24" -nolisten tcp 3> "$work/display" > /dev/null 2>&1 &
 xvfb_pid=$!
-for _ in $(seq 50); do
-    [ -e "/tmp/.X11-unix/X$display" ] && break
-    sleep 0.1
-done
+read -r display < "$work/display"
 
 clean=(env -u WAYLAND_DISPLAY -u XDG_SESSION_TYPE -u DBUS_SESSION_BUS_ADDRESS -u MITORI_VIDEOS
-    QT_QPA_PLATFORM=xcb DISPLAY=":$display" XDG_RUNTIME_DIR="$work/runtime"
+    QT_QPA_PLATFORM=xcb DISPLAY=":$display" XDG_RUNTIME_DIR="$work/runtime" HOME="$profile/home"
     XDG_DATA_HOME="$profile/data" XDG_CONFIG_HOME="$profile/config" XDG_CACHE_HOME="$profile/cache"
     QT_SCALE_FACTOR="$scale" LANGUAGE="$lang" LANG="${lang}_DE.UTF-8" LC_ALL="" QT_QUICK_BACKEND=software
     MITORI_DEVICE_LEVELS=memory MITORI_SPEECH_ENGINE=mock)

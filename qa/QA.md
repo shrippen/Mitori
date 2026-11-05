@@ -60,3 +60,11 @@ Erwartet: Fokus immer sichtbar, jedes Element erreichbar, nichts fängt die Tast
 
 **J-J1 Sicherung** · P7. Export, Import (Ersetzen und Zusammenführen), Abgleich ohne Server, Konflikte, Darstellung wechseln, Sprache wechseln.
 Erwartet: klare Meldung bei jedem Fehler; Daten bleiben; sagt, wo die Datei liegt.
+
+## Grenzen der Sitzung
+
+Xvfb ohne Fenstermanager und mit Software-Backend: das Videobild bleibt schwarz, Wischen ist Maus,
+nicht Touch (Listen mit dem Mausrad scrollen), Drehen und Bildschirmtastatur gibt es nicht, `xdotool`
+verliert manche Umlaute. All das bleibt am Gerät zu prüfen. Prüfbilder können Videobilder zeigen:
+sie bleiben auf dem Rechner und werden nicht angesehen, wenn echte Videos laufen (`--no-videos`
+oder `MITORI_QA_VIDEOS` auf einen Ordner mit Testvideos).
