@@ -5,7 +5,8 @@
 #
 # Usage: ./scripts/build-appimage.sh   → dist/appimage/Mitori-<version>-x86_64.AppImage
 # Needs: cmake, ninja, a C++20 compiler, git, python3 with PyYAML, pip, the GL/EGL and xkbcommon
-# development files, libspeechd (pronunciation), curl, and network access.
+# development files, libspeechd (pronunciation), libpulse (Qt Multimedia links it), curl, and network
+# access.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
