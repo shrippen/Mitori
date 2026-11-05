@@ -850,6 +850,7 @@ TestCase {
             skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
         }
         const before = window.visibility
+        failOnWarning(/Binding loop/)
 
         // Upright: ⤢ on the picture, full screen in place, ⤡ at the band brings it back.
         const page = push("PlayerPage", { playlist: rows, index: 0 })

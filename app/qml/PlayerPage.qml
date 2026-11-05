@@ -45,7 +45,10 @@ Kirigami.Page {
     // The style's page ground (the window's scope gives Page the dialog colour).
     background: Rectangle { color: Look.backgroundColor }
     // Sideways the video takes the whole height: no head (Kirigami's bar, or Shinki's head).
-    readonly property bool headless: view.landscape
+    // A step later: the head going changes the page's height, which `landscape` reads (a binding loop).
+    property bool headless: false
+    function syncHead() { headless = view.landscape }
+    Component.onCompleted: syncHead()
     globalToolBarStyle: headless ? Kirigami.ApplicationHeaderStyle.None : Kirigami.ApplicationHeaderStyle.Auto
 
     onIndexChanged: view.index = index
@@ -109,6 +112,7 @@ Kirigami.Page {
         onIndexChanged: page.index = index
         onShown: id => page.shown(id)
         big: page.big
+        onLandscapeChanged: Qt.callLater(page.syncHead)
         onBackRequested: page.leave()
         onBigRequested: page.big = true
         onBigLeft: {
