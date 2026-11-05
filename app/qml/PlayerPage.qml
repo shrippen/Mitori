@@ -130,7 +130,7 @@ Kirigami.Page {
     ListView {
         id: trainingList
 
-        objectName: "trainingList"
+        objectName: "trainingSideList"
         Layout.fillHeight: true
         Layout.preferredWidth: Math.min(page.width * 0.38, Kirigami.Units.gridUnit * 24)
         visible: page.split
@@ -150,6 +150,7 @@ Kirigami.Page {
                   + modelData.title + (modelData.extra && !modelData.nr ? " (" + modelData.extra + ")" : "")
             subtitle: [modelData.jp, modelData.nr ? modelData.extra : modelData.attack].filter(x => x).join(" · ")
             selected: index === view.index
+            Accessible.name: text.replace("✓ ", "") + (Practice.revision >= 0 && Practice.ratedToday(modelData.id) ? ", " + qsTr("practised") : "")
             focusOnClick: false         // Space stays with the player
             onClicked: view.index = index
             trailing: LookLevelDots {

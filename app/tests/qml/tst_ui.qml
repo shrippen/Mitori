@@ -1266,7 +1266,7 @@ TestCase {
         wait(200)
         const player = push("PlayerPage", { playlist: rows, index: 0, training: true })
         tryVerify(() => player.split)
-        const list = findChild(player, "trainingList")
+        const list = findChild(player, "trainingSideList")
         verify(list.visible)
         compare(list.count, 3)
         verify(findChild(player, "ratingRow").visible)

@@ -1281,39 +1281,42 @@
 <context>
     <name>MediaView</name>
     <message>
-        <location filename="../qml/MediaView.qml" line="32"/>
+        <location filename="../qml/MediaView.qml" line="30"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="39"/>
+        <location filename="../qml/MediaView.qml" line="37"/>
         <source>The photo is not on this device.</source>
         <translation>Das Foto ist nicht auf diesem Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="39"/>
+        <location filename="../qml/MediaView.qml" line="37"/>
         <source>The voice note is not on this device.</source>
         <translation>Die Sprachnotiz ist nicht auf diesem Gerät.</translation>
     </message>
+</context>
+<context>
+    <name>MediaVoice</name>
     <message>
-        <location filename="../qml/MediaView.qml" line="52"/>
+        <location filename="../qml/MediaVoice.qml" line="18"/>
         <source>Stop</source>
-        <translation>Stopp</translation>
+        <translation type="unfinished">Stopp</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="52"/>
+        <location filename="../qml/MediaVoice.qml" line="18"/>
         <source>Play voice note</source>
-        <translation>Sprachnotiz abspielen</translation>
+        <translation type="unfinished">Sprachnotiz abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="65"/>
+        <location filename="../qml/MediaVoice.qml" line="31"/>
         <source>Voice note %1</source>
-        <translation>Sprachnotiz %1</translation>
+        <translation type="unfinished">Sprachnotiz %1</translation>
     </message>
     <message>
-        <location filename="../qml/MediaView.qml" line="66"/>
+        <location filename="../qml/MediaVoice.qml" line="32"/>
         <source>Voice note</source>
-        <translation>Sprachnotiz</translation>
+        <translation type="unfinished">Sprachnotiz</translation>
     </message>
 </context>
 <context>
@@ -1462,6 +1465,14 @@
         <location filename="../qml/NotesPage.qml" line="230"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
+    </message>
+</context>
+<context>
+    <name>PlayerPage</name>
+    <message>
+        <location filename="../qml/PlayerPage.qml" line="153"/>
+        <source>practised</source>
+        <translation type="unfinished">geübt</translation>
     </message>
 </context>
 <context>
@@ -1678,17 +1689,17 @@
 <context>
     <name>PracticeLog</name>
     <message>
-        <location filename="../store/practicelog.cpp" line="87"/>
+        <location filename="../store/practicelog.cpp" line="89"/>
         <source>it comes from a newer Mitori (schema %1); update Mitori</source>
         <translation>es stammt aus einer neueren Mitori-Version (Schema %1); bitte Mitori aktualisieren</translation>
     </message>
     <message>
-        <location filename="../store/practicelog.cpp" line="377"/>
+        <location filename="../store/practicelog.cpp" line="389"/>
         <source>the round is incomplete</source>
         <translation>die Runde ist unvollständig</translation>
     </message>
     <message>
-        <location filename="../store/practicelog.cpp" line="392"/>
+        <location filename="../store/practicelog.cpp" line="404"/>
         <source>a rating is invalid (&quot;%1&quot;)</source>
         <translation>eine Einschätzung ist ungültig („%1“)</translation>
     </message>
