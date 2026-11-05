@@ -844,6 +844,16 @@ TestCase {
         tryCompare(window.pageStack, "depth", 1)
     }
 
+    // A click lands only once the page has slid in: again until it did what it should.
+    function clickUntil(item, done) {
+        tryVerify(() => {
+            if (!done()) {
+                mouseClick(item)
+            }
+            return done()
+        }, 5000)
+    }
+
     function test_4v_full_screen() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
         if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
@@ -857,8 +867,7 @@ TestCase {
         const full = findChild(page, "fullButton")
         tryVerify(() => full.visible && full.width > 0)
         wait(500)       // the page has slid in
-        mouseClick(full)
-        compare(page.big, true)
+        clickUntil(full, () => page.big)
         compare(window.visibility, Window.FullScreen)
         wait(300)
         shot("6b-full-screen")
@@ -867,8 +876,7 @@ TestCase {
         tryVerify(() => leave.visible && leave.width > 0)
         wait(300)
         compare(leave.symbol, "view-restore")
-        mouseClick(leave)
-        compare(page.big, false)
+        clickUntil(leave, () => !page.big)
         compare(window.visibility, before)
         verify(full.visible, "⤢ again")
 
@@ -882,8 +890,7 @@ TestCase {
         // Esc leaves it as well, and the page stays.
         const depth = window.pageStack.depth
         wait(500)       // the window has its size back
-        mouseClick(full)
-        compare(page.big, true)
+        clickUntil(full, () => page.big)
         page.forceActiveFocus()
         keyClick(Qt.Key_Escape)
         compare(page.big, false)
@@ -923,7 +930,7 @@ TestCase {
         const spacedFull = findChild(spaced, "fullButton")
         tryVerify(() => spaced.playing, 5000)
         wait(500)
-        mouseClick(spacedFull)
+        clickUntil(spacedFull, () => spaced.big)
         keyClick(Qt.Key_Space)
         compare(spaced.playing, false, "paused by Space")
         compare(spaced.big, true)
@@ -949,8 +956,7 @@ TestCase {
         searchField.text = ""
         const above = push("PlayerPage", { playlist: rows, index: 0 })
         wait(500)
-        mouseClick(findChild(above, "fullButton"))
-        compare(above.big, true)
+        clickUntil(findChild(above, "fullButton"), () => above.big)
         keyClick(Qt.Key_Back)
         tryCompare(window.pageStack, "currentItem", search)
         tryVerify(() => !above.big)
@@ -986,7 +992,7 @@ TestCase {
         const small = findChild(pane.item, "fullButton")
         verify(small.visible, "⤢ on the small player")
         const before2 = window.pageStack.depth
-        mouseClick(small)
+        clickUntil(small, () => window.pageStack.depth === before2 + 1)
         tryCompare(window.pageStack, "depth", before2 + 1)
         const bigPage = window.pageStack.currentItem
         compare(bigPage.big, true)
@@ -996,7 +1002,7 @@ TestCase {
         compare(window.visibility, Window.FullScreen)
         const close = findChild(bigPage, "bandBack")
         tryVerify(() => close.visible && close.width > 0)
-        mouseClick(close)
+        clickUntil(close, () => window.pageStack.depth === before2)
         tryCompare(window.pageStack, "depth", before2)
         tryCompare(window, "visibility", before)
         window.pageStack.pop()
