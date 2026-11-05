@@ -1301,22 +1301,22 @@
     <message>
         <location filename="../qml/MediaVoice.qml" line="18"/>
         <source>Stop</source>
-        <translation type="unfinished">Stopp</translation>
+        <translation>Stopp</translation>
     </message>
     <message>
         <location filename="../qml/MediaVoice.qml" line="18"/>
         <source>Play voice note</source>
-        <translation type="unfinished">Sprachnotiz abspielen</translation>
+        <translation>Play voice note</translation>
     </message>
     <message>
         <location filename="../qml/MediaVoice.qml" line="31"/>
         <source>Voice note %1</source>
-        <translation type="unfinished">Sprachnotiz %1</translation>
+        <translation>Voice note %1</translation>
     </message>
     <message>
         <location filename="../qml/MediaVoice.qml" line="32"/>
         <source>Voice note</source>
-        <translation type="unfinished">Sprachnotiz</translation>
+        <translation>Sprachnotiz</translation>
     </message>
 </context>
 <context>
@@ -1472,7 +1472,7 @@
     <message>
         <location filename="../qml/PlayerPage.qml" line="153"/>
         <source>practised</source>
-        <translation type="unfinished">geübt</translation>
+        <translation>geübt</translation>
     </message>
 </context>
 <context>
