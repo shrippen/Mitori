@@ -2140,6 +2140,12 @@ TestCase {
         // the editor changes them through Courses.
         const course = Courses.create("Gastlehrer", "2026-05-01", "", "", "")
         verify(Courses.addEntry(course, "Irimi früher"))
+        // In all notes a course entry says when it was written.
+        const allNotes = push("AllNotesPage")
+        allNotes.filter = "courses"
+        tryVerify(() => findChild(allNotes, "noteTitle") !== null)
+        verify(findChild(allNotes, "noteTitle").text.indexOf(" · ") > 0, findChild(allNotes, "noteTitle").text)
+        window.pageStack.pop()
         tryVerify(() => again.shown[0].kind === "course")
         compare(again.shown[0].title, "Gastlehrer")
         wait(800)

@@ -22,17 +22,17 @@
         <translation>Heute</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="226"/>
+        <location filename="../qml/AllNotesPage.qml" line="228"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="227"/>
+        <location filename="../qml/AllNotesPage.qml" line="229"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="279"/>
+        <location filename="../qml/AllNotesPage.qml" line="281"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
@@ -1427,42 +1427,42 @@
         <translation>Heute</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="107"/>
+        <location filename="../qml/NotesPage.qml" line="108"/>
         <source>No notes on this technique yet.</source>
         <translation>Noch keine Notizen zu dieser Technik.</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="159"/>
+        <location filename="../qml/NotesPage.qml" line="160"/>
         <source>Change or delete</source>
         <translation>Bearbeiten oder löschen</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="185"/>
+        <location filename="../qml/NotesPage.qml" line="186"/>
         <source>Press and hold a note (or Enter on it) to change or delete it.</source>
         <translation>Lang drücken (oder Enter auf der Notiz): bearbeiten oder löschen.</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="200"/>
+        <location filename="../qml/NotesPage.qml" line="201"/>
         <source>Note for today …</source>
         <translation>Notiz für heute …</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="201"/>
+        <location filename="../qml/NotesPage.qml" line="202"/>
         <source>New note</source>
         <translation>Neue Notiz</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="220"/>
+        <location filename="../qml/NotesPage.qml" line="221"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="230"/>
+        <location filename="../qml/NotesPage.qml" line="231"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/NotesPage.qml" line="230"/>
+        <location filename="../qml/NotesPage.qml" line="231"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
@@ -1707,62 +1707,62 @@
 <context>
     <name>ProgrammePage</name>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="47"/>
+        <location filename="../qml/ProgrammePage.qml" line="54"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="52"/>
+        <location filename="../qml/ProgrammePage.qml" line="59"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="57"/>
+        <location filename="../qml/ProgrammePage.qml" line="64"/>
         <source>All notes</source>
         <translation>Alle Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="94"/>
+        <location filename="../qml/ProgrammePage.qml" line="101"/>
         <source>%1, %2 of %3 exam-ready</source>
         <translation>%1, %2 von %3 prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="144"/>
+        <location filename="../qml/ProgrammePage.qml" line="162"/>
         <source>Waiting time: %1</source>
         <translation>Wartezeit: %1</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="154"/>
+        <location filename="../qml/ProgrammePage.qml" line="172"/>
         <source>The Japanese writing of these names is a proposal, not yet confirmed.</source>
         <translation>Die japanische Schreibweise dieser Namen ist ein Vorschlag, noch nicht bestätigt.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="171"/>
+        <location filename="../qml/ProgrammePage.qml" line="189"/>
         <source>Exam videos</source>
         <translation>Prüfungsvideos</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="173"/>
+        <location filename="../qml/ProgrammePage.qml" line="191"/>
         <source>There is no video for this grade.</source>
         <translation>Zu diesem Grad gibt es kein Video.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="174"/>
+        <location filename="../qml/ProgrammePage.qml" line="192"/>
         <source>The videos are on the DVDs of the Shinkiryu association. With the DVD&apos;s code Mitori loads them onto this device.</source>
         <translation>Die Videos sind auf den DVDs des Shinkiryu-Verbands. Mit dem Code der DVD lädt Mitori sie auf dieses Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="184"/>
+        <location filename="../qml/ProgrammePage.qml" line="202"/>
         <source>Enter code</source>
         <translation>Code eingeben</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="189"/>
+        <location filename="../qml/ProgrammePage.qml" line="207"/>
         <source>Order on shinkiryu.de</source>
         <translation>Auf shinkiryu.de bestellen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="271"/>
+        <location filename="../qml/ProgrammePage.qml" line="289"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>

@@ -75,6 +75,7 @@ Kirigami.ScrollablePage {
                 LookLabel {
                     Layout.fillWidth: true
                     text: (page.entry.nr ? page.entry.nr + " · " : "") + (page.entry.title || "")
+                          + (page.entry.extra && !page.entry.nr ? " (" + page.entry.extra + ")" : "")
                     font.bold: true
                     wrapMode: Text.Wrap
                 }
