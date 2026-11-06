@@ -71,6 +71,8 @@ public slots:
         QSettings().clear();
         // The first-start wizard has its own case (test_0_welcome); the others start on the menu.
         QSettings().setValue(QStringLiteral("look/welcomed"), true);
+        // The shared grade of an older version (test_0a_practice_migrated).
+        QSettings().setValue(QStringLiteral("programme/grade/shinkitoho"), QStringLiteral("chuden"));
         // A speech engine without a Japanese voice, the same on every machine (the glossary
         // hides its speaker buttons).
         qputenv("MITORI_SPEECH_ENGINE", "mock");

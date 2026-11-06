@@ -30,15 +30,12 @@ public:
 
     QString discipline() const;
     void setDiscipline(const QString &discipline);
-    // The grade chosen last in a discipline, else its first grade with material.
-    Q_INVOKABLE QString grade(const QString &discipline) const;
-    Q_INVOKABLE void setGrade(const QString &discipline, const QString &grade);
 
     // Grades of a discipline that have their own material: {id, name, jp, count}.
     Q_INVOKABLE QVariantList grades(const QString &discipline) const;
     // The programme page's chips, in catalog order: grades(), and with count 0 a grade without
     // entries that has an `inhalt` (Shinki Toho Hon-Menkyo; Hôshu has none). Chosen only on that
-    // page, never with setGrade: nothing else can use such a grade.
+    // page: nothing else can use such a grade.
     Q_INVOKABLE QVariantList gradeChips(const QString &discipline) const;
     // Rows of a grade in programme order. Each row has `kind`:
     //   "group"     title, jp            a heading (Kata, Tachi-waza · Mae-seme, Kamae, Ô-dachi …)
@@ -48,10 +45,10 @@ public:
     //   "info"      id, title, jp, text, comment   an introduction with a comment only (Kumidachi)
     //   "text"      id, title            a theory item of the exam (essay, oral exam): no video, no rating
     Q_INVOKABLE QVariantList entries(const QString &discipline, const QString &grade) const;
-    // What today's practice draws from: the entry rows of every grade up to the one chosen in the
-    // discipline, in programme order, each with `current` (part of the chosen grade) and
+    // What today's practice draws from: the entry rows of every grade up to `grade` (the practice
+    // grade, see PracticeGrade), in programme order, each with `current` (part of that grade) and
     // `gradeName`.
-    Q_INVOKABLE QVariantList practiceEntries(const QString &discipline) const;
+    Q_INVOKABLE QVariantList practiceEntries(const QString &discipline, const QString &grade) const;
     // Techniques whose name, attack, Japanese, additions, group or steps contain every word of `query`
     // (see SearchText), across all disciplines and grades in programme order (at most `limit`).
     // Each row as in entries(), with `discipline`, `disciplineName`, `grade`, `gradeName` and

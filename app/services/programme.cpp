@@ -162,27 +162,6 @@ void Programme::setDiscipline(const QString &discipline)
     emit selectionChanged();
 }
 
-QString Programme::grade(const QString &discipline) const
-{
-    const QVariantList available = grades(discipline);
-    const QString stored = QSettings().value(QStringLiteral("programme/grade/") + discipline).toString();
-    for (const QVariant &g : available) {
-        if (g.toMap().value(QStringLiteral("id")).toString() == stored) {
-            return stored;
-        }
-    }
-    return available.value(0).toMap().value(QStringLiteral("id")).toString();
-}
-
-void Programme::setGrade(const QString &discipline, const QString &grade)
-{
-    if (grade == this->grade(discipline)) {
-        return;
-    }
-    QSettings().setValue(QStringLiteral("programme/grade/") + discipline, grade);
-    emit selectionChanged();
-}
-
 QVariantList Programme::grades(const QString &disciplineId) const
 {
     QVariantList result;
@@ -224,10 +203,9 @@ int Programme::entryCount(const QString &disciplineId, const QString &grade) con
     return count;
 }
 
-QVariantList Programme::practiceEntries(const QString &disciplineId) const
+QVariantList Programme::practiceEntries(const QString &disciplineId, const QString &chosen) const
 {
     QVariantList result;
-    const QString chosen = grade(disciplineId);
     for (const QVariant &g : grades(disciplineId)) {
         const QVariantMap gradeMap = g.toMap();
         const QString id = gradeMap.value(QStringLiteral("id")).toString();

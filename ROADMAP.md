@@ -28,7 +28,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Zeile im Blick, Ende springt beim ersten Druck ans Ende.
 - Schritt 2: Einschätzen 1–4 im Technik-Blatt und im Player (Übungsprotokoll in SQLite, jede Einschätzung ein
   Eintrag mit Zeit und Gerät), Stand als vier Punkte in der Programmliste, Stand je Grad als Leiste mit Legende.
-  Heute üben (Wiederholen nach Plan, Abstände je Stufe einstellbar, Kachel im Startmenü) und Training (Playliste der
+  Heute üben (Wiederholen nach Plan bis zum Übungsgrad, aus „Meine Grade“ oder von Hand, siehe
+  `entwuerfe/app-entscheidungen.md`; Abstände je Stufe einstellbar, Kachel im Startmenü) und Training (Playliste der
   fälligen Techniken, Einschätzen schaltet weiter). Notizen je Technik (Text; nach Tagen, lang drücken zum
   Bearbeiten/Löschen, letzte Notiz im Blatt, Eingabe im Player), „Alle Notizen“ (nach Tagen, Filter je Sparte und Lehrgänge, Zeilen in C++; im
   Programm und in den Notizen einer Technik). Suche (Techniken aller Sparten und Grade, eigene Notizen; Groß/klein,
@@ -55,7 +56,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Flatpak (die KDE-Runtime hat nur das Test-Plugin). Offen: Aussprache auf dem Telefon prüfen, qtspeech für
   Flatpak, A–Z-Sprungleiste, Lesungen ohne lange Vokale (Umschrift ohne ô, „aikido“ → あいきど), in der Suche
   Kommentare und Lehrgänge.
-- Schritt 3: Technik-Landkarte (Kachel 図 im Startmenü): Sparte, „bis“ Grad (anfangs der des Programms), je Gruppe
+- Schritt 3: Technik-Landkarte (Kachel 図 im Startmenü): Sparte, „bis“ Grad (anfangs der Übungsgrad, Chips nur für die Seite), je Gruppe
   ein Raster Technik × Angriff über alle Grade bis dahin (Gruppen gleichen Titels aus Kyu- und Dan-Graden zusammen),
   jeder Platz in der Farbe seiner besten Stufe, leer, wo die Kombination nicht vorkommt; Shinki Toho als nummerierte
   Ô-dachi-Formen. Tippen öffnet das Technik-Blatt, Überfahren zeigt Technik, Angriff, Grad und Stand; Tab erreicht
@@ -208,7 +209,6 @@ Sicherung ohne Endung, konto.ini 600, Alle Notizen und Alle Jahre schneller.
 Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
 - Telefon bei doppelter Anzeigegröße (206 px): Test `test_8o` auf diese Breite ausweiten; Segmente, lange Knöpfe,
   Bewertung und Steuerzeilen des Players brauchen eine schmale Form.
-- Übungsgrad getrennt vom Blättern im Programm.
 - Lehrgangsnotizen mit Technik verbinden (⌗, Eintrag auch bei der Technik), Tablet nach Vorlage (Blatt
   rechts, zwei Spalten, Lehrgänge und Einstellungen als Liste und Seite), Export als Blatt.
 - Programmdaten auf Englisch, App-Passwort im Schlüsselbund, Abschlussseite des Trainings.
