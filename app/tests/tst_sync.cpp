@@ -1074,6 +1074,81 @@ private slots:
         }
     }
 
+    // Links travel with the sync: made on one device, removed on the other, gone with the entry.
+    void linksTravel()
+    {
+        FakeDav dav;
+        const Device a = device(u"l-a"_s);
+        const Device b = device(u"l-b"_s);
+        Sync one(a.practice, a.courses, a.media, a.folder, a.store);
+        Sync two(b.practice, b.courses, b.media, b.folder, b.store);
+        for (Sync *s : {&one, &two}) {
+            s->setAccount(dav.url(), u"ich"_s, u"geheim"_s, s == &one ? u"Eins"_s : u"Zwei"_s);
+            s->setEnabled(true);
+        }
+        const QString tech = u"aikido/t1"_s;
+        const auto links = [&](const Device &d) {
+            CourseBook book;
+            return book.open(d.courses) ? book.linkedEntries(tech).size() : -1;
+        };
+        QString entry;
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            CourseBook::Course c;
+            c.title = u"Eigener Lehrgang"_s;
+            c.first = c.last = QDate(2026, 11, 7);
+            entry = book.addEntry(book.addCourse(c, now(), u"a"_s).uid, u"Ikkyo"_s, now(), u"a"_s).uid;
+            QVERIFY(book.addTag(entry, tech, now(), u"a"_s));
+        }
+        QVERIFY(synced(one));
+        QVERIFY(synced(two));
+        QCOMPARE(links(b), 1);
+
+        // A link changes nothing on the entry: no conflict when both edit it and link it.
+        for (const auto &[path, device] : {std::pair{a.courses, u"a"_s}, std::pair{b.courses, u"b"_s}}) {
+            CourseBook book;
+            QVERIFY(book.open(path));
+            QVERIFY(book.addTag(entry, u"aikido/t-"_s + device, now(), device));
+        }
+        QVERIFY(synced(one));
+        QVERIFY(synced(two));
+        QVERIFY(synced(one));
+        QVERIFY(two.conflicts().isEmpty());
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QCOMPARE(book.linkedEntries(u"aikido/t-b"_s).size(), 1);
+        }
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            QCOMPARE(book.linkedEntries(u"aikido/t-a"_s).size(), 1);
+            QVERIFY(book.removeTag(entry, tech, now()));
+        }
+        QVERIFY(synced(two));
+        QVERIFY(synced(one));
+        QCOMPARE(links(a), 0);
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QVERIFY(book.addTag(entry, tech, now(), u"a"_s));
+        }
+        QVERIFY(synced(one));
+        QVERIFY(synced(two));
+        QCOMPARE(links(b), 1);
+
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            QVERIFY(book.deleteEntry(entry, now()));
+        }
+        QVERIFY(synced(two));
+        QVERIFY(synced(one));
+        QCOMPARE(links(a), 0);
+        QCOMPARE(links(b), 0);
+    }
+
     // A wrong app password: the sync fails with a reason, nothing is sent.
     void wrongPassword()
     {

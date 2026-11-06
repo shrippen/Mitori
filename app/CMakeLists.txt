@@ -83,6 +83,7 @@ qt_add_qml_module(mitori_app
         qml/ExamBoard.qml
         qml/ExamEndPage.qml
         qml/TechniqueMapPage.qml
+        qml/TechniquePickerPage.qml
         qml/CoursesPage.qml
         qml/NotebooksPage.qml
         qml/CourseRow.qml
@@ -529,6 +530,12 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     set_target_properties(tst_courses PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_dependencies(tst_courses mitori)
     add_test(NAME courses COMMAND tst_courses)
+    # Courses names the techniques in the export.
+    foreach(target tst_media tst_backup tst_sync tst_export tst_courses)
+        target_sources(${target} PRIVATE services/programme.cpp services/programme.h)
+    endforeach()
+    target_compile_definitions(tst_export PRIVATE MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
+
     qt_add_executable(tst_bundlecrypto tests/tst_bundlecrypto.cpp store/bundlecrypto.cpp store/bundlecrypto.h)
     target_include_directories(tst_bundlecrypto PRIVATE store)
     target_compile_definitions(tst_bundlecrypto PRIVATE TEST_BUNDLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/bundle")

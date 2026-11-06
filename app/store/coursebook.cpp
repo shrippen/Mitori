@@ -15,6 +15,9 @@ const QString kDateFormat = QStringLiteral("yyyy-MM-dd");
 const QString kCourseColumns = QStringLiteral("uid, calendar_uid, title, first, last, place, teacher, info, announcement,"
                                               " created, changed, device, deleted, exam_discipline, exam_grade");
 const QString kGradeColumns = QStringLiteral("uid, discipline, grade, day, place, created, changed, device, deleted");
+const QString kEntryColumns = QStringLiteral("e.uid, e.course, e.text, e.created, e.changed, e.device, e.deleted, e.media");
+// entry_tags.deleted of a link that went with its entry (see the header); 1 is unlinked by the user.
+constexpr int kWithEntry = 2;
 
 QDateTime utc(const QVariant &ms)
 {
@@ -93,6 +96,12 @@ bool hasColumn(QSqlQuery &q, const QString &table, const QString &column)
 QString newUid()
 {
     return QUuid::createUuid().toString(QUuid::WithoutBraces);
+}
+
+// A link's uid is the pair: the same link made on two devices is one row.
+QString tagUid(const QString &entry, const QString &technique)
+{
+    return entry + QLatin1Char('/') + technique;
 }
 
 } // namespace
@@ -187,6 +196,20 @@ bool CourseBook::migrate()
                                               " created INTEGER NOT NULL, changed INTEGER NOT NULL, device TEXT NOT NULL,"
                                               " deleted INTEGER NOT NULL DEFAULT 0)"))
             && q.exec(QStringLiteral("PRAGMA user_version = 4"));
+        if (!ok) {
+            m_error = q.lastError().text();
+            return false;
+        }
+    }
+
+    // 5: the techniques an entry is linked to.
+    if (version < 5) {
+        const bool ok = q.exec(QStringLiteral("CREATE TABLE IF NOT EXISTS entry_tags (uid TEXT PRIMARY KEY, entry TEXT NOT NULL,"
+                                              " technique TEXT NOT NULL, created INTEGER NOT NULL, changed INTEGER NOT NULL,"
+                                              " device TEXT NOT NULL, deleted INTEGER NOT NULL DEFAULT 0)"))
+            && q.exec(QStringLiteral("CREATE INDEX IF NOT EXISTS entry_tags_entry ON entry_tags (entry)"))
+            && q.exec(QStringLiteral("CREATE INDEX IF NOT EXISTS entry_tags_technique ON entry_tags (technique)"))
+            && q.exec(QStringLiteral("PRAGMA user_version = 5"));
         if (!ok) {
             m_error = q.lastError().text();
             return false;
@@ -296,6 +319,15 @@ bool CourseBook::deleteCourse(const QString &uid, const QDateTime &at)
         return false;
     }
     QSqlQuery q(db);
+    q.prepare(QStringLiteral("UPDATE entry_tags SET deleted = %1, changed = ? WHERE deleted = 0"
+                             " AND entry IN (SELECT uid FROM entries WHERE course = ?)").arg(kWithEntry));
+    q.addBindValue(at.toUTC().toMSecsSinceEpoch());
+    q.addBindValue(uid);
+    if (!q.exec()) {
+        m_error = q.lastError().text();
+        db.rollback();
+        return false;
+    }
     q.prepare(QStringLiteral("UPDATE entries SET deleted = 1, changed = ? WHERE course = ? AND deleted = 0"));
     q.addBindValue(at.toUTC().toMSecsSinceEpoch());
     q.addBindValue(uid);
@@ -447,9 +479,96 @@ QStringList CourseBook::courseMedia(const QString &course) const
     return result;
 }
 
+// The entry and its links, in one step.
 bool CourseBook::deleteEntry(const QString &uid, const QDateTime &at)
 {
-    return mark(QStringLiteral("entries"), uid, at);
+    QSqlDatabase db = QSqlDatabase::database(m_connection);
+    if (!db.transaction()) {
+        m_error = db.lastError().text();
+        return false;
+    }
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral("UPDATE entry_tags SET deleted = %1, changed = ? WHERE entry = ? AND deleted = 0").arg(kWithEntry));
+    q.addBindValue(at.toUTC().toMSecsSinceEpoch());
+    q.addBindValue(uid);
+    if (!q.exec()) {
+        m_error = q.lastError().text();
+        db.rollback();
+        return false;
+    }
+    if (!mark(QStringLiteral("entries"), uid, at)) {
+        db.rollback();
+        return false;
+    }
+    return db.commit();
+}
+
+bool CourseBook::addTag(const QString &entryUid, const QString &technique, const QDateTime &at, const QString &device)
+{
+    m_error.clear();
+    if (technique.isEmpty()) {
+        m_error = QCoreApplication::translate("CourseBook", "a link needs a technique");
+        return false;
+    }
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("SELECT 1 FROM entries WHERE uid = ? AND deleted = 0"));
+    q.addBindValue(entryUid);
+    if (!q.exec() || !q.next()) {
+        m_error = q.lastError().isValid() ? q.lastError().text() : QCoreApplication::translate("CourseBook", "the entry is gone");
+        return false;
+    }
+    q.finish();
+
+    // A link removed before comes back on its row; one that stands keeps its time.
+    const qint64 now = at.toUTC().toMSecsSinceEpoch();
+    q.prepare(QStringLiteral("INSERT INTO entry_tags (uid, entry, technique, created, changed, device, deleted)"
+                             " VALUES (?, ?, ?, ?, ?, ?, 0) ON CONFLICT(uid) DO UPDATE SET changed = excluded.changed,"
+                             " device = excluded.device, deleted = 0 WHERE deleted <> 0"));
+    for (const QVariant &v : {QVariant(tagUid(entryUid, technique)), QVariant(entryUid), QVariant(technique), QVariant(now),
+                              QVariant(now), bound(device)}) {
+        q.addBindValue(v);
+    }
+    if (!q.exec()) {
+        m_error = q.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+bool CourseBook::removeTag(const QString &entry, const QString &technique, const QDateTime &at)
+{
+    return mark(QStringLiteral("entry_tags"), tagUid(entry, technique), at);
+}
+
+QHash<QString, QStringList> CourseBook::courseTags(const QString &course) const
+{
+    QHash<QString, QStringList> result;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("SELECT t.entry, t.technique FROM entry_tags t JOIN entries e ON e.uid = t.entry"
+                             " WHERE e.course = ? AND t.deleted = 0 AND e.deleted = 0 ORDER BY t.created, t.rowid"));
+    q.addBindValue(course);
+    q.exec();
+    while (q.next()) {
+        result[q.value(0).toString()] << q.value(1).toString();
+    }
+    return result;
+}
+
+QList<CourseBook::Linked> CourseBook::linkedEntries(const QString &technique) const
+{
+    QList<Linked> result;
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    q.prepare(QStringLiteral("SELECT %1, c.title, c.first, c.last FROM entry_tags t JOIN entries e ON e.uid = t.entry"
+                             " JOIN courses c ON c.uid = e.course"
+                             " WHERE t.technique = ? AND t.deleted = 0 AND e.deleted = 0 AND c.deleted = 0"
+                             " ORDER BY c.first DESC, c.created DESC, e.created, e.rowid").arg(kEntryColumns));
+    q.addBindValue(technique);
+    q.exec();
+    while (q.next()) {
+        result << Linked{entry(q), q.value(8).toString(), QDate::fromString(q.value(9).toString(), kDateFormat),
+                         QDate::fromString(q.value(10).toString(), kDateFormat)};
+    }
+    return result;
 }
 
 // A deletion stays as a mark with its time (sync).
@@ -567,6 +686,12 @@ bool joinDoubles(QSqlDatabase &db, QString *error)
                        " WHERE e.course = courses.uid AND e.deleted = 0 AND e.changed > courses.changed)").arg(now),
         QStringLiteral("UPDATE entries SET deleted = 1, changed = %1 WHERE deleted = 0"
                        " AND course IN (SELECT uid FROM courses WHERE deleted = 1)").arg(now),
+        // Links follow their entry as it stands now: gone with a deleted one (made elsewhere after
+        // the deletion), back with one that returned (changed elsewhere after the deletion).
+        QStringLiteral("UPDATE entry_tags SET deleted = %1, changed = %2 WHERE deleted = 0"
+                       " AND entry IN (SELECT uid FROM entries WHERE deleted = 1)").arg(kWithEntry).arg(now),
+        QStringLiteral("UPDATE entry_tags SET deleted = 0, changed = %1 WHERE deleted = %2"
+                       " AND entry IN (SELECT uid FROM entries WHERE deleted = 0)").arg(now).arg(kWithEntry),
         // One passed grade twice: the newer row stays.
         QStringLiteral("UPDATE grades SET deleted = 1, changed = %1 WHERE deleted = 0 AND EXISTS (SELECT 1 FROM grades g"
                        " WHERE g.deleted = 0 AND g.discipline = grades.discipline AND g.grade = grades.grade"
@@ -603,6 +728,9 @@ bool CourseBook::merge(const QString &otherPath, TableMerge::Mode mode, TableMer
           u"deleted"_s},
          Kind::Editable, {}},
         {QStringLiteral("starts"), {u"uid"_s, u"day"_s, u"created"_s, u"changed"_s, u"device"_s, u"deleted"_s},
+         Kind::Editable, {}},
+        {QStringLiteral("entry_tags"),
+         {u"uid"_s, u"entry"_s, u"technique"_s, u"created"_s, u"changed"_s, u"device"_s, u"deleted"_s},
          Kind::Editable, {}},
     };
     m_error.clear();

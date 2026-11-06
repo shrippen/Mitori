@@ -304,6 +304,196 @@ private slots:
         QCOMPARE(practice.grade(aikido), QStringLiteral("k2"));
     }
 
+    // What a text names: however it is written, whole words only, the attack narrows it.
+    void suggestFromText()
+    {
+        const auto first = [&](const QString &text) {
+            return programme.suggest(text).value(0).toMap().value(QStringLiteral("title")).toString();
+        };
+        // Hyphens, spaces, case, punctuation; the name in a German sentence.
+        for (const QString &text : {QStringLiteral("Heute viel Shiho-nage."), QStringLiteral("shiho nage!"),
+                                    QStringLiteral("(SHIHONAGE), danach Pause")}) {
+            QCOMPARE(first(text), QStringLiteral("Shiho-nage"));
+        }
+        // Long vowels as the data has them: Shihô-nage (Daitoryu), Ô-dachi, Ikkajô.
+        const auto hasId = [&](const QString &text, const QString &id) {
+            const QVariantList rows = programme.suggest(text, 200);
+            return std::any_of(rows.cbegin(), rows.cend(), [&](const QVariant &r) { return r.toMap().value(QStringLiteral("id")) == id; });
+        };
+        const auto hasTitle = [&](const QString &text, const QString &title) {
+            const QVariantList rows = programme.suggest(text, 200);
+            return std::any_of(rows.cbegin(), rows.cend(), [&](const QVariant &r) { return r.toMap().value(QStringLiteral("title")) == title; });
+        };
+        for (const QString &text : {QStringLiteral("Ikkajo kime osae"), QStringLiteral("Ikkajô-kime-osae"), QStringLiteral("IKKAJŌ KIME OSAE")}) {
+            QVERIFY2(hasTitle(text, QStringLiteral("Ikkajô-kime-osae")), qPrintable(text));
+        }
+        QVERIFY(hasTitle(QStringLiteral("Shiho-nage"), QStringLiteral("Shihô-nage")));
+        for (const QString &text : {QStringLiteral("Ô-dachi 5 geübt"), QStringLiteral("O-dachi 5"), QStringLiteral("odachi Nr. 5"),
+                                    QStringLiteral("Tsukikomi Seigan-yaburi"), QStringLiteral("Gohon-me")}) {
+            QCOMPARE(programme.suggest(text).value(0).toMap().value(QStringLiteral("id")).toString(),
+                     QStringLiteral("shinkitoho/odachi/5"));
+        }
+        QCOMPARE(programme.suggest(QStringLiteral("Ô-dachi 5")).size(), 1);
+        // "O-dachi" alone: the forms, in order.
+        QCOMPARE(programme.suggest(QStringLiteral("O-dachi")).value(0).toMap().value(QStringLiteral("id")).toString(),
+                 QStringLiteral("shinkitoho/odachi/1"));
+        // German umlauts: Kamae-Übung, however typed.
+        for (const QString &text : {QStringLiteral("Kamae-Übung"), QStringLiteral("kamae übung"), QStringLiteral("KAMAE-UBUNG")}) {
+            QVERIFY2(hasId(text, QStringLiteral("shinkitoho/kamae")), qPrintable(text));
+        }
+        // Japanese, with or without okurigana.
+        QVERIFY(hasTitle(QStringLiteral("四方投げです"), QStringLiteral("Shiho-nage")));
+
+        // Not inside a word, not an attack alone, not without a name; a German word stays one.
+        QVERIFY(programme.suggest(QStringLiteral("Shihonagen")).isEmpty());
+        QVERIFY(programme.suggest(QStringLiteral("Rikkyo")).isEmpty());
+        QVERIFY(programme.suggest(QStringLiteral("nur Katate-dori heute")).isEmpty());
+        QVERIFY(programme.suggest(QStringLiteral("Fußstellung beim Tenkan in der Mitte")).isEmpty());
+        QVERIFY(programme.suggest(QString()).isEmpty());
+
+        // The attack comes first: every row before the first without it has it.
+        const QVariantList both = programme.suggest(QStringLiteral("Ikkyo aus Katate-dori"), 40);
+        QVERIFY(both.size() > 2);
+        QCOMPARE(both.first().toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Ikkyo"));
+        QVERIFY(both.first().toMap().value(QStringLiteral("attack")).toString().endsWith(QStringLiteral("katate-dori")));
+        QVERIFY(std::any_of(both.cbegin(), both.cend(), [](const QVariant &r) {
+            return !r.toMap().value(QStringLiteral("attack")).toString().endsWith(QStringLiteral("katate-dori"));
+        }));
+        // The whole attack before one that only ends the same.
+        QCOMPARE(programme.suggest(QStringLiteral("Ikkyo aus Ryote-katate-dori")).first().toMap().value(QStringLiteral("attack")).toString(),
+                 QStringLiteral("Ryote-katate-dori"));
+
+        // Two names take turns: 26 Ikkyo leave room for Kote-gaeshi.
+        const QVariantList two = programme.suggest(QStringLiteral("Ikkyo, dann Kote-gaeshi"), 4);
+        QCOMPARE(two.size(), 4);
+        QSet<QString> titles;
+        for (const QVariant &r : two) {
+            titles.insert(r.toMap().value(QStringLiteral("title")).toString());
+        }
+        QVERIFY(titles.contains(QStringLiteral("Ikkyo")) && titles.contains(QStringLiteral("Kote-gaeshi")));
+
+        // With the attack too: "Ô-dachi 5" is not pushed out by Shiho-nage from Katate-dori.
+        const QVariantList mixed = programme.suggest(QStringLiteral("Heute Ô-dachi 5 und Shiho-nage aus Katate-dori"));
+        QVERIFY(std::any_of(mixed.cbegin(), mixed.cend(), [](const QVariant &r) {
+            return r.toMap().value(QStringLiteral("id")) == QStringLiteral("shinkitoho/odachi/5");
+        }));
+
+        // The discipline chosen last comes first where both have the name.
+        const QString before = programme.discipline();
+        programme.setDiscipline(QStringLiteral("daitoryu"));
+        QCOMPARE(programme.suggest(QStringLiteral("Kote-gaeshi")).first().toMap().value(QStringLiteral("discipline")).toString(),
+                 QStringLiteral("daitoryu"));
+        programme.setDiscipline(QStringLiteral("aikido"));
+        QCOMPARE(programme.suggest(QStringLiteral("Kote-gaeshi")).first().toMap().value(QStringLiteral("discipline")).toString(),
+                 QStringLiteral("aikido"));
+        programme.setDiscipline(before);
+    }
+
+    // The longest whole name wins: a part of it is no other technique named.
+    void suggestLongestName()
+    {
+        const auto titles = [&](const QString &text) {
+            QStringList list;
+            for (const QVariant &r : programme.suggest(text, 200)) {
+                list << r.toMap().value(QStringLiteral("title")).toString();
+            }
+            return list;
+        };
+        const QStringList uchi = titles(QStringLiteral("Uchi-kaiten-nage"));
+        QVERIFY(!uchi.isEmpty());
+        QCOMPARE(uchi.first(), QStringLiteral("Uchi-kaiten-nage"));
+        QVERIFY2(!uchi.contains(QStringLiteral("Kaiten-nage")), qPrintable(uchi.join(u',')));
+
+        const QStringList tenchi = titles(QStringLiteral("Tenchi-nage"));
+        QCOMPARE(tenchi.first(), QStringLiteral("Tenchi-nage"));
+        QVERIFY2(!tenchi.contains(QStringLiteral("Tenchi")), qPrintable(tenchi.join(u',')));
+
+        const QStringList both = titles(QStringLiteral("Ikkyo-shiho-nage"));
+        QCOMPARE(both.first(), QStringLiteral("Ikkyo-shiho-nage"));
+        QVERIFY2(!both.contains(QStringLiteral("Ikkyo")) && !both.contains(QStringLiteral("Shiho-nage")), qPrintable(both.join(u',')));
+
+        // Named apart, each counts.
+        const QStringList apart = titles(QStringLiteral("Kaiten-nage, dann Uchi-kaiten-nage"));
+        QVERIFY(apart.contains(QStringLiteral("Kaiten-nage")) && apart.contains(QStringLiteral("Uchi-kaiten-nage")));
+
+        // The attack named in full first, not the one its end spells.
+        QCOMPARE(programme.suggest(QStringLiteral("Shiho-nage aus Ryote-ryote-dori")).first().toMap().value(QStringLiteral("attack")).toString(),
+                 QStringLiteral("Ryote-ryote-dori"));
+    }
+
+    // A list is no name: punctuation, a line break or a dash between spaces ends a run of words;
+    // a hyphen or a space still joins.
+    void suggestAcrossPunctuation()
+    {
+        const auto titles = [&](const QString &text) {
+            QStringList list;
+            for (const QVariant &r : programme.suggest(text, 200)) {
+                list << r.toMap().value(QStringLiteral("title")).toString();
+            }
+            return list;
+        };
+        const QString ikkyo = QStringLiteral("Ikkyo");
+        const QString shiho = QStringLiteral("Shiho-nage");
+        const QString joined = QStringLiteral("Ikkyo-shiho-nage");
+        for (const QString &text : {QStringLiteral("Ikkyo, Shiho-nage"), QStringLiteral("Ikkyo. Shiho-nage."),
+                                    QStringLiteral("Ikkyo; Shiho-nage"), QStringLiteral("Ikkyo\nShiho-nage"),
+                                    QStringLiteral("Ikkyo – Shiho-nage"), QStringLiteral("Ikkyo - Shiho-nage"),
+                                    QStringLiteral("(Ikkyo) Shiho-nage")}) {
+            const QStringList list = titles(text);
+            QVERIFY2(list.contains(ikkyo) && list.contains(shiho), qPrintable(text + u": " + list.join(u',')));
+            QVERIFY2(!list.contains(joined), qPrintable(text + u": " + list.join(u',')));
+        }
+        const QStringList three = titles(QStringLiteral("Ikkyo. Shiho-nage. Kote-gaeshi."));
+        QVERIFY2(three.contains(ikkyo) && three.contains(shiho) && three.contains(QStringLiteral("Kote-gaeshi")), qPrintable(three.join(u',')));
+        QVERIFY2(!three.contains(joined), qPrintable(three.join(u',')));
+
+        // Hyphens and spaces join.
+        for (const QString &text : {QStringLiteral("Ikkyo-shiho-nage"), QStringLiteral("Ikkyo shiho nage"), QStringLiteral("Ikkyoshihonage.")}) {
+            const QStringList list = titles(text);
+            QVERIFY2(!list.isEmpty() && list.first() == joined, qPrintable(text + u": " + list.join(u',')));
+            QVERIFY2(!list.contains(ikkyo) && !list.contains(shiho), qPrintable(text + u": " + list.join(u',')));
+        }
+
+        // A point before a number is no end: "Nr. 5".
+        QCOMPARE(programme.suggest(QStringLiteral("Ô-dachi Nr. 5")).size(), 1);
+    }
+
+    // Those left out make room: the next ones move up.
+    void suggestWithout()
+    {
+        const QString text = QStringLiteral("Ikkyo, Nikyo, Sankyo, Yonkyo, Gokyo, Shiho-nage, Irimi-nage, Kote-gaeshi, Kaiten-nage, Tenchi-nage");
+        const QVariantList first = programme.suggest(text);
+        QCOMPARE(first.size(), 8);
+        const QStringList firstIds = [&] {
+            QStringList list;
+            for (const QVariant &r : first) {
+                list << r.toMap().value(QStringLiteral("id")).toString();
+            }
+            return list;
+        }();
+        const QVariantList next = programme.suggest(text, 8, firstIds);
+        QCOMPARE(next.size(), 8);
+        for (const QVariant &r : next) {
+            QVERIFY(!firstIds.contains(r.toMap().value(QStringLiteral("id")).toString()));
+        }
+
+        // A form linked leaves "Ô-dachi 5" empty, not the group's other forms.
+        QVERIFY(programme.suggest(QStringLiteral("Ô-dachi 5"), 8, {QStringLiteral("shinkitoho/odachi/5")}).isEmpty());
+    }
+
+    void techniqueLabel()
+    {
+        QCOMPARE(programme.techniqueLabel(QStringLiteral("gibt/es/nicht")), QString());
+        const QString form = programme.techniqueLabel(QStringLiteral("shinkitoho/odachi/5"));
+        QVERIFY2(form.startsWith(QStringLiteral("5 · Gohon-me · Tsukikomi Seigan-yaburi")), qPrintable(form));
+        QVERIFY2(form.endsWith(QStringLiteral(" · Shinki Toho Shoden")), qPrintable(form));
+        const QVariantList rows = programme.search(QStringLiteral("ikkyo katate"), 1);
+        const QString label = programme.techniqueLabel(rows.first().toMap().value(QStringLiteral("id")).toString());
+        QVERIFY2(label.startsWith(QStringLiteral("Ikkyo")), qPrintable(label));
+        QVERIFY2(label.contains(QStringLiteral("katate-dori")), qPrintable(label));
+        QVERIFY2(label.contains(QStringLiteral(" · Aikido ")), qPrintable(label));
+    }
+
     // Search across disciplines: every word must match; case, accents and hyphens do not matter.
     void searchFindsTechniques()
     {

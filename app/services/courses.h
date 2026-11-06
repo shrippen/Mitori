@@ -28,7 +28,8 @@ class QNetworkReply;
 //   calendar (ICS, cache)  ──►  upcoming      [{uid, title, first, last, place, teacher, …,
 //                                              notebook: uid of its notebook or ""}]
 //   CourseBook (SQLite)    ──►  notebooks     [{uid, calendarUid, title, first, last, …, entries}]
-//                               entries(uid)  [{uid, text, created, changed}]
+//                               entries(uid)  [{uid, text, created, changed, media, techniques (ids)}]
+//                               linkedEntries(technique)  [{uid, text, media, created, course, title, first, last}]
 //                               grades        [{uid, discipline, grade, name, day, place}]
 //   + catalog (grade order, waiting times) ──►  nextGrade, waiting, nextExam
 class Courses : public QObject
@@ -123,6 +124,12 @@ public:
     Q_INVOKABLE bool changeEntry(const QString &uid, const QString &text);
     Q_INVOKABLE bool deleteEntry(const QString &uid);
 
+    // Links an entry to a technique, by the user's choice only (Programme.suggest proposes), and
+    // back; the entries linked to a technique, the latest course first.
+    Q_INVOKABLE bool linkTechnique(const QString &entry, const QString &technique);
+    Q_INVOKABLE bool unlinkTechnique(const QString &entry, const QString &technique);
+    Q_INVOKABLE QVariantList linkedEntries(const QString &technique) const;
+
     // The notebook as a ZIP (notizbuch.md, photos, voice notes; store/notebookexport) to a file
     // the user chose (on Android a content:// URL): how many media files were not on the device
     // (left out), or -1 with errorString on failure.
@@ -159,7 +166,10 @@ private:
     QString gradeName(const QString &discipline, const QString &grade) const;
     QString examName(const QString &discipline, const QString &grade) const;
     QVariantMap courseMap(const CourseBook::Course &c, int entries) const;
+    // A notebook's entries with their techniques' names, for the export.
+    QList<CourseBook::Entry> namedEntries(const QString &course) const;
 
+    Catalog m_catalog;
     QHash<QString, QList<Step>> m_steps;
     QHash<QString, QString> m_disciplineNames;
 

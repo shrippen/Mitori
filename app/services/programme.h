@@ -5,6 +5,8 @@
 #include <QVariantList>
 #include <QtQml/qqmlregistration.h>
 
+#include <functional>
+
 #include "catalog.h"
 
 // The exam programme for QML: disciplines, grades and the entries of a grade, ready for a list.
@@ -54,6 +56,16 @@ public:
     // Each row as in entries(), with `discipline`, `disciplineName`, `grade`, `gradeName` and
     // `groupName` (Tachi-waza · Mae-seme …).
     Q_INVOKABLE QVariantList search(const QString &query, int limit = 50) const;
+    // The techniques a text names (a course note), best first, at most `limit`, leaving out the ids
+    // in `without` (those already linked); rows as in search(). A name counts as whole words, however
+    // written ("shiho nage", "Shihonage" for Shihô-nage), and the longest wins: "Uchi-kaiten-nage" does
+    // not also name Kaiten-nage. Of one name, those that also name the attack (whole, then its end,
+    // "Katate-dori") come first, then the discipline chosen last; several names take turns, so that
+    // 26 Ikkyo do not push out Kote-gaeshi. "Ô-dachi 5" is that form, "O-dachi" alone the forms in
+    // order, up to `limit`.
+    Q_INVOKABLE QVariantList suggest(const QString &text, int limit = 8, const QStringList &without = {}) const;
+    // "Shihô-nage · Katate-dori · Aikido 5. Kyu", or "" for an id not in the programme.
+    Q_INVOKABLE QString techniqueLabel(const QString &id) const;
     // One entry by id (the same map as in entries()), or an empty map.
     Q_INVOKABLE QVariantMap entry(const QString &id) const;
     // The technique map (clickdummy "Landkarte") of every grade up to `grade`: a grid per group
@@ -77,6 +89,9 @@ private:
     QVariantList gradeRows(const QString &disciplineId, const QString &grade) const;
     int entryCount(const QString &disciplineId, const QString &grade) const;
     QVariantMap findDiscipline(const QString &id) const;
+    // Every technique once, in programme order, with `discipline`, `disciplineName`, `grade`,
+    // `gradeName` and `groupName`; a visitor that returns false ends the walk.
+    void eachTechnique(const std::function<bool(const QVariantMap &)> &visit) const;
     QVariantList shinkiTohoEntries(const QVariantMap &discipline, const QString &grade) const;
     QVariantList formMap(const QString &grade) const;
 
