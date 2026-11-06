@@ -59,7 +59,7 @@ Kirigami.Page {
     // Here, not in the player: turning the tablet makes the pane anew.
     property bool started: false
     // What the small player left when it went, for the pane made anew (same reason):
-    // { id, rate, position, playing }; taken once.
+    // { id, rate, looping, position, playing, source }; taken once.
     property var paneRest: null
     // Follows split, one step behind: the pane still says where it stood before it goes (a Loader
     // has ended its item's functions by the time anyone hears of it).
@@ -587,8 +587,8 @@ Kirigami.Page {
     }
 
     // A pane made anew (the tablet turned, the window narrowed, back from the grade card): playing
-    // plays on, standing stands. The same technique keeps its tempo and place; another one chosen
-    // meanwhile starts at 1×.
+    // plays on, standing stands. The same technique keeps its tempo, loop and place; another one
+    // chosen meanwhile starts at 1×. A new file of it waits at the chapter's start, as in an open player.
     function restorePane() {
         const now = page.player
         const rest = page.paneRest
@@ -598,14 +598,21 @@ Kirigami.Page {
         }
 
         now.holdStart = !rest.playing
-        if (rest.id === now.current.id) {
-            now.setSpeed(rest.rate)
+        if (rest.id !== now.current.id) {
+            return
+        }
+
+        now.setSpeed(rest.rate)
+        now.looping = rest.looping
+        if (rest.source === now.source.toString()) {
             now.startAt = rest.position
+        } else {
+            now.holdStart = true
         }
     }
 
-    // The small player goes full screen where it stands; back here it stays where it was. The
-    // pane may be gone by then (a window turned for full screen is no longer wide): the values
+    // The small player goes full screen where it stands; back here it stays where it was, playing
+    // or paused as full screen left it. The pane may be gone by then (a window turned for full screen is no longer wide): the values
     // wait until it is made anew.
     property var bigResume: null
     function resumeFromBig() {
@@ -613,11 +620,14 @@ Kirigami.Page {
         if (!now || !bigResume) {
             return
         }
-        now.holdStart = false   // full screen played
+        now.holdStart = !bigResume.playing
         now.looping = bigResume.looping
         now.setSpeed(bigResume.rate)
         if (now.duration > 0) {
             now.seek(bigResume.position)
+            if (bigResume.playing) {
+                now.resume()
+            }
         } else {
             now.startAt = bigResume.position    // still loading: restart() would go to the start
         }
@@ -634,8 +644,8 @@ Kirigami.Page {
         player.setSpeed(small.rate)
         player.big = true
         // Back in the small player: the same place, tempo and loop.
-        player.bigEnded.connect((position, rate, looping) => {
-            bigResume = { position: position, rate: rate, looping: looping }
+        player.bigEnded.connect((position, rate, looping, playing) => {
+            bigResume = { position: position, rate: rate, looping: looping, playing: playing }
             resumeFromBig()
         })
         player.shown.connect(id => page.lastId = id)

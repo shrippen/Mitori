@@ -47,7 +47,7 @@ Kirigami.Page {
     // The entry on screen, for the programme list to mark it when the user comes back.
     signal shown(string id)
     // Full screen ended (bigOnly): where the small player goes on.
-    signal bigEnded(real position, real rate, bool looping)
+    signal bigEnded(real position, real rate, bool looping, bool playing)
 
     title: view.titleWithAddition
     padding: 0
@@ -96,7 +96,7 @@ Kirigami.Page {
             return
         }
         if (bigOnly && big) {
-            bigEnded(view.position, view.rate, view.looping)
+            bigEnded(view.position, view.rate, view.looping, view.playing)
         }
         big = false
         view.pause()
@@ -180,7 +180,7 @@ Kirigami.Page {
         onBigRequested: page.big = true
         onBigLeft: {
             if (page.bigOnly) {
-                page.bigEnded(view.position, view.rate, view.looping)
+                page.bigEnded(view.position, view.rate, view.looping, view.playing)
                 page.leave()
                 return
             }

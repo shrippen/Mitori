@@ -85,6 +85,7 @@ Syncthing entfällt als eigener Weg (geht über den Export-Ordner).
   Beim Öffnen steht das Video still am Kapitelanfang (Eigentümer, 06.11.2026); das erste Tippen startet es, danach
   spielt jede gewählte Technik sofort. Sonst behält das Video seinen Zustand (Review, 06.11.2026): Drehen, Fenstergröße,
   Infokarte, anderer Grad, Regal speichern starten kein stehendes Video; nur das Wählen einer Technik startet.
+  Beim Verlassen des Vollbilds folgt der Zustand dem Vollbild: dort pausiert bleibt pausiert, dort spielend spielt weiter.
 - **Player groß**: bleibt über und unter dem Video genug Platz (ab 120 px, z. B. Tablet 16:10 mit
   Aikido/Daitoryu), stehen Titel oben und Steuerung unten im freien Raum; sonst die Spalte rechts
   (Telefon quer, Shinki Toho 16:9 auf dem Tablet).

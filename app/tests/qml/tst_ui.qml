@@ -2762,6 +2762,15 @@ TestCase {
         compare(page.player.current.id, page.playlist[row].id)
         tryVerify(() => page.player.playing && page.player.position > page.player.from + 300, 10000)
     }
+    // Paused well inside the chapter: its start would not pass for the same place.
+    function pausedInside(player) {
+        player.pause()
+        tryVerify(() => !player.playing)
+        const place = player.from + 5000
+        player.seek(place)
+        tryVerify(() => Math.abs(player.position - place) < 300, 5000)
+        return player.position
+    }
     function staysStanding(player, why) {
         wait(500)
         verify(!player.playing, why)
@@ -2831,7 +2840,7 @@ TestCase {
     // A pane made anew keeps the state: playing plays on, standing stands, in the same place.
     function test_2u_c_new_pane_keeps_state_data() {
         return [
-            { tag: "paused", prepare: page => page.player.pause(), plays: false },
+            { tag: "paused", prepare: page => pausedInside(page.player), plays: false },
             { tag: "waiting after a file change", prepare: page => {
                 Videos.folder = clipFolder("long2")
                 tryVerify(() => page.player.source.toString().indexOf("played-long2") > 0)
@@ -2861,19 +2870,125 @@ TestCase {
         verify(Math.abs(page.player.position - at) < 500, page.player.position + " after " + at)
     }
 
-    // Full screen plays: into a pane made anew it goes on at its place, also when it stood before.
-    function test_2u_c_new_pane_after_full_screen() {
+    // A pane made anew takes the state full screen left, at its place. By hand: offscreen the page
+    // under full screen does not change its size, so the pane does not go on the real way.
+    function test_2u_c_new_pane_after_full_screen_data() {
+        return [ { tag: "played there", playing: true }, { tag: "paused there", playing: false } ]
+    }
+    function test_2u_c_new_pane_after_full_screen(data) {
         const page = tabletProgramme(clipFolder("long"))
         chapterLoaded(page)
-        page.open(page.playlist[0])
-        const from = page.player.from
-        page.player.pause()
+        const place = page.player.from + 2000
+        page.started = true     // as openBig
         window.width = 700
         tryVerify(() => !page.split)
-        page.bigResume = { position: from + 2000, rate: 1, looping: true }
+        page.bigResume = { position: place, rate: 1, looping: true, playing: data.playing }
         window.width = 1280
-        tryVerify(() => page.player && page.player.playing, 10000)
-        verify(page.player.position >= from + 2000 - 300, page.player.position)
+        tryVerify(() => page.player && page.player.duration > 0, 10000)
+        if (data.playing) {
+            tryVerify(() => page.player.playing, 10000, "plays on")
+            verify(page.player.position >= place - 300, page.player.position)
+            return
+        }
+        staysStanding(page.player, "paused there stays paused")
+        verify(Math.abs(page.player.position - place) < 500, page.player.position)
+    }
+
+    // The real way, the pane alive: its state follows full screen, also through a turn after it.
+    function test_2u_c_full_screen_state_follows_data() {
+        return [ { tag: "played there", playing: true }, { tag: "paused there", playing: false } ]
+    }
+    function test_2u_c_full_screen_state_follows(data) {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        const place = page.player.from + 5000
+        page.player.seek(place)
+        tryVerify(() => Math.abs(page.player.position - place) < 500, 5000)
+        page.openBig()
+        const big = window.pageStack.currentItem
+        tryVerify(() => big.big && big.playing && big.position > place, 10000, "full screen goes on at the small player's place")
+        if (!data.playing) {
+            big.togglePlay()
+            tryVerify(() => !big.playing)
+        }
+        const left = big.position
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem === page)
+        tryVerify(() => page.player !== null)
+        const check = () => {
+            if (data.playing) {
+                tryVerify(() => page.player.playing, 10000, "plays on")
+            } else {
+                staysStanding(page.player, "paused there stays paused")
+            }
+            verify(page.player.position >= left - 500, page.player.position + " after " + left)
+        }
+        check()
+
+        remakePane(page)
+        tryVerify(() => page.player.duration > 0, 10000)
+        check()
+    }
+
+    // Saved while the file loads: the place a pane still has to go to, not the file's start.
+    // Stand-ins never finish loading, so the second turn always falls into it.
+    function test_2u_c_turned_twice_while_loading() {
+        const page = tabletProgramme()
+        const place = page.player.from + 5000
+        page.player.startAt = place
+        remakePane(page)
+        compare(page.player.startAt, place, "once")
+        remakePane(page)
+        compare(page.player.startAt, place, "twice")
+    }
+
+    // A place belongs to its technique: chosen while the pane loads, the next starts at its chapter.
+    function test_2u_c_place_ends_with_technique() {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        page.player.seek(100000)
+        tryVerify(() => Math.abs(page.player.position - 100000) < 1000, 5000)
+        remakePane(page)
+        Programme.setGrade("aikido", "k4")
+        page.grade = "k4"
+        tryVerify(() => page.player.video === "aikido/k4" && page.player.duration > 0, 10000)
+        wait(300)
+        verify(page.player.position < page.player.from + 1000, page.player.position + ", chapter at " + page.player.from)
+    }
+
+    // A file changed while no pane stood: the pane waits at the chapter's start, as an open player.
+    function test_2u_c_new_file_waits() {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        rowPlays(page, 1)
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        Videos.folder = clipFolder("long2")
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => page.split && page.player && page.player.duration > 0, 10000)
+        staysStanding(page.player, "waits for a tap")
+        verify(Math.abs(page.player.position - page.player.from) < 500, page.player.position)
+    }
+
+    // The loop stays as it was set on a pane made anew.
+    function test_2u_c_new_pane_keeps_loop() {
+        const page = tabletProgramme()
+        page.player.looping = false
+        remakePane(page)
+        compare(page.player.looping, false)
+    }
+
+    // A save while another technique's file loads is no file changed under it either.
+    function test_2u_b_save_while_next_loads() {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        rowPlays(page, 1)
+        Programme.setGrade("aikido", "k4")
+        page.grade = "k4"
+        Videos.folderChanged()
+        tryVerify(() => page.player.video === "aikido/k4" && page.player.playing, 10000, "plays on")
     }
 
     // The chosen row, tapped when it stands: it plays.
@@ -2901,8 +3016,7 @@ TestCase {
         chapterLoaded(page)
         rowPlays(page, 1)
         const chosen = page.player.current.id
-        page.player.pause()
-        tryVerify(() => !page.player.playing)
+        const at = pausedInside(page.player)
 
         chooseGrade(page, data.to)
         if (data.card) {
@@ -2915,6 +3029,9 @@ TestCase {
         }
         tryVerify(() => page.player.duration > 0, 10000)
         staysStanding(page.player, "stands until a technique is chosen")
+        if (data.card) {
+            verify(Math.abs(page.player.position - at) < 500, page.player.position + " after " + at)
+        }
 
         // Chosen: it plays, and playing it stays playing through the same way.
         rowPlays(page, page.playlist.findIndex(r => r.id === page.player.current.id))
@@ -3585,8 +3702,12 @@ TestCase {
         verify(!allChildren(page).some(c => c.visible && c.titleText !== undefined), "no video hint")
         tryVerify(settled, 3000, "still in place")
         // Just shown, the card has its implicit width until the layouts' next pass (long lines
-        // measured past the edge with a wide font, as in the CI).
+        // measured past the edge with a wide font, as in the CI). A card still small sticks out only
+        // after that pass: wait for it first. What stays past the edge still fails.
         wait(100)
+        for (let i = 0; i < 30 && overflowing(page, window.width).length > 0; i++) {
+            wait(100)
+        }
         compare(overflowing(page, window.width), [])
         shot("3-programme-grade-without-forms")
 

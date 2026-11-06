@@ -127,9 +127,10 @@ Item {
         shown(current.id)
         player.playbackRate = normalRate
 
-        // What waited for a tap, or was loaded, belonged to the technique before.
+        // What waited for a tap, was loaded or was its place belonged to the technique before.
         holdStart = false
         loadedSource = ""
+        startAt = -1
 
         // After the bindings of the new entry (from, to): onCurrentChanged runs before them.
         Qt.callLater(page.restartLoaded)
@@ -180,8 +181,8 @@ Item {
     }
     // What a pane made anew needs of this one (the programme's small player).
     function restState() {
-        return { id: current.id, rate: player.playbackRate, playing: willPlay(),
-                 position: startPending ? startAt : player.position }
+        return { id: current.id, rate: player.playbackRate, looping: looping, playing: willPlay(),
+                 source: player.source.toString(), position: startPending ? startAt : player.position }
     }
     // Another list, keeping technique `id` if it is in it, else its first. Not the user's choice:
     // a standing video stands at the new technique.
@@ -214,6 +215,9 @@ Item {
     }
     function pause() {
         player.pause()
+    }
+    function resume() {
+        player.play()
     }
     function seek(ms) {
         player.position = Math.max(page.from, Math.min(page.end, ms))
