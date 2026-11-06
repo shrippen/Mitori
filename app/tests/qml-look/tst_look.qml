@@ -21,6 +21,7 @@ TestCase {
     // As a page in tst_perf.qml: generous, the CI's machine is small.
     readonly property int switchBudget: 5000
     readonly property int scrolled: 200
+    readonly property int startScrolled: 50
 
     function initTestCase() {
         Appearance.setLanguage(Appearance.Language.English)
@@ -42,6 +43,8 @@ TestCase {
     function cleanup() {
         Appearance.setLanguage(Appearance.Language.English)
         toStyle(startStyle)
+        window.width = 420
+        window.height = 800
         while (window.pageStack.depth > 1)
             window.pageStack.pop()
     }
@@ -168,6 +171,37 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem.keptPage === "SettingsPage.qml")
         window.back()
         tryVerify(() => window.pageStack.currentIndex === 0)
+    }
+
+    // The start page keeps its place too, below the kept pages.
+    function test_start_page_place() {
+        // Low enough for the tiles to scroll.
+        window.height = 360
+        const flick = window.pageStack.get(0).flickable
+        tryVerify(() => flick.contentHeight - flick.height >= startScrolled)
+        flick.contentY = startScrolled
+        openAppearance()
+        toStyle(otherStyle)
+        tryVerify(() => window.pageStack.get(0).flickable.contentY === startScrolled, 5000, "the start page's place")
+    }
+
+    // A place beyond the page's end ends at its end; once settled the page does not jump back to
+    // it when it grows later (the page is narrower, its text wraps).
+    function test_scroll_to_clamps() {
+        // Low enough for the page to scroll.
+        window.height = 360
+        const flick = push("SettingsPage").flickable
+        const far = flick.contentHeight + 5000
+        window.scrollTo(flick, far)
+        tryVerify(() => flick.contentY > 0 && flick.contentY === flick.contentHeight + flick.bottomMargin - flick.height,
+                  5000, "the page's end")
+        wait(window.scrollSettle + 200)
+        flick.contentY = 0
+        const height = flick.contentHeight
+        window.width = 240
+        tryVerify(() => flick.contentHeight !== height, 5000, "the page changed")
+        wait(100)
+        compare(flick.contentY, 0)
     }
 
     // A tap on the tile itself, there and back; a tile of the running style does nothing.

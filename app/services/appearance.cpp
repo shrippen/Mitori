@@ -127,13 +127,14 @@ Appearance::~Appearance()
 
 bool Appearance::offers(Style style, const QStringList &importPaths)
 {
-    // One controls style in a run: Plasma's where it is, else Material.
     if (style == Style::Breeze) {
         return hasBreeze(importPaths);
     }
+#ifndef Q_OS_ANDROID
     if (style == Style::Material) {
-        return !hasBreeze(importPaths);
+        return false;
     }
+#endif
 #ifndef MITORI_SHINKI
     if (style == Style::Shinki) {
         return false;
@@ -152,17 +153,8 @@ Appearance::Style Appearance::startStyle(const QStringList &importPaths)
 
 QString Appearance::controlsStyle(Style style, const QStringList &importPaths)
 {
-    switch (style) {
-    case Style::Breeze:
-        return QStringLiteral("org.kde.desktop");
-    case Style::Material:
-        return QStringLiteral("Material");
-    case Style::Shinki:
-        // Shinki's controls style comes with shinki/qml/Shinki; until then Kante's controls.
-    case Style::Kante:
-    case Style::Leinen:
-        break;
-    }
+    // Shinki's controls style comes with shinki/qml/Shinki; until then Kante's controls.
+    Q_UNUSED(style)
     return hasBreeze(importPaths) ? QStringLiteral("org.kde.desktop") : QStringLiteral("Material");
 }
 

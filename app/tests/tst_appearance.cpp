@@ -52,22 +52,39 @@ private slots:
         for (const QVariant &s : styles) {
             QVERIFY(s.toMap().value(QStringLiteral("style")).toInt() != int(Appearance::Style::Breeze));
         }
-        QCOMPARE(styles.first().toMap().value(QStringLiteral("style")).toInt(), int(Appearance::Style::Material));
+        QCOMPARE(styles.first().toMap().value(QStringLiteral("style")).toInt(), int(Appearance::Style::Kante));
         a.setStyle(Appearance::Style::Breeze);
         QCOMPARE(Appearance::startStyle({}), Appearance::Style::Leinen);
         QCOMPARE(Appearance::controlsStyle(Appearance::Style::Material, {}), QStringLiteral("Material"));
         QCOMPARE(Appearance::controlsStyle(Appearance::Style::Kante, {}), QStringLiteral("Material"));
     }
 
-    // On Plasma Breeze in place of Material: Qt's controls style cannot change in a run, so all
-    // styles a device offers share one, and every change works without a restart.
-    void oneControlsStyle()
+    // Material only on Android (owner, 06.11.2026), here never, Plasma or not. A saved one starts
+    // as the default, with that tile marked; the saved value stays. All styles a device offers
+    // share one controls style, so every change works without a restart.
+    void materialOnlyOnAndroid()
     {
         QTemporaryDir plasma;
         QVERIFY(QDir(plasma.path()).mkpath(QStringLiteral("org/kde/desktop")));
-        qputenv("KDE_FULL_SESSION", "true");
-        Appearance a;
         const QStringList paths{plasma.path()};
+        QSettings().setValue(QStringLiteral("look/style"), int(Appearance::Style::Material));
+
+        for (const bool session : {true, false}) {
+            if (session) {
+                qputenv("KDE_FULL_SESSION", "true");
+            } else {
+                qunsetenv("KDE_FULL_SESSION");
+            }
+            QCOMPARE(Appearance::startStyle(paths), Appearance::Style::Leinen);
+            Appearance a;
+            QCOMPARE(a.style(), Appearance::Style::Leinen);
+            for (const QVariant &s : a.styles()) {
+                QVERIFY(s.toMap().value(QStringLiteral("style")).toInt() != int(Appearance::Style::Material));
+            }
+            QCOMPARE(QSettings().value(QStringLiteral("look/style")).toInt(), int(Appearance::Style::Material));
+        }
+
+        qputenv("KDE_FULL_SESSION", "true");
         QStringList controls;
         for (const Appearance::Style style : {Appearance::Style::Breeze, Appearance::Style::Kante,
                                               Appearance::Style::Leinen, Appearance::Style::Shinki}) {
@@ -75,14 +92,8 @@ private slots:
         }
         controls.removeDuplicates();
         QCOMPARE(controls, QStringList{QStringLiteral("org.kde.desktop")});
-
-        QSettings().setValue(QStringLiteral("look/style"), int(Appearance::Style::Material));
-        QCOMPARE(Appearance::startStyle(paths), Appearance::Style::Leinen);
-        // The style that really starts is the chosen one: its tile is marked.
-        QCOMPARE(Appearance().style(), Appearance::Style::Leinen);
-        QCOMPARE(QSettings().value(QStringLiteral("look/style")).toInt(), int(Appearance::Style::Material));
         qunsetenv("KDE_FULL_SESSION");
-        QCOMPARE(Appearance::startStyle({}), Appearance::Style::Material);
+        QSettings().remove(QStringLiteral("look/style"));
     }
 
     // Shinki comes only with -DMITORI_SHINKI=ON (until every page reaches it).

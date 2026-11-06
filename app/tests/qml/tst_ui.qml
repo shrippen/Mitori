@@ -102,7 +102,7 @@ TestCase {
         next.clicked()
         compare(steps.currentIndex, 1)
         const tiles = findChildren(page, "styleTile")
-        verify(tiles.length >= 3, "Material, Kante, Leinen at least")
+        verify(tiles.length >= 2, "Kante, Leinen at least")
         // A real change of style has its own cases (tst_look.qml): here the running one.
         const running = tiles.find(t => t.checked)
         verify(running)

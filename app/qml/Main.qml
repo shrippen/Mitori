@@ -82,7 +82,8 @@ Kirigami.ApplicationWindow {
     function keptPageList() {
         // A field in focus saves when it is left.
         root.contentItem.forceActiveFocus()
-        const pages = []
+        const start = root.pageStack.get(0)
+        const pages = [{ contentY: start && start.flickable ? start.flickable.contentY : 0 }]
         for (let i = 1; i <= root.pageStack.currentIndex; i++) {
             const page = root.pageStack.get(i)
             const name = page ? page["keptPage"] : undefined
@@ -98,7 +99,8 @@ Kirigami.ApplicationWindow {
         const duration = root.pageStack.columnView.scrollDuration
         root.pageStack.columnView.scrollDuration = 0
         for (const kept of root.keptPages) {
-            const page = root.pageStack.push(Qt.resolvedUrl(kept.page), kept.state)
+            // The first entry is the start page, which is there already.
+            const page = kept.page ? root.pageStack.push(Qt.resolvedUrl(kept.page), kept.state) : root.pageStack.get(0)
             if (page.flickable && kept.contentY > 0) {
                 root.scrollTo(page.flickable, kept.contentY)
             }
@@ -106,17 +108,43 @@ Kirigami.ApplicationWindow {
         Qt.callLater(() => { root.pageStack.columnView.scrollDuration = duration })
     }
 
-    // The old place, once the page is that tall: the previews on it come a moment later.
+    // The old place, or the page's end where the page is shorter now. A new page gets its size and
+    // its previews a moment later: it follows them until it stands, not after that.
     function scrollTo(flickable, y) {
+        // A page gone (Back at once, the next change of style) reads undefined.
+        const gone = () => flickable.contentHeight === undefined
+        const stop = () => {
+            if (!gone()) {
+                flickable.contentHeightChanged.disconnect(place)
+                flickable.heightChanged.disconnect(place)
+            }
+        }
         const place = () => {
-            if (flickable.contentHeight - flickable.height < y) {
+            if (gone()) {
                 return
             }
-            flickable.contentHeightChanged.disconnect(place)
-            flickable.contentY = y
+            const end = flickable.contentHeight + flickable.bottomMargin - flickable.height
+            flickable.contentY = Math.max(0, Math.min(y, end))
+            if (flickable.contentY === y) {
+                stop()
+            }
         }
         flickable.contentHeightChanged.connect(place)
+        flickable.heightChanged.connect(place)
         Qt.callLater(place)
+        scrollSettled.stops.push(stop)
+        scrollSettled.restart()
+    }
+    readonly property int scrollSettle: 1000
+    Timer {
+        id: scrollSettled
+
+        property var stops: []
+        interval: root.scrollSettle
+        onTriggered: {
+            stops.forEach(stop => stop())
+            stops = []
+        }
     }
 
     // The first start: the wizard over the start menu (it goes back there).

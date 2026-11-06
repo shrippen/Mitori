@@ -17,12 +17,12 @@ class QQmlEngine;
 //   language   the catalog is swapped and the engine retranslates; every page stays (setLanguage).
 //   style      the window is built anew: the file selector for app/qml/Look, the component cache
 //              cleared, Look's roles read anew, the pages up to the current one back (rebuild).
-//              Singletons and so the services stay. Qt's controls style is the one thing fixed
-//              for the run, so a device offers only styles of one controls style:
+//              Singletons and so the services stay. Qt's controls style is fixed for the run: a
+//              device's styles all share one.
 //
 //   style      controls (QQC2)        KanteStyle
 //   Breeze     org.kde.desktop        System    (only where qqc2-desktop-style is, on Plasma)
-//   Material   Material               System    (only where Breeze is not)
+//   Material   Material               System    (only on Android, owner 06.11.2026)
 //   Kante      Breeze or Material     Kante, dark
 //   Leinen     Breeze or Material     Kante, light ("Leinen")
 //   Shinki     Breeze or Material     Kante, light   (only with -DMITORI_SHINKI=ON; its own

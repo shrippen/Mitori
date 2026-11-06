@@ -231,7 +231,7 @@ Look (app/qml/Look)     wählt je Stil:   Kante ──────────�
    │                                     app/qml/Kante          shinki/qml/Shinki
    │                                     (KanteStyle, Kante*)    (ShinkiStyle, Shinki*, Controls-Stil)
 Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Controls-Stil „Shinki“
-                        Material: Material
+                        Material: Material (nur Android)
                         Kante, Leinen: Breeze, wo es ihn gibt, sonst Material, mit Kantes Zeichnung
 ```
 
@@ -239,8 +239,9 @@ Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Contr
   Tutorial zu den Funktionen. Später lässt sich der Stil in Einstellungen → Darstellung ändern. Der Wechsel
   gilt sofort, mit Vorschau je Stil: Mitori baut das Fenster neu (`Appearance::rebuild`). Der Controls-Stil
   steht fest, sobald das erste Fenster da ist; darum bietet ein Gerät nur Stile mit demselben Controls-Stil an.
-  Breeze gibt es dort, wo es den Stil gibt: in einer Plasma-Sitzung mit qqc2-desktop-style, dort ohne Material.
-  AppImage, Flatpak ohne KDE-Laufzeit und Android haben nur Material.
+  Breeze gibt es dort, wo es den Stil gibt: in einer Plasma-Sitzung mit qqc2-desktop-style. Den Stil Material gibt
+  es nur auf Android (Owner, 06.11.2026), auch nicht im AppImage oder Flatpak; ein gespeichertes Material startet
+  anderswo als Leinen. Ohne Breeze zeichnen die Kante-Stile und Shinki auf Qts Material-Controls.
 - **`ShinkiStyle`** ist ein Singleton mit den Rollen, Stufen, Schriften und Größen aus `tokens.json`. Es ist
   die einzige Stelle mit Werten; jeder Wert dieser Bibel steht in `tokens.json`. `tools/shinki_style.py`
   erzeugt es, ein Test prüft, dass es aktuell ist. Die Namen: `paper`, `levelColor(3)`, `bookFamily`,
