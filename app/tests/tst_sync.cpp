@@ -782,7 +782,7 @@ private slots:
     }
 
     // P1 in the file, P2 in the store, the file cannot be rewritten. The next start would take P1
-    // back (the file counts as newest), so the note asks for P2 again; that repairs it for good.
+    // back (the file counts as newest), so the note asks for “Sync now”; that repairs it for good.
     void newerNotRecorded()
     {
         FakeDav dav;
@@ -938,6 +938,31 @@ private slots:
         sync.setEnabled(true);
         QTest::qWait(10);
         QCOMPARE(sync.passwordNote(), Sync::PasswordNote::NotSaved);
+    }
+
+    // An older password stays in the file when the new one finds no place: it still lies there.
+    void nowhereButOlderInFile()
+    {
+        const Device d = device(u"nirgendsaelter"_s);
+        oldAccount(d, u"https://example.org/dav/"_s, u"alt"_s);
+        d.store->held = true;
+        d.store->answer = SecretStore::Result::Failed;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        d.store->release();
+        QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::RefusedByStore);
+
+        d.store->held = true;
+        sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, u"neu"_s, u"X"_s);
+        WriteBlock block;
+        d.store->release();
+        QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NotSaved);
+        QVERIFY(sync.passwordInFile());
+
+        // "Sync now" (an empty field) saves what memory holds: nothing to type again.
+        block.lift();
+        sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, QString(), u"X"_s);
+        QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::RefusedByStore);
+        QVERIFY(sync.passwordSaved());
     }
 
     // Nobody who has no password is bothered by a wallet's unlock prompt.

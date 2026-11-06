@@ -683,6 +683,12 @@ Kirigami.Page {
             }
             return
         }
+        // Before the first row the chips, which scroll with the rows.
+        const chip = step < 0 ? page.lastInHead() : null
+        if (chip) {
+            chip.forceActiveFocus(reason)
+            return
+        }
         // The next item of the window's chain outside the list (the small player, the header).
         let item = page.Window.activeFocusItem
         for (let n = 0; item && n < 1000; n++) {
@@ -691,6 +697,25 @@ Kirigami.Page {
                 item.forceActiveFocus(reason)
                 return
             }
+        }
+    }
+    // The last item that takes the focus in the list's head (on a tablet its chips), or null.
+    function lastInHead() {
+        const head = list.headerItem
+        let last = null
+        let item = head ? head.nextItemInFocusChain(true) : null
+        for (let n = 0; item && n < 1000 && page.inside(item, head); n++) {
+            last = item
+            item = item.nextItemInFocusChain(true)
+        }
+        return last
+    }
+    // Keys came to the chips ("All notes", Tab): the list shows them. A tap needs no move.
+    readonly property Item focusNow: page.Window.activeFocusItem
+    onFocusNowChanged: {
+        const head = list.headerItem
+        if (focusNow && head && focusNow.focusReason !== Qt.MouseFocusReason && page.inside(focusNow, head)) {
+            list.positionViewAtBeginning()
         }
     }
     function inside(item, ancestor) {

@@ -90,24 +90,17 @@ inline QString withoutHiragana(const QString &text)
 // A text asked whether it names something (a technique in a note): the name's words joined must be
 // a run of whole words of the text, so that spaces and hyphens do not matter ("Shihô-nage" in "shiho
 // nage aus" and "Shihonage,") but word ends do (not in "Shihonagen"). Punctuation, a line break or a
-// dash between spaces part names: "Ikkyo, Shiho-nage" does not name Ikkyo-shiho-nage. With kanji
-// anywhere: Japanese has no spaces, and okurigana may differ.
+// dash between spaces part names: "Ikkyo, Shiho-nage" does not name Ikkyo-shiho-nage, except where
+// the name has that punctuation itself ("Sankajô-kime-osae / -nage"). Digits never join: "Ô-dachi
+// 1-3" does not name form 13. With kanji anywhere: Japanese has no spaces, and okurigana may differ.
 class NamedIn
 {
 public:
     explicit NamedIn(const QString &text)
     {
-        const QList<uint> points = text.toUcs4();
-        QString clause;
-        for (qsizetype i = 0; i <= points.size(); ++i) {
-            if (i < points.size() && !endsClause(points, i)) {
-                const char32_t c = points[i];
-                clause += QString::fromUcs4(&c, 1);
-                continue;
-            }
+        for (const QString &clause : clauses(text)) {
             m_words += searchKey(clause).split(u' ', Qt::SkipEmptyParts);
             m_ends << m_words.size();
-            clause.clear();
         }
     }
 
@@ -131,10 +124,12 @@ public:
             return found;
         }
         for (qsizetype i = 0; i < m_words.size(); ++i) {
-            const qsizetype end = *std::upper_bound(m_ends.cbegin(), m_ends.cend(), i);
             QString run;
             qsizetype j = i;
-            for (; j < end && run.size() < joined.size(); ++j) {
+            for (; j < m_words.size() && run.size() < joined.size(); ++j) {
+                if (j > i && !joins(run, j, name)) {
+                    break;
+                }
                 run += m_words.at(j);
             }
             if (run == joined) {
@@ -155,6 +150,44 @@ public:
     }
 
 private:
+    static QStringList clauses(const QString &text)
+    {
+        QStringList result;
+        const QList<uint> points = text.toUcs4();
+        QString clause;
+        for (qsizetype i = 0; i <= points.size(); ++i) {
+            if (i < points.size() && !endsClause(points, i)) {
+                const char32_t c = points[i];
+                clause += QString::fromUcs4(&c, 1);
+                continue;
+            }
+            result << clause;
+            clause.clear();
+        }
+        return result;
+    }
+
+    // Whether word `next` may go on `run`, the start of `name`.
+    bool joins(const QString &run, qsizetype next, const QString &name) const
+    {
+        if (run.back().isDigit() && m_words.at(next).front().isDigit()) {
+            return false;
+        }
+        if (!std::binary_search(m_ends.cbegin(), m_ends.cend(), next)) {
+            return true;
+        }
+
+        // A clause of the text ends here: the name must have a clause end there too.
+        qsizetype letters = 0;
+        for (const QString &clause : clauses(name)) {
+            letters += searchKey(clause).remove(u' ').size();
+            if (letters == run.size()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Whether the character parts names. Not a hyphen, an apostrophe, a point or comma in a number,
     // or a point before one ("Nr. 5").
     static bool endsClause(const QList<uint> &points, qsizetype i)

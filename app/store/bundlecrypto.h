@@ -19,7 +19,7 @@ namespace BundleCrypto {
 QString normalized(const QString &input);
 // Whether the code has the right length (a wrong character or check character in it: a typo).
 bool complete(const QString &input);
-// "7KQ2M-X9HDV-3TAPR-WE6YC"
+// "7KQ2M-X9HDV-3TAPR-WE6YT"
 QString grouped(const QString &code);
 // The code's entry in the manifest: hex(BLAKE2b-128("mitori-code:" + code)).
 QString lookupId(const QString &code);

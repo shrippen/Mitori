@@ -456,6 +456,27 @@ private slots:
 
         // A point before a number is no end: "Nr. 5".
         QCOMPARE(programme.suggest(QStringLiteral("Ô-dachi Nr. 5")).size(), 1);
+
+        // Digits do not join: "1-3" is not form 13; "13" is.
+        const auto formIds = [&](const QString &text) {
+            QStringList list;
+            for (const QVariant &r : programme.suggest(text, 200)) {
+                list << r.toMap().value(QStringLiteral("id")).toString();
+            }
+            return list;
+        };
+        const QString thirteen = QStringLiteral("shinkitoho/odachi/13");
+        for (const QString &text : {QStringLiteral("Ô-dachi 1-3"), QStringLiteral("Ô-dachi 1–3"), QStringLiteral("Ô-dachi 1 3")}) {
+            QVERIFY2(!formIds(text).contains(thirteen), qPrintable(text + u": " + formIds(text).join(u',')));
+        }
+        QCOMPARE(formIds(QStringLiteral("Ô-dachi 13")), QStringList{thirteen});
+
+        // A name with punctuation of its own names itself, and its first part is not named then.
+        const QString slashed = QStringLiteral("Sankajô-kime-osae / -nage");
+        const QString part = QStringLiteral("Sankajô-kime-osae");
+        QCOMPARE(titles(slashed).value(0), slashed);
+        QVERIFY2(!titles(slashed).contains(part), qPrintable(titles(slashed).join(u',')));
+        QCOMPARE(titles(part).value(0), part);
     }
 
     // Those left out make room: the next ones move up.

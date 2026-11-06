@@ -59,6 +59,16 @@ public:
         sink->setVideoFrame(QVideoFrame(text.isEmpty() ? image : qrImage(text)));
     }
 
+    // The Flatpak as services/saveplace tells it ("": none).
+    Q_INVOKABLE void setFlatpak(const QString &id)
+    {
+        if (id.isEmpty()) {
+            qunsetenv("FLATPAK_ID");
+        } else {
+            qputenv("FLATPAK_ID", id.toUtf8());
+        }
+    }
+
     // Qt's own German catalog is installed (not everywhere: tst_look only checks it then).
     Q_INVOKABLE bool qtCatalogThere() const
     {

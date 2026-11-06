@@ -55,6 +55,10 @@ python3 third_party/mitori-daten/tools/daten.py
 GPL-3.0-or-later. Texte und Listen aus `third_party/mitori-daten/quellen/` und die daraus
 übernommenen Kommentare gehören ihren Verfassern (Shinkiryu-Verband).
 
+Die App enthält außerdem ZXing-C++ (Apache-2.0) mit librscpp (Apache-2.0) und libzueci (BSD-3-Clause)
+sowie Monocypher (BSD-2-Clause oder CC0-1.0). Ihre Lizenztexte liegen in `app/third_party/` und stehen
+ebenfalls unter „Über Mitori“.
+
 Die App enthält QtKeychain (auch in APK, AppImage und Flatpak; dort steht der Text unter „Über Mitori“):
 
 ```
