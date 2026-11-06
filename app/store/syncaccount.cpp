@@ -275,6 +275,16 @@ void SyncAccount::setEnabled(Toggle on)
     settings()->setValue(QStringLiteral("konto/enabled"), on == Toggle::On);
 }
 
+bool SyncAccount::replaced() const
+{
+    return settings()->value(QStringLiteral("konto/replaced"), false).toBool();
+}
+
+void SyncAccount::setReplaced(Toggle on)
+{
+    settings()->setValue(QStringLiteral("konto/replaced"), on == Toggle::On);
+}
+
 bool SyncAccount::automatic() const
 {
     return settings()->value(QStringLiteral("konto/auto"), false).toBool();

@@ -89,6 +89,9 @@ public:
     void setEnabled(Toggle on);
     bool automatic() const;
     void setAutomatic(Toggle on);
+    // This device's data was replaced by a backup and the sync not turned on since.
+    bool replaced() const;
+    void setReplaced(Toggle on);
 
     // This device's sync id (made once).
     QString id();

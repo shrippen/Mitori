@@ -7,7 +7,7 @@ import org.kde.kirigami as Kirigami
 import Mitori
 
 // Settings: the video bundles (codes of the DVDs), a folder with exam videos of one's own, and
-// the backup (save everything as a file, read one back: it is merged, see Backup), and the sync
+// the backup (save everything as a file, read one back: merged or replacing, see Backup), and the sync
 // between devices over WebDAV / Nextcloud (Sync).
 Kirigami.ScrollablePage {
     id: page
@@ -84,7 +84,7 @@ Kirigami.ScrollablePage {
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             wrapMode: Text.Wrap
             color: Look.disabledTextColor
-            text: qsTr("One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back merges it: what is newer stays, nothing gets lost. DVD codes are not in it.")
+            text: qsTr("One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back asks: merge it (the newer state wins, also a newer deletion) or replace this device's data with it. DVD codes are not in it.")
         }
         LookLabel {
             objectName: "backupDone"
@@ -99,8 +99,8 @@ Kirigami.ScrollablePage {
             objectName: "backupError"
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
-            visible: Backup.errorString !== ""
-            text: Backup.errorString
+            visible: text !== ""
+            text: page.refused !== "" ? page.refused : Backup.errorString
             color: Look.negativeTextColor
             wrapMode: Text.Wrap
         }
@@ -118,6 +118,14 @@ Kirigami.ScrollablePage {
                 checked: Sync.enabled
                 onToggled: Sync.enabled = checked
             }
+        }
+        LookLabel {
+            objectName: "syncAfterReplace"
+            Layout.fillWidth: true
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 30
+            visible: Sync.afterReplace
+            wrapMode: Text.Wrap
+            text: qsTr("This device's data was replaced by a backup. If you turn sync on, what your other devices hold comes here, their changes and deletions too: what you restored from the backup can go again.")
         }
         LookFormRow {
             label: qsTr("Folder on the server")
@@ -278,6 +286,8 @@ Kirigami.ScrollablePage {
     // What the last step did ("" for nothing yet), and what the read backup would change.
     property string done: ""
     property var summary: ({})
+    property url source
+    property string refused
 
     SaveFileDialog {
         id: saveDialog
@@ -285,9 +295,7 @@ Kirigami.ScrollablePage {
         objectName: "saveBackupDialog"
         anchor: page
         title: qsTr("Save backup")
-        onChosen: target => page.done = Backup.save(target)
-                                        ? (Backup.savedTo() !== "" ? qsTr("Backup saved: %1").arg(Backup.savedTo()) : qsTr("Backup saved."))
-                                        : ""
+        onChosen: target => page.saveBackup(target)
     }
 
     FileDialog {
@@ -300,15 +308,53 @@ Kirigami.ScrollablePage {
         onAccepted: page.inspect(selectedFile)
     }
 
+    function saveBackup(url) {
+        page.refused = ""
+        const ok = Backup.save(url)
+        page.done = !ok ? "" : Backup.savedTo() !== "" ? qsTr("Backup saved: %1").arg(Backup.savedTo()) : qsTr("Backup saved.")
+        return ok
+    }
+
     function inspect(url) {
         page.done = ""
+        page.refused = ""
+        page.source = url
         page.summary = Backup.inspect(url)
         if (Object.keys(page.summary).length > 0) {
             mergeDialog.open()
         }
     }
 
-    // "Notes: 3 new, 2 changed" per kind that changes; a line when nothing does.
+    // A running sync would merge into the new state: refused, and read again later (fresh numbers).
+    function replaceData(syncRuns) {
+        if (syncRuns) {
+            Backup.discard()
+            page.refused = qsTr("Not replaced: a sync was running. Read the backup again when it has finished.")
+            return
+        }
+        const syncWasOn = Sync.enabled
+        const ok = Backup.replace()
+        if (ok) {
+            Sync.dataReplaced()
+        }
+        page.done = !ok ? "" : syncWasOn ? qsTr("This device's data was replaced by the backup. Sync is off now.")
+                                         : qsTr("This device's data was replaced by the backup.")
+    }
+
+    // A sync brought something while a dialog is open: its numbers anew. Not readable any more: the
+    // error shows, nothing to choose.
+    function inspectAgain() {
+        if (!mergeDialog.visible && !replaceDialog.visible) {
+            return
+        }
+        page.summary = Backup.inspect(page.source)
+        if (Object.keys(page.summary).length === 0) {
+            mergeDialog.close()
+            replaceDialog.close()
+        }
+    }
+
+    // "Notes: 3 new, 2 changed, 1 deleted" per kind that changes; a line when nothing does.
     function changes(s) {
         const kinds = [["ratings", qsTr("Ratings")], ["notes", qsTr("Notes")], ["rounds", qsTr("Exam rounds")],
                        ["notebooks", qsTr("Notebooks")], ["entries", qsTr("Notebook entries")], ["grades", qsTr("Grades")],
@@ -320,8 +366,11 @@ Kirigami.ScrollablePage {
             if (c.added > 0) {
                 parts.push(qsTr("%n new", "", c.added))
             }
-            if (c.changed > 0) {
-                parts.push(qsTr("%n changed", "", c.changed))
+            if (c.edited > 0) {
+                parts.push(qsTr("%n changed", "", c.edited))
+            }
+            if (c.removed > 0) {
+                parts.push(qsTr("%n deleted", "", c.removed))
             }
             if (parts.length > 0) {
                 lines.push(name + ": " + parts.join(", "))
@@ -330,7 +379,40 @@ Kirigami.ScrollablePage {
         if (s.media > 0) {
             lines.push(qsTr("Photos and voice notes: %n new", "", s.media))
         }
-        return lines.length > 0 ? lines.join("\n") : qsTr("Nothing new: this device has everything in the backup.")
+        if (s.mediaRemoved > 0) {
+            lines.push(qsTr("Photos and voice notes: %n deleted", "", s.mediaRemoved))
+        }
+        return lines.length > 0 ? qsTr("On this device it changes:") + "\n" + lines.join("\n")
+                                : qsTr("Nothing new: this device has everything in the backup.")
+    }
+
+    // "Ratings: 12" per kind, by the summary's key for that number; the media's number apart.
+    function amounts(s, key, media) {
+        const kinds = [["ratings", qsTr("Ratings")], ["notes", qsTr("Notes")], ["rounds", qsTr("Exam rounds")],
+                       ["notebooks", qsTr("Notebooks")], ["entries", qsTr("Notebook entries")], ["grades", qsTr("Grades")],
+                       ["starts", qsTr("Start of training")], ["links", qsTr("Technique links")]]
+        let lines = []
+        for (const [kind, name] of kinds) {
+            const n = (s[kind] || {})[key] || 0
+            if (n > 0) {
+                lines.push(name + ": " + n)
+            }
+        }
+        if (media > 0) {
+            lines.push(qsTr("Photos and voice notes") + ": " + media)
+        }
+        return lines
+    }
+
+    // How much of the window's height a dialog may take (as Kante's size steps).
+    readonly property real dialogRoom: 0.9
+
+    // What a replace means for the sync; "" without an account.
+    function syncNote() {
+        if (Sync.enabled) {
+            return qsTr("Sync is turned off on this device: your other devices keep their data and would bring it here. If you turn sync on again, what they hold comes here, their changes and deletions too: what you restored from the backup can go again.")
+        }
+        return Sync.server !== "" ? qsTr("If you turn sync on again, what your other devices hold comes here, their changes and deletions too: what you restored from the backup can go again.") : ""
     }
 
     LookDialog {
@@ -341,26 +423,133 @@ Kirigami.ScrollablePage {
         anchors.centerIn: parent
         modal: true
         span: LookDialog.Span.Small
-        title: qsTr("Merge backup?")
+        // Taller than a phone held sideways: the text scrolls, the buttons stay.
+        height: Math.min(implicitHeight, (parent ? parent.height : implicitHeight) * page.dialogRoom)
+        // From the text and the button, as the second dialog.
+        contentHeight: mergeBody.implicitHeight + Look.unit(8) + replaceButton.implicitHeight
+        title: qsTr("Read backup")
         acceptText: qsTr("Merge")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
         onAccepted: page.done = Backup.restore() ? qsTr("Backup merged.") : ""
         onRejected: Backup.discard()
 
-        LookLabel {
-            id: mergeText
+        // The second choice beside the first, right above the buttons: the text scrolls, the choices never
+        // do. Not in the footer: three buttons do not fit one row on a phone.
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: Look.unit(8)
 
-            objectName: "mergeText"
-            width: parent.width
-            wrapMode: Text.Wrap
-            // Closed it measures nothing: a window turning (full screen) made a page still on its way
-            // out wrap this text anew, a binding loop in the dialog's height.
-            text: !mergeDialog.visible ? "" : (page.summary.created ? qsTr("Backup of %1.").arg(page.summary.created.toLocaleString(Qt.locale(), Locale.ShortFormat)) + "\n\n" : "")
-                  + page.changes(page.summary)
+            LookScrollView {
+                id: mergeScroll
+
+                objectName: "mergeScroll"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                contentWidth: availableWidth
+                rightPadding: Look.unit(8)      // the bar stands beside the text
+                clip: true
+
+                ColumnLayout {
+                    id: mergeBody
+
+                    width: mergeScroll.availableWidth
+                    spacing: Look.unit(16)
+
+                    LookLabel {
+                        objectName: "replaceHint"
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        text: !mergeDialog.visible ? "" : qsTr("Replacing deletes what is on this device and puts the backup's state in its place. It asks once more.")
+                    }
+                    LookLabel {
+                        id: mergeText
+
+                        objectName: "mergeText"
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        // Closed it measures nothing: a window turning (full screen) made a page still on its way
+                        // out wrap this text anew, a binding loop in the dialog's height.
+                        text: !mergeDialog.visible ? "" : (page.summary.created ? qsTr("Backup of %1.").arg(page.summary.created.toLocaleString(Qt.locale(), Locale.ShortFormat)) + "\n\n" : "")
+                              + qsTr("It holds: %1").arg(page.amounts(page.summary, "holds", page.summary.mediaHolds).join(", ") || qsTr("nothing"))
+                              + "\n\n" + qsTr("Merging: ratings and exam rounds are only added. For everything else the newer state wins: a newer text replaces this device's, a newer deletion deletes here too, with the photo. What the backup lacks stays, except: an entry in a notebook the backup deleted later goes with it; two notebooks of one course become one, the entries move, the younger one's details go; of one grade entered twice the newer stays.")
+                              + "\n\n"
+                              + page.changes(page.summary)
+                    }
+                }
+            }
+            LookButton {
+                id: replaceButton
+
+                objectName: "replaceInstead"
+                Layout.alignment: Qt.AlignRight
+                icon.name: "edit-delete"
+                text: qsTr("Replace …")
+                onClicked: {
+                    mergeDialog.close()
+                    replaceDialog.open()
+                }
+            }
         }
     }
 
-    // The services read their data anew after a merge.
+    // The second step of a replace: says what goes. Cancel goes back to the first.
+    LookDialog {
+        id: replaceDialog
+
+        objectName: "replaceBackup"
+        parent: QQC2.Overlay.overlay
+        anchors.centerIn: parent
+        modal: true
+        destructive: true
+        span: LookDialog.Span.Small
+        height: Math.min(implicitHeight, (parent ? parent.height : implicitHeight) * page.dialogRoom)
+        // From the text: under Shinki with the desktop's controls the dialog measured one line of it.
+        contentHeight: replaceText.implicitHeight
+        title: qsTr("Replace this device's data?")
+        acceptText: qsTr("Delete and replace")
+        standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
+        onAccepted: page.replaceData(Sync.busy)
+        onRejected: mergeDialog.open()
+
+        LookScrollView {
+            id: replaceScroll
+
+            objectName: "replaceScroll"
+            anchors.fill: parent
+            contentWidth: availableWidth
+            rightPadding: Look.unit(8)      // the bar stands beside the text
+            clip: true
+
+            LookLabel {
+                id: replaceText
+
+                objectName: "replaceText"
+                width: replaceScroll.availableWidth
+                wrapMode: Text.Wrap
+                text: {
+                    if (!replaceDialog.visible) {
+                        return ""
+                    }
+                    const lost = page.amounts(page.summary, "lost", page.summary.mediaLost)
+                    return qsTr("This cannot be undone. The backup's state takes the place of this device's ratings, notes, exam rounds, notebooks, grades, start of training, photos and voice notes.")
+                           + "\n\n" + (lost.length > 0 ? qsTr("Deleted, or set back to the backup's older state:") + "\n" + lost.join("\n")
+                                                        : qsTr("The backup has all of this device's data, none is lost."))
+                           + "\n\n" + qsTr("Downloaded videos, DVD codes and settings stay.")
+                           + (page.syncNote() !== "" ? "\n\n" + page.syncNote() : "")
+                           + (Sync.busy ? "\n\n" + qsTr("A sync is running: replace when it has finished.") : "")
+                }
+            }
+        }
+    }
+
+    Connections {
+        target: Sync
+        function onMerged() {
+            page.inspectAgain()
+        }
+    }
+
+    // The services read their data anew after a merge or a replace.
     Connections {
         target: Backup
         function onRestored() {
