@@ -362,6 +362,8 @@ Kirigami.ScrollablePage {
         span: LookDialog.Span.Small
         // Taller than a phone held sideways: the text scrolls, the buttons stay.
         height: Math.min(implicitHeight, (parent ? parent.height : implicitHeight) * page.dialogRoom)
+        // From the text and the button, as the second dialog.
+        contentHeight: mergeBody.implicitHeight + Look.unit(8) + replaceButton.implicitHeight
         title: qsTr("Read backup")
         acceptText: qsTr("Merge")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
@@ -385,9 +387,17 @@ Kirigami.ScrollablePage {
                 clip: true
 
                 ColumnLayout {
+                    id: mergeBody
+
                     width: mergeScroll.availableWidth
                     spacing: Look.unit(16)
 
+                    LookLabel {
+                        objectName: "replaceHint"
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        text: !mergeDialog.visible ? "" : qsTr("Replacing deletes what is on this device and puts the backup's state in its place. It asks once more.")
+                    }
                     LookLabel {
                         id: mergeText
 
@@ -402,14 +412,11 @@ Kirigami.ScrollablePage {
                               + "\n\n"
                               + page.changes(page.summary)
                     }
-                    LookLabel {
-                        Layout.fillWidth: true
-                        wrapMode: Text.Wrap
-                        text: !mergeDialog.visible ? "" : qsTr("Replacing deletes what is on this device and puts the backup's state in its place. It asks once more.")
-                    }
                 }
             }
             LookButton {
+                id: replaceButton
+
                 objectName: "replaceInstead"
                 Layout.alignment: Qt.AlignRight
                 icon.name: "edit-delete"
@@ -433,6 +440,8 @@ Kirigami.ScrollablePage {
         destructive: true
         span: LookDialog.Span.Small
         height: Math.min(implicitHeight, (parent ? parent.height : implicitHeight) * page.dialogRoom)
+        // From the text: under Shinki with the desktop's controls the dialog measured one line of it.
+        contentHeight: replaceText.implicitHeight
         title: qsTr("Replace this device's data?")
         acceptText: qsTr("Delete and replace")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
@@ -463,6 +472,8 @@ Kirigami.ScrollablePage {
             clip: true
 
             LookLabel {
+                id: replaceText
+
                 objectName: "replaceText"
                 width: replaceScroll.availableWidth
                 wrapMode: Text.Wrap

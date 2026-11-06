@@ -839,6 +839,67 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // The German words on the smallest phone: every footer button of both dialogs lies inside its
+    // dialog. And what replacing does is the first thing to read.
+    function test_3d_backup_german_footer() {
+        window.width = 320
+        window.height = 568
+        const page = push("SettingsPage")
+        const url = "file://" + uiShotsDir + "/sicherung-deutsch.zip"
+        verify(Backup.save(url), Backup.errorString)
+        page.inspect(url)
+        const first = findChild(page, "mergeBackup")
+        tryVerify(() => first.opened)
+        tryVerify(() => first.width <= 320)
+
+        const hint = findChild(page, "replaceHint")
+        verify(hint.y < findChild(page, "mergeText").y, "hint at " + hint.y)
+
+        // The dialog's height follows the text, not its first lines.
+        const firstArea = findChild(page, "mergeScroll")
+        const wanted = hint.implicitHeight + findChild(page, "mergeText").implicitHeight
+        tryVerify(() => firstArea.height >= Math.min(wanted, 200), 2000, "shows " + firstArea.height + " of " + wanted)
+
+        const fits = (dialog, word) => {
+            const accept = dialog.standardButton(QQC2.Dialog.Ok)
+            const cancel = dialog.standardButton(QQC2.Dialog.Cancel)
+            dialog.acceptText = word
+            cancel.text = "Abbrechen"
+            tryVerify(() => accept.text === word && cancel.text === "Abbrechen")
+            wait(50)   // the button box lays the new widths out
+            for (const button of [accept, cancel]) {
+                const at = button.mapToItem(dialog.parent, 0, 0)
+                verify(at.x >= dialog.x && at.x + button.width <= dialog.x + dialog.width,
+                       button.text + " from " + at.x + " to " + (at.x + button.width)
+                       + " in a dialog from " + dialog.x + " to " + (dialog.x + dialog.width))
+            }
+        }
+        fits(first, uiCatalog.german("SettingsPage", "Merge"))
+        shot("4c-backup-choice-de-320", true)
+
+        findChild(page, "replaceInstead").clicked()
+        const second = findChild(page, "replaceBackup")
+        tryVerify(() => second.opened)
+        fits(second, uiCatalog.german("SettingsPage", "Delete and replace"))
+
+        // The warning shows, not one line of it (the dialog's height follows the text).
+        const warning = findChild(page, "replaceText")
+        const warningArea = findChild(page, "replaceScroll")
+        tryVerify(() => warningArea.height >= warning.implicitHeight, 2000,
+                  "shows " + warningArea.height + " of " + warning.implicitHeight)
+        shot("4c-backup-replace-de-320", true)
+
+        second.acceptText = "Delete and replace"
+        first.acceptText = "Merge"
+        second.standardButton(QQC2.Dialog.Cancel).text = "Cancel"
+        first.standardButton(QQC2.Dialog.Cancel).text = "Cancel"
+        second.reject()
+        tryVerify(() => first.opened)
+        first.reject()
+        tryVerify(() => !first.visible)
+        window.pageStack.pop()
+    }
+
     // The player's switches: the screen stays on while a video plays (and the switch on);
     // sound off mutes also at full tempo; both switches stay for the next start. "Noted today" lists
     // the day's notes on the technique.
