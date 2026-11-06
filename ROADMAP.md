@@ -213,8 +213,8 @@ Sicherung ohne Endung, konto.ini 600, Alle Notizen und Alle Jahre schneller.
 Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
 - Telefon bei doppelter Anzeigegröße (206 px): Test `test_8o` auf diese Breite ausweiten; Segmente, lange Knöpfe,
   Bewertung und Steuerzeilen des Players brauchen eine schmale Form.
-- Tablet nach Vorlage (Programm: Player oder Blatt rechts, erledigt; offen: zwei Spalten für Heute, Statistik und
-  Grade, Lehrgänge und Einstellungen als Liste und Seite).
+- Tablet nach Vorlage (Programm: Player oder Blatt rechts; Heute, Statistik und Grade in zwei Spalten: erledigt;
+  offen: Lehrgänge und Einstellungen als Liste und Seite).
 - Programmdaten auf Englisch.
 - Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).
 

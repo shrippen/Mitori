@@ -56,90 +56,114 @@ Kirigami.ScrollablePage {
         return page.bounds.filter(b => count >= b).length
     }
 
+    // On a tablet sideways: two columns in a page of its own width, in the middle.
+    readonly property bool wide: Tablet.wide(width, height)
+    leftPadding: wide ? Tablet.sidePadding(width, padding) : padding
+    rightPadding: leftPadding
+
     title: qsTr("Statistics")
 
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        LookSectionLabel {
-            text: qsTr("Last 30 days")
-        }
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Kirigami.Units.gridUnit * 2
+        TwoColumns {
+            wide: page.wide
 
-            LookKpi {
-                objectName: "practiceDays"
-                value: String(page.last30.days)
-                label: qsTr("practice days")
-            }
-            LookKpi {
-                objectName: "techniquesPractised"
-                value: String(page.last30.techniques)
-                label: qsTr("techniques practised")
-            }
-        }
-        LookLabel {
-            Layout.fillWidth: true
-            text: qsTr("A technique counts once on each day it is rated.")
-            color: Look.mutedTextColor
-            font: Look.smallFont
-            wrapMode: Text.Wrap
-        }
+            ColumnLayout {
+                objectName: "last30Column"
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                spacing: Kirigami.Units.largeSpacing
 
-        LookSectionLabel {
-            text: qsTr("Practice days")
-        }
-        Item {
-            id: heatBox
-
-            Layout.fillWidth: true
-            implicitHeight: heat.implicitHeight
-
-            LookCalendarHeatmap {
-                id: heat
-
-                objectName: "practiceHeatmap"
-                // As many weeks as fit, up to half a year.
-                weeks: Math.max(4, Math.min(26, Math.floor((heatBox.width - labelWidth + spacing) / step)))
-                endDate: page.todayDate
-                levels: {
-                    const l = {}
-                    for (const d in page.perDay) {
-                        l[d] = page.levelOf(page.perDay[d])
-                    }
-                    return l
+                LookSectionLabel {
+                    text: qsTr("Last 30 days")
                 }
-                // Every day shown says what it was, also a day without practice.
-                tips: {
-                    const t = {}
-                    for (let i = 0; i < 26 * 7; i++) {
-                        const day = new Date(page.todayDate.getFullYear(), page.todayDate.getMonth(), page.todayDate.getDate() - i, 12)
-                        const key = isoDay(day)
-                        t[key] = page.perDay[key] ? qsTr("%n technique(s)", "", page.perDay[key]) : qsTr("no practice")
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Kirigami.Units.gridUnit * 2
+
+                    LookKpi {
+                        objectName: "practiceDays"
+                        value: String(page.last30.days)
+                        label: qsTr("practice days")
                     }
-                    return t
+                    LookKpi {
+                        objectName: "techniquesPractised"
+                        value: String(page.last30.techniques)
+                        label: qsTr("techniques practised")
+                    }
                 }
-                Accessible.name: qsTr("Practice days")
+                LookLabel {
+                    Layout.fillWidth: true
+                    text: qsTr("A technique counts once on each day it is rated.")
+                    color: Look.mutedTextColor
+                    font: Look.smallFont
+                    wrapMode: Text.Wrap
+                }
+            }
+            ColumnLayout {
+                objectName: "daysColumn"
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                spacing: Kirigami.Units.largeSpacing
+
+                LookSectionLabel {
+                    text: qsTr("Practice days")
+                }
+                Item {
+                    id: heatBox
+
+                    Layout.fillWidth: true
+                    implicitHeight: heat.implicitHeight
+
+                    LookCalendarHeatmap {
+                        id: heat
+
+                        objectName: "practiceHeatmap"
+                        // As many weeks as fit, up to half a year.
+                        weeks: Math.max(4, Math.min(26, Math.floor((heatBox.width - labelWidth + spacing) / step)))
+                        endDate: page.todayDate
+                        levels: {
+                            const l = {}
+                            for (const d in page.perDay) {
+                                l[d] = page.levelOf(page.perDay[d])
+                            }
+                            return l
+                        }
+                        // Every day shown says what it was, also a day without practice.
+                        tips: {
+                            const t = {}
+                            for (let i = 0; i < 26 * 7; i++) {
+                                const day = new Date(page.todayDate.getFullYear(), page.todayDate.getMonth(), page.todayDate.getDate() - i, 12)
+                                const key = isoDay(day)
+                                t[key] = page.perDay[key] ? qsTr("%n technique(s)", "", page.perDay[key]) : qsTr("no practice")
+                            }
+                            return t
+                        }
+                        Accessible.name: qsTr("Practice days")
+                    }
+                }
+                LookButton {
+                    objectName: "allYears"
+                    role: LookButton.Role.Quiet
+                    icon.name: "view-calendar"
+                    text: qsTr("All years …")
+                    onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("YearsPage.qml"))
+                }
+                LookLegend {
+                    Layout.fillWidth: true
+                    model: [{ color: Look.levelColor(0), text: qsTr("no practice") },
+                            { color: Look.levelColor(1), text: qsTr("1–2 techniques") },
+                            { color: Look.levelColor(2), text: "3–5" },
+                            { color: Look.levelColor(3), text: "6–9" },
+                            { color: Look.levelColor(4), text: qsTr("10 and more") }]
+                }
             }
         }
-        LookButton {
-            objectName: "allYears"
-            role: LookButton.Role.Quiet
-            icon.name: "view-calendar"
-            text: qsTr("All years …")
-            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("YearsPage.qml"))
-        }
-        LookLegend {
-            Layout.fillWidth: true
-            model: [{ color: Look.levelColor(0), text: qsTr("no practice") },
-                    { color: Look.levelColor(1), text: qsTr("1–2 techniques") },
-                    { color: Look.levelColor(2), text: "3–5" },
-                    { color: Look.levelColor(3), text: "6–9" },
-                    { color: Look.levelColor(4), text: qsTr("10 and more") }]
-        }
 
+        // The discipline over both columns on a tablet (the clickdummy), its heading then in the column.
         LookSectionLabel {
+            visible: !page.wide
             text: qsTr("Rating by grade")
         }
         LookSegmented {
@@ -148,91 +172,112 @@ Kirigami.ScrollablePage {
             currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
             onActivated: index => page.discipline = Programme.disciplines[index].id
         }
-        Repeater {
-            model: Programme.grades(page.discipline)
+        TwoColumns {
+            wide: page.wide
 
             ColumnLayout {
-                id: gradeItem
-
-                required property var modelData
-                readonly property var rows: Programme.entries(page.discipline, modelData.id)
-
+                objectName: "gradesColumn"
                 Layout.fillWidth: true
-                spacing: Look.unit(4)
-                visible: stand.ids.length > 0
+                Layout.alignment: Qt.AlignTop
+                spacing: Kirigami.Units.largeSpacing
 
-                RowLayout {
-                    Layout.fillWidth: true
+                LookSectionLabel {
+                    visible: page.wide
+                    text: qsTr("Rating by grade")
+                }
+                Repeater {
+                    model: Programme.grades(page.discipline)
 
-                    LookLabel {
+                    ColumnLayout {
+                        id: gradeItem
+
+                        required property var modelData
+                        readonly property var rows: Programme.entries(page.discipline, modelData.id)
+
                         Layout.fillWidth: true
-                        text: gradeItem.modelData.name
-                        font.bold: true
-                    }
-                    // The figures without hovering (touch): exam-ready of all techniques.
-                    LookLabel {
-                        objectName: "gradeFigure"
-                        text: qsTr("%1 of %2 exam-ready").arg(stand.counts[4]).arg(stand.ids.length)
-                        color: Look.mutedTextColor
+                        spacing: Look.unit(4)
+                        visible: stand.ids.length > 0
+
+                        RowLayout {
+                            Layout.fillWidth: true
+
+                            LookLabel {
+                                Layout.fillWidth: true
+                                text: gradeItem.modelData.name
+                                font.bold: true
+                            }
+                            // The figures without hovering (touch): exam-ready of all techniques.
+                            LookLabel {
+                                objectName: "gradeFigure"
+                                text: qsTr("%1 of %2 exam-ready").arg(stand.counts[4]).arg(stand.ids.length)
+                                color: Look.mutedTextColor
+                            }
+                        }
+                        GradeStand {
+                            id: stand
+                            readyShown: false
+
+                            objectName: "statsGradeStand"
+                            Layout.fillWidth: true
+                            entries: gradeItem.rows
+                            name: gradeItem.modelData.name
+                            legend: false
+                        }
                     }
                 }
-                GradeStand {
-                    id: stand
-                    readyShown: false
-
-                    objectName: "statsGradeStand"
+                LookLegend {
                     Layout.fillWidth: true
-                    entries: gradeItem.rows
-                    name: gradeItem.modelData.name
-                    legend: false
+                    model: [4, 3, 2, 1, 0].map(l => ({ color: Look.levelColor(l), text: Practice.levelNames[l] }))
                 }
             }
-        }
-        LookLegend {
-            Layout.fillWidth: true
-            model: [4, 3, 2, 1, 0].map(l => ({ color: Look.levelColor(l), text: Practice.levelNames[l] }))
-        }
+            ColumnLayout {
+                objectName: "examColumn"
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                spacing: Kirigami.Units.largeSpacing
 
-        // Exam mode: the average rating of each of the last rounds of the discipline, on a scale
-        // from 1 (seen) to 4 (exam-ready). A round of all 1 keeps a sliver (minBarHeight), else it
-        // would show no bar at all.
-        LookSectionLabel {
-            text: qsTr("Exam mode · average per round")
-        }
-        LookBarChart {
-            id: examChart
+                // Exam mode: the average rating of each of the last rounds of the discipline, on a scale
+                // from 1 (seen) to 4 (exam-ready). A round of all 1 keeps a sliver (minBarHeight), else it
+                // would show no bar at all.
+                LookSectionLabel {
+                    text: qsTr("Exam mode · average per round")
+                }
+                LookBarChart {
+                    id: examChart
 
-            objectName: "examChart"
-            Layout.fillWidth: true
-            Layout.preferredHeight: Look.unit(160)
-            visible: page.rounds.length > 0
-            values: page.rounds.map(r => r.average)
-            labels: page.rounds.map(r => r.at.toLocaleDateString(Qt.locale(), qsTr("M/d", "date under a bar")))
-            minValue: 1
-            maxValue: 4
-            minBarHeight: Look.unit(3)
-            axis: true
-            axisTitle: qsTr("Average")
-            formatter: v => page.averageText(v)
-            // The read-out names the round: date (its title), grade, techniques and average.
-            partNames: hoverIndex >= 0 && hoverIndex < page.rounds.length ? [page.roundText(page.rounds[hoverIndex])] : []
-            Accessible.name: qsTr("Exam mode, average per round")
+                    objectName: "examChart"
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Look.unit(160)
+                    visible: page.rounds.length > 0
+                    values: page.rounds.map(r => r.average)
+                    labels: page.rounds.map(r => r.at.toLocaleDateString(Qt.locale(), qsTr("M/d", "date under a bar")))
+                    minValue: 1
+                    maxValue: 4
+                    minBarHeight: Look.unit(3)
+                    axis: true
+                    axisTitle: qsTr("Average")
+                    formatter: v => page.averageText(v)
+                    // The read-out names the round: date (its title), grade, techniques and average.
+                    partNames: hoverIndex >= 0 && hoverIndex < page.rounds.length ? [page.roundText(page.rounds[hoverIndex])] : []
+                    Accessible.name: qsTr("Exam mode, average per round")
 
-            // Touch has no hover: a tap shows the read-out of its bar.
-            TapHandler {
-                onTapped: point => examChart.hoverIndex = examChart.barAt(point.position.x)
+                    // Touch has no hover: a tap shows the read-out of its bar.
+                    TapHandler {
+                        onTapped: point => examChart.hoverIndex = examChart.barAt(point.position.x)
+                    }
+                }
+                LookLabel {
+                    objectName: "examRoundsText"
+                    Layout.fillWidth: true
+                    text: page.rounds.length > 0
+                          ? qsTr("Vertical: average of the ratings (1 %1 … 4 %2). Horizontal: date of the round.")
+                                .arg(Practice.levelNames[1]).arg(Practice.levelNames[4])
+                          : qsTr("No round in the exam mode yet.")
+                    color: Look.mutedTextColor
+                    font: Look.smallFont
+                    wrapMode: Text.Wrap
+                }
             }
-        }
-        LookLabel {
-            objectName: "examRoundsText"
-            Layout.fillWidth: true
-            text: page.rounds.length > 0
-                  ? qsTr("Vertical: average of the ratings (1 %1 … 4 %2). Horizontal: date of the round.")
-                        .arg(Practice.levelNames[1]).arg(Practice.levelNames[4])
-                  : qsTr("No round in the exam mode yet.")
-            color: Look.mutedTextColor
-            font: Look.smallFont
-            wrapMode: Text.Wrap
         }
 
         // My grades of the discipline, oldest first, and a planned exam.

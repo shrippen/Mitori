@@ -5227,6 +5227,139 @@ TestCase {
         wait(100)
     }
 
+    // One breakpoint for all pages: a tablet sideways, not a phone sideways, nor anything upright.
+    function test_8q_tablet_breakpoint() {
+        compare(Tablet.minHeight, Kirigami.Units.gridUnit * 26)
+        verify(Tablet.wide(1280, 800))
+        verify(Tablet.wide(1024, 768))
+        verify(!Tablet.wide(800, 1280))
+        verify(!Tablet.wide(915, 412), "a phone held sideways")
+        verify(!Tablet.wide(800, 800))
+        verify(!Tablet.wide(530, 520), "nearly square: no room for two columns")
+        verify(!Tablet.wide(600, 520))
+    }
+
+    // Today, Statistics and My grades on a tablet sideways: two columns in a page of at most 880
+    // units, in the middle (the clickdummy's `.tab .page`, `.tab .grid2`). Upright and on a phone
+    // one column, nothing past the edge.
+    function test_8q_pages_columns_data() {
+        const sizes = [ { size: "1280x800", width: 1280, height: 800, two: true }, { size: "1024x768", width: 1024, height: 768, two: true },
+                        { size: "800x1280", width: 800, height: 1280, two: false }, { size: "360", width: 360, height: 800, two: false },
+                        { size: "320", width: 320, height: 800, two: false },
+                        { size: "530x520", width: 530, height: 520, two: false }, { size: "600x520", width: 600, height: 520, two: false } ]
+        const pages = [ { name: "TodayPage", pairs: [["dueLeft", "dueRight"]] },
+                        { name: "StatsPage", pairs: [["last30Column", "daysColumn"], ["gradesColumn", "examColumn"]] },
+                        { name: "GradesPage", pairs: [["grades_aikido", "grades_daitoryu"]] } ]
+        const rows = []
+        for (const page of pages) {
+            for (const size of sizes) {
+                rows.push(Object.assign({ tag: page.name + " " + size.size }, page, size))
+            }
+        }
+        return rows
+    }
+    function test_8q_pages_columns(data) {
+        window.width = data.width
+        window.height = data.height
+        wait(100)
+        const page = push(data.name)
+        tryVerify(() => Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1, 3000)
+        wait(300)
+
+        const box = name => {
+            const item = findChild(page, name)
+            verify(item && item.visible, name)
+            const at = item.mapToItem(null, 0, 0)
+            return { left: at.x, top: at.y, right: at.x + item.width }
+        }
+        for (const [first, second] of data.pairs) {
+            const a = box(first), b = box(second)
+            if (data.two) {
+                verify(a.right <= b.left + 0.5, first + " beside " + second + ": " + a.right + " / " + b.left)
+            } else {
+                verify(b.top > a.top, second + " below " + first)
+                verify(Math.abs(a.left - b.left) < Look.unit(16), first + " and " + second + " in one column")
+            }
+        }
+        compare(overflowing(page, data.width), [])
+
+        // Both columns together: at most 880 on a tablet, in the middle.
+        if (data.two) {
+            const a = box(data.pairs[0][0]), b = box(data.pairs[0][1])
+            verify(b.right - a.left <= Look.unit(880) + 0.5, "the page's width: " + (b.right - a.left))
+            verify(Math.abs(a.left - (data.width - b.right)) < Look.unit(24), "in the middle: " + a.left + " / " + b.right)
+        }
+        if (data.width === 1280) {
+            shot("8q-" + data.name)
+        }
+    }
+
+    // The on-screen keyboard is a lower window (not a device's here): while a field of the page is
+    // typed in, and until the page is high again, the live page keeps its columns, both ways.
+    function test_8r_typing_holds_columns_data() {
+        const place = page => findChild(findChild(page, "grades_daitoryu"), "gradePlace")
+        const days = page => allChildren(findChild(page, "intervalDays")).find(c => c.cursorPosition !== undefined)
+        return [ { tag: "grades sideways", name: "GradesPage", field: place, width: 1280, high: 800, low: 450, wide: true },
+                 { tag: "grades upright", name: "GradesPage", field: place, width: 800, high: 1280, low: 780, wide: false },
+                 { tag: "today sideways", name: "TodayPage", field: days, width: 1280, high: 800, low: 450, wide: true },
+                 { tag: "today upright", name: "TodayPage", field: days, width: 800, high: 1280, low: 780, wide: false } ]
+    }
+    function test_8r_typing_holds_columns(data) {
+        window.width = data.width
+        window.height = data.high
+        wait(100)
+        const page = push(data.name)
+        tryVerify(() => Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1, 3000)
+        wait(200)
+        compare(page.wide, data.wide)
+        const flick = page.flickable
+        flick.contentY = flick.contentHeight - flick.height
+        wait(100)
+
+        const field = data.field(page)
+        field.forceActiveFocus()
+        tryVerify(() => field.activeFocus)
+        const fieldY = () => field.mapToItem(flick.contentItem, 0, 0).y
+        const before = fieldY()
+        window.height = data.low
+        tryVerify(() => Math.abs(page.height - (data.low - (window.height - page.height))) < 1)
+        wait(200)
+        compare(page.wide, data.wide, "the keyboard leaves the columns alone")
+        compare(fieldY(), before, "the field stays where it was")
+        verify(field.activeFocus)
+
+        // A tap takes the focus while the keyboard is still open: still held.
+        window.contentItem.forceActiveFocus()
+        tryVerify(() => !field.activeFocus)
+        wait(100)
+        compare(page.wide, data.wide, "the keyboard is still open")
+
+        // The keyboard closes; afterwards the page follows its size again.
+        window.height = data.high
+        wait(200)
+        compare(page.wide, data.wide)
+        window.height = data.low
+        tryVerify(() => page.wide === !data.wide, 2000, "released: the low window counts")
+    }
+
+    // Turned while a field is typed in: the new shape counts, the hold starts anew.
+    function test_8r_turned_while_typing() {
+        window.width = 1280
+        window.height = 800
+        wait(100)
+        const page = push("GradesPage")
+        tryVerify(() => page.wide)
+        const field = findChild(page, "gradePlace")
+        field.forceActiveFocus()
+        tryVerify(() => field.activeFocus)
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.wide, 2000, "upright: one column")
+        window.height = 780
+        wait(200)
+        verify(!page.wide, "the keyboard, upright: still one column")
+    }
+
     function test_8o_nothing_past_the_edge_data() {
         // Twice the scale on a phone (206 px) is not there yet: ROADMAP, QA round of 5 Nov 2026.
         return [{ tag: "360", width: 360, height: 800 }]
