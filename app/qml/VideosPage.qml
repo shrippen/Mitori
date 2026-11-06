@@ -10,7 +10,7 @@ import Mitori
 // onto the device; each bundle loads, updates and goes on its own. A removed bundle keeps its
 // code. Downloads wait for Wi-Fi unless the user says otherwise.
 //
-//   CODE OF THE DVD   [7KQ2M-X9HDV-3TAPR-WE6YC] [Unlock]
+//   CODE OF THE DVD   [7KQ2M-X9HDV-3TAPR-WE6YT] [Unlock] [Scan code]
 //   Aikido · all Kyu   5 videos · 600 MB · version 2       loaded       [Remove]
 //   Daitoryu · all Kyu 5 videos · 330 MB                   not unlocked
 Kirigami.ScrollablePage {
@@ -58,6 +58,29 @@ Kirigami.ScrollablePage {
         }
     }
 
+    // A scan does what typing does: the code goes into the field, Unlock runs.
+    Connections {
+        target: CodeScanner
+
+        function onReady() {
+            // A second answer to one wish finds the scan page already on top.
+            if (!page.isCurrentPage) {
+                return
+            }
+            page.Kirigami.PageStack.push(Qt.resolvedUrl("ScanPage.qml"), { done: code => page.redeem(code) })
+        }
+        function onRefused(reason) {
+            page.codeOk = false
+            page.codeMessage = reason === CodeScanner.Refusal.NoCamera ? qsTr("This device has no camera. Type the code instead.")
+                             : qsTr("Mitori may not use the camera. Type the code instead, or allow it in the system settings.")
+        }
+    }
+    function redeem(code) {
+        page.codeMessage = ""
+        codeField.text = code
+        unlockButton.clicked()
+    }
+
     // The rows' model: a change of the list (progress, state) changes a row in place, so a press
     // on its button meets the same button when it is let go.
     KeyedListModel {
@@ -92,14 +115,21 @@ Kirigami.ScrollablePage {
             rule: true
             text: qsTr("Code of the DVD")
         }
-        RowLayout {
+        // In one row where the code fits beside the buttons; on a phone they go below it.
+        GridLayout {
+            id: codeRow
+
+            readonly property bool narrow: page.width < Kirigami.Units.gridUnit * 26
+
             Layout.fillWidth: true
+            columns: narrow ? 2 : 3
 
             LookTextField {
                 id: codeField
 
                 objectName: "codeField"
                 Layout.fillWidth: true
+                Layout.columnSpan: codeRow.narrow ? 2 : 1
                 placeholderText: "XXXXX-XXXXX-…"
                 font: Look.monoFont(Look.defaultFont.pointSize)
                 inputMethodHints: Qt.ImhUppercaseOnly | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
@@ -111,10 +141,20 @@ Kirigami.ScrollablePage {
                 id: unlockButton
 
                 objectName: "unlockButton"
+                Layout.fillWidth: codeRow.narrow
                 role: LookButton.Role.Primary
                 enabled: codeField.text.trim() !== "" && !Bundles.unlocking
                 text: Bundles.unlocking ? qsTr("Checking …") : qsTr("Unlock")
                 onClicked: Bundles.unlock(codeField.text)
+            }
+            LookButton {
+                objectName: "scanButton"
+                Layout.fillWidth: codeRow.narrow
+                enabled: !Bundles.unlocking
+                icon.name: "view-barcode-qr"
+                text: qsTr("Scan code")
+                Accessible.name: qsTr("Scan the code of the DVD")
+                onClicked: CodeScanner.open()
             }
         }
         LookLabel {

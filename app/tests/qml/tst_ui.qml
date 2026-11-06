@@ -137,7 +137,7 @@ TestCase {
         compare(findChildren(page, "languageTile").length, 3)
         compare(findChildren(page, "languageTile").find(t => t.checked).text, "System")
         verify(findChild(page, "aboutText").text.indexOf(Appearance.version) >= 0)
-        verify(findChild(page, "keychainLicence").text.indexOf("Frank Osterfeld") >= 0)
+        verify(findChild(page, "licences").text.indexOf("Frank Osterfeld") >= 0)
         verify(Appearance.version !== "")
         verify(/^\D*\d{4}\.\d{1,2}\.\d+$/.test(findChild(page, "dataVersion").text))
         shot("0b-appearance")
@@ -2198,6 +2198,141 @@ TestCase {
         tryVerify(() => Bundles.bundles[0].state === Bundles.State.Unlocked)
         verify(!Videos.available("test/v"))
         compare(Bundles.bundles[0].code, "7KQ2M-X9HDV-3TAPR-WE6YT", "the code stays")
+        window.pageStack.pop()
+    }
+
+    // Scanning (fake frames, no camera): refused without a camera or permission, typing stays;
+    // Cancel changes nothing; a QR code without a code gets a sentence and the page stays; a
+    // code goes the way of a typed one: its errors, its unlocking.
+    function test_9n_videos_scan() {
+        failOnWarning(/ReferenceError|TypeError|Binding loop/)
+        const page = push("VideosPage")
+        tryCompare(Bundles, "manifestState", Bundles.ManifestState.Ready, 5000)
+        wait(800)       // Kirigami slides the page in (disabled meanwhile)
+        const field = findChild(page, "codeField")
+        const message = findChild(page, "codeMessage")
+        const scan = findChild(page, "scanButton")
+        const scanPage = () => window.pageStack.currentItem
+        const onScanPage = () => scanPage().title === qsTr("Scan code")
+        const openScan = () => {
+            mouseClick(scan)
+            tryVerify(onScanPage)
+            wait(800)
+            return scanPage()
+        }
+        // A camera at work: the same picture until something happens.
+        const showUntil = (text, happened) => {
+            const sink = findChild(scanPage(), "scanOutput").videoSink
+            tryVerify(() => {
+                if (happened()) {
+                    return true
+                }
+                uiCatalog.showFrame(sink, text)
+                return false
+            }, 5000)
+        }
+
+        uiCatalog.setCamera("none")
+        mouseClick(scan)
+        compare(message.text, qsTr("This device has no camera. Type the code instead."))
+        verify(window.pageStack.currentItem === page)
+        uiCatalog.setCamera("denied")
+        mouseClick(scan)
+        compare(message.text, qsTr("Mitori may not use the camera. Type the code instead, or allow it in the system settings."))
+        verify(window.pageStack.currentItem === page)
+        verify(findChild(page, "codeField").enabled, "typing still works")
+        uiCatalog.setCamera("frames")
+
+        // Cancel means cancel: a code still in the picture while the page slides out redeems
+        // nothing and takes no second page off the stack. The same for the way back.
+        const depth = window.pageStack.depth
+        const leaveThenShowCode = leave => {
+            const leaving = openScan()
+            const sink = findChild(leaving, "scanOutput").videoSink
+            leave(leaving)
+            for (let i = 0; i < 12 && leaving.title; ++i) {      // until the page is gone with its sink
+                uiCatalog.showFrame(sink, "7KQ2M-X9HDV-3TAPR-WE6YT")
+                wait(60)
+            }
+            tryVerify(() => window.pageStack.currentItem === page)
+            wait(600)
+            compare(field.text, "", "nothing redeemed")
+            compare(message.text, "")
+            verify(!Bundles.unlocking)
+            compare(window.pageStack.currentItem, page, "the videos page stays")
+            compare(window.pageStack.depth, depth)
+        }
+        page.codeMessage = ""
+        leaveThenShowCode(leaving => mouseClick(findChild(leaving, "scanCancel")))
+        leaveThenShowCode(() => window.pageStack.pop())
+        leaveThenShowCode(leaving => {
+            const cancel = findChild(leaving, "scanCancel")
+            mouseClick(cancel)
+            mouseClick(cancel)
+        })
+
+        // Two answers to one wish (a double tap, the permission dialog): one page.
+        CodeScanner.open()
+        CodeScanner.open()
+        tryVerify(onScanPage)
+        compare(window.pageStack.depth, depth + 1)
+        wait(800)
+        mouseClick(findChild(scanPage(), "scanCancel"))
+        tryVerify(() => window.pageStack.currentItem === page)
+        wait(800)
+
+        let scanning
+
+        // An empty picture says nothing; a foreign QR code a sentence, the camera reads on.
+        scanning = openScan()
+        const hint = findChild(scanning, "scanHint")
+        const asked = hint.text
+        uiCatalog.showFrame(findChild(scanning, "scanOutput").videoSink, "")
+        wait(300)
+        compare(hint.text, asked)
+        showUntil("https://example.org/keine-dvd", () => hint.text !== asked)
+        compare(hint.text, qsTr("This QR code holds no DVD code. Use the one on the insert of the DVD."))
+        verify(onScanPage())
+        shot("15c-videos-scan")
+
+        // A camera that fails: a sentence of ours beside the foreign one, the way out stays.
+        const failed = findChild(scanning, "scanError")
+        verify(!failed.visible)
+        scanning.cameraFailed = true
+        tryVerify(() => failed.visible)
+        compare(failed.text, qsTr("The camera does not work; another program may be using it. Cancel and type the code instead."))
+        verify(hint.visible && hint.text === qsTr("This QR code holds no DVD code. Use the one on the insert of the DVD."))
+        scanning.cameraFailed = false
+
+        // A well-formed code nobody knows: back, the same answer as to a typed one, in the field.
+        const prefix = "0000000000000000000"
+        const unknown = Array.from("0123456789ABCDEFGHJKMNPQRSTVWXYZ").map(c => prefix + c).find(c => Bundles.codeValid(c))
+        showUntil(unknown, () => !onScanPage())
+        tryVerify(() => window.pageStack.currentItem === page)
+        tryCompare(message, "text", qsTr("This code is not known (or no longer valid)."))
+        compare(field.text, Bundles.grouped(unknown))
+        verify(!page.codeOk)
+        wait(800)
+
+        // The code: unlocked and loaded as if typed.
+        scanning = openScan()
+        showUntil("7KQ2M-X9HDV-3TAPR-WE6YT", () => !onScanPage())
+        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Installed, 10000)
+        verify(message.text.indexOf("Test") > 0, message.text)
+        compare(field.text, "")
+        verify(Bundles.remove("test-bundle"))
+        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Unlocked)
+        window.pageStack.pop()
+    }
+
+    // The licences of what ships with the app (Apache-2.0 and the BSD ones ask for it).
+    function test_9n_videos_licences() {
+        const page = push("AppearancePage")
+        const text = findChild(page, "licences").text
+        for (const needed of ["ZXing-C++", "Apache License", "Axel Waggershauser", "libzueci", "Copyright (C) 2022 gitlost",
+                              "Redistribution and use in source and binary forms", "Bjoern Hoehrmann", "Monocypher", "Loup Vaillant", "Frank Osterfeld"]) {
+            verify(text.indexOf(needed) >= 0, needed)
+        }
         window.pageStack.pop()
     }
 
@@ -4757,7 +4892,7 @@ TestCase {
         const round = Exam.draw("aikido", "k5", 3, 0)
         for (const [file, props] of [["ProgrammePage", {}], ["TodayPage", {}], ["StatsPage", {}], ["YearsPage", {}], ["AllNotesPage", {}],
                                      ["TechniqueMapPage", {}], ["SearchPage", {}], ["CoursesPage", {}], ["NotebooksPage", {}], ["GradesPage", {}],
-                                     ["SettingsPage", {}], ["VideosPage", {}], ["AppearancePage", {}], ["ExamPage", {}],
+                                     ["SettingsPage", {}], ["VideosPage", {}], ["ScanPage", {}], ["AppearancePage", {}], ["ExamPage", {}],
                                      ["ExamRoundPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["ExamEndPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["TrainingEndPage", { count: 12 }],

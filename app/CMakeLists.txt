@@ -101,6 +101,7 @@ qt_add_qml_module(mitori_app
         qml/MediaVoice.qml
         qml/MediaCompose.qml
         qml/CameraPage.qml
+        qml/ScanPage.qml
         qml/ConflictsPage.qml
         qml/YearsPage.qml
         qml/StyleChoice.qml
@@ -210,6 +211,10 @@ qt_add_qml_module(mitori_app
         store/bundleshelf.cpp
         services/bundles.h
         services/bundles.cpp
+        platform/qrreader.h
+        platform/qrreader.cpp
+        services/codescanner.h
+        services/codescanner.cpp
         services/keyedlistmodel.h
         services/keyedlistmodel.cpp
         services/allnotes.h
@@ -321,22 +326,25 @@ if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
     target_compile_definitions(mitori_app PRIVATE MITORI_SHINKI_FILES)
 endif()
 
-# QtKeychain's licence asks that binaries carry it: it is shown in "About Mitori".
-qt_add_resources(mitori_app "licences"
-    PREFIX "/licences"
-    BASE third_party/qtkeychain
-    FILES third_party/qtkeychain/COPYING
-)
-
 # Monocypher (app/third_party, BSD-2-Clause / CC0): Argon2id, BLAKE2b and XChaCha20-Poly1305 for the
 # video bundles (store/bundlecrypto).
 add_library(monocypher STATIC third_party/monocypher/monocypher.c third_party/monocypher/monocypher.h)
 target_include_directories(monocypher PUBLIC third_party/monocypher)
 set_target_properties(monocypher PROPERTIES POSITION_INDEPENDENT_CODE ON)
+# ZXing-C++ (app/third_party, Apache-2.0): the DVD's QR code (platform/qrreader).
+add_subdirectory(third_party/zxing-cpp)
+# The licences of what is linked ask that binaries carry them: shown in "About Mitori"
+# (services/appearance).
+qt_add_resources(mitori_app "licences"
+    PREFIX "/licences"
+    BASE third_party
+    FILES third_party/zxing-cpp/ATTRIBUTION.txt third_party/zxing-cpp/LICENSE third_party/qtkeychain/COPYING
+        third_party/monocypher/LICENCE.md
+)
 
 # The generated type registration includes the headers by name.
 target_include_directories(mitori_app PUBLIC catalog services store player platform)
-target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql Qt6::Network Qt6::Concurrent KF6::Kirigami monocypher)
+target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql Qt6::Network Qt6::Concurrent KF6::Kirigami monocypher ZXing)
 target_link_libraries(mitori_app PRIVATE Qt6Keychain::Qt6Keychain)
 if(NOT ANDROID)
     target_link_libraries(mitori_app PUBLIC Qt6::DBus)
@@ -396,6 +404,8 @@ endif()
 
 if(MITORI_BUILD_TESTS AND NOT ANDROID)
     enable_testing()
+    # The fake camera (services/codescanner): in test builds only.
+    target_compile_definitions(mitori_app PRIVATE MITORI_TEST_CAMERA)
     find_package(Qt6 REQUIRED COMPONENTS Test)
     qt_add_executable(tst_catalog tests/tst_catalog.cpp catalog/catalog.cpp catalog/catalog.h)
     target_include_directories(tst_catalog PRIVATE catalog)
@@ -566,6 +576,15 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     set_target_properties(tst_bundles PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME bundles COMMAND tst_bundles)
 
+    qt_add_executable(tst_codescanner tests/tst_codescanner.cpp services/codescanner.cpp services/codescanner.h
+        platform/qrreader.cpp platform/qrreader.h store/bundlecrypto.cpp store/bundlecrypto.h)
+    target_include_directories(tst_codescanner PRIVATE services platform store)
+    target_compile_definitions(tst_codescanner PRIVATE MITORI_TEST_CAMERA)
+    target_link_libraries(tst_codescanner PRIVATE Qt6::Core Qt6::Gui Qt6::Multimedia Qt6::Qml Qt6::Concurrent Qt6::Test monocypher ZXing)
+    set_target_properties(tst_codescanner PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+    add_test(NAME codescanner COMMAND tst_codescanner)
+    set_tests_properties(codescanner PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
     qt_add_executable(tst_levels tests/tst_levels.cpp services/levels.cpp services/levels.h
         platform/devicelevels.cpp platform/devicelevels.h)
     target_include_directories(tst_levels PRIVATE services platform)
@@ -587,7 +606,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     # only with MITORI_VIDEOS (the videos are not in the repository).
     find_package(Qt6 REQUIRED COMPONENTS QuickTest)
     qt_add_executable(tst_ui tests/tst_ui.cpp)
-    target_link_libraries(tst_ui PRIVATE mitori_app mitori_appplugin Qt6::QuickTest)
+    target_link_libraries(tst_ui PRIVATE mitori_app mitori_appplugin Qt6::QuickTest ZXing)
     target_compile_definitions(tst_ui PRIVATE QUICK_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/qml"
         UI_SHOTS_DIR="${CMAKE_BINARY_DIR}/ui-shots" UI_DATA_DIR="${CMAKE_BINARY_DIR}/ui-data"
         TEST_BUNDLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/bundle"

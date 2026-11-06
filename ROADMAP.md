@@ -111,7 +111,12 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   einmal ohne), einzeln entfernen (Code bleibt), neue Version als Update mit Hinweis im Startmenü. Videos aus einem
   Bundle sind schon beschnitten. Werkzeug `tools/bundle.py` (build, codes, sperren, pruefen, hochladen), Bundles in
   `tools/bundles.yaml`, Geheimes in `../bundle-geheim`. Offen: Bundles bauen und hochladen (Owner: Zustimmung des
-  Verbands), QR-Code scannen, Freischalten auf dem Telefon prüfen (Argon2id mit 64 MiB).
+  Verbands), Freischalten und QR-Scan auf dem Telefon prüfen (Argon2id mit 64 MiB).
+- QR-Code der DVD (`platform/qrreader` mit ZXing-C++, `services/codescanner`, `ScanPage`), neben dem Tippen, das der
+  Hauptweg bleibt. **Inhalt des QR-Codes: genau der Code in der gruppierten Form, wie ihn `tools/bundle.py codes` in
+  die CSV schreibt (erste Spalte), z. B. `7KQ2M-X9HDV-3TAPR-WE6YT`, der Code der Testdaten, kein echter** (23 Zeichen, ASCII, sonst nichts: keine URL, kein
+  Präfix). Beim Druck der Einleger genau diesen Text codieren. Ein Scan läuft wie getippt; ein QR-Code ohne gültigen
+  Code (Länge, Zeichen, Prüfzeichen) bekommt einen Satz, die Kamera läuft weiter. Der Code wird nie geloggt.
 
 ## Offene Punkte (Stand 03.11.2026)
 
@@ -208,7 +213,7 @@ Sicherung ohne Endung, konto.ini 600, Alle Notizen und Alle Jahre schneller.
 Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
 - Telefon bei doppelter Anzeigegröße (206 px): Test `test_8o` auf diese Breite ausweiten; Segmente, lange Knöpfe,
   Bewertung und Steuerzeilen des Players brauchen eine schmale Form.
-- QR-Code, Tablet nach Vorlage (Blatt
+- Tablet nach Vorlage (Blatt
   rechts, zwei Spalten, Lehrgänge und Einstellungen als Liste und Seite).
 - Programmdaten auf Englisch.
 - Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).

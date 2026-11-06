@@ -62,13 +62,6 @@ Kirigami.ScrollablePage {
             color: Look.mutedTextColor
             text: qsTr("Programme data %1").arg(Programme.dataVersion)
         }
-        LookLabel {
-            objectName: "keychainLicence"
-            Layout.fillWidth: true
-            wrapMode: Text.Wrap
-            color: Look.mutedTextColor
-            text: Appearance.keychainLicence
-        }
         Repeater {
             model: Programme.disciplines
 
@@ -87,6 +80,14 @@ Kirigami.ScrollablePage {
             wrapMode: Text.Wrap
             color: Look.mutedTextColor
             text: qsTr("Sources: the exam regulations and lists of the dojo, the comments of shinkiryu.de and the Aiki-Budo lexicon.")
+        }
+        LookLabel {
+            objectName: "licences"
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+            textFormat: Text.PlainText
+            color: Look.mutedTextColor
+            text: Appearance.licences
         }
     }
 }

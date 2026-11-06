@@ -10,6 +10,8 @@
 #include <QLibraryInfo>
 #include <QJsonObject>
 #include <QUrl>
+#include <QVideoFrame>
+#include <QVideoSink>
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QSettings>
@@ -25,6 +27,7 @@
 #include "catalog.h"
 #include "mediastore.h"
 #include "practice.h"
+#include "qrimage.h"
 
 Q_IMPORT_QML_PLUGIN(MitoriPlugin)
 
@@ -41,6 +44,19 @@ public:
             (void)m_german.load(QStringLiteral(":/i18n/mitori_de"));
         }
         return m_german.translate(context.toUtf8().constData(), source.toUtf8().constData());
+    }
+
+    // The fake camera (services/codescanner): what stands in for the device, and a QR code or an
+    // empty picture ("") as a frame of the page's sink.
+    Q_INVOKABLE void setCamera(const QString &stand) { qputenv("MITORI_CAMERA", stand.toUtf8()); }
+    Q_INVOKABLE void showFrame(QVideoSink *sink, const QString &text)
+    {
+        if (!sink) {
+            return;     // the page is gone
+        }
+        QImage image(360, 360, QImage::Format_Grayscale8);
+        image.fill(128);
+        sink->setVideoFrame(QVideoFrame(text.isEmpty() ? image : qrImage(text)));
     }
 
     // Qt's own German catalog is installed (not everywhere: tst_look only checks it then).
@@ -113,6 +129,8 @@ public slots:
         }
         // Brightness and volume in memory: no test dims the screen (platform/devicelevels).
         qputenv("MITORI_DEVICE_LEVELS", "memory");
+        // No test turns a camera on; frames come from showFrame.
+        qputenv("MITORI_CAMERA", "frames");
         qputenv("MITORI_COURSES_CALENDAR", QUrl::fromLocalFile(calendar.fileName()).toString().toUtf8());
         // Video bundles from the test data (tools/bundle.py), as a local package folder: never the network.
         QDir(BundleShelf::defaultRoot()).removeRecursively();
