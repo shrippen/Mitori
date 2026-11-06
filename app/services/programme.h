@@ -36,6 +36,10 @@ public:
 
     // Grades of a discipline that have their own material: {id, name, jp, count}.
     Q_INVOKABLE QVariantList grades(const QString &discipline) const;
+    // The programme page's chips, in catalog order: grades(), and with count 0 a grade without
+    // entries that has an `inhalt` (Shinki Toho Hon-Menkyo; Hôshu has none). Chosen only on that
+    // page, never with setGrade: nothing else can use such a grade.
+    Q_INVOKABLE QVariantList gradeChips(const QString &discipline) const;
     // Rows of a grade in programme order. Each row has `kind`:
     //   "group"     title, jp            a heading (Kata, Tachi-waza · Mae-seme, Kamae, Ô-dachi …)
     //   "attack"    title, extra, jp     the attack the techniques below answer
@@ -74,6 +78,7 @@ signals:
 private:
     // The rows of a grade without the grade's name (entries() adds it).
     QVariantList gradeRows(const QString &disciplineId, const QString &grade) const;
+    int entryCount(const QString &disciplineId, const QString &grade) const;
     QVariantMap findDiscipline(const QString &id) const;
     QVariantList shinkiTohoEntries(const QVariantMap &discipline, const QString &grade) const;
     QVariantList formMap(const QString &grade) const;
