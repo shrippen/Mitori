@@ -3109,7 +3109,9 @@ TestCase {
                 tryVerify(() => sheet.opened)
                 look("sheet", sheet.contentItem)
                 // The head has the style's colours, as the content (it lies beside it).
-                compare(String(sheet.header.Kirigami.Theme.textColor), String(sheet.contentItem.Kirigami.Theme.textColor))
+                verify(Qt.colorEqual(sheet.header.Kirigami.Theme.textColor, sheet.contentItem.Kirigami.Theme.textColor))
+                const sheetClose = findChild(sheet.header, "sheetClose")
+                verify(sheetClose && sheetClose.visible !== sheet.shinkiSheet)
                 sheet.close()
                 tryVerify(() => !sheet.visible)
             }

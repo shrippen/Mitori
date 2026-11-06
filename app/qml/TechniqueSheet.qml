@@ -82,6 +82,16 @@ Kirigami.Dialog {
         height: sheet.shinkiSheet ? 0 : implicitHeight
         contentItem: Kirigami.DialogHeaderTopContent {
             dialog: sheet
+            // Kirigami's ✕ keeps the platform's colour whatever the scope says: dark on Kante's dark.
+            showCloseButton: false
+
+            LookToolButton {
+                objectName: "sheetClose"
+                icon.name: "window-close-symbolic"
+                text: qsTr("Close")
+                display: QQC2.AbstractButton.IconOnly
+                onClicked: sheet.close()
+            }
         }
         Keys.onPressed: event => sheet.scrollKey(event)
     }

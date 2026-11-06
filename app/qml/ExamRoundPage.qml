@@ -71,7 +71,8 @@ Kirigami.Page {
 
         LookLabel {
             width: parent.width
-            // Closed it measures nothing: see the merge dialog in SettingsPage.
+            // Empty while closed: a turning window made the closed dialog wrap this text anew, a
+            // binding loop in its height (as the merge dialog in SettingsPage).
             text: !cancelDialog.visible ? "" : qsTr("You are at point %1 of %2. Nothing has been rated yet, the round is simply dropped.").arg(page.index + 1).arg(page.points.length)
             wrapMode: Text.Wrap
         }
