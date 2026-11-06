@@ -418,6 +418,31 @@ private slots:
         QVERIFY(synced(phone));
         QCOMPARE(texts(a.practice), (QStringList{u"Stand"_s, u"beim Tablet"_s}));
         QCOMPARE(ratings(), 1);
+
+        // Not only rows come: the tablet deletes the note, the phone restores it by replacing, and
+        // the sync, on again, deletes it once more. The newer deletion wins, without a conflict.
+        QVERIFY(synced(tablet));
+        {
+            PracticeLog log;
+            QVERIFY(log.open(b.practice));
+            bool found = false;
+            for (const PracticeLog::Note &n : log.allNotes()) {
+                if (n.text == u"Stand"_s) {
+                    found = log.deleteNote(n.uid, now());
+                }
+            }
+            QVERIFY(found);
+        }
+        QVERIFY(synced(tablet));
+        QVERIFY(synced(phone));
+        QCOMPARE(texts(a.practice), QStringList{u"beim Tablet"_s});
+        goBack();
+        phone.dataReplaced();
+        QCOMPARE(texts(a.practice), QStringList{u"Stand"_s});
+        phone.setEnabled(true);
+        QVERIFY(synced(phone));
+        QVERIFY(phone.conflicts().isEmpty());
+        QCOMPARE(texts(a.practice), QStringList{u"beim Tablet"_s});
     }
 
     // A sync waiting for the key store when the data is replaced: it does not follow, and no error

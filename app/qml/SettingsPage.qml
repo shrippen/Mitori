@@ -128,7 +128,7 @@ Kirigami.ScrollablePage {
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             visible: Sync.afterReplace
             wrapMode: Text.Wrap
-            text: qsTr("This device's data was replaced by a backup. If you turn sync on, what your other devices hold comes back here.")
+            text: qsTr("This device's data was replaced by a backup. If you turn sync on, what your other devices hold comes here, their changes and deletions too: what you restored from the backup can go again.")
         }
         LookFormRow {
             label: qsTr("Folder on the server")
@@ -300,9 +300,7 @@ Kirigami.ScrollablePage {
         defaultSuffix: "zip"
         nameFilters: [qsTr("ZIP archives (*.zip)")]
         currentFolder: StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]
-        onAccepted: page.done = Backup.save(selectedFile)
-                                ? (Backup.savedTo() !== "" ? qsTr("Backup saved: %1").arg(Backup.savedTo()) : qsTr("Backup saved."))
-                                : ""
+        onAccepted: page.saveBackup(selectedFile)
     }
 
     FileDialog {
@@ -313,6 +311,13 @@ Kirigami.ScrollablePage {
         nameFilters: [qsTr("ZIP archives (*.zip)")]
         currentFolder: StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]
         onAccepted: page.inspect(selectedFile)
+    }
+
+    function saveBackup(url) {
+        page.refused = ""
+        const ok = Backup.save(url)
+        page.done = !ok ? "" : Backup.savedTo() !== "" ? qsTr("Backup saved: %1").arg(Backup.savedTo()) : qsTr("Backup saved.")
+        return ok
     }
 
     function inspect(url) {
@@ -410,9 +415,9 @@ Kirigami.ScrollablePage {
     // What a replace means for the sync; "" without an account.
     function syncNote() {
         if (Sync.enabled) {
-            return qsTr("Sync is turned off on this device: your other devices keep their data and would bring it back here. If you turn sync on again, what they hold comes back.")
+            return qsTr("Sync is turned off on this device: your other devices keep their data and would bring it here. If you turn sync on again, what they hold comes here, their changes and deletions too: what you restored from the backup can go again.")
         }
-        return Sync.server !== "" ? qsTr("If you turn sync on again, what your other devices hold comes back here.") : ""
+        return Sync.server !== "" ? qsTr("If you turn sync on again, what your other devices hold comes here, their changes and deletions too: what you restored from the backup can go again.") : ""
     }
 
     LookDialog {

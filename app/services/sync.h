@@ -84,8 +84,9 @@ public:
     Q_INVOKABLE void touched();
     Q_INVOKABLE bool resolve(int index, Choice choice);
     // The device's data was replaced by a backup (not during a sync, see `busy`): sync off, else
-    // the next run merges back what the other devices' archives hold (a merge only adds; ratings
-    // and exam rounds have no deletion marks). Open conflicts go: they name rows that are gone.
+    // the next run merges what the other devices' archives hold: rows the backup lacks come back
+    // (ratings and exam rounds have no deletion marks), and a newer change or deletion there takes
+    // what the backup restored. Open conflicts go: they name rows that are gone.
     Q_INVOKABLE void dataReplaced();
 
     // Waits for a running sync (tests).

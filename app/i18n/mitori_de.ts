@@ -1996,6 +1996,11 @@
         <translation>Abgleichen</translation>
     </message>
     <message>
+        <location filename="../qml/SettingsPage.qml" line="131"/>
+        <source>This device&apos;s data was replaced by a backup. If you turn sync on, what your other devices hold comes here, their changes and deletions too: what you restored from the backup can go again.</source>
+        <translation>Die Daten auf diesem Gerät wurden durch eine Sicherung ersetzt. Schaltest du den Abgleich ein, kommt, was deine anderen Geräte haben, auch ihre Änderungen und Löschungen: Was du aus der Sicherung zurückgeholt hast, kann wieder gehen.</translation>
+    </message>
+    <message>
         <location filename="../qml/SettingsPage.qml" line="134"/>
         <source>Folder on the server</source>
         <translation>Ordner auf dem Server</translation>
@@ -2035,11 +2040,6 @@
         <location filename="../qml/SettingsPage.qml" line="90"/>
         <source>One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back asks: merge it (the newer state wins, also a newer deletion) or replace this device&apos;s data with it. DVD codes are not in it.</source>
         <translation>Eine Datei mit deinen Einschätzungen, Notizen, Prüfungsrunden, Notizbüchern, Graden, Fotos und Sprachnotizen. Beim Einlesen fragt Mitori: vereinen (der neuere Stand gewinnt, auch eine neuere Löschung) oder die Daten auf diesem Gerät dadurch ersetzen. DVD-Codes sind nicht enthalten.</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsPage.qml" line="131"/>
-        <source>This device&apos;s data was replaced by a backup. If you turn sync on, what your other devices hold comes back here.</source>
-        <translation>Die Daten auf diesem Gerät wurden durch eine Sicherung ersetzt. Schaltest du den Abgleich ein, kommt zurück, was deine anderen Geräte haben.</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="185"/>
@@ -2161,70 +2161,70 @@
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="301"/>
-        <location filename="../qml/SettingsPage.qml" line="313"/>
+        <location filename="../qml/SettingsPage.qml" line="311"/>
         <source>ZIP archives (*.zip)</source>
         <translation>ZIP-Archive (*.zip)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="304"/>
+        <location filename="../qml/SettingsPage.qml" line="319"/>
         <source>Backup saved.</source>
         <translation>Sicherung gespeichert.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="304"/>
+        <location filename="../qml/SettingsPage.qml" line="319"/>
         <source>Backup saved: %1</source>
         <translation>Sicherung gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="311"/>
-        <location filename="../qml/SettingsPage.qml" line="430"/>
+        <location filename="../qml/SettingsPage.qml" line="309"/>
+        <location filename="../qml/SettingsPage.qml" line="435"/>
         <source>Read backup</source>
         <translation>Sicherung einlesen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="359"/>
-        <location filename="../qml/SettingsPage.qml" line="391"/>
+        <location filename="../qml/SettingsPage.qml" line="364"/>
+        <location filename="../qml/SettingsPage.qml" line="396"/>
         <source>Ratings</source>
         <translation>Einschätzungen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="359"/>
-        <location filename="../qml/SettingsPage.qml" line="391"/>
+        <location filename="../qml/SettingsPage.qml" line="364"/>
+        <location filename="../qml/SettingsPage.qml" line="396"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="359"/>
-        <location filename="../qml/SettingsPage.qml" line="391"/>
+        <location filename="../qml/SettingsPage.qml" line="364"/>
+        <location filename="../qml/SettingsPage.qml" line="396"/>
         <source>Exam rounds</source>
         <translation>Prüfungsrunden</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="360"/>
-        <location filename="../qml/SettingsPage.qml" line="392"/>
+        <location filename="../qml/SettingsPage.qml" line="365"/>
+        <location filename="../qml/SettingsPage.qml" line="397"/>
         <source>Notebooks</source>
         <translation>Notizbücher</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="360"/>
-        <location filename="../qml/SettingsPage.qml" line="392"/>
+        <location filename="../qml/SettingsPage.qml" line="365"/>
+        <location filename="../qml/SettingsPage.qml" line="397"/>
         <source>Notebook entries</source>
         <translation>Einträge in Notizbüchern</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="360"/>
-        <location filename="../qml/SettingsPage.qml" line="392"/>
+        <location filename="../qml/SettingsPage.qml" line="365"/>
+        <location filename="../qml/SettingsPage.qml" line="397"/>
         <source>Grades</source>
         <translation>Grade</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="361"/>
-        <location filename="../qml/SettingsPage.qml" line="393"/>
+        <location filename="../qml/SettingsPage.qml" line="366"/>
+        <location filename="../qml/SettingsPage.qml" line="398"/>
         <source>Start of training</source>
         <translation>Trainingsbeginn</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="367"/>
+        <location filename="../qml/SettingsPage.qml" line="372"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n neu</numerusform>
@@ -2232,7 +2232,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="370"/>
+        <location filename="../qml/SettingsPage.qml" line="375"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n geändert</numerusform>
@@ -2240,7 +2240,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="373"/>
+        <location filename="../qml/SettingsPage.qml" line="378"/>
         <source>%n deleted</source>
         <translation>
             <numerusform>%n gelöscht</numerusform>
@@ -2248,7 +2248,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="380"/>
+        <location filename="../qml/SettingsPage.qml" line="385"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Fotos und Sprachnotizen: %n neu</numerusform>
@@ -2256,7 +2256,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="383"/>
+        <location filename="../qml/SettingsPage.qml" line="388"/>
         <source>Photos and voice notes: %n deleted</source>
         <translation>
             <numerusform>Fotos und Sprachnotizen: %n gelöscht</numerusform>
@@ -2264,117 +2264,117 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="385"/>
+        <location filename="../qml/SettingsPage.qml" line="390"/>
         <source>On this device it changes:</source>
         <translation>Auf diesem Gerät ändert sich:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="386"/>
+        <location filename="../qml/SettingsPage.qml" line="391"/>
         <source>Nothing new: this device has everything in the backup.</source>
         <translation>Nichts Neues: dieses Gerät hat schon alles aus der Sicherung.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="402"/>
+        <location filename="../qml/SettingsPage.qml" line="407"/>
         <source>Photos and voice notes</source>
         <translation>Fotos und Sprachnotizen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="413"/>
-        <source>Sync is turned off on this device: your other devices keep their data and would bring it back here. If you turn sync on again, what they hold comes back.</source>
-        <translation>Der Abgleich wird auf diesem Gerät ausgeschaltet: Deine anderen Geräte behalten ihre Daten und würden sie hierher zurückbringen. Schaltest du den Abgleich wieder ein, kommt zurück, was sie haben.</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsPage.qml" line="415"/>
-        <source>If you turn sync on again, what your other devices hold comes back here.</source>
-        <translation>Schaltest du den Abgleich wieder ein, kommt zurück, was deine anderen Geräte haben.</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsPage.qml" line="473"/>
+        <location filename="../qml/SettingsPage.qml" line="478"/>
         <source>It holds: %1</source>
         <translation>Sie enthält: %1</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="473"/>
+        <location filename="../qml/SettingsPage.qml" line="478"/>
         <source>nothing</source>
         <translation>nichts</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="474"/>
+        <location filename="../qml/SettingsPage.qml" line="479"/>
         <source>Merging: ratings and exam rounds are only added. For everything else the newer state wins: a newer text replaces this device&apos;s, a newer deletion deletes here too, with the photo. What the backup lacks stays, except: an entry in a notebook the backup deleted later goes with it; two notebooks of one course become one, the entries move, the younger one&apos;s details go; of one grade entered twice the newer stays.</source>
         <translation>Vereinen: Einschätzungen und Prüfungsrunden kommen nur dazu. Bei allem anderen gewinnt der neuere Stand: Ein neuerer Text ersetzt den auf diesem Gerät, eine neuere Löschung löscht auch hier, samt Foto. Was der Sicherung fehlt, bleibt, außer: Ein Eintrag in einem Notizbuch, das dort später gelöscht wurde, geht mit; zwei Notizbücher eines Lehrgangs werden eins, die Einträge ziehen um, die Angaben des jüngeren gehen; von einem doppelt eingetragenen Grad bleibt der neuere.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="486"/>
+        <location filename="../qml/SettingsPage.qml" line="491"/>
         <source>Replace …</source>
         <translation>Ersetzen …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="508"/>
+        <location filename="../qml/SettingsPage.qml" line="513"/>
         <source>Replace this device&apos;s data?</source>
         <translation>Daten auf diesem Gerät ersetzen?</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="509"/>
+        <location filename="../qml/SettingsPage.qml" line="514"/>
         <source>Delete and replace</source>
         <translation>Ersetzen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="332"/>
+        <location filename="../qml/SettingsPage.qml" line="337"/>
         <source>Not replaced: a sync was running. Read the backup again when it has finished.</source>
         <translation>Nicht ersetzt: Ein Abgleich lief. Lies die Sicherung noch einmal ein, wenn er fertig ist.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="340"/>
+        <location filename="../qml/SettingsPage.qml" line="345"/>
         <source>This device&apos;s data was replaced by the backup. Sync is off now.</source>
         <translation>Die Daten auf diesem Gerät wurden durch die Sicherung ersetzt. Der Abgleich ist jetzt aus.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="341"/>
+        <location filename="../qml/SettingsPage.qml" line="346"/>
         <source>This device&apos;s data was replaced by the backup.</source>
         <translation>Die Daten auf diesem Gerät wurden durch die Sicherung ersetzt.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="534"/>
+        <location filename="../qml/SettingsPage.qml" line="418"/>
+        <source>Sync is turned off on this device: your other devices keep their data and would bring it here. If you turn sync on again, what they hold comes here, their changes and deletions too: what you restored from the backup can go again.</source>
+        <translation>Der Abgleich wird auf diesem Gerät ausgeschaltet: Deine anderen Geräte behalten ihre Daten und würden sie hierher bringen. Schaltest du ihn wieder ein, kommt, was sie haben, auch ihre Änderungen und Löschungen: Was du aus der Sicherung zurückgeholt hast, kann wieder gehen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="420"/>
+        <source>If you turn sync on again, what your other devices hold comes here, their changes and deletions too: what you restored from the backup can go again.</source>
+        <translation>Schaltest du den Abgleich wieder ein, kommt, was deine anderen Geräte haben, auch ihre Änderungen und Löschungen: Was du aus der Sicherung zurückgeholt hast, kann wieder gehen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="539"/>
         <source>This cannot be undone. The backup&apos;s state takes the place of this device&apos;s ratings, notes, exam rounds, notebooks, grades, start of training, photos and voice notes.</source>
         <translation>Das lässt sich nicht rückgängig machen. Der Stand der Sicherung tritt an die Stelle der Einschätzungen, Notizen, Prüfungsrunden, Notizbücher, Grade, des Trainingsbeginns, der Fotos und Sprachnotizen auf diesem Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="535"/>
+        <location filename="../qml/SettingsPage.qml" line="540"/>
         <source>Deleted, or set back to the backup&apos;s older state:</source>
         <translation>Gelöscht oder auf den älteren Stand der Sicherung zurückgesetzt:</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="536"/>
+        <location filename="../qml/SettingsPage.qml" line="541"/>
         <source>The backup has all of this device&apos;s data, none is lost.</source>
         <translation>Die Sicherung hat alle Daten dieses Geräts, nichts geht verloren.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="537"/>
+        <location filename="../qml/SettingsPage.qml" line="542"/>
         <source>Downloaded videos, DVD codes and settings stay.</source>
         <translation>Heruntergeladene Videos, DVD-Codes und Einstellungen bleiben.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="539"/>
+        <location filename="../qml/SettingsPage.qml" line="544"/>
         <source>A sync is running: replace when it has finished.</source>
         <translation>Ein Abgleich läuft: Ersetzen geht, wenn er fertig ist.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="431"/>
+        <location filename="../qml/SettingsPage.qml" line="436"/>
         <source>Merge</source>
         <translation>Vereinen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="433"/>
+        <location filename="../qml/SettingsPage.qml" line="438"/>
         <source>Backup merged.</source>
         <translation>Sicherung vereint.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="462"/>
+        <location filename="../qml/SettingsPage.qml" line="467"/>
         <source>Replacing deletes what is on this device and puts the backup&apos;s state in its place. It asks once more.</source>
         <translation>Ersetzen löscht, was auf diesem Gerät ist, und setzt den Stand der Sicherung an seine Stelle. Mitori fragt dann noch einmal.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="472"/>
+        <location filename="../qml/SettingsPage.qml" line="477"/>
         <source>Backup of %1.</source>
         <translation>Sicherung vom %1.</translation>
     </message>

@@ -758,6 +758,8 @@ TestCase {
         verify(warning.text.indexOf("cannot be undone") >= 0, warning.text)
         verify(warning.text.indexOf("Notes: 1") >= 0, warning.text)
         verify(warning.text.indexOf("Sync is turned off") >= 0, warning.text)
+        verify(warning.text.indexOf("changes and deletions") >= 0, warning.text)
+        verify(warning.text.indexOf("what you restored from the backup can go again") >= 0, warning.text)
 
         // A sync brings something while the dialog is open: the numbers follow.
         verify(Practice.addNote(entry, "kam mit dem Abgleich"))
@@ -791,6 +793,10 @@ TestCase {
         compare(findChild(page, "backupDone").visible, false)
         compare(Practice.notes(entry).length, notes + 2)
 
+        // Saving says how that went, not the refusal before it.
+        verify(page.saveBackup("file://" + uiShotsDir + "/sicherung-wahl-2.zip"))
+        verify(!refused.visible, refused.text)
+
         // Read again and accepted: as in the backup, Practice read anew, the sync off, and it says so.
         page.inspect(url)
         verify(!refused.visible)
@@ -809,6 +815,7 @@ TestCase {
         // Beside the switch until it is on again: what turning it on brings back.
         const note = findChild(page, "syncAfterReplace")
         verify(note.visible)
+        verify(note.text.indexOf("changes and deletions") >= 0, note.text)
         Sync.enabled = true
         verify(!note.visible)
         Sync.enabled = false
