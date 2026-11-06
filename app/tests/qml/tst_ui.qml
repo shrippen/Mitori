@@ -3566,6 +3566,34 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Linked techniques do not use up the suggestions: the list fills up, and "no other technique"
+    // is said only when none is left.
+    function test_8f_note_techniques_fill() {
+        const course = Courses.create("Zehn Namen", "2026-05-01", "", "", "")
+        verify(Courses.addEntry(course, "Ikkyo, Nikyo, Sankyo, Yonkyo, Gokyo, Shiho-nage, Irimi-nage, Kote-gaeshi, Kaiten-nage, Tenchi-nage"))
+        const entry = Courses.entries(course)[0]
+        const picker = push("TechniquePickerPage", { course: course, entryUid: entry.uid })
+        compare(picker.named.length, 8)
+        for (const t of picker.named) {
+            verify(Courses.linkTechnique(entry.uid, t.id))
+        }
+        tryCompare(picker.linked, "length", 8)
+        tryVerify(() => picker.named.length > 0, 2000, "more are named")
+        verify(!findChild(picker, "pickerNoneNamed").visible)
+        window.pageStack.pop()
+
+        // The technique's sheet counts the linked entries with its notes.
+        const component = Qt.createComponent("Mitori", "TechniqueSheet")
+        verify(component.status === Component.Ready, component.errorString())
+        const technique = Programme.entry(Courses.entries(course)[0].techniques[0])
+        const sheet = component.createObject(window.pageStack.currentItem, { entry: technique })
+        const before = Practice.notes(sheet.entry.id).length
+        compare(sheet.noteCount, before + 1)
+        verify(findChild(sheet.contentItem, "sheetNotesButton").text.indexOf("(" + (before + 1) + ")") > 0)
+        sheet.destroy()
+        verify(Courses.remove(course))
+    }
+
     // Found by the QA round of 5 Nov 2026 (qa/PERSONAS.md).
     // What the data knows and the screen left out: Zanshin, open questions, proposals, a grade's
     // meaning and waiting time, the Suburi texts (QA round P5; the booklet p. 44 f.).

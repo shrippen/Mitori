@@ -390,6 +390,61 @@ private slots:
         programme.setDiscipline(before);
     }
 
+    // The longest whole name wins: a part of it is no other technique named.
+    void suggestLongestName()
+    {
+        const auto titles = [&](const QString &text) {
+            QStringList list;
+            for (const QVariant &r : programme.suggest(text, 200)) {
+                list << r.toMap().value(QStringLiteral("title")).toString();
+            }
+            return list;
+        };
+        const QStringList uchi = titles(QStringLiteral("Uchi-kaiten-nage"));
+        QVERIFY(!uchi.isEmpty());
+        QCOMPARE(uchi.first(), QStringLiteral("Uchi-kaiten-nage"));
+        QVERIFY2(!uchi.contains(QStringLiteral("Kaiten-nage")), qPrintable(uchi.join(u',')));
+
+        const QStringList tenchi = titles(QStringLiteral("Tenchi-nage"));
+        QCOMPARE(tenchi.first(), QStringLiteral("Tenchi-nage"));
+        QVERIFY2(!tenchi.contains(QStringLiteral("Tenchi")), qPrintable(tenchi.join(u',')));
+
+        const QStringList both = titles(QStringLiteral("Ikkyo-shiho-nage"));
+        QCOMPARE(both.first(), QStringLiteral("Ikkyo-shiho-nage"));
+        QVERIFY2(!both.contains(QStringLiteral("Ikkyo")) && !both.contains(QStringLiteral("Shiho-nage")), qPrintable(both.join(u',')));
+
+        // Named apart, each counts.
+        const QStringList apart = titles(QStringLiteral("Kaiten-nage, dann Uchi-kaiten-nage"));
+        QVERIFY(apart.contains(QStringLiteral("Kaiten-nage")) && apart.contains(QStringLiteral("Uchi-kaiten-nage")));
+
+        // The attack named in full first, not the one its end spells.
+        QCOMPARE(programme.suggest(QStringLiteral("Shiho-nage aus Ryote-ryote-dori")).first().toMap().value(QStringLiteral("attack")).toString(),
+                 QStringLiteral("Ryote-ryote-dori"));
+    }
+
+    // Those left out make room: the next ones move up.
+    void suggestWithout()
+    {
+        const QString text = QStringLiteral("Ikkyo, Nikyo, Sankyo, Yonkyo, Gokyo, Shiho-nage, Irimi-nage, Kote-gaeshi, Kaiten-nage, Tenchi-nage");
+        const QVariantList first = programme.suggest(text);
+        QCOMPARE(first.size(), 8);
+        const QStringList firstIds = [&] {
+            QStringList list;
+            for (const QVariant &r : first) {
+                list << r.toMap().value(QStringLiteral("id")).toString();
+            }
+            return list;
+        }();
+        const QVariantList next = programme.suggest(text, 8, firstIds);
+        QCOMPARE(next.size(), 8);
+        for (const QVariant &r : next) {
+            QVERIFY(!firstIds.contains(r.toMap().value(QStringLiteral("id")).toString()));
+        }
+
+        // A form linked leaves "Ô-dachi 5" empty, not the group's other forms.
+        QVERIFY(programme.suggest(QStringLiteral("Ô-dachi 5"), 8, {QStringLiteral("shinkitoho/odachi/5")}).isEmpty());
+    }
+
     void techniqueLabel()
     {
         QCOMPARE(programme.techniqueLabel(QStringLiteral("gibt/es/nicht")), QString());

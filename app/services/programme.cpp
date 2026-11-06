@@ -429,8 +429,41 @@ constexpr int kAttackPartNamed = 1;
 constexpr int kExtraNamed = 1;
 constexpr int kGroupNamed = 1;
 
+// The names of the programme a text holds. The longest whole name wins: in "Uchi-kaiten-nage" that
+// is the only name, not also Kaiten-nage; named apart, each counts.
+class Mentions
+{
+public:
+    explicit Mentions(const QString &text)
+        : m_text(text)
+    {
+    }
+
+    void add(const QString &name) { m_taken += m_text.spans(name); }
+
+    bool names(const QString &name) const
+    {
+        const QList<NamedIn::Span> places = m_text.spans(name);
+        if (places.isEmpty()) {
+            return m_text.names(name);     // kanji
+        }
+        return std::any_of(places.cbegin(), places.cend(), [this](const NamedIn::Span &place) {
+            return std::none_of(m_taken.cbegin(), m_taken.cend(), [&](const NamedIn::Span &t) { return place.inside(t); });
+        });
+    }
+
+private:
+    NamedIn m_text;
+    QList<NamedIn::Span> m_taken;
+};
+
+QStringList titleParts(const QVariantMap &row)
+{
+    return row.value(QStringLiteral("title")).toString().split(QStringLiteral(" · "));
+}
+
 // An attack by its end: "Katate-dori" names Ryote-katate-dori less than the whole name does.
-int attackScore(const NamedIn &text, const QString &attack)
+int attackScore(const Mentions &text, const QString &attack)
 {
     if (text.names(attack)) {
         return kAttackNamed;
@@ -450,13 +483,12 @@ QString groupWord(const QVariantMap &row)
     return row.value(QStringLiteral("groupName")).toString().section(u' ', 0, 0);
 }
 
-int namedScore(const NamedIn &text, const QVariantMap &row)
+int namedScore(const Mentions &text, const QVariantMap &row)
 {
     int score = 0;
 
     // A form's name has two parts ("Ippon-me · Hitotsu-gachi"), each names it.
-    const QStringList parts = row.value(QStringLiteral("title")).toString().split(QStringLiteral(" · "))
-                              << row.value(QStringLiteral("jp")).toString();
+    const QStringList parts = titleParts(row) << row.value(QStringLiteral("jp")).toString();
     if (std::any_of(parts.cbegin(), parts.cend(), [&](const QString &p) { return text.names(p); })) {
         score = kNamed;
     }
@@ -484,7 +516,7 @@ int namedScore(const NamedIn &text, const QVariantMap &row)
 
 } // namespace
 
-QVariantList Programme::suggest(const QString &text, int limit) const
+QVariantList Programme::suggest(const QString &text, int limit, const QStringList &without) const
 {
     struct Hit {
         int score;
@@ -492,16 +524,31 @@ QVariantList Programme::suggest(const QString &text, int limit) const
         int turn;       // the how-manieth of its name
         QVariantMap row;
     };
-    const NamedIn named(text);
+    QVariantList rows;
+    eachTechnique([&rows](const QVariantMap &row) {
+        rows << row;
+        return true;
+    });
+
+    // Every name in the text first: only then a part of a longer one shows.
+    Mentions named(text);
+    for (const QVariant &v : std::as_const(rows)) {
+        const QVariantMap row = v.toMap();
+        for (const QString &part : titleParts(row)) {
+            named.add(part);
+        }
+        named.add(row.value(QStringLiteral("attack")).toString());
+    }
+
     const QString chosen = discipline();
     QList<Hit> hits;
-    eachTechnique([&](const QVariantMap &row) {
+    for (const QVariant &v : std::as_const(rows)) {
+        const QVariantMap row = v.toMap();
         const int score = namedScore(named, row);
         if (score > 0) {
             hits << Hit{score, row.value(QStringLiteral("discipline")).toString() == chosen, 0, row};
         }
-        return true;
-    });
+    }
 
     // A form named by its number leaves out the group's other forms: "Ô-dachi 5" is only that one.
     QSet<QString> formNamed;
@@ -511,6 +558,9 @@ QVariantList Programme::suggest(const QString &text, int limit) const
         }
     }
     hits.removeIf([&](const Hit &h) { return h.score < kNamed && formNamed.contains(groupWord(h.row)); });
+
+    // Left out before the cut, so that the next ones move up.
+    hits.removeIf([&](const Hit &h) { return without.contains(h.row.value(QStringLiteral("id")).toString()); });
 
     // Best first within a name, then the names in turns: "Ikkyo, Ô-dachi 5" shows both. The forms
     // of a group named alone count as one name.

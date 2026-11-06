@@ -99,26 +99,46 @@ public:
     {
     }
 
-    bool names(const QString &name) const
-    {
-        const QString joined = searchKey(name).remove(u' ');
-        if (joined.isEmpty()) {
-            return false;
+    // Where a name stands: from word `first` to word `last` of the text.
+    struct Span {
+        qsizetype first = 0;
+        qsizetype last = 0;
+
+        bool inside(const Span &other) const
+        {
+            return other.first <= first && last <= other.last && (other.first < first || last < other.last);
         }
-        if (hasKanji(joined)) {
-            const QString bare = withoutHiragana(joined);
-            return !bare.isEmpty() && withoutHiragana(m_words.join(QString())).contains(bare);
+    };
+
+    // Every place of a name; none for a name with kanji (those have no word ends).
+    QList<Span> spans(const QString &name) const
+    {
+        QList<Span> found;
+        const QString joined = searchKey(name).remove(u' ');
+        if (joined.isEmpty() || hasKanji(joined)) {
+            return found;
         }
         for (qsizetype i = 0; i < m_words.size(); ++i) {
             QString run;
-            for (qsizetype j = i; j < m_words.size() && run.size() < joined.size(); ++j) {
+            qsizetype j = i;
+            for (; j < m_words.size() && run.size() < joined.size(); ++j) {
                 run += m_words.at(j);
             }
             if (run == joined) {
-                return true;
+                found << Span{i, j - 1};
             }
         }
-        return false;
+        return found;
+    }
+
+    bool names(const QString &name) const
+    {
+        const QString joined = searchKey(name).remove(u' ');
+        if (joined.isEmpty() || !hasKanji(joined)) {
+            return !spans(name).isEmpty();
+        }
+        const QString bare = withoutHiragana(joined);
+        return !bare.isEmpty() && withoutHiragana(m_words.join(QString())).contains(bare);
     }
 
 private:

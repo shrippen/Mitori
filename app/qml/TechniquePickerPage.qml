@@ -20,7 +20,8 @@ Kirigami.ScrollablePage {
 
     readonly property var entry: Courses.revision >= 0 ? (Courses.entries(course).find(e => e.uid === entryUid) || ({})) : ({})
     readonly property var linked: entry.techniques || []
-    readonly property var named: Programme.suggest(entry.text || "").filter(t => !isLinked(t.id))
+    readonly property var named: Programme.suggest(entry.text || "", namedLimit, linked)
+    readonly property int namedLimit: 8
     // The query searched (follows the field after a short pause while typing).
     property string query: ""
     // At most `limit` techniques are listed; one more found says there are more.
