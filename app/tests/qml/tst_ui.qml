@@ -145,6 +145,7 @@ TestCase {
         compare(Appearance.language, Appearance.Language.German)
         verify(hint.visible)
         verify(findChild(page, "aboutText").text.indexOf(Appearance.version) >= 0)
+        verify(findChild(page, "keychainLicence").text.indexOf("Frank Osterfeld") >= 0)
         verify(Appearance.version !== "")
         verify(/^\D*\d{4}\.\d{1,2}\.\d+$/.test(findChild(page, "dataVersion").text))
         shot("0b-appearance")
@@ -666,6 +667,26 @@ TestCase {
         const conflicts = push("ConflictsPage")
         compare(conflicts.title, "Conflicts")
         verify(findChild(conflicts, "noConflicts").visible)
+        window.pageStack.pop()
+    }
+
+    // No key store answers (the test's environment): the password lands in the file, the note says
+    // so and what to do. Runs after the case without an account.
+    function test_3e_sync_password_in_file() {
+        const page = push("SettingsPage")
+        Sync.enabled = true
+        const hint = findChild(page, "syncPasswordNote")
+        verify(!hint.visible)
+        Sync.setAccount("https://cloud.example.org/dav/", "ich", "nur-ein-test", "")
+        tryVerify(() => hint.visible, 10000)
+        verify(hint.text.indexOf("restart Mitori") >= 0, hint.text)
+        verify(Sync.hasPassword)
+        page.flickable.contentY = hint.mapToItem(page.flickable.contentItem, 0, 0).y - 20
+        wait(50)
+        shot("4e-sync-password-file")
+        Sync.enabled = false
+        verify(hint.visible, "it still lies there with sync off")
+        verify(hint.text.indexOf("With sync on") >= 0, hint.text)
         window.pageStack.pop()
     }
 
