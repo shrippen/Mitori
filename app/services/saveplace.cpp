@@ -19,6 +19,11 @@ bool SavePlace::asksItself() const
 
 QUrl SavePlace::resolve(const QUrl &picked, const QUrl &folder) const
 {
+    // A portal's path is the granted file, Android's a content URL: nothing to read into them, and
+    // another name would be written as a hidden file.
+    if (!asksItself()) {
+        return picked;
+    }
     return TypedPath::resolve(picked, folder, kSuffix);
 }
 

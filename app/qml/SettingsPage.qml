@@ -235,6 +235,7 @@ Kirigami.ScrollablePage {
     SaveFileDialog {
         id: saveDialog
 
+        objectName: "saveBackupDialog"
         anchor: page
         title: qsTr("Save backup")
         onChosen: target => page.done = Backup.save(target)

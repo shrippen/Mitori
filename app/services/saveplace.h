@@ -4,8 +4,9 @@
 #include <QUrl>
 #include <QtQml/qqmlregistration.h>
 
-// Where a save dialog's answer goes (SaveFileDialog.qml): the path the user typed
-// (platform/typedpath), and whether it would replace a file.
+// Where a save dialog's answer goes (SaveFileDialog.qml): with Qt's own dialog the path the user
+// typed, with its suffix (platform/typedpath), and whether it would replace a file. The other
+// dialogs answer with the file itself.
 class SavePlace : public QObject
 {
     Q_OBJECT

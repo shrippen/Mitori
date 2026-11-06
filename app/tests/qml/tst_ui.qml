@@ -664,6 +664,13 @@ TestCase {
         const page = push("SettingsPage")
         const url = "file://" + uiShotsDir + "/sicherung-test.zip"
         verify(Backup.save(url), Backup.errorString)
+
+        // The built-in dialog's answer without a suffix: the backup gets it.
+        const bare = "sicherung-bare-" + Date.now()
+        findChild(page, "saveBackupDialog").take("file://" + uiShotsDir + "/" + bare)
+        tryVerify(() => findChild(page, "backupDone").visible)
+        verify(findChild(page, "backupDone").text.indexOf(bare + ".zip") > 0, findChild(page, "backupDone").text)
+
         page.inspect(url)
         const dialog = findChild(page, "mergeBackup")
         tryVerify(() => dialog.opened)

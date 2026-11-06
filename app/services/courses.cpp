@@ -6,6 +6,7 @@
 #include "sharefile.h"
 #include "devicecalendar.h"
 
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -19,6 +20,14 @@
 #include <QStandardPaths>
 
 namespace {
+
+// A notebook's folder for its copy to share; a hash, as a uid from a calendar may hold anything.
+QString copyFolder(const QString &uid)
+{
+    const QByteArray hash = QCryptographicHash::hash(uid.toUtf8(), QCryptographicHash::Sha1).toHex();
+    return QDir(ShareFile::folder()).filePath(QString::fromLatin1(hash));
+}
+
 
 // The association's public course calendar.
 const QUrl kCalendar(QStringLiteral("https://cal.arianw.de/dav/calendars/shinki/Lehrgaenge?export"));
@@ -138,6 +147,7 @@ void Courses::reload(Reload when)
 
 void Courses::refresh()
 {
+    dropGoneCopies();
     ++m_revision;
     emit changed();
     emit calendarChanged();
@@ -285,7 +295,6 @@ bool Courses::remove(const QString &uid)
         return false;
     }
     const QStringList media = m_book->courseMedia(uid);
-    const QString shared = exportName(uid);
     if (!saved(m_book->deleteCourse(uid, QDateTime::currentDateTimeUtc()), tr("The notebook could not be deleted: %1"))) {
         return false;
     }
@@ -293,10 +302,7 @@ bool Courses::remove(const QString &uid)
         MediaStore::shared().remove(name);
     }
 
-    // A copy made for sharing holds the same text, photos and voice notes.
-    if (!shared.isEmpty()) {
-        QFile::remove(QDir(ShareFile::folder()).filePath(shared));
-    }
+    dropCopy(uid);
     return true;
 }
 
@@ -622,6 +628,31 @@ bool Courses::canShare() const
     return ShareFile::available();
 }
 
+void Courses::dropCopy(const QString &uid)
+{
+    QDir(copyFolder(uid)).removeRecursively();
+}
+
+// A sync or a backup may have taken a notebook away; its copy goes with it.
+void Courses::dropGoneCopies()
+{
+    const QDir folder(ShareFile::folder());
+    const QStringList copies = folder.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    if (!m_open || copies.isEmpty()) {
+        return;
+    }
+
+    QSet<QString> kept;
+    for (const CourseBook::Course &c : m_book->courses()) {
+        kept.insert(QFileInfo(copyFolder(c.uid)).fileName());
+    }
+    for (const QString &copy : copies) {
+        if (!kept.contains(copy)) {
+            QDir(folder.filePath(copy)).removeRecursively();
+        }
+    }
+}
+
 QString Courses::shareCopy(const QString &uid, int *missing)
 {
     const QString name = exportName(uid);
@@ -629,8 +660,8 @@ QString Courses::shareCopy(const QString &uid, int *missing)
         return {};
     }
 
-    QDir folder(ShareFile::folder());
-    folder.removeRecursively();
+    QDir(ShareFile::folder()).removeRecursively();
+    const QDir folder(copyFolder(uid));
     folder.mkpath(QStringLiteral("."));
     const QString path = folder.filePath(name);
     const int lost = exportNotebook(uid, QUrl::fromLocalFile(path));

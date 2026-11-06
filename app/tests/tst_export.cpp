@@ -4,12 +4,14 @@
 #include <QFileInfo>
 #include <QImage>
 #include <QProcess>
+#include <QScopeGuard>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QTest>
 
 #include "catalog.h"
+#include "coursebook.h"
 #include "courses.h"
 #include "mediastore.h"
 #include "notebookexport.h"
@@ -137,7 +139,7 @@ private slots:
         const QString first = courses.shareCopy(uid, &lostFiles);
         QCOMPARE(lostFiles, 1);
         QCOMPARE(QFileInfo(first).fileName(), courses.exportName(uid));
-        QCOMPARE(QFileInfo(first).absolutePath(), ShareFile::folder());
+        QVERIFY(first.startsWith(ShareFile::folder() + u'/'));
         QCOMPARE(QFileInfo(first).size(), QFileInfo(zip).size());
         const QString other = courses.create(u"Zweiter"_s, u"2026-08-01"_s, {}, {}, {});
         const QString second = courses.shareCopy(other);
@@ -147,6 +149,23 @@ private slots:
         // Deleted, its copy goes with it: text, photos and voice notes it held.
         QVERIFY(courses.remove(other));
         QVERIFY2(!QFile::exists(second), qPrintable(second));
+
+        // Another notebook of the same file name: its deletion leaves this copy alone.
+        const QString twinA = courses.create(u"Sommer: Mainz"_s, u"2026-07-04"_s, {}, {}, {});
+        const QString twinB = courses.create(u"Sommer/Mainz"_s, u"2026-07-04"_s, {}, {}, {});
+        QCOMPARE(courses.exportName(twinA), courses.exportName(twinB));
+        const QString twinCopy = courses.shareCopy(twinA);
+        QVERIFY(courses.remove(twinB));
+        QVERIFY2(QFile::exists(twinCopy), qPrintable(twinCopy));
+
+        // Deleted elsewhere: a sync takes it out of the database, then the notebooks are shown anew.
+        {
+            CourseBook book;
+            QVERIFY(book.open(m_dir.filePath(u"c.sqlite"_s)));
+            QVERIFY(book.deleteCourse(twinA, QDateTime::currentDateTimeUtc()));
+        }
+        courses.refresh();
+        QVERIFY2(!QFile::exists(twinCopy), qPrintable(twinCopy));
         QVERIFY(courses.shareCopy(u"no such notebook"_s).isEmpty());
         QVERIFY(!courses.canShare());
         QCOMPARE(courses.shareNotebook(uid), -1);
@@ -192,6 +211,38 @@ private slots:
         const QUrl typed = QUrl::fromLocalFile(m_dir.filePath(u"sicherung.alt"_s));
         QCOMPARE(place.resolve(typed, folder), QUrl::fromLocalFile(old.fileName()));
         QVERIFY(place.taken(place.resolve(typed, folder)));
+    }
+
+    // Round 2: in the Flatpak the portal hands out the granted file. Another name would be written
+    // as a hidden file while the app reports success, so the path stays as it came.
+    void portalPathStays()
+    {
+        const QByteArray before = qgetenv("FLATPAK_ID");
+        qputenv("FLATPAK_ID", "io.github.shrippen.Mitori");
+        const auto restore = qScopeGuard([&] {
+            if (before.isEmpty()) {
+                qunsetenv("FLATPAK_ID");
+            } else {
+                qputenv("FLATPAK_ID", before);
+            }
+        });
+
+        SavePlace place;
+        QVERIFY(!place.asksItself());
+        const QUrl folder = QUrl::fromLocalFile(u"/run/user/1000/doc/ab12"_s);
+        const QUrl granted = QUrl::fromLocalFile(u"/run/user/1000/doc/ab12/y.alt"_s);
+        QCOMPARE(place.resolve(granted, folder), granted);
+
+        // The export writes that very file.
+        Catalog catalog;
+        Courses courses(m_dir.filePath(u"portal.sqlite"_s), QUrl::fromLocalFile(m_dir.filePath(u"none.ics"_s)),
+                        m_dir.filePath(u"cache-portal.ics"_s), catalog);
+        const QString uid = courses.create(u"Portal"_s, u"2026-07-04"_s, {}, {}, {});
+        const QUrl here = QUrl::fromLocalFile(m_dir.filePath(u"y.alt"_s));
+        const QUrl target = place.resolve(here, QUrl::fromLocalFile(m_dir.path()));
+        QCOMPARE(courses.exportNotebook(uid, target), 0);
+        QVERIFY(QFile::exists(here.toLocalFile()));
+        QVERIFY(!QFile::exists(here.toLocalFile() + u".zip"_s));
     }
 
     // Characters a URL or a file system takes for something else stay out of the name.

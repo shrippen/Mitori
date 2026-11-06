@@ -81,14 +81,9 @@ bool Backup::save(const QUrl &target)
         }
     }
 
-    // A local file, or a content:// URL from Android's file picker (QFile opens both there). A
-    // local name gets its suffix: the open dialog's filter would never show it again.
-    QString path = target.isLocalFile() ? target.toLocalFile() : target.toString();
-    // A folder stays one and fails below: no hidden ".zip" in it.
-    const bool folder = path.endsWith(QLatin1Char('/')) || QFileInfo(path).isDir();
-    if (target.isLocalFile() && !folder && !path.endsWith(QLatin1String(".zip"), Qt::CaseInsensitive)) {
-        path += QLatin1String(".zip");
-    }
+    // A local file, or a content:// URL from Android's file picker (QFile opens both there). The
+    // suffix comes from SavePlace, with the dialog that needs it; this is the file to write.
+    const QString path = target.isLocalFile() ? target.toLocalFile() : target.toString();
     m_savedTo = target.isLocalFile() ? path : QString();
     QFile file(path);
     bool opened = false;
