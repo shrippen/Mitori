@@ -26,7 +26,10 @@ Item {
     property bool big: false
     // Where the first chapter starts, once (the small player's place when it goes full screen).
     property real startAt: -1
-    readonly property var current: playlist[index] || ({})
+    // The old row while list and place change together (setList): no row of the new list at the
+    // old place on the way.
+    property var heldRow: null
+    readonly property var current: heldRow || playlist[index] || ({})
     readonly property string video: current.video ? current.video.video : ""
     // A technique of the training may have no video on the device: a card stands for the picture.
     // The video's file now; it reports only a real change. All that belongs to a file hangs on it:
@@ -67,7 +70,8 @@ Item {
     property bool looping: true
     // Each technique starts at 1× (owner, 06.11.2026): its loop and full screen keep the tempo.
     readonly property real normalRate: 1
-    property string tempoEntry: ""
+    // The technique on screen: only another one restarts, a list made anew brings new objects for it.
+    property string shownEntry: ""
     // The double tap shows what it did, for a moment (the clickdummy): "2 s ››" on the side that
     // was tapped. The text is a symbol, not a word: it stays the same in every language.
     property string jumpHint: ""
@@ -116,18 +120,24 @@ Item {
     signal playTapped()
 
     onCurrentChanged: {
+        if (!current.id || current.id === shownEntry) {
+            return
+        }
+        shownEntry = current.id
         shown(current.id)
-        // By id: a playlist made anew brings new objects for the same technique.
-        if (current.id !== tempoEntry) {
-            tempoEntry = current.id || ""
-            player.playbackRate = normalRate
-        }
+        player.playbackRate = normalRate
+
+        // What waited for a tap, or was loaded, belonged to the technique before.
+        holdStart = false
+        loadedSource = ""
+
         // After the bindings of the new entry (from, to): onCurrentChanged runs before them.
-        if (player.source.toString() === Videos.source(video).toString() && !startPending) {
-            Qt.callLater(page.restart)
-        }
+        Qt.callLater(page.restartLoaded)
     }
-    Component.onCompleted: shown(current.id)
+    Component.onCompleted: {
+        shownEntry = current.id || ""
+        shown(current.id)
+    }
     Component.onDestruction: {
         player.stop()
         Levels.restore()
@@ -143,15 +153,49 @@ Item {
         }
         holdStart = false
     }
+    // Another file is still loading: its LoadedMedia restarts.
+    function restartLoaded() {
+        if (!startPending) {
+            restart()
+        }
+    }
 
-    // The file changed under the open player (a bundle came or was updated): it waits at the
-    // chapter's start for a tap instead of sounding by itself, say under the notes.
+    // The next restart stands. The file changed under the open player (a bundle came or was
+    // updated, or went): it waits at the chapter's start for a tap instead of sounding by itself,
+    // say under the notes. A first load replaces nothing. Ends with the technique or a tap.
     property url loadedSource
     property bool holdStart: false
     Connections {
         target: Videos
         function onFolderChanged() {
-            page.holdStart = Videos.source(page.video).toString() !== page.loadedSource.toString()
+            const loaded = page.loadedSource.toString()
+            if (loaded !== "" && Videos.source(page.video).toString() !== loaded) {
+                page.holdStart = true
+            }
+        }
+    }
+    // Whether it plays, or will when its file is loaded.
+    function willPlay() {
+        return player.playing || (startPending && autoPlay && !holdStart)
+    }
+    // What a pane made anew needs of this one (the programme's small player).
+    function restState() {
+        return { id: current.id, rate: player.playbackRate, playing: willPlay(),
+                 position: startPending ? startAt : player.position }
+    }
+    // Another list, keeping technique `id` if it is in it, else its first. Not the user's choice:
+    // a standing video stands at the new technique.
+    function setList(list, id) {
+        const before = current.id
+        const stands = !willPlay()
+
+        heldRow = current
+        playlist = list
+        index = Math.max(0, list.findIndex(r => r.id === id))
+        heldRow = null
+
+        if (current.id !== before) {
+            holdStart = stands
         }
     }
     // Play from the chapter start when the video stands at (or after) the chapter end.
@@ -161,6 +205,7 @@ Item {
             return
         }
         playTapped()    // first: restart() asks autoPlay
+        holdStart = false
         if (player.position >= end - frameMs || player.mediaStatus === MediaPlayer.EndOfMedia) {
             restart()
         } else {

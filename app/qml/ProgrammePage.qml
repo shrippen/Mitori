@@ -58,8 +58,19 @@ Kirigami.Page {
     // The first tap came (play control, a row, full screen): chosen techniques now play at once.
     // Here, not in the player: turning the tablet makes the pane anew.
     property bool started: false
-    // The tempo of the technique in the small player, for a pane made anew (same reason).
-    property var paneTempo: null
+    // What the small player left when it went, for the pane made anew (same reason):
+    // { id, rate, position, playing }; taken once.
+    property var paneRest: null
+    // Follows split, one step behind: the pane still says where it stood before it goes (a Loader
+    // has ended its item's functions by the time anyone hears of it).
+    property bool paneOn: false
+    onSplitChanged: {
+        if (!split && player) {
+            paneRest = player.restState()
+        }
+        paneOn = split
+    }
+    Component.onCompleted: paneOn = split
 
     title: qsTr("Programme")
 
@@ -372,12 +383,12 @@ Kirigami.Page {
             id: pane
 
             objectName: "playerPane"
-            active: page.split
+            active: page.paneOn
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
             onLoaded: {
-                page.restoreTempo()
+                page.restorePane()
                 page.resumeFromBig()    // second: what full screen left is newer
             }
 
@@ -387,11 +398,14 @@ Kirigami.Page {
                 compact: true
                 autoPlay: page.isCurrentPage && page.started
                 onPlayTapped: page.started = true
-                onRateChanged: page.paneTempo = { id: paneView.current.id, rate: paneView.rate }
                 playlist: page.playlist
-                // The chosen technique (also after the pane is made anew, turning the tablet); bound
-                // only until the player moves on by itself (next, previous).
+                // The chosen technique (also after the pane is made anew, turning the tablet).
                 index: Math.max(0, page.playlist.findIndex(r => r.id === page.lastId))
+                // First values only: setList changes both in one step, bindings one after the other.
+                Component.onCompleted: {
+                    paneView.playlist = page.playlist
+                    paneView.index = paneView.index
+                }
                 onShown: id => {
                     if (id) {
                         page.lastId = id
@@ -415,9 +429,10 @@ Kirigami.Page {
     }
 
     // Another grade or discipline: the technique shown last if it is in it, else its first.
+    // Nothing to play (the grade card): the pane goes as it stands and comes back so.
     onPlaylistChanged: {
-        if (page.player) {
-            page.player.index = Math.max(0, page.playlist.findIndex(r => r.id === page.lastId))
+        if (page.player && page.playlist.length > 0) {
+            page.player.setList(page.playlist, page.lastId)
         }
     }
     // Under another page (notes, comment) the small player rests.
@@ -548,7 +563,7 @@ Kirigami.Page {
             page.playBeside(entry)
             return
         }
-        page.paneTempo = null   // a new player page starts at 1×, and so does the pane after it
+        page.paneRest = { playing: false }   // a new player page starts at 1×, and so does the pane after it; it stands
         page.cameFromPlayer = true
         const playlist = page.rows.filter(r => page.playable(r))
         // The window's page stack returns the new page (the attached PageStack.push returns nothing).
@@ -560,10 +575,10 @@ Kirigami.Page {
         player.shown.connect(id => page.lastId = id)
     }
 
-    // A row beside the list. As the first tap it also starts the technique standing there: its
-    // row is already chosen, so nothing else would make it play.
+    // A row beside the list. It also starts the technique standing there: its row is already
+    // chosen, so nothing else would make it play.
     function playBeside(entry) {
-        const standing = !page.started && page.player && page.player.current.id === entry.id
+        const standing = page.player && page.player.current.id === entry.id && !page.player.playing
         page.started = true
         page.lastId = entry.id
         if (standing) {
@@ -571,12 +586,21 @@ Kirigami.Page {
         }
     }
 
-    // A pane made anew (the tablet turned, the window narrowed) starts at 1×: the same technique
-    // keeps its tempo. The id: another technique chosen meanwhile starts at 1×.
-    function restoreTempo() {
+    // A pane made anew (the tablet turned, the window narrowed, back from the grade card): playing
+    // plays on, standing stands. The same technique keeps its tempo and place; another one chosen
+    // meanwhile starts at 1×.
+    function restorePane() {
         const now = page.player
-        if (now && page.paneTempo && page.paneTempo.id === now.current.id) {
-            now.setSpeed(page.paneTempo.rate)
+        const rest = page.paneRest
+        page.paneRest = null
+        if (!now || !rest) {
+            return
+        }
+
+        now.holdStart = !rest.playing
+        if (rest.id === now.current.id) {
+            now.setSpeed(rest.rate)
+            now.startAt = rest.position
         }
     }
 
@@ -589,6 +613,7 @@ Kirigami.Page {
         if (!now || !bigResume) {
             return
         }
+        now.holdStart = false   // full screen played
         now.looping = bigResume.looping
         now.setSpeed(bigResume.rate)
         if (now.duration > 0) {

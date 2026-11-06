@@ -83,7 +83,8 @@ Syncthing entfällt als eigener Weg (geht über den Export-Ordner).
 - **Programm und Player klein sind eine Seite**: Liste links, rechts Video, Steuerung, Einschätzen, Notiz und
   Kommentar der gewählten Technik; Tippen auf eine Zeile spielt sie. Ohne Video steht rechts das Blatt.
   Beim Öffnen steht das Video still am Kapitelanfang (Eigentümer, 06.11.2026); das erste Tippen startet es, danach
-  spielt jede gewählte Technik sofort.
+  spielt jede gewählte Technik sofort. Sonst behält das Video seinen Zustand (Review, 06.11.2026): Drehen, Fenstergröße,
+  Infokarte, anderer Grad, Regal speichern starten kein stehendes Video; nur das Wählen einer Technik startet.
 - **Player groß**: bleibt über und unter dem Video genug Platz (ab 120 px, z. B. Tablet 16:10 mit
   Aikido/Daitoryu), stehen Titel oben und Steuerung unten im freien Raum; sonst die Spalte rechts
   (Telefon quer, Shinki Toho 16:9 auf dem Tablet).
