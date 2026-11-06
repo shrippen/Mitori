@@ -720,79 +720,82 @@
 <context>
     <name>CoursesPage</name>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="46"/>
+        <location filename="../qml/CoursesPage.qml" line="50"/>
         <source>none entered yet</source>
         <translation>noch keine eingetragen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="49"/>
+        <location filename="../qml/CoursesPage.qml" line="57"/>
         <source>Courses</source>
         <translation>Lehrgänge</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="55"/>
+        <location filename="../qml/CoursesPage.qml" line="63"/>
         <source>New course</source>
         <translation>Neuer Lehrgang</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="60"/>
+        <location filename="../qml/CoursesPage.qml" line="68"/>
         <source>Reload</source>
         <translation>Neu laden</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="90"/>
+        <location filename="../qml/CoursesPage.qml" line="105"/>
         <source>My grades</source>
         <translation>Meine Grade</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../qml/CoursesPage.qml" line="117"/>
+        <source>%n notebook(s)</source>
+        <translation>
+            <numerusform>%n Notizbuch</numerusform>
+            <numerusform>%n Notizbücher</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="100"/>
+        <location filename="../qml/CoursesPage.qml" line="127"/>
         <source>Planned exams</source>
         <translation>Geplante Prüfungen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="122"/>
+        <location filename="../qml/CoursesPage.qml" line="149"/>
         <source>Next dates</source>
         <translation>Nächste Termine</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="132"/>
+        <location filename="../qml/CoursesPage.qml" line="159"/>
         <source>Loading the course calendar …</source>
         <translation>Der Lehrgangskalender wird geladen …</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="134"/>
+        <location filename="../qml/CoursesPage.qml" line="161"/>
         <source>The course calendar could not be loaded; as of %1.</source>
         <translation>Der Lehrgangskalender ließ sich nicht laden; Stand %1.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="135"/>
+        <location filename="../qml/CoursesPage.qml" line="162"/>
         <source>The course calendar could not be loaded. Check the connection and reload.</source>
         <translation>Der Lehrgangskalender ließ sich nicht laden. Verbindung prüfen und neu laden.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="138"/>
+        <location filename="../qml/CoursesPage.qml" line="165"/>
         <source>From the association&apos;s course calendar, as of %1. Tap a date for its notebook.</source>
         <translation>Aus dem Lehrgangskalender des Verbands, Stand %1. Tippen öffnet das Notizbuch.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="139"/>
+        <location filename="../qml/CoursesPage.qml" line="166"/>
         <source>No coming dates in the course calendar.</source>
         <translation>Keine kommenden Termine im Lehrgangskalender.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="141"/>
+        <location filename="../qml/CoursesPage.qml" line="168"/>
         <source>The course calendar is not loaded yet.</source>
         <translation>Der Lehrgangskalender ist noch nicht geladen.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursesPage.qml" line="165"/>
+        <location filename="../qml/CoursesPage.qml" line="116"/>
         <source>My notebooks</source>
         <translation>Meine Notizbücher</translation>
-    </message>
-    <message>
-        <location filename="../qml/CoursesPage.qml" line="170"/>
-        <source>No notebooks yet. Tap a date above, or make a course of your own (+).</source>
-        <translation>Noch keine Notizbücher. Oben einen Termin antippen oder einen eigenen Lehrgang anlegen (+).</translation>
     </message>
 </context>
 <context>
@@ -1407,6 +1410,19 @@
         <location filename="../store/notebookexport.cpp" line="64"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
+    </message>
+</context>
+<context>
+    <name>NotebooksPage</name>
+    <message>
+        <location filename="../qml/NotebooksPage.qml" line="23"/>
+        <source>My notebooks</source>
+        <translation>Meine Notizbücher</translation>
+    </message>
+    <message>
+        <location filename="../qml/NotebooksPage.qml" line="40"/>
+        <source>No notebooks yet. Tap a date on the Courses page, or make a course of your own there (+).</source>
+        <translation>Noch keine Notizbücher. Auf der Seite „Lehrgänge“ einen Termin antippen oder dort einen eigenen Lehrgang anlegen (+).</translation>
     </message>
 </context>
 <context>

@@ -16,6 +16,8 @@ Ergänzt `app-konzept.html` (Stand 2). Stand 01.11.2026.
 - Notizen bleiben **privat**; weitergeben nur über den Export.
 - Export möglichst einfach (Markdown/Text); für die Shinki News wird ohnehin umgebaut.
 - Lehrgangsnotizen erscheinen **nicht** in „Wiederholen nach Plan“.
+- **„Meine Notizbücher“** (Owner, 06.11.2026): Knopf neben „Meine Grade“ oben auf „Lehrgänge“, eigene Seite mit allen
+  Notizbüchern; ein Termin öffnet weiter sein Notizbuch und legt es beim ersten Mal an. Ersetzt den Abschnitt im Clickdummy.
 
 ## Video-Bundles
 

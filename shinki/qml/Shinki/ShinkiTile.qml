@@ -46,16 +46,33 @@ QQC2.AbstractButton {
         }
         ColumnLayout {
             Layout.fillWidth: true
+            // At the top: tiles of a row keep their titles level when one wraps.
+            Layout.alignment: Qt.AlignTop
             spacing: 0
 
             QQC2.Label {
+                id: title
+
+                // Lines break between words; a word too long for a line ends the title in an
+                // ellipsis ("Meine / Notizbü…"), it is not split. Text.WordWrap alone would run
+                // past the tile. Its line: each word before it on one line (titles are short).
+                readonly property int longWord: tile.text.split(" ").findIndex(w => titleMetrics.advanceWidth(w) > width)
+
                 Layout.fillWidth: true
+                maximumLineCount: longWord >= 0 ? longWord + 1 : undefined
                 text: tile.text
                 color: ShinkiStyle.ink
                 font.family: ShinkiStyle.uiFamily
                 font.bold: true
                 font.pixelSize: tile.big ? ShinkiStyle.tileTitleBigSize : ShinkiStyle.tileTitleSize
+                wrapMode: Text.WordWrap
                 elide: Text.ElideRight
+
+                FontMetrics {
+                    id: titleMetrics
+
+                    font: title.font
+                }
             }
             QQC2.Label {
                 Layout.fillWidth: true

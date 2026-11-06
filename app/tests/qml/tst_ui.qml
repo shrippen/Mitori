@@ -1507,9 +1507,25 @@ TestCase {
         compare(rows[1].daysAway, 40)
         // The first day as a local day (no time zone moves it to the day before).
         compare(rows[0].firstDay.getDate(), new Date(Date.now() + 12 * 86400000).getDate())
-        compare(findChildren(page, "notebookRow").length, 0)
+        compare(findChildren(page, "notebookRow").length, 0, "the list lives on its own page")
         verify(findChild(window.pageStack.items[0], "coursesTile").hint.indexOf("Siebeldingen") === 0)
         shot("14-courses")
+
+        // "My notebooks" says how many, and opens the list: empty, it says how to make one.
+        const notebooksTile = findChild(page, "myNotebooks")
+        verify(notebooksTile.visible)
+        verify(notebooksTile.hint.indexOf("0") === 0, notebooksTile.hint)
+        verify(findChild(page, "myGrades").visible)
+        mouseClick(notebooksTile)
+        tryCompare(window.pageStack, "depth", 3)
+        const emptyList = window.pageStack.currentItem
+        tryVerify(() => emptyList.title === "My notebooks")
+        verify(findChild(emptyList, "notebooksEmpty").visible)
+        compare(findChildren(emptyList, "notebookRow").length, 0)
+        shot("14a-notebooks-empty")
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        wait(800)       // Kirigami slides the page back (disabled meanwhile)
 
         // A date opens its notebook, made on first use; an entry is added from the field.
         mouseClick(rows[0])
@@ -1528,12 +1544,33 @@ TestCase {
         shot("14b-course-notebook")
         window.pageStack.pop()
         tryVerify(() => window.pageStack.currentItem === page)
-        tryVerify(() => findChildren(page, "notebookRow").length === 1)
-        compare(findChildren(page, "eventRow")[0].course.entries, 1)
-        compare(Courses.notebookFor("ui-daito"), book.uid, "the same notebook again")
+        tryVerify(() => findChildren(page, "eventRow")[0].course.entries === 1)
+        const dateBook = Courses.notebookFor("ui-daito")
+        compare(dateBook, book.uid, "the same notebook again")
 
-        // A course of one's own.
-        const made = push("CourseNewPage")
+        // The date's notebook is counted and listed; a tap on its row opens it.
+        verify(notebooksTile.hint.indexOf("1") === 0, notebooksTile.hint)
+        wait(800)       // Kirigami slides the page back (disabled meanwhile)
+        mouseClick(notebooksTile)
+        tryCompare(window.pageStack, "depth", 3)
+        const list = window.pageStack.currentItem
+        tryVerify(() => findChildren(list, "notebookRow").length === 1)
+        verify(!findChild(list, "notebooksEmpty").visible)
+        const listed = findChildren(list, "notebookRow")[0]
+        compare(listed.course.uid, dateBook)
+        shot("14d-notebooks")
+        mouseClick(listed)
+        tryCompare(window.pageStack, "depth", 4)
+        tryVerify(() => window.pageStack.currentItem.uid === dateBook)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === list)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+
+        // A course of one's own: "New course" stays on this page.
+        page.actions.find(a => a.objectName === "newCourse").trigger()
+        tryVerify(() => findChild(window.pageStack.currentItem, "makeCourse") !== null)
+        const made = window.pageStack.currentItem
         verify(!findChild(made, "makeCourse").enabled, "a title is needed")
         findChild(made, "courseTitleField").text = "Training mit Gastlehrer"
         findChild(made, "coursePlace").text = "Dojo Weimar"
@@ -1551,8 +1588,106 @@ TestCase {
         shot("14c-course-delete", true)
         remove.accept()
         tryVerify(() => window.pageStack.currentItem === page, 3000)
-        compare(findChildren(page, "notebookRow").length, 1)
+        compare(Courses.notebooks.length, 1)
         window.pageStack.pop()
+    }
+
+    // A tile's title, the label that shows its text.
+    function tileTitle(tile) {
+        return allChildren(tile).find(c => c.text === tile.text && c.lineCount !== undefined)
+    }
+
+    // Lines break between words only: "Meine / Notizbüche / r" has more lines than words.
+    function checkTitle(tile) {
+        const title = tileTitle(tile)
+        const words = tile.text.split(" ").length
+        verify(title.lineCount <= words, tile.text + ": " + title.lineCount + " lines, broken inside a word")
+        verify(title.contentWidth <= title.width + 1, tile.text + " runs past its tile")
+    }
+
+    // The start menu in German (the run stays English: the catalog, not installed), Shinki only
+    // (its tile is ours). A single word too long for a line may end in an ellipsis.
+    function checkStartTiles() {
+        const tiles = findChild(window.pageStack.items[0], "tiles")
+        wait(100)
+        const shown = []
+        for (let i = 0; i < tiles.children.length; i++) {
+            if (tiles.children[i].visible && tiles.children[i].glyph !== undefined) {
+                shown.push(tiles.children[i])
+            }
+        }
+        verify(shown.length >= 6, "the start tiles: " + shown.length)
+        for (const tile of shown) {
+            const english = tile.text
+            tile.text = uiCatalog.german("StartPage", english)
+            verify(tile.text !== "", "no German for " + english)
+            wait(20)
+            checkTitle(tile)
+            tile.text = english
+        }
+    }
+
+    // At 360 and 320 px, in every look of the Kante side (Shinki: ctest ui_shinki): the two tiles
+    // lie side by side, equally wide and high, with no text cut, however many grades there are.
+    function test_9m_tiles_fit_data() {
+        const looks = Look.shinki ? [{ tag: "shinki" }]
+                                  : [{ tag: "system", kind: KanteStyle.Kind.System },
+                                     { tag: "kante", kind: KanteStyle.Kind.Kante },
+                                     { tag: "leinen", kind: KanteStyle.Kind.KanteLight }]
+        const rows = []
+        for (const width of [360, 320]) {
+            for (const look of looks) {
+                rows.push({ tag: look.tag + "-" + width, kind: look.kind, width: width })
+            }
+        }
+        return rows
+    }
+    function test_9m_tiles_fit(data) {
+        const kind = KanteStyle.kind
+        if (!Look.shinki) {
+            KanteStyle.kind = data.kind
+        }
+        window.width = data.width
+        if (Look.shinki) {
+            checkStartTiles()
+        }
+        for (const [discipline, grade] of [["aikido", "k5"], ["daitoryu", "k5"], ["shinkitoho", "shoden"]]) {
+            verify(Courses.addGrade(discipline, grade, "2024-03-01", ""))
+            const page = push("CoursesPage")
+            wait(300)
+            const grades = findChild(page, "myGrades")
+            const notebooks = findChild(page, "myNotebooks")
+            // The test runs in English; German is the longer (mitori_de.ts).
+            grades.text = uiCatalog.german("CoursesPage", "My grades")
+            notebooks.text = uiCatalog.german("CoursesPage", "My notebooks")
+            notebooks.hint = "12 Notizbücher"
+            wait(50)
+            compare(grades.y, notebooks.y, "side by side")
+            compare(grades.width, notebooks.width)
+            compare(grades.height, notebooks.height)
+            verify(notebooks.mapToItem(window.contentItem, notebooks.width, 0).x <= data.width)
+            // "Notizbücher" fits no line of Shinki's tile at 320 px: only that title may end in an
+            // ellipsis, and only there.
+            const mayCut = Look.shinki && data.width < 360 ? tileTitle(notebooks) : null
+            for (const item of allChildren(grades).concat(allChildren(notebooks))) {
+                verify(!item.truncated || item === mayCut, grade + ": cut off: " + item.text)
+            }
+            checkTitle(grades)
+            checkTitle(notebooks)
+            // Shinki's text starts at the top of the tile: one title on two lines moves no other.
+            if (Look.shinki) {
+                compare(tileTitle(grades).mapToItem(window.contentItem, 0, 0).y,
+                        tileTitle(notebooks).mapToItem(window.contentItem, 0, 0).y, "the titles' tops")
+            }
+            shot("14e-tiles-" + data.tag + "-" + discipline)
+            window.pageStack.pop()
+        }
+        // The uids first: Courses.grades shrinks with each removal.
+        for (const uid of Courses.grades.map(g => g.uid)) {
+            verify(Courses.removeGrade(uid))
+        }
+        compare(Courses.grades.length, 0)
+        KanteStyle.kind = kind
     }
 
     // Videos: a DVD's code unlocks its bundle (the test data's), which loads onto the device and
@@ -2890,7 +3025,9 @@ TestCase {
         Programme.setGrade("aikido", "k3")
         const page = push("ProgrammePage")
         const list = findChild(page, "programmeList")
-        wait(500)
+        // Kirigami slides the page in (longer under load); a key during that is lost.
+        tryVerify(() => Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1, 5000)
+        wait(1500)
         page.forceActiveFocus()
         const before = list.contentY
         keyClick(Qt.Key_PageDown)
@@ -3289,7 +3426,7 @@ TestCase {
         look("start", window.pageStack.currentItem)
         const round = Exam.draw("aikido", "k5", 3, 0)
         for (const [file, props] of [["ProgrammePage", {}], ["TodayPage", {}], ["StatsPage", {}], ["YearsPage", {}], ["AllNotesPage", {}],
-                                     ["TechniqueMapPage", {}], ["SearchPage", {}], ["CoursesPage", {}], ["GradesPage", {}],
+                                     ["TechniqueMapPage", {}], ["SearchPage", {}], ["CoursesPage", {}], ["NotebooksPage", {}], ["GradesPage", {}],
                                      ["SettingsPage", {}], ["VideosPage", {}], ["AppearancePage", {}], ["ExamPage", {}],
                                      ["ExamRoundPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["ExamEndPage", { points: round, discipline: "aikido", grade: "k5" }],
