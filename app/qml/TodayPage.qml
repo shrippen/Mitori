@@ -39,6 +39,12 @@ Kirigami.ScrollablePage {
     // An exam planned in this discipline (Courses): its hint leads to the mock exam.
     readonly property var exam: Courses.revision >= 0 ? Courses.nextExam(discipline) : ({})
 
+    // On a tablet sideways: two columns in a page of its own width, in the middle.
+    readonly property TypingHold hold: TypingHold { target: page }
+    readonly property bool wide: hold.wide
+    leftPadding: wide ? Tablet.sidePadding(width, padding) : padding
+    rightPadding: leftPadding
+
     title: qsTr("Practice today")
 
     function reason(row) {
@@ -125,67 +131,85 @@ Kirigami.ScrollablePage {
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Kirigami.Units.largeSpacing
+        // What is due and the way to it; beside it the practice days.
+        TwoColumns {
+            wide: page.wide
 
-            LookKpi {
-                objectName: "dueCount"
-                value: String(page.due.length)
-                label: qsTr("techniques due")
-            }
-            LookLabel {
+            ColumnLayout {
+                objectName: "dueLeft"
                 Layout.fillWidth: true
-                text: page.due.length === 0 ? qsTr("Everything is practised for today.")
-                      : qsTr("%1 unsure · %2 long ago · %3 new").arg(page.unsure).arg(page.longAgo).arg(page.fresh)
-                color: Look.mutedTextColor
-                wrapMode: Text.Wrap
-            }
-        }
-        LookButton {
-            objectName: "startTraining"
-            visible: page.due.length > 0
-            role: LookButton.Role.Primary
-            icon.name: "media-playback-start"
-            text: qsTr("Start training")
-            onClicked: page.startTraining()
-        }
-        LookLabel {
-            Layout.fillWidth: true
-            visible: page.due.length > 0 && page.playable.length < page.due.length
-            text: qsTr("%n of them without a video on this device: the training shows their name, practise from memory.", "", page.due.length - page.playable.length)
-            color: Look.mutedTextColor
-            wrapMode: Text.Wrap
-        }
+                Layout.alignment: Qt.AlignTop
+                spacing: Kirigami.Units.largeSpacing
 
-        LookCalendarHeatmap {
-            objectName: "todayHeatmap"
-            weeks: 12
-            levels: {
-                const bounds = [1, 3, 6, 10]
-                const l = {}
-                for (const d in page.perDay) {
-                    l[d] = bounds.filter(b => page.perDay[d] >= b).length
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Kirigami.Units.largeSpacing
+
+                    LookKpi {
+                        objectName: "dueCount"
+                        value: String(page.due.length)
+                        label: qsTr("techniques due")
+                    }
+                    LookLabel {
+                        Layout.fillWidth: true
+                        text: page.due.length === 0 ? qsTr("Everything is practised for today.")
+                              : qsTr("%1 unsure · %2 long ago · %3 new").arg(page.unsure).arg(page.longAgo).arg(page.fresh)
+                        color: Look.mutedTextColor
+                        wrapMode: Text.Wrap
+                    }
                 }
-                return l
-            }
-            tips: {
-                const t = {}
-                for (const d in page.perDay) {
-                    t[d] = qsTr("%n technique(s)", "", page.perDay[d])
+                LookButton {
+                    objectName: "startTraining"
+                    visible: page.due.length > 0
+                    role: LookButton.Role.Primary
+                    icon.name: "media-playback-start"
+                    text: qsTr("Start training")
+                    onClicked: page.startTraining()
                 }
-                return t
+                LookLabel {
+                    Layout.fillWidth: true
+                    visible: page.due.length > 0 && page.playable.length < page.due.length
+                    text: qsTr("%n of them without a video on this device: the training shows their name, practise from memory.", "", page.due.length - page.playable.length)
+                    color: Look.mutedTextColor
+                    wrapMode: Text.Wrap
+                }
             }
-            Accessible.name: qsTr("Practice days of the last 12 weeks")
-        }
-        LookLegend {
-            objectName: "todayLegend"
-            Layout.fillWidth: true
-            model: [{ color: Look.levelColor(0), text: qsTr("no practice") },
-                    { color: Look.levelColor(1), text: qsTr("1–2 techniques") },
-                    { color: Look.levelColor(2), text: "3–5" },
-                    { color: Look.levelColor(3), text: "6–9" },
-                    { color: Look.levelColor(4), text: qsTr("10 and more") }]
+            ColumnLayout {
+                objectName: "dueRight"
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                spacing: Kirigami.Units.largeSpacing
+
+                LookCalendarHeatmap {
+                    objectName: "todayHeatmap"
+                    weeks: 12
+                    levels: {
+                        const bounds = [1, 3, 6, 10]
+                        const l = {}
+                        for (const d in page.perDay) {
+                            l[d] = bounds.filter(b => page.perDay[d] >= b).length
+                        }
+                        return l
+                    }
+                    tips: {
+                        const t = {}
+                        for (const d in page.perDay) {
+                            t[d] = qsTr("%n technique(s)", "", page.perDay[d])
+                        }
+                        return t
+                    }
+                    Accessible.name: qsTr("Practice days of the last 12 weeks")
+                }
+                LookLegend {
+                    objectName: "todayLegend"
+                    Layout.fillWidth: true
+                    model: [{ color: Look.levelColor(0), text: qsTr("no practice") },
+                            { color: Look.levelColor(1), text: qsTr("1–2 techniques") },
+                            { color: Look.levelColor(2), text: "3–5" },
+                            { color: Look.levelColor(3), text: "6–9" },
+                            { color: Look.levelColor(4), text: qsTr("10 and more") }]
+                }
+            }
         }
 
         LookSectionLabel {
@@ -222,7 +246,7 @@ Kirigami.ScrollablePage {
         }
         GridLayout {
             Layout.fillWidth: true
-            columns: 2
+            columns: page.wide ? 4 : 2
             columnSpacing: Kirigami.Units.largeSpacing
 
             Repeater {
@@ -238,6 +262,7 @@ Kirigami.ScrollablePage {
                         color: Look.mutedTextColor
                     }
                     LookSpinBox {
+                        objectName: "intervalDays"
                         from: 1
                         to: 365
                         value: Practice.intervals[interval.index]

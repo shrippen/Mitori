@@ -57,10 +57,8 @@ Kirigami.Page {
         interval: 1600
         onTriggered: page.returnedId = ""
     }
-    // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
-    // a phone held sideways has about 20) keeps the list and the small player side by side.
-    readonly property int tabletHeight: 460
-    readonly property bool wide: width > height && (height >= tabletHeight || noteHold)     // a tablet sideways, not a phone
+    // A tablet sideways keeps the list and the small player side by side.
+    readonly property bool wide: Tablet.wide(width, height) || (width > height && noteHold)
     // The on-screen keyboard may shrink the page while a note is typed in the small player: from
     // the field's focus on the player stays until the page is high again or the player goes. A tap
     // on "Add" or a row takes the focus while the keyboard is still open.
@@ -72,7 +70,7 @@ Kirigami.Page {
         }
     }
     function endNoteHold() {
-        if (height >= tabletHeight && !(player && player.noteFocused)) {
+        if (height >= Tablet.minHeight && !(player && player.noteFocused)) {
             noteHold = false
         }
     }
