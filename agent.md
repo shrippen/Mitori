@@ -105,6 +105,8 @@ platform/       eine Implementierung je Plattform (Bildschirm wach, Helligkeit, 
   sind von Hand zu prüfen. Die CI kann das nicht (keine Videos im Repo).
 - Oberflächentest `app/tests/qml/tst_ui.qml` (ctest `ui`): lädt jede Seite offscreen und legt Bilder nach
   `<build>/ui-shots`; mit `MITORI_VIDEOS` spielt er auch ein Video. Neue Seiten bekommen dort einen Fall.
+  Wechsel von Stil und Sprache: `app/tests/qml-look/tst_look.qml` (ctest `look`, `look_shinki`), nur dort: `tst_ui.qml`
+  hielte Seitentypen im Cache der Engine fest.
 - Texte: Englisch im Code (`qsTr`), Deutsch in `app/i18n/mitori_de.ts` (`--target update_translations`); ein Test
   prüft, dass keine Übersetzung fehlt. `mitori_en.ts` hält nur englische Pluralformen (und lässt Englisch vor Deutsch
   gewinnen, wenn es in den Spracheinstellungen vorne steht).

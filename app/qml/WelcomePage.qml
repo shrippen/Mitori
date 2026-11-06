@@ -29,7 +29,11 @@ Kirigami.ScrollablePage {
         { glyph: "講", title: qsTr("Courses"), text: qsTr("The seminars from the calendar, a notebook for each.") }
     ]
 
-    // At once: a page popped may live on for the forward arrow, and the style asks for a restart.
+    // A new window (a change of style) comes back here, on this step (Main.keptPageList).
+    readonly property string keptPage: "WelcomePage.qml"
+    readonly property var keptState: ({ step: page.step })
+
+    // At once: a page popped may live on for the forward arrow.
     function finish() {
         Appearance.welcome()
         page.Kirigami.PageStack.pop()
@@ -99,13 +103,6 @@ Kirigami.ScrollablePage {
                 }
                 StyleChoice {
                     Layout.fillWidth: true
-                }
-                LookLabel {
-                    Layout.fillWidth: true
-                    visible: Appearance.restartNeeded
-                    wrapMode: Text.Wrap
-                    color: Look.mutedTextColor
-                    text: qsTr("The style changes when Mitori starts again.")
                 }
             }
 

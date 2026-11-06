@@ -10,7 +10,7 @@ Kirigami.ApplicationWindow {
     width: KanteStyle.unit(420)
     height: KanteStyle.unit(800)
 
-    // The style Mitori started with (Appearance): Breeze and Material are the platform's
+    // The style the window is built in (Appearance): Breeze and Material are the platform's
     // colours, Kante dark, Leinen light, Shinki the club newspaper's (paper, ink, one red).
     // Shinki and Kante are two themes of their own: neither takes the other's colours.
     readonly property bool platformStyle: Appearance.running === Appearance.Style.Breeze
@@ -74,11 +74,93 @@ Kirigami.ApplicationWindow {
         })
     }
     pageStack.initialPage: StartPage {}
+
+    // After a change of style (Appearance::rebuild) the pages of the old window, as keptPageList gave
+    // them. A page names itself with `keptPage` (and `keptState`, its properties); only pages
+    // without an unsaved input of their own do, and those are the only ways to the style choice.
+    property var keptPages: []
+    function keptPageList() {
+        // A field in focus saves when it is left.
+        root.contentItem.forceActiveFocus()
+        const start = root.pageStack.get(0)
+        const pages = [{ contentY: start && start.flickable ? start.flickable.contentY : 0 }]
+        for (let i = 1; i <= root.pageStack.currentIndex; i++) {
+            const page = root.pageStack.get(i)
+            const name = page ? page["keptPage"] : undefined
+            if (!name) {
+                break
+            }
+            pages.push({ page: name, state: page["keptState"] ?? {}, contentY: page.flickable ? page.flickable.contentY : 0 })
+        }
+        return pages
+    }
+    // At once, without the slide: the window opens as it was.
+    function restorePages() {
+        const duration = root.pageStack.columnView.scrollDuration
+        root.pageStack.columnView.scrollDuration = 0
+        for (const kept of root.keptPages) {
+            // The first entry is the start page, which is there already.
+            const page = kept.page ? root.pageStack.push(Qt.resolvedUrl(kept.page), kept.state) : root.pageStack.get(0)
+            if (page.flickable && kept.contentY > 0) {
+                root.scrollTo(page.flickable, kept.contentY)
+            }
+        }
+        Qt.callLater(() => { root.pageStack.columnView.scrollDuration = duration })
+    }
+
+    // The old place, or the page's end where the page is shorter now. A new page gets its size and
+    // its previews a moment later: it follows them until it stands, not after that.
+    function scrollTo(flickable, y) {
+        // A page gone (Back at once, the next change of style) reads undefined.
+        const gone = () => flickable.contentHeight === undefined
+        const stop = () => {
+            if (!gone()) {
+                flickable.contentHeightChanged.disconnect(place)
+                flickable.heightChanged.disconnect(place)
+            }
+        }
+        const place = () => {
+            if (gone()) {
+                return
+            }
+            const end = flickable.contentHeight + flickable.bottomMargin - flickable.height
+            flickable.contentY = Math.max(0, Math.min(y, end))
+            if (flickable.contentY === y) {
+                stop()
+            }
+        }
+        flickable.contentHeightChanged.connect(place)
+        flickable.heightChanged.connect(place)
+        Qt.callLater(place)
+        scrollSettled.stops.push(stop)
+        scrollSettled.restart()
+    }
+    readonly property int scrollSettle: 1000
+    Timer {
+        id: scrollSettled
+
+        property var stops: []
+        interval: root.scrollSettle
+        onTriggered: {
+            stops.forEach(stop => stop())
+            stops = []
+        }
+    }
+
     // The first start: the wizard over the start menu (it goes back there).
     Component.onCompleted: {
+        Appearance.adopt(root)
+        restorePages()
         if (!Appearance.welcomed) {
             pageStack.push(Qt.resolvedUrl("WelcomePage.qml"))
         }
+    }
+
+    // Android's bars in the window's ground.
+    Binding {
+        target: Appearance
+        property: "barColor"
+        value: Look.backgroundColor
     }
 
     // The sync: after it brought something the services read anew; a change asks for one soon.
