@@ -10,6 +10,8 @@ find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 find_package(KF6 REQUIRED COMPONENTS Kirigami)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+# The app password in the system's key store (store/secretstore).
+find_package(Qt6Keychain REQUIRED)
 # Pronunciation in the glossary; without the module the speaker buttons stay hidden.
 find_package(Qt6 6.8 QUIET COMPONENTS TextToSpeech)
 # The screen's brightness over Solid (platform/devicelevels) on Linux.
@@ -216,6 +218,8 @@ qt_add_qml_module(mitori_app
         services/backup.cpp
         store/webdav.h
         store/webdav.cpp
+        store/secretstore.h
+        store/secretstore.cpp
         store/syncaccount.h
         store/syncaccount.cpp
         services/syncjob.h
@@ -312,16 +316,19 @@ target_include_directories(monocypher PUBLIC third_party/monocypher)
 set_target_properties(monocypher PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # ZXing-C++ (app/third_party, Apache-2.0): the DVD's QR code (platform/qrreader).
 add_subdirectory(third_party/zxing-cpp)
-# Their licences ask that binaries carry them: shown in "About Mitori" (services/appearance).
-qt_add_resources(mitori_app "licences_bundled"
+# The licences of what is linked ask that binaries carry them: shown in "About Mitori"
+# (services/appearance).
+qt_add_resources(mitori_app "licences"
     PREFIX "/licences"
     BASE third_party
-    FILES third_party/zxing-cpp/ATTRIBUTION.txt third_party/zxing-cpp/LICENSE third_party/monocypher/LICENCE.md
+    FILES third_party/zxing-cpp/ATTRIBUTION.txt third_party/zxing-cpp/LICENSE third_party/qtkeychain/COPYING
+        third_party/monocypher/LICENCE.md
 )
 
 # The generated type registration includes the headers by name.
 target_include_directories(mitori_app PUBLIC catalog services store player platform)
 target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql Qt6::Network Qt6::Concurrent KF6::Kirigami monocypher ZXing)
+target_link_libraries(mitori_app PRIVATE Qt6Keychain::Qt6Keychain)
 if(NOT ANDROID)
     target_link_libraries(mitori_app PUBLIC Qt6::DBus)
 endif()
@@ -477,7 +484,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME backup COMMAND tst_backup)
 
     qt_add_executable(tst_sync tests/tst_sync.cpp services/sync.cpp services/sync.h services/syncjob.cpp services/syncjob.h
-        store/syncaccount.cpp store/syncaccount.h store/webdav.cpp store/webdav.h
+        store/secretstore.cpp store/secretstore.h store/syncaccount.cpp store/syncaccount.h store/webdav.cpp store/webdav.h
         store/backuparchive.cpp store/backuparchive.h store/zipreader.cpp store/zipreader.h
         store/zipwriter.cpp store/zipwriter.h store/mediastore.cpp store/mediastore.h
         services/practice.cpp services/practice.h store/practicelog.cpp store/practicelog.h store/tablemerge.cpp store/tablemerge.h
@@ -485,7 +492,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
         store/coursebook.cpp store/coursebook.h store/icsreader.cpp store/icsreader.h store/device.h
         platform/devicecalendar.cpp platform/devicecalendar.h catalog/catalog.cpp catalog/catalog.h store/notebookexport.cpp store/notebookexport.h)
     target_include_directories(tst_sync PRIVATE catalog services store platform)
-    target_link_libraries(tst_sync PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Concurrent Qt6::Test)
+    target_link_libraries(tst_sync PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Concurrent Qt6::Test Qt6Keychain::Qt6Keychain)
     set_target_properties(tst_sync PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME sync COMMAND tst_sync)
 
@@ -574,11 +581,13 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
         TEST_MEDIA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/media")
     set_target_properties(tst_ui PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME ui COMMAND tst_ui)
-    set_tests_properties(ui PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material")
+    # A key store that cannot answer, the same on every machine: never the developer's wallet.
+    set(NO_KEY_STORE "QTKEYCHAIN_BACKEND=kwallet6;DBUS_SESSION_BUS_ADDRESS=unix:path=/nonexistent")
+    set_tests_properties(ui PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material;${NO_KEY_STORE}")
     # The same pages as Shinki (shinki/README.md, "Prüfen"); its shots in ui-shots/shinki.
     add_test(NAME ui_shinki COMMAND tst_ui)
     set_tests_properties(ui_shinki PROPERTIES ENVIRONMENT
-        "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material;MITORI_TEST_STYLE=shinki")
+        "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material;MITORI_TEST_STYLE=shinki;${NO_KEY_STORE}")
     # The pages' times with five years of use (budgets catch what became slow).
     qt_add_executable(tst_perf tests/tst_perf.cpp)
     target_link_libraries(tst_perf PRIVATE mitori_app mitori_appplugin Qt6::QuickTest Qt6::Sql)
@@ -587,7 +596,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
         PERF_DATA_DIR="${CMAKE_BINARY_DIR}/perf-data" MITORI_DATEN_JSON="${MITORI_DATEN_JSON}")
     set_target_properties(tst_perf PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME perf COMMAND tst_perf)
-    set_tests_properties(perf PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material")
+    set_tests_properties(perf PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material;${NO_KEY_STORE}")
     # Both runs share the test data (ui-data): never at the same time.
     set_tests_properties(ui ui_shinki PROPERTIES RESOURCE_LOCK ui_data)
 endif()

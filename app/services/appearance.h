@@ -32,7 +32,7 @@ class Appearance : public QObject
     Q_PROPERTY(bool restartNeeded READ restartNeeded NOTIFY changed)
     Q_PROPERTY(bool welcomed READ welcomed NOTIFY changed)
     Q_PROPERTY(QString version READ version CONSTANT)
-    Q_PROPERTY(QString thirdPartyLicences READ thirdPartyLicences CONSTANT)
+    Q_PROPERTY(QString licences READ licences CONSTANT)
 
 public:
     enum class Style { Breeze, Material, Kante, Leinen, Shinki };
@@ -48,7 +48,7 @@ public:
     bool restartNeeded() const;
     bool welcomed() const { return m_welcomed; }
     QString version() const;
-    QString thirdPartyLicences() const;
+    QString licences() const;
 
     // The styles this device offers, in order: [{style, name, text}].
     Q_INVOKABLE QVariantList styles() const;

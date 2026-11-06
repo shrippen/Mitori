@@ -20,7 +20,24 @@ finish-args:
   - --talk-name=org.kde.Solid.PowerManagement   # screen brightness (player gesture)
   - --filesystem=xdg-videos:ro   # the video folder (settings) under ~/Videos until the bundles come
 
+# The app password: in the sandbox libsecret (runtime) keeps it in an encrypted file under the app's
+# data, keyed by the Secret portal; that needs no permission. Deliberately no
+# --talk-name=org.freedesktop.secrets: it would open all the user's secrets to the app, and with
+# the portal libsecret ignores it anyway. Without the portal the settings show a note.
 modules:
+  # The system's key store (store/secretstore).
+  - name: qtkeychain
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_TRANSLATIONS=OFF
+      - -DBUILD_TESTING=OFF
+    cleanup: [/include, /lib/cmake, /mkspecs]
+    sources:
+      - type: archive
+        url: https://github.com/frankosterfeld/qtkeychain/archive/refs/tags/0.17.0.tar.gz
+        sha256: 3b85c3929034b0a99da777130c34d99f006fcd3a9d56564159399a33fee0e504
+
   # tools/daten.py (run by the build); build time only.
   - name: pyyaml
     buildsystem: simple

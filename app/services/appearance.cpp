@@ -113,10 +113,11 @@ QString Appearance::version() const
     return QStringLiteral(MITORI_VERSION);
 }
 
-QString Appearance::thirdPartyLicences() const
+QString Appearance::licences() const
 {
     QStringList texts;
-    for (const char *name : {":/licences/zxing-cpp/ATTRIBUTION.txt", ":/licences/zxing-cpp/LICENSE", ":/licences/monocypher/LICENCE.md"}) {
+    for (const char *name : {":/licences/zxing-cpp/ATTRIBUTION.txt", ":/licences/zxing-cpp/LICENSE", ":/licences/qtkeychain/COPYING",
+                             ":/licences/monocypher/LICENCE.md"}) {
         QFile file(QString::fromLatin1(name));
         if (file.open(QIODevice::ReadOnly)) {
             texts << QString::fromUtf8(file.readAll());
