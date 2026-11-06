@@ -16,7 +16,8 @@ Kirigami.Page {
     // Called with the code (the page that opened the camera).
     property var done: null
     property bool foreignSeen: false
-    property bool cameraFailed: camera.error !== Camera.NoError
+    // Only a camera we run: on a machine without any, Camera has an error from the start.
+    property bool cameraFailed: CodeScanner.liveCamera && camera.error !== Camera.NoError
 
     property Item lookScope: LookScope { target: page }
     background: Rectangle { color: Look.backgroundColor }
@@ -111,7 +112,12 @@ Kirigami.Page {
             objectName: "scanCancel"
             Layout.alignment: Qt.AlignHCenter
             text: qsTr("Cancel")
-            onClicked: page.Kirigami.PageStack.pop()
+            // A second tap while the page slides out would pop the page below.
+            onClicked: {
+                if (page.isCurrentPage) {
+                    page.Kirigami.PageStack.pop()
+                }
+            }
         }
     }
 }
