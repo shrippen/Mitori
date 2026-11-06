@@ -11,6 +11,7 @@
 #include <QNetworkRequest>
 #include <QSaveFile>
 #include <QSettings>
+#include <QStorageInfo>
 #include <QtConcurrent/QtConcurrentRun>
 
 namespace {
@@ -443,4 +444,13 @@ bool Bundles::remove(const QString &id)
     const bool ok = m_shelf->remove(id);
     emit changed();
     return ok;
+}
+
+qint64 Bundles::freeSpace() const
+{
+    // The shelf's folder comes with the first bundle: until then the nearest that exists.
+    QDir dir(m_shelf->root());
+    while (!dir.exists() && dir.cdUp()) {
+    }
+    return QStorageInfo(dir).bytesAvailable();
 }

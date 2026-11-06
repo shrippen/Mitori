@@ -41,6 +41,8 @@ class Bundles : public QObject
     Q_PROPERTY(bool wifiOnly READ wifiOnly WRITE setWifiOnly NOTIFY changed)
     // Bytes of the loaded videos.
     Q_PROPERTY(qint64 size READ size NOTIFY changed)
+    // Free on the disk that holds the videos (the storage bar), in bytes.
+    Q_PROPERTY(qint64 freeSpace READ freeSpace NOTIFY changed)
     // Bundles with a newer version than the one loaded (the start menu's hint).
     Q_PROPERTY(int updates READ updates NOTIFY changed)
     Q_PROPERTY(QString errorString READ errorString NOTIFY changed)
@@ -68,6 +70,7 @@ public:
     bool wifiOnly() const;
     void setWifiOnly(bool on);
     qint64 size() const { return m_shelf->size(); }
+    qint64 freeSpace() const;
     int updates() const;
     QString errorString() const { return m_error; }
 

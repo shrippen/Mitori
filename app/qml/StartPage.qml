@@ -152,7 +152,7 @@ Kirigami.ScrollablePage {
                 visible: Programme.errorString === ""
                 glyph: "稽"
                 text: qsTr("Practice today")
-                hint: due > 0 ? qsTr("%n due", "", due) : qsTr("all practised")
+                hint: (due > 0 ? qsTr("%n due", "", due) : qsTr("all practised")) + " · " + programmeTile.current.title
                 onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("TodayPage.qml"))
             }
 

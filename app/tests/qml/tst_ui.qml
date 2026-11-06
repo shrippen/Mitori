@@ -2975,6 +2975,63 @@ TestCase {
         return found
     }
 
+    // The grade chips say how far each grade is; the storage bar has its legend.
+    function test_8p_grade_chips_and_storage() {
+        const width = window.width, height = window.height
+        window.width = 360
+        window.height = 800
+        wait(100)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        const chips = findChild(page, "gradeChips")
+        const k5 = chips.itemAt(page.grades.findIndex(g => g.id === "k5"))
+        const ids = Programme.entries("aikido", "k5").filter(r => r.kind === "entry").map(r => r.id)
+        compare(k5.text, page.grades.find(g => g.id === "k5").name + " " + Practice.counts(ids)[4] + "/" + ids.length)
+        const programmeList = findChild(page, "programmeList")
+        tryVerify(() => programmeList.height < 1000)
+        wait(800)
+        compare(programmeList.contentY, programmeList.originY, "the list opens at its top")
+        shot("8p-chips")
+        window.pageStack.pop()
+        const videos = push("VideosPage")
+        verify(findChild(videos, "storageBar").visible)
+        compare(findChild(videos, "storageLegend").model.length, 3)
+        shot("8p-storage")
+        window.pageStack.pop()
+        window.width = width
+        window.height = height
+        wait(100)
+    }
+
+    // On a phone the row of the last technique lights up on the way back, then no longer.
+    function test_8p_row_lights_up_on_return() {
+        const width = window.width, height = window.height
+        window.width = 400
+        window.height = 800
+        wait(100)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        tryVerify(() => !page.split)
+        const rows = page.rows.filter(r => r.kind === "entry")
+        const last = rows[rows.length - 1]
+        const player = push("PlayerPage", { playlist: rows, index: rows.length - 1 })
+        page.lastId = last.id
+        tryVerify(() => window.pageStack.currentItem === player)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        compare(page.returnedId, last.id)
+        const list = findChild(page, "programmeList")
+        const row = page.rows.findIndex(r => r.id === last.id)
+        tryVerify(() => list.itemAtIndex(row) !== null)
+        tryVerify(() => page.returnedId === "", 3000)
+        window.pageStack.pop()
+        window.width = width
+        window.height = height
+        wait(100)
+    }
+
     function test_8o_nothing_past_the_edge_data() {
         // Twice the scale on a phone (206 px) is not there yet: ROADMAP, QA round of 5 Nov 2026.
         return [{ tag: "360", width: 360, height: 800 }]

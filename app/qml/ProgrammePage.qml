@@ -28,6 +28,21 @@ Kirigami.Page {
     // The entry shown last in the player, marked when the list comes back (on a tablet: the one
     // playing beside the list).
     property string lastId: ""
+    // On a phone that row lights up for a moment on the way back, and comes into view.
+    property string returnedId: ""
+    // A moment later: at once the list, shown again, goes back to its top.
+    Timer {
+        id: returnedInView
+
+        interval: 50
+        onTriggered: list.positionViewAtIndex(page.rows.findIndex(r => r.id === page.returnedId), ListView.Contain)
+    }
+    Timer {
+        id: returnedOff
+
+        interval: 1600
+        onTriggered: page.returnedId = ""
+    }
     // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
     // a phone held sideways has about 20) keeps the list and the small player side by side.
     readonly property bool wide: width > height && height >= 460     // a tablet sideways, not a phone
@@ -78,7 +93,13 @@ Kirigami.Page {
                 LookChip {
                     required property var modelData
 
-                    text: modelData.name
+                    // How far the grade is (clickdummy `.gchip`): exam-ready of all its techniques.
+                    readonly property var ids: Programme.entries(page.discipline, modelData.id)
+                        .filter(r => r.kind === "entry").map(r => r.id)
+                    readonly property int ready: Practice.revision >= 0 ? Practice.counts(ids)[4] : 0
+                    text: ids.length ? modelData.name + " " + ready + "/" + ids.length : modelData.name
+                    Accessible.name: ids.length ? qsTr("%1, %2 of %3 exam-ready").arg(modelData.name).arg(ready).arg(ids.length)
+                                                : modelData.name
                     checkable: true
                     choice: true        // the page holds the grade: a tap only reports it
 
@@ -108,6 +129,13 @@ Kirigami.Page {
                 id: list
 
                 objectName: "programmeList"
+                function settle() {
+                    if (!moving && headerItem && contentY - originY < headerItem.height) {
+                        Qt.callLater(positionViewAtBeginning)
+                    }
+                }
+                onHeightChanged: settle()
+                onOriginYChanged: settle()
                 model: page.rows
                 reuseItems: true
                 // Up and Down scroll (the page's keys) also from a focused row; the list has no
@@ -119,6 +147,10 @@ Kirigami.Page {
                 header: ColumnLayout {
                     width: ListView.view.width
                     spacing: Kirigami.Units.smallSpacing
+
+                    // Its height settles after the page opens (its width, the wrapping chips): the
+                    // list stays at its top instead of cutting off the first line.
+                    onHeightChanged: list.settle()
 
                     // A grade's meaning, content and waiting time (Shinki Toho has them).
                     LookLabel {
@@ -235,7 +267,7 @@ Kirigami.Page {
                             leadingText: entry.nr ? String(entry.nr) : ""
                             text: entry.title + (entry.kind === "entry" && entry.extra && !entry.nr ? " (" + entry.extra + ")" : "")
                             subtitle: [entry.jp, entry.nr ? entry.extra : entry.text].filter(x => x).join(" · ")
-                            selected: entry.id === page.lastId
+                            selected: entry.id === (page.split ? page.lastId : page.returnedId)
                             onClicked: page.open(entry)
                             Keys.onTabPressed: event => page.tabRow(rowLoader.index, 1, event)
                             Keys.onBacktabPressed: event => page.tabRow(rowLoader.index, -1, event)
@@ -319,6 +351,14 @@ Kirigami.Page {
     onIsCurrentPageChanged: {
         if (!isCurrentPage && page.player) {
             page.player.pause()
+        }
+        if (isCurrentPage && !page.split && page.lastId !== "") {
+            const row = page.rows.findIndex(r => r.id === page.lastId)
+            if (row >= 0) {
+                page.returnedId = page.lastId
+                returnedOff.restart()
+                returnedInView.start()
+            }
         }
     }
     // The keys scroll the list as ScrollablePage did (Up, Down, Page Up, Page Down, Home, End).
@@ -426,6 +466,7 @@ Kirigami.Page {
 
     function play(entry) {
         sheet.close()
+        bigResume = null
         if (page.split) {
             page.lastId = entry.id
             return

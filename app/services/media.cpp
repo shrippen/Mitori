@@ -67,3 +67,8 @@ QString Media::importCapture(const QString &path)
     QFile::remove(path);
     return name;
 }
+
+qint64 Media::size() const
+{
+    return m_store->size();
+}
