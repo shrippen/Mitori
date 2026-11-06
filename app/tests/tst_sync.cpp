@@ -1080,8 +1080,8 @@ private slots:
         FakeDav dav;
         const Device a = device(u"l-a"_s);
         const Device b = device(u"l-b"_s);
-        Sync one(a.practice, a.courses, a.media, a.folder);
-        Sync two(b.practice, b.courses, b.media, b.folder);
+        Sync one(a.practice, a.courses, a.media, a.folder, a.store);
+        Sync two(b.practice, b.courses, b.media, b.folder, b.store);
         for (Sync *s : {&one, &two}) {
             s->setAccount(dav.url(), u"ich"_s, u"geheim"_s, s == &one ? u"Eins"_s : u"Zwei"_s);
             s->setEnabled(true);
