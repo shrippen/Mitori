@@ -707,7 +707,8 @@ TestCase {
             Practice.deleteNote(n.uid)
         }
         window.pageStack.pop()
-        tryVerify(() => !Levels.held, 2000, "the screen may sleep again")
+        // The page goes after its slide: on a busy machine (the CI, under Shinki) over two seconds.
+        tryVerify(() => !Levels.held, 10000, "the screen may sleep again")
     }
 
     // Swipe on the picture: up on the left half brightens the screen, down on the right half
