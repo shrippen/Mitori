@@ -1490,7 +1490,7 @@
     <message>
         <location filename="../qml/PlayerView.qml" line="719"/>
         <location filename="../qml/PlayerView.qml" line="746"/>
-        <location filename="../qml/PlayerView.qml" line="903"/>
+        <location filename="../qml/PlayerView.qml" line="908"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
@@ -1579,12 +1579,22 @@
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="844"/>
+        <location filename="../qml/PlayerView.qml" line="823"/>
+        <source>Previous</source>
+        <translation>Vorige</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerView.qml" line="833"/>
+        <source>Next</source>
+        <translation>Nächste</translation>
+    </message>
+    <message>
+        <location filename="../qml/PlayerView.qml" line="849"/>
         <source>Today&apos;s playlist · %1 of %2 practised</source>
         <translation>Heutige Playliste · %1 von %2 geübt</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="865"/>
+        <location filename="../qml/PlayerView.qml" line="870"/>
         <source>practised</source>
         <translation>geübt</translation>
     </message>
@@ -1623,12 +1633,12 @@
         <translation>In Zeitlupe stumm</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="820"/>
+        <location filename="../qml/PlayerView.qml" line="824"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="829"/>
+        <location filename="../qml/PlayerView.qml" line="834"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>

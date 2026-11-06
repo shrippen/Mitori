@@ -810,14 +810,18 @@ Item {
                     }
                 }
 
+                // Short words: both buttons are as wide as they need, and with another font the
+                // long ones pushed the whole column past the edge of a 360 px phone.
                 RowLayout {
+                    objectName: "neighbourRow"
                     Layout.fillWidth: true
                     visible: !page.landscape
 
                     LookToolButton {
                         enabled: page.index > 0
                         icon.name: "media-skip-backward"
-                        text: qsTr("Previous technique")
+                        text: qsTr("Previous")
+                        Accessible.name: qsTr("Previous technique")
                         onClicked: page.go(-1)
                     }
                     Item {
@@ -826,7 +830,8 @@ Item {
                     LookToolButton {
                         enabled: page.index < page.playlist.length - 1
                         icon.name: "media-skip-forward"
-                        text: qsTr("Next technique")
+                        text: qsTr("Next")
+                        Accessible.name: qsTr("Next technique")
                         onClicked: page.go(1)
                     }
                 }

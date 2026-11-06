@@ -403,6 +403,7 @@ Kirigami.Page {
 
     // A row chosen in the list plays beside it; the list shows the row of the technique playing.
     onLastIdChanged: {
+        bigResume = null        // another technique: what full screen left is no longer its place
         const i = page.playlist.findIndex(r => r.id === page.lastId)
         if (page.player && i >= 0 && page.player.index !== i) {
             page.player.index = i
