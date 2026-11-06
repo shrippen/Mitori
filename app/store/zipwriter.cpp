@@ -75,6 +75,13 @@ bool ZipWriter::write(const QByteArray &bytes)
     return m_ok;
 }
 
+qint64 ZipWriter::sizeOf(const QString &name, qint64 bytes)
+{
+    constexpr qint64 kLocalSize = 30;
+    constexpr qint64 kCentralSize = 46;
+    return kLocalSize + kCentralSize + 2 * name.toUtf8().size() + bytes;
+}
+
 bool ZipWriter::add(const QString &name, const QByteArray &data, const QDateTime &modified)
 {
     const QDateTime local = modified.toLocalTime();

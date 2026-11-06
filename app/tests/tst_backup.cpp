@@ -540,17 +540,29 @@ private slots:
         QVERIFY(!media.has(u"x.jpg"_s));
     }
 
-    // A name typed without the suffix: the open dialog's filter would never show the file again.
-    void addsTheSuffix()
+    // Exactly the file it is given: a portal's path is the granted file, another name would be a
+    // hidden file nobody sees. The suffix for the built-in dialog comes from SavePlace.
+    void writesTheGivenFile()
     {
         const Device d = device(u"endung"_s);
         Backup backup(d.practice, d.courses, d.media, d.work);
-        QVERIFY(backup.save(QUrl::fromLocalFile(m_dir.filePath(u"sicherung"_s))));
-        QVERIFY(QFile::exists(m_dir.filePath(u"sicherung.zip"_s)));
-        QVERIFY(!QFile::exists(m_dir.filePath(u"sicherung"_s)));
-        QCOMPARE(backup.savedTo(), m_dir.filePath(u"sicherung.zip"_s));
-        QVERIFY(backup.save(QUrl::fromLocalFile(m_dir.filePath(u"b.ZIP"_s))));
-        QVERIFY(QFile::exists(m_dir.filePath(u"b.ZIP"_s)));
+        const QString granted = m_dir.filePath(u"y.alt"_s);
+        QVERIFY(backup.save(QUrl::fromLocalFile(granted)));
+        QVERIFY2(QFile::exists(granted), qPrintable(backup.savedTo()));
+        QVERIFY(!QFile::exists(granted + u".zip"_s));
+        QCOMPARE(backup.savedTo(), granted);
+    }
+
+    // A folder is no name: "~/" must not become a hidden file ".zip" in it.
+    void folderIsNoName()
+    {
+        const QString folder = m_dir.filePath(u"ordner"_s);
+        QVERIFY(QDir().mkpath(folder));
+        const Device d = device(u"ordner-geraet"_s);
+        Backup backup(d.practice, d.courses, d.media, d.work);
+        QVERIFY(!backup.save(QUrl::fromLocalFile(folder + u'/')));
+        QVERIFY(!backup.errorString().isEmpty());
+        QVERIFY(!QFile::exists(folder + u"/.zip"_s));
     }
 
     // A file that is no backup, and one of a newer format, are refused with a reason.
