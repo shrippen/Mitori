@@ -183,10 +183,14 @@ Item {
     function willPlay() {
         return player.playing || (startPending && autoPlay && !holdStart)
     }
+    // Where it stands, or will stand when its file is loaded.
+    function placeNow() {
+        return startPending ? startAt : player.position
+    }
     // What a pane made anew needs of this one (the programme's small player).
     function restState() {
         return { id: current.id, rate: player.playbackRate, looping: looping, playing: willPlay(),
-                 source: player.source.toString(), position: startPending ? startAt : player.position }
+                 source: player.source.toString(), position: placeNow() }
     }
     // Another list, keeping technique `id` if it is in it, else its first. Not the user's choice:
     // a standing video stands at the new technique.

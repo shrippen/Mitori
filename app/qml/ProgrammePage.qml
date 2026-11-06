@@ -632,18 +632,21 @@ Kirigami.Page {
         bigResume = null
     }
     function openBig() {
+        const wasPlaying = page.player.willPlay()   // before started: it asks autoPlay
         page.started = true     // full screen plays
         page.cameFromPlayer = true
         const small = page.player
         const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
         const player = window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), {
-            playlist: small.playlist, index: small.index, bigOnly: true, startAt: small.position, looping: small.looping
+            playlist: small.playlist, index: small.index, bigOnly: true, startAt: small.placeNow(), looping: small.looping
         }) as PlayerPage
         player.setSpeed(small.rate)
         player.big = true
         // Back in the small player: the same place, tempo and loop.
+        // Left before its file loaded, full screen played nothing: as the small player was.
         player.bigEnded.connect((position, rate, looping, playing) => {
-            bigResume = { position: position, rate: rate, looping: looping, playing: playing }
+            bigResume = { position: position, rate: rate, looping: looping,
+                          playing: player.startPending ? wasPlaying : playing }
             resumeFromBig()
         })
         player.shown.connect(id => page.lastId = id)

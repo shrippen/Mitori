@@ -3181,14 +3181,46 @@ TestCase {
         check()
     }
 
-    // Left before its file loaded: it was going to play, so the small player plays.
-    function test_2u_c_full_screen_left_while_loading() {
+    // Left before its file loaded: full screen played nothing, so the small player stays as it was,
+    // at its place (far inside the chapter: a run from the start cannot reach it in time).
+    function test_2u_c_full_screen_left_while_loading_data() {
+        const back = () => window.pageStack.goBack()
+        const button = big => findChild(big, "bandBack").clicked()
+        return [ { tag: "playing, back", playing: true, leave: back },
+                 { tag: "playing, button", playing: true, leave: button },
+                 { tag: "standing, back", playing: false, leave: back },
+                 { tag: "standing, button", playing: false, leave: button } ]
+    }
+    function test_2u_c_full_screen_left_while_loading(data) {
         const page = tabletProgramme(clipFolder("long"))
         chapterLoaded(page)
+        rowPlays(page, 0)
+        const place = page.player.from + 100000
+        page.player.seek(place)
+        tryVerify(() => Math.abs(page.player.position - place) < 1000, 5000)
+        if (!data.playing) {
+            page.player.pause()
+            tryVerify(() => !page.player.playing)
+        }
+
         page.openBig()
-        window.pageStack.goBack()
+        data.leave(window.pageStack.currentItem)
         tryVerify(() => window.pageStack.currentItem === page)
-        tryVerify(() => page.player.playing, 5000, "plays on")
+        if (data.playing) {
+            tryVerify(() => page.player.playing, 5000, "plays on")
+        } else {
+            staysStanding(page.player, "stood, stays standing")
+        }
+        tryVerify(() => Math.abs(page.player.position - place) < 3000, 3000, page.player.position + ", was at " + place)
+    }
+
+    // Full screen from a pane still loading: the place that pane is going to.
+    function test_2u_c_full_screen_from_loading_pane() {
+        const page = tabletProgramme()
+        const place = page.player.from + 100000
+        page.player.startAt = place
+        page.openBig()
+        compare(window.pageStack.currentItem.startAt, place)
     }
 
     // Saved while the file loads: the place a pane still has to go to, not the file's start.

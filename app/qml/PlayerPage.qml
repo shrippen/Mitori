@@ -28,6 +28,7 @@ Kirigami.Page {
     readonly property alias end: view.end
     readonly property alias frameMs: view.frameMs
     readonly property alias position: view.position
+    readonly property alias startPending: view.startPending
     readonly property alias playing: view.playing
     readonly property alias duration: view.duration
     readonly property alias rate: view.rate
@@ -95,7 +96,7 @@ Kirigami.Page {
             return
         }
         if (bigOnly && big) {
-            bigEnded(view.position, view.rate, view.looping, view.willPlay())
+            bigEnded(view.placeNow(), view.rate, view.looping, view.willPlay())
         }
         big = false
         view.pause()
@@ -203,7 +204,7 @@ Kirigami.Page {
         onBigRequested: page.big = true
         onBigLeft: {
             if (page.bigOnly) {
-                page.bigEnded(view.position, view.rate, view.looping, view.willPlay())
+                page.bigEnded(view.placeNow(), view.rate, view.looping, view.willPlay())
                 page.leave()
                 return
             }
