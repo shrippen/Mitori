@@ -32,7 +32,8 @@ FileDialog {
     }
 
     fileMode: FileDialog.SaveFile
-    defaultSuffix: "zip"
+    // Only Qt's own dialog: it would rename a portal's answer, and that file is the granted one.
+    defaultSuffix: SavePlace.asksItself ? "zip" : ""
     nameFilters: [qsTr("ZIP archives (*.zip)")]
     currentFolder: StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]
     options: SavePlace.asksItself ? FileDialog.DontConfirmOverwrite : 0

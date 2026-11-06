@@ -3330,6 +3330,8 @@ TestCase {
         mouseClick(findChild(sheet, "exportSave"))
         tryVerify(() => !sheet.visible)
         const dialog = findChild(book, "exportDialog")
+        // Only for Qt's own dialog: it would rename a portal's answer "…/doc/ab12/y" to "y.zip".
+        compare(dialog.defaultSuffix, SavePlace.asksItself ? "zip" : "")
         tryVerify(() => dialog.visible)
         dialog.close()
         tryVerify(() => !dialog.visible)
