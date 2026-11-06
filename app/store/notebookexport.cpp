@@ -66,6 +66,9 @@ QByteArray markdown(const CourseBook::Course &c, const QList<CourseBook::Entry> 
                       ? QStringLiteral("  \n![%1](%2)").arg(tr("Photo"), file)
                       : QStringLiteral("  \n[%1](%2)").arg(tr("Voice note"), file);
         }
+        if (!e.techniques.isEmpty()) {
+            md += QStringLiteral("  \n⌗ %1").arg(e.techniques.join(QStringLiteral(", ")));
+        }
         md += QLatin1Char('\n');
     }
     return md.toUtf8();

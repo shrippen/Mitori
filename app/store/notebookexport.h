@@ -14,6 +14,7 @@ class QIODevice;
 //                                ## Samstag, 6. Juni 2026
 //                                **15:30** Fußstellung beim Tenkan
 //                                ![Foto](bilder/01-foto.jpg)
+//                                ⌗ Shiho-nage · Katate-dori · Aikido 5. Kyu
 //   bilder/01-foto.jpg
 //   audio/02-sprachnotiz.m4a
 namespace NotebookExport {
