@@ -14,6 +14,7 @@ import "grades.js" as Grades
 // calendar" and the official announcement where the calendar names one, then the entries by
 // day; a field at the foot adds one. Press and hold an entry (or Enter on it) to change or
 // delete it. Notes stay on the device; export comes with photos and voice notes.
+// ⌗ links an entry to techniques (TechniquePickerPage); its chips lead to their notes.
 // On a course that has not ended an exam can be planned (discipline and grade), with its
 // waiting time checked against the course's first day.
 Kirigami.ScrollablePage {
@@ -25,7 +26,45 @@ Kirigami.ScrollablePage {
     background: Rectangle { color: Look.backgroundColor }
 
     required property string uid
+    // Out of the stack, also from the middle; the top page stays the one shown.
+    function leave() {
+        const row = page.Kirigami.PageStack.pageStack
+        row.removePage(page)
+        row.currentIndex = row.depth - 1
+    }
+    // An entry to show on opening (from a technique's notes): scrolled to, with the focus.
+    property string entryUid: ""
+    property Item entryShown: null
+    onEntryShownChanged: {
+        if (entryShown) {
+            showTimer.restart()
+        }
+    }
+    // After the first layout: only then the entry has its place.
+    Timer {
+        id: showTimer
+
+        interval: Kirigami.Units.shortDuration
+        onTriggered: {
+            const view = page.flickable
+            const item = page.entryShown
+            if (!item) {
+                return
+            }
+            const y = item.mapToItem(view.contentItem, 0, 0).y - Kirigami.Units.largeSpacing
+            view.contentY = Math.max(0, Math.min(y, view.contentHeight - view.height))
+            item.forceActiveFocus()
+            page.entryUid = ""      // later changes on the page leave the view where it is
+        }
+    }
     readonly property var course: Courses.revision >= 0 ? Courses.notebook(uid) : ({})
+    // The notebook deleted (here, on a second page of it, by a sync): no empty page stays behind.
+    readonly property bool gone: !course.uid
+    onGoneChanged: {
+        if (gone) {
+            Qt.callLater(page.leave)
+        }
+    }
     readonly property var entries: Courses.revision >= 0 ? Courses.entries(uid) : []
     // [{key, day: Date, entries: [...]}] in the order written (a course's days run forward).
     readonly property var days: {
@@ -331,6 +370,11 @@ Kirigami.ScrollablePage {
                             readonly property var modelData: entryItem.modelData
 
                             objectName: "courseEntry"
+                            Component.onCompleted: {
+                                if (entryItem.modelData.uid === page.entryUid) {
+                                    page.entryShown = entryItemLabel
+                                }
+                            }
                             Layout.fillWidth: true
                             text: entryItem.modelData.created.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) + "  " + (entryItem.modelData.text || page.mediaWord(entryItem.modelData.media))
                             wrapMode: Text.Wrap
@@ -360,6 +404,43 @@ Kirigami.ScrollablePage {
                         MediaView {
                             Layout.fillWidth: true
                             media: entryItem.modelData.media || ""
+                        }
+
+                        // Its techniques (a chip opens their notes) and ⌗ to change them.
+                        Flow {
+                            id: techniqueFlow
+
+                            Layout.fillWidth: true
+                            spacing: Kirigami.Units.smallSpacing
+
+                            Repeater {
+                                model: entryItem.modelData.techniques
+
+                                LookChip {
+                                    required property var modelData
+                                    readonly property string label: Programme.techniqueLabel(modelData)
+
+                                    objectName: "entryTechnique"
+                                    width: Math.min(implicitWidth, techniqueFlow.width)
+                                    text: "↗ " + (label || qsTr("Technique no longer in the programme"))
+                                    onClicked: {
+                                        const known = Programme.entry(modelData)
+                                        page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), {
+                                            entry: known.id ? known : { id: modelData, title: qsTr("Technique no longer in the programme") }
+                                        })
+                                    }
+                                }
+                            }
+                            LookButton {
+                                objectName: "linkTechnique"
+                                role: LookButton.Role.Quiet
+                                text: "⌗ " + qsTr("Link technique")
+                                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("TechniquePickerPage.qml"), {
+                                    course: page.uid,
+                                    entryUid: entryItem.modelData.uid
+                                })
+                                Accessible.name: qsTr("Link technique")
+                            }
                         }
                     }
                 }
@@ -452,11 +533,7 @@ Kirigami.ScrollablePage {
         title: qsTr("Delete notebook?")
         acceptText: qsTr("Delete")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
-        onAccepted: {
-            if (Courses.remove(page.uid)) {
-                page.Kirigami.PageStack.pop()
-            }
-        }
+        onAccepted: Courses.remove(page.uid)
 
         LookLabel {
             width: parent.width
