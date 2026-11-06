@@ -206,7 +206,7 @@ Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
   Bewertung und Steuerzeilen des Players brauchen eine schmale Form.
 - Lehrgangsnotizen mit Technik verbinden (⌗, Eintrag auch bei der Technik), QR-Code, Tablet nach Vorlage (Blatt
   rechts, zwei Spalten, Lehrgänge und Einstellungen als Liste und Seite).
-- Programmdaten auf Englisch, App-Passwort im Schlüsselbund, Abschlussseite des Trainings.
+- Programmdaten auf Englisch, App-Passwort im Schlüsselbund.
 - Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).
 
 Offen, klein:
