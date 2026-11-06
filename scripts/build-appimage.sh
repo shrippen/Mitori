@@ -5,8 +5,8 @@
 #
 # Usage: ./scripts/build-appimage.sh   → dist/appimage/Mitori-<version>-x86_64.AppImage
 # Needs: cmake, ninja, a C++20 compiler, git, python3 with PyYAML, pip, the GL/EGL and xkbcommon
-# development files, libspeechd (pronunciation), libpulse (Qt Multimedia links it), curl, and network
-# access.
+# development files, libspeechd (pronunciation), libpulse (Qt Multimedia links it), libsecret's
+# development files (QtKeychain), curl, and network access.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -15,6 +15,7 @@ VERSION="$(sed -n 's/^project(mitori VERSION \([0-9.]*\).*/\1/p' "$ROOT/app/CMak
 
 QT_VER="6.11.3"
 KF6_VERSION="6.30.0"
+QTKEYCHAIN_VERSION="0.17.0"
 QT="$HOME/Qt/$QT_VER/gcc_64"
 PREFIX="${KF6_LINUX:-$HOME/kf6-linux}"
 ARCH="$(uname -m)"
@@ -36,7 +37,7 @@ if [ ! -d "$QT/lib/cmake/Qt6ShaderTools" ] || [ ! -d "$QT/lib/cmake/Qt6Multimedi
     aqt install-qt linux desktop "$QT_VER" linux_gcc_64 -m qtshadertools qtmultimedia qtspeech -O "$HOME/Qt" 2>&1 | show 3
 fi
 
-# ── 2. KF6 into $PREFIX ──
+# ── 2. KF6 and QtKeychain into $PREFIX ──
 build() { # name source-dir [cmake args...]
     local name="$1" src="$2"; shift 2
     info "Building $name..."
@@ -56,6 +57,10 @@ if ! grep -qs "\"$KF6_VERSION\"" "$PREFIX"/lib/cmake/KF6Kirigami/KF6KirigamiConf
     wait
     build extra-cmake-modules "$WORK/extra-cmake-modules" -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF -DBUILD_QTHELP_DOCS=OFF
     build Kirigami "$WORK/kirigami" -DBUILD_EXAMPLES=OFF
+fi
+if ! grep -qs "\"$QTKEYCHAIN_VERSION\"" "$PREFIX"/lib/cmake/Qt6Keychain/Qt6KeychainConfigVersion.cmake; then
+    git clone --quiet --depth 1 --branch "$QTKEYCHAIN_VERSION" https://github.com/frankosterfeld/qtkeychain.git "$WORK/qtkeychain"
+    build QtKeychain "$WORK/qtkeychain" -DBUILD_TRANSLATIONS=OFF
 fi
 LIBDIR="$PREFIX/lib"
 

@@ -83,72 +83,72 @@
 <context>
     <name>Appearance</name>
     <message>
-        <location filename="../services/appearance.cpp" line="184"/>
+        <location filename="../services/appearance.cpp" line="191"/>
         <source>Breeze</source>
         <translation>Breeze</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="184"/>
+        <location filename="../services/appearance.cpp" line="191"/>
         <source>Plasma&apos;s own look, with its colours</source>
         <translation>Plasmas eigenes Aussehen, mit seinen Farben</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="185"/>
+        <location filename="../services/appearance.cpp" line="192"/>
         <source>Material</source>
         <translation>Material</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="185"/>
+        <location filename="../services/appearance.cpp" line="192"/>
         <source>Android&apos;s look, light</source>
         <translation>Das Aussehen von Android, hell</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="186"/>
+        <location filename="../services/appearance.cpp" line="193"/>
         <source>Kante</source>
         <translation>Kante</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="186"/>
+        <location filename="../services/appearance.cpp" line="193"/>
         <source>Dark, sharp edges, yellow accent</source>
         <translation>Dunkel, scharfe Kanten, gelber Akzent</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="187"/>
+        <location filename="../services/appearance.cpp" line="194"/>
         <source>Leinen</source>
         <translation>Leinen</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="187"/>
+        <location filename="../services/appearance.cpp" line="194"/>
         <source>Kante in light linen</source>
         <translation>Kante in hellem Leinen</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="188"/>
+        <location filename="../services/appearance.cpp" line="195"/>
         <source>Shinki</source>
         <translation>Shinki</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="188"/>
+        <location filename="../services/appearance.cpp" line="195"/>
         <source>Paper, ink and one red, as the Shinki News</source>
         <translation>Papier, Tusche und ein Rot, wie die Shinki News</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="259"/>
+        <location filename="../services/appearance.cpp" line="266"/>
         <source>Practice today</source>
         <translation>Heute üben</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="260"/>
+        <location filename="../services/appearance.cpp" line="267"/>
         <source>Tap a technique: its place in the exam video plays.</source>
         <translation>Technik antippen: die Stelle im Prüfungsvideo läuft.</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="261"/>
+        <location filename="../services/appearance.cpp" line="268"/>
         <source>exam-ready</source>
         <translation>prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="262"/>
+        <location filename="../services/appearance.cpp" line="269"/>
         <source>Videos</source>
         <translation>Videos</translation>
     </message>
@@ -191,7 +191,7 @@
         <translation>Mitori %1. Die Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho, mit den Prüfungsvideos der DVDs.</translation>
     </message>
     <message>
-        <location filename="../qml/AppearancePage.qml" line="82"/>
+        <location filename="../qml/AppearancePage.qml" line="89"/>
         <source>Sources: the exam regulations and lists of the dojo, the comments of shinkiryu.de and the Aiki-Budo lexicon.</source>
         <translation>Quellen: die Prüfungsordnungen und Listen des Dojo, die Kommentare von shinkiryu.de und das Aiki-Budo-Lexikon.</translation>
     </message>
@@ -1217,7 +1217,7 @@
 <context>
     <name>LanguageChoice</name>
     <message>
-        <location filename="../qml/LanguageChoice.qml" line="15"/>
+        <location filename="../qml/LanguageChoice.qml" line="14"/>
         <source>System</source>
         <translation>System</translation>
     </message>
@@ -1500,7 +1500,7 @@
 <context>
     <name>PlayerPage</name>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="178"/>
+        <location filename="../qml/PlayerPage.qml" line="179"/>
         <source>practised</source>
         <translation>geübt</translation>
     </message>
@@ -1508,153 +1508,153 @@
 <context>
     <name>PlayerView</name>
     <message>
-        <location filename="../qml/PlayerView.qml" line="715"/>
+        <location filename="../qml/PlayerView.qml" line="771"/>
         <source>There is no video of this technique. Practise it from memory, then rate it.</source>
         <translation>Zu dieser Technik gibt es kein Video. Aus dem Gedächtnis üben, dann einschätzen.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="716"/>
+        <location filename="../qml/PlayerView.qml" line="772"/>
         <source>Its video is not on this device. Practise it from memory, then rate it.</source>
         <translation>Ihr Video ist nicht auf diesem Gerät. Aus dem Gedächtnis üben, dann einschätzen.</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="728"/>
-        <location filename="../qml/PlayerView.qml" line="755"/>
-        <location filename="../qml/PlayerView.qml" line="921"/>
+        <location filename="../qml/PlayerView.qml" line="784"/>
+        <location filename="../qml/PlayerView.qml" line="811"/>
+        <location filename="../qml/PlayerView.qml" line="977"/>
         <source>Position</source>
         <translation>Position</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="748"/>
+        <location filename="../qml/PlayerView.qml" line="804"/>
         <source>Chapter start</source>
         <translation>Kapitelanfang</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="598"/>
-        <location filename="../qml/PlayerView.qml" line="749"/>
+        <location filename="../qml/PlayerView.qml" line="654"/>
+        <location filename="../qml/PlayerView.qml" line="805"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="598"/>
-        <location filename="../qml/PlayerView.qml" line="750"/>
+        <location filename="../qml/PlayerView.qml" line="654"/>
+        <location filename="../qml/PlayerView.qml" line="806"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="640"/>
-        <location filename="../qml/PlayerView.qml" line="641"/>
-        <location filename="../qml/PlayerView.qml" line="751"/>
+        <location filename="../qml/PlayerView.qml" line="696"/>
+        <location filename="../qml/PlayerView.qml" line="697"/>
+        <location filename="../qml/PlayerView.qml" line="807"/>
         <source>Loop</source>
         <translation>Schleife</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="629"/>
-        <location filename="../qml/PlayerView.qml" line="752"/>
+        <location filename="../qml/PlayerView.qml" line="685"/>
+        <location filename="../qml/PlayerView.qml" line="808"/>
         <source>Tempo</source>
         <translation>Tempo</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="204"/>
+        <location filename="../qml/PlayerView.qml" line="260"/>
         <source>Exit full screen</source>
         <translation>Vollbild beenden</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="526"/>
+        <location filename="../qml/PlayerView.qml" line="582"/>
         <source>Full screen</source>
         <translation>Vollbild</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="583"/>
-        <location filename="../qml/PlayerView.qml" line="603"/>
+        <location filename="../qml/PlayerView.qml" line="639"/>
+        <location filename="../qml/PlayerView.qml" line="659"/>
         <source>1 frame</source>
         <translation>1 Bild</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="583"/>
-        <location filename="../qml/PlayerView.qml" line="603"/>
+        <location filename="../qml/PlayerView.qml" line="639"/>
+        <location filename="../qml/PlayerView.qml" line="659"/>
         <source>Frame</source>
         <translation>Bild</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="586"/>
-        <location filename="../qml/PlayerView.qml" line="753"/>
+        <location filename="../qml/PlayerView.qml" line="642"/>
+        <location filename="../qml/PlayerView.qml" line="809"/>
         <source>Frame back</source>
         <translation>Bild zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="606"/>
-        <location filename="../qml/PlayerView.qml" line="754"/>
+        <location filename="../qml/PlayerView.qml" line="662"/>
+        <location filename="../qml/PlayerView.qml" line="810"/>
         <source>Frame on</source>
         <translation>Bild vor</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="756"/>
+        <location filename="../qml/PlayerView.qml" line="812"/>
         <source>Playback</source>
         <translation>Wiedergabe</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="778"/>
+        <location filename="../qml/PlayerView.qml" line="834"/>
         <source>Sound</source>
         <translation>Ton</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="789"/>
+        <location filename="../qml/PlayerView.qml" line="845"/>
         <source>Screen on</source>
         <translation>Bildschirm an</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="810"/>
+        <location filename="../qml/PlayerView.qml" line="866"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="836"/>
+        <location filename="../qml/PlayerView.qml" line="892"/>
         <source>Previous</source>
         <translation>Vorige</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="846"/>
+        <location filename="../qml/PlayerView.qml" line="902"/>
         <source>Next</source>
         <translation>Nächste</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="862"/>
+        <location filename="../qml/PlayerView.qml" line="918"/>
         <source>Today&apos;s playlist · %1 of %2 practised</source>
         <translation>Heutige Playliste · %1 von %2 geübt</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="883"/>
+        <location filename="../qml/PlayerView.qml" line="939"/>
         <source>practised</source>
         <translation>geübt</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="204"/>
+        <location filename="../qml/PlayerView.qml" line="260"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="460"/>
+        <location filename="../qml/PlayerView.qml" line="516"/>
         <source>Brightness %1 %</source>
         <translation>Helligkeit %1 %</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="460"/>
+        <location filename="../qml/PlayerView.qml" line="516"/>
         <source>Volume %1 %</source>
         <translation>Lautstärke %1 %</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="778"/>
+        <location filename="../qml/PlayerView.qml" line="834"/>
         <source>Silent in slow motion</source>
         <translation>In Zeitlupe stumm</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="837"/>
+        <location filename="../qml/PlayerView.qml" line="893"/>
         <source>Previous technique</source>
         <translation>Vorige Technik</translation>
     </message>
     <message>
-        <location filename="../qml/PlayerView.qml" line="847"/>
+        <location filename="../qml/PlayerView.qml" line="903"/>
         <source>Next technique</source>
         <translation>Nächste Technik</translation>
     </message>
@@ -1733,87 +1733,87 @@
 <context>
     <name>ProgrammePage</name>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="66"/>
+        <location filename="../qml/ProgrammePage.qml" line="77"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="71"/>
+        <location filename="../qml/ProgrammePage.qml" line="82"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="76"/>
+        <location filename="../qml/ProgrammePage.qml" line="87"/>
         <source>All notes</source>
         <translation>Alle Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="113"/>
+        <location filename="../qml/ProgrammePage.qml" line="124"/>
         <source>%1, %2 of %3 exam-ready</source>
         <translation>%1, %2 von %3 prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="114"/>
+        <location filename="../qml/ProgrammePage.qml" line="125"/>
         <source>%1, no forms yet</source>
         <translation>%1, noch keine Formen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="177"/>
+        <location filename="../qml/ProgrammePage.qml" line="188"/>
         <source>Waiting time: %1</source>
         <translation>Wartezeit: %1</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="187"/>
+        <location filename="../qml/ProgrammePage.qml" line="198"/>
         <source>The Japanese writing of these names is a proposal, not yet confirmed.</source>
         <translation>Die japanische Schreibweise dieser Namen ist ein Vorschlag, noch nicht bestätigt.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="212"/>
+        <location filename="../qml/ProgrammePage.qml" line="223"/>
         <source>Meaning</source>
         <translation>Bedeutung</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="213"/>
+        <location filename="../qml/ProgrammePage.qml" line="224"/>
         <source>Content</source>
         <translation>Inhalt</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="214"/>
+        <location filename="../qml/ProgrammePage.qml" line="225"/>
         <source>Waiting time</source>
         <translation>Wartezeit</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="233"/>
+        <location filename="../qml/ProgrammePage.qml" line="244"/>
         <source>The forms of this grade are not in the app yet.</source>
         <translation>Die Formen dieses Grades sind noch nicht in der App.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="251"/>
+        <location filename="../qml/ProgrammePage.qml" line="262"/>
         <source>Exam videos</source>
         <translation>Prüfungsvideos</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="253"/>
+        <location filename="../qml/ProgrammePage.qml" line="264"/>
         <source>There is no video for this grade.</source>
         <translation>Zu diesem Grad gibt es kein Video.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="254"/>
+        <location filename="../qml/ProgrammePage.qml" line="265"/>
         <source>The videos are on the DVDs of the Shinkiryu association. With the DVD&apos;s code Mitori loads them onto this device.</source>
         <translation>Die Videos sind auf den DVDs des Shinkiryu-Verbands. Mit dem Code der DVD lädt Mitori sie auf dieses Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="264"/>
+        <location filename="../qml/ProgrammePage.qml" line="275"/>
         <source>Enter code</source>
         <translation>Code eingeben</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="269"/>
+        <location filename="../qml/ProgrammePage.qml" line="280"/>
         <source>Order on shinkiryu.de</source>
         <translation>Auf shinkiryu.de bestellen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="351"/>
+        <location filename="../qml/ProgrammePage.qml" line="362"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
@@ -2030,52 +2030,128 @@
         <translation>gespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="167"/>
+        <location filename="../qml/SettingsPage.qml" line="179"/>
+        <source>App password cannot be read</source>
+        <translation>App-Passwort nicht lesbar</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="181"/>
+        <source>App password not saved</source>
+        <translation>App-Passwort nicht gespeichert</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="180"/>
+        <location filename="../qml/SettingsPage.qml" line="182"/>
+        <source>App password lies in a file</source>
+        <translation>App-Passwort liegt in einer Datei</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="180"/>
+        <source>App password not on record</source>
+        <translation>App-Passwort nicht vermerkt</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="188"/>
+        <source>An older app password lies unencrypted in Mitori&apos;s sync folder. Switch sync on to see what to do.</source>
+        <translation>Ein älteres App-Passwort liegt unverschlüsselt in Mitoris Abgleich-Ordner. Schalte den Abgleich ein, um zu sehen, was zu tun ist.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="190"/>
+        <source>It lies unencrypted in Mitori&apos;s sync folder. With sync on, Mitori moves it to the key store.</source>
+        <translation>Es liegt unverschlüsselt in Mitoris Abgleich-Ordner. Bei eingeschaltetem Abgleich verschiebt Mitori es in den Schlüsselbund.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="194"/>
+        <source>Mitori is handing it to the Android key store. Until that is confirmed, it lies unencrypted in Mitori&apos;s sync folder.</source>
+        <translation>Mitori übergibt es dem Android-Schlüsselspeicher. Bis das bestätigt ist, liegt es unverschlüsselt in Mitoris Abgleich-Ordner.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="195"/>
+        <source>Mitori is handing it to the key store. Until that is confirmed, it lies unencrypted in Mitori&apos;s sync folder. If the key store asks to be unlocked, unlock it.</source>
+        <translation>Mitori übergibt es dem Schlüsselbund. Bis das bestätigt ist, liegt es unverschlüsselt in Mitoris Abgleich-Ordner. Fragt der Schlüsselbund nach dem Entsperren, entsperre ihn.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="197"/>
+        <source>The Android key store did not take it, so it lies unencrypted in Mitori&apos;s sync folder. Restart Mitori: it tries again by itself. If this note stays, use an app password you can revoke on the server.</source>
+        <translation>Der Android-Schlüsselspeicher hat es nicht angenommen, darum liegt es unverschlüsselt in Mitoris Abgleich-Ordner. Starte Mitori neu: Es versucht es von selbst noch einmal. Bleibt dieser Hinweis, nimm ein App-Passwort, das du auf dem Server widerrufen kannst.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="198"/>
+        <source>No key store took it, so it lies unencrypted in Mitori&apos;s sync folder. Set up and unlock KWallet, GNOME Keyring or another Secret Service (for the Flatpak: with the desktop&apos;s secrets portal), then restart Mitori: it moves the password by itself.</source>
+        <translation>Kein Schlüsselbund hat es angenommen, darum liegt es unverschlüsselt in Mitoris Abgleich-Ordner. Richte KWallet, GNOME Schlüsselbund oder einen anderen Secret Service ein und entsperre ihn (für das Flatpak: mit dem Secret-Portal des Desktops), dann starte Mitori neu: Es verschiebt das Passwort von selbst.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="200"/>
+        <source>The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so it also still lies there unencrypted. Check the free space and the folder&apos;s rights, then restart Mitori.</source>
+        <translation>Der Schlüsselbund hat es, aber Mitori konnte die Datei konto.ini in seinem Abgleich-Ordner nicht neu schreiben, darum liegt es dort auch noch unverschlüsselt. Prüfe den freien Platz und die Rechte des Ordners, dann starte Mitori neu.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="202"/>
+        <source>The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder&apos;s rights, then press “Sync now”. Restarting before that loses this password here: an older one in the file comes back and replaces it in the key store.</source>
+        <translation>Der Schlüsselbund hat es, aber Mitori konnte die Datei konto.ini in seinem Abgleich-Ordner nicht neu schreiben, darum würde der nächste Start es nicht verwenden. Prüfe den freien Platz und die Rechte des Ordners, dann tippe auf „Jetzt abgleichen“. Ein Neustart davor verliert dieses Passwort hier: Ein älteres aus der Datei kommt zurück und ersetzt es im Schlüsselbund.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="204"/>
+        <source>Neither the key store nor the file konto.ini took it: it is gone when Mitori closes. Check the free space and the sync folder&apos;s rights, then enter it again.</source>
+        <translation>Weder der Schlüsselbund noch die Datei konto.ini haben es angenommen: Es ist weg, sobald Mitori schließt. Prüfe den freien Platz und die Rechte des Abgleich-Ordners, dann gib es neu ein.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="206"/>
+        <source>The Android key store does not give it out or no longer holds it, so Mitori cannot sync. Press “Sync now” to ask again, or enter the password again.</source>
+        <translation>Der Android-Schlüsselspeicher gibt es nicht heraus oder hat es nicht mehr, darum kann Mitori nicht abgleichen. Tippe auf „Jetzt abgleichen“, um erneut zu fragen, oder gib das Passwort neu ein.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="207"/>
+        <source>The key store does not give it out or no longer holds it, so Mitori cannot sync. Unlock it and press “Sync now”, or enter the password again.</source>
+        <translation>Der Schlüsselbund gibt es nicht heraus oder hat es nicht mehr, darum kann Mitori nicht abgleichen. Entsperre ihn und tippe auf „Jetzt abgleichen“, oder gib das Passwort neu ein.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="214"/>
         <source>This device</source>
         <translation>Dieses Gerät</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="179"/>
+        <location filename="../qml/SettingsPage.qml" line="226"/>
         <source>Sync after every change</source>
         <translation>Nach jeder Änderung abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="189"/>
+        <location filename="../qml/SettingsPage.qml" line="236"/>
         <source>Otherwise when Mitori starts and once a day. Every rating and note is an entry of its own with a time; changes from several devices are merged. Mitori asks only when the same note was changed on two devices.</source>
         <translation>Sonst beim Start und einmal am Tag. Jede Einschätzung und jede Notiz ist ein eigener Eintrag mit Zeitstempel; Änderungen von mehreren Geräten werden zusammengeführt. Mitori fragt nur nach, wenn dieselbe Notiz auf zwei Geräten geändert wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="196"/>
+        <location filename="../qml/SettingsPage.qml" line="243"/>
         <source>Syncing …</source>
         <translation>Gleiche ab …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="196"/>
+        <location filename="../qml/SettingsPage.qml" line="243"/>
         <source>Sync now</source>
         <translation>Jetzt abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="210"/>
+        <location filename="../qml/SettingsPage.qml" line="257"/>
         <source>Last synced: %1</source>
         <translation>Zuletzt abgeglichen: %1</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="211"/>
+        <location filename="../qml/SettingsPage.qml" line="258"/>
         <source>Not synced yet.</source>
         <translation>Noch nicht abgeglichen.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="219"/>
+        <location filename="../qml/SettingsPage.qml" line="266"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="219"/>
+        <location filename="../qml/SettingsPage.qml" line="266"/>
         <source>Device</source>
         <translation>Gerät</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="227"/>
+        <location filename="../qml/SettingsPage.qml" line="274"/>
         <source>%n conflict(s): solve …</source>
         <translation>
             <numerusform>%n Konflikt: lösen …</numerusform>
@@ -2083,68 +2159,68 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="244"/>
+        <location filename="../qml/SettingsPage.qml" line="291"/>
         <source>Save backup</source>
         <translation>Sicherung speichern</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="247"/>
-        <location filename="../qml/SettingsPage.qml" line="259"/>
+        <location filename="../qml/SettingsPage.qml" line="294"/>
+        <location filename="../qml/SettingsPage.qml" line="306"/>
         <source>ZIP archives (*.zip)</source>
         <translation>ZIP-Archive (*.zip)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="250"/>
+        <location filename="../qml/SettingsPage.qml" line="297"/>
         <source>Backup saved.</source>
         <translation>Sicherung gespeichert.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="250"/>
+        <location filename="../qml/SettingsPage.qml" line="297"/>
         <source>Backup saved: %1</source>
         <translation>Sicherung gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="257"/>
+        <location filename="../qml/SettingsPage.qml" line="304"/>
         <source>Read backup</source>
         <translation>Sicherung einlesen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="274"/>
+        <location filename="../qml/SettingsPage.qml" line="321"/>
         <source>Ratings</source>
         <translation>Einschätzungen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="274"/>
+        <location filename="../qml/SettingsPage.qml" line="321"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="274"/>
+        <location filename="../qml/SettingsPage.qml" line="321"/>
         <source>Exam rounds</source>
         <translation>Prüfungsrunden</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="275"/>
+        <location filename="../qml/SettingsPage.qml" line="322"/>
         <source>Notebooks</source>
         <translation>Notizbücher</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="275"/>
+        <location filename="../qml/SettingsPage.qml" line="322"/>
         <source>Notebook entries</source>
         <translation>Einträge in Notizbüchern</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="275"/>
+        <location filename="../qml/SettingsPage.qml" line="322"/>
         <source>Grades</source>
         <translation>Grade</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="276"/>
+        <location filename="../qml/SettingsPage.qml" line="323"/>
         <source>Start of training</source>
         <translation>Trainingsbeginn</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="282"/>
+        <location filename="../qml/SettingsPage.qml" line="329"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n neu</numerusform>
@@ -2152,7 +2228,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="285"/>
+        <location filename="../qml/SettingsPage.qml" line="332"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n geändert</numerusform>
@@ -2160,7 +2236,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="292"/>
+        <location filename="../qml/SettingsPage.qml" line="339"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Fotos und Sprachnotizen: %n neu</numerusform>
@@ -2168,27 +2244,27 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="294"/>
+        <location filename="../qml/SettingsPage.qml" line="341"/>
         <source>Nothing new: this device has everything in the backup.</source>
         <translation>Nichts Neues: dieses Gerät hat schon alles aus der Sicherung.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="305"/>
+        <location filename="../qml/SettingsPage.qml" line="352"/>
         <source>Merge backup?</source>
         <translation>Sicherung zusammenführen?</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="306"/>
+        <location filename="../qml/SettingsPage.qml" line="353"/>
         <source>Merge</source>
         <translation>Zusammenführen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="308"/>
+        <location filename="../qml/SettingsPage.qml" line="355"/>
         <source>Backup merged.</source>
         <translation>Sicherung zusammengeführt.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="319"/>
+        <location filename="../qml/SettingsPage.qml" line="366"/>
         <source>Backup of %1.</source>
         <translation>Sicherung vom %1.</translation>
     </message>
@@ -2489,12 +2565,23 @@
 <context>
     <name>Sync</name>
     <message>
-        <location filename="../services/sync.cpp" line="127"/>
+        <location filename="../services/sync.cpp" line="165"/>
+        <location filename="../services/sync.cpp" line="180"/>
         <source>Enter the server, user and app password first.</source>
         <translation>Zuerst Server, Benutzer und App-Passwort eintragen.</translation>
     </message>
     <message>
-        <location filename="../services/sync.cpp" line="169"/>
+        <location filename="../services/sync.cpp" line="176"/>
+        <source>Waiting for the system&apos;s key store …</source>
+        <translation>Warte auf den Schlüsselbund des Systems …</translation>
+    </message>
+    <message>
+        <location filename="../services/sync.cpp" line="202"/>
+        <source>The key store did not give out the app password: see the note at the password.</source>
+        <translation>Der Schlüsselbund hat das App-Passwort nicht herausgegeben: siehe den Hinweis beim Passwort.</translation>
+    </message>
+    <message>
+        <location filename="../services/sync.cpp" line="243"/>
         <source>The sync failed: %1</source>
         <translation>Der Abgleich ist fehlgeschlagen: %1</translation>
     </message>
@@ -2694,8 +2781,8 @@
     </message>
     <message>
         <location filename="../qml/TodayPage.qml" line="102"/>
-        <source>up to %1 (first grade, nothing in My grades yet)</source>
-        <translation>bis %1 (erster Grad, noch nichts in Meine Grade)</translation>
+        <source>up to %1 (first grade, nothing for this discipline in My grades yet)</source>
+        <translation>bis %1 (erster Grad, für diese Sparte noch nichts in Meine Grade)</translation>
     </message>
     <message>
         <location filename="../qml/TodayPage.qml" line="119"/>

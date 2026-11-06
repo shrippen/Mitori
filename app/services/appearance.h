@@ -45,6 +45,7 @@ class Appearance : public QObject
     Q_PROPERTY(QObject *window READ window NOTIFY windowChanged)
     // The window's ground: Android's status and navigation bars follow it (Main binds it).
     Q_PROPERTY(QColor barColor READ barColor WRITE setBarColor NOTIFY barColorChanged)
+    Q_PROPERTY(QString keychainLicence READ keychainLicence CONSTANT)
 
 public:
     enum class Style { Breeze, Material, Kante, Leinen, Shinki };
@@ -64,6 +65,7 @@ public:
     QObject *window() const { return m_window; }
     QColor barColor() const { return m_barColor; }
     void setBarColor(const QColor &color);
+    QString keychainLicence() const;
 
     // A tap: saved, and at once in the app.
     Q_INVOKABLE void setStyle(Style style);

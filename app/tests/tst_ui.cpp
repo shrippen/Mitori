@@ -90,6 +90,7 @@ public slots:
         QFile::remove(Practice::defaultPath());
         QFile::remove(Courses::defaultPath());
         QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)).remove(QStringLiteral("lehrgaenge.ics"));
+        QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QStringLiteral("/sync")).removeRecursively();
         // The course calendar from a file, dates relative to today: never the network.
         const auto day = [](int offset) { return QDate::currentDate().addDays(offset).toString(QStringLiteral("yyyyMMdd")).toUtf8(); };
         QDir().mkpath(QStringLiteral(UI_DATA_DIR));
@@ -118,6 +119,25 @@ public slots:
             QDir().mkpath(QFileInfo(played).absolutePath());
             QFile::remove(played);
             QFile::copy(QStringLiteral(TEST_MEDIA_DIR "/stimme.m4a"), played);
+        }
+        // A long silent clip under the catalog's names: the catalog's chapters really play (tablet).
+        const auto clip = [](const QString &file) {
+            const QString played = QStringLiteral(UI_DATA_DIR "/played-") + file;
+            QDir().mkpath(QFileInfo(played).absolutePath());
+            QFile::remove(played);
+            QFile::copy(QStringLiteral(TEST_MEDIA_DIR "/stille.m4a"), played);
+        };
+        for (const QString &name : {QStringLiteral("long"), QStringLiteral("long2")}) {
+            clip(name + QStringLiteral("/Aikido/5. Kyu.mkv"));
+            clip(name + QStringLiteral("/Aikido/4. Kyu.mkv"));
+            clip(name + QStringLiteral("/Shinki Toho/Chuden.mkv"));
+        }
+        // 4. Kyu plays, 5. Kyu does not: its file is gone, or does not load.
+        clip(QStringLiteral("gone/Aikido/4. Kyu.mkv"));
+        clip(QStringLiteral("broken/Aikido/4. Kyu.mkv"));
+        QFile broken(QStringLiteral(UI_DATA_DIR "/played-broken/Aikido/5. Kyu.mkv"));
+        if (!broken.open(QIODevice::WriteOnly)) {
+            qFatal("no broken clip: %s", qPrintable(broken.fileName()));
         }
         const QString packages = QStringLiteral(UI_DATA_DIR "/packages");
         const QString video = packages + QStringLiteral("/test-bundle/1/test.mvb");
