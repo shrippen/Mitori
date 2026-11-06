@@ -2762,8 +2762,8 @@
     </message>
     <message>
         <location filename="../qml/TodayPage.qml" line="102"/>
-        <source>up to %1 (first grade, nothing in My grades yet)</source>
-        <translation>bis %1 (erster Grad, noch nichts in Meine Grade)</translation>
+        <source>up to %1 (first grade, nothing for this discipline in My grades yet)</source>
+        <translation>bis %1 (erster Grad, für diese Sparte noch nichts in Meine Grade)</translation>
     </message>
     <message>
         <location filename="../qml/TodayPage.qml" line="119"/>
