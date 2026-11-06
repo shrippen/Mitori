@@ -1586,22 +1586,65 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // 360 px, in every look of the Kante side (Shinki: ctest ui_shinki): the two tiles lie side by
-    // side, equally wide and high, with no text cut, however many grades there are.
-    function test_9m_tiles_fit_data() {
-        if (Look.shinki) {
-            return [{ tag: "shinki" }]
+    // A tile's title, the label that shows its text.
+    function tileTitle(tile) {
+        return allChildren(tile).find(c => c.text === tile.text && c.lineCount !== undefined)
+    }
+
+    // Lines break between words only: "Meine / Notizbüche / r" has more lines than words.
+    function checkTitle(tile) {
+        const title = tileTitle(tile)
+        const words = tile.text.split(" ").length
+        verify(title.lineCount <= words, tile.text + ": " + title.lineCount + " lines, broken inside a word")
+        verify(title.contentWidth <= title.width + 1, tile.text + " runs past its tile")
+    }
+
+    // The start menu in German (the run stays English: the catalog, not installed), Shinki only
+    // (its tile is ours). A single word too long for a line may end in an ellipsis.
+    function checkStartTiles() {
+        const tiles = findChild(window.pageStack.items[0], "tiles")
+        wait(100)
+        const shown = []
+        for (let i = 0; i < tiles.children.length; i++) {
+            if (tiles.children[i].visible && tiles.children[i].glyph !== undefined) {
+                shown.push(tiles.children[i])
+            }
         }
-        return [{ tag: "system", kind: KanteStyle.Kind.System },
-                { tag: "kante", kind: KanteStyle.Kind.Kante },
-                { tag: "leinen", kind: KanteStyle.Kind.KanteLight }]
+        verify(shown.length >= 6, "the start tiles: " + shown.length)
+        for (const tile of shown) {
+            const english = tile.text
+            tile.text = uiCatalog.german("StartPage", english)
+            verify(tile.text !== "", "no German for " + english)
+            wait(20)
+            checkTitle(tile)
+            tile.text = english
+        }
+    }
+
+    // At 360 and 320 px, in every look of the Kante side (Shinki: ctest ui_shinki): the two tiles
+    // lie side by side, equally wide and high, with no text cut, however many grades there are.
+    function test_9m_tiles_fit_data() {
+        const looks = Look.shinki ? [{ tag: "shinki" }]
+                                  : [{ tag: "system", kind: KanteStyle.Kind.System },
+                                     { tag: "kante", kind: KanteStyle.Kind.Kante },
+                                     { tag: "leinen", kind: KanteStyle.Kind.KanteLight }]
+        const rows = []
+        for (const width of [360, 320]) {
+            for (const look of looks) {
+                rows.push({ tag: look.tag + "-" + width, kind: look.kind, width: width })
+            }
+        }
+        return rows
     }
     function test_9m_tiles_fit(data) {
         const kind = KanteStyle.kind
         if (!Look.shinki) {
             KanteStyle.kind = data.kind
         }
-        window.width = 360
+        window.width = data.width
+        if (Look.shinki) {
+            checkStartTiles()
+        }
         for (const [discipline, grade] of [["aikido", "k5"], ["daitoryu", "k5"], ["shinkitoho", "shoden"]]) {
             verify(Courses.addGrade(discipline, grade, "2024-03-01", ""))
             const page = push("CoursesPage")
@@ -1609,16 +1652,26 @@ TestCase {
             const grades = findChild(page, "myGrades")
             const notebooks = findChild(page, "myNotebooks")
             // The test runs in English; German is the longer (mitori_de.ts).
-            grades.text = "Meine Grade"
-            notebooks.text = "Meine Notizbücher"
+            grades.text = uiCatalog.german("CoursesPage", "My grades")
+            notebooks.text = uiCatalog.german("CoursesPage", "My notebooks")
             notebooks.hint = "12 Notizbücher"
             wait(50)
             compare(grades.y, notebooks.y, "side by side")
             compare(grades.width, notebooks.width)
             compare(grades.height, notebooks.height)
-            verify(notebooks.mapToItem(window.contentItem, notebooks.width, 0).x <= 360)
+            verify(notebooks.mapToItem(window.contentItem, notebooks.width, 0).x <= data.width)
+            // "Notizbücher" fits no line of Shinki's tile at 320 px: only that title may end in an
+            // ellipsis, and only there.
+            const mayCut = Look.shinki && data.width < 360 ? tileTitle(notebooks) : null
             for (const item of allChildren(grades).concat(allChildren(notebooks))) {
-                verify(!item.truncated, grade + ": cut off: " + item.text)
+                verify(!item.truncated || item === mayCut, grade + ": cut off: " + item.text)
+            }
+            checkTitle(grades)
+            checkTitle(notebooks)
+            // Shinki's text starts at the top of the tile: one title on two lines moves no other.
+            if (Look.shinki) {
+                compare(tileTitle(grades).mapToItem(window.contentItem, 0, 0).y,
+                        tileTitle(notebooks).mapToItem(window.contentItem, 0, 0).y, "the titles' tops")
             }
             shot("14e-tiles-" + data.tag + "-" + discipline)
             window.pageStack.pop()
@@ -2774,7 +2827,9 @@ TestCase {
         Programme.setGrade("aikido", "k3")
         const page = push("ProgrammePage")
         const list = findChild(page, "programmeList")
-        wait(500)
+        // Kirigami slides the page in (longer under load); a key during that is lost.
+        tryVerify(() => Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1, 5000)
+        wait(1500)
         page.forceActiveFocus()
         const before = list.contentY
         keyClick(Qt.Key_PageDown)

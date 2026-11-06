@@ -9,6 +9,7 @@
 #include <QQmlEngine>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QTranslator>
 #include <QUrl>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuickTest>
@@ -24,6 +25,17 @@ Q_IMPORT_QML_PLUGIN(MitoriPlugin)
 class Setup : public QObject
 {
     Q_OBJECT
+
+public:
+    // A text from the German catalog ("" without one): how long a page's text is in German, while
+    // the run stays English (nothing is installed).
+    Q_INVOKABLE QString german(const QString &context, const QString &source)
+    {
+        if (m_german.isEmpty()) {
+            (void)m_german.load(QStringLiteral(":/i18n/mitori_de"));
+        }
+        return m_german.translate(context.toUtf8().constData(), source.toUtf8().constData());
+    }
 
 public slots:
     void applicationAvailable()
@@ -96,6 +108,7 @@ public slots:
         QDir().mkpath(shots);
         engine->rootContext()->setContextProperty(QStringLiteral("uiShotsDir"), shots);
         engine->rootContext()->setContextProperty(QStringLiteral("uiShinki"), shinki);
+        engine->rootContext()->setContextProperty(QStringLiteral("uiCatalog"), this);
         // The second run (ctest ui_shinki): the pages through Look as Shinki. The running style
         // belongs to it too: the window's head and the global tool bar follow it (as after a
         // start with Shinki).
@@ -105,6 +118,9 @@ public slots:
         }
         engine->rootContext()->setContextProperty(QStringLiteral("testMediaDir"), QStringLiteral(TEST_MEDIA_DIR));
     }
+
+private:
+    QTranslator m_german;
 };
 
 QUICK_TEST_MAIN_WITH_SETUP(ui, Setup)
