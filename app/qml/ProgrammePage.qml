@@ -59,7 +59,10 @@ Kirigami.Page {
     }
     // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
     // a phone held sideways has about 20) keeps the list and the small player side by side.
-    readonly property bool wide: width > height && height >= 460     // a tablet sideways, not a phone
+    // While a note is typed in the small player the on-screen keyboard may shrink the page: the
+    // player and its field stay, or the keyboard would close under the fingers.
+    readonly property bool wide: width > height && (height >= 460 || noteTyping)     // a tablet sideways, not a phone
+    property bool noteTyping: false
     readonly property var playlist: rows.filter(r => page.playable(r))
     readonly property bool split: wide && playlist.length > 0
     // List and right pane; a grade without forms has only its card.
@@ -70,6 +73,21 @@ Kirigami.Page {
     readonly property var paneEntry: !twoPanes ? null
                                      : rows.find(r => r.kind === "entry" && r.id === sheetId)
                                        || (split ? null : rows.find(r => r.kind === "entry")) || null
+    // Turned with a dialog open: its row, once the list has its new height. Twice: until the list
+    // made the rows there, its height is an estimate and the row stops a few pixels short.
+    Timer {
+        id: turnedInView
+
+        property bool again: true
+        interval: 50
+        onTriggered: {
+            list.positionViewAtIndex(page.rows.findIndex(r => r.id === page.lastId), ListView.Contain)
+            if (again) {
+                restart()
+            }
+            again = !again
+        }
+    }
     // On a tablet the chips scroll with the rows: while the head settles after opening or a chip,
     // the list stays at its top, until a row or a finger moves it.
     property bool keepTop: true
@@ -471,6 +489,7 @@ Kirigami.Page {
                     id: paneView
 
                     compact: true
+                    onNoteFocusedChanged: page.noteTyping = noteFocused
                     autoPlay: page.isCurrentPage && page.started && !page.paneEntry
                     onPlayTapped: page.started = true
                     playlist: page.playlist
@@ -688,11 +707,14 @@ Kirigami.Page {
             page.sheetId = entry.id
             return
         }
+        page.sheetId = ""
         page.lastId = entry.id
         page.paneRest = Object.assign({ looping: true }, page.paneRest, { playing: false })
         if (page.player) {
             page.player.holdStart = true
         }
+        page.keepTop = false
+        turnedInView.restart()
     }
     function showDialog(entry) {
         sheet.entry = entry

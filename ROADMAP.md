@@ -22,8 +22,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Player (Schleife, vier Tempi, Einzelbild, Doppeltipp, Querformat), Videos aus einem lokalen Ordner.
   Wischen hoch/runter links: Helligkeit, rechts: Lautstärke (`platform/devicelevels`: Android Fenster-Helligkeit
   und AudioManager, Linux Helligkeit über Solid, Ton des Players). Offen: Test auf dem Telefon. Tablet quer: Startmenü als
-  Raster mit vier Spalten; Programm und Player klein auf einer Seite (Liste links, Player rechts mit Kommentar). Offen
-  dort: rechts das Blatt bei Techniken ohne Video, Player groß mit Titel und Steuerung über/unter dem Video,
+  Raster mit vier Spalten; Programm und Player klein auf einer Seite (Liste links, rechts Player mit Kommentar oder das
+  Blatt bei Techniken ohne Video). Offen dort: Player groß mit Titel und Steuerung über/unter dem Video,
   Kommentar als Lesespalte. Tastatur im Programm: Tab geht Zeile für Zeile durch die ganze Liste und hält die
   Zeile im Blick, Ende springt beim ersten Druck ans Ende.
 - Schritt 2: Einschätzen 1–4 im Technik-Blatt und im Player (Übungsprotokoll in SQLite, jede Einschätzung ein
@@ -208,8 +208,8 @@ Sicherung ohne Endung, konto.ini 600, Alle Notizen und Alle Jahre schneller.
 Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
 - Telefon bei doppelter Anzeigegröße (206 px): Test `test_8o` auf diese Breite ausweiten; Segmente, lange Knöpfe,
   Bewertung und Steuerzeilen des Players brauchen eine schmale Form.
-- QR-Code, Tablet nach Vorlage (Blatt
-  rechts: erledigt; offen: zwei Spalten, Lehrgänge und Einstellungen als Liste und Seite).
+- QR-Code, Tablet nach Vorlage (Programm: Player oder
+  Blatt rechts, erledigt; offen: zwei Spalten für Heute, Statistik und Grade, Lehrgänge und Einstellungen als Liste und Seite).
 - Programmdaten auf Englisch.
 - Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).
 

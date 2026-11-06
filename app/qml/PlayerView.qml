@@ -53,6 +53,8 @@ Item {
     // Beside the list with room (the clickdummy's `.trow`, `.tbelow`): the switches beside the
     // transport, and below them two columns. A narrow pane keeps the one column.
     readonly property bool paneColumns: compact && width >= Look.unit(560)
+    // The note field holds the focus (the page keeps the player while the keyboard shrinks it).
+    readonly property bool noteFocused: !!controlsView.focusedField && controlsView.focusedField.activeFocus
     // Sideways only with a picture; without a video the card and the controls stand as upright.
     // By the window's height: the page's own changes with the head that this property hides.
     readonly property bool landscape: !compact && hasVideo && (big || width > Window.height)
@@ -458,7 +460,7 @@ Item {
             LookLabel {
                 objectName: "railTitle"
                 // The small player has it on the picture too (the clickdummy's `.qname`).
-                visible: page.onRail || (page.compact && page.hasVideo)
+                visible: page.onRail || (page.paneColumns && page.hasVideo)
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.margins: Kirigami.Units.largeSpacing

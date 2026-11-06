@@ -3783,6 +3783,7 @@ TestCase {
         window.height = 560
         tryVerify(() => page.split && page.player && !page.player.paneColumns)
         verify(findChild(page.player, "compactTitle").visible)
+        verify(!findChild(page.player, "railTitle").visible, "the name once")
         verify(!findChild(page.player, "panePrevious").visible)
         verify(findChild(page.player, "neighbourRow").visible)
     }
@@ -3817,6 +3818,85 @@ TestCase {
         wait(300)
         compare(list.contentY, list.originY, "a chip stays at the top")
         Programme.discipline = "aikido"
+    }
+
+    // A sheet left beside the list, turned under another page: the dialog of a technique with a
+    // video, turned back, shows the player, not the old sheet over it.
+    function test_2v_h_old_sheet_stays_gone() {
+        const page = tabletProgramme()
+        page.open(Object.assign({}, page.playlist[3], { video: null }))
+        compare(page.paneEntry.id, page.playlist[3].id)
+        push("SearchPage")
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.wide)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+
+        const dialog = findChild(page, "techniqueSheet")
+        const chosen = page.playlist[1]
+        page.open(chosen)
+        tryVerify(() => dialog.opened)
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => !dialog.visible && page.split && page.player)
+        compare(page.lastId, chosen.id)
+        compare(page.paneEntry, null, "the old sheet does not cover the player")
+        verify(findChild(page, "playerPane").visible)
+    }
+
+    // The dialog of the last technique, turned sideways: the list shows its row.
+    function test_2v_i_turned_row_in_view() {
+        const page = tabletProgramme()
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        const list = findChild(page, "programmeList")
+        wait(700)       // the head has settled: nothing holds the list at its top
+        list.positionViewAtEnd()
+        const chosen = page.playlist[page.playlist.length - 1]
+        page.open(chosen)
+        const dialog = findChild(page, "techniqueSheet")
+        tryVerify(() => dialog.opened)
+
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => !dialog.visible && page.split && page.player)
+        const row = page.rows.findIndex(r => r.id === chosen.id)
+        tryVerify(() => {
+            const item = list.itemAtIndex(row)
+            if (!item) {
+                return false
+            }
+            const at = item.mapToItem(list, 0, 0)
+            return at.y >= -0.5 && at.y + item.height <= list.height + 0.5
+        }, 3000, "row " + row + " in view")
+    }
+
+    // The on-screen keyboard shrinks the window below a tablet's height: while the note is typed
+    // the small player and its field stay, and they go when the field lets go.
+    function test_2v_j_keyboard_keeps_note_field() {
+        const page = tabletProgramme()
+        const field = findChild(page.player, "noteField")
+        const player = page.player
+        field.forceActiveFocus()
+        tryVerify(() => field.activeFocus)
+        window.height = 400
+        tryVerify(() => page.height < 460)
+        wait(100)
+        verify(page.split, "the pane stays")
+        compare(page.player, player, "not made anew")
+        verify(field.activeFocus, "the keyboard stays open")
+
+        window.height = 800
+        tryVerify(() => page.height >= 460)
+        verify(field.activeFocus)
+
+        window.height = 400
+        tryVerify(() => page.height < 460)
+        field.focus = false
+        page.forceActiveFocus()
+        tryVerify(() => !page.split, 2000, "without the field a low window is no tablet")
     }
 
     // The dialog of a technique with a video, open when the tablet turns sideways: its technique
