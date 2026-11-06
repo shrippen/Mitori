@@ -28,7 +28,8 @@ Kirigami.ScrollablePage {
     readonly property var grades: Courses.revision >= 0 ? Courses.grades : []
 
     // On a tablet sideways: two columns in a page of its own width, in the middle.
-    readonly property bool wide: Tablet.wide(width, height)
+    readonly property TypingHold hold: TypingHold { target: page }
+    readonly property bool wide: hold.wide
     leftPadding: wide ? Tablet.sidePadding(width, padding) : padding
     rightPadding: leftPadding
 

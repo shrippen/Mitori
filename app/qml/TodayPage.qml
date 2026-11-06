@@ -40,7 +40,8 @@ Kirigami.ScrollablePage {
     readonly property var exam: Courses.revision >= 0 ? Courses.nextExam(discipline) : ({})
 
     // On a tablet sideways: two columns in a page of its own width, in the middle.
-    readonly property bool wide: Tablet.wide(width, height)
+    readonly property TypingHold hold: TypingHold { target: page }
+    readonly property bool wide: hold.wide
     leftPadding: wide ? Tablet.sidePadding(width, padding) : padding
     rightPadding: leftPadding
 
@@ -261,6 +262,7 @@ Kirigami.ScrollablePage {
                         color: Look.mutedTextColor
                     }
                     LookSpinBox {
+                        objectName: "intervalDays"
                         from: 1
                         to: 365
                         value: Practice.intervals[interval.index]
