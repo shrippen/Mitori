@@ -216,8 +216,9 @@ Kirigami.Page {
                         Layout.fillWidth: true
                         objectName: "noteTitle"
                         // A course's day has several sessions: its entries say when.
-                        text: noteItem.row.title + (noteItem.row.kind === "course"
-                              ? " · " + noteItem.row.created.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) : "")
+                        text: (noteItem.row.kind === "course"
+                               ? noteItem.row.created.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) + " · " : "")
+                              + noteItem.row.title
                         color: Look.mutedTextColor
                         font: Look.smallFont
                         elide: Text.ElideRight

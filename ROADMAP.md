@@ -177,9 +177,8 @@ Reihenfolge der Kacheln. Offen, nach Gewicht:
 - **Startmenü**: Programm-Kachel mit Stand („Aikido · 5. Kyu · 7 von 20 prüfungsreif“ und Leiste, Kurzname);
   Telefon groß + zwei Spalten statt einer; Tablet die große Kachel 2 × 2; Begrüßung; Heute mit Sparte; Bundle-
   Update mit Namen.
-- **Programm**: Stand je Grad in den Chips; Shinki-Toho-Infokarte (Bedeutung, Inhalt, Mindestabstand);
-  Beschreibung von Suburi und Kiriotoshi; Lupe im Kopf; Rückkehr aus dem Player: kurz aufleuchten statt dauerhaft
-  markieren, auch am Telefon hinscrollen; Tablet-Liste schneidet lange Ô-dachi-Zeilen ab.
+- **Programm**: Shinki-Toho-Infokarte (Bedeutung, Inhalt, Mindestabstand); Beschreibung von Suburi und
+  Kiriotoshi; Lupe im Kopf; Tablet-Liste schneidet lange Ô-dachi-Zeilen ab.
 - **Kommentar**: Fußnoten und Listen setzen; Gruppe und Kanji im Text (Überschriften und ganzer Titel: erledigt).
 - **Heute üben**: Kalender 12 Wochen mit Legende; Hinweis „tippen öffnet das Blatt“.
 - **Videos**: Code-Seite mit Erklärung

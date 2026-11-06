@@ -3025,6 +3025,7 @@ TestCase {
         const last = rows[rows.length - 1]
         const player = push("PlayerPage", { playlist: rows, index: rows.length - 1 })
         page.lastId = last.id
+        page.cameFromPlayer = true  // as play() does: this test needs no video
         tryVerify(() => window.pageStack.currentItem === player)
         window.pageStack.pop()
         tryVerify(() => window.pageStack.currentItem === page)
@@ -3033,6 +3034,16 @@ TestCase {
         const row = page.rows.findIndex(r => r.id === last.id)
         tryVerify(() => list.itemAtIndex(row) !== null)
         tryVerify(() => page.returnedId === "", 3000)
+        // Back from anything else (the notes) the list stays where the user had it.
+        list.positionViewAtBeginning()
+        const top = list.contentY
+        const notes = push("NotesPage", { entry: rows[0] })
+        tryVerify(() => window.pageStack.currentItem === notes)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        compare(page.returnedId, "")
+        wait(200)
+        compare(list.contentY, top)
         window.pageStack.pop()
         window.width = width
         window.height = height

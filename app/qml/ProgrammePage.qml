@@ -30,6 +30,7 @@ Kirigami.Page {
     property string lastId: ""
     // On a phone that row lights up for a moment on the way back, and comes into view.
     property string returnedId: ""
+    property bool cameFromPlayer: false       // only from the player: from the notes the list stays put
     // A moment later: at once the list, shown again, goes back to its top.
     Timer {
         id: returnedInView
@@ -129,8 +130,16 @@ Kirigami.Page {
                 id: list
 
                 objectName: "programmeList"
+                // The first moment after opening only: later a chip wrapping anew (a rating) must
+                // not take the list from where it is.
+                property bool settling: true
+                Timer {
+                    interval: 1000
+                    running: true
+                    onTriggered: list.settling = false
+                }
                 function settle() {
-                    if (!moving && headerItem && contentY - originY < headerItem.height) {
+                    if (settling && !moving && headerItem && contentY - originY < headerItem.height) {
                         Qt.callLater(positionViewAtBeginning)
                     }
                 }
@@ -352,13 +361,16 @@ Kirigami.Page {
         if (!isCurrentPage && page.player) {
             page.player.pause()
         }
-        if (isCurrentPage && !page.split && page.lastId !== "") {
+        if (isCurrentPage && page.cameFromPlayer && !page.split && page.lastId !== "") {
             const row = page.rows.findIndex(r => r.id === page.lastId)
             if (row >= 0) {
                 page.returnedId = page.lastId
                 returnedOff.restart()
                 returnedInView.start()
             }
+        }
+        if (isCurrentPage) {
+            page.cameFromPlayer = false
         }
     }
     // The keys scroll the list as ScrollablePage did (Up, Down, Page Up, Page Down, Home, End).
@@ -472,6 +484,7 @@ Kirigami.Page {
             page.lastId = entry.id
             return
         }
+        page.cameFromPlayer = true
         const playlist = page.rows.filter(r => page.playable(r))
         // The window's page stack returns the new page (the attached PageStack.push returns nothing).
         const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow

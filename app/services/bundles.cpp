@@ -449,8 +449,9 @@ bool Bundles::remove(const QString &id)
 qint64 Bundles::freeSpace() const
 {
     // The shelf's folder comes with the first bundle: until then the nearest that exists.
-    QDir dir(m_shelf->root());
-    while (!dir.exists() && dir.cdUp()) {
+    QString path = QDir::cleanPath(m_shelf->root());
+    while (!QFileInfo::exists(path) && QFileInfo(path).absolutePath() != path) {
+        path = QFileInfo(path).absolutePath();
     }
-    return QStorageInfo(dir).bytesAvailable();
+    return QStorageInfo(path).bytesAvailable();
 }
