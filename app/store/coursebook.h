@@ -142,6 +142,9 @@ public:
     bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result,
                const TableMerge::Watch &watch = {});
 
+    // The tables a backup holds and merge() takes.
+    static QList<TableMerge::Table> tables();
+
     // When training began, by discipline; an invalid day removes it.
     QHash<QString, QDate> starts() const;
     bool setStart(const QString &discipline, const QDate &day, const QDateTime &at, const QString &device);

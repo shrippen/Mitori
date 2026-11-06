@@ -89,6 +89,10 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Einlesen führt zusammen (`store/tablemerge`): Einschätzungen und Prüfungsrunden als Vereinigung, Notizen,
   Notizbücher, Einträge und Grade per uid, das neuere `changed` gewinnt, Löschmarken eingeschlossen; zwei Notizbücher
   eines Termins werden eins, ein Grad doppelt der neuere. Vorher zeigt ein Dialog, was neu und was geändert ist.
+  Oder Ersetzen (Besitzer, 06.11.2026; zweite Rückfrage mit Zahlen): alle Zeilen beider Datenbanken in einer Transaktion
+  (`TableMerge::replace`), Medien davor, alles oder nichts; schaltet den Abgleich aus, weil dessen Zusammenführen
+  zurückholt, was andere Geräte haben, auch ihre neueren Änderungen und Löschungen (eine Weitergabe des Ersetzens an sie gibt es nicht; Einschätzungen und
+  Prüfungsrunden haben keine Löschmarken).
   DVD-Codes und Inhaltsschlüssel bleiben draußen. Android Auto Backup sichert die Datenbanken ohne Medien.
   Offen: Die Vorschau zählt Einträge, die das Zusammenführen gleich wieder löscht (Notizbuch woanders gelöscht);
   ein als Dublette gelöschtes Notizbuch kann nach einer späteren Löschung durch den Nutzer wiederkommen (selten).
