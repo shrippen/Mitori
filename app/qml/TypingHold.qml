@@ -3,7 +3,8 @@ import QtQuick
 // A page's `wide` that the on-screen keyboard does not flip: the keyboard shrinks the window
 // (adjustResize), which would change the columns under the fingers, both ways. From the moment a
 // field of `target` is typed in the page keeps its columns, until no field has the focus and the
-// page is as high as when it began. A new width (turned) counts at once.
+// page is as high as when it began. A new width (turned) counts at once, with the old width as the
+// height: the keyboard may still be open, and the tablet is what counts, not the low window.
 QtObject {
     id: hold
 
@@ -31,8 +32,8 @@ QtObject {
         return false
     }
 
-    function begin() {
-        heldWide = Tablet.wide(target.width, target.height)
+    function begin(fullHeight) {
+        heldWide = Tablet.wide(target.width, fullHeight)
         heldHeight = target.height
         holding = true
     }
@@ -44,16 +45,19 @@ QtObject {
 
     onTypingChanged: {
         if (typing && !holding) {
-            begin()
+            begin(target.height)
         } else {
             end()
         }
     }
     onHighChanged: end()
+    property real lastWidth: 0
+    Component.onCompleted: lastWidth = targetWidth
     onTargetWidthChanged: {
         holding = false
         if (typing) {
-            begin()
+            begin(lastWidth)
         }
+        lastWidth = targetWidth
     }
 }

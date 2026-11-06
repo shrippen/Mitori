@@ -24,8 +24,20 @@ Kirigami.ScrollablePage {
     background: Rectangle { color: Look.backgroundColor }
 
     required property string uid
+    // ListAndPage, beside the list on a tablet: another row or a turn takes this page away at any
+    // moment, so a begun entry is saved then.
+    property var paneHost: null
+    Component.onDestruction: {
+        if (paneHost && compose.text.trim() !== "") {
+            page.add()
+        }
+    }
     // Out of the stack, also from the middle; the top page stays the one shown.
     function leave() {
+        if (paneHost) {
+            paneHost.clearPane()
+            return
+        }
         const row = page.Kirigami.PageStack.pageStack
         row.removePage(page)
         row.currentIndex = row.depth - 1

@@ -22,6 +22,9 @@ Kirigami.ScrollablePage {
     property Item lookScope: LookScope { target: page }
     background: Rectangle { color: Look.backgroundColor }
 
+    // ListAndPage, beside the list on a tablet: its page is the one on the stack.
+    property var paneHost: null
+
     // The answer to the last code: "" or what went wrong.
     property string codeMessage: ""
     property bool codeOk: false
@@ -65,7 +68,7 @@ Kirigami.ScrollablePage {
 
         function onReady() {
             // A second answer to one wish finds the scan page already on top.
-            if (!page.isCurrentPage) {
+            if (!(page.paneHost ?? page).isCurrentPage) {
                 return
             }
             page.Kirigami.PageStack.push(Qt.resolvedUrl("ScanPage.qml"), { done: code => page.redeem(code) })

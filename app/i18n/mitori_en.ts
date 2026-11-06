@@ -17,7 +17,7 @@
     <message numerus="yes">
         <location filename="../qml/BackupPage.qml" line="238"/>
         <source>%n conflict(s): solve …</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n conflict: solve …</numerusform>
             <numerusform>%n conflicts: solve …</numerusform>
         </translation>
@@ -25,7 +25,7 @@
     <message numerus="yes">
         <location filename="../qml/BackupPage.qml" line="329"/>
         <source>%n new</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n new</numerusform>
             <numerusform>%n new</numerusform>
         </translation>
@@ -33,7 +33,7 @@
     <message numerus="yes">
         <location filename="../qml/BackupPage.qml" line="332"/>
         <source>%n changed</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n changed</numerusform>
             <numerusform>%n changed</numerusform>
         </translation>
@@ -41,7 +41,7 @@
     <message numerus="yes">
         <location filename="../qml/BackupPage.qml" line="335"/>
         <source>%n deleted</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n deleted</numerusform>
             <numerusform>%n deleted</numerusform>
         </translation>
@@ -49,7 +49,7 @@
     <message numerus="yes">
         <location filename="../qml/BackupPage.qml" line="342"/>
         <source>Photos and voice notes: %n new</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>
             <numerusform>Photos and voice notes: %n new</numerusform>
         </translation>
@@ -57,7 +57,7 @@
     <message numerus="yes">
         <location filename="../qml/BackupPage.qml" line="345"/>
         <source>Photos and voice notes: %n deleted</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>Photos and voice notes: %n deleted</numerusform>
             <numerusform>Photos and voice notes: %n deleted</numerusform>
         </translation>
@@ -66,7 +66,7 @@
 <context>
     <name>CoursePage</name>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="177"/>
+        <location filename="../qml/CoursePage.qml" line="189"/>
         <source>%n file(s) were not on this device and are missing.</source>
         <translation>
             <numerusform>%n file was not on this device and is missing.</numerusform>
@@ -74,7 +74,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="541"/>
+        <location filename="../qml/CoursePage.qml" line="553"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>The notebook and its %n entry go from this device.</numerusform>
@@ -104,7 +104,7 @@
 <context>
     <name>CoursesPage</name>
     <message numerus="yes">
-        <location filename="../qml/CoursesPage.qml" line="117"/>
+        <location filename="../qml/CoursesPage.qml" line="125"/>
         <source>%n notebook(s)</source>
         <translation>
             <numerusform>%n notebook</numerusform>
@@ -279,7 +279,7 @@
 <context>
     <name>VideosPage</name>
     <message numerus="yes">
-        <location filename="../qml/VideosPage.qml" line="244"/>
+        <location filename="../qml/VideosPage.qml" line="247"/>
         <source>%n video(s)</source>
         <translation>
             <numerusform>%n video</numerusform>

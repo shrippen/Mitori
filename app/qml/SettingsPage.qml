@@ -7,9 +7,9 @@ import Mitori
 // Settings (clickdummy "Einstellungen"): the way to the videos, the backup and sync, and the
 // appearance, each a page of its own.
 //
-//   映  Videos              Bundles, updates, code
-//   保  Backup and sync     File, Nextcloud, other devices
-//   色  Appearance          Style, language, about Mitori
+//   Videos              Bundles, updates, code
+//   Backup and sync     File, Nextcloud, other devices
+//   Appearance          Style, language, about Mitori
 Kirigami.ScrollablePage {
     id: page
 
@@ -22,8 +22,16 @@ Kirigami.ScrollablePage {
     // A new window (a change of style) comes back here (Main.keptPageList).
     readonly property string keptPage: "SettingsPage.qml"
 
+    // ListAndPage, when it shows this page: on a tablet sideways the rows choose beside the list.
+    property var paneHost: null
+    readonly property var firstPane: ({ source: "VideosPage.qml", props: {} })
     function open(file) {
-        page.Kirigami.PageStack.push(Qt.resolvedUrl(file))
+        if (!paneHost || !paneHost.show(file)) {
+            page.Kirigami.PageStack.push(Qt.resolvedUrl(file))
+        }
+    }
+    function shown(file) {
+        return !!paneHost && paneHost.isShown(file)
     }
 
     ColumnLayout {
@@ -32,25 +40,25 @@ Kirigami.ScrollablePage {
         LookListRow {
             objectName: "videosButton"
             Layout.fillWidth: true
-            leadingText: "映"
             text: qsTr("Videos")
             subtitle: qsTr("Bundles, updates, code")
+            selected: page.shown("VideosPage.qml")
             onClicked: page.open("VideosPage.qml")
         }
         LookListRow {
             objectName: "backupButton"
             Layout.fillWidth: true
-            leadingText: "保"
             text: qsTr("Backup and sync")
             subtitle: qsTr("File, Nextcloud, other devices")
+            selected: page.shown("BackupPage.qml")
             onClicked: page.open("BackupPage.qml")
         }
         LookListRow {
             objectName: "appearanceButton"
             Layout.fillWidth: true
-            leadingText: "色"
             text: qsTr("Appearance")
             subtitle: qsTr("Style, language, about Mitori")
+            selected: page.shown("AppearancePage.qml")
             onClicked: page.open("AppearancePage.qml")
         }
     }

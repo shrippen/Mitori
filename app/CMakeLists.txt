@@ -69,6 +69,7 @@ qt_add_qml_module(mitori_app
         qml/Tablet.qml
         qml/TwoColumns.qml
         qml/TypingHold.qml
+        qml/ListAndPage.qml
         qml/CommentPage.qml
         qml/PlayerPage.qml
         qml/PlayerView.qml
