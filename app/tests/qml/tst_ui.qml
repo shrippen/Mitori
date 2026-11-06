@@ -3338,6 +3338,92 @@ TestCase {
         return found
     }
 
+    // Hon-Menkyo and Menkyo-Kaiden: a chip with "–" and a card instead of the list; the grade the
+    // other pages use stays.
+    function test_8p_grade_without_forms() {
+        const width = window.width, height = window.height
+        window.width = 360
+        window.height = 800
+        wait(100)
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "chuden")
+        const page = push("ProgrammePage")
+        const settled = () => Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1
+        tryVerify(settled, 3000, "the page has slid in")
+        const chips = findChild(page, "gradeChips")
+        const card = findChild(page, "gradeCard")
+        verify(!card.visible)
+        verify(page.grades.every(g => g.id !== "hoshu"), "Hôshu has no content")
+
+        const index = page.grades.findIndex(g => g.id === "kaiden")
+        const data = page.grades[index]
+        const chip = chips.itemAt(index)
+        compare(chip.text, data.name + " –")
+        compare(chip.Accessible.name, qsTranslate("ProgrammePage", "%1, no forms yet").arg(data.name))
+
+        clickUntil(chip, () => page.grade === "kaiden")
+        verify(chip.checked)
+        compare(Programme.grade("shinkitoho"), "chuden", "the other pages keep their grade")
+        tryVerify(() => card.visible)
+        compare(page.rows.length, 0)
+
+        const texts = allChildren(card).filter(c => c.visible).map(c => c.text)
+        for (const expected of [data.bedeutung, data.inhalt, data.abstand]) {
+            verify(expected && texts.indexOf(expected) >= 0, expected)
+        }
+        const head = allChildren(card).find(c => c.japanese !== undefined)
+        compare(head.title, data.name)
+        compare(head.japanese, data.jp)
+        verify(findChild(card, "gradeCardNote").visible)
+        verify(!findChild(page, "gradeInfo").visible, "the card says it")
+        verify(!findChild(page, "gradeStand").visible)
+        verify(!allChildren(page).some(c => c.visible && c.titleText !== undefined), "no video hint")
+        tryVerify(settled, 3000, "still in place")
+        // Just shown, the card has its implicit width until the layouts' next pass (long lines
+        // measured past the edge with a wide font, as in the CI). What stays past it still fails.
+        for (let i = 0; i < 30 && overflowing(page, window.width).length > 0; i++) {
+            wait(100)
+        }
+        compare(overflowing(page, window.width), [])
+        shot("3-programme-grade-without-forms")
+
+        // A tablet sideways: nothing beside the card, no empty player. With videos of another
+        // grade the pane stands there first and goes.
+        window.width = 1280
+        window.height = 800
+        wait(100)
+        verify(!page.split)
+        verify(!findChild(page, "playerPane").active)
+        verify(card.width <= Kirigami.Units.gridUnit * 30 + 1, "a card, not a band: " + card.width)
+        shot("3-programme-grade-without-forms-wide")
+
+        // Back to a grade with forms: the list, and the pane if there are videos.
+        clickUntil(chips.itemAt(page.grades.findIndex(g => g.id === "chuden")), () => page.grade === "chuden")
+        tryVerify(() => !card.visible)
+        verify(page.rows.length > 0)
+        compare(page.split, page.playlist.length > 0)
+        compare(findChild(page, "playerPane").active, page.playlist.length > 0)
+
+        // From beside the player (with videos) to the card and back: the pane goes and returns.
+        const hadPane = page.split
+        clickUntil(chip, () => page.grade === "kaiden")
+        verify(!page.split)
+        verify(!findChild(page, "playerPane").active)
+        clickUntil(chips.itemAt(page.grades.findIndex(g => g.id === "chuden")), () => page.grade === "chuden")
+        compare(page.split, hadPane)
+        window.pageStack.pop()
+
+        // Opened anew: the grade the other pages use, not the card.
+        const again = push("ProgrammePage")
+        compare(again.grade, "chuden")
+        verify(!findChild(again, "gradeCard").visible)
+        window.pageStack.pop()
+        window.width = width
+        window.height = height
+        Programme.setGrade("shinkitoho", "shoden")
+        Programme.discipline = "aikido"
+    }
+
     // The grade chips say how far each grade is; the storage bar has its legend.
     function test_8p_grade_chips_and_storage() {
         const width = window.width, height = window.height
@@ -3374,6 +3460,25 @@ TestCase {
         window.width = width
         window.height = height
         wait(100)
+    }
+
+    // The head settling just before the list goes to a row (back from the player): the row wins.
+    // The list went back to its top, about every second run of test_8p_row_lights_up_on_return.
+    function test_8p_row_beats_keep_top() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        const list = findChild(page, "programmeList")
+        tryVerify(() => list.count > 0)
+        wait(500)
+        list.positionViewAtBeginning()
+        wait(100)
+        verify(!list.moving)
+        list.originYChanged()       // the head's new height, at the top: keep the top, a moment later
+        list.positionViewAtIndex(page.rows.length - 1, ListView.Contain)
+        wait(200)
+        verify(list.itemAtIndex(page.rows.length - 1) !== null, "the last row, at " + list.contentY)
+        window.pageStack.pop()
     }
 
     // On a phone the row of the last technique lights up on the way back, then no longer.
