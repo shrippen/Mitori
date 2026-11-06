@@ -75,7 +75,7 @@
 <context>
     <name>ExamPage</name>
     <message numerus="yes">
-        <location filename="../qml/ExamPage.qml" line="91"/>
+        <location filename="../qml/ExamPage.qml" line="90"/>
         <source>%n point(s)</source>
         <translation>
             <numerusform>%n point</numerusform>
@@ -143,7 +143,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="273"/>
+        <location filename="../qml/SettingsPage.qml" line="274"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n new</numerusform>
@@ -151,7 +151,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="276"/>
+        <location filename="../qml/SettingsPage.qml" line="277"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n changed</numerusform>
@@ -159,7 +159,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="283"/>
+        <location filename="../qml/SettingsPage.qml" line="284"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>
@@ -170,7 +170,7 @@
 <context>
     <name>StartPage</name>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="92"/>
+        <location filename="../qml/StartPage.qml" line="93"/>
         <source>%n video bundle(s) can be updated.</source>
         <translation>
             <numerusform>%n video bundle can be updated.</numerusform>
@@ -178,7 +178,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="155"/>
+        <location filename="../qml/StartPage.qml" line="157"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n due</numerusform>
@@ -186,7 +186,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="203"/>
+        <location filename="../qml/StartPage.qml" line="204"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -194,7 +194,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="186"/>
+        <location filename="../qml/StartPage.qml" line="187"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>
@@ -228,7 +228,7 @@
 <context>
     <name>TodayPage</name>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="45"/>
+        <location filename="../qml/TodayPage.qml" line="49"/>
         <source>%1 · %n day(s) ago</source>
         <translation>
             <numerusform>%1 · %n day ago</numerusform>
@@ -236,7 +236,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="47"/>
+        <location filename="../qml/TodayPage.qml" line="51"/>
         <source>not practised for %n day(s)</source>
         <translation>
             <numerusform>not practised for %n day</numerusform>
@@ -244,7 +244,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="128"/>
+        <location filename="../qml/TodayPage.qml" line="154"/>
         <source>%n of them without a video on this device: the training shows their name, practise from memory.</source>
         <translation>
             <numerusform>%n of them has no video on this device: the training shows its name, practise it from memory.</numerusform>
@@ -252,7 +252,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="147"/>
+        <location filename="../qml/TodayPage.qml" line="173"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>

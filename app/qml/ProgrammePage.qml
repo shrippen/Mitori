@@ -11,7 +11,7 @@ import Mitori
 // (app-entscheidungen.md, "Tablet quer") list and small player are one page: a row with a video
 // plays beside the list, one without opens the sheet. Opened, the page is silent: the video stands
 // until the first tap. A grade without forms (Hon-Menkyo) shows a card instead of the list; it
-// stays on this page, other pages keep the grade chosen last.
+// stays on this page, like every grade browsed here.
 Kirigami.Page {
     id: page
 
@@ -22,7 +22,9 @@ Kirigami.Page {
 
     readonly property string discipline: Programme.discipline
     readonly property var grades: Programme.gradeChips(discipline)
-    property string grade: Programme.grade(discipline)
+    // The grade being browsed: starts at the practice grade, then only this page's. Changes nothing
+    // on the start menu, today's practice or the exam mode (PracticeGrade).
+    property string grade: PracticeGrade.grade(discipline)
     readonly property var chosenGrade: grades.find(g => g.id === grade) || ({})
     readonly property bool noForms: chosenGrade.count === 0
     readonly property var rows: Programme.entries(discipline, grade)
@@ -86,7 +88,7 @@ Kirigami.Page {
             currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
             onActivated: index => {
                 Programme.discipline = Programme.disciplines[index].id
-                page.grade = Programme.grade(Programme.discipline)
+                page.grade = PracticeGrade.grade(Programme.discipline)
             }
         }
 
@@ -114,13 +116,7 @@ Kirigami.Page {
                     choice: true        // the page holds the grade: a tap only reports it
 
                     checked: modelData.id === page.grade
-                    onClicked: {
-                        // Without forms: only this page shows it, see Programme.gradeChips.
-                        if (ids.length) {
-                            Programme.setGrade(page.discipline, modelData.id)
-                        }
-                        page.grade = modelData.id
-                    }
+                    onClicked: page.grade = modelData.id
                 }
             }
         }

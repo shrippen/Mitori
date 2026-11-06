@@ -52,8 +52,8 @@ public:
 
     // Grades with exam material: {id, name, jp, count} (count = points).
     Q_INVOKABLE QVariantList grades(const QString &discipline) const;
-    // The grade chosen in the programme if it has material, else the first that has.
-    Q_INVOKABLE QString grade(const QString &discipline) const;
+    // `chosen` (the practice grade) if it has material, else the first that has.
+    Q_INVOKABLE QString grade(const QString &discipline, const QString &chosen) const;
     Q_INVOKABLE QVariantList material(const QString &discipline, const QString &grade) const;
     // Whether grades before this one have material (samples possible).
     Q_INVOKABLE bool hasEarlier(const QString &discipline, const QString &grade) const;
