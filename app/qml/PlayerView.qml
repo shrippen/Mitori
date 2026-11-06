@@ -106,8 +106,9 @@ Item {
 
     // The entry on screen, for the programme list to mark it when the user comes back.
     signal shown(string id)
-    // Back (landscape, training done) and the notes of the technique: the page decides.
+    // Back (landscape), the training's end and the notes of the technique: the page decides.
     signal backRequested()
+    signal trainingEnded()
     signal notesRequested(var entry)
     signal commentRequested(var entry)
     signal bigRequested()
@@ -181,8 +182,7 @@ Item {
         player.position = Math.max(from, Math.min(to, player.position + ms))
     }
     // Training: the next technique not practised today, after this one and then from the start
-    // (one skipped with "next"); when all are, the training is done and the player stays.
-    readonly property bool trainingDone: training && Practice.revision >= 0 && playlist.every(r => Practice.ratedToday(r.id))
+    // (one skipped with "next"); when all are, the training ends.
     function nextOpen() {
         for (let k = 1; k < playlist.length; ++k) {
             const i = (index + k) % playlist.length
@@ -191,6 +191,7 @@ Item {
                 return
             }
         }
+        trainingEnded()
     }
     function go(direction) {
         const next = index + direction
@@ -695,21 +696,6 @@ Item {
                     wrapMode: Text.Wrap
                 }
 
-                LookHint {
-                    objectName: "trainingDone"
-                    Layout.fillWidth: true
-                    visible: page.trainingDone
-                    importance: LookHint.Importance.Info
-                    titleText: qsTr("Done")
-                    text: qsTr("Training done: %n technique(s). They count as a practice day in the statistics.", "", page.practisedCount)
-
-                    LookButton {
-                        visible: !page.compact
-                        text: qsTr("Back")
-                        onClicked: page.backRequested()
-                    }
-                }
-
                 LookLabel {
                     objectName: "placeText"
                     Layout.fillWidth: true
@@ -809,7 +795,11 @@ Item {
                     objectName: "ratingRow"
                     Layout.fillWidth: true
                     entry: page.current.id || ""
-                    onRated: if (page.training) page.nextOpen()
+                    onRated: {
+                        if (page.training) {
+                            page.nextOpen()
+                        }
+                    }
                 }
 
                 // Beside the list on a tablet the sheet does not open: the comment is here.
@@ -898,8 +888,8 @@ Item {
                 }
 
                 // The positions of a sequence (Kamae exercise): beside the list on a tablet no
-                // sheet opens, and in the player they go along with the video. Last, so "Done",
-                // the way on and Back stay in view; the picture does not give way to them.
+                // sheet opens, and in the player they go along with the video. Last, so the
+                // rating and the way on stay in view; the picture does not give way to them.
                 StepList {
                     id: stepList
 

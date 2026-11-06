@@ -84,17 +84,6 @@
     </message>
 </context>
 <context>
-    <name>PlayerView</name>
-    <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="704"/>
-        <source>Training done: %n technique(s). They count as a practice day in the statistics.</source>
-        <translation>
-            <numerusform>Training done: %n technique. It counts as a practice day in the statistics.</numerusform>
-            <numerusform>Training done: %n techniques. They count as a practice day in the statistics.</numerusform>
-        </translation>
-    </message>
-</context>
-<context>
     <name>SearchPage</name>
     <message numerus="yes">
         <location filename="../qml/SearchPage.qml" line="145"/>
@@ -217,7 +206,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="154"/>
+        <location filename="../qml/TodayPage.qml" line="156"/>
         <source>%n of them without a video on this device: the training shows their name, practise from memory.</source>
         <translation>
             <numerusform>%n of them has no video on this device: the training shows its name, practise it from memory.</numerusform>
@@ -225,11 +214,22 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="173"/>
+        <location filename="../qml/TodayPage.qml" line="175"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>
             <numerusform>%n techniques</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>TrainingEndPage</name>
+    <message numerus="yes">
+        <location filename="../qml/TrainingEndPage.qml" line="65"/>
+        <source>Technique(s) practised and rated. Today counts as a practice day in the statistics.</source>
+        <translation>
+            <numerusform>Technique practised and rated. Today counts as a practice day in the statistics.</numerusform>
+            <numerusform>Techniques practised and rated. Today counts as a practice day in the statistics.</numerusform>
         </translation>
     </message>
 </context>

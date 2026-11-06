@@ -38,7 +38,7 @@ ColumnLayout {
             keepDraft()
         }
     }
-    // Leaving the player (Back, the training's Done card) keeps the draft too.
+    // Leaving the player (Back, the training's last rating) keeps the draft too.
     Component.onDestruction: keepDraft()
 
     spacing: Look.unit(6)
