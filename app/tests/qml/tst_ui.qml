@@ -145,6 +145,7 @@ TestCase {
         compare(Appearance.language, Appearance.Language.German)
         verify(hint.visible)
         verify(findChild(page, "aboutText").text.indexOf(Appearance.version) >= 0)
+        verify(findChild(page, "keychainLicence").text.indexOf("Frank Osterfeld") >= 0)
         verify(Appearance.version !== "")
         verify(/^\D*\d{4}\.\d{1,2}\.\d+$/.test(findChild(page, "dataVersion").text))
         shot("0b-appearance")
@@ -666,6 +667,26 @@ TestCase {
         const conflicts = push("ConflictsPage")
         compare(conflicts.title, "Conflicts")
         verify(findChild(conflicts, "noConflicts").visible)
+        window.pageStack.pop()
+    }
+
+    // No key store answers (the test's environment): the password lands in the file, the note says
+    // so and what to do. Runs after the case without an account.
+    function test_3e_sync_password_in_file() {
+        const page = push("SettingsPage")
+        Sync.enabled = true
+        const hint = findChild(page, "syncPasswordNote")
+        verify(!hint.visible)
+        Sync.setAccount("https://cloud.example.org/dav/", "ich", "nur-ein-test", "")
+        tryVerify(() => hint.visible, 10000)
+        verify(hint.text.indexOf("restart Mitori") >= 0, hint.text)
+        verify(Sync.hasPassword)
+        page.flickable.contentY = hint.mapToItem(page.flickable.contentItem, 0, 0).y - 20
+        wait(50)
+        shot("4e-sync-password-file")
+        Sync.enabled = false
+        verify(hint.visible, "it still lies there with sync off")
+        verify(hint.text.indexOf("With sync on") >= 0, hint.text)
         window.pageStack.pop()
     }
 
@@ -2009,7 +2030,8 @@ TestCase {
         const folder = name => uiDataDir + "/played-" + name
         Videos.folder = folder("a")
         const entry = {id: "x", title: "T", video: {video: "aikido/k5", von: 0.1, bis: 60}}
-        const player = push("PlayerPage", {playlist: [entry], index: 0})
+        const next = {id: "y", title: "U", video: {video: "aikido/k5", von: 0.2, bis: 60}}
+        const player = push("PlayerPage", {playlist: [entry, next], index: 0})
         tryVerify(() => player.playing, 10000)
         tryVerify(() => player.position > 300 && player.position < 700, 10000)
         const at = player.position
@@ -2026,7 +2048,7 @@ TestCase {
         verify(!player.playing, "it waits for a tap")
 
         // The next technique plays as usual again.
-        player.togglePlay()
+        player.go(1)
         tryVerify(() => player.playing, 5000)
         window.pageStack.pop()
         Videos.folder = before
@@ -2984,20 +3006,431 @@ TestCase {
         compare(tile.days, 1)
     }
 
-    // The programme on a tablet, with stand-ins for the videos: nothing plays, but what would is
-    // the player's autoPlay.
-    function tabletProgramme() {
+    // Another video folder for this case; cleanup() brings the real one back.
+    function useFolder(folder) {
         if (realFolder === "") {
             realFolder = Videos.folder
         }
-        Videos.folder = standInVideos
-        Programme.discipline = "aikido"
-        PracticeGrade.setGrade("aikido", "k5")
+        Videos.folder = folder
+    }
+
+    // The programme on a tablet, with stand-ins for the videos: nothing plays, but what would is
+    // the player's autoPlay.
+    function tabletProgramme(folder, discipline, grade) {
+        useFolder(folder || standInVideos)
+        Programme.discipline = discipline || "aikido"
+        PracticeGrade.setGrade(Programme.discipline, grade || "k5")
         window.width = 1280
         window.height = 800
         const page = push("ProgrammePage")
         tryVerify(() => page.split && page.player)
         return page
+    }
+
+    // Clips that really play under the catalog's names (tst_ui.cpp).
+    function clipFolder(name) {
+        return uiDataDir + "/played-" + name
+    }
+    function chapterLoaded(page) {
+        tryVerify(() => page.player && page.player.duration > 0 && Math.abs(page.player.position - page.player.from) < 1000, 10000)
+    }
+    // The row plays beside the list, past its chapter's start.
+    function rowPlays(page, row) {
+        page.open(page.playlist[row])
+        compare(page.player.current.id, page.playlist[row].id)
+        tryVerify(() => page.player.playing && page.player.position > page.player.from + 300, 10000)
+    }
+    // Paused well inside the chapter: its start would not pass for the same place.
+    function pausedInside(player) {
+        player.pause()
+        tryVerify(() => !player.playing)
+        const place = player.from + 5000
+        player.seek(place)
+        tryVerify(() => Math.abs(player.position - place) < 300, 5000)
+        return player.position
+    }
+    function staysStanding(player, why) {
+        wait(500)
+        verify(!player.playing, why)
+    }
+    function remakePane(page, width, height) {
+        window.width = width || 800
+        window.height = height || 1280
+        tryVerify(() => !page.split)
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => page.split && page.player)
+    }
+    function chooseGrade(page, id) {
+        const chips = findChild(page, "gradeChips")
+        clickUntil(chips.itemAt(page.grades.findIndex(g => g.id === id)), () => page.grade === id)
+    }
+
+    // A shelf save makes the list anew, with new objects: only another technique restarts.
+    function test_2u_a_save_leaves_player_alone() {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        rowPlays(page, 1)
+        page.player.setSpeed(0.5)
+        const running = page.player.position
+
+        Videos.folderChanged()
+        wait(300)
+        verify(page.player.playing, "still playing")
+        verify(page.player.position >= running, page.player.position + " after " + running)
+        compare(page.player.rate, 0.5)
+
+        page.player.pause()
+        tryVerify(() => !page.player.playing)
+        const paused = page.player.position
+        Videos.folderChanged()
+        staysStanding(page.player, "paused stays paused")
+        verify(Math.abs(page.player.position - paused) < 100, page.player.position + " after " + paused)
+    }
+
+    // What waits for a tap ends with its technique: another one plays as usual.
+    function test_2u_b_hold_ends_with_technique_data() {
+        return [ { tag: "file gone", folder: "gone" }, { tag: "failed load", folder: "broken" } ]
+    }
+    function test_2u_b_hold_ends_with_technique(data) {
+        useFolder(clipFolder("long"))
+        const chapter = { von: 1, bis: 60 }
+        const rows = [{ id: "a", title: "A", video: Object.assign({ video: "aikido/k5" }, chapter) },
+                      { id: "b", title: "B", video: Object.assign({ video: "aikido/k4" }, chapter) }]
+        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        tryVerify(() => player.playing, 10000)
+
+        Videos.folder = clipFolder(data.folder)
+        wait(300)
+        player.go(1)
+        tryVerify(() => player.playing && player.position > 1000, 10000, "the next technique plays")
+    }
+
+    // A save while the player first loads is no file changed under it.
+    function test_2u_b_save_during_first_load() {
+        useFolder(clipFolder("long"))
+        const rows = [{ id: "a", title: "A", video: { video: "aikido/k5", von: 1, bis: 60 } }]
+        const player = window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/PlayerPage.qml"), { playlist: rows, index: 0 })
+        Videos.folderChanged()
+        tryVerify(() => player.playing, 10000, "plays as if opened alone")
+    }
+
+    // A pane made anew keeps the state: playing plays on, standing stands, in the same place.
+    function test_2u_c_new_pane_keeps_state_data() {
+        return [
+            { tag: "paused", prepare: page => pausedInside(page.player), plays: false },
+            { tag: "waiting after a file change", prepare: page => {
+                Videos.folder = clipFolder("long2")
+                tryVerify(() => page.player.source.toString().indexOf("played-long2") > 0)
+                tryVerify(() => page.player.duration > 0 && !page.player.playing, 10000)
+                wait(300)
+              }, plays: false },
+            { tag: "playing", prepare: () => {}, plays: true }
+        ]
+    }
+    function test_2u_c_new_pane_keeps_state(data) {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        rowPlays(page, 1)
+        data.prepare(page)
+        tryCompare(page.player, "playing", data.plays)
+        const at = page.player.position
+
+        remakePane(page)
+        tryVerify(() => page.player.duration > 0, 10000)
+        compare(page.player.current.id, page.playlist[1].id)
+        if (data.plays) {
+            tryVerify(() => page.player.playing, 10000, "plays on")
+            verify(page.player.position >= at - 300, page.player.position + " after " + at)
+            return
+        }
+        staysStanding(page.player, "stands, no sound by itself")
+        verify(Math.abs(page.player.position - at) < 500, page.player.position + " after " + at)
+    }
+
+    // A pane made anew takes the state full screen left, at its place. By hand: offscreen the page
+    // under full screen does not change its size, so the pane does not go on the real way.
+    function test_2u_c_new_pane_after_full_screen_data() {
+        return [ { tag: "played there", playing: true }, { tag: "paused there", playing: false } ]
+    }
+    function test_2u_c_new_pane_after_full_screen(data) {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        const place = page.player.from + 2000
+        page.started = true     // as openBig
+        window.width = 700
+        tryVerify(() => !page.split)
+        page.bigResume = { position: place, rate: 1, looping: true, playing: data.playing }
+        window.width = 1280
+        tryVerify(() => page.player && page.player.duration > 0, 10000)
+        if (data.playing) {
+            tryVerify(() => page.player.playing, 10000, "plays on")
+            verify(page.player.position >= place - 300, page.player.position)
+            return
+        }
+        staysStanding(page.player, "paused there stays paused")
+        verify(Math.abs(page.player.position - place) < 500, page.player.position)
+    }
+
+    // The real way, the pane alive: its state follows full screen, also through a turn after it.
+    function test_2u_c_full_screen_state_follows_data() {
+        return [ { tag: "played there", playing: true }, { tag: "paused there", playing: false } ]
+    }
+    function test_2u_c_full_screen_state_follows(data) {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        const place = page.player.from + 100000
+        page.player.seek(place)
+        tryVerify(() => Math.abs(page.player.position - place) < 500, 5000)
+        page.openBig()
+        const big = window.pageStack.currentItem
+        tryVerify(() => big.big && big.playing, 10000)
+        tryVerify(() => Math.abs(big.position - place) < 3000, 3000, big.position + ", small player at " + place)
+        if (!data.playing) {
+            big.togglePlay()
+            tryVerify(() => !big.playing)
+        }
+        const left = big.position
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem === page)
+        tryVerify(() => page.player !== null)
+        const check = () => {
+            if (data.playing) {
+                tryVerify(() => page.player.playing, 10000, "plays on")
+            } else {
+                staysStanding(page.player, "paused there stays paused")
+            }
+            verify(page.player.position >= left - 500, page.player.position + " after " + left)
+        }
+        check()
+
+        remakePane(page)
+        tryVerify(() => page.player.duration > 0, 10000)
+        check()
+    }
+
+    // Left before its file loaded: full screen played nothing, so the small player stays as it was,
+    // at its place (far inside the chapter: a run from the start cannot reach it in time).
+    function test_2u_c_full_screen_left_while_loading_data() {
+        const back = () => window.pageStack.goBack()
+        const button = big => findChild(big, "bandBack").clicked()
+        return [ { tag: "playing, back", playing: true, leave: back },
+                 { tag: "playing, button", playing: true, leave: button },
+                 { tag: "standing, back", playing: false, leave: back },
+                 { tag: "standing, button", playing: false, leave: button } ]
+    }
+    function test_2u_c_full_screen_left_while_loading(data) {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        rowPlays(page, 0)
+        const place = page.player.from + 100000
+        page.player.seek(place)
+        tryVerify(() => Math.abs(page.player.position - place) < 1000, 5000)
+        if (!data.playing) {
+            page.player.pause()
+            tryVerify(() => !page.player.playing)
+        }
+
+        page.openBig()
+        data.leave(window.pageStack.currentItem)
+        tryVerify(() => window.pageStack.currentItem === page)
+        if (data.playing) {
+            tryVerify(() => page.player.playing, 5000, "plays on")
+        } else {
+            staysStanding(page.player, "stood, stays standing")
+        }
+        tryVerify(() => Math.abs(page.player.position - place) < 3000, 3000, page.player.position + ", was at " + place)
+    }
+
+    // Full screen from a pane still loading: the place that pane is going to.
+    function test_2u_c_full_screen_from_loading_pane() {
+        const page = tabletProgramme()
+        const place = page.player.from + 100000
+        page.player.startAt = place
+        page.openBig()
+        compare(window.pageStack.currentItem.startAt, place)
+    }
+
+    // Saved while the file loads: the place a pane still has to go to, not the file's start.
+    // Stand-ins never finish loading, so the second turn always falls into it.
+    function test_2u_c_turned_twice_while_loading() {
+        const page = tabletProgramme()
+        const place = page.player.from + 5000
+        page.player.startAt = place
+        remakePane(page)
+        compare(page.player.startAt, place, "once")
+        remakePane(page)
+        compare(page.player.startAt, place, "twice")
+    }
+
+    // A place belongs to its technique: chosen while the pane loads, the next starts at its chapter.
+    function test_2u_c_place_ends_with_technique() {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        page.player.seek(100000)
+        tryVerify(() => Math.abs(page.player.position - 100000) < 1000, 5000)
+        remakePane(page)
+        page.grade = "k4"
+        tryVerify(() => page.player.video === "aikido/k4" && page.player.duration > 0, 10000)
+        wait(300)
+        verify(page.player.position < page.player.from + 1000, page.player.position + ", chapter at " + page.player.from)
+    }
+
+    // A file changed while no pane stood: the pane waits at the chapter's start, as an open player.
+    function test_2u_c_new_file_waits_data() {
+        return [ { tag: "from the pane", big: false }, { tag: "from full screen", big: true } ]
+    }
+    function test_2u_c_new_file_waits(data) {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        rowPlays(page, 1)
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        Videos.folder = clipFolder("long2")
+        if (data.big) {
+            page.bigResume = { position: 210000, rate: 1, looping: true, playing: true }
+        }
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => page.split && page.player && page.player.duration > 0, 10000)
+        staysStanding(page.player, "waits for a tap")
+        verify(Math.abs(page.player.position - page.player.from) < 500, page.player.position)
+    }
+
+    // The loop stays as it was set on a pane made anew.
+    function test_2u_c_new_pane_keeps_loop() {
+        const page = tabletProgramme()
+        page.player.looping = false
+        remakePane(page)
+        compare(page.player.looping, false)
+
+        // Another technique chosen while no pane stood: as in a live pane.
+        window.width = 700
+        tryVerify(() => !page.split)
+        page.grade = "k4"
+        window.width = 1280
+        tryVerify(() => page.split && page.player)
+        compare(page.player.video, "aikido/k4")
+        compare(page.player.looping, false, "another technique")
+    }
+
+    // A save while another technique's file loads is no file changed under it either.
+    function test_2u_b_save_while_next_loads() {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        rowPlays(page, 1)
+        page.grade = "k4"
+        Videos.folderChanged()
+        tryVerify(() => page.player.video === "aikido/k4" && page.player.playing, 10000, "plays on")
+    }
+
+    // The chosen row, tapped when it stands: it plays.
+    function test_2u_d_chosen_row_plays() {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        rowPlays(page, 1)
+        page.player.pause()
+        tryVerify(() => !page.player.playing)
+        page.open(page.playlist[1])
+        tryVerify(() => page.player.playing, 5000, "the tap plays it")
+        page.open(page.playlist[1])
+        wait(100)
+        verify(page.player.playing, "playing: the tap leaves it")
+    }
+
+    // After the first tap a standing video stands through chips and cards until a technique is
+    // chosen; a playing one plays on.
+    function test_2u_e_grades_keep_standing_data() {
+        return [ { tag: "another grade", discipline: "aikido", from: "k5", to: "k4", card: false },
+                 { tag: "the grade card", discipline: "shinkitoho", from: "chuden", to: "kaiden", card: true } ]
+    }
+    function test_2u_e_grades_keep_standing(data) {
+        const page = tabletProgramme(clipFolder("long"), data.discipline, data.from)
+        chapterLoaded(page)
+        rowPlays(page, 1)
+        const chosen = page.player.current.id
+        const at = pausedInside(page.player)
+
+        chooseGrade(page, data.to)
+        if (data.card) {
+            tryVerify(() => !page.split)
+            chooseGrade(page, data.from)
+            tryVerify(() => page.split && page.player)
+            compare(page.player.current.id, chosen)
+        } else {
+            tryVerify(() => page.player.current.id !== chosen)
+        }
+        tryVerify(() => page.player.duration > 0, 10000)
+        staysStanding(page.player, "stands until a technique is chosen")
+        if (data.card) {
+            verify(Math.abs(page.player.position - at) < 500, page.player.position + " after " + at)
+        }
+
+        // Chosen: it plays, and playing it stays playing through the same way.
+        rowPlays(page, page.playlist.findIndex(r => r.id === page.player.current.id))
+        chooseGrade(page, data.card ? data.to : data.from)
+        if (data.card) {
+            tryVerify(() => !page.split)
+            chooseGrade(page, data.from)
+            tryVerify(() => page.split && page.player)
+        }
+        tryVerify(() => page.player.playing, 10000, "playing plays on")
+        Programme.discipline = "aikido"
+    }
+
+    // Row 3 at 0.5×, the card, back: row 3 at 0.5×.
+    function test_2u_f_card_keeps_technique() {
+        const page = tabletProgramme(standInVideos, "shinkitoho", "chuden")
+        page.open(page.playlist[2])
+        const chosen = page.player.current.id
+        page.player.setSpeed(0.5)
+
+        chooseGrade(page, "kaiden")
+        tryVerify(() => !page.split)
+        compare(page.lastId, chosen)
+        chooseGrade(page, "chuden")
+        tryVerify(() => page.split && page.player)
+        compare(page.player.current.id, chosen)
+        compare(page.lastId, chosen)
+        compare(page.player.rate, 0.5)
+        Programme.discipline = "aikido"
+    }
+
+    // Another list in the pane: the technique shown last if it is in it, else the first; no row
+    // of the new list at the old place on the way (it would become the chosen one).
+    function test_2u_f_grade_starts_at_its_first() {
+        const page = tabletProgramme(standInVideos)
+        page.open(page.playlist[2])
+        const seen = []
+        const see = id => seen.push(id)
+        page.player.shown.connect(see)
+        chooseGrade(page, "k4")
+        page.player.shown.disconnect(see)
+        compare(page.player.index, 0)
+        compare(page.lastId, page.playlist[0].id)
+        compare(seen, [page.playlist[0].id])
+    }
+
+    // A tempo left on a technique does not come back after another was shown.
+    function test_2u_g_old_tempo_stays_gone() {
+        const page = tabletProgramme(standInVideos, "shinkitoho", "chuden")
+        const first = page.playlist[0].id
+        page.player.setSpeed(0.25)
+
+        chooseGrade(page, "kaiden")
+        tryVerify(() => !page.split)
+        chooseGrade(page, "shoden")
+        tryVerify(() => page.split && page.player)
+        compare(page.player.rate, 1)
+        chooseGrade(page, "chuden")
+        compare(page.player.current.id, first)
+        compare(page.player.rate, 1)
+
+        remakePane(page, 700, 800)
+        compare(page.player.current.id, first)
+        compare(page.player.rate, 1, "not the tempo left before")
+        Programme.discipline = "aikido"
     }
 
     // Opening the programme is silent: the first tap starts, and from then on a row plays at once.
@@ -3102,23 +3535,6 @@ TestCase {
         verify(!page.player.playing)
         page.open(page.playlist[0])
         tryVerify(() => page.player.playing, 5000)
-        window.pageStack.pop()
-
-        // From full screen (it plays there) into a pane made anew: it goes on.
-        page = push("ProgrammePage")
-        tryVerify(() => page.player && page.player.duration > 0, 5000)
-        page.openBig()
-        const big = window.pageStack.currentItem
-        tryVerify(() => big.big && big.playing, 5000)
-        window.pageStack.goBack()
-        tryVerify(() => window.pageStack.currentItem === page)
-        tryVerify(() => page.split && page.player)
-        window.width = 800
-        window.height = 1280
-        tryVerify(() => !page.split)
-        window.width = 1280
-        window.height = 800
-        tryVerify(() => page.player && page.player.playing, 5000)
         window.pageStack.pop()
     }
 
@@ -3774,6 +4190,7 @@ TestCase {
         window.width = 360
         window.height = 800
         wait(100)
+        useFolder(standInVideos)
         Programme.discipline = "shinkitoho"
         PracticeGrade.setGrade("shinkitoho", "chuden")
         const page = push("ProgrammePage")
@@ -3809,7 +4226,9 @@ TestCase {
         verify(!allChildren(page).some(c => c.visible && c.titleText !== undefined), "no video hint")
         tryVerify(settled, 3000, "still in place")
         // Just shown, the card has its implicit width until the layouts' next pass (long lines
-        // measured past the edge with a wide font, as in the CI). What stays past it still fails.
+        // measured past the edge with a wide font, as in the CI). A card still small sticks out only
+        // after that pass: wait for it first. What stays past the edge still fails.
+        wait(100)
         for (let i = 0; i < 30 && overflowing(page, window.width).length > 0; i++) {
             wait(100)
         }
@@ -3830,16 +4249,16 @@ TestCase {
         clickUntil(chips.itemAt(page.grades.findIndex(g => g.id === "chuden")), () => page.grade === "chuden")
         tryVerify(() => !card.visible)
         verify(page.rows.length > 0)
-        compare(page.split, page.playlist.length > 0)
-        compare(findChild(page, "playerPane").active, page.playlist.length > 0)
+        verify(page.split)
+        verify(findChild(page, "playerPane").active)
 
-        // From beside the player (with videos) to the card and back: the pane goes and returns.
-        const hadPane = page.split
+        // From beside the player to the card and back: the pane goes and returns.
         clickUntil(chip, () => page.grade === "kaiden")
         verify(!page.split)
         verify(!findChild(page, "playerPane").active)
         clickUntil(chips.itemAt(page.grades.findIndex(g => g.id === "chuden")), () => page.grade === "chuden")
-        compare(page.split, hadPane)
+        verify(page.split)
+        verify(findChild(page, "playerPane").active)
         window.pageStack.pop()
 
         // Opened anew: the grade the other pages use, not the card.

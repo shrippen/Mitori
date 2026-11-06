@@ -37,6 +37,16 @@ def test_backup_without_bundles():
             assert ("file", "bundles/") in excluded, (name, section)
 
 
+def test_backup_without_account():
+    """konto.ini (the password if no key store took it) and the Keystore's encrypted copy lie in
+    files/sync/: never in a backup or a device transfer."""
+    rules = ET.parse(RES / "data_extraction_rules.xml").getroot()
+    for section in ("cloud-backup", "device-transfer"):
+        assert ("file", "sync/") in {(e.get("domain"), e.get("path")) for e in rules.find(section).iter("exclude")}
+    old = ET.parse(RES / "backup_rules.xml").getroot()
+    assert ("file", "sync/") in {(e.get("domain"), e.get("path")) for e in old.iter("exclude")}
+
+
 def test_cloud_backup_without_media():
     """Photos and voice notes (files/medien/) stay out of the cloud backup: past 25 MB Android backs
     up nothing, the practice log and the notes neither. A device transfer takes them along."""
