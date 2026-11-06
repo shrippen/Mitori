@@ -70,10 +70,7 @@ Kirigami.ScrollablePage {
                 objectName: "saveBackup"
                 icon.name: "document-save"
                 text: qsTr("Save backup …")
-                onClicked: {
-                    saveDialog.selectedFile = saveDialog.currentFolder + "/" + Backup.fileName()
-                    saveDialog.open()
-                }
+                onClicked: saveDialog.ask(Backup.fileName())
             }
         }
         LookButton {
@@ -292,15 +289,13 @@ Kirigami.ScrollablePage {
     property url source
     property string refused
 
-    FileDialog {
+    SaveFileDialog {
         id: saveDialog
 
+        objectName: "saveBackupDialog"
+        anchor: page
         title: qsTr("Save backup")
-        fileMode: FileDialog.SaveFile
-        defaultSuffix: "zip"
-        nameFilters: [qsTr("ZIP archives (*.zip)")]
-        currentFolder: StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]
-        onAccepted: page.saveBackup(selectedFile)
+        onChosen: target => page.saveBackup(target)
     }
 
     FileDialog {

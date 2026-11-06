@@ -15,7 +15,7 @@
 <context>
     <name>CoursePage</name>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="182"/>
+        <location filename="../qml/CoursePage.qml" line="177"/>
         <source>%n file(s) were not on this device and are missing.</source>
         <translation>
             <numerusform>%n file was not on this device and is missing.</numerusform>
@@ -23,7 +23,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="540"/>
+        <location filename="../qml/CoursePage.qml" line="541"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>The notebook and its %n entry go from this device.</numerusform>
@@ -84,6 +84,33 @@
     </message>
 </context>
 <context>
+    <name>ExportSheet</name>
+    <message numerus="yes">
+        <location filename="../qml/ExportSheet.qml" line="134"/>
+        <source>%n photo(s)</source>
+        <translation>
+            <numerusform>%n photo</numerusform>
+            <numerusform>%n photos</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/ExportSheet.qml" line="135"/>
+        <source>%n voice note(s)</source>
+        <translation>
+            <numerusform>%n voice note</numerusform>
+            <numerusform>%n voice notes</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/ExportSheet.qml" line="143"/>
+        <source>%n file(s) are not on this device and stay out.</source>
+        <translation>
+            <numerusform>%n file is not on this device and stays out.</numerusform>
+            <numerusform>%n files are not on this device and stay out.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>SearchPage</name>
     <message numerus="yes">
         <location filename="../qml/SearchPage.qml" line="145"/>
@@ -97,7 +124,7 @@
 <context>
     <name>SettingsPage</name>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="279"/>
+        <location filename="../qml/SettingsPage.qml" line="276"/>
         <source>%n conflict(s): solve …</source>
         <translation>
             <numerusform>%n conflict: solve …</numerusform>
@@ -105,7 +132,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="372"/>
+        <location filename="../qml/SettingsPage.qml" line="367"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n new</numerusform>
@@ -113,7 +140,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="375"/>
+        <location filename="../qml/SettingsPage.qml" line="370"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n changed</numerusform>
@@ -121,7 +148,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="378"/>
+        <location filename="../qml/SettingsPage.qml" line="373"/>
         <source>%n deleted</source>
         <translation>
             <numerusform>%n deleted</numerusform>
@@ -129,7 +156,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="385"/>
+        <location filename="../qml/SettingsPage.qml" line="380"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>
@@ -137,7 +164,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="388"/>
+        <location filename="../qml/SettingsPage.qml" line="383"/>
         <source>Photos and voice notes: %n deleted</source>
         <translation>
             <numerusform>Photos and voice notes: %n deleted</numerusform>

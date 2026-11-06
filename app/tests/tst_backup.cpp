@@ -801,6 +801,35 @@ private slots:
         QVERIFY(!backup.replace());      // the inspected backup is used up
     }
 
+    // Technique links arrive by replace: counted among what the backup holds, the row in the table.
+    void replaceBringsLinks()
+    {
+        const Device phone = device(u"verweis-telefon"_s);
+        const Device tablet = device(u"verweis-tablet"_s);
+        QString entry;
+        {
+            CourseBook book;
+            QVERIFY(book.open(phone.courses));
+            CourseBook::Course c;
+            c.title = u"Kurs"_s;
+            c.first = c.last = QDate(2026, 7, 4);
+            const QString course = book.addCourse(c, at(9), u"telefon"_s).uid;
+            entry = book.addEntry(course, u"mit Verweis"_s, at(9), u"telefon"_s).uid;
+            QVERIFY(book.addTag(entry, u"aikido/k5/a"_s, at(9), u"telefon"_s));
+        }
+        const QString zip = saved(phone, u"verweis.zip"_s);
+
+        Backup backup(tablet.practice, tablet.courses, tablet.media, tablet.work);
+        const QVariantMap s = backup.inspect(QUrl::fromLocalFile(zip));
+        QCOMPARE(s.value(u"links"_s).toMap().value(u"holds"_s).toInt(), 1);
+        QVERIFY2(backup.replace(), qPrintable(backup.errorString()));
+
+        CourseBook book;
+        QVERIFY(book.open(tablet.courses));
+        QCOMPARE(book.linkedEntries(u"aikido/k5/a"_s).size(), 1);
+        QVERIFY(state(tablet).filter(u"row entry_tags"_s).size() == 1);
+    }
+
     // Each way a replace can fail, before and after the first file's rows are written: the device
     // stays as it was, nothing of the backup stays behind, no restored().
     void replaceFails_data()
@@ -873,17 +902,29 @@ private slots:
         QCOMPARE(state(tablet), before);
     }
 
-    // A name typed without the suffix: the open dialog's filter would never show the file again.
-    void addsTheSuffix()
+    // Exactly the file it is given: a portal's path is the granted file, another name would be a
+    // hidden file nobody sees. The suffix for the built-in dialog comes from SavePlace.
+    void writesTheGivenFile()
     {
         const Device d = device(u"endung"_s);
         Backup backup(d.practice, d.courses, d.media, d.work);
-        QVERIFY(backup.save(QUrl::fromLocalFile(m_dir.filePath(u"sicherung"_s))));
-        QVERIFY(QFile::exists(m_dir.filePath(u"sicherung.zip"_s)));
-        QVERIFY(!QFile::exists(m_dir.filePath(u"sicherung"_s)));
-        QCOMPARE(backup.savedTo(), m_dir.filePath(u"sicherung.zip"_s));
-        QVERIFY(backup.save(QUrl::fromLocalFile(m_dir.filePath(u"b.ZIP"_s))));
-        QVERIFY(QFile::exists(m_dir.filePath(u"b.ZIP"_s)));
+        const QString granted = m_dir.filePath(u"y.alt"_s);
+        QVERIFY(backup.save(QUrl::fromLocalFile(granted)));
+        QVERIFY2(QFile::exists(granted), qPrintable(backup.savedTo()));
+        QVERIFY(!QFile::exists(granted + u".zip"_s));
+        QCOMPARE(backup.savedTo(), granted);
+    }
+
+    // A folder is no name: "~/" must not become a hidden file ".zip" in it.
+    void folderIsNoName()
+    {
+        const QString folder = m_dir.filePath(u"ordner"_s);
+        QVERIFY(QDir().mkpath(folder));
+        const Device d = device(u"ordner-geraet"_s);
+        Backup backup(d.practice, d.courses, d.media, d.work);
+        QVERIFY(!backup.save(QUrl::fromLocalFile(folder + u'/')));
+        QVERIFY(!backup.errorString().isEmpty());
+        QVERIFY(!QFile::exists(folder + u"/.zip"_s));
     }
 
     // A file that is no backup, and one of a newer format, are refused with a reason.

@@ -44,5 +44,17 @@
             </intent-filter>
             <meta-data android:name="android.app.lib_name" android:value="mitori" />
         </activity>
+
+        <!-- Share a notebook: a content URI for the export copy in the cache, nothing else
+             (platform/sharefile, res/xml/share_paths.xml). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_paths" />
+        </provider>
     </application>
 </manifest>

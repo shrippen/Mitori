@@ -25,6 +25,9 @@ public:
     bool finish();
 
     static quint32 crc32(const QByteArray &data);
+    // The archive's bytes for a file of this name and size; all files plus kEndSize is its size.
+    static qint64 sizeOf(const QString &name, qint64 bytes);
+    static constexpr qint64 kEndSize = 22;
 
 private:
     struct Entry {
