@@ -673,8 +673,9 @@ TestCase {
     }
 
     // Both ways of reading a backup: merging keeps what the backup lacks; replacing asks a second
-    // time with what goes, cancelling leads back, and accepting takes it away, turns the sync off
-    // and reloads Practice.
+    // time with what goes, cancelling leads back, numbers follow a sync that brought something, a
+    // running sync refuses it plainly, and accepting takes it away, turns the sync off and reloads
+    // Practice.
     function test_3d_backup_choices() {
         const page = push("SettingsPage")
         const url = "file://" + uiShotsDir + "/sicherung-wahl.zip"
@@ -690,7 +691,10 @@ TestCase {
         tryVerify(() => mergeDialog.opened)
         const text = findChild(page, "mergeText")
         verify(text.text.indexOf("It holds") >= 0, text.text)
-        verify(text.text.indexOf("Merging keeps") >= 0, text.text)
+        verify(text.text.indexOf("newer deletion") >= 0, text.text)
+        verify(text.text.indexOf("keeps everything") < 0, text.text)
+        verify(text.text.indexOf("Nothing new") >= 0, text.text)
+        verify(text.text.indexOf("On this device it changes") < 0, text.text)
         tryVerify(() => mergeDialog.contentHeight >= findChild(page, "replaceInstead").y + findChild(page, "replaceInstead").height, 1000,
                   "the column fits: " + mergeDialog.contentHeight)
         shot("4c-backup-choice", true)
@@ -709,6 +713,11 @@ TestCase {
         verify(warning.text.indexOf("cannot be undone") >= 0, warning.text)
         verify(warning.text.indexOf("Notes: 1") >= 0, warning.text)
         verify(warning.text.indexOf("Sync is turned off") >= 0, warning.text)
+
+        // A sync brings something while the dialog is open: the numbers follow.
+        verify(Practice.addNote(entry, "kam mit dem Abgleich"))
+        Sync.merged()
+        tryVerify(() => warning.text.indexOf("Notes: 2") >= 0, 2000, warning.text)
         tryVerify(() => replaceDialog.contentHeight >= warning.implicitHeight, 1000,
                   "the text fits: " + replaceDialog.contentHeight + " for " + warning.implicitHeight)
         shot("4c-backup-replace", true)
@@ -724,17 +733,49 @@ TestCase {
         window.height = 800
         replaceDialog.reject()
         tryVerify(() => mergeDialog.opened)
-        compare(Practice.notes(entry).length, notes + 1)
+        compare(Practice.notes(entry).length, notes + 2)
 
-        // Accepted: as in the backup, Practice read anew, the sync off.
+        // While a sync runs (a port nobody listens on): not replaced, and it says so.
+        // The account goes also when a check fails: the settings stay for the next run.
+        findChild(page, "replaceInstead").clicked()
+        tryVerify(() => replaceDialog.opened)
+        Sync.setAccount("http://127.0.0.1:1/", "test", "", Sync.deviceName)
+        const refused = findChild(page, "backupError")
+        try {
+            verify(Sync.syncNow())
+            verify(Sync.busy)
+            replaceDialog.accept()
+            tryVerify(() => !replaceDialog.visible)
+            verify(refused.visible)
+            verify(refused.text.indexOf("Not replaced") >= 0, refused.text)
+            compare(findChild(page, "backupDone").visible, false)
+            compare(Practice.notes(entry).length, notes + 2)
+            tryVerify(() => !Sync.busy, 20000)
+        } finally {
+            Sync.setAccount("", "", "", Sync.deviceName)
+        }
+
+        // Read again and accepted: as in the backup, Practice read anew, the sync off, and it says so.
+        page.inspect(url)
+        verify(!refused.visible)
+        tryVerify(() => mergeDialog.opened)
         findChild(page, "replaceInstead").clicked()
         tryVerify(() => replaceDialog.opened)
         replaceDialog.accept()
-        tryVerify(() => findChild(page, "backupDone").visible)
-        compare(findChild(page, "backupError").visible, false)
+        const done = findChild(page, "backupDone")
+        tryVerify(() => done.visible)
+        verify(done.text.indexOf("Sync is off") >= 0, done.text)
+        compare(refused.visible, false)
         compare(Practice.notes(entry).length, notes)
         verify(!Sync.enabled)
         tryVerify(() => !replaceDialog.visible)
+
+        // Beside the switch until it is on again: what turning it on brings back.
+        const note = findChild(page, "syncAfterReplace")
+        verify(note.visible)
+        Sync.enabled = true
+        verify(!note.visible)
+        Sync.enabled = false
         window.pageStack.pop()
     }
 

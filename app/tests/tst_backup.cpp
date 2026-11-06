@@ -296,6 +296,8 @@ private slots:
         QCOMPARE(summary.value(u"grades"_s).toMap().value(u"added"_s).toInt(), 1);
         QCOMPARE(summary.value(u"media"_s).toInt(), 1);
         QCOMPARE(summary.value(u"starts"_s).toMap().value(u"added"_s).toInt(), 1);
+        QCOMPARE(summary.value(u"notes"_s).toMap().value(u"removed"_s).toInt(), 1);   // deleted
+        QCOMPARE(summary.value(u"mediaRemoved"_s).toInt(), 1);                        // its photo
         QVERIFY(summary.value(u"created"_s).toDateTime().isValid());
         QFile f(tablet.practice);
         QVERIFY(f.open(QIODevice::ReadOnly));
@@ -430,7 +432,10 @@ private slots:
         Backup backupB(b.practice, b.courses, b.media, b.work);
         const QString fromB = m_dir.filePath(u"weg-b.zip"_s);
         QVERIFY(backupB.save(QUrl::fromLocalFile(fromB)));
-        QVERIFY(!backupA.inspect(QUrl::fromLocalFile(fromB)).isEmpty());
+        const QVariantMap s = backupA.inspect(QUrl::fromLocalFile(fromB));
+        QCOMPARE(s.value(u"notebooks"_s).toMap().value(u"removed"_s).toInt(), 1);
+        QCOMPARE(s.value(u"entries"_s).toMap().value(u"removed"_s).toInt(), 1);       // goes with its notebook
+        QCOMPARE(s.value(u"mediaRemoved"_s).toInt(), 1);
         QVERIFY(backupA.restore());
         {
             CourseBook book;

@@ -61,6 +61,7 @@ struct Result {
     QList<Conflict> conflicts;
 
     // Preview only: what replacing this copy by the other would do (replace() below).
+    QHash<QString, int> removed;        // {table: rows here the merge deletes (counted in changed too)}
     QHash<QString, int> holds;          // {table: rows of the other, not deleted}
     QHash<QString, int> lost;           // {table: rows here it lacks, has deleted or has older}
     QStringList theirMedia;             // media files the other's rows name (not deleted)

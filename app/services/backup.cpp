@@ -19,11 +19,12 @@ namespace {
 const QString kInspected = QStringLiteral("eingelesen.zip");
 const QString kCopyPrefix = QStringLiteral("kopie-");
 
-// {added, changed, holds, lost} of one table for QML.
+// {added, changed, removed, holds, lost} of one table for QML.
 QVariantMap counts(const TableMerge::Result &r, const QString &table)
 {
     return {{QStringLiteral("added"), r.added.value(table)},
             {QStringLiteral("changed"), r.changed.value(table)},
+            {QStringLiteral("removed"), r.removed.value(table)},
             {QStringLiteral("holds"), r.holds.value(table)},
             {QStringLiteral("lost"), r.lost.value(table)}};
 }
@@ -326,6 +327,12 @@ bool Backup::merge(Step step, QVariantMap *summary)
         }
     }
 
+    // The files a merge deletes here (Preview; Apply has removed them above).
+    int mediaRemoved = 0;
+    for (const QString &name : fromLog.orphans + fromBook.orphans) {
+        mediaRemoved += m_media.has(name) ? 1 : 0;
+    }
+
     // For replace(): the media the backup's rows name and it holds, and those that would go here.
     const QSet<QString> theirs = nameSet(fromLog.theirMedia + fromBook.theirMedia);
     int mediaHolds = 0;
@@ -349,6 +356,7 @@ bool Backup::merge(Step step, QVariantMap *summary)
                 {QStringLiteral("grades"), counts(fromBook, QStringLiteral("grades"))},
                 {QStringLiteral("starts"), counts(fromBook, QStringLiteral("starts"))},
                 {QStringLiteral("media"), media},
+                {QStringLiteral("mediaRemoved"), mediaRemoved},
                 {QStringLiteral("mediaHolds"), mediaHolds},
                 {QStringLiteral("mediaLost"), mediaLost}};
     return setError({});

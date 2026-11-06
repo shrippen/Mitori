@@ -70,6 +70,7 @@ void Sync::setEnabled(bool on)
     }
     m_account.setEnabled(on ? SyncAccount::Toggle::On : SyncAccount::Toggle::Off);
     if (on) {
+        m_account.setReplaced(SyncAccount::Toggle::Off);
         m_daily.start();
     } else {
         m_daily.stop();
@@ -185,7 +186,12 @@ void Sync::announce()
 void Sync::dataReplaced()
 {
     m_account.setConflicts({});
+    if (enabled() || !m_account.account().folder.isEmpty()) {
+        m_account.setReplaced(SyncAccount::Toggle::On);
+    }
+    m_error.clear();        // a failed run before this says nothing about the new state
     setEnabled(false);
+    emit accountChanged();
     emit stateChanged();
 }
 

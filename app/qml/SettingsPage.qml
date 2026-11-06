@@ -87,7 +87,7 @@ Kirigami.ScrollablePage {
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             wrapMode: Text.Wrap
             color: Look.disabledTextColor
-            text: qsTr("One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back asks: merge it (what is newer stays, nothing gets lost) or replace this device's data with it. DVD codes are not in it.")
+            text: qsTr("One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back asks: merge it (the newer state of each note wins, also a newer deletion) or replace this device's data with it. DVD codes are not in it.")
         }
         LookLabel {
             objectName: "backupDone"
@@ -102,8 +102,8 @@ Kirigami.ScrollablePage {
             objectName: "backupError"
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
-            visible: Backup.errorString !== ""
-            text: Backup.errorString
+            visible: text !== ""
+            text: page.refused !== "" ? page.refused : Backup.errorString
             color: Look.negativeTextColor
             wrapMode: Text.Wrap
         }
@@ -121,6 +121,14 @@ Kirigami.ScrollablePage {
                 checked: Sync.enabled
                 onToggled: Sync.enabled = checked
             }
+        }
+        LookLabel {
+            objectName: "syncAfterReplace"
+            Layout.fillWidth: true
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 30
+            visible: Sync.afterReplace
+            wrapMode: Text.Wrap
+            text: qsTr("This device's data was replaced by a backup. If you turn sync on, what your other devices hold comes back here.")
         }
         LookFormRow {
             label: qsTr("Folder on the server")
@@ -234,6 +242,8 @@ Kirigami.ScrollablePage {
     // What the last step did ("" for nothing yet), and what the read backup would change.
     property string done: ""
     property var summary: ({})
+    property url source
+    property string refused
 
     FileDialog {
         id: saveDialog
@@ -260,13 +270,28 @@ Kirigami.ScrollablePage {
 
     function inspect(url) {
         page.done = ""
+        page.refused = ""
+        page.source = url
         page.summary = Backup.inspect(url)
         if (Object.keys(page.summary).length > 0) {
             mergeDialog.open()
         }
     }
 
-    // "Notes: 3 new, 2 changed" per kind that changes; a line when nothing does.
+    // A sync brought something while a dialog is open: its numbers anew. Not readable any more: the
+    // error shows, nothing to choose.
+    function inspectAgain() {
+        if (!mergeDialog.visible && !replaceDialog.visible) {
+            return
+        }
+        page.summary = Backup.inspect(page.source)
+        if (Object.keys(page.summary).length === 0) {
+            mergeDialog.close()
+            replaceDialog.close()
+        }
+    }
+
+    // "Notes: 3 new, 2 changed, 1 deleted" per kind that changes; a line when nothing does.
     function changes(s) {
         const kinds = [["ratings", qsTr("Ratings")], ["notes", qsTr("Notes")], ["rounds", qsTr("Exam rounds")],
                        ["notebooks", qsTr("Notebooks")], ["entries", qsTr("Notebook entries")], ["grades", qsTr("Grades")],
@@ -278,8 +303,13 @@ Kirigami.ScrollablePage {
             if (c.added > 0) {
                 parts.push(qsTr("%n new", "", c.added))
             }
-            if (c.changed > 0) {
-                parts.push(qsTr("%n changed", "", c.changed))
+            // A deleted row counts as changed too; the clean-up after a merge deletes rows it did not change.
+            const changed = Math.max((c.changed || 0) - (c.removed || 0), 0)
+            if (changed > 0) {
+                parts.push(qsTr("%n changed", "", changed))
+            }
+            if (c.removed > 0) {
+                parts.push(qsTr("%n deleted", "", c.removed))
             }
             if (parts.length > 0) {
                 lines.push(name + ": " + parts.join(", "))
@@ -288,7 +318,11 @@ Kirigami.ScrollablePage {
         if (s.media > 0) {
             lines.push(qsTr("Photos and voice notes: %n new", "", s.media))
         }
-        return lines.length > 0 ? lines.join("\n") : qsTr("Nothing new: this device has everything in the backup.")
+        if (s.mediaRemoved > 0) {
+            lines.push(qsTr("Photos and voice notes: %n deleted", "", s.mediaRemoved))
+        }
+        return lines.length > 0 ? qsTr("On this device it changes:") + "\n" + lines.join("\n")
+                                : qsTr("Nothing new: this device has everything in the backup.")
     }
 
     // "Ratings: 12" per kind, by the summary's key for that number; the media's number apart.
@@ -359,7 +393,8 @@ Kirigami.ScrollablePage {
                     // out wrap this text anew, a binding loop in the dialog's height.
                     text: !mergeDialog.visible ? "" : (page.summary.created ? qsTr("Backup of %1.").arg(page.summary.created.toLocaleString(Qt.locale(), Locale.ShortFormat)) + "\n\n" : "")
                           + qsTr("It holds: %1").arg(page.amounts(page.summary, "holds", page.summary.mediaHolds).join(", ") || qsTr("nothing"))
-                          + "\n\n" + qsTr("Merging keeps everything on this device and takes in:") + "\n"
+                          + "\n\n" + qsTr("Merging: the newer state of each note wins. A newer text replaces this device's, a newer deletion removes the note here with its photo. What the backup lacks stays.")
+                          + "\n\n"
                           + page.changes(page.summary)
                 }
                 LookLabel {
@@ -395,16 +430,19 @@ Kirigami.ScrollablePage {
         acceptText: qsTr("Delete and replace")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
         onAccepted: {
-            // A running sync would merge into the new state: wait for it (the note below says so).
+            // A running sync would merge into the new state: refused, and read again later (fresh numbers).
             if (Sync.busy) {
-                replaceDialog.open()
+                Backup.discard()
+                page.refused = qsTr("Not replaced: a sync was running. Read the backup again when it has finished.")
                 return
             }
+            const syncWasOn = Sync.enabled
             const ok = Backup.replace()
             if (ok) {
                 Sync.dataReplaced()
             }
-            page.done = ok ? qsTr("This device's data was replaced by the backup.") : ""
+            page.done = !ok ? "" : syncWasOn ? qsTr("This device's data was replaced by the backup. Sync is off now.")
+                                             : qsTr("This device's data was replaced by the backup.")
         }
         onRejected: mergeDialog.open()
 
@@ -434,6 +472,13 @@ Kirigami.ScrollablePage {
                            + (Sync.busy ? "\n\n" + qsTr("A sync is running: replace when it has finished.") : "")
                 }
             }
+        }
+    }
+
+    Connections {
+        target: Sync
+        function onMerged() {
+            page.inspectAgain()
         }
     }
 

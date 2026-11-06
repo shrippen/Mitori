@@ -283,7 +283,12 @@ private slots:
         QVERIFY(!phone.syncNow());
         QCOMPARE(texts(a.practice), QStringList{u"Stand"_s});
 
+        // The settings warn before it is turned on again, also after a restart; on, that is over.
+        QVERIFY(phone.property("afterReplace").toBool());
+        QVERIFY(Sync(a.practice, a.courses, a.media, a.folder).property("afterReplace").toBool());
+
         phone.setEnabled(true);
+        QVERIFY(!phone.property("afterReplace").toBool());
         QVERIFY(synced(phone));
         QCOMPARE(texts(a.practice), (QStringList{u"Stand"_s, u"beim Tablet"_s}));
         QCOMPARE(ratings(), 1);

@@ -117,6 +117,37 @@ QSet<QString> liveMedia(QSqlDatabase &db, const QString &side, const QList<Table
     return names;
 }
 
+using RowSets = QHash<QString, QSet<QString>>;
+
+// The rows of the editable tables that are not deleted, by table.
+RowSets liveRows(QSqlDatabase &db, const QList<TableMerge::Table> &tables, bool *ok, QString *error)
+{
+    RowSets rows;
+    QSqlQuery q(db);
+    for (const TableMerge::Table &t : tables) {
+        if (t.kind == TableMerge::Kind::Log) {
+            continue;
+        }
+        if (!q.exec(QStringLiteral("SELECT %1 FROM main.%2 WHERE deleted = 0").arg(t.columns.first(), t.name))) {
+            *ok = failed(q, error);
+            return {};
+        }
+        while (q.next()) {
+            rows[t.name].insert(q.value(0).toString());
+        }
+    }
+    return rows;
+}
+
+// What the merge deleted: rows live before and not after. Also those its clean-up deleted (an
+// entry going with its notebook), which no comparison of the two copies shows.
+void countRemoved(const RowSets &before, const RowSets &after, TableMerge::Result *result)
+{
+    for (auto it = before.cbegin(); it != before.cend(); ++it) {
+        result->removed[it.key()] = (it.value() - after.value(it.key())).size();
+    }
+}
+
 // One number from a query.
 bool countRows(QSqlQuery &q, const QString &sql, int *count, QString *error)
 {
@@ -225,11 +256,15 @@ bool TableMerge::run(QSqlDatabase &db, const QString &otherPath, const QList<Tab
     const QSet<QString> before = ok ? liveMedia(db, kMain, tables, &ok, error) : QSet<QString>();
     ok = ok && (mode != Mode::Preview || compare(db, tables, result, error));
     result->mine = before.values();
+    const RowSets rowsBefore = ok && mode == Mode::Preview ? liveRows(db, tables, &ok, error) : RowSets();
     ok = ok && hold(db, watch, error);
     for (const Table &t : tables) {
         ok = ok && mergeTable(db, t, watch, result, error);
     }
     ok = ok && (!after || after(db, error));
+    if (ok && mode == Mode::Preview) {
+        countRemoved(rowsBefore, liveRows(db, tables, &ok, error), result);
+    }
 
     // The media the rows name after the merge: only those come from the backup (a deleted note's
     // photo not); what they named before and no more goes.

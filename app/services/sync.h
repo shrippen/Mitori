@@ -24,6 +24,7 @@ class Sync : public QObject
 
     Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY accountChanged)
     Q_PROPERTY(bool automatic READ automatic WRITE setAutomatic NOTIFY accountChanged)
+    Q_PROPERTY(bool afterReplace READ afterReplace NOTIFY accountChanged)
     Q_PROPERTY(QString server READ server NOTIFY accountChanged)
     Q_PROPERTY(QString user READ user NOTIFY accountChanged)
     Q_PROPERTY(bool hasPassword READ hasPassword NOTIFY accountChanged)
@@ -48,6 +49,9 @@ public:
     void setEnabled(bool on);
     bool automatic() const { return m_account.automatic(); }
     void setAutomatic(bool on);
+    // The data was replaced (dataReplaced) and the sync not turned on since: turning it on brings back
+    // what other devices hold, the settings say so.
+    bool afterReplace() const { return m_account.replaced(); }
     QString server() const { return m_account.account().folder.toString(); }
     QString user() const { return m_account.account().user; }
     bool hasPassword() const { return !m_account.account().password.isEmpty(); }

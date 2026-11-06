@@ -97,7 +97,7 @@
 <context>
     <name>SettingsPage</name>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="224"/>
+        <location filename="../qml/SettingsPage.qml" line="232"/>
         <source>%n conflict(s): solve …</source>
         <translation>
             <numerusform>%n conflict: solve …</numerusform>
@@ -105,7 +105,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="279"/>
+        <location filename="../qml/SettingsPage.qml" line="304"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n new</numerusform>
@@ -113,7 +113,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="282"/>
+        <location filename="../qml/SettingsPage.qml" line="309"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n changed</numerusform>
@@ -121,11 +121,27 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="289"/>
+        <location filename="../qml/SettingsPage.qml" line="312"/>
+        <source>%n deleted</source>
+        <translation>
+            <numerusform>%n deleted</numerusform>
+            <numerusform>%n deleted</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/SettingsPage.qml" line="319"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>
             <numerusform>Photos and voice notes: %n new</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/SettingsPage.qml" line="322"/>
+        <source>Photos and voice notes: %n deleted</source>
+        <translation>
+            <numerusform>Photos and voice notes: %n deleted</numerusform>
+            <numerusform>Photos and voice notes: %n deleted</numerusform>
         </translation>
     </message>
 </context>
