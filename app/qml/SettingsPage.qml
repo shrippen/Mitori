@@ -311,7 +311,9 @@ Kirigami.ScrollablePage {
             objectName: "mergeText"
             width: parent.width
             wrapMode: Text.Wrap
-            text: (page.summary.created ? qsTr("Backup of %1.").arg(page.summary.created.toLocaleString(Qt.locale(), Locale.ShortFormat)) + "\n\n" : "")
+            // Closed it measures nothing: a window turning (full screen) made a page still on its way
+            // out wrap this text anew, a binding loop in the dialog's height.
+            text: !mergeDialog.visible ? "" : (page.summary.created ? qsTr("Backup of %1.").arg(page.summary.created.toLocaleString(Qt.locale(), Locale.ShortFormat)) + "\n\n" : "")
                   + page.changes(page.summary)
         }
     }

@@ -3012,6 +3012,10 @@ TestCase {
                                      ["PlayerPage", { playlist: rows, index: 0 }]]) {
             const page = push(file, props)
             look(file, page)
+            if (file === "PlayerPage") {
+                // Room to spare: another font (the CI's) needs more than this machine's.
+                verify(findChild(page, "neighbourRow").implicitWidth < data.width * 0.75)
+            }
             if (file === "ProgrammePage") {
                 page.open(page.rows.find(r => r.id === "shinkitoho/odachi/5"))
                 const sheet = findChild(page, "techniqueSheet")
