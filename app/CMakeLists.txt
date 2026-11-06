@@ -152,6 +152,8 @@ qt_add_qml_module(mitori_app
         catalog/catalog.cpp
         services/programme.h
         services/programme.cpp
+        services/practicegrade.h
+        services/practicegrade.cpp
         services/glossary.h
         services/glossary.cpp
         player/speaker.h
@@ -374,11 +376,15 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME catalog COMMAND tst_catalog)
 
     qt_add_executable(tst_programme tests/tst_programme.cpp services/programme.cpp services/programme.h
+        services/practicegrade.cpp services/practicegrade.h
+        services/courses.cpp services/courses.h
+        store/coursebook.cpp store/coursebook.h store/tablemerge.cpp store/tablemerge.h store/icsreader.cpp store/icsreader.h store/device.h
+        platform/devicecalendar.cpp platform/devicecalendar.h store/mediastore.cpp store/mediastore.h store/zipwriter.cpp store/zipwriter.h store/notebookexport.cpp store/notebookexport.h
         catalog/catalog.cpp catalog/catalog.h)
-    target_include_directories(tst_programme PRIVATE catalog services store)
+    target_include_directories(tst_programme PRIVATE catalog services store platform)
     target_compile_definitions(tst_programme PRIVATE MITORI_DATEN_JSON="${MITORI_DATEN_JSON}"
         TEST_DATA_DIR="${CMAKE_BINARY_DIR}/test-data/programme")
-    target_link_libraries(tst_programme PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
+    target_link_libraries(tst_programme PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Test)
     set_target_properties(tst_programme PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_dependencies(tst_programme mitori)
     add_test(NAME programme COMMAND tst_programme)
