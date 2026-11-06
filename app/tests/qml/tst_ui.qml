@@ -685,6 +685,13 @@ TestCase {
         const page = push("SettingsPage")
         const url = "file://" + uiShotsDir + "/sicherung-test.zip"
         verify(Backup.save(url), Backup.errorString)
+
+        // The built-in dialog's answer without a suffix: the backup gets it.
+        const bare = "sicherung-bare-" + Date.now()
+        findChild(page, "saveBackupDialog").take("file://" + uiShotsDir + "/" + bare)
+        tryVerify(() => findChild(page, "backupDone").visible)
+        verify(findChild(page, "backupDone").text.indexOf(bare + ".zip") > 0, findChild(page, "backupDone").text)
+
         page.inspect(url)
         const dialog = findChild(page, "mergeBackup")
         tryVerify(() => dialog.opened)
@@ -3911,6 +3918,97 @@ TestCase {
         shot("14d-course-exported")
         window.pageStack.pop()
         verify(Courses.remove(course))
+    }
+
+    // The export sheet (owner, 6 Nov 2026): what goes out, the actions; at 360 px nothing past the
+    // edge, not with a long name or a long word in the text. The desktop has no share dialog.
+    function test_8e_export_sheet() {
+        const w = window.width
+        window.width = 360
+        wait(100)
+        const course = Courses.create("Sommerlehrgang mit einem sehr langen Namen, der umbrechen muss", "2026-05-01", "", "", "")
+        verify(Courses.addEntry(course, "<b>Tenkan</b> https://example.org/" + "x".repeat(120)))
+        verify(Courses.addEntry(course, "Tafel", Media.importPhoto("file://" + testMediaDir + "/foto.png")))
+        const book = push("CoursePage", { uid: course })
+        book.actions.find(a => a.objectName === "exportCourse").trigger()
+        const sheet = findChild(book, "exportSheet")
+        tryVerify(() => sheet.opened)
+
+        compare(findChild(sheet, "exportFile").text, Courses.exportName(course))
+        const counts = findChild(sheet, "exportCounts").text
+        verify(counts.indexOf("1 photo") === 0 && counts.indexOf("0 voice note") > 0, counts)
+        verify(/\d (bytes|kB|MB)/.test(counts), counts)
+        verify(!findChild(sheet, "exportMissing").visible)
+
+        // Markup in a note stays text: the file holds it so.
+        const text = findChild(sheet, "exportText")
+        compare(text.textFormat, Text.PlainText)
+        verify(text.text.indexOf("<b>Tenkan</b>") > 0, text.text)
+        verify(text.text.indexOf("](bilder/02-foto.jpg)") > 0, text.text)
+
+        verify(!findChild(sheet, "exportShare").visible, "no share dialog on the desktop")
+        verify(findChild(sheet, "exportSave").visible)
+        wait(200)
+        compare(overflowing(sheet.contentItem, 360), [])
+        verify(sheet.width <= sheet.parent.width + 0.5, "the sheet is " + sheet.width)
+        shot("14e-export-sheet", true)
+
+        // With a share dialog (Android) both buttons fit.
+        sheet.shareable = true
+        wait(100)
+        verify(findChild(sheet, "exportShare").visible)
+        compare(overflowing(sheet.contentItem, 360), [])
+        shot("14f-export-sheet-share", true)
+        sheet.shareable = Qt.binding(() => Courses.canShare)
+
+        // Save: the sheet goes, the file dialog comes.
+        mouseClick(findChild(sheet, "exportSave"))
+        tryVerify(() => !sheet.visible)
+        const dialog = findChild(book, "exportDialog")
+        // Only for Qt's own dialog: it would rename a portal's answer "…/doc/ab12/y" to "y.zip".
+        compare(dialog.defaultSuffix, SavePlace.asksItself ? "zip" : "")
+        tryVerify(() => dialog.visible)
+        dialog.close()
+        tryVerify(() => !dialog.visible)
+
+        // The dialog's answer reaches the export (in the test's folder, not the real Documents).
+        const accepted = "export-accepted-" + Date.now() + ".zip"
+        dialog.currentFolder = "file://" + uiShotsDir
+        dialog.ask(accepted)
+        tryVerify(() => dialog.visible)
+        dialog.accept()
+        tryVerify(() => findChild(book, "exportedTo").visible)
+        verify(findChild(book, "exportedTo").text.indexOf(uiShotsDir + "/" + accepted) > 0, findChild(book, "exportedTo").text)
+        book.exported = ""
+
+        // No suffix typed: the file gets it, whatever Qt did (it adds none with a dot in the path).
+        const bare = "export-bare-" + Date.now()
+        dialog.take(dialog.currentFolder + "/" + bare)
+        tryVerify(() => findChild(book, "exportedTo").visible)
+        verify(findChild(book, "exportedTo").text.indexOf(uiShotsDir + "/" + bare + ".zip") > 0, findChild(book, "exportedTo").text)
+        book.exported = ""
+
+        // A typed path goes where it says, and what is there is not replaced unasked.
+        const target = uiShotsDir + "/export-typed-" + Date.now() + ".zip"
+        dialog.take(dialog.currentFolder + "/" + target)
+        tryVerify(() => findChild(book, "exportedTo").visible)
+        verify(findChild(book, "exportedTo").text.indexOf(target) > 0, findChild(book, "exportedTo").text)
+        book.exported = ""
+        dialog.take("file://" + target)
+        const replace = findChild(dialog, "replaceFile")
+        tryVerify(() => replace.opened)
+        verify(!findChild(book, "exportedTo").visible, "not before the answer")
+        replace.accept()
+        tryVerify(() => findChild(book, "exportedTo").visible)
+
+        // Qt's dialog was a window of its own; offscreen nothing hands the focus back to this one.
+        window.requestActivate()
+        tryVerify(() => window.active)
+
+        window.pageStack.pop()
+        verify(Courses.remove(course))
+        window.width = w
+        wait(100)
     }
 
     // ⌗: an entry linked to a technique by choice, shown in its notes, back to the entry; a deleted

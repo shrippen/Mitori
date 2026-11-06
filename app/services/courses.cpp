@@ -3,12 +3,15 @@
 #include "device.h"
 #include "mediastore.h"
 #include "notebookexport.h"
+#include "sharefile.h"
 #include "devicecalendar.h"
 #include "programme.h"
 
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QLocale>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -18,6 +21,14 @@
 #include <QStandardPaths>
 
 namespace {
+
+// A notebook's folder for its copy to share; a hash, as a uid from a calendar may hold anything.
+QString copyFolder(const QString &uid)
+{
+    const QByteArray hash = QCryptographicHash::hash(uid.toUtf8(), QCryptographicHash::Sha1).toHex();
+    return QDir(ShareFile::folder()).filePath(QString::fromLatin1(hash));
+}
+
 
 // The association's public course calendar.
 const QUrl kCalendar(QStringLiteral("https://cal.arianw.de/dav/calendars/shinki/Lehrgaenge?export"));
@@ -138,6 +149,7 @@ void Courses::reload(Reload when)
 
 void Courses::refresh()
 {
+    dropGoneCopies();
     ++m_revision;
     emit changed();
     emit calendarChanged();
@@ -291,6 +303,8 @@ bool Courses::remove(const QString &uid)
     for (const QString &name : media) {
         MediaStore::shared().remove(name);
     }
+
+    dropCopy(uid);
     return true;
 }
 
@@ -641,6 +655,94 @@ int Courses::exportNotebook(const QString &uid, const QUrl &target)
     if (!m_error.isEmpty()) {
         m_error.clear();
         emit errorChanged();
+    }
+    return missing;
+}
+
+QVariantMap Courses::exportPreview(const QString &uid) const
+{
+    if (!m_open) {
+        return {};
+    }
+    const QList<CourseBook::Course> list = m_book->courses();
+    const auto it = std::find_if(list.cbegin(), list.cend(), [&](const auto &c) { return c.uid == uid; });
+    if (it == list.cend()) {
+        return {};
+    }
+
+    const NotebookExport::Summary s = NotebookExport::summary(*it, namedEntries(uid), MediaStore::shared());
+    return {{QStringLiteral("title"), it->title},
+            {QStringLiteral("name"), NotebookExport::fileName(*it)},
+            {QStringLiteral("text"), QString::fromUtf8(s.text)},
+            {QStringLiteral("photos"), s.photos},
+            {QStringLiteral("voices"), s.voices},
+            {QStringLiteral("missing"), s.missing},
+            {QStringLiteral("bytes"), s.bytes},
+            {QStringLiteral("size"), QLocale().formattedDataSize(s.bytes, 1, QLocale::DataSizeTraditionalFormat)}};
+}
+
+bool Courses::canShare() const
+{
+    return ShareFile::available();
+}
+
+void Courses::dropCopy(const QString &uid)
+{
+    QDir(copyFolder(uid)).removeRecursively();
+}
+
+// A sync or a backup may have taken a notebook away; its copy goes with it.
+void Courses::dropGoneCopies()
+{
+    const QDir folder(ShareFile::folder());
+    const QStringList copies = folder.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    if (!m_open || copies.isEmpty()) {
+        return;
+    }
+
+    QSet<QString> kept;
+    for (const CourseBook::Course &c : m_book->courses()) {
+        kept.insert(QFileInfo(copyFolder(c.uid)).fileName());
+    }
+    for (const QString &copy : copies) {
+        if (!kept.contains(copy)) {
+            QDir(folder.filePath(copy)).removeRecursively();
+        }
+    }
+}
+
+QString Courses::shareCopy(const QString &uid, int *missing)
+{
+    const QString name = exportName(uid);
+    if (name.isEmpty()) {
+        return {};
+    }
+
+    QDir(ShareFile::folder()).removeRecursively();
+    const QDir folder(copyFolder(uid));
+    folder.mkpath(QStringLiteral("."));
+    const QString path = folder.filePath(name);
+    const int lost = exportNotebook(uid, QUrl::fromLocalFile(path));
+    if (lost < 0) {
+        return {};
+    }
+    if (missing) {
+        *missing = lost;
+    }
+    return path;
+}
+
+int Courses::shareNotebook(const QString &uid)
+{
+    int missing = 0;
+    const QString path = shareCopy(uid, &missing);
+    if (path.isEmpty()) {
+        return -1;
+    }
+    if (!ShareFile::send(path, QFileInfo(path).completeBaseName())) {
+        m_error = tr("The share dialog could not be opened.");
+        emit errorChanged();
+        return -1;
     }
     return missing;
 }
