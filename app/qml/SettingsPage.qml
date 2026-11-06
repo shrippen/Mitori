@@ -18,6 +18,8 @@ Kirigami.ScrollablePage {
     background: Rectangle { color: Look.backgroundColor }
 
     title: qsTr("Settings")
+    // A new window (a change of style) comes back here (Main.keptPageList).
+    readonly property string keptPage: "SettingsPage.qml"
 
     // The settings as rows of its own: the name of the setting as a small caps line above its
     // field (the clickdummy's forms), not the desktop's form layout.
@@ -47,6 +49,7 @@ Kirigami.ScrollablePage {
             LookTextField {
                 id: folderField
 
+                objectName: "videoFolder"
                 Layout.fillWidth: true
                 text: Videos.folder
                 onEditingFinished: Videos.folder = text

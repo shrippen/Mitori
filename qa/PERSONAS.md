@@ -9,7 +9,7 @@ Feste, erfundene Personas für Entwurf, Journeys ([`QA.md`](QA.md)) und QA. Konz
 | P3 | Marta Lang, sieht schlecht | Telefon, Skalierung 2, Leinen, Deutsch | Daitoryu üben trotz Sehschwäche |
 | P4 | Jonas Weber, Schwert und Lehrgänge | Telefon 360×800, Shinki, Deutsch | Shinki Toho, Lehrgangsnotizen unterwegs |
 | P5 | Kenji Arai, Prüfer im Verband | Tablet hochkant 800×1280, Shinki, Deutsch | stimmen Programm, Namen, Kanji? |
-| P6 | Lena Smith, Gast aus England | Telefon, Material, Englisch, keine Videos | ohne DVD anfangen, Code eingeben |
+| P6 | Lena Smith, Gast aus England | Telefon, Material (nur auf dem Gerät: den Stil gibt es nur auf Android), Englisch, keine Videos | ohne DVD anfangen, Code eingeben |
 | P7 | Tom Berg, Tastatur und Sicherung | Plasma-Desktop 1280×720, Breeze, Deutsch | alles per Tastatur, Abgleich, Export |
 
 ## P1 Anna Vogt

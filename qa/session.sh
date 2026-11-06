@@ -4,7 +4,7 @@
 #
 #   Xvfb :N ─► mitori (xcb, own XDG folders, levels in memory) ─► --run CMD ─► clean up
 #
-#   qa/session.sh [--size 412x915] [--scale 2] [--style shinki|kante|leinen|material|breeze]
+#   qa/session.sh [--size 412x915] [--scale 2] [--style shinki|kante|leinen|breeze]
 #                 [--lang de|en] [--new] [--videos DIR] [--keep DIR] [--run CMD] [-- <app arguments>]
 #
 #   --size       screen (phone 412x915, tablet 1280x800)
@@ -41,7 +41,7 @@ if [ ! -x "$app" ]; then
     exit 2
 fi
 
-declare -A styles=([breeze]=0 [material]=1 [kante]=2 [leinen]=3 [shinki]=4)
+declare -A styles=([breeze]=0 [kante]=2 [leinen]=3 [shinki]=4)
 if [ -z "${styles[$style]:-}" ]; then
     echo "session: unknown style $style" >&2
     exit 2

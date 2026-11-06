@@ -28,7 +28,7 @@ class Practice : public QObject
     // Today's date; changes at midnight, so due lists and "rated today" follow a new day.
     Q_PROPERTY(QDate today READ today NOTIFY todayChanged)
     // Words per level: [none, seen, with help, sure, ready for the exam] (translated).
-    Q_PROPERTY(QStringList levelNames READ levelNames CONSTANT)
+    Q_PROPERTY(QStringList levelNames READ levelNames NOTIFY levelNamesChanged)
 
 public:
     explicit Practice(QObject *parent = nullptr);
@@ -103,11 +103,15 @@ public:
     static QString deviceId();
 
 signals:
+    void levelNamesChanged();
     void changed();
     void errorChanged();
     void intervalsChanged();
     void todayChanged();
     void notesChanged();
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     void load(const QString &path);
