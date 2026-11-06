@@ -116,7 +116,7 @@ Kleinigkeiten aus Reviews und Tests, je ein Folge-PR oder beim nächsten Bearbei
   Konkrete Antworten bisher: A-X-04 (Futari-/San'nin-gake ohne Zusatz, ändert IDs), A-D-11, D-D-01, D-D-07,
   D-K-02; S-02 und S-12 ohne Antwort; viele „Als Frage an Sensei notieren“.
 - Android: „Bildschirm an“ (FLAG_KEEP_SCREEN_ON) nur gebaut, nicht am Telefon geprüft.
-- Bundle-Manifest auf Gitea fehlt (404 beim Start: `mitori-manifest/1/manifest.json`).
+- Bundle-Manifest auf Gitea fehlt (404 beim Start: `mitori-manifest/1/manifest.json`). Für den Upload fehlen außerdem Adresse und Ordner für Caddy (`video-basis`, `video-ziel` in `bundle-geheim`).
 
 ### Fehler (Test zuerst)
 - Zurück-Taste (Android, Alt+Links → goBack) lässt den Player im Stapel, er spielt unsichtbar weiter (Review #64).
@@ -241,6 +241,6 @@ Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutz
   (`services/appearance`, gilt nach dem Neustart). Shinki steht nur mit `-DMITORI_SHINKI=ON` zur Wahl, bis alle
   Seiten über `app/qml/Look` gehen; bis dahin sieht es aus wie Leinen.
 - **Videos ausliefern**: beschnitten (Aikido `crop=720:372:0:64`, Daitoryu `crop=720:374:0:50`,
-  Shinki Toho ohne), HEVC, als versionierte Bundles im generischen Gitea-Paket.
+  Shinki Toho ohne), HEVC, als versionierte Bundles: Dateien statisch über Caddy, immer nur die aktuelle Version; das Manifest (Gitea-Paket) nennt ihre Adressen und Schnittpunkte.
 - **Übersetzungen** deutsch und englisch von Anfang an.
 - **Später**: Stores (F-Droid, Flathub), weitere Statistik-Auswertungen.

@@ -20,11 +20,12 @@ Ergänzt `app-konzept.html` (Stand 2). Stand 01.11.2026.
 ## Video-Bundles
 
 - Manifest-Verfahren mit Code je DVD wie im Konzept.
-- Bundles liegen als **generisches Gitea-Paket** (git.arianw.de).
+- Die **Videodateien** liegen statisch auf dem Server (Caddy), immer nur die aktuelle Version. Das **Manifest** liegt als generisches Gitea-Paket (git.arianw.de) und nennt je Datei Adresse und Schnittpunkte (Owner, 06.11.2026).
+- Öffentlich abrufbar dürfen die Dateien nur verschlüsselt sein; Schlüssel und Codes bleiben geheim (Owner, 06.11.2026).
 - Videos dürfen **entschlüsselt auf dem Gerät** liegen (kein eigenes AES-QIODevice).
 - Bundles sind **versioniert**; eine neue Bundle-Version bekommt einen eigenen Update-Hinweis in der App
   (getrennt vom App-Update-Check).
-- Kein Neukodieren geplant, die Dateien sind schon klein.
+- Neukodieren und Remastern macht der Owner von Hand (`bundle.py build --fertig`, Owner, 06.11.2026).
 - Zustimmung des Verbands holt der Nutzer selbst ein.
 
 ## Sicherung

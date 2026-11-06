@@ -33,6 +33,9 @@ public:
     Q_INVOKABLE QUrl source(const QString &video) const;
     // Picture area without the black bars: {hoehe, y, h, verhaeltnis} (see tools/kapitel.py).
     Q_INVOKABLE QVariantMap crop(const QString &video) const;
+    // Where technique `id` lies in the file: a loaded bundle's cut point (it fits that file), else
+    // `place` as is, the row's {video, von, bis} from the catalog.
+    Q_INVOKABLE QVariantMap place(const QString &id, const QVariantMap &place) const;
 
     Q_INVOKABLE static QString defaultFolder();
 
