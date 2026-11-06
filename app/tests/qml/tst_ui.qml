@@ -3608,6 +3608,49 @@ TestCase {
         compare(page.player.rate, 1)
     }
 
+    // Turning the tablet or narrowing the window makes the pane anew: still the same technique,
+    // so the same tempo. A technique chosen, or a player page opened, in between starts at 1×.
+    function test_8y_new_pane_keeps_tempo() {
+        const page = tabletProgramme()
+        const remake = (width, height) => {
+            window.width = width
+            window.height = height
+            tryVerify(() => !page.split)
+            window.width = 1280
+            window.height = 800
+            tryVerify(() => page.split && page.player)
+        }
+        const old = page.player
+        const chosen = page.player.current.id
+        page.player.setSpeed(0.5)
+        remake(800, 1280)
+        verify(page.player !== old, "a new pane")
+        compare(page.player.current.id, chosen)
+        compare(page.player.rate, 0.5, "turned")
+        remake(700, 800)
+        compare(page.player.rate, 0.5, "window narrowed")
+
+        page.player.go(1)
+        compare(page.player.rate, 1, "the next technique")
+        remake(800, 1280)
+        compare(page.player.rate, 1, "its tempo, not the one before")
+
+        // Upright: the same technique on a player page of its own, then turned back.
+        page.player.setSpeed(0.25)
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        page.play(page.rows.find(r => r.id === page.lastId))
+        tryVerify(() => window.pageStack.currentItem !== page)
+        compare(window.pageStack.currentItem.rate, 1)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => page.split && page.player)
+        compare(page.player.rate, 1, "after a new player page")
+    }
+
     // The pane made anew after full screen takes up the tempo left there, not 1×.
     function test_8y_pane_made_anew_keeps_tempo() {
         const page = tabletProgramme()
