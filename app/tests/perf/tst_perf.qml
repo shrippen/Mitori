@@ -71,7 +71,7 @@ TestCase {
 
     function test_1_pages() {
         for (const name of ["TodayPage", "StatsPage", "YearsPage", "AllNotesPage", "TechniqueMapPage", "SearchPage",
-                            "CoursesPage", "GradesPage", "SettingsPage", "VideosPage", "AppearancePage", "ExamPage"]) {
+                            "CoursesPage", "NotebooksPage", "GradesPage", "SettingsPage", "VideosPage", "AppearancePage", "ExamPage"]) {
             page(name, name)
             back()
         }

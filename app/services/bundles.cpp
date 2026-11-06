@@ -19,17 +19,36 @@ namespace {
 // The public manifest (tools/bundle.py hochladen): which bundles exist, their files, the codes'
 // entries. It holds no code and no key.
 const QUrl kManifest(QStringLiteral("https://git.arianw.de/api/packages/shrippen/generic/mitori-manifest/1/manifest.json"));
-constexpr int kFormat = 1;                      // "format" of the manifest
+constexpr int kHttpError = 400;                 // from this status on a body is an error page
+constexpr int kFormat = 2;                      // "format" of the manifest
 constexpr auto kWifiOnlyKey = "videos/wifiOnly";
 constexpr qint64 kFreshSeconds = 6 * 60 * 60;
 constexpr int kTimeoutMs = 30 * 1000;           // without a byte for this long a download fails
 constexpr qint64 kProgressMs = 250;             // the least time between two progress reports
 const QString kManifestFile = QStringLiteral("manifest.json");
 
-// The file a video gets on the device: "aikido-k5.mvb" → "aikido-k5.mkv".
-QString plainName(const QString &file)
+// A file's cut points from the manifest; what makes no sense is left out (the app's own time counts).
+QHash<QString, BundleShelf::Cut> cutsOf(const QJsonObject &file)
 {
-    return QFileInfo(file).completeBaseName() + QStringLiteral(".mkv");
+    QHash<QString, BundleShelf::Cut> cuts;
+    for (const QJsonValue &v : file.value(QStringLiteral("kapitel")).toArray()) {
+        const QJsonObject k = v.toObject();
+        const QString id = k.value(QStringLiteral("id")).toString();
+        const QJsonValue von = k.value(QStringLiteral("von"));
+        const QJsonValue bis = k.value(QStringLiteral("bis"));
+        if (id.isEmpty() || !von.isDouble() || !bis.isDouble() || von.toDouble() < 0 || von.toDouble() >= bis.toDouble()) {
+            continue;
+        }
+        cuts.insert(id, {von.toDouble(), bis.toDouble()});
+    }
+    return cuts;
+}
+
+// The file a video gets on the device: "aikido-k5.mvb", version 2 → "aikido-k5.v2.mkv". With the
+// version, so that a player showing the old file sees that it changed.
+QString plainName(const QString &file, int version)
+{
+    return QFileInfo(file).completeBaseName() + QStringLiteral(".v%1.mkv").arg(version);
 }
 
 } // namespace
@@ -320,7 +339,7 @@ void Bundles::next(Job &job)
     if (job.videos.isEmpty()) {
         QDir(m_shelf->folder(id)).removeRecursively();
         if (!QDir().rename(partDir, m_shelf->folder(id))
-            || !m_shelf->installed(id, job.version, job.files, job.cropped)) {
+            || !m_shelf->installed(id, job.version, job.files, job.cropped, job.cuts)) {
             fail(id, tr("The videos could not be saved on this device."));
             return;
         }
@@ -338,7 +357,12 @@ void Bundles::next(Job &job)
         fail(id, tr("The manifest names a file that cannot be loaded."));
         return;
     }
-    job.part = std::make_unique<QFile>(QDir(partDir).filePath(plainName(file)));
+    const QUrl url(f.value(QStringLiteral("url")).toString());
+    if (!url.isValid() || url.isRelative()) {
+        fail(id, tr("The manifest names a file that cannot be loaded."));
+        return;
+    }
+    job.part = std::make_unique<QFile>(QDir(partDir).filePath(plainName(file, job.version)));
     if (!job.part->open(QIODevice::WriteOnly)) {
         fail(id, tr("The videos could not be saved on this device."));
         return;
@@ -347,8 +371,6 @@ void Bundles::next(Job &job)
     job.sha.reset();
     job.received = 0;
 
-    const QUrl url(m_manifest.value(QStringLiteral("basis")).toString() + QStringLiteral("/mitori-") + id + QLatin1Char('/')
-                   + QString::number(job.version) + QLatin1Char('/') + file);
     QNetworkRequest request(url);
     request.setTransferTimeout(kTimeoutMs);
     QNetworkReply *reply = network()->get(request);
@@ -356,6 +378,10 @@ void Bundles::next(Job &job)
     connect(reply, &QNetworkReply::readyRead, this, [this, id, reply] {
         const auto j = m_jobs.value(id);
         if (!j || j->reply != reply) {
+            return;
+        }
+        // An error page is no video: `finished` says what happened.
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() >= kHttpError) {
             return;
         }
         const QByteArray data = reply->readAll();
@@ -386,9 +412,14 @@ void Bundles::next(Job &job)
                         && QString::fromLatin1(j->sha.result().toHex()) == f.value(QStringLiteral("sha256")).toString();
         j->part->close();
         if (!ok) {
+            // The server keeps only the current version: the next try needs the new manifest.
+            const bool gone = reply->error() == QNetworkReply::ContentNotFoundError;
             fail(id, reply->error() != QNetworkReply::NoError && reply->error() != QNetworkReply::OperationCanceledError
                          ? tr("Loading failed: %1").arg(reply->errorString())
                          : tr("A video arrived damaged; load it again."));
+            if (gone) {
+                reload();
+            }
             return;
         }
         const QString video = f.value(QStringLiteral("video")).toString();
@@ -396,6 +427,7 @@ void Bundles::next(Job &job)
         if (f.value(QStringLiteral("beschnitten")).toBool()) {
             j->cropped << video;
         }
+        j->cuts.insert(video, cutsOf(f));
         j->done += qint64(f.value(QStringLiteral("groesse")).toDouble());
         j->received = 0;
         j->videos.removeFirst();

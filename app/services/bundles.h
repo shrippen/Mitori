@@ -104,6 +104,7 @@ private:
         QJsonArray videos;          // still to load, first one now
         QHash<QString, QString> files;
         QStringList cropped;
+        BundleShelf::Cuts cuts;
         qint64 done = 0;            // bytes of the bundle's files already loaded
         qint64 total = 0;
         QPointer<QNetworkReply> reply;

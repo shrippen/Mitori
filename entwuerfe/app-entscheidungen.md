@@ -16,15 +16,18 @@ Ergänzt `app-konzept.html` (Stand 2). Stand 01.11.2026.
 - Notizen bleiben **privat**; weitergeben nur über den Export.
 - Export möglichst einfach (Markdown/Text); für die Shinki News wird ohnehin umgebaut.
 - Lehrgangsnotizen erscheinen **nicht** in „Wiederholen nach Plan“.
+- **„Meine Notizbücher“** (Owner, 06.11.2026): Knopf neben „Meine Grade“ oben auf „Lehrgänge“, eigene Seite mit allen
+  Notizbüchern; ein Termin öffnet weiter sein Notizbuch und legt es beim ersten Mal an. Ersetzt den Abschnitt im Clickdummy.
 
 ## Video-Bundles
 
 - Manifest-Verfahren mit Code je DVD wie im Konzept.
-- Bundles liegen als **generisches Gitea-Paket** (git.arianw.de).
+- Die **Videodateien** liegen statisch auf dem Server (Caddy), immer nur die aktuelle Version. Das **Manifest** liegt als generisches Gitea-Paket (git.arianw.de) und nennt je Datei Adresse und Schnittpunkte (Owner, 06.11.2026).
+- Öffentlich abrufbar dürfen die Dateien nur verschlüsselt sein; Schlüssel und Codes bleiben geheim (Owner, 06.11.2026).
 - Videos dürfen **entschlüsselt auf dem Gerät** liegen (kein eigenes AES-QIODevice).
 - Bundles sind **versioniert**; eine neue Bundle-Version bekommt einen eigenen Update-Hinweis in der App
   (getrennt vom App-Update-Check).
-- Kein Neukodieren geplant, die Dateien sind schon klein.
+- Neukodieren und Remastern macht der Owner von Hand (`bundle.py build --fertig`, Owner, 06.11.2026).
 - Zustimmung des Verbands holt der Nutzer selbst ein.
 
 ## Sicherung
@@ -49,6 +52,8 @@ Syncthing entfällt als eigener Weg (geht über den Export-Ordner).
 ## Player (Runde 2)
 
 - Schleife ist Standard. Einschätzen und Notiz direkt im Player. Vier Tempi (0,25 / 0,5 / 0,75 / 1) reichen.
+- Jede neue Technik startet mit 1× (Eigentümer, 06.11.2026), auch nach einem Neustart; die Schleife und der
+  Wechsel zwischen klein und groß behalten das Tempo.
 - Gesten aufs Video: Doppeltipp links/rechts = 2 s zurück/vor; Wischen hoch/runter in der linken Hälfte =
   Helligkeit des Geräts, in der rechten = Lautstärke.
 - Querformat: Entwurf B, schmale Spalte rechts (Hochformat, Einzelbild, Pause, Tempo, Schleife), Bild bleibt frei,
@@ -77,6 +82,8 @@ Syncthing entfällt als eigener Weg (geht über den Export-Ordner).
 - Startmenü als 4-spaltiges Kachelraster.
 - **Programm und Player klein sind eine Seite**: Liste links, rechts Video, Steuerung, Einschätzen, Notiz und
   Kommentar der gewählten Technik; Tippen auf eine Zeile spielt sie. Ohne Video steht rechts das Blatt.
+  Beim Öffnen steht das Video still am Kapitelanfang (Eigentümer, 06.11.2026); das erste Tippen startet es, danach
+  spielt jede gewählte Technik sofort.
 - **Player groß**: bleibt über und unter dem Video genug Platz (ab 120 px, z. B. Tablet 16:10 mit
   Aikido/Daitoryu), stehen Titel oben und Steuerung unten im freien Raum; sonst die Spalte rechts
   (Telefon quer, Shinki Toho 16:9 auf dem Tablet).

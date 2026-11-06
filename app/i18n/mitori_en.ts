@@ -51,6 +51,17 @@
     </message>
 </context>
 <context>
+    <name>CoursesPage</name>
+    <message numerus="yes">
+        <location filename="../qml/CoursesPage.qml" line="117"/>
+        <source>%n notebook(s)</source>
+        <translation>
+            <numerusform>%n notebook</numerusform>
+            <numerusform>%n notebooks</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>ExamEndPage</name>
     <message numerus="yes">
         <location filename="../qml/ExamEndPage.qml" line="156"/>

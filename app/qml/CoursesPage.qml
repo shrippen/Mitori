@@ -8,17 +8,17 @@ import Mitori
 import "coursedays.js" as CourseDays
 import "grades.js" as Grades
 
-// Courses (clickdummy "Lehrgänge"): the coming dates of the association's course calendar and
-// the user's notebooks. A date opens its notebook (made on first use); "New course" makes one
-// without a calendar event (a private training, a guest teacher). On top "My grades" and the
-// exams planned on coming courses, with their waiting times.
+// Courses (clickdummy "Lehrgänge"): the coming dates of the association's course calendar. A date
+// opens its notebook (made on first use); "New course" makes one without a calendar event (a
+// private training, a guest teacher). On top "My grades", "My notebooks" (NotebooksPage, owner
+// 06.11.2026) and the exams planned on coming courses, with their waiting times.
 //
-//   段 My grades                         Aikido 4. Kyu · Daitoryu 5. Kyu            ›
+//   [段 My grades                    ] [記 My notebooks                ]
+//   [   Aikido 4. Kyu · Daitoryu 5. Kyu] [   3 notebooks                ]
 //   PLANNED EXAMS   Aikido 3. Kyu  Bonn, 12.06.26          fits (from 09.03.26)
 //   NEXT DATES · course calendar        loaded from the network, kept for offline use
 //   [ 6 ] Daitoryu Aiki Jujutsu         place · 6.–7.6.2026 · teacher       in 12 days
 //    Jun                                                                     3 notes
-//   MY NOTEBOOKS                         every notebook, the latest course first
 Kirigami.ScrollablePage {
     id: page
 
@@ -32,7 +32,10 @@ Kirigami.ScrollablePage {
     // Exams on courses that have not ended, the next first.
     readonly property var planned: notebooks.filter(n => n.examGrade && CourseDays.fromToday(n.last) >= 0)
                                             .sort((a, b) => a.first.localeCompare(b.first))
-    // The highest grade passed per discipline: "Aikido 4. Kyu · Daitoryu 5. Kyu".
+    // What fits a tile on a phone in any font (Kante's tile cuts after two lines).
+    readonly property int gradesTextLetters: 34
+    // The highest grade passed per discipline: "Aikido 4. Kyu · Daitoryu 5. Kyu"; what does not
+    // fit is counted: "Aikido 4. Kyu +2".
     readonly property string gradesText: {
         const grades = Courses.revision >= 0 ? Courses.grades : []
         const parts = []
@@ -43,7 +46,12 @@ Kirigami.ScrollablePage {
                 parts.push(d.kurzname + " " + passed[passed.length - 1].name)
             }
         }
-        return grades.length > 0 ? parts.join(" · ") : qsTr("none entered yet")
+        if (grades.length === 0) {
+            return qsTr("none entered yet")
+        }
+
+        const whole = parts.join(" · ")
+        return whole.length <= gradesTextLetters ? whole : parts[0] + " +" + (parts.length - 1)
     }
 
     title: qsTr("Courses")
@@ -83,13 +91,32 @@ Kirigami.ScrollablePage {
             wrapMode: Text.Wrap
         }
 
-        LookListRow {
-            objectName: "myGrades"
+        // Side by side at every width: equal columns, as high as the higher one; the tiles wrap.
+        RowLayout {
             Layout.fillWidth: true
-            leadingText: "段"
-            text: qsTr("My grades")
-            subtitle: page.gradesText
-            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("GradesPage.qml"))
+            spacing: Kirigami.Units.largeSpacing
+
+            LookTile {
+                objectName: "myGrades"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1          // equal columns
+                glyph: "段"
+                text: qsTr("My grades")
+                hint: page.gradesText
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("GradesPage.qml"))
+            }
+
+            LookTile {
+                objectName: "myNotebooks"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1          // equal columns
+                glyph: "記"
+                text: qsTr("My notebooks")
+                hint: qsTr("%n notebook(s)", "", page.notebooks.length)
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("NotebooksPage.qml"))
+            }
         }
 
         LookSectionLabel {
@@ -155,32 +182,6 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 course: modelData
                 onClicked: page.open(modelData.notebook || Courses.notebookFor(modelData.uid))
-            }
-        }
-
-        LookSectionLabel {
-            Layout.fillWidth: true
-            Layout.topMargin: Kirigami.Units.largeSpacing
-            rule: true
-            text: qsTr("My notebooks")
-        }
-        LookLabel {
-            Layout.fillWidth: true
-            visible: page.notebooks.length === 0
-            text: qsTr("No notebooks yet. Tap a date above, or make a course of your own (+).")
-            color: Look.mutedTextColor
-            wrapMode: Text.Wrap
-        }
-        Repeater {
-            model: page.notebooks
-
-            CourseRow {
-                required property var modelData
-
-                objectName: "notebookRow"
-                Layout.fillWidth: true
-                course: modelData
-                onClicked: page.open(modelData.uid)
             }
         }
     }

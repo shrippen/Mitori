@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 
-import QtCore
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Controls.impl
@@ -30,19 +29,24 @@ Item {
     readonly property var current: playlist[index] || ({})
     readonly property string video: current.video ? current.video.video : ""
     // A technique of the training may have no video on the device: a card stands for the picture.
-    readonly property bool hasVideo: video !== "" && Videos.available(video)
+    // The video's file now; it reports only a real change. All that belongs to a file hangs on it:
+    // when a bundle comes or goes, picture, times and cut change together.
+    readonly property url file: Videos.folder !== undefined ? Videos.source(video) : ""
+    readonly property bool hasVideo: video !== "" && file.toString() !== ""
     // Where the technique stands: attack · addition · grade · position ("Shomen-uchi · 5. Kyu · 3 / 8").
     readonly property string placeText: [current.attack, current.attackExtra, current.gradeName,
                                          playlist.length > 1 ? (index + 1) + " / " + playlist.length : ""]
                                         .filter(x => !!x).join(" · ")
     // How many of the playlist are rated today (the training's progress).
     readonly property int practisedCount: Practice.revision >= 0 ? playlist.filter(r => Practice.ratedToday(r.id)).length : 0
-    readonly property real from: current.video ? current.video.von * 1000 : 0
-    readonly property real to: current.video ? current.video.bis * 1000 : 0
+    // A loaded bundle brings its own cut points; they fit its file.
+    readonly property var place: current.video && file !== undefined ? Videos.place(current.id, current.video) : null
+    readonly property real from: place ? place.von * 1000 : 0
+    readonly property real to: place ? place.bis * 1000 : 0
     // Where the loop turns: the chapter end, but never the end of the file (the last chapter of a
     // video ends with it, and a player at the end of the file no longer seeks back).
     readonly property real end: player.duration > 0 ? Math.min(to, player.duration - 250) : to
-    readonly property var crop: Videos.crop(video)
+    readonly property var crop: file !== undefined ? Videos.crop(video) : ({})
     // Sideways only with a picture; without a video the card and the controls stand as upright.
     // By the window's height: the page's own changes with the head that this property hides.
     readonly property bool landscape: !compact && hasVideo && (big || width > Window.height)
@@ -61,12 +65,9 @@ Item {
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
     readonly property int jumpMs: 2000      // double tap
     property bool looping: true
-    // The tempo stays for the next time (the clickdummy keeps it).
-    Settings {
-        id: tempoStore
-
-        category: "player"
-    }
+    // Each technique starts at 1× (owner, 06.11.2026): its loop and full screen keep the tempo.
+    readonly property real normalRate: 1
+    property string tempoEntry: ""
     // The double tap shows what it did, for a moment (the clickdummy): "2 s ››" on the side that
     // was tapped. The text is a symbol, not a word: it stays the same in every language.
     property string jumpHint: ""
@@ -93,14 +94,15 @@ Item {
     // Start at the chapter once per loaded file: the FFmpeg backend reports LoadedMedia again
     // after every seek, and restarting there would undo each step, jump and timeline move.
     property bool startPending: true
-    // Whether a newly loaded chapter plays (off while another page lies above the small player:
-    // it loads at the chapter start and waits).
+    // Whether a newly loaded chapter plays (off while another page lies above the small player,
+    // or before its first tap: it loads at the chapter start and waits).
     property bool autoPlay: true
     // For the UI test: where the video stands (ms) and whether it plays.
     readonly property alias position: player.position
     readonly property alias playing: player.playing
     readonly property alias duration: player.duration
     readonly property alias rate: player.playbackRate
+    readonly property alias source: player.source
 
     // The entry on screen, for the programme list to mark it when the user comes back.
     signal shown(string id)
@@ -110,9 +112,16 @@ Item {
     signal commentRequested(var entry)
     signal bigRequested()
     signal bigLeft()
+    // The user asked for play; the small player's page needs that for its first tap.
+    signal playTapped()
 
     onCurrentChanged: {
         shown(current.id)
+        // By id: a playlist made anew brings new objects for the same technique.
+        if (current.id !== tempoEntry) {
+            tempoEntry = current.id || ""
+            player.playbackRate = normalRate
+        }
         // After the bindings of the new entry (from, to): onCurrentChanged runs before them.
         if (player.source.toString() === Videos.source(video).toString() && !startPending) {
             Qt.callLater(page.restart)
@@ -128,15 +137,31 @@ Item {
         // Outside the chapter: the small player was still loading.
         player.position = startAt >= from && startAt <= to ? startAt : from
         startAt = -1
-        if (autoPlay) {
+        loadedSource = player.source
+        if (autoPlay && !holdStart) {
             player.play()
+        }
+        holdStart = false
+    }
+
+    // The file changed under the open player (a bundle came or was updated): it waits at the
+    // chapter's start for a tap instead of sounding by itself, say under the notes.
+    property url loadedSource
+    property bool holdStart: false
+    Connections {
+        target: Videos
+        function onFolderChanged() {
+            page.holdStart = Videos.source(page.video).toString() !== page.loadedSource.toString()
         }
     }
     // Play from the chapter start when the video stands at (or after) the chapter end.
     function togglePlay() {
         if (player.playing) {
             player.pause()
-        } else if (player.position >= end - frameMs || player.mediaStatus === MediaPlayer.EndOfMedia) {
+            return
+        }
+        playTapped()    // first: restart() asks autoPlay
+        if (player.position >= end - frameMs || player.mediaStatus === MediaPlayer.EndOfMedia) {
             restart()
         } else {
             player.play()
@@ -191,14 +216,12 @@ Item {
     MediaPlayer {
         id: player
 
-        source: Videos.source(page.video)
+        source: page.file
         videoOutput: output
         audioOutput: AudioOutput {
             muted: player.playbackRate < 1 || !Levels.sound
             volume: Levels.playerVolume
         }
-        playbackRate: page.tempi.indexOf(tempoStore.value("tempo", 1) * 1) >= 0 ? tempoStore.value("tempo", 1) * 1 : 1
-        onPlaybackRateChanged: tempoStore.setValue("tempo", playbackRate)
         // The screen stays on while it plays (the switch "Screen on"), not while it stands.
         onPlayingChanged: Levels.setPlayback(playing ? Levels.Playback.Playing : Levels.Playback.Stopped)
         onSourceChanged: page.startPending = true
