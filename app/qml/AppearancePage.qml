@@ -94,5 +94,13 @@ Kirigami.ScrollablePage {
             color: Look.mutedTextColor
             text: qsTr("Sources: the exam regulations and lists of the dojo, the comments of shinkiryu.de and the Aiki-Budo lexicon.")
         }
+        LookLabel {
+            objectName: "thirdPartyLicences"
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+            textFormat: Text.PlainText
+            color: Look.mutedTextColor
+            text: Appearance.thirdPartyLicences
+        }
     }
 }

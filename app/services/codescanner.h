@@ -7,14 +7,14 @@
 #include <QtQml/qqmlregistration.h>
 
 // The DVD's code from a camera, for QML. The QR code holds exactly the code as printed in
-// bundle.py's CSV ("7KQ2M-X9HDV-3TAPR-WE6YC"; ROADMAP.md, step 4). Never logs what it reads.
+// bundle.py's CSV ("7KQ2M-X9HDV-3TAPR-WE6YT", the test data's; ROADMAP.md, step 4). Never logs what it reads.
 //
 //   open() ──camera? permission (asked now, not at start)──► ready() / refused(reason)
 //   watch(sink) ─frame, one at a time, off the UI thread─► found(code), then it stops
 //                                                          foreign() and it reads on
 //
-// Tests: MITORI_CAMERA=none|denied|frames stands in for the device; "frames" opens without a
-// camera, the frames come from the test.
+// Test builds only (MITORI_BUILD_TESTS): MITORI_CAMERA=none|denied|frames stands in for the
+// device; "frames" opens without a camera, the frames come from the test.
 class CodeScanner : public QObject
 {
     Q_OBJECT
@@ -34,7 +34,8 @@ public:
 
     Q_INVOKABLE void open();
     Q_INVOKABLE void watch(QVideoSink *sink);
-    Q_INVOKABLE void stop();
+    // Only this sink: a page that slides out does not stop the next one's.
+    Q_INVOKABLE void unwatch(QVideoSink *sink);
 
 signals:
     void ready();
@@ -44,11 +45,13 @@ signals:
     void foreign();
 
 private:
+    void stop();
     void take(const QVideoFrame &frame);
     void report(const QString &text);
 
     QPointer<QVideoSink> m_sink;
     int m_watch = 0;            // a read that started for an earlier watch() does not count
     bool m_reading = false;
+    bool m_asking = false;      // a permission request is open: a second tap waits for its answer
     qint64 m_lastRead = 0;      // ms since the epoch
 };

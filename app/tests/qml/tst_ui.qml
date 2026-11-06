@@ -1980,12 +1980,40 @@ TestCase {
         verify(findChild(page, "codeField").enabled, "typing still works")
         uiCatalog.setCamera("frames")
 
-        let scanning = openScan()
-        mouseClick(findChild(scanning, "scanCancel"))
-        tryVerify(() => window.pageStack.currentItem === page)
-        compare(field.text, "")
-        verify(!Bundles.unlocking)
+        // Cancel means cancel: a code still in the picture while the page slides out redeems
+        // nothing and takes no second page off the stack. The same for the way back.
+        const depth = window.pageStack.depth
+        const leaveThenShowCode = leave => {
+            const leaving = openScan()
+            const sink = findChild(leaving, "scanOutput").videoSink
+            leave(leaving)
+            for (let i = 0; i < 12 && leaving.title; ++i) {      // until the page is gone with its sink
+                uiCatalog.showFrame(sink, "7KQ2M-X9HDV-3TAPR-WE6YT")
+                wait(60)
+            }
+            tryVerify(() => window.pageStack.currentItem === page)
+            wait(600)
+            compare(field.text, "", "nothing redeemed")
+            compare(message.text, "")
+            verify(!Bundles.unlocking)
+            compare(window.pageStack.currentItem, page, "the videos page stays")
+            compare(window.pageStack.depth, depth)
+        }
+        page.codeMessage = ""
+        leaveThenShowCode(leaving => mouseClick(findChild(leaving, "scanCancel")))
+        leaveThenShowCode(() => window.pageStack.pop())
+
+        // Two answers to one wish (a double tap, the permission dialog): one page.
+        CodeScanner.open()
+        CodeScanner.open()
+        tryVerify(onScanPage)
+        compare(window.pageStack.depth, depth + 1)
         wait(800)
+        mouseClick(findChild(scanPage(), "scanCancel"))
+        tryVerify(() => window.pageStack.currentItem === page)
+        wait(800)
+
+        let scanning
 
         // An empty picture says nothing; a foreign QR code a sentence, the camera reads on.
         scanning = openScan()
@@ -1998,6 +2026,15 @@ TestCase {
         compare(hint.text, qsTr("This QR code holds no DVD code. Use the one on the insert of the DVD."))
         verify(onScanPage())
         shot("15c-videos-scan")
+
+        // A camera that fails: a sentence of ours beside the foreign one, the way out stays.
+        const failed = findChild(scanning, "scanError")
+        verify(!failed.visible)
+        scanning.cameraFailed = true
+        tryVerify(() => failed.visible)
+        compare(failed.text, qsTr("The camera does not work; another program may be using it. Cancel and type the code instead."))
+        verify(hint.visible && hint.text === qsTr("This QR code holds no DVD code. Use the one on the insert of the DVD."))
+        scanning.cameraFailed = false
 
         // A well-formed code nobody knows: back, the same answer as to a typed one, in the field.
         const prefix = "0000000000000000000"
@@ -2017,6 +2054,17 @@ TestCase {
         compare(field.text, "")
         verify(Bundles.remove("test-bundle"))
         tryVerify(() => Bundles.bundles[0].state === Bundles.State.Unlocked)
+        window.pageStack.pop()
+    }
+
+    // The licences of what ships with the app (Apache-2.0 and the BSD ones ask for it).
+    function test_9n_videos_licences() {
+        const page = push("AppearancePage")
+        const text = findChild(page, "thirdPartyLicences").text
+        for (const needed of ["ZXing-C++", "Apache License", "Axel Waggershauser", "libzueci", "Copyright (C) 2022 gitlost",
+                              "Redistribution and use in source and binary forms", "Bjoern Hoehrmann", "Monocypher", "Loup Vaillant"]) {
+            verify(text.indexOf(needed) >= 0, needed)
+        }
         window.pageStack.pop()
     }
 

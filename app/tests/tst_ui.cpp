@@ -47,6 +47,9 @@ public:
     Q_INVOKABLE void setCamera(const QString &stand) { qputenv("MITORI_CAMERA", stand.toUtf8()); }
     Q_INVOKABLE void showFrame(QVideoSink *sink, const QString &text)
     {
+        if (!sink) {
+            return;     // the page is gone
+        }
         QImage image(360, 360, QImage::Format_Grayscale8);
         image.fill(128);
         sink->setVideoFrame(QVideoFrame(text.isEmpty() ? image : qrImage(text)));

@@ -183,9 +183,21 @@ private slots:
         QSignalSpy found(&scanner, &CodeScanner::found);
         scanner.watch(&sink);
         sink.setVideoFrame(QVideoFrame(qrImage(kCode)));
-        scanner.stop();
+        scanner.unwatch(&sink);
         QTest::qWait(kSilenceMs);
         QVERIFY(found.isEmpty());
+    }
+
+    // The page sliding out says so late: the next page's reading goes on.
+    void unwatchLeavesOtherSink()
+    {
+        CodeScanner scanner;
+        QVideoSink old;
+        QVideoSink current;
+        QSignalSpy found(&scanner, &CodeScanner::found);
+        scanner.watch(&current);
+        scanner.unwatch(&old);
+        QVERIFY(showUntil(current, qrImage(kCode), found));
     }
 
     void refuses()

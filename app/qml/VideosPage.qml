@@ -10,7 +10,7 @@ import Mitori
 // onto the device; each bundle loads, updates and goes on its own. A removed bundle keeps its
 // code. Downloads wait for Wi-Fi unless the user says otherwise.
 //
-//   CODE OF THE DVD   [7KQ2M-X9HDV-3TAPR-WE6YC] [Unlock] [Scan code]
+//   CODE OF THE DVD   [7KQ2M-X9HDV-3TAPR-WE6YT] [Unlock] [Scan code]
 //   Aikido · all Kyu   5 videos · 600 MB · version 2       loaded       [Remove]
 //   Daitoryu · all Kyu 5 videos · 330 MB                   not unlocked
 Kirigami.ScrollablePage {
@@ -63,6 +63,10 @@ Kirigami.ScrollablePage {
         target: CodeScanner
 
         function onReady() {
+            // A second answer to one wish finds the scan page already on top.
+            if (!page.isCurrentPage) {
+                return
+            }
             page.Kirigami.PageStack.push(Qt.resolvedUrl("ScanPage.qml"), { done: code => page.redeem(code) })
         }
         function onRefused(reason) {

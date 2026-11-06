@@ -312,6 +312,12 @@ target_include_directories(monocypher PUBLIC third_party/monocypher)
 set_target_properties(monocypher PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # ZXing-C++ (app/third_party, Apache-2.0): the DVD's QR code (platform/qrreader).
 add_subdirectory(third_party/zxing-cpp)
+# Their licences ask that binaries carry them: shown in "About Mitori" (services/appearance).
+qt_add_resources(mitori_app "licences_bundled"
+    PREFIX "/licences"
+    BASE third_party
+    FILES third_party/zxing-cpp/ATTRIBUTION.txt third_party/zxing-cpp/LICENSE third_party/monocypher/LICENCE.md
+)
 
 # The generated type registration includes the headers by name.
 target_include_directories(mitori_app PUBLIC catalog services store player platform)
@@ -374,6 +380,8 @@ endif()
 
 if(MITORI_BUILD_TESTS AND NOT ANDROID)
     enable_testing()
+    # The fake camera (services/codescanner): in test builds only.
+    target_compile_definitions(mitori_app PRIVATE MITORI_TEST_CAMERA)
     find_package(Qt6 REQUIRED COMPONENTS Test)
     qt_add_executable(tst_catalog tests/tst_catalog.cpp catalog/catalog.cpp catalog/catalog.h)
     target_include_directories(tst_catalog PRIVATE catalog)
@@ -533,6 +541,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     qt_add_executable(tst_codescanner tests/tst_codescanner.cpp services/codescanner.cpp services/codescanner.h
         platform/qrreader.cpp platform/qrreader.h store/bundlecrypto.cpp store/bundlecrypto.h)
     target_include_directories(tst_codescanner PRIVATE services platform store)
+    target_compile_definitions(tst_codescanner PRIVATE MITORI_TEST_CAMERA)
     target_link_libraries(tst_codescanner PRIVATE Qt6::Core Qt6::Gui Qt6::Multimedia Qt6::Qml Qt6::Concurrent Qt6::Test monocypher ZXing)
     set_target_properties(tst_codescanner PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME codescanner COMMAND tst_codescanner)

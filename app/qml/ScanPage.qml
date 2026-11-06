@@ -16,6 +16,7 @@ Kirigami.Page {
     // Called with the code (the page that opened the camera).
     property var done: null
     property bool foreignSeen: false
+    property bool cameraFailed: camera.error !== Camera.NoError
 
     property Item lookScope: LookScope { target: page }
     background: Rectangle { color: Look.backgroundColor }
@@ -23,13 +24,25 @@ Kirigami.Page {
     title: qsTr("Scan code")
     padding: 0
 
-    Component.onCompleted: CodeScanner.watch(output.videoSink)
-    Component.onDestruction: CodeScanner.stop()
+    // Reads only while on top. Leaving stops at once: the page lives on while it slides out, and
+    // what it read then would redeem a cancelled code and take the page below along with its pop().
+    function follow() {
+        if (page.isCurrentPage) {
+            CodeScanner.watch(output.videoSink)
+        } else {
+            CodeScanner.unwatch(output.videoSink)
+        }
+    }
+    onIsCurrentPageChanged: page.follow()
+    Component.onCompleted: page.follow()
 
     Connections {
         target: CodeScanner
 
         function onFound(code) {
+            if (!page.isCurrentPage) {
+                return
+            }
             if (page.done) {
                 page.done(code)
             }
@@ -45,7 +58,7 @@ Kirigami.Page {
             id: camera
 
             // Off in the background: no picture is taken that nobody sees.
-            active: CodeScanner.liveCamera && Qt.application.state !== Qt.ApplicationSuspended
+            active: CodeScanner.liveCamera && page.isCurrentPage && Qt.application.state !== Qt.ApplicationSuspended
                     && Qt.application.state !== Qt.ApplicationHidden
         }
         videoOutput: output
@@ -76,9 +89,20 @@ Kirigami.Page {
             Layout.fillWidth: true
             Layout.leftMargin: Kirigami.Units.gridUnit
             Layout.rightMargin: Kirigami.Units.gridUnit
-            text: camera.errorString !== "" ? camera.errorString
-                : page.foreignSeen ? qsTr("This QR code holds no DVD code. Use the one on the insert of the DVD.")
+            text: page.foreignSeen ? qsTr("This QR code holds no DVD code. Use the one on the insert of the DVD.")
                 : qsTr("Hold the QR code from the insert of the DVD in front of the camera.")
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.Wrap
+        }
+
+        LookLabel {
+            objectName: "scanError"
+            Layout.fillWidth: true
+            Layout.leftMargin: Kirigami.Units.gridUnit
+            Layout.rightMargin: Kirigami.Units.gridUnit
+            visible: page.cameraFailed
+            text: qsTr("The camera does not work; another program may be using it. Cancel and type the code instead.")
+            color: Look.negativeTextColor
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
         }

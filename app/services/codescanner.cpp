@@ -13,8 +13,17 @@
 
 namespace {
 
-constexpr char kCameraEnv[] = "MITORI_CAMERA";
 constexpr qint64 kReadGapMs = 100;      // a camera sends 30 frames a second; the battery needs not all
+
+// What stands in for the device in a test build; nothing in one that ships.
+QByteArray standIn()
+{
+#ifdef MITORI_TEST_CAMERA
+    return qgetenv("MITORI_CAMERA");
+#else
+    return {};
+#endif
+}
 
 } // namespace
 
@@ -25,12 +34,16 @@ CodeScanner::CodeScanner(QObject *parent)
 
 bool CodeScanner::liveCamera() const
 {
-    return qEnvironmentVariableIsEmpty(kCameraEnv);
+    return standIn().isEmpty();
 }
 
 void CodeScanner::open()
 {
-    const QByteArray stand = qgetenv(kCameraEnv);
+    if (m_asking) {
+        return;
+    }
+
+    const QByteArray stand = standIn();
     if (stand == "frames") {
         emit ready();
         return;
@@ -51,7 +64,9 @@ void CodeScanner::open()
     }
 
     // Android: a dialog the first time, a refusal at once when the user said never.
+    m_asking = true;
     qApp->requestPermission(camera, this, [this](const QPermission &answer) {
+        m_asking = false;
         if (answer.status() == Qt::PermissionStatus::Granted) {
             emit ready();
         } else {
@@ -67,6 +82,13 @@ void CodeScanner::watch(QVideoSink *sink)
     if (sink) {
         // The camera's thread may send them: queued to this one, read on a worker.
         connect(sink, &QVideoSink::videoFrameChanged, this, &CodeScanner::take);
+    }
+}
+
+void CodeScanner::unwatch(QVideoSink *sink)
+{
+    if (sink == m_sink) {
+        stop();
     }
 }
 

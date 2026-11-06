@@ -110,7 +110,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   Verbands), Freischalten und QR-Scan auf dem Telefon prüfen (Argon2id mit 64 MiB).
 - QR-Code der DVD (`platform/qrreader` mit ZXing-C++, `services/codescanner`, `ScanPage`), neben dem Tippen, das der
   Hauptweg bleibt. **Inhalt des QR-Codes: genau der Code in der gruppierten Form, wie ihn `tools/bundle.py codes` in
-  die CSV schreibt (erste Spalte), z. B. `7KQ2M-X9HDV-3TAPR-WE6YC`** (23 Zeichen, ASCII, sonst nichts: keine URL, kein
+  die CSV schreibt (erste Spalte), z. B. `7KQ2M-X9HDV-3TAPR-WE6YT`, der Code der Testdaten, kein echter** (23 Zeichen, ASCII, sonst nichts: keine URL, kein
   Präfix). Beim Druck der Einleger genau diesen Text codieren. Ein Scan läuft wie getippt; ein QR-Code ohne gültigen
   Code (Länge, Zeichen, Prüfzeichen) bekommt einen Satz, die Kamera läuft weiter. Der Code wird nie geloggt.
 
