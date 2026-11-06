@@ -86,7 +86,7 @@
 <context>
     <name>PlayerView</name>
     <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="681"/>
+        <location filename="../qml/PlayerView.qml" line="704"/>
         <source>Training done: %n technique(s). They count as a practice day in the statistics.</source>
         <translation>
             <numerusform>Training done: %n technique. It counts as a practice day in the statistics.</numerusform>
@@ -236,7 +236,7 @@
 <context>
     <name>VideosPage</name>
     <message numerus="yes">
-        <location filename="../qml/VideosPage.qml" line="203"/>
+        <location filename="../qml/VideosPage.qml" line="237"/>
         <source>%n video(s)</source>
         <translation>
             <numerusform>%n video</numerusform>

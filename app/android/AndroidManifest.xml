@@ -14,7 +14,7 @@
     <!-- The course calendar and the video bundles; ACCESS_NETWORK_STATE for "only on Wi-Fi". -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- Photos and voice notes on notes (asked for when first used). -->
+    <!-- Photos and voice notes on notes, the DVD's QR code (asked for when first used). -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
