@@ -98,7 +98,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             text: page.manualGrade ? qsTr("up to %1 (chosen by you)").arg(page.gradeName)
                   : page.anyPassed ? qsTr("up to %1 (from My grades)").arg(page.gradeName)
-                                   : qsTr("up to %1 (first grade, nothing in My grades yet)").arg(page.gradeName)
+                                   : qsTr("up to %1 (first grade, nothing for this discipline in My grades yet)").arg(page.gradeName)
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }

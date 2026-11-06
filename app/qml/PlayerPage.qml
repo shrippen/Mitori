@@ -191,6 +191,11 @@ Kirigami.Page {
             view.pause()
             page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
         }
+        // The same under the comment (only beside the list: the training on a tablet).
+        onCommentRequested: entry => {
+            view.pause()
+            page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
+        }
     }
     }
 }
