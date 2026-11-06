@@ -59,6 +59,12 @@ struct Result {
     QStringList orphans;                // media files the rows named before and no more
     QStringList media;                  // media files the rows name after the merge (not deleted)
     QList<Conflict> conflicts;
+
+    // Preview only: what replacing this copy by the other would do (replace() below).
+    QHash<QString, int> holds;          // {table: rows of the other, not deleted}
+    QHash<QString, int> lost;           // {table: rows here it lacks, has deleted or has older}
+    QStringList theirMedia;             // media files the other's rows name (not deleted)
+    QStringList mine;                   // media files this copy's rows name (not deleted)
 };
 
 // Attaches `otherPath` (a file of the same schema), merges, runs `after` in the same transaction
@@ -66,5 +72,17 @@ struct Result {
 using After = bool (*)(QSqlDatabase &db, QString *error);
 bool run(QSqlDatabase &db, const QString &otherPath, const QList<Table> &tables, Mode mode,
          Result *result, QString *error, After after = nullptr, const Watch &watch = {});
+
+// One store's file, the file that takes its place, and the tables to take.
+struct Copy {
+    QString path;
+    QString other;
+    QList<Table> tables;
+};
+
+// Every table of every copy takes the other file's rows, nothing of its own stays. One connection
+// and one transaction over all files: all of them or none (SQLite's journal, also on a crash).
+// False with `error` on failure.
+bool replace(const QList<Copy> &copies, QString *error);
 
 }

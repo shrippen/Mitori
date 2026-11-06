@@ -672,6 +672,72 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Both ways of reading a backup: merging keeps what the backup lacks; replacing asks a second
+    // time with what goes, cancelling leads back, and accepting takes it away, turns the sync off
+    // and reloads Practice.
+    function test_3d_backup_choices() {
+        const page = push("SettingsPage")
+        const url = "file://" + uiShotsDir + "/sicherung-wahl.zip"
+        verify(Backup.save(url), Backup.errorString)
+        const entry = Programme.entries("aikido", "k4").filter(r => r.kind === "entry")[0].id
+        const notes = Practice.notes(entry).length
+        verify(Practice.addNote(entry, "nicht in der Sicherung"))
+        const mergeDialog = findChild(page, "mergeBackup")
+        const replaceDialog = findChild(page, "replaceBackup")
+
+        // Merge, the dialog's main button: the note stays.
+        page.inspect(url)
+        tryVerify(() => mergeDialog.opened)
+        const text = findChild(page, "mergeText")
+        verify(text.text.indexOf("It holds") >= 0, text.text)
+        verify(text.text.indexOf("Merging keeps") >= 0, text.text)
+        tryVerify(() => mergeDialog.contentHeight >= findChild(page, "replaceInstead").y + findChild(page, "replaceInstead").height, 1000,
+                  "the column fits: " + mergeDialog.contentHeight)
+        shot("4c-backup-choice", true)
+        mergeDialog.accept()
+        tryVerify(() => !mergeDialog.visible)
+        compare(Practice.notes(entry).length, notes + 1)
+
+        // Replace: the second step says what goes, Cancel leads back to the first.
+        Sync.enabled = true
+        page.inspect(url)
+        tryVerify(() => mergeDialog.opened)
+        findChild(page, "replaceInstead").clicked()
+        tryVerify(() => replaceDialog.opened)
+        verify(!mergeDialog.visible)
+        const warning = findChild(page, "replaceText")
+        verify(warning.text.indexOf("cannot be undone") >= 0, warning.text)
+        verify(warning.text.indexOf("Notes: 1") >= 0, warning.text)
+        verify(warning.text.indexOf("Sync is turned off") >= 0, warning.text)
+        tryVerify(() => replaceDialog.contentHeight >= warning.implicitHeight, 1000,
+                  "the text fits: " + replaceDialog.contentHeight + " for " + warning.implicitHeight)
+        shot("4c-backup-replace", true)
+
+        // A phone held sideways: the dialog stays in the window, the text scrolls.
+        window.width = 800
+        window.height = 360
+        const scroll = findChild(page, "replaceScroll")
+        tryVerify(() => replaceDialog.height <= window.height, 1000, "dialog " + replaceDialog.height)
+        tryVerify(() => scroll.contentItem.contentHeight > scroll.height, 1000, "the text scrolls")
+        shot("4c-backup-replace-sideways", true)
+        window.width = 420
+        window.height = 800
+        replaceDialog.reject()
+        tryVerify(() => mergeDialog.opened)
+        compare(Practice.notes(entry).length, notes + 1)
+
+        // Accepted: as in the backup, Practice read anew, the sync off.
+        findChild(page, "replaceInstead").clicked()
+        tryVerify(() => replaceDialog.opened)
+        replaceDialog.accept()
+        tryVerify(() => findChild(page, "backupDone").visible)
+        compare(findChild(page, "backupError").visible, false)
+        compare(Practice.notes(entry).length, notes)
+        verify(!Sync.enabled)
+        tryVerify(() => !replaceDialog.visible)
+        window.pageStack.pop()
+    }
+
     // The player's switches: the screen stays on while a video plays (and the switch on);
     // sound off mutes also at full tempo; both stay for the next start. "Noted today" lists
     // the day's notes on the technique.

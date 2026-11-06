@@ -182,6 +182,13 @@ void Sync::announce()
     m_merging = false;
 }
 
+void Sync::dataReplaced()
+{
+    m_account.setConflicts({});
+    setEnabled(false);
+    emit stateChanged();
+}
+
 void Sync::setError(const QString &error)
 {
     if (m_error != error) {
