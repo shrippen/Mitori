@@ -309,128 +309,134 @@
         <translation>gespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="143"/>
+        <location filename="../qml/BackupPage.qml" line="147"/>
         <source>App password cannot be read</source>
         <translation>App-Passwort nicht lesbar</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="144"/>
+        <location filename="../qml/BackupPage.qml" line="148"/>
         <source>App password not on record</source>
         <translation>App-Passwort nicht vermerkt</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="144"/>
-        <location filename="../qml/BackupPage.qml" line="146"/>
+        <location filename="../qml/BackupPage.qml" line="148"/>
+        <location filename="../qml/BackupPage.qml" line="149"/>
+        <location filename="../qml/BackupPage.qml" line="150"/>
         <source>App password lies in a file</source>
         <translation>App-Passwort liegt in einer Datei</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="145"/>
+        <location filename="../qml/BackupPage.qml" line="149"/>
         <source>App password not saved</source>
         <translation>App-Passwort nicht gespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="152"/>
+        <location filename="../qml/BackupPage.qml" line="156"/>
         <source>An older app password lies unencrypted in Mitori&apos;s sync folder. Switch sync on to see what to do.</source>
         <translation>Ein älteres App-Passwort liegt unverschlüsselt in Mitoris Abgleich-Ordner. Schalte den Abgleich ein, um zu sehen, was zu tun ist.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="154"/>
+        <location filename="../qml/BackupPage.qml" line="158"/>
         <source>It lies unencrypted in Mitori&apos;s sync folder. With sync on, Mitori moves it to the key store.</source>
         <translation>Es liegt unverschlüsselt in Mitoris Abgleich-Ordner. Bei eingeschaltetem Abgleich verschiebt Mitori es in den Schlüsselbund.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="158"/>
+        <location filename="../qml/BackupPage.qml" line="162"/>
         <source>Mitori is handing it to the Android key store. Until that is confirmed, it lies unencrypted in Mitori&apos;s sync folder.</source>
         <translation>Mitori übergibt es dem Android-Schlüsselspeicher. Bis das bestätigt ist, liegt es unverschlüsselt in Mitoris Abgleich-Ordner.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="159"/>
+        <location filename="../qml/BackupPage.qml" line="163"/>
         <source>Mitori is handing it to the key store. Until that is confirmed, it lies unencrypted in Mitori&apos;s sync folder. If the key store asks to be unlocked, unlock it.</source>
         <translation>Mitori übergibt es dem Schlüsselbund. Bis das bestätigt ist, liegt es unverschlüsselt in Mitoris Abgleich-Ordner. Fragt der Schlüsselbund nach dem Entsperren, entsperre ihn.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="161"/>
+        <location filename="../qml/BackupPage.qml" line="165"/>
         <source>The Android key store did not take it, so it lies unencrypted in Mitori&apos;s sync folder. Restart Mitori: it tries again by itself. If this note stays, use an app password you can revoke on the server.</source>
         <translation>Der Android-Schlüsselspeicher hat es nicht angenommen, darum liegt es unverschlüsselt in Mitoris Abgleich-Ordner. Starte Mitori neu: Es versucht es von selbst noch einmal. Bleibt dieser Hinweis, nimm ein App-Passwort, das du auf dem Server widerrufen kannst.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="162"/>
+        <location filename="../qml/BackupPage.qml" line="166"/>
         <source>No key store took it, so it lies unencrypted in Mitori&apos;s sync folder. Set up and unlock KWallet, GNOME Keyring or another Secret Service (for the Flatpak: with the desktop&apos;s secrets portal), then restart Mitori: it moves the password by itself.</source>
         <translation>Kein Schlüsselbund hat es angenommen, darum liegt es unverschlüsselt in Mitoris Abgleich-Ordner. Richte KWallet, GNOME Schlüsselbund oder einen anderen Secret Service ein und entsperre ihn (für das Flatpak: mit dem Secret-Portal des Desktops), dann starte Mitori neu: Es verschiebt das Passwort von selbst.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="164"/>
+        <location filename="../qml/BackupPage.qml" line="168"/>
         <source>The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so it also still lies there unencrypted. Check the free space and the folder&apos;s rights, then restart Mitori.</source>
         <translation>Der Schlüsselbund hat es, aber Mitori konnte die Datei konto.ini in seinem Abgleich-Ordner nicht neu schreiben, darum liegt es dort auch noch unverschlüsselt. Prüfe den freien Platz und die Rechte des Ordners, dann starte Mitori neu.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="166"/>
+        <location filename="../qml/BackupPage.qml" line="170"/>
+        <source>The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder&apos;s rights, then press “Sync now”. Restarting before that loses this password here.</source>
+        <translation>Der Schlüsselbund hat es, aber Mitori konnte die Datei konto.ini in seinem Abgleich-Ordner nicht neu schreiben, darum würde der nächste Start es nicht verwenden. Prüfe den freien Platz und die Rechte des Ordners, dann tippe auf „Jetzt abgleichen“. Ein Neustart davor verliert dieses Passwort hier.</translation>
+    </message>
+    <message>
+        <location filename="../qml/BackupPage.qml" line="171"/>
         <source>The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder&apos;s rights, then press “Sync now”. Restarting before that loses this password here: an older one in the file comes back and replaces it in the key store.</source>
         <translation>Der Schlüsselbund hat es, aber Mitori konnte die Datei konto.ini in seinem Abgleich-Ordner nicht neu schreiben, darum würde der nächste Start es nicht verwenden. Prüfe den freien Platz und die Rechte des Ordners, dann tippe auf „Jetzt abgleichen“. Ein Neustart davor verliert dieses Passwort hier: Ein älteres aus der Datei kommt zurück und ersetzt es im Schlüsselbund.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="168"/>
-        <source>Neither the key store nor the file konto.ini took it: it is gone when Mitori closes. Check the free space and the sync folder&apos;s rights, then enter it again.</source>
-        <translation>Weder der Schlüsselbund noch die Datei konto.ini haben es angenommen: Es ist weg, sobald Mitori schließt. Prüfe den freien Platz und die Rechte des Abgleich-Ordners, dann gib es neu ein.</translation>
+        <location filename="../qml/BackupPage.qml" line="173"/>
+        <source>Neither the key store nor the file konto.ini took it: it is gone when Mitori closes. Check the free space and the sync folder&apos;s rights, then press “Sync now”.</source>
+        <translation>Weder der Schlüsselbund noch die Datei konto.ini haben es angenommen: Es ist weg, sobald Mitori schließt. Prüfe den freien Platz und die Rechte des Abgleich-Ordners, dann tippe auf „Jetzt abgleichen“.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="170"/>
+        <location filename="../qml/BackupPage.qml" line="175"/>
         <source>The Android key store does not give it out or no longer holds it, so Mitori cannot sync. Press “Sync now” to ask again, or enter the password again.</source>
         <translation>Der Android-Schlüsselspeicher gibt es nicht heraus oder hat es nicht mehr, darum kann Mitori nicht abgleichen. Tippe auf „Jetzt abgleichen“, um erneut zu fragen, oder gib das Passwort neu ein.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="171"/>
+        <location filename="../qml/BackupPage.qml" line="176"/>
         <source>The key store does not give it out or no longer holds it, so Mitori cannot sync. Unlock it and press “Sync now”, or enter the password again.</source>
         <translation>Der Schlüsselbund gibt es nicht heraus oder hat es nicht mehr, darum kann Mitori nicht abgleichen. Entsperre ihn und tippe auf „Jetzt abgleichen“, oder gib das Passwort neu ein.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="178"/>
+        <location filename="../qml/BackupPage.qml" line="183"/>
         <source>This device</source>
         <translation>Dieses Gerät</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="190"/>
+        <location filename="../qml/BackupPage.qml" line="195"/>
         <source>Sync after every change</source>
         <translation>Nach jeder Änderung abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="200"/>
+        <location filename="../qml/BackupPage.qml" line="205"/>
         <source>Otherwise when Mitori starts and once a day. Every rating and note is an entry of its own with a time; changes from several devices are merged. Mitori asks only when the same note was changed on two devices.</source>
         <translation>Sonst beim Start und einmal am Tag. Jede Einschätzung und jede Notiz ist ein eigener Eintrag mit Zeitstempel; Änderungen von mehreren Geräten werden zusammengeführt. Mitori fragt nur nach, wenn dieselbe Notiz auf zwei Geräten geändert wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="207"/>
+        <location filename="../qml/BackupPage.qml" line="212"/>
         <source>Syncing …</source>
         <translation>Gleiche ab …</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="207"/>
+        <location filename="../qml/BackupPage.qml" line="212"/>
         <source>Sync now</source>
         <translation>Jetzt abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="221"/>
+        <location filename="../qml/BackupPage.qml" line="226"/>
         <source>Last synced: %1</source>
         <translation>Zuletzt abgeglichen: %1</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="222"/>
+        <location filename="../qml/BackupPage.qml" line="227"/>
         <source>Not synced yet.</source>
         <translation>Noch nicht abgeglichen.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="230"/>
+        <location filename="../qml/BackupPage.qml" line="235"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="230"/>
+        <location filename="../qml/BackupPage.qml" line="235"/>
         <source>Device</source>
         <translation>Gerät</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="238"/>
+        <location filename="../qml/BackupPage.qml" line="243"/>
         <source>%n conflict(s): solve …</source>
         <translation>
             <numerusform>%n Konflikt: lösen …</numerusform>
@@ -438,96 +444,96 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="259"/>
+        <location filename="../qml/BackupPage.qml" line="264"/>
         <source>Save backup</source>
         <translation>Sicherung speichern</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="266"/>
-        <location filename="../qml/BackupPage.qml" line="392"/>
+        <location filename="../qml/BackupPage.qml" line="271"/>
+        <location filename="../qml/BackupPage.qml" line="397"/>
         <source>Read backup</source>
         <translation>Sicherung einlesen</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="268"/>
+        <location filename="../qml/BackupPage.qml" line="273"/>
         <source>ZIP archives (*.zip)</source>
         <translation>ZIP-Archive (*.zip)</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="276"/>
+        <location filename="../qml/BackupPage.qml" line="281"/>
         <source>Backup saved: %1</source>
         <translation>Sicherung gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="276"/>
+        <location filename="../qml/BackupPage.qml" line="281"/>
         <source>Backup saved.</source>
         <translation>Sicherung gespeichert.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="294"/>
+        <location filename="../qml/BackupPage.qml" line="299"/>
         <source>Not replaced: a sync was running. Read the backup again when it has finished.</source>
         <translation>Nicht ersetzt: Ein Abgleich lief. Lies die Sicherung noch einmal ein, wenn er fertig ist.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="302"/>
+        <location filename="../qml/BackupPage.qml" line="307"/>
         <source>This device&apos;s data was replaced by the backup. Sync is off now.</source>
         <translation>Die Daten auf diesem Gerät wurden durch die Sicherung ersetzt. Der Abgleich ist jetzt aus.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="303"/>
+        <location filename="../qml/BackupPage.qml" line="308"/>
         <source>This device&apos;s data was replaced by the backup.</source>
         <translation>Die Daten auf diesem Gerät wurden durch die Sicherung ersetzt.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="321"/>
-        <location filename="../qml/BackupPage.qml" line="353"/>
+        <location filename="../qml/BackupPage.qml" line="326"/>
+        <location filename="../qml/BackupPage.qml" line="358"/>
         <source>Ratings</source>
         <translation>Einschätzungen</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="321"/>
-        <location filename="../qml/BackupPage.qml" line="353"/>
+        <location filename="../qml/BackupPage.qml" line="326"/>
+        <location filename="../qml/BackupPage.qml" line="358"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="321"/>
-        <location filename="../qml/BackupPage.qml" line="353"/>
+        <location filename="../qml/BackupPage.qml" line="326"/>
+        <location filename="../qml/BackupPage.qml" line="358"/>
         <source>Exam rounds</source>
         <translation>Prüfungsrunden</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="322"/>
-        <location filename="../qml/BackupPage.qml" line="354"/>
+        <location filename="../qml/BackupPage.qml" line="327"/>
+        <location filename="../qml/BackupPage.qml" line="359"/>
         <source>Notebooks</source>
         <translation>Notizbücher</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="322"/>
-        <location filename="../qml/BackupPage.qml" line="354"/>
+        <location filename="../qml/BackupPage.qml" line="327"/>
+        <location filename="../qml/BackupPage.qml" line="359"/>
         <source>Notebook entries</source>
         <translation>Einträge in Notizbüchern</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="322"/>
-        <location filename="../qml/BackupPage.qml" line="354"/>
+        <location filename="../qml/BackupPage.qml" line="327"/>
+        <location filename="../qml/BackupPage.qml" line="359"/>
         <source>Grades</source>
         <translation>Grade</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="323"/>
-        <location filename="../qml/BackupPage.qml" line="355"/>
+        <location filename="../qml/BackupPage.qml" line="328"/>
+        <location filename="../qml/BackupPage.qml" line="360"/>
         <source>Start of training</source>
         <translation>Trainingsbeginn</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="323"/>
-        <location filename="../qml/BackupPage.qml" line="355"/>
+        <location filename="../qml/BackupPage.qml" line="328"/>
+        <location filename="../qml/BackupPage.qml" line="360"/>
         <source>Technique links</source>
         <translation>Verbindungen zu Techniken</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="329"/>
+        <location filename="../qml/BackupPage.qml" line="334"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n neu</numerusform>
@@ -535,7 +541,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="332"/>
+        <location filename="../qml/BackupPage.qml" line="337"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n geändert</numerusform>
@@ -543,7 +549,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="335"/>
+        <location filename="../qml/BackupPage.qml" line="340"/>
         <source>%n deleted</source>
         <translation>
             <numerusform>%n gelöscht</numerusform>
@@ -551,7 +557,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="342"/>
+        <location filename="../qml/BackupPage.qml" line="347"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Fotos und Sprachnotizen: %n neu</numerusform>
@@ -559,7 +565,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="345"/>
+        <location filename="../qml/BackupPage.qml" line="350"/>
         <source>Photos and voice notes: %n deleted</source>
         <translation>
             <numerusform>Fotos und Sprachnotizen: %n gelöscht</numerusform>
@@ -567,102 +573,102 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="347"/>
+        <location filename="../qml/BackupPage.qml" line="352"/>
         <source>On this device it changes:</source>
         <translation>Auf diesem Gerät ändert sich:</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="348"/>
+        <location filename="../qml/BackupPage.qml" line="353"/>
         <source>Nothing new: this device has everything in the backup.</source>
         <translation>Nichts Neues: dieses Gerät hat schon alles aus der Sicherung.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="364"/>
+        <location filename="../qml/BackupPage.qml" line="369"/>
         <source>Photos and voice notes</source>
         <translation>Fotos und Sprachnotizen</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="375"/>
+        <location filename="../qml/BackupPage.qml" line="380"/>
         <source>Sync is turned off on this device: your other devices keep their data and would bring it here. If you turn sync on again, what they hold comes here, their changes and deletions too: what you restored from the backup can go again.</source>
         <translation>Der Abgleich wird auf diesem Gerät ausgeschaltet: Deine anderen Geräte behalten ihre Daten und würden sie hierher bringen. Schaltest du ihn wieder ein, kommt, was sie haben, auch ihre Änderungen und Löschungen: Was du aus der Sicherung zurückgeholt hast, kann wieder gehen.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="377"/>
+        <location filename="../qml/BackupPage.qml" line="382"/>
         <source>If you turn sync on again, what your other devices hold comes here, their changes and deletions too: what you restored from the backup can go again.</source>
         <translation>Schaltest du den Abgleich wieder ein, kommt, was deine anderen Geräte haben, auch ihre Änderungen und Löschungen: Was du aus der Sicherung zurückgeholt hast, kann wieder gehen.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="393"/>
+        <location filename="../qml/BackupPage.qml" line="398"/>
         <source>Merge</source>
         <translation>Vereinen</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="395"/>
+        <location filename="../qml/BackupPage.qml" line="400"/>
         <source>Backup merged.</source>
         <translation>Sicherung vereint.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="424"/>
+        <location filename="../qml/BackupPage.qml" line="429"/>
         <source>Replacing deletes what is on this device and puts the backup&apos;s state in its place. It asks once more.</source>
         <translation>Ersetzen löscht, was auf diesem Gerät ist, und setzt den Stand der Sicherung an seine Stelle. Mitori fragt dann noch einmal.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="434"/>
+        <location filename="../qml/BackupPage.qml" line="439"/>
         <source>Backup of %1.</source>
         <translation>Sicherung vom %1.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="435"/>
+        <location filename="../qml/BackupPage.qml" line="440"/>
         <source>It holds: %1</source>
         <translation>Sie enthält: %1</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="435"/>
+        <location filename="../qml/BackupPage.qml" line="440"/>
         <source>nothing</source>
         <translation>nichts</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="436"/>
+        <location filename="../qml/BackupPage.qml" line="441"/>
         <source>Merging: ratings and exam rounds are only added. For everything else the newer state wins: a newer text replaces this device&apos;s, a newer deletion deletes here too, with the photo. What the backup lacks stays, except: an entry in a notebook the backup deleted later goes with it; two notebooks of one course become one, the entries move, the younger one&apos;s details go; of one grade entered twice the newer stays.</source>
         <translation>Vereinen: Einschätzungen und Prüfungsrunden kommen nur dazu. Bei allem anderen gewinnt der neuere Stand: Ein neuerer Text ersetzt den auf diesem Gerät, eine neuere Löschung löscht auch hier, samt Foto. Was der Sicherung fehlt, bleibt, außer: Ein Eintrag in einem Notizbuch, das dort später gelöscht wurde, geht mit; zwei Notizbücher eines Lehrgangs werden eins, die Einträge ziehen um, die Angaben des jüngeren gehen; von einem doppelt eingetragenen Grad bleibt der neuere.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="448"/>
+        <location filename="../qml/BackupPage.qml" line="453"/>
         <source>Replace …</source>
         <translation>Ersetzen …</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="470"/>
+        <location filename="../qml/BackupPage.qml" line="475"/>
         <source>Replace this device&apos;s data?</source>
         <translation>Daten auf diesem Gerät ersetzen?</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="471"/>
+        <location filename="../qml/BackupPage.qml" line="476"/>
         <source>Delete and replace</source>
         <translation>Ersetzen</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="496"/>
+        <location filename="../qml/BackupPage.qml" line="501"/>
         <source>This cannot be undone. The backup&apos;s state takes the place of this device&apos;s ratings, notes, exam rounds, notebooks, grades, start of training, photos and voice notes.</source>
         <translation>Das lässt sich nicht rückgängig machen. Der Stand der Sicherung tritt an die Stelle der Einschätzungen, Notizen, Prüfungsrunden, Notizbücher, Grade, des Trainingsbeginns, der Fotos und Sprachnotizen auf diesem Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="497"/>
+        <location filename="../qml/BackupPage.qml" line="502"/>
         <source>Deleted, or set back to the backup&apos;s older state:</source>
         <translation>Gelöscht oder auf den älteren Stand der Sicherung zurückgesetzt:</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="498"/>
+        <location filename="../qml/BackupPage.qml" line="503"/>
         <source>The backup has all of this device&apos;s data, none is lost.</source>
         <translation>Die Sicherung hat alle Daten dieses Geräts, nichts geht verloren.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="499"/>
+        <location filename="../qml/BackupPage.qml" line="504"/>
         <source>Downloaded videos, DVD codes and settings stay.</source>
         <translation>Heruntergeladene Videos, DVD-Codes und Einstellungen bleiben.</translation>
     </message>
     <message>
-        <location filename="../qml/BackupPage.qml" line="501"/>
+        <location filename="../qml/BackupPage.qml" line="506"/>
         <source>A sync is running: replace when it has finished.</source>
         <translation>Ein Abgleich läuft: Ersetzen geht, wenn er fertig ist.</translation>
     </message>
@@ -1530,9 +1536,9 @@
         <translation>Speichern</translation>
     </message>
     <message>
-        <location filename="../qml/ExportSheet.qml" line="178"/>
-        <source>A small archive: Markdown, photos and voice notes. Otherwise notes stay private on the device.</source>
-        <translation>Kleines Archiv: Markdown, Fotos und Sprachnotizen. Notizen bleiben sonst privat auf dem Gerät.</translation>
+        <location filename="../qml/ExportSheet.qml" line="179"/>
+        <source>A small archive: Markdown, photos and voice notes.</source>
+        <translation>Kleines Archiv: Markdown, Fotos und Sprachnotizen.</translation>
     </message>
 </context>
 <context>
@@ -2034,7 +2040,7 @@
 <context>
     <name>PlayerPage</name>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="179"/>
+        <location filename="../qml/PlayerPage.qml" line="180"/>
         <source>practised</source>
         <translation>geübt</translation>
     </message>
@@ -2405,27 +2411,27 @@
         <translation>Code scannen</translation>
     </message>
     <message>
-        <location filename="../qml/ScanPage.qml" line="84"/>
+        <location filename="../qml/ScanPage.qml" line="92"/>
         <source>Camera picture</source>
         <translation>Kamerabild</translation>
     </message>
     <message>
-        <location filename="../qml/ScanPage.qml" line="93"/>
+        <location filename="../qml/ScanPage.qml" line="101"/>
         <source>This QR code holds no DVD code. Use the one on the insert of the DVD.</source>
         <translation>Dieser QR-Code enthält keinen DVD-Code. Den vom Einleger der DVD nehmen.</translation>
     </message>
     <message>
-        <location filename="../qml/ScanPage.qml" line="94"/>
+        <location filename="../qml/ScanPage.qml" line="102"/>
         <source>Hold the QR code from the insert of the DVD in front of the camera.</source>
         <translation>QR-Code vom Einleger der DVD vor die Kamera halten.</translation>
     </message>
     <message>
-        <location filename="../qml/ScanPage.qml" line="105"/>
+        <location filename="../qml/ScanPage.qml" line="113"/>
         <source>The camera does not work; another program may be using it. Cancel and type the code instead.</source>
         <translation>Die Kamera funktioniert nicht; vielleicht nutzt sie gerade ein anderes Programm. Abbrechen und den Code eintippen.</translation>
     </message>
     <message>
-        <location filename="../qml/ScanPage.qml" line="114"/>
+        <location filename="../qml/ScanPage.qml" line="122"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
@@ -2534,32 +2540,32 @@
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="44"/>
+        <location filename="../qml/SettingsPage.qml" line="43"/>
         <source>Videos</source>
         <translation>Videos</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="45"/>
+        <location filename="../qml/SettingsPage.qml" line="44"/>
         <source>Bundles, updates, code</source>
         <translation>Bundles, Updates, Code</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="53"/>
+        <location filename="../qml/SettingsPage.qml" line="51"/>
         <source>Backup and sync</source>
         <translation>Sicherung und Abgleich</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="54"/>
+        <location filename="../qml/SettingsPage.qml" line="52"/>
         <source>File, Nextcloud, other devices</source>
         <translation>Datei, Nextcloud, andere Geräte</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="62"/>
+        <location filename="../qml/SettingsPage.qml" line="59"/>
         <source>Appearance</source>
         <translation>Darstellung</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="63"/>
+        <location filename="../qml/SettingsPage.qml" line="60"/>
         <source>Style, language, about Mitori</source>
         <translation>Stil, Sprache, über Mitori</translation>
     </message>
@@ -3253,8 +3259,8 @@
     <name>VideosPage</name>
     <message>
         <location filename="../qml/VideosPage.qml" line="32"/>
-        <location filename="../qml/VideosPage.qml" line="212"/>
-        <location filename="../qml/VideosPage.qml" line="222"/>
+        <location filename="../qml/VideosPage.qml" line="213"/>
+        <location filename="../qml/VideosPage.qml" line="223"/>
         <source>Videos</source>
         <translation>Videos</translation>
     </message>
@@ -3294,99 +3300,99 @@
         <translation>Dieser Code öffnet sein Paket nicht.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="78"/>
+        <location filename="../qml/VideosPage.qml" line="79"/>
         <source>This device has no camera. Type the code instead.</source>
         <translation>Dieses Gerät hat keine Kamera. Den Code bitte eintippen.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="79"/>
+        <location filename="../qml/VideosPage.qml" line="80"/>
         <source>Mitori may not use the camera. Type the code instead, or allow it in the system settings.</source>
         <translation>Mitori darf die Kamera nicht benutzen. Den Code eintippen oder es in den Systemeinstellungen erlauben.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="112"/>
+        <location filename="../qml/VideosPage.qml" line="113"/>
         <source>The exam videos come with the DVDs of the Shinkiryu association: each DVD has a code that loads its videos onto this device.</source>
         <translation>Die Prüfungsvideos gibt es mit den DVDs des Shinkiryu-Verbands: Jede DVD hat einen Code, der ihre Videos auf dieses Gerät lädt.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="120"/>
-        <location filename="../qml/VideosPage.qml" line="140"/>
+        <location filename="../qml/VideosPage.qml" line="121"/>
+        <location filename="../qml/VideosPage.qml" line="141"/>
         <source>Code of the DVD</source>
         <translation>Code der DVD</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="151"/>
+        <location filename="../qml/VideosPage.qml" line="152"/>
         <source>Checking …</source>
         <translation>Prüfe …</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="151"/>
+        <location filename="../qml/VideosPage.qml" line="152"/>
         <source>Unlock</source>
         <translation>Freischalten</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="159"/>
+        <location filename="../qml/VideosPage.qml" line="160"/>
         <source>Scan code</source>
         <translation>Code scannen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="160"/>
+        <location filename="../qml/VideosPage.qml" line="161"/>
         <source>Scan the code of the DVD</source>
         <translation>Code der DVD scannen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="173"/>
+        <location filename="../qml/VideosPage.qml" line="174"/>
         <source>Order on shinkiryu.de</source>
         <translation>Bei shinkiryu.de bestellen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="182"/>
+        <location filename="../qml/VideosPage.qml" line="183"/>
         <source>Bundles</source>
         <translation>Videopakete</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="187"/>
+        <location filename="../qml/VideosPage.qml" line="188"/>
         <source>Load only over Wi-Fi</source>
         <translation>Nur im WLAN laden</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="193"/>
+        <location filename="../qml/VideosPage.qml" line="194"/>
         <source>A bundle has 70–600 MB.</source>
         <translation>Ein Paket hat 70–600 MB.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="200"/>
+        <location filename="../qml/VideosPage.qml" line="201"/>
         <source>Loading the list of videos …</source>
         <translation>Die Videoliste wird geladen …</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="202"/>
+        <location filename="../qml/VideosPage.qml" line="203"/>
         <source>The list of videos could not be loaded. Reload later, or check the connection.</source>
         <translation>Die Videoliste ließ sich nicht laden. Später neu laden oder die Verbindung prüfen.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="203"/>
+        <location filename="../qml/VideosPage.qml" line="204"/>
         <source>On this device: %1 of videos.</source>
         <translation>Auf diesem Gerät: %1 Videos.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="213"/>
-        <location filename="../qml/VideosPage.qml" line="223"/>
+        <location filename="../qml/VideosPage.qml" line="214"/>
+        <location filename="../qml/VideosPage.qml" line="224"/>
         <source>Photos, voice notes</source>
         <translation>Fotos, Sprachnotizen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="215"/>
+        <location filename="../qml/VideosPage.qml" line="216"/>
         <source>Storage</source>
         <translation>Speicher</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="224"/>
+        <location filename="../qml/VideosPage.qml" line="225"/>
         <source>free</source>
         <translation>frei</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/VideosPage.qml" line="247"/>
+        <location filename="../qml/VideosPage.qml" line="248"/>
         <source>%n video(s)</source>
         <translation>
             <numerusform>%n Video</numerusform>
@@ -3394,97 +3400,97 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="248"/>
+        <location filename="../qml/VideosPage.qml" line="249"/>
         <source>version %1</source>
         <translation>Version %1</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="249"/>
+        <location filename="../qml/VideosPage.qml" line="250"/>
         <source>version %1: %2</source>
         <translation>Version %1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="249"/>
+        <location filename="../qml/VideosPage.qml" line="250"/>
         <source>new</source>
         <translation>neu</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="256"/>
+        <location filename="../qml/VideosPage.qml" line="257"/>
         <source>not unlocked</source>
         <translation>nicht freigeschaltet</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="257"/>
+        <location filename="../qml/VideosPage.qml" line="258"/>
         <source>code saved</source>
         <translation>Code gespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="258"/>
+        <location filename="../qml/VideosPage.qml" line="259"/>
         <source>waits for Wi-Fi</source>
         <translation>wartet auf WLAN</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="259"/>
+        <location filename="../qml/VideosPage.qml" line="260"/>
         <source>loading %1 %</source>
         <translation>lädt %1 %</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="260"/>
+        <location filename="../qml/VideosPage.qml" line="261"/>
         <source>loaded</source>
         <translation>geladen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="261"/>
+        <location filename="../qml/VideosPage.qml" line="262"/>
         <source>update</source>
         <translation>Update</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="262"/>
+        <location filename="../qml/VideosPage.qml" line="263"/>
         <source>failed</source>
         <translation>fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="269"/>
+        <location filename="../qml/VideosPage.qml" line="270"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="270"/>
+        <location filename="../qml/VideosPage.qml" line="271"/>
         <source>Remove</source>
         <translation>Entfernen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="271"/>
+        <location filename="../qml/VideosPage.qml" line="272"/>
         <source>Update</source>
         <translation>Aktualisieren</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="272"/>
+        <location filename="../qml/VideosPage.qml" line="273"/>
         <source>Load now</source>
         <translation>Jetzt laden</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="273"/>
+        <location filename="../qml/VideosPage.qml" line="274"/>
         <source>Load</source>
         <translation>Laden</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="292"/>
+        <location filename="../qml/VideosPage.qml" line="293"/>
         <source>Removing frees the space; the code stays saved, so the videos load again without it.</source>
         <translation>Entfernen gibt den Platz frei; der Code bleibt gespeichert, die Videos lassen sich ohne ihn neu laden.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="299"/>
+        <location filename="../qml/VideosPage.qml" line="300"/>
         <source>Video folder</source>
         <translation>Videoordner</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="314"/>
+        <location filename="../qml/VideosPage.qml" line="315"/>
         <source>Without a bundle: a folder with the videos, folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</source>
         <translation>Ohne Paket: ein Ordner mit den Videos, Ordner und Namen wie auf den DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="315"/>
+        <location filename="../qml/VideosPage.qml" line="316"/>
         <source>The Flatpak can read folders under ~/Videos only.</source>
         <translation>Das Flatpak liest nur Ordner unter ~/Videos.</translation>
     </message>

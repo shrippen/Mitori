@@ -131,29 +131,33 @@ Kirigami.ScrollablePage {
         // the file: it still does, while the field and "Sync now" the others speak of are hidden.
         LookHint {
             readonly property bool android: Qt.platform.os === "android"
+            // A test sets what only a failing disk reaches.
+            property int note: Sync.passwordNote
+            property bool syncOn: Sync.enabled
+            property bool inFile: Sync.passwordInFile
 
             objectName: "syncPasswordNote"
             Layout.fillWidth: true
-            visible: Sync.passwordNote !== Sync.NoNote && (Sync.enabled || Sync.passwordInFile)
-            importance: Sync.passwordNote === Sync.MovingToStore && Sync.enabled ? LookHint.Importance.Info
-                      : Sync.passwordNote === Sync.Unreadable || Sync.passwordNote === Sync.NotSaved ? LookHint.Importance.Error
+            visible: note !== Sync.NoNote && (syncOn || inFile)
+            importance: note === Sync.MovingToStore && syncOn ? LookHint.Importance.Info
+                      : note === Sync.Unreadable || note === Sync.NotSaved ? LookHint.Importance.Error
                       : LookHint.Importance.Important
             titleText: {
-                switch (Sync.passwordNote) {
+                switch (note) {
                 case Sync.Unreadable: return qsTr("App password cannot be read")
-                case Sync.NotRecorded: return Sync.enabled ? qsTr("App password not on record") : qsTr("App password lies in a file")
-                case Sync.NotSaved: return qsTr("App password not saved")
+                case Sync.NotRecorded: return syncOn ? qsTr("App password not on record") : qsTr("App password lies in a file")
+                case Sync.NotSaved: return syncOn ? qsTr("App password not saved") : qsTr("App password lies in a file")
                 default: return qsTr("App password lies in a file")
                 }
             }
             text: {
-                if (!Sync.enabled) {
-                    if (Sync.passwordNote === Sync.NotRecorded) {
+                if (!syncOn) {
+                    if (note === Sync.NotRecorded || note === Sync.NotSaved) {
                         return qsTr("An older app password lies unencrypted in Mitori's sync folder. Switch sync on to see what to do.")
                     }
                     return qsTr("It lies unencrypted in Mitori's sync folder. With sync on, Mitori moves it to the key store.")
                 }
-                switch (Sync.passwordNote) {
+                switch (note) {
                 case Sync.MovingToStore:
                     return android ? qsTr("Mitori is handing it to the Android key store. Until that is confirmed, it lies unencrypted in Mitori's sync folder.")
                                    : qsTr("Mitori is handing it to the key store. Until that is confirmed, it lies unencrypted in Mitori's sync folder. If the key store asks to be unlocked, unlock it.")
@@ -163,9 +167,10 @@ Kirigami.ScrollablePage {
                 case Sync.NotRemovedFromFile:
                     return qsTr("The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so it also still lies there unencrypted. Check the free space and the folder's rights, then restart Mitori.")
                 case Sync.NotRecorded:
-                    return qsTr("The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder's rights, then press “Sync now”. Restarting before that loses this password here: an older one in the file comes back and replaces it in the key store.")
+                    return !inFile ? qsTr("The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder's rights, then press “Sync now”. Restarting before that loses this password here.")
+                                   : qsTr("The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder's rights, then press “Sync now”. Restarting before that loses this password here: an older one in the file comes back and replaces it in the key store.")
                 case Sync.NotSaved:
-                    return qsTr("Neither the key store nor the file konto.ini took it: it is gone when Mitori closes. Check the free space and the sync folder's rights, then enter it again.")
+                    return qsTr("Neither the key store nor the file konto.ini took it: it is gone when Mitori closes. Check the free space and the sync folder's rights, then press “Sync now”.")
                 case Sync.Unreadable:
                     return android ? qsTr("The Android key store does not give it out or no longer holds it, so Mitori cannot sync. Press “Sync now” to ask again, or enter the password again.")
                                    : qsTr("The key store does not give it out or no longer holds it, so Mitori cannot sync. Unlock it and press “Sync now”, or enter the password again.")

@@ -71,6 +71,7 @@ Kirigami.ScrollablePage {
             if (!(page.paneHost ?? page).isCurrentPage) {
                 return
             }
+            page.codeMessage = ""       // the camera is there: an earlier refusal no longer holds
             page.Kirigami.PageStack.push(Qt.resolvedUrl("ScanPage.qml"), { done: code => page.redeem(code) })
         }
         function onRefused(reason) {

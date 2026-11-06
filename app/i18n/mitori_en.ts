@@ -15,7 +15,7 @@
 <context>
     <name>BackupPage</name>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="238"/>
+        <location filename="../qml/BackupPage.qml" line="243"/>
         <source>%n conflict(s): solve …</source>
         <translation>
             <numerusform>%n conflict: solve …</numerusform>
@@ -23,7 +23,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="329"/>
+        <location filename="../qml/BackupPage.qml" line="334"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n new</numerusform>
@@ -31,7 +31,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="332"/>
+        <location filename="../qml/BackupPage.qml" line="337"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n changed</numerusform>
@@ -39,7 +39,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="335"/>
+        <location filename="../qml/BackupPage.qml" line="340"/>
         <source>%n deleted</source>
         <translation>
             <numerusform>%n deleted</numerusform>
@@ -47,7 +47,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="342"/>
+        <location filename="../qml/BackupPage.qml" line="347"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>
@@ -55,7 +55,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/BackupPage.qml" line="345"/>
+        <location filename="../qml/BackupPage.qml" line="350"/>
         <source>Photos and voice notes: %n deleted</source>
         <translation>
             <numerusform>Photos and voice notes: %n deleted</numerusform>
@@ -279,7 +279,7 @@
 <context>
     <name>VideosPage</name>
     <message numerus="yes">
-        <location filename="../qml/VideosPage.qml" line="247"/>
+        <location filename="../qml/VideosPage.qml" line="248"/>
         <source>%n video(s)</source>
         <translation>
             <numerusform>%n video</numerusform>

@@ -144,7 +144,7 @@ bool Sync::passwordInFile() const
     const PasswordNote note = passwordNote();
     return note == PasswordNote::MovingToStore || note == PasswordNote::RefusedByStore
            || note == PasswordNote::NotRemovedFromFile
-           || (note == PasswordNote::NotRecorded && m_account.fileHoldsPassword());
+           || ((note == PasswordNote::NotRecorded || note == PasswordNote::NotSaved) && m_account.fileHoldsPassword());
 }
 
 void Sync::scheduled()
