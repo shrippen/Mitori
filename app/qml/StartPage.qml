@@ -6,7 +6,7 @@ import "coursedays.js" as CourseDays
 import "grades.js" as Grades
 
 // Start menu (clickdummy "Startmenü", variant 1): tiles; the programme tile shows the discipline
-// and grade chosen last. More tiles come with their features (ROADMAP.md).
+// chosen last and its practice grade. More tiles come with their features (ROADMAP.md).
 Kirigami.ScrollablePage {
     id: page
 
@@ -21,7 +21,8 @@ Kirigami.ScrollablePage {
 
     // How many of the grade's techniques are exam-ready (the clickdummy's start menu: "3 of 8
     // exam-ready" under the programme tile).
-    readonly property var gradeRows: Programme.entries(Programme.discipline, Programme.grade(Programme.discipline))
+    readonly property string practiceGrade: PracticeGrade.revision >= 0 ? PracticeGrade.grade(Programme.discipline) : ""
+    readonly property var gradeRows: Programme.entries(Programme.discipline, practiceGrade)
     readonly property var gradeIds: gradeRows.filter(r => r.kind === "entry").map(r => r.id)
     readonly property var gradeCounts: Practice.revision >= 0 ? Practice.counts(gradeIds) : [0, 0, 0, 0, 0]
 
@@ -127,6 +128,7 @@ Kirigami.ScrollablePage {
             LookTile {
                 id: programmeTile
 
+                objectName: "programmeTile"
                 readonly property var current: page.disciplineInfo(Programme.discipline)
 
                 Layout.fillWidth: true
@@ -145,7 +147,7 @@ Kirigami.ScrollablePage {
                 objectName: "todayTile"
 
                 readonly property int due: Practice.revision >= 0 && Practice.intervals.length === 4 && Practice.today.getTime() > 0
-                                           ? Practice.due(Programme.practiceEntries(Programme.discipline)).length : 0
+                                           ? Practice.due(Programme.practiceEntries(Programme.discipline, page.practiceGrade)).length : 0
 
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1          // equal columns
@@ -159,8 +161,7 @@ Kirigami.ScrollablePage {
             LookTile {
                 objectName: "examTile"
 
-                // Programme.discipline notifies on a new grade too.
-                readonly property string grade: Exam.grade(Programme.discipline)
+                readonly property string grade: Exam.grade(Programme.discipline, page.practiceGrade)
                 readonly property string gradeName: (Exam.grades(Programme.discipline).find(g => g.id === grade) || {}).name || ""
 
                 Layout.fillWidth: true
@@ -229,13 +230,13 @@ Kirigami.ScrollablePage {
         }
     }
 
-    // Title of a discipline and the name of its chosen grade.
+    // Title of a discipline and the name of its practice grade.
     function disciplineInfo(id) {
         const d = Programme.disciplines.find(x => x.id === id)
         if (!d) {
             return { title: "", grade: "" }
         }
-        const gradeId = Programme.grade(id)
+        const gradeId = PracticeGrade.revision >= 0 ? PracticeGrade.grade(id) : ""
         const g = d.grade.find(x => x.id === gradeId)
         return { title: d.titel, grade: g ? g.name : "" }
     }
