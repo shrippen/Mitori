@@ -7,6 +7,7 @@
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTimeZone>
 
 #include "catalog.h"
 #include "coursebook.h"
@@ -132,6 +133,127 @@ private slots:
         CourseBook book;
         QVERIFY(!book.open(path));
         QVERIFY(book.errorString().contains(u"newer"_s));
+    }
+
+    // Links: add (twice is one), remove, add again; a deleted entry or notebook takes them.
+    void bookLinksTechniques()
+    {
+        const auto at = [](int hour) { return QDateTime(QDate(2026, 11, 1), QTime(hour, 0), QTimeZone::UTC); };
+        const QString tech = u"aikido/t1"_s;
+        CourseBook book;
+        QVERIFY(book.open(m_dir.filePath(u"links.sqlite"_s)));
+        CourseBook::Course c;
+        c.title = u"Sommer"_s;
+        c.first = c.last = QDate(2026, 7, 4);
+        const QString course = book.addCourse(c, at(8), u"dev"_s).uid;
+        c.title = u"Herbst"_s;
+        c.first = c.last = QDate(2026, 10, 3);
+        const QString later = book.addCourse(c, at(8), u"dev"_s).uid;
+        const QString one = book.addEntry(course, u"eins"_s, at(9), u"dev"_s).uid;
+        const QString two = book.addEntry(course, u"zwei"_s, at(9), u"dev"_s).uid;
+        const QString three = book.addEntry(later, u"drei"_s, at(9), u"dev"_s).uid;
+
+        QVERIFY(book.addTag(one, tech, at(10), u"dev"_s));
+        QVERIFY(book.addTag(one, tech, at(11), u"dev"_s));
+        QVERIFY(book.addTag(one, u"aikido/t2"_s, at(11), u"dev"_s));
+        QVERIFY(book.addTag(two, tech, at(10), u"dev"_s));
+        QVERIFY(book.addTag(three, tech, at(10), u"dev"_s));
+        QCOMPARE(book.courseTags(course).value(one), QStringList({tech, u"aikido/t2"_s}));
+        QCOMPARE(book.courseTags(course).value(two), QStringList({tech}));
+
+        // The latest course first, with its title and days; the entries in the order written.
+        const QList<CourseBook::Linked> linked = book.linkedEntries(tech);
+        QCOMPARE(linked.size(), 3);
+        QCOMPARE(linked.at(0).entry.uid, three);
+        QCOMPARE(linked.at(0).title, u"Herbst"_s);
+        QCOMPARE(linked.at(0).first, QDate(2026, 10, 3));
+        QCOMPARE(linked.at(1).entry.uid, one);
+        QCOMPARE(linked.at(1).entry.text, u"eins"_s);
+
+        // Not to a technique "", not to an entry that is not there; removing one that is not linked.
+        QVERIFY(!book.addTag(one, QString(), at(11), u"dev"_s));
+        QVERIFY(!book.addTag(u"nope"_s, tech, at(11), u"dev"_s));
+        QVERIFY(!book.removeTag(two, u"aikido/t2"_s, at(11)));
+
+        QVERIFY(book.removeTag(one, tech, at(12)));
+        QCOMPARE(book.courseTags(course).value(one), QStringList({u"aikido/t2"_s}));
+        QVERIFY(book.addTag(one, tech, at(13), u"dev"_s));
+        QCOMPARE(book.linkedEntries(tech).size(), 3);
+
+        QVERIFY(book.deleteEntry(two, at(14)));
+        QVERIFY(!book.addTag(two, tech, at(15), u"dev"_s));
+        QCOMPARE(book.linkedEntries(tech).size(), 2);
+        QVERIFY(!book.courseTags(course).contains(two));
+
+        QVERIFY(book.deleteCourse(course, at(16)));
+        QCOMPARE(book.linkedEntries(tech).size(), 1);
+        QCOMPARE(book.linkedEntries(tech).first().entry.uid, three);
+        QVERIFY(book.linkedEntries(u"aikido/t2"_s).isEmpty());
+    }
+
+    // The service: entries() names the links; a link is only made when asked (a text naming a
+    // technique alone links nothing).
+    void linksThroughTheService()
+    {
+        const auto c = made(u"links-service"_s);
+        const QString uid = c->create(u"Sommer"_s, u"2026-07-04"_s, u"2026-07-05"_s, {}, {});
+        QVERIFY(c->addEntry(uid, u"Ikkyo aus Katate-dori"_s));
+        QVariantMap entry = c->entries(uid).first().toMap();
+        QVERIFY(entry.value(u"techniques"_s).toList().isEmpty());
+
+        QSignalSpy changed(c.get(), &Courses::changed);
+        QVERIFY(c->linkTechnique(entry.value(u"uid"_s).toString(), u"aikido/t1"_s));
+        QCOMPARE(changed.size(), 1);
+        entry = c->entries(uid).first().toMap();
+        QCOMPARE(entry.value(u"techniques"_s).toList(), QVariantList({u"aikido/t1"_s}));
+
+        const QVariantMap linked = c->linkedEntries(u"aikido/t1"_s).first().toMap();
+        QCOMPARE(linked.value(u"text"_s).toString(), u"Ikkyo aus Katate-dori"_s);
+        QCOMPARE(linked.value(u"title"_s).toString(), u"Sommer"_s);
+        QCOMPARE(linked.value(u"course"_s).toString(), uid);
+        QCOMPARE(linked.value(u"first"_s).toString(), u"2026-07-04"_s);
+        QCOMPARE(linked.value(u"last"_s).toString(), u"2026-07-05"_s);
+
+        QVERIFY(c->unlinkTechnique(entry.value(u"uid"_s).toString(), u"aikido/t1"_s));
+        QVERIFY(c->linkedEntries(u"aikido/t1"_s).isEmpty());
+
+        // A failed link says why.
+        QVERIFY(!c->linkTechnique(u"nope"_s, u"aikido/t1"_s));
+        QVERIFY(!c->errorString().isEmpty());
+    }
+
+    // A file of schema 4 keeps its data and gets the links.
+    void bookMigratesSchema4()
+    {
+        const QString path = m_dir.filePath(u"schema4.sqlite"_s);
+        QString entry;
+        {
+            CourseBook book;
+            QVERIFY(book.open(path));
+            CourseBook::Course c;
+            c.title = u"Alt"_s;
+            c.first = c.last = QDate(2026, 5, 1);
+            const QString course = book.addCourse(c, QDateTime::currentDateTimeUtc(), u"dev"_s).uid;
+            entry = book.addEntry(course, u"Notiz"_s, QDateTime::currentDateTimeUtc(), u"dev"_s).uid;
+        }
+        {
+            QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"schema4"_s);
+            db.setDatabaseName(path);
+            QVERIFY(db.open());
+            QSqlQuery q(db);
+            QVERIFY(q.exec(u"DROP TABLE entry_tags"_s));
+            QVERIFY(q.exec(u"PRAGMA user_version = 4"_s));
+            q.finish();
+            db.close();
+        }
+        QSqlDatabase::removeDatabase(u"schema4"_s);
+
+        CourseBook book;
+        QVERIFY2(book.open(path), qPrintable(book.errorString()));
+        QCOMPARE(book.allEntries().size(), 1);
+        QVERIFY(book.linkedEntries(u"aikido/t1"_s).isEmpty());
+        QVERIFY(book.addTag(entry, u"aikido/t1"_s, QDateTime::currentDateTimeUtc(), u"dev"_s));
+        QCOMPARE(book.linkedEntries(u"aikido/t1"_s).size(), 1);
     }
 
     // A notebook file of schema 1 (Mitori 0.x before grades) opens as schema 2: its notebooks and

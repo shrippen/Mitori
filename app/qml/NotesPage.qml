@@ -5,9 +5,11 @@ import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Mitori
+import "coursedays.js" as CourseDays
 
 // Notes on a technique (clickdummy "Notizen"): by day, newest day first; a field at the foot
 // adds a note for today. Press and hold a note (or right-click) to change or delete it.
+// Below them the course notes linked to it (⌗ in the notebook); a tap opens one in its notebook.
 // Photos and voice notes come with the platform layer (ROADMAP.md).
 Kirigami.ScrollablePage {
     id: page
@@ -21,6 +23,7 @@ Kirigami.ScrollablePage {
     // Opened from "All notes": its action goes back there instead of stacking another list.
     property bool fromAllNotes: false
     readonly property var notes: Practice.notesRevision >= 0 ? Practice.notes(entry.id) : []
+    readonly property var courseNotes: Courses.revision >= 0 ? Courses.linkedEntries(entry.id) : []
     // [{day: Date, notes: [...]}], newest day first; within a day in the order written.
     readonly property var days: {
         const result = []
@@ -104,7 +107,7 @@ Kirigami.ScrollablePage {
 
         LookLabel {
             Layout.fillWidth: true
-            visible: page.notes.length === 0
+            visible: page.notes.length === 0 && page.courseNotes.length === 0
             text: qsTr("No notes on this technique yet.")
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
@@ -186,6 +189,66 @@ Kirigami.ScrollablePage {
             text: qsTr("Press and hold a note (or Enter on it) to change or delete it.")
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
+        }
+
+        LookSectionLabel {
+            objectName: "fromCourses"
+            visible: page.courseNotes.length > 0
+            text: qsTr("From a course")
+        }
+        Repeater {
+            model: page.courseNotes
+
+            ColumnLayout {
+                id: courseNote
+
+                required property var modelData
+                readonly property string courseLine: modelData.title + " · " + CourseDays.range(modelData.first, modelData.last)
+
+                function open() {
+                    page.Kirigami.PageStack.push(Qt.resolvedUrl("CoursePage.qml"), {
+                        uid: modelData.course,
+                        entryUid: modelData.uid
+                    })
+                }
+
+                Layout.fillWidth: true
+                spacing: 0
+
+                LookLabel {
+                    Layout.fillWidth: true
+                    text: courseNote.courseLine
+                    font: Look.smallFont
+                    color: Look.mutedTextColor
+                    wrapMode: Text.Wrap
+                }
+                LookLabel {
+                    id: courseNoteLabel
+
+                    objectName: "courseNote"
+                    Layout.fillWidth: true
+                    text: courseNote.modelData.text || page.mediaWord(courseNote.modelData.media)
+                    wrapMode: Text.Wrap
+                    padding: Kirigami.Units.smallSpacing
+                    activeFocusOnTab: true
+                    background: Rectangle {
+                        color: Look.cardColor
+                        border.width: courseNoteLabel.activeFocus ? Look.focusWidth : 0
+                        border.color: Look.focusColor
+                    }
+                    Accessible.role: Accessible.Button
+                    Accessible.name: text
+                    Accessible.description: courseNote.courseLine
+                    Accessible.onPressAction: courseNote.open()
+                    Keys.onReturnPressed: courseNote.open()
+                    Keys.onEnterPressed: courseNote.open()
+
+                    TapHandler {
+                        acceptedButtons: Qt.LeftButton
+                        onTapped: courseNote.open()
+                    }
+                }
+            }
         }
     }
 

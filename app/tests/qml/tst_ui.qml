@@ -3278,6 +3278,99 @@ TestCase {
         verify(Courses.remove(course))
     }
 
+    // ⌗: an entry linked to a technique by choice, shown in its notes, back to the entry; a deleted
+    // entry or notebook leaves the notes.
+    function test_8f_note_techniques() {
+        const course = Courses.create("Technik-Lehrgang", "2026-05-01", "2026-05-02", "", "")
+        for (let i = 0; i < 40; ++i) {
+            verify(Courses.addEntry(course, "Füllzeile " + i))
+        }
+        verify(Courses.addEntry(course, "Heute Ô-dachi 5 und Shiho-nage aus Katate-dori"))
+        const entries = Courses.entries(course)
+        const entry = entries[entries.length - 1]
+        compare(entry.techniques.length, 0, "a text naming a technique links nothing by itself")
+
+        const book = push("CoursePage", { uid: course })
+        const buttons = findChildren(book, "linkTechnique")
+        compare(buttons.length, entries.length)
+        verify(buttons[buttons.length - 1].Accessible.name !== "")
+        buttons[buttons.length - 1].clicked()
+        tryVerify(() => window.pageStack.currentItem.objectName === "techniquePicker")
+        const picker = window.pageStack.currentItem
+
+        // Suggestions from the text; the search finds others; a tap links.
+        const first = () => findChildren(picker, "techniqueChoice")
+        tryVerify(() => first().length > 2)
+        verify(first().some(r => r.text.indexOf("Gohon-me") === 0), first().map(r => r.text).join())
+        const shiho = first().find(r => r.text.indexOf("Shiho-nage") === 0)
+        verify(/katate-dori/i.test(shiho.subtitle.split(" · ")[0]), "the attack named comes first: " + shiho.subtitle)
+        const shihoId = shiho.modelData.id
+        wait(800)       // the page has moved in
+        shot("14e-technique-picker")
+        mouseClick(shiho)
+        tryCompare(picker, "linked", [shihoId])
+        tryVerify(() => findChildren(picker, "linkedTechnique").length === 1)
+        verify(!first().some(r => r.modelData.id === shihoId))
+
+        const field = findChild(picker, "pickerSearch")
+        field.text = "Ikkajo kime"
+        tryVerify(() => picker.foundShown.length > 0)
+        tryVerify(() => first().some(r => r.text === "Ikkajô-kime-osae"))
+        field.text = "gibtesnicht"
+        tryVerify(() => findChild(picker, "pickerNotFound").visible)
+        field.text = ""
+
+        // Unlink and link again, then back to the notebook: a chip.
+        findChildren(picker, "linkedTechnique")[0].clicked()
+        tryVerify(() => picker.linked.length === 0)
+        verify(Courses.linkTechnique(entry.uid, shihoId))
+        window.pageStack.pop()
+        tryVerify(() => findChildren(book, "entryTechnique").length === 1)
+        verify(findChildren(book, "entryTechnique")[0].text.indexOf("Shiho-nage") > 0)
+        verify(findChildren(book, "entryTechnique")[0].Accessible.name.indexOf("Shiho-nage") > 0)
+        book.flickable.contentY = book.flickable.contentHeight - book.flickable.height
+        wait(800)
+        shot("14f-entry-technique-chip")
+
+        // The chip opens the technique's notes; there the entry, course and day; a tap goes to it.
+        findChildren(book, "entryTechnique")[0].clicked()
+        tryVerify(() => window.pageStack.currentItem !== book && window.pageStack.currentItem.courseNotes !== undefined)
+        const notes = window.pageStack.currentItem
+        compare(notes.entry.id, shihoId)
+        verify(findChild(notes, "fromCourses").visible)
+        const row = findChild(notes, "courseNote")
+        verify(row)
+        compare(row.Accessible.name, entry.text)
+        verify(row.Accessible.description.indexOf("Technik-Lehrgang") === 0, row.Accessible.description)
+        shot("14g-notes-from-course")
+        mouseClick(row)
+        tryVerify(() => window.pageStack.currentItem !== notes && window.pageStack.currentItem.uid === course)
+        const opened = window.pageStack.currentItem
+        const target = findChildren(opened, "courseEntry").find(l => l.modelData.uid === entry.uid)
+        tryVerify(() => target.activeFocus, 3000, "the entry has the focus")
+        const view = opened.flickable
+        const y = target.mapToItem(view.contentItem, 0, 0).y
+        verify(view.contentY > 0, "scrolled down")
+        verify(y >= view.contentY && y + target.height <= view.contentY + view.height, "in view")
+        window.pageStack.pop()
+
+        // Deleted entry, then course: gone from the notes.
+        tryVerify(() => window.pageStack.currentItem === notes)
+        const page = notes
+        verify(Courses.addEntry(course, "noch eine"))
+        const more = Courses.entries(course)
+        const other = more[more.length - 1]
+        verify(Courses.linkTechnique(other.uid, shihoId))
+        tryCompare(page.courseNotes, "length", 2)
+        verify(Courses.deleteEntry(other.uid))
+        tryCompare(page.courseNotes, "length", 1)
+        verify(Courses.remove(course))
+        tryCompare(page.courseNotes, "length", 0)
+        verify(!findChild(page, "fromCourses").visible)
+        window.pageStack.pop()
+        window.pageStack.pop()
+    }
+
     // Found by the QA round of 5 Nov 2026 (qa/PERSONAS.md).
     // What the data knows and the screen left out: Zanshin, open questions, proposals, a grade's
     // meaning and waiting time, the Suburi texts (QA round P5; the booklet p. 44 f.).
@@ -3663,6 +3756,7 @@ TestCase {
                                      ["ExamRoundPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["ExamEndPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["NotesPage", { entry: rows[0] }], ["WelcomePage", {}],
+                                     ["TechniquePickerPage", { course: "none", entryUid: "none" }],
                                      ["PlayerPage", { playlist: rows, index: 0 }]]) {
             const page = push(file, props)
             look(file, page)

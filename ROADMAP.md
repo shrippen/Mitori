@@ -173,8 +173,6 @@ Reihenfolge der Kacheln. Offen, nach Gewicht:
 - **Training**: Playliste auf dem Tablet links neben dem Player (Telefon: darunter, erledigt).
 - **Player**: Knopf ⤢ ins Querformat; Titelzeile mit Kanji (Angriff · Zusatz · Grad · i / n steht hochkant schon,
   quer fehlt sie im Bild); quer die schmale Spalte nach Entwurf B, Zeitleiste im Bild.
-- **Lehrgangsnotizbuch**: ⌗-Verknüpfung (Angriff, Technik, Waffe mit Vorschlägen; Chips, „↗ im Programm“, die
-  Notiz auch bei der Technik und in deren Notizen).
 - **Einstellungen** als drei Unterseiten (Videos, Sicherung, Darstellung); Darstellung ist schon eine eigene Seite.
 - **Startmenü**: Programm-Kachel mit Stand („Aikido · 5. Kyu · 7 von 20 prüfungsreif“ und Leiste, Kurzname);
   Telefon groß + zwei Spalten statt einer; Tablet die große Kachel 2 × 2; Begrüßung; Heute mit Sparte; Bundle-
@@ -204,7 +202,7 @@ Sicherung ohne Endung, konto.ini 600, Alle Notizen und Alle Jahre schneller.
 Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
 - Telefon bei doppelter Anzeigegröße (206 px): Test `test_8o` auf diese Breite ausweiten; Segmente, lange Knöpfe,
   Bewertung und Steuerzeilen des Players brauchen eine schmale Form.
-- Lehrgangsnotizen mit Technik verbinden (⌗, Eintrag auch bei der Technik), QR-Code, Tablet nach Vorlage (Blatt
+- QR-Code, Tablet nach Vorlage (Blatt
   rechts, zwei Spalten, Lehrgänge und Einstellungen als Liste und Seite), Export als Blatt.
 - Programmdaten auf Englisch, App-Passwort im Schlüsselbund, Abschlussseite des Trainings.
 - Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).

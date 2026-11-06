@@ -87,6 +87,44 @@ inline QString withoutHiragana(const QString &text)
     return QString::fromUcs4(reinterpret_cast<const char32_t *>(points.constData()), points.size());
 }
 
+// A text asked whether it names something (a technique in a note): the name's words joined must be
+// a run of whole words of the text, so that spaces and hyphens do not matter ("Shihô-nage" in "shiho
+// nage aus" and "Shihonage,") but word ends do (not in "Shihonagen"). With kanji anywhere: Japanese
+// has no spaces, and okurigana may differ.
+class NamedIn
+{
+public:
+    explicit NamedIn(const QString &text)
+        : m_words(searchKey(text).split(u' ', Qt::SkipEmptyParts))
+    {
+    }
+
+    bool names(const QString &name) const
+    {
+        const QString joined = searchKey(name).remove(u' ');
+        if (joined.isEmpty()) {
+            return false;
+        }
+        if (hasKanji(joined)) {
+            const QString bare = withoutHiragana(joined);
+            return !bare.isEmpty() && withoutHiragana(m_words.join(QString())).contains(bare);
+        }
+        for (qsizetype i = 0; i < m_words.size(); ++i) {
+            QString run;
+            for (qsizetype j = i; j < m_words.size() && run.size() < joined.size(); ++j) {
+                run += m_words.at(j);
+            }
+            if (run == joined) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+private:
+    QStringList m_words;
+};
+
 // A text to search (a technique's fields, a note): whether every word of a query occurs in it.
 // A word matches inside a word, or joined from the start of a word across the following
 // hyphens and spaces: across a hyphen it may end anywhere (shihon finds Shiho-nage while
