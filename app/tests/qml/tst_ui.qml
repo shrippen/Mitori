@@ -3055,6 +3055,11 @@ TestCase {
         tryVerify(() => page.split && page.player)
     }
     function chooseGrade(page, id) {
+        // On a tablet the chips scroll with the rows: back to them, as the user would.
+        if (page.wide) {
+            findChild(page, "programmeList").positionViewAtBeginning()
+            wait(50)
+        }
         const chips = findChild(page, "gradeChips")
         clickUntil(chips.itemAt(page.grades.findIndex(g => g.id === id)), () => page.grade === id)
     }
@@ -3424,6 +3429,201 @@ TestCase {
         compare(page.player.current.id, first)
         compare(page.player.rate, 1, "not the tempo left before")
         Programme.discipline = "aikido"
+    }
+
+    // Without a video in the grade the sheet stands beside the list, no dialog: the first technique,
+    // then the row chosen. Turned, the chosen sheet stays open, as a dialog upright.
+    function test_2v_a_sheet_beside_the_list() {
+        useFolder(clipFolder("gone"))
+        Programme.discipline = "aikido"
+        PracticeGrade.setGrade("aikido", "k5")
+        window.width = 1280
+        window.height = 800
+        const page = push("ProgrammePage")
+        tryVerify(() => page.twoPanes)
+        verify(!page.split, "no player without a video")
+
+        const entries = page.rows.filter(r => r.kind === "entry")
+        compare(page.paneEntry.id, entries[0].id)
+        tryVerify(() => findChild(page, "paneSheet"))
+        const body = findChild(page, "paneSheet")
+        compare(body.entry.id, entries[0].id)
+        verify(findChild(body, "sheetTitle").visible, "the name stands in every style")
+        verify(findChild(body, "sheetNoVideo").visible)
+        verify(!findChild(body, "sheetClose").visible, "nothing to close beside the list")
+        verify(!findChild(page, "playerPane").visible)
+        shot("2v-sheet-beside-the-list")
+
+        const dialog = findChild(page, "techniqueSheet")
+        page.open(entries[1])
+        compare(page.paneEntry.id, entries[1].id)
+        compare(body.entry.id, entries[1].id)
+        verify(!dialog.visible, "no dialog over the list")
+
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => dialog.opened)
+        compare(dialog.entry.id, entries[1].id)
+        compare(page.paneEntry, null)
+
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => !dialog.visible)
+        compare(page.paneEntry.id, entries[1].id)
+    }
+
+    // A row without a video among rows with one: the sheet takes the pane, the player waits under
+    // it without a sound, its place and tempo kept; its row brings it back. Another grade drops
+    // the sheet.
+    function test_2v_b_sheet_over_the_player() {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        rowPlays(page, 1)
+        page.player.setSpeed(0.5)
+
+        const withoutVideo = Object.assign({}, page.playlist[3], { video: null })
+        page.open(withoutVideo)
+        compare(page.paneEntry.id, withoutVideo.id)
+        tryVerify(() => !page.player.playing)
+        verify(!findChild(page, "playerPane").visible)
+        verify(!page.player.autoPlay, "nothing starts under the sheet")
+        staysStanding(page.player, "hidden, no sound")
+        const place = page.player.position
+
+        page.open(page.playlist[1])
+        compare(page.paneEntry, null)
+        verify(findChild(page, "playerPane").visible)
+        tryVerify(() => page.player.playing && page.player.position >= place, 10000)
+        compare(page.player.rate, 0.5)
+
+        page.open(withoutVideo)
+        tryVerify(() => !page.player.playing)
+        chooseGrade(page, "k4")
+        chooseGrade(page, "k5")
+        tryVerify(() => page.split && page.player)
+        compare(page.paneEntry, null)
+        compare(page.sheetId, "")
+        staysStanding(page.player, "a chip starts nothing")
+    }
+
+    // The tablet sizes: discipline and grades with the rows, the player's parts as in the
+    // clickdummy, all of it inside the pane without scrolling.
+    function test_2v_c_tablet_layout_data() {
+        return [ { tag: "1280x800", width: 1280, height: 800 }, { tag: "1024x768", width: 1024, height: 768 } ]
+    }
+    function test_2v_c_tablet_layout(data) {
+        const page = tabletProgramme()
+        window.width = data.width
+        window.height = data.height
+        tryVerify(() => page.split && page.player)
+        verify(!page.header.visible, "no head above both panes")
+        verify(page.inside(findChild(page, "gradeChips"), findChild(page, "programmeList")), "the grades scroll with the rows")
+
+        const view = page.player
+        tryVerify(() => view.paneColumns)
+        wait(100)
+        const edges = name => {
+            const item = findChild(view, name)
+            verify(item && item.visible, name)
+            const at = item.mapToItem(null, 0, 0)
+            return { left: at.x, top: at.y, right: at.x + item.width, bottom: at.y + item.height }
+        }
+        const bar = edges("transportBar")
+        verify(edges("panePrevious").right <= bar.left + 0.5, "previous before the bar")
+        verify(edges("paneNext").left >= bar.right - 0.5, "next after the bar")
+        const sound = edges("soundSwitch")
+        verify(sound.left >= edges("paneNext").right - 0.5, "the switches after them")
+        verify(sound.right <= data.width + 0.5, "inside the window: " + sound.right)
+        verify(edges("awakeSwitch").top >= sound.bottom - 0.5, "one below the other")
+
+        const rating = edges("ratingRow")
+        const note = edges("noteField")
+        verify(rating.right <= note.left + 0.5, "two columns")
+        verify(note.right <= data.width + 0.5, "inside the window: " + note.right)
+        verify(rating.top >= bar.bottom - 0.5, "below the bar")
+        verify(edges("paneTitle").bottom <= rating.top + 0.5, "the name above the rating")
+        verify(edges("railTitle").top >= edges("stage").top, "the name on the picture")
+        verify(!findChild(view, "neighbourRow").visible, "neighbours only once")
+        verify(!findChild(view, "compactTitle").visible, "the name once below the picture")
+
+        const controls = findChild(view, "controlsView")
+        verify(controls.contentHeight <= controls.height + 0.5, controls.contentHeight + " in " + controls.height)
+        const stage = findChild(view, "stage")
+        verify(stage.height >= Math.min(view.height / 2, stage.width / stage.ratio) - 0.5, "the picture at least half, or all of it")
+        shot("2v-tablet-" + data.tag)
+
+        // The longest word on the switches: still inside, still no scrolling.
+        view.setSpeed(0.5)
+        wait(100)
+        verify(edges("soundSwitch").right <= data.width + 0.5, "slow motion: " + edges("soundSwitch").right)
+        verify(controls.contentHeight <= controls.height + 0.5, controls.contentHeight + " in " + controls.height)
+    }
+
+    // A pane too narrow for columns (a small tablet window) keeps the one column.
+    function test_2v_d_narrow_pane() {
+        const page = tabletProgramme()
+        window.width = 760
+        window.height = 560
+        tryVerify(() => page.split && page.player && !page.player.paneColumns)
+        verify(findChild(page.player, "compactTitle").visible)
+        verify(!findChild(page.player, "panePrevious").visible)
+        verify(findChild(page.player, "neighbourRow").visible)
+    }
+
+    // Upright a tablet has the phone's layout: grades above the list, the sheet as a dialog.
+    function test_2v_e_tablet_upright() {
+        const page = tabletProgramme()
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.twoPanes)
+        tryVerify(() => page.header.visible && page.header.implicitHeight > 0)
+        verify(!page.inside(findChild(page, "gradeChips"), findChild(page, "programmeList")))
+        const scroll = findChild(page, "programmeScroll")
+        tryCompare(scroll, "width", page.width)
+        page.open(page.rows.find(r => r.kind === "entry"))
+        const dialog = findChild(page, "techniqueSheet")
+        tryVerify(() => dialog.opened)
+        compare(page.sheetId, "")
+        shot("2v-tablet-upright", true)
+        dialog.close()
+        tryVerify(() => !dialog.visible)
+    }
+
+    // The chips scroll with the rows: opening the page or tapping a chip leaves them in view, even
+    // when the technique shown stands further down (it failed so under Shinki, list 192 px down).
+    function test_2v_g_chips_stay_in_view() {
+        const page = tabletProgramme(standInVideos, "shinkitoho", "chuden")
+        const list = findChild(page, "programmeList")
+        wait(300)
+        compare(list.contentY, list.originY, "opened at the top")
+        chooseGrade(page, "shoden")
+        wait(300)
+        compare(list.contentY, list.originY, "a chip stays at the top")
+        Programme.discipline = "aikido"
+    }
+
+    // The dialog of a technique with a video, open when the tablet turns sideways: its technique
+    // stands in the player, also after the first tap; turning starts nothing.
+    function test_2v_f_dialog_turned_sideways() {
+        const page = tabletProgramme(clipFolder("long"))
+        page.open(page.playlist[0])     // the first tap
+        tryVerify(() => page.player.playing, 10000)
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        const dialog = findChild(page, "techniqueSheet")
+        const chosen = page.playlist[2]
+        page.open(chosen)
+        tryVerify(() => dialog.opened)
+
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => !dialog.visible && page.split && page.player)
+        compare(page.paneEntry, null)
+        compare(page.lastId, chosen.id)
+        compare(page.player.current.id, chosen.id)
+        tryVerify(() => page.player.duration > 0, 10000)
+        staysStanding(page.player, "turned, no sound by itself")
     }
 
     // Opening the programme is silent: the first tap starts, and from then on a row plays at once.
@@ -4152,17 +4352,17 @@ TestCase {
         shot("3-programme-grade-without-forms-wide")
 
         // Back to a grade with forms: the list, and the pane if there are videos.
-        clickUntil(chips.itemAt(page.grades.findIndex(g => g.id === "chuden")), () => page.grade === "chuden")
+        chooseGrade(page, "chuden")
         tryVerify(() => !card.visible)
         verify(page.rows.length > 0)
         verify(page.split)
         verify(findChild(page, "playerPane").active)
 
         // From beside the player to the card and back: the pane goes and returns.
-        clickUntil(chip, () => page.grade === "kaiden")
+        chooseGrade(page, "kaiden")
         verify(!page.split)
         verify(!findChild(page, "playerPane").active)
-        clickUntil(chips.itemAt(page.grades.findIndex(g => g.id === "chuden")), () => page.grade === "chuden")
+        chooseGrade(page, "chuden")
         verify(page.split)
         verify(findChild(page, "playerPane").active)
         window.pageStack.pop()

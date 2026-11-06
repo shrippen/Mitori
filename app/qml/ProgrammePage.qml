@@ -8,10 +8,17 @@ import Mitori
 
 // Programme (clickdummy "Programm"): discipline, grade, and the grade's own material. A row opens
 // the technique sheet first; ▶ goes straight to the player. On a tablet in landscape
-// (app-entscheidungen.md, "Tablet quer") list and small player are one page: a row with a video
-// plays beside the list, one without opens the sheet. Opened, the page is silent: the video stands
-// until the first tap. A grade without forms (Hon-Menkyo) shows a card instead of the list; it
-// stays on this page, like every grade browsed here.
+// (app-entscheidungen.md, "Tablet quer") list and right pane are one page: a row with a video
+// plays beside the list, one without shows its sheet there, and the discipline and grade scroll
+// with the list. Opened, the page is silent: the video stands until the first tap. A grade without
+// forms (Hon-Menkyo) shows a card instead of the list; it stays on this page, like every grade
+// browsed here.
+//
+//   ┌ list ─────┬ right pane ───────────┐
+//   │ discipline│ small player or sheet │
+//   │ grades    │                       │
+//   │ rows …    │                       │
+//   └───────────┴───────────────────────┘
 Kirigami.Page {
     id: page
 
@@ -55,6 +62,42 @@ Kirigami.Page {
     readonly property bool wide: width > height && height >= 460     // a tablet sideways, not a phone
     readonly property var playlist: rows.filter(r => page.playable(r))
     readonly property bool split: wide && playlist.length > 0
+    // List and right pane; a grade without forms has only its card.
+    readonly property bool twoPanes: wide && !noForms
+    // The row chosen for the sheet beside the list. Empty: the small player, or without a video
+    // in the grade the first technique's sheet (the clickdummy's `selId`).
+    property string sheetId: ""
+    readonly property var paneEntry: !twoPanes ? null
+                                     : rows.find(r => r.kind === "entry" && r.id === sheetId)
+                                       || (split ? null : rows.find(r => r.kind === "entry")) || null
+    // On a tablet the chips scroll with the rows: while the head settles after opening or a chip,
+    // the list stays at its top, until a row or a finger moves it.
+    property bool keepTop: true
+    Timer {
+        id: keepTopOff
+
+        running: true
+        interval: 500
+        onTriggered: page.keepTop = false
+    }
+    // Another grade: nothing of the sheet comes back later over a playing video.
+    onRowsChanged: {
+        page.keepTop = true
+        keepTopOff.restart()
+        if (sheetId !== "" && !rows.some(r => r.id === sheetId)) {
+            sheetId = ""
+        }
+    }
+    // Turned: the sheet stays open, as a dialog upright and beside the list sideways.
+    onWideChanged: {
+        keepTopOff.restart()
+        if (wide && sheet.visible) {
+            page.dialogToPane()
+        } else if (!wide && sheetId !== "" && isCurrentPage) {
+            showDialog(rows.find(r => r.id === sheetId))
+            sheetId = ""
+        }
+    }
     // The small player beside the list (tablet), typed for the calls below.
     readonly property PlayerView player: pane.item as PlayerView
     // The first tap came (play control, a row, full screen): chosen techniques now play at once.
@@ -89,48 +132,59 @@ Kirigami.Page {
         }
     ]
 
-    header: ColumnLayout {
-        spacing: Kirigami.Units.smallSpacing
+    // Discipline and grades: above the list on a phone, with its rows on a tablet (the clickdummy).
+    Component {
+        id: chooser
 
-        LookSegmented {
-            Layout.fillWidth: true
-            Layout.margins: Kirigami.Units.smallSpacing
-            model: Programme.disciplines.map(d => d.kurzname)
-            currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
-            onActivated: index => {
-                Programme.discipline = Programme.disciplines[index].id
-                page.grade = PracticeGrade.grade(Programme.discipline)
-            }
-        }
-
-        Flow {
-            Layout.fillWidth: true
-            Layout.leftMargin: Kirigami.Units.smallSpacing
-            Layout.rightMargin: Kirigami.Units.smallSpacing
+        ColumnLayout {
             spacing: Kirigami.Units.smallSpacing
 
-            Repeater {
-                objectName: "gradeChips"
-                model: page.grades
+            LookSegmented {
+                Layout.fillWidth: true
+                Layout.margins: Kirigami.Units.smallSpacing
+                model: Programme.disciplines.map(d => d.kurzname)
+                currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
+                onActivated: index => {
+                    Programme.discipline = Programme.disciplines[index].id
+                    page.grade = PracticeGrade.grade(Programme.discipline)
+                }
+            }
 
-                LookChip {
-                    required property var modelData
+            Flow {
+                Layout.fillWidth: true
+                Layout.leftMargin: Kirigami.Units.smallSpacing
+                Layout.rightMargin: Kirigami.Units.smallSpacing
+                spacing: Kirigami.Units.smallSpacing
 
-                    // How far the grade is (clickdummy `.gchip`): exam-ready of all its techniques.
-                    readonly property var ids: Programme.entries(page.discipline, modelData.id)
-                        .filter(r => r.kind === "entry").map(r => r.id)
-                    readonly property int ready: Practice.revision >= 0 ? Practice.counts(ids)[4] : 0
-                    text: ids.length ? modelData.name + " " + ready + "/" + ids.length : modelData.name + " –"
-                    Accessible.name: ids.length ? qsTr("%1, %2 of %3 exam-ready").arg(modelData.name).arg(ready).arg(ids.length)
-                                                : qsTr("%1, no forms yet").arg(modelData.name)
-                    checkable: true
-                    choice: true        // the page holds the grade: a tap only reports it
+                Repeater {
+                    objectName: "gradeChips"
+                    model: page.grades
 
-                    checked: modelData.id === page.grade
-                    onClicked: page.grade = modelData.id
+                    LookChip {
+                        required property var modelData
+
+                        // How far the grade is (clickdummy `.gchip`): exam-ready of all its techniques.
+                        readonly property var ids: Programme.entries(page.discipline, modelData.id)
+                            .filter(r => r.kind === "entry").map(r => r.id)
+                        readonly property int ready: Practice.revision >= 0 ? Practice.counts(ids)[4] : 0
+                        text: ids.length ? modelData.name + " " + ready + "/" + ids.length : modelData.name + " –"
+                        Accessible.name: ids.length ? qsTr("%1, %2 of %3 exam-ready").arg(modelData.name).arg(ready).arg(ids.length)
+                                                    : qsTr("%1, no forms yet").arg(modelData.name)
+                        checkable: true
+                        choice: true        // the page holds the grade: a tap only reports it
+
+                        checked: modelData.id === page.grade
+                        onClicked: page.grade = modelData.id
+                    }
                 }
             }
         }
+    }
+
+    header: Loader {
+        active: !page.wide
+        visible: active         // an emptied Loader keeps its implicit height
+        sourceComponent: chooser
     }
 
     padding: 0
@@ -143,8 +197,8 @@ Kirigami.Page {
             objectName: "programmeScroll"
             clip: true                                  // the rows scroll under the grade chips, not over them
             Layout.fillHeight: true
-            Layout.fillWidth: !page.split
-            Layout.preferredWidth: page.split ? Kirigami.Units.gridUnit * 20 : -1
+            Layout.fillWidth: !page.twoPanes
+            Layout.preferredWidth: page.twoPanes ? Kirigami.Units.gridUnit * 20 : -1
             ListView {
                 id: list
 
@@ -165,7 +219,18 @@ Kirigami.Page {
                         })
                     }
                     topBefore = originY
+
+                    // Opened, or a chip tapped: the head settles in several steps, the chips stay.
+                    if (page.keepTop && page.wide) {
+                        keepTopOff.restart()
+                        Qt.callLater(() => {
+                            if (list && page.keepTop) {
+                                list.positionViewAtBeginning()
+                            }
+                        })
+                    }
                 }
+                onMovementStarted: page.keepTop = false
                 model: page.rows
                 reuseItems: true
                 // Up and Down scroll (the page's keys) also from a focused row; the list has no
@@ -177,6 +242,13 @@ Kirigami.Page {
                 header: ColumnLayout {
                     width: ListView.view.width
                     spacing: Kirigami.Units.smallSpacing
+
+                    Loader {
+                        Layout.fillWidth: true
+                        active: page.wide
+                        visible: active
+                        sourceComponent: chooser
+                    }
 
                     // A grade's meaning, content and waiting time (Shinki Toho has them).
                     LookLabel {
@@ -264,10 +336,10 @@ Kirigami.Page {
                               ? qsTr("There is no video for this grade.")
                               : qsTr("The videos are on the DVDs of the Shinkiryu association. With the DVD's code Mitori loads them onto this device.")
 
-                        // One below the other on a small phone: side by side they would widen the list.
+                        // One below the other in a narrow list: side by side they would widen it.
                         GridLayout {
                             Layout.fillWidth: true
-                            columns: page.width < Kirigami.Units.gridUnit * 24 ? 1 : 2
+                            columns: list.width < Kirigami.Units.gridUnit * 24 ? 1 : 2
 
                             LookButton {
                                 objectName: "enterCode"
@@ -340,7 +412,7 @@ Kirigami.Page {
                             leadingText: entry.nr ? String(entry.nr) : ""
                             text: entry.title + (entry.kind === "entry" && entry.extra && !entry.nr ? " (" + entry.extra + ")" : "")
                             subtitle: [entry.jp, entry.nr ? entry.extra : entry.text].filter(x => x).join(" · ")
-                            selected: entry.id === (page.split ? page.lastId : page.returnedId)
+                            selected: entry.id === (page.paneEntry ? page.paneEntry.id : page.split ? page.lastId : page.returnedId)
                             onClicked: page.open(entry)
                             Keys.onTabPressed: event => page.tabRow(rowLoader.index, 1, event)
                             Keys.onBacktabPressed: event => page.tabRow(rowLoader.index, -1, event)
@@ -370,46 +442,91 @@ Kirigami.Page {
         }
 
         Kirigami.Separator {
-            visible: page.split
+            visible: page.twoPanes
             Layout.fillHeight: true
         }
 
-        // The small player beside the list (tablet).
-        Loader {
-            id: pane
+        // The right pane (tablet): the small player, or the sheet of a technique without a video.
+        // The player stays under the sheet, paused: its place and tempo wait for its row.
+        Item {
+            id: rightPane
 
-            objectName: "playerPane"
-            active: page.paneOn
-            visible: active
+            visible: page.twoPanes
             Layout.fillWidth: true
             Layout.fillHeight: true
-            onLoaded: {
-                page.restorePane()
-                page.resumeFromBig()    // second: what full screen left is newer
+
+            Loader {
+                id: pane
+
+                objectName: "playerPane"
+                anchors.fill: parent
+                active: page.paneOn
+                visible: active && !page.paneEntry
+                onLoaded: {
+                    page.restorePane()
+                    page.resumeFromBig()    // second: what full screen left is newer
+                }
+
+                sourceComponent: PlayerView {
+                    id: paneView
+
+                    compact: true
+                    autoPlay: page.isCurrentPage && page.started && !page.paneEntry
+                    onPlayTapped: page.started = true
+                    playlist: page.playlist
+                    // The chosen technique (also after the pane is made anew, turning the tablet).
+                    index: Math.max(0, page.playlist.findIndex(r => r.id === page.lastId))
+                    // First values only: setList changes both in one step, bindings one after the other.
+                    Component.onCompleted: {
+                        paneView.playlist = page.playlist
+                        paneView.index = paneView.index
+                    }
+                    onShown: id => {
+                        if (id) {
+                            page.lastId = id
+                        }
+                    }
+                    onBigRequested: page.openBig()
+                    onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
+                    onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
+                }
             }
 
-            sourceComponent: PlayerView {
-                id: paneView
+            Loader {
+                objectName: "sheetPane"
+                anchors.fill: parent
+                active: !!page.paneEntry
 
-                compact: true
-                autoPlay: page.isCurrentPage && page.started
-                onPlayTapped: page.started = true
-                playlist: page.playlist
-                // The chosen technique (also after the pane is made anew, turning the tablet).
-                index: Math.max(0, page.playlist.findIndex(r => r.id === page.lastId))
-                // First values only: setList changes both in one step, bindings one after the other.
-                Component.onCompleted: {
-                    paneView.playlist = page.playlist
-                    paneView.index = paneView.index
-                }
-                onShown: id => {
-                    if (id) {
-                        page.lastId = id
+                sourceComponent: LookScrollView {
+                    contentWidth: availableWidth
+                    clip: true
+
+                    Flickable {
+                        id: paneFlick
+
+                        contentHeight: paneBody.implicitHeight + 2 * paneBody.y
+                        boundsBehavior: Flickable.StopAtBounds
+                        readonly property LookFocusFollow focusFollow: LookFocusFollow { flickable: paneFlick }
+
+                        // A column that reads (the clickdummy's `.sheet.inline`).
+                        TechniqueBody {
+                            id: paneBody
+
+                            objectName: "paneSheet"
+                            x: Look.unit(28)
+                            y: Look.unit(28)
+                            width: Math.min(paneFlick.width - 2 * x, Kirigami.Units.gridUnit * 36)
+                            inPane: true
+                            entry: page.paneEntry || ({})
+                            playable: page.paneEntry ? page.playable(page.paneEntry) : false
+                            onScrollKey: event => paneBody.scrollIn(paneFlick, event)
+                            onPlayRequested: entry => page.play(entry)
+                            onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
+                            onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
+                            onVideosRequested: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
+                        }
                     }
                 }
-                onBigRequested: page.openBig()
-                onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
-                onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
             }
         }
     }
@@ -424,11 +541,14 @@ Kirigami.Page {
         onVideosRequested: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
     }
 
+    property bool listChanging: false
     // Another grade or discipline: the technique shown last if it is in it, else its first.
     // Nothing to play (the grade card): the pane goes as it stands and comes back so.
     onPlaylistChanged: {
         if (page.player && page.playlist.length > 0) {
+            page.listChanging = true
             page.player.setList(page.playlist, page.lastId)
+            page.listChanging = false
         }
     }
     // Under another page (notes, comment) the small player rests.
@@ -449,12 +569,13 @@ Kirigami.Page {
         }
     }
     // The keys scroll the list as ScrollablePage did (Up, Down, Page Up, Page Down, Home, End).
-    // Keys the small player leaves (Up, Down, Page Up, Page Down, End) stay with it.
+    // Keys the small player or the sheet beside the list leaves (Up, Down, Page Up, Page Down, End)
+    // stay with them.
     function scrollBy(dy) {
         list.contentY = Math.max(list.originY, Math.min(list.originY + list.contentHeight - list.height, list.contentY + dy))
     }
     function inPlayer() {
-        return page.inside(page.Window.activeFocusItem, pane)
+        return page.inside(page.Window.activeFocusItem, rightPane)
     }
     // From the page and from a focused row (the list passes them on before its ScrollView, which
     // would scroll a whole screen).
@@ -495,8 +616,10 @@ Kirigami.Page {
         if (page.player && i >= 0 && page.player.index !== i) {
             page.player.index = i
         }
+        // Only within a list: opening the page or tapping a chip leaves the chips in view.
         const row = page.rows.findIndex(r => r.id === page.lastId)
-        if (page.split && row >= 0) {
+        if (page.split && row >= 0 && pane.status === Loader.Ready && !page.listChanging) {
+            page.keepTop = false
             list.positionViewAtIndex(row, ListView.Contain)
         }
     }
@@ -547,6 +670,31 @@ Kirigami.Page {
             page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
             return
         }
+        if (page.twoPanes) {
+            page.sheetId = entry.id
+            if (page.player) {
+                page.player.pause()     // hidden under the sheet, it makes no sound
+            }
+            return
+        }
+        page.showDialog(entry)
+    }
+    // The dialog open when the tablet turns sideways: its technique goes to the right pane. One with
+    // a video stands in the player: turning starts nothing.
+    function dialogToPane() {
+        const entry = sheet.entry
+        sheet.close()
+        if (!page.playable(entry)) {
+            page.sheetId = entry.id
+            return
+        }
+        page.lastId = entry.id
+        page.paneRest = Object.assign({ looping: true }, page.paneRest, { playing: false })
+        if (page.player) {
+            page.player.holdStart = true
+        }
+    }
+    function showDialog(entry) {
         sheet.entry = entry
         sheet.playable = page.playable(entry)
         sheet.open()
@@ -554,6 +702,7 @@ Kirigami.Page {
 
     function play(entry) {
         sheet.close()
+        page.sheetId = ""
         bigResume = null
         if (page.split) {
             page.playBeside(entry)
@@ -575,6 +724,7 @@ Kirigami.Page {
     // chosen, so nothing else would make it play.
     function playBeside(entry) {
         const standing = page.player && page.player.current.id === entry.id && !page.player.playing
+        page.sheetId = ""
         page.started = true
         page.lastId = entry.id
         if (standing) {

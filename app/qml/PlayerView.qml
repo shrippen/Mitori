@@ -50,6 +50,9 @@ Item {
     // video ends with it, and a player at the end of the file no longer seeks back).
     readonly property real end: player.duration > 0 ? Math.min(to, player.duration - 250) : to
     readonly property var crop: file !== undefined ? Videos.crop(video) : ({})
+    // Beside the list with room (the clickdummy's `.trow`, `.tbelow`): the switches beside the
+    // transport, and below them two columns. A narrow pane keeps the one column.
+    readonly property bool paneColumns: compact && width >= Look.unit(560)
     // Sideways only with a picture; without a video the card and the controls stand as upright.
     // By the window's height: the page's own changes with the head that this property hides.
     readonly property bool landscape: !compact && hasVideo && (big || width > Window.height)
@@ -454,11 +457,12 @@ Item {
 
             LookLabel {
                 objectName: "railTitle"
-                visible: page.onRail
+                // The small player has it on the picture too (the clickdummy's `.qname`).
+                visible: page.onRail || (page.compact && page.hasVideo)
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.margins: Kirigami.Units.largeSpacing
-                text: page.titleText + (page.current.attack ? "  ·  " + page.current.attack : "")
+                text: page.titleText + (!page.compact && page.current.attack ? "  ·  " + page.current.attack : "")
                 color: Look.stageTextColor
                 style: Text.Outline
                 styleColor: Look.stageColor
@@ -715,7 +719,7 @@ Item {
             readonly property real neededHeight: contentHeight
                                                  - (stepList.visible ? stepList.height + stepList.Layout.topMargin + controls.spacing : 0)
             // Down to the transport bar, which stays in view.
-            readonly property real barHeight: controls.y + transport.y + transport.height + Kirigami.Units.largeSpacing
+            readonly property real barHeight: controls.y + transportRow.y + transport.y + transport.height + Kirigami.Units.largeSpacing
             boundsBehavior: Flickable.StopAtBounds
             clip: true
             QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
@@ -744,7 +748,7 @@ Item {
 
                 LookLabel {
                     Layout.fillWidth: true
-                    visible: page.compact
+                    visible: page.compact && !page.paneColumns
                     objectName: "compactTitle"
                     text: (page.current.nr ? page.current.nr + " · " : "") + page.titleWithAddition
                           + (page.current.jp ? "  " + page.current.jp : "")
@@ -755,7 +759,7 @@ Item {
                 LookLabel {
                     objectName: "placeText"
                     Layout.fillWidth: true
-                    visible: !page.landscape && page.placeText !== ""
+                    visible: !page.landscape && !page.paneColumns && page.placeText !== ""
                     text: page.placeText
                     color: Look.disabledTextColor
                     wrapMode: Text.Wrap
@@ -786,96 +790,174 @@ Item {
                     LookSliderSkin { control: timeline }
                 }
 
-                LookTransportBar {
-                    id: transport
+                // Beside the list: the neighbours around the bar, the switches after them (the
+                // clickdummy's `.trow`). Elsewhere one below the other.
+                GridLayout {
+                    id: transportRow
 
-                    objectName: "transportBar"
                     Layout.fillWidth: true
                     visible: page.hasVideo
-                    Layout.preferredWidth: 0        // wraps in the column instead of widening it
-                    playing: player.playing
-                    looping: page.looping
-                    speed: player.playbackRate
-                    speedSteps: page.tempi
-                    metronomeVisible: false
-                    countInVisible: false
-                    frameStep: true
-                    positionText: page.timeText2
-                    rewindText: qsTr("Chapter start")
-                    playText: qsTr("Play")
-                    pauseText: qsTr("Pause")
-                    loopText: qsTr("Loop")
-                    speedText: qsTr("Tempo")
-                    frameBackText: qsTr("Frame back")
-                    frameOnText: qsTr("Frame on")
-                    positionName: qsTr("Position")
-                    accessibleName: qsTr("Playback")
-                    onPlayToggled: page.togglePlay()
-                    onLoopToggled: page.looping = !page.looping
-                    onSpeedChangeRequested: speed => player.playbackRate = speed
-                    onRewind: player.position = page.from
-                    onFrameStepRequested: direction => page.step(direction)
-                }
+                    columns: page.paneColumns ? 4 : 1
+                    rowSpacing: controls.spacing
+                    columnSpacing: Kirigami.Units.smallSpacing
 
-                // The player's switches, kept for the next start: sound (always off in slow
-                // motion) and the screen staying on while a video plays.
-                RowLayout {
-                    Layout.fillWidth: true
-                    visible: page.hasVideo
+                    LookToolButton {
+                        objectName: "panePrevious"
+                        visible: page.paneColumns
+                        icon.width: Look.unit(18)
+                        icon.height: Look.unit(18)
+                        enabled: page.index > 0
+                        icon.name: "media-skip-backward"
+                        text: qsTr("Previous")
+                        display: QQC2.AbstractButton.IconOnly
+                        Accessible.name: qsTr("Previous technique")
+                        onClicked: page.go(-1)
+                    }
+                    LookTransportBar {
+                        id: transport
 
-                    LookToggle {
-                        objectName: "soundSwitch"
-                        // On only where it sounds: slow motion is always silent.
-                        readonly property bool sounds: Levels.sound && player.playbackRate >= 1
-                        enabled: player.playbackRate >= 1     // a tap in slow motion would change it unseen
-                        checkable: true
-                        checked: sounds
-                        icon.name: sounds ? "audio-volume-high" : "audio-volume-muted"
-                        text: player.playbackRate < 1 ? qsTr("Silent in slow motion") : qsTr("Sound")
-                        onClicked: {
-                            checked = Qt.binding(() => sounds)
-                            Levels.setSound(Levels.sound ? Levels.Switch.Off : Levels.Switch.On)
+                        objectName: "transportBar"
+                        Layout.fillWidth: true
+                        visible: page.hasVideo
+                        Layout.preferredWidth: 0        // wraps in the column instead of widening it
+                        playing: player.playing
+                        looping: page.looping
+                        speed: player.playbackRate
+                        speedSteps: page.tempi
+                        metronomeVisible: false
+                        countInVisible: false
+                        frameStep: true
+                        positionText: page.timeText2
+                        rewindText: qsTr("Chapter start")
+                        playText: qsTr("Play")
+                        pauseText: qsTr("Pause")
+                        loopText: qsTr("Loop")
+                        speedText: qsTr("Tempo")
+                        frameBackText: qsTr("Frame back")
+                        frameOnText: qsTr("Frame on")
+                        positionName: qsTr("Position")
+                        accessibleName: qsTr("Playback")
+                        onPlayToggled: page.togglePlay()
+                        onLoopToggled: page.looping = !page.looping
+                        onSpeedChangeRequested: speed => player.playbackRate = speed
+                        onRewind: player.position = page.from
+                        onFrameStepRequested: direction => page.step(direction)
+                    }
+
+                    LookToolButton {
+                        objectName: "paneNext"
+                        visible: page.paneColumns
+                        icon.width: Look.unit(18)
+                        icon.height: Look.unit(18)
+                        enabled: page.index < page.playlist.length - 1
+                        icon.name: "media-skip-forward"
+                        text: qsTr("Next")
+                        display: QQC2.AbstractButton.IconOnly
+                        Accessible.name: qsTr("Next technique")
+                        onClicked: page.go(1)
+                    }
+
+                    // The player's switches, kept for the next start: sound (always off in slow
+                    // motion) and the screen staying on while a video plays.
+                    GridLayout {
+                        Layout.fillWidth: !page.paneColumns
+                        visible: page.hasVideo
+                        columns: page.paneColumns ? 1 : 2
+
+                        LookToggle {
+                            objectName: "soundSwitch"
+                            // On only where it sounds: slow motion is always silent.
+                            readonly property bool sounds: Levels.sound && player.playbackRate >= 1
+                            enabled: player.playbackRate >= 1     // a tap in slow motion would change it unseen
+                            checkable: true
+                            checked: sounds
+                            icon.name: sounds ? "audio-volume-high" : "audio-volume-muted"
+                            text: player.playbackRate < 1 ? qsTr("Silent in slow motion") : qsTr("Sound")
+                            onClicked: {
+                                checked = Qt.binding(() => sounds)
+                                Levels.setSound(Levels.sound ? Levels.Switch.Off : Levels.Switch.On)
+                            }
+                        }
+                        LookToggle {
+                            objectName: "awakeSwitch"
+                            checkable: true
+                            checked: Levels.awake
+                            icon.name: "brightness-high"
+                            text: qsTr("Screen on")
+                            onClicked: Levels.setAwake(Levels.awake ? Levels.Switch.Off : Levels.Switch.On)
                         }
                     }
-                    LookToggle {
-                        objectName: "awakeSwitch"
-                        checkable: true
-                        checked: Levels.awake
-                        icon.name: "brightness-high"
-                        text: qsTr("Screen on")
-                        onClicked: Levels.setAwake(Levels.awake ? Levels.Switch.Off : Levels.Switch.On)
-                    }
                 }
 
-                RatingRow {
-                    objectName: "ratingRow"
+                // Beside the list two columns (the clickdummy's `.tbelow`): the technique and how
+                // it sits, then the notes and the comment. Elsewhere one below the other.
+                GridLayout {
                     Layout.fillWidth: true
-                    entry: page.current.id || ""
-                    onRated: {
-                        if (page.training) {
-                            page.nextOpen()
+                    columns: page.paneColumns ? 2 : 1
+                    columnSpacing: Kirigami.Units.largeSpacing
+                    rowSpacing: controls.spacing
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        Layout.alignment: Qt.AlignTop
+                        spacing: Kirigami.Units.smallSpacing
+
+                        LookLabel {
+                            objectName: "paneTitle"
+                            Layout.fillWidth: true
+                            visible: page.paneColumns
+                            text: (page.current.nr ? page.current.nr + " · " : "") + page.titleWithAddition
+                                  + (page.current.jp ? "  " + page.current.jp : "")
+                            font.bold: true
+                            wrapMode: Text.Wrap
+                        }
+                        LookLabel {
+                            objectName: "panePlace"
+                            Layout.fillWidth: true
+                            visible: page.paneColumns && page.placeText !== ""
+                            text: page.placeText
+                            color: Look.disabledTextColor
+                            wrapMode: Text.Wrap
+                        }
+                        RatingRow {
+                            objectName: "ratingRow"
+                            Layout.fillWidth: true
+                            entry: page.current.id || ""
+                            onRated: {
+                                if (page.training) {
+                                    page.nextOpen()
+                                }
+                            }
                         }
                     }
-                }
 
-                // Beside the list on a tablet the sheet does not open: the comment is here.
-                LookButton {
-                    objectName: "commentButton"
-                    visible: page.compact && !!page.current.comment
-                    icon.name: "documentinfo"
-                    text: qsTr("Comment")
-                    onClicked: page.commentRequested(page.current)
-                }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        Layout.alignment: Qt.AlignTop
+                        spacing: controls.spacing
 
-                NoteRow {
-                    Layout.fillWidth: true
-                    entry: page.current
-                    onNotesRequested: page.notesRequested(page.current)
-                    // Above the on-screen keyboard: scroll the field into view when it gets the
-                    // focus and again when the keyboard opens (the window shrinks: adjustResize).
-                    onFieldFocused: field => {
-                        controlsView.focusedField = field
-                        Qt.callLater(controlsView.showFocusedField)
+                        NoteRow {
+                            Layout.fillWidth: true
+                            entry: page.current
+                            onNotesRequested: page.notesRequested(page.current)
+                            // Above the on-screen keyboard: scroll the field into view when it gets the
+                            // focus and again when the keyboard opens (the window shrinks: adjustResize).
+                            onFieldFocused: field => {
+                                controlsView.focusedField = field
+                                Qt.callLater(controlsView.showFocusedField)
+                            }
+                        }
+
+                        // Beside the list on a tablet the sheet does not open: the comment is here.
+                        LookButton {
+                            objectName: "commentButton"
+                            visible: page.compact && !!page.current.comment
+                            icon.name: "documentinfo"
+                            text: qsTr("Comment")
+                            onClicked: page.commentRequested(page.current)
+                        }
                     }
                 }
 
@@ -884,7 +966,7 @@ Item {
                 RowLayout {
                     objectName: "neighbourRow"
                     Layout.fillWidth: true
-                    visible: !page.landscape
+                    visible: !page.landscape && !page.paneColumns
 
                     LookToolButton {
                         enabled: page.index > 0

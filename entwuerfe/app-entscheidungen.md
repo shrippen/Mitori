@@ -86,6 +86,10 @@ Syncthing entfällt als eigener Weg (geht über den Export-Ordner).
   spielt jede gewählte Technik sofort. Sonst behält das Video seinen Zustand (Review, 06.11.2026): Drehen, Fenstergröße,
   Infokarte, anderer Grad, Regal speichern starten kein stehendes Video; nur das Wählen einer Technik startet.
   Beim Verlassen des Vollbilds folgt der Zustand dem Vollbild: dort pausiert bleibt pausiert, dort spielend spielt weiter.
+- **Blatt neben der Liste** (Eigentümer, 06.11.2026: „Tablet nach Vorlage“): Der rechte Bereich zeigt den Player oder das
+  Blatt, das Blatt liegt nicht mehr als Dialog darüber. Eine Zeile ohne Video zeigt ihr Blatt, der Player wartet darunter
+  still an seiner Stelle; ihre Zeile holt ihn zurück, ein anderer Grad lässt ihn stehen. Hochkant gilt das Layout des
+  Telefons; ein offenes Blatt geht beim Drehen mit, und eine Technik mit Video steht danach im Player, ohne zu starten.
 - **Player groß**: bleibt über und unter dem Video genug Platz (ab 120 px, z. B. Tablet 16:10 mit
   Aikido/Daitoryu), stehen Titel oben und Steuerung unten im freien Raum; sonst die Spalte rechts
   (Telefon quer, Shinki Toho 16:9 auf dem Tablet).
