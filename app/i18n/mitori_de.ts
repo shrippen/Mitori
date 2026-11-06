@@ -2183,8 +2183,8 @@
         <location filename="../qml/StartPage.qml" line="92"/>
         <source>%n video bundle(s) can be updated.</source>
         <translation>
-            <numerusform>%n Video-Bundle lässt sich aktualisieren.</numerusform>
-            <numerusform>%n Video-Bundles lassen sich aktualisieren.</numerusform>
+            <numerusform>%n Videopaket lässt sich aktualisieren.</numerusform>
+            <numerusform>%n Videopakete lassen sich aktualisieren.</numerusform>
         </translation>
     </message>
     <message>
