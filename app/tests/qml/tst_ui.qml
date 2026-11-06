@@ -3078,6 +3078,11 @@ TestCase {
         verify(!findChild(page, "gradeStand").visible)
         verify(!allChildren(page).some(c => c.visible && c.titleText !== undefined), "no video hint")
         tryVerify(settled, 3000, "still in place")
+        // Just shown, the card has its implicit width until the layouts' next pass (long lines
+        // measured past the edge with a wide font, as in the CI). What stays past it still fails.
+        for (let i = 0; i < 30 && overflowing(page, window.width).length > 0; i++) {
+            wait(100)
+        }
         compare(overflowing(page, window.width), [])
         shot("3-programme-grade-without-forms")
 
@@ -3156,7 +3161,6 @@ TestCase {
         wait(100)
     }
 
-    // On a phone the row of the last technique lights up on the way back, then no longer.
     // The head settling just before the list goes to a row (back from the player): the row wins.
     // The list went back to its top, about every second run of test_8p_row_lights_up_on_return.
     function test_8p_row_beats_keep_top() {
@@ -3176,6 +3180,7 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // On a phone the row of the last technique lights up on the way back, then no longer.
     function test_8p_row_lights_up_on_return() {
         const width = window.width, height = window.height
         window.width = 400
