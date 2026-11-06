@@ -1,16 +1,23 @@
 #include <QBuffer>
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QImage>
 #include <QProcess>
+#include <QScopeGuard>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTimeZone>
 
 #include "catalog.h"
+#include "coursebook.h"
 #include "courses.h"
 #include "mediastore.h"
 #include "notebookexport.h"
+#include "saveplace.h"
+#include "sharefile.h"
 #include "zipwriter.h"
 
 using namespace Qt::StringLiterals;
@@ -116,6 +123,56 @@ private slots:
         keep.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
         QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(zip)), 1);
         QCOMPARE(courses.errorString(), QString());
+
+        // The sheet's preview says what the file holds, to the byte.
+        const QVariantMap preview = courses.exportPreview(uid);
+        QCOMPARE(preview.value(u"name"_s).toString(), courses.exportName(uid));
+        QCOMPARE(preview.value(u"photos"_s).toInt(), 1);
+        QCOMPARE(preview.value(u"voices"_s).toInt(), 1);
+        QCOMPARE(preview.value(u"missing"_s).toInt(), 1);
+        QCOMPARE(preview.value(u"bytes"_s).toLongLong(), QFileInfo(zip).size());
+        QVERIFY(!preview.value(u"size"_s).toString().isEmpty());
+        QVERIFY(preview.value(u"text"_s).toString().contains(u"](bilder/02-foto.jpg)"_s));
+        QVERIFY(courses.exportPreview(u"no such notebook"_s).isEmpty());
+
+        // The copy to share: one file, the last one, the same archive; the desktop has no dialog.
+        int lostFiles = -1;
+        const QString first = courses.shareCopy(uid, &lostFiles);
+        QCOMPARE(lostFiles, 1);
+        QCOMPARE(QFileInfo(first).fileName(), courses.exportName(uid));
+        QVERIFY(first.startsWith(ShareFile::folder() + u'/'));
+        QCOMPARE(QFileInfo(first).size(), QFileInfo(zip).size());
+        const QString other = courses.create(u"Zweiter"_s, u"2026-08-01"_s, {}, {}, {});
+        const QString second = courses.shareCopy(other);
+        QVERIFY(!QFile::exists(first));
+        QVERIFY(QFile::exists(second));
+
+        // Deleted, its copy goes with it: text, photos and voice notes it held.
+        QVERIFY(courses.remove(other));
+        QVERIFY2(!QFile::exists(second), qPrintable(second));
+
+        // Another notebook of the same file name: its deletion leaves this copy alone.
+        const QString twinA = courses.create(u"Sommer: Mainz"_s, u"2026-07-04"_s, {}, {}, {});
+        const QString twinB = courses.create(u"Sommer/Mainz"_s, u"2026-07-04"_s, {}, {}, {});
+        QCOMPARE(courses.exportName(twinA), courses.exportName(twinB));
+        const QString twinCopy = courses.shareCopy(twinA);
+        QVERIFY(courses.remove(twinB));
+        QVERIFY2(QFile::exists(twinCopy), qPrintable(twinCopy));
+
+        // Deleted elsewhere: a sync takes it out of the database, then the notebooks are shown anew.
+        {
+            CourseBook book;
+            QVERIFY(book.open(m_dir.filePath(u"c.sqlite"_s)));
+            QVERIFY(book.deleteCourse(twinA, QDateTime::currentDateTimeUtc()));
+        }
+        courses.refresh();
+        QVERIFY2(!QFile::exists(twinCopy), qPrintable(twinCopy));
+        QVERIFY(courses.shareCopy(u"no such notebook"_s).isEmpty());
+        QVERIFY(!courses.canShare());
+        QCOMPARE(courses.shareNotebook(uid), -1);
+        QVERIFY(!courses.errorString().isEmpty());
+        QVERIFY(QDir(ShareFile::folder()).removeRecursively());
+
         const QString back = readBack(zip);
         QVERIFY2(!back.startsWith(u"failed"_s), qPrintable(back));
         const QStringList parts = back.split(u"---\n"_s);
@@ -134,6 +191,100 @@ private slots:
         QVERIFY(md.contains(u"verloren"_s));
         QVERIFY(!md.contains(u"04-"_s));                // the lost file is not linked
         QVERIFY(md.contains(u"verloren  \n(Voice note not on the device)"_s));
+    }
+
+    // The question before replacing: only a file, and the one the export would write. A folder
+    // ("~/") is no file to replace; a name without its suffix means the name with it.
+    void saveTarget()
+    {
+        SavePlace place;
+        if (!place.asksItself()) {
+            QSKIP("the portal's dialog asks in the Flatpak");
+        }
+        QVERIFY(QDir(m_dir.path()).mkdir(u"ordner"_s));
+        const QUrl folder = QUrl::fromLocalFile(m_dir.path());
+        QVERIFY(!place.taken(QUrl::fromLocalFile(m_dir.filePath(u"ordner"_s))));
+        QVERIFY(!place.taken(QUrl::fromLocalFile(m_dir.filePath(u"ordner/"_s))));
+
+        QFile old(m_dir.filePath(u"sicherung.alt.zip"_s));
+        QVERIFY(old.open(QIODevice::WriteOnly));
+        old.close();
+        const QUrl typed = QUrl::fromLocalFile(m_dir.filePath(u"sicherung.alt"_s));
+        QCOMPARE(place.resolve(typed, folder), QUrl::fromLocalFile(old.fileName()));
+        QVERIFY(place.taken(place.resolve(typed, folder)));
+    }
+
+    // Round 2: in the Flatpak the portal hands out the granted file. Another name would be written
+    // as a hidden file while the app reports success, so the path stays as it came.
+    void portalPathStays()
+    {
+        const QByteArray before = qgetenv("FLATPAK_ID");
+        qputenv("FLATPAK_ID", "io.github.shrippen.Mitori");
+        const auto restore = qScopeGuard([&] {
+            if (before.isEmpty()) {
+                qunsetenv("FLATPAK_ID");
+            } else {
+                qputenv("FLATPAK_ID", before);
+            }
+        });
+
+        SavePlace place;
+        QVERIFY(!place.asksItself());
+        const QUrl folder = QUrl::fromLocalFile(u"/run/user/1000/doc/ab12"_s);
+        const QUrl granted = QUrl::fromLocalFile(u"/run/user/1000/doc/ab12/y.alt"_s);
+        QCOMPARE(place.resolve(granted, folder), granted);
+
+        // The export writes that very file.
+        Catalog catalog;
+        Courses courses(m_dir.filePath(u"portal.sqlite"_s), QUrl::fromLocalFile(m_dir.filePath(u"none.ics"_s)),
+                        m_dir.filePath(u"cache-portal.ics"_s), catalog);
+        const QString uid = courses.create(u"Portal"_s, u"2026-07-04"_s, {}, {}, {});
+        const QUrl here = QUrl::fromLocalFile(m_dir.filePath(u"y.alt"_s));
+        const QUrl target = place.resolve(here, QUrl::fromLocalFile(m_dir.path()));
+        QCOMPARE(courses.exportNotebook(uid, target), 0);
+        QVERIFY(QFile::exists(here.toLocalFile()));
+        QVERIFY(!QFile::exists(here.toLocalFile() + u".zip"_s));
+    }
+
+    // An entry's techniques stand with it, by name; one no longer in the programme says so.
+    void namesTechniques()
+    {
+        CourseBook::Course c;
+        c.title = u"Sommer"_s;
+        c.first = c.last = QDate(2026, 7, 4);
+        CourseBook::Entry plain;
+        plain.text = u"ohne"_s;
+        plain.created = QDateTime(QDate(2026, 7, 4), QTime(10, 0), QTimeZone::UTC);
+        CourseBook::Entry tagged = plain;
+        tagged.text = u"mit"_s;
+        tagged.techniques = QStringList{u"Ikkyo · Aikido 5. Kyu"_s, u"Nikyo"_s};
+        const QString md = QString::fromUtf8(NotebookExport::markdown(c, {plain, tagged}, {}));
+        QVERIFY2(md.contains(u"mit  \n⌗ Ikkyo · Aikido 5. Kyu, Nikyo\n"_s), qPrintable(md));
+        QCOMPARE(md.count(u"⌗"_s), 1);
+
+        // From the service, with the programme's names.
+        if (QStandardPaths::findExecutable(u"python3"_s).isEmpty()) {
+            QSKIP("python3 reads the archive back");
+        }
+        Catalog catalog;
+        QVERIFY2(catalog.load(QStringLiteral(MITORI_DATEN_JSON)), qPrintable(catalog.errorString()));
+        Courses courses(m_dir.filePath(u"names.sqlite"_s), QUrl::fromLocalFile(m_dir.filePath(u"none.ics"_s)),
+                        m_dir.filePath(u"names-cache.ics"_s), catalog);
+        const QString uid = courses.create(u"Namen"_s, u"2026-07-04"_s, {}, {}, {});
+        QVERIFY(courses.addEntry(uid, u"Form"_s));
+        const QString entry = courses.entries(uid).first().toMap().value(u"uid"_s).toString();
+        QVERIFY(courses.linkTechnique(entry, u"shinkitoho/odachi/5"_s));
+        QVERIFY(courses.linkTechnique(entry, u"gibt/es/nicht"_s));
+        const QString zip = m_dir.filePath(courses.exportName(uid));
+        QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(zip)), 0);
+        const QString back = readBack(zip);
+        QVERIFY2(back.contains(u"⌗ 5 · Gohon-me · Tsukikomi Seigan-yaburi"_s), qPrintable(back));
+        QVERIFY2(back.contains(u"Technique no longer in the programme"_s), qPrintable(back));
+        QVERIFY(!back.contains(u"gibt/es/nicht"_s));
+
+        // The sheet's preview says the same as the file.
+        const QString preview = courses.exportPreview(uid).value(u"text"_s).toString();
+        QVERIFY2(preview.contains(u"⌗ 5 · Gohon-me · Tsukikomi Seigan-yaburi"_s), qPrintable(preview));
     }
 
     // Characters a URL or a file system takes for something else stay out of the name.

@@ -19,7 +19,9 @@ ColumnLayout {
     readonly property bool hasComment: !!entry.comment
     readonly property var steps: entry.steps || []
     readonly property var lastNote: Practice.notesRevision >= 0 && entry.id ? Practice.lastNote(entry.id) : ({})
-    readonly property int noteCount: Practice.notesRevision >= 0 && entry.id ? Practice.notes(entry.id).length : 0
+    // Its notes and the course entries linked to it: the notes page shows both.
+    readonly property int noteCount: Practice.notesRevision >= 0 && Courses.revision >= 0 && entry.id
+                                     ? Practice.notes(entry.id).length + Courses.linkedEntries(entry.id).length : 0
     // The form's number before the name, as in the list ("3 · Kote-gaeshi").
     readonly property string title: (entry.nr ? entry.nr + " · " : "") + (entry.title || "")
     // The sheet from the bottom: its head (grip, ✕) stands in here instead of Kirigami's.

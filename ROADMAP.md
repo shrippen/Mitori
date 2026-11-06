@@ -70,8 +70,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   über den Kalender-Intent, sonst als ICS-Datei an die Kalender-App), „Ausschreibung“ (aus der Zeile
   „Ausschreibung: URL“), Einträge nach Tagen (lang drücken: ändern, löschen), Notizbuch löschen. Gespeichert in
   `lehrgaenge.sqlite` (`store/coursebook`, eigenes Schema), jede Zeile mit Zeit und Gerät für den Abgleich.
-  Die Einträge stehen auch in „Alle Notizen“ (Filter „Lehrgänge“). „Exportieren“: das Notizbuch als ZIP
-  (`notizbuch.md` nach Tagen, `bilder/`, `audio/`; `store/zipwriter`, `store/notebookexport`) in eine gewählte Datei.
+  Die Einträge stehen auch in „Alle Notizen“ (Filter „Lehrgänge“). „Exportieren“: ein Blatt zeigt, was hinausgeht (`ExportSheet`);
+  das Notizbuch als ZIP (`notizbuch.md` nach Tagen, `bilder/`, `audio/`; `store/zipwriter`, `store/notebookexport`) teilen (Android) oder in eine gewählte Datei.
 - Schritt 4: Fotos und Sprachnotizen an Notizen einer Technik und an Lehrgangseinträgen: Foto mit der Kamera
   (`CameraPage`) oder aus einer Datei, Sprachnotiz (AAC in MP4) direkt in der Eingabezeile; Anzeige in Notizen,
   Notizbuch und „Alle Notizen“, Sprachnotiz zum Abspielen. Dateien in `medien/` (`store/mediastore`, Fotos höchstens
@@ -173,8 +173,8 @@ Reihenfolge der Kacheln. Offen, nach Gewicht:
 - **Training**: Playliste auf dem Tablet links neben dem Player (Telefon: darunter, erledigt).
 - **Player**: Knopf ⤢ ins Querformat; Titelzeile mit Kanji (Angriff · Zusatz · Grad · i / n steht hochkant schon,
   quer fehlt sie im Bild); quer die schmale Spalte nach Entwurf B, Zeitleiste im Bild.
-- **Lehrgangsnotizbuch**: ⌗-Verknüpfung (Angriff, Technik, Waffe mit Vorschlägen; Chips, „↗ im Programm“, die
-  Notiz auch bei der Technik und in deren Notizen).
+- **Lehrgangsnotizbuch**: ⌗ verbindet Einträge mit Techniken (erledigt, #91). Noch offen aus der Vorlage: Angriff und
+  Waffe als eigene Verknüpfung und „↗ im Programm“ (der Chip führt bisher zu den Notizen der Technik, nicht ins Programm).
 - **Einstellungen** als drei Unterseiten (Videos, Sicherung, Darstellung); Darstellung ist schon eine eigene Seite.
 - **Startmenü**: Programm-Kachel mit Stand („Aikido · 5. Kyu · 7 von 20 prüfungsreif“ und Leiste, Kurzname);
   Telefon groß + zwei Spalten statt einer; Tablet die große Kachel 2 × 2; Begrüßung; Heute mit Sparte; Bundle-
@@ -204,8 +204,8 @@ Sicherung ohne Endung, konto.ini 600, Alle Notizen und Alle Jahre schneller.
 Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
 - Telefon bei doppelter Anzeigegröße (206 px): Test `test_8o` auf diese Breite ausweiten; Segmente, lange Knöpfe,
   Bewertung und Steuerzeilen des Players brauchen eine schmale Form.
-- Lehrgangsnotizen mit Technik verbinden (⌗, Eintrag auch bei der Technik), QR-Code, Tablet nach Vorlage (Blatt
-  rechts: erledigt; offen: zwei Spalten, Lehrgänge und Einstellungen als Liste und Seite), Export als Blatt.
+- QR-Code, Tablet nach Vorlage (Blatt
+  rechts: erledigt; offen: zwei Spalten, Lehrgänge und Einstellungen als Liste und Seite).
 - Programmdaten auf Englisch.
 - Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).
 
@@ -213,7 +213,7 @@ Offen, klein:
 - Treffer in Kommentaren und Lehrgangsnotizen, Heute merkt die Sparte, Kurzname auf der Programm-Kachel,
   Kommentar mit Gruppe und Kanji.
 - Barrierefreiheit: Kontrast der leeren Bewertungskästchen 1,36:1, Fortschrittsspur 1,07:1, Fokusring 2,05:1;
-  Fokus nach Dialogen und Zurück, Tastaturweg zum Player (29 Tabs), Ursache für den eingetippten Exportpfad.
+  Fokus nach Dialogen und Zurück, Tastaturweg zum Player (29 Tabs).
 - Daten: „Ago: Kin“ (Lexikon, vermutlich „Kinn“), Glossar Kiri-otoshi ohne Übersetzung, „Kote“ ohne Kanji.
 
 

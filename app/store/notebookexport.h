@@ -14,9 +14,20 @@ class QIODevice;
 //                                ## Samstag, 6. Juni 2026
 //                                **15:30** Fußstellung beim Tenkan
 //                                ![Foto](bilder/01-foto.jpg)
+//                                ⌗ Shiho-nage · Katate-dori · Aikido 5. Kyu
 //   bilder/01-foto.jpg
 //   audio/02-sprachnotiz.m4a
 namespace NotebookExport {
+
+// What the archive would hold, without writing it (the export sheet's preview).
+struct Summary {
+    QByteArray text;        // notizbuch.md
+    int photos = 0;
+    int voices = 0;
+    int missing = 0;        // media files not on the device
+    qint64 bytes = 0;       // the archive's size
+};
+Summary summary(const CourseBook::Course &course, const QList<CourseBook::Entry> &entries, const MediaStore &media);
 
 // Writes the archive; false when a file could not be written. A missing media file is left
 // out (the entry keeps its text) and counted in `missing`.

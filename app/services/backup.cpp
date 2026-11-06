@@ -81,12 +81,9 @@ bool Backup::save(const QUrl &target)
         }
     }
 
-    // A local file, or a content:// URL from Android's file picker (QFile opens both there). A
-    // local name gets its suffix: the open dialog's filter would never show it again.
-    QString path = target.isLocalFile() ? target.toLocalFile() : target.toString();
-    if (target.isLocalFile() && !path.endsWith(QLatin1String(".zip"), Qt::CaseInsensitive)) {
-        path += QLatin1String(".zip");
-    }
+    // A local file, or a content:// URL from Android's file picker (QFile opens both there). The
+    // suffix comes from SavePlace, with the dialog that needs it; this is the file to write.
+    const QString path = target.isLocalFile() ? target.toLocalFile() : target.toString();
     m_savedTo = target.isLocalFile() ? path : QString();
     QFile file(path);
     bool opened = false;
@@ -234,6 +231,7 @@ bool Backup::merge(Step step, QVariantMap *summary)
                 {QStringLiteral("entries"), counts(fromBook, QStringLiteral("entries"))},
                 {QStringLiteral("grades"), counts(fromBook, QStringLiteral("grades"))},
                 {QStringLiteral("starts"), counts(fromBook, QStringLiteral("starts"))},
+                {QStringLiteral("links"), counts(fromBook, QStringLiteral("entry_tags"))},
                 {QStringLiteral("media"), media}};
     return setError({});
 }

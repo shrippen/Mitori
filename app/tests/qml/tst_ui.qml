@@ -695,6 +695,13 @@ TestCase {
         const page = push("SettingsPage")
         const url = "file://" + uiShotsDir + "/sicherung-test.zip"
         verify(Backup.save(url), Backup.errorString)
+
+        // The built-in dialog's answer without a suffix: the backup gets it.
+        const bare = "sicherung-bare-" + Date.now()
+        findChild(page, "saveBackupDialog").take("file://" + uiShotsDir + "/" + bare)
+        tryVerify(() => findChild(page, "backupDone").visible)
+        verify(findChild(page, "backupDone").text.indexOf(bare + ".zip") > 0, findChild(page, "backupDone").text)
+
         page.inspect(url)
         const dialog = findChild(page, "mergeBackup")
         tryVerify(() => dialog.opened)
@@ -4123,6 +4130,252 @@ TestCase {
         verify(Courses.remove(course))
     }
 
+    // The export sheet (owner, 6 Nov 2026): what goes out, the actions; at 360 px nothing past the
+    // edge, not with a long name or a long word in the text. The desktop has no share dialog.
+    function test_8e_export_sheet() {
+        const w = window.width
+        window.width = 360
+        wait(100)
+        const course = Courses.create("Sommerlehrgang mit einem sehr langen Namen, der umbrechen muss", "2026-05-01", "", "", "")
+        verify(Courses.addEntry(course, "<b>Tenkan</b> https://example.org/" + "x".repeat(120)))
+        verify(Courses.addEntry(course, "Tafel", Media.importPhoto("file://" + testMediaDir + "/foto.png")))
+        const book = push("CoursePage", { uid: course })
+        book.actions.find(a => a.objectName === "exportCourse").trigger()
+        const sheet = findChild(book, "exportSheet")
+        tryVerify(() => sheet.opened)
+
+        compare(findChild(sheet, "exportFile").text, Courses.exportName(course))
+        const counts = findChild(sheet, "exportCounts").text
+        verify(counts.indexOf("1 photo") === 0 && counts.indexOf("0 voice note") > 0, counts)
+        verify(/\d (bytes|kB|MB)/.test(counts), counts)
+        verify(!findChild(sheet, "exportMissing").visible)
+
+        // Markup in a note stays text: the file holds it so.
+        const text = findChild(sheet, "exportText")
+        compare(text.textFormat, Text.PlainText)
+        verify(text.text.indexOf("<b>Tenkan</b>") > 0, text.text)
+        verify(text.text.indexOf("](bilder/02-foto.jpg)") > 0, text.text)
+
+        verify(!findChild(sheet, "exportShare").visible, "no share dialog on the desktop")
+        verify(findChild(sheet, "exportSave").visible)
+        wait(200)
+        compare(overflowing(sheet.contentItem, 360), [])
+        verify(sheet.width <= sheet.parent.width + 0.5, "the sheet is " + sheet.width)
+        shot("14e-export-sheet", true)
+
+        // With a share dialog (Android) both buttons fit.
+        sheet.shareable = true
+        wait(100)
+        verify(findChild(sheet, "exportShare").visible)
+        compare(overflowing(sheet.contentItem, 360), [])
+        shot("14f-export-sheet-share", true)
+        sheet.shareable = Qt.binding(() => Courses.canShare)
+
+        // Save: the sheet goes, the file dialog comes.
+        mouseClick(findChild(sheet, "exportSave"))
+        tryVerify(() => !sheet.visible)
+        const dialog = findChild(book, "exportDialog")
+        // Only for Qt's own dialog: it would rename a portal's answer "…/doc/ab12/y" to "y.zip".
+        compare(dialog.defaultSuffix, SavePlace.asksItself ? "zip" : "")
+        tryVerify(() => dialog.visible)
+        dialog.close()
+        tryVerify(() => !dialog.visible)
+
+        // The dialog's answer reaches the export (in the test's folder, not the real Documents).
+        const accepted = "export-accepted-" + Date.now() + ".zip"
+        dialog.currentFolder = "file://" + uiShotsDir
+        dialog.ask(accepted)
+        tryVerify(() => dialog.visible)
+        dialog.accept()
+        tryVerify(() => findChild(book, "exportedTo").visible)
+        verify(findChild(book, "exportedTo").text.indexOf(uiShotsDir + "/" + accepted) > 0, findChild(book, "exportedTo").text)
+        book.exported = ""
+
+        // No suffix typed: the file gets it, whatever Qt did (it adds none with a dot in the path).
+        const bare = "export-bare-" + Date.now()
+        dialog.take(dialog.currentFolder + "/" + bare)
+        tryVerify(() => findChild(book, "exportedTo").visible)
+        verify(findChild(book, "exportedTo").text.indexOf(uiShotsDir + "/" + bare + ".zip") > 0, findChild(book, "exportedTo").text)
+        book.exported = ""
+
+        // A typed path goes where it says, and what is there is not replaced unasked.
+        const target = uiShotsDir + "/export-typed-" + Date.now() + ".zip"
+        dialog.take(dialog.currentFolder + "/" + target)
+        tryVerify(() => findChild(book, "exportedTo").visible)
+        verify(findChild(book, "exportedTo").text.indexOf(target) > 0, findChild(book, "exportedTo").text)
+        book.exported = ""
+        dialog.take("file://" + target)
+        const replace = findChild(dialog, "replaceFile")
+        tryVerify(() => replace.opened)
+        verify(!findChild(book, "exportedTo").visible, "not before the answer")
+        replace.accept()
+        tryVerify(() => findChild(book, "exportedTo").visible)
+
+        // Qt's dialog was a window of its own; offscreen nothing hands the focus back to this one.
+        window.requestActivate()
+        tryVerify(() => window.active)
+
+        window.pageStack.pop()
+        verify(Courses.remove(course))
+        window.width = w
+        wait(100)
+    }
+
+    // ⌗: an entry linked to a technique by choice, shown in its notes, back to the entry; a deleted
+    // entry or notebook leaves the notes.
+    function test_8f_note_techniques() {
+        const course = Courses.create("Technik-Lehrgang", "2026-05-01", "2026-05-02", "", "")
+        for (let i = 0; i < 40; ++i) {
+            verify(Courses.addEntry(course, "Füllzeile " + i))
+        }
+        verify(Courses.addEntry(course, "Heute Ô-dachi 5 und Shiho-nage aus Katate-dori"))
+        const entries = Courses.entries(course)
+        const entry = entries[entries.length - 1]
+        compare(entry.techniques.length, 0, "a text naming a technique links nothing by itself")
+
+        const book = push("CoursePage", { uid: course })
+        const buttons = findChildren(book, "linkTechnique")
+        compare(buttons.length, entries.length)
+        verify(buttons[buttons.length - 1].Accessible.name !== "")
+        buttons[buttons.length - 1].clicked()
+        tryVerify(() => window.pageStack.currentItem.objectName === "techniquePicker")
+        const picker = window.pageStack.currentItem
+
+        // Suggestions from the text; the search finds others; a tap links.
+        const first = () => findChildren(picker, "techniqueChoice")
+        tryVerify(() => first().length > 2)
+        verify(first().some(r => r.text.indexOf("Gohon-me") === 0), first().map(r => r.text).join())
+        const shiho = first().find(r => r.text.indexOf("Shiho-nage") === 0)
+        verify(/katate-dori/i.test(shiho.subtitle.split(" · ")[0]), "the attack named comes first: " + shiho.subtitle)
+        const shihoId = shiho.modelData.id
+        wait(800)       // the page has moved in
+        shot("14e-technique-picker")
+        mouseClick(shiho)
+        tryCompare(picker, "linked", [shihoId])
+        tryVerify(() => findChildren(picker, "linkedTechnique").length === 1)
+        verify(!first().some(r => r.modelData.id === shihoId))
+
+        const field = findChild(picker, "pickerSearch")
+        field.text = "Ikkajo kime"
+        tryVerify(() => picker.foundShown.length > 0)
+        tryVerify(() => first().some(r => r.text === "Ikkajô-kime-osae"))
+        field.text = "gibtesnicht"
+        tryVerify(() => findChild(picker, "pickerNotFound").visible)
+        field.text = ""
+
+        // Unlink and link again, then back to the notebook: a chip.
+        findChildren(picker, "linkedTechnique")[0].clicked()
+        tryVerify(() => picker.linked.length === 0)
+        verify(Courses.linkTechnique(entry.uid, shihoId))
+        window.pageStack.pop()
+        tryVerify(() => findChildren(book, "entryTechnique").length === 1)
+        verify(findChildren(book, "entryTechnique")[0].text.indexOf("Shiho-nage") > 0)
+        verify(findChildren(book, "entryTechnique")[0].Accessible.name.indexOf("Shiho-nage") > 0)
+        book.flickable.contentY = book.flickable.contentHeight - book.flickable.height
+        wait(800)
+        shot("14f-entry-technique-chip")
+
+        // The chip opens the technique's notes; there the entry, course and day; a tap goes to it.
+        findChildren(book, "entryTechnique")[0].clicked()
+        tryVerify(() => window.pageStack.currentItem !== book && window.pageStack.currentItem.courseNotes !== undefined)
+        const notes = window.pageStack.currentItem
+        compare(notes.entry.id, shihoId)
+        verify(findChild(notes, "fromCourses").visible)
+        const row = findChild(notes, "courseNote")
+        verify(row)
+        compare(row.Accessible.name, entry.text)
+        verify(row.Accessible.description.indexOf("Technik-Lehrgang") === 0, row.Accessible.description)
+        shot("14g-notes-from-course")
+        mouseClick(row)
+        tryVerify(() => window.pageStack.currentItem !== notes && window.pageStack.currentItem.uid === course)
+        const opened = window.pageStack.currentItem
+        const target = findChildren(opened, "courseEntry").find(l => l.modelData.uid === entry.uid)
+        tryVerify(() => target.activeFocus, 3000, "the entry has the focus")
+        const view = opened.flickable
+        const y = target.mapToItem(view.contentItem, 0, 0).y
+        verify(view.contentY > 0, "scrolled down")
+        verify(y >= view.contentY && y + target.height <= view.contentY + view.height, "in view")
+        window.pageStack.pop()
+
+        // Deleted entry, then course: gone from the notes.
+        tryVerify(() => window.pageStack.currentItem === notes)
+        const page = notes
+        verify(Courses.addEntry(course, "noch eine"))
+        const more = Courses.entries(course)
+        const other = more[more.length - 1]
+        verify(Courses.linkTechnique(other.uid, shihoId))
+        tryCompare(page.courseNotes, "length", 2)
+        verify(Courses.deleteEntry(other.uid))
+        tryCompare(page.courseNotes, "length", 1)
+        verify(Courses.remove(course))
+        tryCompare(page.courseNotes, "length", 0)
+        verify(!findChild(page, "fromCourses").visible)
+        window.pageStack.pop()
+    }
+
+    // Deleting a notebook opened twice (through a technique's notes): no page of it stays behind.
+    function test_8f_note_techniques_gone() {
+        const course = Courses.create("Zweimal offen", "2026-05-01", "", "", "")
+        verify(Courses.addEntry(course, "Ikkyo"))
+        const entry = Courses.entries(course)[0]
+        const technique = Programme.search("Ikkyo", 1)[0]
+        verify(Courses.linkTechnique(entry.uid, technique.id))
+        const depth = window.pageStack.depth
+
+        const first = push("CoursePage", { uid: course })
+        const notes = push("NotesPage", { entry: technique })
+        const second = push("CoursePage", { uid: course, entryUid: entry.uid })
+        wait(500)       // Kirigami slides the page in
+        compare(window.pageStack.depth, depth + 3)
+        const remove = findChild(second, "removeCourse")
+        remove.open()
+        tryVerify(() => remove.opened)
+        remove.accept()
+        tryCompare(window.pageStack, "depth", depth + 1)
+        verify(window.pageStack.currentItem === notes)
+        compare(notes.courseNotes.length, 0)
+        window.pageStack.pop()
+        compare(window.pageStack.depth, depth)
+        verify(window.pageStack.currentItem.uid === undefined, "no dead page")
+    }
+
+    // Linked techniques do not use up the suggestions: the list fills up, and "no other technique"
+    // is said only when none is left.
+    function test_8f_note_techniques_fill() {
+        const course = Courses.create("Zehn Namen", "2026-05-01", "", "", "")
+        verify(Courses.addEntry(course, "Ikkyo, Nikyo, Sankyo, Yonkyo, Gokyo, Shiho-nage, Irimi-nage, Kote-gaeshi, Kaiten-nage, Tenchi-nage"))
+        const entry = Courses.entries(course)[0]
+        const picker = push("TechniquePickerPage", { course: course, entryUid: entry.uid })
+        compare(picker.named.length, 8)
+        for (const t of picker.named) {
+            verify(Courses.linkTechnique(entry.uid, t.id))
+        }
+        tryCompare(picker.linked, "length", 8)
+        tryVerify(() => picker.named.length > 0, 2000, "more are named")
+        verify(!findChild(picker, "pickerNoneNamed").visible)
+
+        // A search that only finds a linked one did find it.
+        verify(Courses.linkTechnique(entry.uid, "shinkitoho/odachi/5"))
+        const field = findChild(picker, "pickerSearch")
+        field.text = "Gohon-me"
+        tryVerify(() => picker.found.length === 1)
+        compare(picker.foundShown.length, 0)
+        verify(!findChild(picker, "pickerNotFound").visible, "it stands under Linked")
+        field.text = ""
+        window.pageStack.pop()
+
+        // The technique's sheet counts the linked entries with its notes.
+        const component = Qt.createComponent("Mitori", "TechniqueSheet")
+        verify(component.status === Component.Ready, component.errorString())
+        const technique = Programme.entry(Courses.entries(course)[0].techniques[0])
+        const sheet = component.createObject(window.pageStack.currentItem, { entry: technique })
+        const before = Practice.notes(sheet.entry.id).length
+        compare(sheet.noteCount, before + 1)
+        verify(findChild(sheet.contentItem, "sheetNotesButton").text.indexOf("(" + (before + 1) + ")") > 0)
+        sheet.destroy()
+        verify(Courses.remove(course))
+    }
+
     // Found by the QA round of 5 Nov 2026 (qa/PERSONAS.md).
     // What the data knows and the screen left out: Zanshin, open questions, proposals, a grade's
     // meaning and waiting time, the Suburi texts (QA round P5; the booklet p. 44 f.).
@@ -4509,6 +4762,7 @@ TestCase {
                                      ["ExamEndPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["TrainingEndPage", { count: 12 }],
                                      ["NotesPage", { entry: rows[0] }], ["WelcomePage", {}],
+                                     ["TechniquePickerPage", { course: "none", entryUid: "none" }],
                                      ["PlayerPage", { playlist: rows, index: 0 }]]) {
             const page = push(file, props)
             look(file, page)
