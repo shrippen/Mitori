@@ -78,6 +78,9 @@ private slots:
 
         QSettings().setValue(QStringLiteral("look/style"), int(Appearance::Style::Material));
         QCOMPARE(Appearance::startStyle(paths), Appearance::Style::Leinen);
+        // The style that really starts is the chosen one: its tile is marked.
+        QCOMPARE(Appearance().style(), Appearance::Style::Leinen);
+        QCOMPARE(QSettings().value(QStringLiteral("look/style")).toInt(), int(Appearance::Style::Material));
         qunsetenv("KDE_FULL_SESSION");
         QCOMPARE(Appearance::startStyle({}), Appearance::Style::Material);
     }

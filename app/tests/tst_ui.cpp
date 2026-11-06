@@ -7,6 +7,7 @@
 #include <QGuiApplication>
 #include <QPointer>
 #include <QJsonDocument>
+#include <QLibraryInfo>
 #include <QJsonObject>
 #include <QUrl>
 #include <QQmlContext>
@@ -40,6 +41,12 @@ public:
             (void)m_german.load(QStringLiteral(":/i18n/mitori_de"));
         }
         return m_german.translate(context.toUtf8().constData(), source.toUtf8().constData());
+    }
+
+    // Qt's own German catalog is installed (not everywhere: tst_look only checks it then).
+    Q_INVOKABLE bool qtCatalogThere() const
+    {
+        return QFile::exists(QLibraryInfo::path(QLibraryInfo::TranslationsPath) + QStringLiteral("/qt_de.qm"));
     }
 
     // The windows of the run (tst_look: a change of style leaves one for the app).

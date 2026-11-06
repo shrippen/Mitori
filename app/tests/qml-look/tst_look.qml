@@ -264,6 +264,10 @@ TestCase {
         compare(Qt.locale().name.substring(0, 2), "de")
         compare(Number(1.5).toLocaleString(Qt.locale(), "f", 1), "1,5")
         compare(new Date(2026, 0, 2).toLocaleDateString(Qt.locale(), "MMMM"), "Januar")
+        // Qt's own words (a dialog's Cancel) follow, where Qt's catalog is installed.
+        if (uiCatalog.qtCatalogThere()) {
+            compare(qsTranslate("QPlatformTheme", "Cancel"), "Abbrechen")
+        }
         standingPreviews(page)
         shot("look-de-" + startName)
 
@@ -276,6 +280,7 @@ TestCase {
         compare(Qt.locale().name.substring(0, 2), "en")
         compare(Number(1.5).toLocaleString(Qt.locale(), "f", 1), "1.5")
         compare(new Date(2026, 0, 2).toLocaleDateString(Qt.locale(), "MMMM"), "January")
+        compare(qsTranslate("QPlatformTheme", "Cancel"), "Cancel")
         notes.destroy()
     }
 

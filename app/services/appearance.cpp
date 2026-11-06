@@ -7,6 +7,7 @@
 #include <QDirIterator>
 #include <QFontDatabase>
 #include <QGuiApplication>
+#include <QLibraryInfo>
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQmlFileSelector>
@@ -58,17 +59,33 @@ bool loadCatalog(QTranslator &catalog, Appearance::Language language)
     return catalog.load(locale, QStringLiteral("mitori"), QStringLiteral("_"), QStringLiteral(":/i18n"));
 }
 
-// The one catalog the app runs with; the locale, so that dates and numbers follow.
+// Qt's own catalog (a dialog's Cancel), where it is installed; the AppImage has none.
+bool loadQtCatalog(QTranslator &catalog)
+{
+    return catalog.load(QLocale(), QStringLiteral("qt"), QStringLiteral("_"), QLibraryInfo::path(QLibraryInfo::TranslationsPath));
+}
+
+// The catalogs the app runs with, Qt's and its own (asked first: installed last); the locale, so
+// that dates and numbers follow.
 void applyLanguage(Appearance::Language language)
 {
+    static QTranslator *runningQt = nullptr;
     static QTranslator *running = nullptr;
-    if (running) {
-        QCoreApplication::removeTranslator(running);
-        delete running;
+    for (QTranslator *old : {running, runningQt}) {
+        if (old) {
+            QCoreApplication::removeTranslator(old);
+            delete old;
+        }
     }
-    running = new QTranslator(QCoreApplication::instance());
+
     const QString name = Appearance::localeName(language);
     QLocale::setDefault(name.isEmpty() ? QLocale::system() : QLocale(name));
+
+    runningQt = new QTranslator(QCoreApplication::instance());
+    if (loadQtCatalog(*runningQt)) {
+        QCoreApplication::installTranslator(runningQt);
+    }
+    running = new QTranslator(QCoreApplication::instance());
     if (loadCatalog(*running, language)) {
         QCoreApplication::installTranslator(running);
     }
@@ -98,6 +115,9 @@ Appearance::Appearance(QObject *parent)
     , m_language(savedLanguage())
     , m_welcomed(QSettings().value(QLatin1String(kWelcomedKey), false).toBool())
 {
+    // A saved style this device does not offer starts as the default (startStyle): that is the
+    // choice shown. The saved one stays for a session that offers it.
+    m_style = m_running;
 }
 
 Appearance::~Appearance()
