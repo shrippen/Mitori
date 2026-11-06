@@ -4,7 +4,9 @@
 #include "practice.h"
 #include "programme.h"
 
+#include <QCoreApplication>
 #include <QDateTime>
+#include <QEvent>
 
 namespace {
 
@@ -27,6 +29,24 @@ void AllNotes::setPractice(Practice *practice)
     }
     emit sourcesChanged();
     rebuild();
+}
+
+AllNotes::AllNotes(QObject *parent)
+    : KeyedListModel(parent)
+{
+    // A new catalog (Appearance::setLanguage): a row's texts are read anew.
+    if (auto *app = QCoreApplication::instance()) {
+        app->installEventFilter(this);
+    }
+}
+
+bool AllNotes::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::LanguageChange && watched == QCoreApplication::instance()) {
+        m_techniques.clear();
+        rebuild();
+    }
+    return KeyedListModel::eventFilter(watched, event);
 }
 
 void AllNotes::setCourses(Courses *courses)

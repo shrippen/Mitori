@@ -1,9 +1,13 @@
+#include <algorithm>
 #include <ctime>
 
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QGuiApplication>
+#include <QPointer>
 #include <QJsonDocument>
+#include <QLibraryInfo>
 #include <QJsonObject>
 #include <QUrl>
 #include <QQmlContext>
@@ -37,6 +41,33 @@ public:
             (void)m_german.load(QStringLiteral(":/i18n/mitori_de"));
         }
         return m_german.translate(context.toUtf8().constData(), source.toUtf8().constData());
+    }
+
+    // Qt's own German catalog is installed (not everywhere: tst_look only checks it then).
+    Q_INVOKABLE bool qtCatalogThere() const
+    {
+        return QFile::exists(QLibraryInfo::path(QLibraryInfo::TranslationsPath) + QStringLiteral("/qt_de.qm"));
+    }
+
+    // The windows of the run (tst_look: a change of style leaves one for the app).
+    Q_INVOKABLE int windowCount() const { return int(QGuiApplication::allWindows().size()); }
+
+    // Objects that must go with a change of style: how many still live.
+    Q_INVOKABLE void watch(QObject *object) { m_watched.append(object); }
+    Q_INVOKABLE int watchedAlive() const
+    {
+        return int(std::count_if(m_watched.begin(), m_watched.end(), [](const QPointer<QObject> &o) { return !o.isNull(); }));
+    }
+
+    // Whether an item is drawn by Shinki's component ("ShinkiButton" among its QML base types).
+    Q_INVOKABLE bool drawnByShinki(QObject *object) const
+    {
+        for (const QMetaObject *meta = object ? object->metaObject() : nullptr; meta; meta = meta->superClass()) {
+            if (QLatin1String(meta->className()).startsWith(QLatin1String("Shinki"))) {
+                return true;
+            }
+        }
+        return false;
     }
 
 public slots:
@@ -144,6 +175,7 @@ public slots:
         // belongs to it too: the window's head and the global tool bar follow it (as after a
         // start with Shinki).
         if (shinki) {
+            QSettings().setValue(QStringLiteral("look/style"), int(Appearance::Style::Shinki));
             QSettings().setValue(QStringLiteral("look/running"), int(Appearance::Style::Shinki));
             Appearance::prepare(Appearance::Style::Shinki, engine);
         }
@@ -165,6 +197,7 @@ public slots:
 
 private:
     QTranslator m_german;
+    QList<QPointer<QObject>> m_watched;
 };
 
 QUICK_TEST_MAIN_WITH_SETUP(ui, Setup)

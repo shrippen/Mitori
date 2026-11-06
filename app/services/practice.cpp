@@ -8,7 +8,9 @@
 
 #include <algorithm>
 
+#include <QCoreApplication>
 #include <QDir>
+#include <QEvent>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QUuid>
@@ -32,6 +34,18 @@ Practice::Practice(const QString &path, QObject *parent)
         }
     });
     m_dayTimer.start();
+    // A new catalog (Appearance::setLanguage): the level names are read anew.
+    if (auto *app = QCoreApplication::instance()) {
+        app->installEventFilter(this);
+    }
+}
+
+bool Practice::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::LanguageChange && watched == QCoreApplication::instance()) {
+        emit levelNamesChanged();
+    }
+    return QObject::eventFilter(watched, event);
 }
 
 Practice::~Practice() = default;
