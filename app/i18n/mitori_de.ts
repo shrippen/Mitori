@@ -83,72 +83,72 @@
 <context>
     <name>Appearance</name>
     <message>
-        <location filename="../services/appearance.cpp" line="203"/>
+        <location filename="../services/appearance.cpp" line="210"/>
         <source>Breeze</source>
         <translation>Breeze</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="203"/>
+        <location filename="../services/appearance.cpp" line="210"/>
         <source>Plasma&apos;s own look, with its colours</source>
         <translation>Plasmas eigenes Aussehen, mit seinen Farben</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="204"/>
+        <location filename="../services/appearance.cpp" line="211"/>
         <source>Material</source>
         <translation>Material</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="204"/>
+        <location filename="../services/appearance.cpp" line="211"/>
         <source>Android&apos;s look, light</source>
         <translation>Das Aussehen von Android, hell</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="205"/>
+        <location filename="../services/appearance.cpp" line="212"/>
         <source>Kante</source>
         <translation>Kante</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="205"/>
+        <location filename="../services/appearance.cpp" line="212"/>
         <source>Dark, sharp edges, yellow accent</source>
         <translation>Dunkel, scharfe Kanten, gelber Akzent</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="206"/>
+        <location filename="../services/appearance.cpp" line="213"/>
         <source>Leinen</source>
         <translation>Leinen</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="206"/>
+        <location filename="../services/appearance.cpp" line="213"/>
         <source>Kante in light linen</source>
         <translation>Kante in hellem Leinen</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="207"/>
+        <location filename="../services/appearance.cpp" line="214"/>
         <source>Shinki</source>
         <translation>Shinki</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="207"/>
+        <location filename="../services/appearance.cpp" line="214"/>
         <source>Paper, ink and one red, as the Shinki News</source>
         <translation>Papier, Tusche und ein Rot, wie die Shinki News</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="278"/>
+        <location filename="../services/appearance.cpp" line="285"/>
         <source>Practice today</source>
         <translation>Heute üben</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="279"/>
+        <location filename="../services/appearance.cpp" line="286"/>
         <source>Tap a technique: its place in the exam video plays.</source>
         <translation>Technik antippen: die Stelle im Prüfungsvideo läuft.</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="280"/>
+        <location filename="../services/appearance.cpp" line="287"/>
         <source>exam-ready</source>
         <translation>prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="281"/>
+        <location filename="../services/appearance.cpp" line="288"/>
         <source>Videos</source>
         <translation>Videos</translation>
     </message>
@@ -191,7 +191,7 @@
         <translation>Mitori %1. Die Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho, mit den Prüfungsvideos der DVDs.</translation>
     </message>
     <message>
-        <location filename="../qml/AppearancePage.qml" line="89"/>
+        <location filename="../qml/AppearancePage.qml" line="82"/>
         <source>Sources: the exam regulations and lists of the dojo, the comments of shinkiryu.de and the Aiki-Budo lexicon.</source>
         <translation>Quellen: die Prüfungsordnungen und Listen des Dojo, die Kommentare von shinkiryu.de und das Aiki-Budo-Lexikon.</translation>
     </message>
@@ -1964,6 +1964,39 @@
     </message>
 </context>
 <context>
+    <name>ScanPage</name>
+    <message>
+        <location filename="../qml/ScanPage.qml" line="25"/>
+        <source>Scan code</source>
+        <translation>Code scannen</translation>
+    </message>
+    <message>
+        <location filename="../qml/ScanPage.qml" line="84"/>
+        <source>Camera picture</source>
+        <translation>Kamerabild</translation>
+    </message>
+    <message>
+        <location filename="../qml/ScanPage.qml" line="93"/>
+        <source>This QR code holds no DVD code. Use the one on the insert of the DVD.</source>
+        <translation>Dieser QR-Code enthält keinen DVD-Code. Den vom Einleger der DVD nehmen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ScanPage.qml" line="94"/>
+        <source>Hold the QR code from the insert of the DVD in front of the camera.</source>
+        <translation>QR-Code vom Einleger der DVD vor die Kamera halten.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ScanPage.qml" line="105"/>
+        <source>The camera does not work; another program may be using it. Cancel and type the code instead.</source>
+        <translation>Die Kamera funktioniert nicht; vielleicht nutzt sie gerade ein anderes Programm. Abbrechen und den Code eintippen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ScanPage.qml" line="114"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+</context>
+<context>
     <name>SearchPage</name>
     <message>
         <location filename="../qml/SearchPage.qml" line="56"/>
@@ -3208,8 +3241,8 @@
     <name>VideosPage</name>
     <message>
         <location filename="../qml/VideosPage.qml" line="28"/>
-        <location filename="../qml/VideosPage.qml" line="168"/>
-        <location filename="../qml/VideosPage.qml" line="178"/>
+        <location filename="../qml/VideosPage.qml" line="208"/>
+        <location filename="../qml/VideosPage.qml" line="218"/>
         <source>Videos</source>
         <translation>Videos</translation>
     </message>
@@ -3249,79 +3282,99 @@
         <translation>Dieser Code öffnet sein Paket nicht.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="85"/>
+        <location filename="../qml/VideosPage.qml" line="74"/>
+        <source>This device has no camera. Type the code instead.</source>
+        <translation>Dieses Gerät hat keine Kamera. Den Code bitte eintippen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideosPage.qml" line="75"/>
+        <source>Mitori may not use the camera. Type the code instead, or allow it in the system settings.</source>
+        <translation>Mitori darf die Kamera nicht benutzen. Den Code eintippen oder es in den Systemeinstellungen erlauben.</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideosPage.qml" line="108"/>
         <source>The exam videos come with the DVDs of the Shinkiryu association: each DVD has a code that loads its videos onto this device.</source>
         <translation>Die Prüfungsvideos gibt es mit den DVDs des Shinkiryu-Verbands: Jede DVD hat einen Code, der ihre Videos auf dieses Gerät lädt.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="93"/>
-        <location filename="../qml/VideosPage.qml" line="106"/>
+        <location filename="../qml/VideosPage.qml" line="116"/>
+        <location filename="../qml/VideosPage.qml" line="136"/>
         <source>Code of the DVD</source>
         <translation>Code der DVD</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="116"/>
+        <location filename="../qml/VideosPage.qml" line="147"/>
         <source>Checking …</source>
         <translation>Prüfe …</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="116"/>
+        <location filename="../qml/VideosPage.qml" line="147"/>
         <source>Unlock</source>
         <translation>Freischalten</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="129"/>
+        <location filename="../qml/VideosPage.qml" line="155"/>
+        <source>Scan code</source>
+        <translation>Code scannen</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideosPage.qml" line="156"/>
+        <source>Scan the code of the DVD</source>
+        <translation>Code der DVD scannen</translation>
+    </message>
+    <message>
+        <location filename="../qml/VideosPage.qml" line="169"/>
         <source>Order on shinkiryu.de</source>
         <translation>Bei shinkiryu.de bestellen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="138"/>
+        <location filename="../qml/VideosPage.qml" line="178"/>
         <source>Bundles</source>
         <translation>Videopakete</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="143"/>
+        <location filename="../qml/VideosPage.qml" line="183"/>
         <source>Load only over Wi-Fi</source>
         <translation>Nur im WLAN laden</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="149"/>
+        <location filename="../qml/VideosPage.qml" line="189"/>
         <source>A bundle has 70–600 MB.</source>
         <translation>Ein Paket hat 70–600 MB.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="156"/>
+        <location filename="../qml/VideosPage.qml" line="196"/>
         <source>Loading the list of videos …</source>
         <translation>Die Videoliste wird geladen …</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="158"/>
+        <location filename="../qml/VideosPage.qml" line="198"/>
         <source>The list of videos could not be loaded. Reload later, or check the connection.</source>
         <translation>Die Videoliste ließ sich nicht laden. Später neu laden oder die Verbindung prüfen.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="159"/>
+        <location filename="../qml/VideosPage.qml" line="199"/>
         <source>On this device: %1 of videos.</source>
         <translation>Auf diesem Gerät: %1 Videos.</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="169"/>
-        <location filename="../qml/VideosPage.qml" line="179"/>
+        <location filename="../qml/VideosPage.qml" line="209"/>
+        <location filename="../qml/VideosPage.qml" line="219"/>
         <source>Photos, voice notes</source>
         <translation>Fotos, Sprachnotizen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="171"/>
+        <location filename="../qml/VideosPage.qml" line="211"/>
         <source>Storage</source>
         <translation>Speicher</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="180"/>
+        <location filename="../qml/VideosPage.qml" line="220"/>
         <source>free</source>
         <translation>frei</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/VideosPage.qml" line="203"/>
+        <location filename="../qml/VideosPage.qml" line="243"/>
         <source>%n video(s)</source>
         <translation>
             <numerusform>%n Video</numerusform>
@@ -3329,82 +3382,82 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="204"/>
+        <location filename="../qml/VideosPage.qml" line="244"/>
         <source>version %1</source>
         <translation>Version %1</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="205"/>
+        <location filename="../qml/VideosPage.qml" line="245"/>
         <source>version %1: %2</source>
         <translation>Version %1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="205"/>
+        <location filename="../qml/VideosPage.qml" line="245"/>
         <source>new</source>
         <translation>neu</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="212"/>
+        <location filename="../qml/VideosPage.qml" line="252"/>
         <source>not unlocked</source>
         <translation>nicht freigeschaltet</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="213"/>
+        <location filename="../qml/VideosPage.qml" line="253"/>
         <source>code saved</source>
         <translation>Code gespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="214"/>
+        <location filename="../qml/VideosPage.qml" line="254"/>
         <source>waits for Wi-Fi</source>
         <translation>wartet auf WLAN</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="215"/>
+        <location filename="../qml/VideosPage.qml" line="255"/>
         <source>loading %1 %</source>
         <translation>lädt %1 %</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="216"/>
+        <location filename="../qml/VideosPage.qml" line="256"/>
         <source>loaded</source>
         <translation>geladen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="217"/>
+        <location filename="../qml/VideosPage.qml" line="257"/>
         <source>update</source>
         <translation>Update</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="218"/>
+        <location filename="../qml/VideosPage.qml" line="258"/>
         <source>failed</source>
         <translation>fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="225"/>
+        <location filename="../qml/VideosPage.qml" line="265"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="226"/>
+        <location filename="../qml/VideosPage.qml" line="266"/>
         <source>Remove</source>
         <translation>Entfernen</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="227"/>
+        <location filename="../qml/VideosPage.qml" line="267"/>
         <source>Update</source>
         <translation>Aktualisieren</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="228"/>
+        <location filename="../qml/VideosPage.qml" line="268"/>
         <source>Load now</source>
         <translation>Jetzt laden</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="229"/>
+        <location filename="../qml/VideosPage.qml" line="269"/>
         <source>Load</source>
         <translation>Laden</translation>
     </message>
     <message>
-        <location filename="../qml/VideosPage.qml" line="248"/>
+        <location filename="../qml/VideosPage.qml" line="288"/>
         <source>Removing frees the space; the code stays saved, so the videos load again without it.</source>
         <translation>Entfernen gibt den Platz frei; der Code bleibt gespeichert, die Videos lassen sich ohne ihn neu laden.</translation>
     </message>

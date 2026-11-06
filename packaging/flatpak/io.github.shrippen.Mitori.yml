@@ -15,7 +15,7 @@ finish-args:
   - --share=ipc
   - --socket=fallback-x11
   - --socket=wayland
-  - --device=all           # GPU, and the camera for photos on notes (V4L2)
+  - --device=all           # GPU, and the camera for photos and the DVD's QR code (V4L2; no narrower option reaches it)
   - --socket=pulseaudio    # video sound
   - --talk-name=org.kde.Solid.PowerManagement   # screen brightness (player gesture)
   - --filesystem=xdg-videos:ro   # the video folder (settings) under ~/Videos until the bundles come

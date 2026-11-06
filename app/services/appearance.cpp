@@ -181,10 +181,17 @@ QString Appearance::version() const
     return QStringLiteral(MITORI_VERSION);
 }
 
-QString Appearance::keychainLicence() const
+QString Appearance::licences() const
 {
-    QFile file(QStringLiteral(":/licences/COPYING"));
-    return file.open(QIODevice::ReadOnly) ? QString::fromUtf8(file.readAll()) : QString();
+    QStringList texts;
+    for (const char *name : {":/licences/zxing-cpp/ATTRIBUTION.txt", ":/licences/zxing-cpp/LICENSE", ":/licences/qtkeychain/COPYING",
+                             ":/licences/monocypher/LICENCE.md"}) {
+        QFile file(QString::fromLatin1(name));
+        if (file.open(QIODevice::ReadOnly)) {
+            texts << QString::fromUtf8(file.readAll());
+        }
+    }
+    return texts.join(QLatin1Char('\n'));
 }
 
 QStringList Appearance::importPaths() const
