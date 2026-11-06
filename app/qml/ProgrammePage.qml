@@ -9,7 +9,8 @@ import Mitori
 // Programme (clickdummy "Programm"): discipline, grade, and the grade's own material. A row opens
 // the technique sheet first; ▶ goes straight to the player. On a tablet in landscape
 // (app-entscheidungen.md, "Tablet quer") list and small player are one page: a row with a video
-// plays beside the list, one without opens the sheet.
+// plays beside the list, one without opens the sheet. A grade without forms (Hon-Menkyo) shows a
+// card instead of the list; it stays on this page, other pages keep the grade chosen last.
 Kirigami.Page {
     id: page
 
@@ -19,8 +20,10 @@ Kirigami.Page {
     background: Rectangle { color: Look.backgroundColor }
 
     readonly property string discipline: Programme.discipline
-    readonly property var grades: Programme.grades(discipline)
+    readonly property var grades: Programme.gradeChips(discipline)
     property string grade: Programme.grade(discipline)
+    readonly property var chosenGrade: grades.find(g => g.id === grade) || ({})
+    readonly property bool noForms: chosenGrade.count === 0
     readonly property var rows: Programme.entries(discipline, grade)
     // Whether the grade has video positions at all, and whether any of their videos is on the device.
     readonly property bool hasPositions: rows.some(r => !!r.video)
@@ -98,15 +101,18 @@ Kirigami.Page {
                     readonly property var ids: Programme.entries(page.discipline, modelData.id)
                         .filter(r => r.kind === "entry").map(r => r.id)
                     readonly property int ready: Practice.revision >= 0 ? Practice.counts(ids)[4] : 0
-                    text: ids.length ? modelData.name + " " + ready + "/" + ids.length : modelData.name
+                    text: ids.length ? modelData.name + " " + ready + "/" + ids.length : modelData.name + " –"
                     Accessible.name: ids.length ? qsTr("%1, %2 of %3 exam-ready").arg(modelData.name).arg(ready).arg(ids.length)
-                                                : modelData.name
+                                                : qsTr("%1, no forms yet").arg(modelData.name)
                     checkable: true
                     choice: true        // the page holds the grade: a tap only reports it
 
                     checked: modelData.id === page.grade
                     onClicked: {
-                        Programme.setGrade(page.discipline, modelData.id)
+                        // Without forms: only this page shows it, see Programme.gradeChips.
+                        if (ids.length) {
+                            Programme.setGrade(page.discipline, modelData.id)
+                        }
                         page.grade = modelData.id
                     }
                 }
@@ -132,11 +138,18 @@ Kirigami.Page {
                 objectName: "programmeList"
                 // The head above the rows changes height (its width, another grade): a list standing
                 // at its top stays there instead of cutting off the first line. One scrolled
-                // anywhere else, by hand or to the playing row, is left alone.
+                // anywhere else, by hand or to the playing row, is left alone; also when that
+                // happens before the moment is over (back from the player).
                 property real topBefore: 0
                 onOriginYChanged: {
                     if (!moving && contentY === topBefore) {
-                        Qt.callLater(positionViewAtBeginning)
+                        const stood = contentY
+                        Qt.callLater(() => {
+                            // No list: the page has gone by now.
+                            if (list && list.contentY === stood) {
+                                list.positionViewAtBeginning()
+                            }
+                        })
                     }
                     topBefore = originY
                 }
@@ -157,8 +170,8 @@ Kirigami.Page {
                         objectName: "gradeInfo"
                         Layout.fillWidth: true
                         Layout.margins: Kirigami.Units.smallSpacing
-                        readonly property var grade: page.grades.find(g => g.id === page.grade) || ({})
-                        visible: !!grade.bedeutung
+                        readonly property var grade: page.chosenGrade
+                        visible: !!grade.bedeutung && !page.noForms
                         text: [grade.bedeutung, grade.inhalt, grade.abstand ? qsTr("Waiting time: %1").arg(grade.abstand) : ""]
                               .filter(x => x).join(" · ")
                         color: Look.mutedTextColor
@@ -174,6 +187,53 @@ Kirigami.Page {
                         font: Look.smallFont
                         wrapMode: Text.Wrap
                     }
+                    // A grade without forms: what the catalog knows of it. On a tablet no player
+                    // stands beside it (nothing to play), and the card stays at a width that reads.
+                    QQC2.Control {
+                        objectName: "gradeCard"
+                        Layout.fillWidth: true
+                        Layout.maximumWidth: Kirigami.Units.gridUnit * 30
+                        Layout.margins: Kirigami.Units.smallSpacing
+                        visible: page.noForms
+                        padding: Kirigami.Units.largeSpacing
+                        background: LookCard {}
+
+                        contentItem: ColumnLayout {
+                            spacing: Kirigami.Units.largeSpacing
+
+                            LookGroupHead {
+                                Layout.fillWidth: true
+                                title: page.chosenGrade.name || ""
+                                japanese: page.chosenGrade.jp || ""
+                            }
+                            Repeater {
+                                model: [{ label: qsTr("Meaning"), value: page.chosenGrade.bedeutung },
+                                        { label: qsTr("Content"), value: page.chosenGrade.inhalt },
+                                        { label: qsTr("Waiting time"), value: page.chosenGrade.abstand }].filter(f => f.value)
+
+                                LookFormRow {
+                                    id: fact
+
+                                    required property var modelData
+
+                                    label: modelData.label
+
+                                    LookLabel {
+                                        Layout.fillWidth: true
+                                        text: fact.modelData.value
+                                        wrapMode: Text.Wrap
+                                    }
+                                }
+                            }
+                            LookLabel {
+                                objectName: "gradeCardNote"
+                                Layout.fillWidth: true
+                                text: qsTr("The forms of this grade are not in the app yet.")
+                                color: Look.mutedTextColor
+                                wrapMode: Text.Wrap
+                            }
+                        }
+                    }
                     GradeStand {
                         objectName: "gradeStand"
                         Layout.fillWidth: true
@@ -184,7 +244,7 @@ Kirigami.Page {
                     LookHint {
                         Layout.fillWidth: true
                         Layout.margins: Kirigami.Units.smallSpacing
-                        visible: !page.hasVideo
+                        visible: !page.hasVideo && !page.noForms
                         importance: LookHint.Importance.Info
                         titleText: qsTr("Exam videos")
                         text: !page.hasPositions

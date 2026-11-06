@@ -1717,62 +1717,87 @@
 <context>
     <name>ProgrammePage</name>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="55"/>
+        <location filename="../qml/ProgrammePage.qml" line="58"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="60"/>
+        <location filename="../qml/ProgrammePage.qml" line="63"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="65"/>
+        <location filename="../qml/ProgrammePage.qml" line="68"/>
         <source>All notes</source>
         <translation>Alle Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="102"/>
+        <location filename="../qml/ProgrammePage.qml" line="105"/>
         <source>%1, %2 of %3 exam-ready</source>
         <translation>%1, %2 von %3 prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="162"/>
+        <location filename="../qml/ProgrammePage.qml" line="106"/>
+        <source>%1, no forms yet</source>
+        <translation>%1, noch keine Formen</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="174"/>
         <source>Waiting time: %1</source>
         <translation>Wartezeit: %1</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="172"/>
+        <location filename="../qml/ProgrammePage.qml" line="184"/>
         <source>The Japanese writing of these names is a proposal, not yet confirmed.</source>
         <translation>Die japanische Schreibweise dieser Namen ist ein Vorschlag, noch nicht bestätigt.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="189"/>
+        <location filename="../qml/ProgrammePage.qml" line="209"/>
+        <source>Meaning</source>
+        <translation>Bedeutung</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="210"/>
+        <source>Content</source>
+        <translation>Inhalt</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="211"/>
+        <source>Waiting time</source>
+        <translation>Wartezeit</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="230"/>
+        <source>The forms of this grade are not in the app yet.</source>
+        <translation>Die Formen dieses Grades sind noch nicht in der App.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ProgrammePage.qml" line="248"/>
         <source>Exam videos</source>
         <translation>Prüfungsvideos</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="191"/>
+        <location filename="../qml/ProgrammePage.qml" line="250"/>
         <source>There is no video for this grade.</source>
         <translation>Zu diesem Grad gibt es kein Video.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="192"/>
+        <location filename="../qml/ProgrammePage.qml" line="251"/>
         <source>The videos are on the DVDs of the Shinkiryu association. With the DVD&apos;s code Mitori loads them onto this device.</source>
         <translation>Die Videos sind auf den DVDs des Shinkiryu-Verbands. Mit dem Code der DVD lädt Mitori sie auf dieses Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="202"/>
+        <location filename="../qml/ProgrammePage.qml" line="261"/>
         <source>Enter code</source>
         <translation>Code eingeben</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="207"/>
+        <location filename="../qml/ProgrammePage.qml" line="266"/>
         <source>Order on shinkiryu.de</source>
         <translation>Auf shinkiryu.de bestellen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="289"/>
+        <location filename="../qml/ProgrammePage.qml" line="348"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
