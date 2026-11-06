@@ -1,4 +1,5 @@
 #include <QFile>
+#include <QFileInfo>
 #include <QImage>
 #include <QSettings>
 #include <QStandardPaths>
@@ -34,6 +35,17 @@ private slots:
         QSettings().clear();
         QVERIFY(m_dir.isValid());
         QDir(MediaStore::defaultRoot()).removeRecursively();
+    }
+
+    // The storage bar's figure: all files of the folder, a missing folder counts nothing.
+    void sizeOfTheFolder()
+    {
+        MediaStore store(m_dir.filePath(u"sized"_s));
+        QCOMPARE(store.size(), 0);
+        const QString name = store.importPhoto(QUrl::fromLocalFile(picture(u"sized.png"_s, {40, 30})));
+        QVERIFY(!name.isEmpty());
+        QCOMPARE(store.size(), QFileInfo(store.path(name)).size());
+        QVERIFY(store.size() > 0);
     }
 
     // A large picture comes in smaller, as JPEG; something that is no picture does not.

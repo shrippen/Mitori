@@ -39,6 +39,8 @@ public:
     Q_INVOKABLE QString importCapture(const QString &path);
     Q_INVOKABLE QVariantMap newVoice();
     Q_INVOKABLE bool discard(const QString &name);
+    // The photos and voice notes together, in bytes (the Videos page's storage bar).
+    Q_INVOKABLE qint64 size() const;
 
 private:
     MediaStore *m_store;

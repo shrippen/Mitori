@@ -20,6 +20,8 @@ public:
     static QString defaultRoot();
 
     QString root() const { return m_root; }
+    // All its files together, in bytes.
+    qint64 size() const;
     // A file's kind by its name ("….jpg" a photo, "….m4a" a voice note).
     static Kind kindOf(const QString &name);
     QString path(const QString &name) const;

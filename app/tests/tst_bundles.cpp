@@ -130,6 +130,13 @@ private slots:
         QVERIFY(m_dir.isValid());
     }
 
+    // The storage bar: free space also before the shelf's folder and its parents exist.
+    void freeSpaceWithoutFolder()
+    {
+        Bundles bundles(QUrl(), m_dir.filePath(u"not/yet/there"_s));
+        QVERIFY(bundles.freeSpace() > 0);
+    }
+
     // The manifest lists the bundle locked; a bad code fails at once, a valid one unlocks it.
     void unlock()
     {

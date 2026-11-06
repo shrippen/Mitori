@@ -2,6 +2,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QImage>
 #include <QImageReader>
 #include <QStandardPaths>
@@ -132,4 +133,14 @@ bool MediaStore::adopt(const QString &name, const QByteArray &data)
         return false;
     }
     return true;
+}
+
+qint64 MediaStore::size() const
+{
+    qint64 total = 0;
+    const auto files = QDir(m_root).entryInfoList(QDir::Files);
+    for (const QFileInfo &file : files) {
+        total += file.size();
+    }
+    return total;
 }

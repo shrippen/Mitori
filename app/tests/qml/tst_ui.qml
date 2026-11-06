@@ -2141,6 +2141,12 @@ TestCase {
         // the editor changes them through Courses.
         const course = Courses.create("Gastlehrer", "2026-05-01", "", "", "")
         verify(Courses.addEntry(course, "Irimi früher"))
+        // In all notes a course entry says when it was written.
+        const allNotes = push("AllNotesPage")
+        allNotes.filter = "courses"
+        tryVerify(() => findChild(allNotes, "noteTitle") !== null)
+        verify(findChild(allNotes, "noteTitle").text.indexOf(" · ") > 0, findChild(allNotes, "noteTitle").text)
+        window.pageStack.pop()
         tryVerify(() => again.shown[0].kind === "course")
         compare(again.shown[0].title, "Gastlehrer")
         wait(800)
@@ -2976,6 +2982,83 @@ TestCase {
         return found
     }
 
+    // The grade chips say how far each grade is; the storage bar has its legend.
+    function test_8p_grade_chips_and_storage() {
+        const width = window.width, height = window.height
+        window.width = 360
+        window.height = 800
+        wait(100)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        const chips = findChild(page, "gradeChips")
+        const k5 = chips.itemAt(page.grades.findIndex(g => g.id === "k5"))
+        const ids = Programme.entries("aikido", "k5").filter(r => r.kind === "entry").map(r => r.id)
+        compare(k5.text, page.grades.find(g => g.id === "k5").name + " " + Practice.counts(ids)[4] + "/" + ids.length)
+        const programmeList = findChild(page, "programmeList")
+        tryVerify(() => programmeList.height < 1000)
+        wait(800)
+        compare(programmeList.contentY, programmeList.originY, "the list opens at its top")
+        // Another discipline, another head (the grades' meaning): still at its top.
+        Programme.discipline = "shinkitoho"
+        page.grade = Programme.grade("shinkitoho")
+        tryVerify(() => findChild(programmeList.headerItem, "gradeInfo").visible)
+        wait(300)
+        compare(programmeList.contentY, programmeList.originY, "the list stays at its top")
+        Programme.discipline = "aikido"
+        page.grade = "k5"
+        wait(100)
+        shot("8p-chips")
+        window.pageStack.pop()
+        const videos = push("VideosPage")
+        verify(findChild(videos, "storageBar").visible)
+        compare(findChild(videos, "storageLegend").model.length, 3)
+        shot("8p-storage")
+        window.pageStack.pop()
+        window.width = width
+        window.height = height
+        wait(100)
+    }
+
+    // On a phone the row of the last technique lights up on the way back, then no longer.
+    function test_8p_row_lights_up_on_return() {
+        const width = window.width, height = window.height
+        window.width = 400
+        window.height = 800
+        wait(100)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        tryVerify(() => !page.split)
+        const rows = page.rows.filter(r => r.kind === "entry")
+        const last = rows[rows.length - 1]
+        const player = push("PlayerPage", { playlist: rows, index: rows.length - 1 })
+        page.lastId = last.id
+        page.cameFromPlayer = true  // as play() does: this test needs no video
+        tryVerify(() => window.pageStack.currentItem === player)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        compare(page.returnedId, last.id)
+        const list = findChild(page, "programmeList")
+        const row = page.rows.findIndex(r => r.id === last.id)
+        tryVerify(() => list.itemAtIndex(row) !== null)
+        tryVerify(() => page.returnedId === "", 3000)
+        // Back from anything else (the notes) the list stays where the user had it.
+        list.positionViewAtBeginning()
+        const top = list.contentY
+        const notes = push("NotesPage", { entry: rows[0] })
+        tryVerify(() => window.pageStack.currentItem === notes)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        compare(page.returnedId, "")
+        wait(200)
+        compare(list.contentY, top)
+        window.pageStack.pop()
+        window.width = width
+        window.height = height
+        wait(100)
+    }
+
     function test_8o_nothing_past_the_edge_data() {
         // Twice the scale on a phone (206 px) is not there yet: ROADMAP, QA round of 5 Nov 2026.
         return [{ tag: "360", width: 360, height: 800 }]
@@ -3156,7 +3239,6 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // Tablet: the small player goes on where full screen ended, with its tempo and loop.
     // A window turned for full screen is no longer wide: the pane comes back only afterwards, and
     // then takes up the place, tempo and loop; a technique played since then outdates them.
     function test_8t_pane_made_anew_after_full_screen() {
@@ -3174,7 +3256,9 @@ TestCase {
         tryVerify(() => !page.split)
         page.lastId = rows[0].id
         // What full screen left while there is no pane.
-        page.bigResume = { position: 3000, rate: 0.5, looping: false }
+        const chapter = Programme.entries("aikido", "k5").find(r => r.id === rows[0].id).video
+        const place = (chapter.von || 0) * 1000 + 3000
+        page.bigResume = { position: place, rate: 0.5, looping: false }
         page.resumeFromBig()
         verify(page.bigResume !== null, "kept until the pane is there")
         window.width = 1280
@@ -3182,7 +3266,7 @@ TestCase {
         compare(page.player.looping, false)
         compare(page.player.rate, 0.5)
         verify(page.player.position >= page.player.from, page.player.position)
-        verify(Math.abs(page.player.position - Math.max(page.player.from, Math.min(page.player.to, 3000))) < 1500,
+        verify(Math.abs(page.player.position - place) < 1500,
                page.player.position + " from " + page.player.from + " to " + page.player.to)
         verify(page.bigResume === null, "taken up once")
         page.player.setSpeed(1)
@@ -3200,6 +3284,7 @@ TestCase {
         wait(100)
     }
 
+    // Tablet: the small player goes on where full screen ended, with its tempo and loop.
     function test_8t_small_player_keeps_place_after_full_screen() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
         if (rows.length === 0 || !Videos.available(rows[0].video.video)) {

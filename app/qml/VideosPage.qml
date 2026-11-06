@@ -66,6 +66,13 @@ Kirigami.ScrollablePage {
         rows: Bundles.bundles
     }
 
+    // Over a thousand MB in GB (the free space of a disk).
+    function amount(bytes) {
+        return bytes < 1e9 ? megabytes(bytes) : (bytes / 1e9).toLocaleString(Qt.locale(), 'f', 1) + " GB"
+    }
+    // Photos and voice notes change on other pages: read when this one opens.
+    readonly property real mediaSize: Media.size()
+    readonly property real storageTotal: Bundles.size + mediaSize + Bundles.freeSpace
     function megabytes(bytes) {
         return Math.round(bytes / 1e6).toLocaleString(Qt.locale(), 'f', 0) + " MB"
     }
@@ -152,6 +159,26 @@ Kirigami.ScrollablePage {
                 : qsTr("On this device: %1 of videos.").arg(page.megabytes(Bundles.size))
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
+        }
+        LookProgressBar {
+            objectName: "storageBar"
+            Layout.fillWidth: true
+            visible: page.storageTotal > 0
+            parts: [
+                { value: Bundles.size / page.storageTotal, color: Look.levelColor(4), text: page.amount(Bundles.size) + " " + qsTr("Videos") },
+                { value: page.mediaSize / page.storageTotal, color: Look.levelColor(2), text: page.amount(page.mediaSize) + " " + qsTr("Photos, voice notes") }
+            ]
+            Accessible.name: qsTr("Storage")
+        }
+        LookLegend {
+            objectName: "storageLegend"
+            Layout.fillWidth: true
+            visible: page.storageTotal > 0
+            model: [
+                { color: Look.levelColor(4), value: page.amount(Bundles.size), text: qsTr("Videos") },
+                { color: Look.levelColor(2), value: page.amount(page.mediaSize), text: qsTr("Photos, voice notes") },
+                { color: Look.levelColor(0), value: page.amount(Bundles.freeSpace), text: qsTr("free") }
+            ]
         }
         LookLabel {
             Layout.fillWidth: true

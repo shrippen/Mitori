@@ -215,7 +215,10 @@ Kirigami.Page {
                     LookLabel {
                         Layout.fillWidth: true
                         objectName: "noteTitle"
-                        text: noteItem.row.title
+                        // A course's day has several sessions: its entries say when.
+                        text: (noteItem.row.kind === "course"
+                               ? noteItem.row.created.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) + " · " : "")
+                              + noteItem.row.title
                         color: Look.mutedTextColor
                         font: Look.smallFont
                         elide: Text.ElideRight

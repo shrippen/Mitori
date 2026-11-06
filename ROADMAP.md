@@ -177,12 +177,11 @@ Reihenfolge der Kacheln. Offen, nach Gewicht:
 - **Startmenü**: Programm-Kachel mit Stand („Aikido · 5. Kyu · 7 von 20 prüfungsreif“ und Leiste, Kurzname);
   Telefon groß + zwei Spalten statt einer; Tablet die große Kachel 2 × 2; Begrüßung; Heute mit Sparte; Bundle-
   Update mit Namen.
-- **Programm**: Stand je Grad in den Chips; Shinki-Toho-Infokarte (Bedeutung, Inhalt, Mindestabstand);
-  Beschreibung von Suburi und Kiriotoshi; Lupe im Kopf; Rückkehr aus dem Player: kurz aufleuchten statt dauerhaft
-  markieren, auch am Telefon hinscrollen; Tablet-Liste schneidet lange Ô-dachi-Zeilen ab.
+- **Programm**: Shinki-Toho-Infokarte (Bedeutung, Inhalt, Mindestabstand); Beschreibung von Suburi und
+  Kiriotoshi; Lupe im Kopf; Tablet-Liste schneidet lange Ô-dachi-Zeilen ab.
 - **Kommentar**: Fußnoten und Listen setzen; Gruppe und Kanji im Text (Überschriften und ganzer Titel: erledigt).
 - **Heute üben**: Kalender 12 Wochen mit Legende; Hinweis „tippen öffnet das Blatt“.
-- **Videos**: Speicherbalken mit Legende (Videos, Fotos und Sprachnotizen, frei); Code-Seite mit Erklärung
+- **Videos**: Code-Seite mit Erklärung
   (Schreibweise egal, was passiert, der Code bleibt auf dem Gerät).
 - **Sicherung**: Hinweis auf Android Auto Backup (ohne Medien); Konflikte als Hinweiszeile.
 - **Konflikte**: Kopf mit Angriff und Tag.
@@ -210,8 +209,8 @@ Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
 - Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).
 
 Offen, klein:
-- Grad-Chips mit Stand, Rückkehr in die Liste leuchtet kurz auf, Treffer in Kommentaren und Lehrgangsnotizen,
-  Speicherbalken bei den Videos, Heute merkt die Sparte, Kurzname auf der Kachel, Kommentar mit Gruppe und Kanji.
+- Treffer in Kommentaren und Lehrgangsnotizen, Heute merkt die Sparte, Kurzname auf der Programm-Kachel,
+  Kommentar mit Gruppe und Kanji.
 - Barrierefreiheit: Kontrast der leeren Bewertungskästchen 1,36:1, Fortschrittsspur 1,07:1, Fokusring 2,05:1;
   Fokus nach Dialogen und Zurück, Tastaturweg zum Player (29 Tabs), Ursache für den eingetippten Exportpfad.
 - Daten: „Ago: Kin“ (Lexikon, vermutlich „Kinn“), Glossar Kiri-otoshi ohne Übersetzung, „Kote“ ohne Kanji.
