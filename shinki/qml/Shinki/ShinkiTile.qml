@@ -55,7 +55,7 @@ QQC2.AbstractButton {
                 font.family: ShinkiStyle.uiFamily
                 font.bold: true
                 font.pixelSize: tile.big ? ShinkiStyle.tileTitleBigSize : ShinkiStyle.tileTitleSize
-                elide: Text.ElideRight
+                wrapMode: Text.Wrap
             }
             QQC2.Label {
                 Layout.fillWidth: true
