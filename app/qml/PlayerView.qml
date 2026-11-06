@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 
-import QtCore
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Controls.impl
@@ -61,12 +60,9 @@ Item {
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
     readonly property int jumpMs: 2000      // double tap
     property bool looping: true
-    // The tempo stays for the next time (the clickdummy keeps it).
-    Settings {
-        id: tempoStore
-
-        category: "player"
-    }
+    // Each technique starts at 1× (owner, 06.11.2026): its loop and full screen keep the tempo.
+    readonly property real normalRate: 1
+    property string tempoEntry: ""
     // The double tap shows what it did, for a moment (the clickdummy): "2 s ››" on the side that
     // was tapped. The text is a symbol, not a word: it stays the same in every language.
     property string jumpHint: ""
@@ -93,8 +89,8 @@ Item {
     // Start at the chapter once per loaded file: the FFmpeg backend reports LoadedMedia again
     // after every seek, and restarting there would undo each step, jump and timeline move.
     property bool startPending: true
-    // Whether a newly loaded chapter plays (off while another page lies above the small player:
-    // it loads at the chapter start and waits).
+    // Whether a newly loaded chapter plays (off while another page lies above the small player,
+    // or before its first tap: it loads at the chapter start and waits).
     property bool autoPlay: true
     // For the UI test: where the video stands (ms) and whether it plays.
     readonly property alias position: player.position
@@ -110,9 +106,16 @@ Item {
     signal commentRequested(var entry)
     signal bigRequested()
     signal bigLeft()
+    // The user asked for play; the small player's page needs that for its first tap.
+    signal playTapped()
 
     onCurrentChanged: {
         shown(current.id)
+        // By id: a playlist made anew brings new objects for the same technique.
+        if (current.id !== tempoEntry) {
+            tempoEntry = current.id || ""
+            player.playbackRate = normalRate
+        }
         // After the bindings of the new entry (from, to): onCurrentChanged runs before them.
         if (player.source.toString() === Videos.source(video).toString() && !startPending) {
             Qt.callLater(page.restart)
@@ -136,7 +139,10 @@ Item {
     function togglePlay() {
         if (player.playing) {
             player.pause()
-        } else if (player.position >= end - frameMs || player.mediaStatus === MediaPlayer.EndOfMedia) {
+            return
+        }
+        playTapped()    // first: restart() asks autoPlay
+        if (player.position >= end - frameMs || player.mediaStatus === MediaPlayer.EndOfMedia) {
             restart()
         } else {
             player.play()
@@ -197,8 +203,6 @@ Item {
             muted: player.playbackRate < 1 || !Levels.sound
             volume: Levels.playerVolume
         }
-        playbackRate: page.tempi.indexOf(tempoStore.value("tempo", 1) * 1) >= 0 ? tempoStore.value("tempo", 1) * 1 : 1
-        onPlaybackRateChanged: tempoStore.setValue("tempo", playbackRate)
         // The screen stays on while it plays (the switch "Screen on"), not while it stands.
         onPlayingChanged: Levels.setPlayback(playing ? Levels.Playback.Playing : Levels.Playback.Stopped)
         onSourceChanged: page.startPending = true
