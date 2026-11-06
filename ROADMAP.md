@@ -102,7 +102,7 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   (wie die Sicherung), holt die genannten Medien und legt das eigene Archiv ab; beim Start, einmal am Tag und auf
   Wunsch nach jeder Änderung. Konflikt nur, wenn dieselbe Notiz oder derselbe Eintrag seit dem letzten Abgleich auf
   zwei Geräten geändert wurde: bleibt bis zur Wahl (dieses Gerät, das andere, beide behalten; `ConflictsPage`).
-  Konto, App-Passwort und Sync-Id in `sync/`, von Android Auto Backup und Geräteumzug ausgenommen.
+  Konto und Sync-Id in `sync/`, von Android Auto Backup und Geräteumzug ausgenommen; das App-Passwort im Schlüsselbund.
   Offen: Test gegen eine echte Nextcloud; die Konfliktkarte zeigt zum aktuellen Text noch die Zeit des Abgleichs.
 - Schritt 4: Video-Bundles (Einstellungen → „Videos und DVD-Codes“, Hinweis im Programm „Code eingeben“): das öffentliche
   Manifest (Gitea-Paket `mitori-manifest`) listet die Bundles; der Code einer DVD (20 Zeichen, Prüfzeichen) schaltet
@@ -210,7 +210,7 @@ Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
   Bewertung und Steuerzeilen des Players brauchen eine schmale Form.
 - Lehrgangsnotizen mit Technik verbinden (⌗, Eintrag auch bei der Technik), QR-Code, Tablet nach Vorlage (Blatt
   rechts, zwei Spalten, Lehrgänge und Einstellungen als Liste und Seite), Export als Blatt.
-- Programmdaten auf Englisch, App-Passwort im Schlüsselbund.
+- Programmdaten auf Englisch.
 - Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).
 
 Offen, klein:
