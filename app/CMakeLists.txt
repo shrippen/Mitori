@@ -475,7 +475,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     set_target_properties(tst_sync PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME sync COMMAND tst_sync)
 
-    qt_add_executable(tst_export tests/tst_export.cpp store/zipwriter.cpp store/zipwriter.h
+    qt_add_executable(tst_export tests/tst_export.cpp services/saveplace.cpp services/saveplace.h platform/typedpath.cpp platform/typedpath.h store/zipwriter.cpp store/zipwriter.h
         store/notebookexport.cpp store/notebookexport.h store/mediastore.cpp store/mediastore.h
         services/courses.cpp services/courses.h store/coursebook.cpp store/coursebook.h store/tablemerge.cpp store/tablemerge.h
         store/icsreader.cpp store/icsreader.h store/device.h platform/devicecalendar.cpp platform/devicecalendar.h platform/sharefile.cpp platform/sharefile.h

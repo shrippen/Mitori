@@ -3316,6 +3316,13 @@ TestCase {
         verify(findChild(book, "exportedTo").text.indexOf(uiShotsDir + "/" + accepted) > 0, findChild(book, "exportedTo").text)
         book.exported = ""
 
+        // No suffix typed: the file gets it, whatever Qt did (it adds none with a dot in the path).
+        const bare = "export-bare-" + Date.now()
+        dialog.take(dialog.currentFolder + "/" + bare)
+        tryVerify(() => findChild(book, "exportedTo").visible)
+        verify(findChild(book, "exportedTo").text.indexOf(uiShotsDir + "/" + bare + ".zip") > 0, findChild(book, "exportedTo").text)
+        book.exported = ""
+
         // A typed path goes where it says, and what is there is not replaced unasked.
         const target = uiShotsDir + "/export-typed-" + Date.now() + ".zip"
         dialog.take(dialog.currentFolder + "/" + target)

@@ -9,9 +9,10 @@
 //   in the folder /docs, name field   /var/x.zip  →  file:///docs//var/x.zip   (no such folder)
 //                                     ~/x.zip     →  file:///docs/~/x.zip
 //                        path field   x.zip       →  file:x.zip                (the process's folder)
+//   Qt adds the suffix only when the whole path has no dot: in ~/.cache, y stays y.
 namespace TypedPath {
 
-// The file the user meant; anything else (a plain pick, Android's content://) as it is.
-QUrl resolve(const QUrl &picked, const QUrl &folder);
+// The file the user meant, with `suffix` ("zip"); Android's content:// as it is.
+QUrl resolve(const QUrl &picked, const QUrl &folder, const char *suffix);
 
 }

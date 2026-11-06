@@ -14,9 +14,14 @@ using namespace Qt::StringLiterals;
 // QA round of 5 Nov 2026: a full path typed into the save dialog failed. This drives Qt's own
 // dialog (the one the desktop gets, see platform/typedpath.h) with the keys and resolves what it
 // answers, so a Qt that changes the answer shows here.
+//
+// The folders are set here, not left to TMPDIR: Qt adds the suffix only when the whole path has no
+// dot, so the same run differs between /tmp and ~/.cache.
 class TstFileDialog : public QObject
 {
     Q_OBJECT
+
+    static constexpr auto kSuffix = "zip";
 
     // The dialog's items hang on parent items, not on QObject children.
     static QQuickItem *findItem(QQuickItem *item, const QString &name)
@@ -51,24 +56,43 @@ class TstFileDialog : public QObject
 private slots:
     void typedIntoNameField_data()
     {
+        QTest::addColumn<QString>("folderName");
         QTest::addColumn<QString>("typed");
         QTest::addColumn<QString>("expected");     // "<folder>" and "<home>" stand for those
 
-        QTest::newRow("name") << u"x.zip"_s << u"<folder>/x.zip"_s;
-        QTest::newRow("subfolder") << u"sub/x.zip"_s << u"<folder>/sub/x.zip"_s;
-        QTest::newRow("full path") << u"/var/x/y.zip"_s << u"/var/x/y.zip"_s;
-        QTest::newRow("full path, no suffix") << u"/var/x/y"_s << u"/var/x/y.zip"_s;
-        QTest::newRow("home") << u"~/y.zip"_s << u"<home>/y.zip"_s;
+        const QString plain = u"plain"_s;
+        QTest::newRow("name") << plain << u"x.zip"_s << u"<folder>/x.zip"_s;
+        QTest::newRow("name, no suffix") << plain << u"x"_s << u"<folder>/x.zip"_s;
+        QTest::newRow("subfolder") << plain << u"sub/x.zip"_s << u"<folder>/sub/x.zip"_s;
+        QTest::newRow("full path") << plain << u"/var/x/y.zip"_s << u"/var/x/y.zip"_s;
+        QTest::newRow("full path, no suffix") << plain << u"/var/x/y"_s << u"/var/x/y.zip"_s;
+        QTest::newRow("home") << plain << u"~/y.zip"_s << u"<home>/y.zip"_s;
+        QTest::newRow("home itself") << plain << u"~/"_s << u"<home>/"_s;
+
+        // After Save with an empty name field, or typing "sub/" and Save: Qt's folder ends in "/".
+        const QString slash = u"plain/"_s;
+        QTest::newRow("slash: name") << slash << u"y.zip"_s << u"<folder>/y.zip"_s;
+        QTest::newRow("slash: subfolder") << slash << u"sub/y.zip"_s << u"<folder>/sub/y.zip"_s;
+        QTest::newRow("slash: full path") << slash << u"/var/x/y.zip"_s << u"/var/x/y.zip"_s;
+
+        // A dot in the folder (~/.cache, ~/Dr.Weber): Qt adds no suffix at all.
+        const QString dotted = u"dotted.folder"_s;
+        QTest::newRow("dot: name") << dotted << u"y"_s << u"<folder>/y.zip"_s;
+        QTest::newRow("dot: name with suffix") << dotted << u"y.zip"_s << u"<folder>/y.zip"_s;
+        QTest::newRow("dot: other suffix") << dotted << u"y.alt"_s << u"<folder>/y.alt.zip"_s;
+        QTest::newRow("dot: full path") << dotted << u"/var/x/y"_s << u"/var/x/y.zip"_s;
     }
 
     void typedIntoNameField()
     {
+        QFETCH(QString, folderName);
         QFETCH(QString, typed);
         QFETCH(QString, expected);
 
         QTemporaryDir dir;
         QVERIFY(dir.isValid());
-        const QUrl folder = QUrl::fromLocalFile(dir.path());
+        QVERIFY(QDir(dir.path()).mkpath(folderName));
+        const QUrl folder = QUrl::fromLocalFile(dir.filePath(folderName));
         QQmlEngine engine;
         QQmlComponent component(&engine);
         component.setData(QStringLiteral("import QtQuick\nimport QtQuick.Dialogs\n"
@@ -97,9 +121,13 @@ private slots:
         QCOMPARE(field->property("text").toString(), typed);
         QTest::keyClick(static_cast<QWindow *>(window), Qt::Key_Return);      // the text goes to the dialog
 
-        expected.replace(u"<folder>"_s, dir.path()).replace(u"<home>"_s, QDir::homePath());
+        QString name = folderName;
+        if (name.endsWith(u'/')) {
+            name.chop(1);
+        }
+        expected.replace(u"<folder>"_s, dir.filePath(name)).replace(u"<home>"_s, QDir::homePath());
         const QUrl picked = dialog->property("selectedFile").toUrl();
-        QCOMPARE(TypedPath::resolve(picked, folder), QUrl::fromLocalFile(expected));
+        QCOMPARE(TypedPath::resolve(picked, dialog->property("currentFolder").toUrl(), kSuffix), QUrl::fromLocalFile(expected));
         QVERIFY(QMetaObject::invokeMethod(dialog, "close"));
     }
 
@@ -120,6 +148,18 @@ private slots:
         QTest::newRow("name in the root") << QUrl(u"file:///x.zip"_s) << QUrl(u"file:///"_s) << QUrl(u"file:///x.zip"_s);
         QTest::newRow("a folder called so") << QUrl(u"file:///docs/~x/y.zip"_s) << docs << QUrl(u"file:///docs/~x/y.zip"_s);
         QTest::newRow("Android") << QUrl(u"content://a/b%2Fc"_s) << QUrl(u"content://a"_s) << QUrl(u"content://a/b%2Fc"_s);
+
+        const QUrl slash(u"file:///docs/"_s);
+        QTest::newRow("slash: a pick") << QUrl(u"file:///docs/x.zip"_s) << slash << QUrl(u"file:///docs/x.zip"_s);
+        QTest::newRow("slash: name") << QUrl(u"file:///docs//y.zip"_s) << slash << QUrl(u"file:///docs/y.zip"_s);
+        QTest::newRow("slash: full path") << QUrl(u"file:///docs///var/y.zip"_s) << slash << QUrl(u"file:///var/y.zip"_s);
+        QTest::newRow("slash: in a subfolder") << QUrl(u"file:///docs/sub//y.zip"_s) << QUrl(u"file:///docs/sub/"_s)
+                                                << QUrl(u"file:///docs/sub/y.zip"_s);
+        QTest::newRow("capital suffix") << QUrl(u"file:///docs/x.ZIP"_s) << docs << QUrl(u"file:///docs/x.ZIP"_s);
+        QTest::newRow("other suffix") << QUrl(u"file:///docs/x.alt"_s) << docs << QUrl(u"file:///docs/x.alt.zip"_s);
+        QTest::newRow("no suffix, dot in the folder") << QUrl(u"file:///do.cs/x"_s) << QUrl(u"file:///do.cs"_s)
+                                                       << QUrl(u"file:///do.cs/x.zip"_s);
+        QTest::newRow("a folder, typed") << QUrl(u"file:///var/"_s) << docs << QUrl(u"file:///var/"_s);
     }
 
     void resolve()
@@ -128,7 +168,18 @@ private slots:
         QFETCH(QUrl, folder);
         QFETCH(QUrl, expected);
 
-        QCOMPARE(TypedPath::resolve(picked, folder), expected);
+        QCOMPARE(TypedPath::resolve(picked, folder, kSuffix), expected);
+    }
+
+    // An existing folder stays one: no "folder.zip" next to it.
+    void folderKeepsItsName()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QUrl folder = QUrl::fromLocalFile(dir.path());
+        QVERIFY(QDir(dir.path()).mkdir(u"d"_s));
+        const QUrl inside = QUrl::fromLocalFile(dir.filePath(u"d"_s));
+        QCOMPARE(TypedPath::resolve(inside, folder, kSuffix), inside);
     }
 };
 

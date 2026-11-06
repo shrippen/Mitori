@@ -22,6 +22,6 @@ public:
     bool asksItself() const;
 
     Q_INVOKABLE QUrl resolve(const QUrl &picked, const QUrl &folder) const;
-    // A file is there and asksItself: the user has to say yes first.
+    // A file (no folder) is there and asksItself: the user has to say yes first.
     Q_INVOKABLE bool taken(const QUrl &target) const;
 };

@@ -285,11 +285,17 @@ bool Courses::remove(const QString &uid)
         return false;
     }
     const QStringList media = m_book->courseMedia(uid);
+    const QString shared = exportName(uid);
     if (!saved(m_book->deleteCourse(uid, QDateTime::currentDateTimeUtc()), tr("The notebook could not be deleted: %1"))) {
         return false;
     }
     for (const QString &name : media) {
         MediaStore::shared().remove(name);
+    }
+
+    // A copy made for sharing holds the same text, photos and voice notes.
+    if (!shared.isEmpty()) {
+        QFile::remove(QDir(ShareFile::folder()).filePath(shared));
     }
     return true;
 }

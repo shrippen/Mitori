@@ -382,6 +382,18 @@ private slots:
     }
 
     // A file that is no backup, and one of a newer format, are refused with a reason.
+    // A folder is no name: "~/" must not become a hidden file ".zip" in it.
+    void folderIsNoName()
+    {
+        const QString folder = m_dir.filePath(u"ordner"_s);
+        QVERIFY(QDir().mkpath(folder));
+        const Device d = device(u"ordner-geraet"_s);
+        Backup backup(d.practice, d.courses, d.media, d.work);
+        QVERIFY(!backup.save(QUrl::fromLocalFile(folder + u'/')));
+        QVERIFY(!backup.errorString().isEmpty());
+        QVERIFY(!QFile::exists(folder + u"/.zip"_s));
+    }
+
     void refused()
     {
         const Device d = device(u"fremd"_s);

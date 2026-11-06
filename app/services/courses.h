@@ -137,8 +137,9 @@ public:
     bool canShare() const;
     // The notebook to the share dialog: as exportNotebook, with a copy in the cache.
     Q_INVOKABLE int shareNotebook(const QString &uid);
-    // That copy: its path, or "" with errorString. The last one stays until the next: the app the
-    // user picked may read it long after the dialog (a mail's draft). Tests.
+    // That copy: its path, or "" with errorString. The last one stays until the next, or until
+    // its notebook is deleted: the app the user picked may read it long after the dialog (a mail's
+    // draft). Tests.
     QString shareCopy(const QString &uid, int *missing = nullptr);
 
     // The course into the device's calendar app (platform/devicecalendar); false without one.

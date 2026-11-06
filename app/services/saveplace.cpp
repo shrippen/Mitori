@@ -4,6 +4,10 @@
 
 #include "typedpath.h"
 
+namespace {
+constexpr auto kSuffix = "zip";         // the dialog saves ZIP archives
+}
+
 bool SavePlace::asksItself() const
 {
 #ifdef Q_OS_ANDROID
@@ -15,10 +19,10 @@ bool SavePlace::asksItself() const
 
 QUrl SavePlace::resolve(const QUrl &picked, const QUrl &folder) const
 {
-    return TypedPath::resolve(picked, folder);
+    return TypedPath::resolve(picked, folder, kSuffix);
 }
 
 bool SavePlace::taken(const QUrl &target) const
 {
-    return asksItself() && target.isLocalFile() && QFileInfo::exists(target.toLocalFile());
+    return asksItself() && target.isLocalFile() && QFileInfo(target.toLocalFile()).isFile();
 }

@@ -13,6 +13,7 @@
 #include "courses.h"
 #include "mediastore.h"
 #include "notebookexport.h"
+#include "saveplace.h"
 #include "sharefile.h"
 #include "zipwriter.h"
 
@@ -142,6 +143,10 @@ private slots:
         const QString second = courses.shareCopy(other);
         QVERIFY(!QFile::exists(first));
         QVERIFY(QFile::exists(second));
+
+        // Deleted, its copy goes with it: text, photos and voice notes it held.
+        QVERIFY(courses.remove(other));
+        QVERIFY2(!QFile::exists(second), qPrintable(second));
         QVERIFY(courses.shareCopy(u"no such notebook"_s).isEmpty());
         QVERIFY(!courses.canShare());
         QCOMPARE(courses.shareNotebook(uid), -1);
@@ -166,6 +171,27 @@ private slots:
         QVERIFY(md.contains(u"verloren"_s));
         QVERIFY(!md.contains(u"04-"_s));                // the lost file is not linked
         QVERIFY(md.contains(u"verloren  \n(Voice note not on the device)"_s));
+    }
+
+    // The question before replacing: only a file, and the one the export would write. A folder
+    // ("~/") is no file to replace; a name without its suffix means the name with it.
+    void saveTarget()
+    {
+        SavePlace place;
+        if (!place.asksItself()) {
+            QSKIP("the portal's dialog asks in the Flatpak");
+        }
+        QVERIFY(QDir(m_dir.path()).mkdir(u"ordner"_s));
+        const QUrl folder = QUrl::fromLocalFile(m_dir.path());
+        QVERIFY(!place.taken(QUrl::fromLocalFile(m_dir.filePath(u"ordner"_s))));
+        QVERIFY(!place.taken(QUrl::fromLocalFile(m_dir.filePath(u"ordner/"_s))));
+
+        QFile old(m_dir.filePath(u"sicherung.alt.zip"_s));
+        QVERIFY(old.open(QIODevice::WriteOnly));
+        old.close();
+        const QUrl typed = QUrl::fromLocalFile(m_dir.filePath(u"sicherung.alt"_s));
+        QCOMPARE(place.resolve(typed, folder), QUrl::fromLocalFile(old.fileName()));
+        QVERIFY(place.taken(place.resolve(typed, folder)));
     }
 
     // Characters a URL or a file system takes for something else stay out of the name.
