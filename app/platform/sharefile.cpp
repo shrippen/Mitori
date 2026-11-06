@@ -61,7 +61,9 @@ bool sendOnAndroid(const QString &path, const QString &subject)
     constexpr jint kNewTask = 0x10000000;   // Intent.FLAG_ACTIVITY_NEW_TASK: the context may not be an activity
     chooser.callObjectMethod("addFlags", "(I)Landroid/content/Intent;", kNewTask);
 
-    context.callMethod<void>("startActivity", "(Landroid/content/Intent;)V", chooser.object());
+    // Through JNI: QJniObject::callMethod clears the exception itself, and this check would never see it.
+    const jmethodID start = env.findMethod(env->GetObjectClass(context.object()), "startActivity", "(Landroid/content/Intent;)V");
+    env->CallVoidMethod(context.object(), start, chooser.object());
     return !env.checkAndClearExceptions();
 }
 #endif
