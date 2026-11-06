@@ -678,6 +678,9 @@ TestCase {
     function test_4t_player_switches() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
         const page = push("PlayerPage", { playlist: rows, index: 0 })
+        // The page has the bar's style (with Auto it had no head, and no way back, under Kante).
+        const bar = window.pageStack.globalToolBar
+        compare(page.globalToolBarStyle, bar.actualStyle)
         verify(!Levels.held, "no video plays: the screen may sleep")
         Levels.setPlayback(Levels.Playback.Playing)     // as the player does while it plays
         const awake = findChild(page, "awakeSwitch")

@@ -215,6 +215,13 @@ Offen, klein:
   Fokus nach Dialogen und Zurück, Tastaturweg zum Player (29 Tabs), Ursache für den eingetippten Exportpfad.
 - Daten: „Ago: Kin“ (Lexikon, vermutlich „Kinn“), Glossar Kiri-otoshi ohne Übersetzung, „Kote“ ohne Kanji.
 
+
+Abschlussrunde auf `main` (06.11.2026, ohne Videos): behoben sind Kopf des Trainings unter Kante, Titel und ✕ des Blatts. Offen:
+- Kopf der Startseite unter Kante ohne System-Farbschema beim Kaltstart hell (`globalToolBar.colorSet` und späteres Erzeugen des Kopfs wirken nicht).
+- Englisch: Bedeutungen und Glossar deutsch (Umbau „Programmdaten auf Englisch“).
+- Esc verlässt nur den Player, nicht Kommentar oder Programm. Quer am Telefon bleiben im Programm rund 140 px für die Liste.
+- „Abbrechen“ im Dialog „Runde verwerfen?“ ist doppeldeutig (Knopf aus dem Standard).
+- `ScrollBar.qml:51` meldet Warnungen im Journal (59×); „not placed in the graphics scene“ je Seite.
 ## Kante-Bedarf
 
 Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutzt:

@@ -71,7 +71,7 @@ Kirigami.Page {
 
         LookLabel {
             width: parent.width
-            text: qsTr("You are at point %1 of %2. Nothing has been rated yet, the round is simply dropped.").arg(page.index + 1).arg(page.points.length)
+            text: !cancelDialog.visible ? "" : qsTr("You are at point %1 of %2. Nothing has been rated yet, the round is simply dropped.").arg(page.index + 1).arg(page.points.length)
             wrapMode: Text.Wrap
         }
     }

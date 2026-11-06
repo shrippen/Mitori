@@ -22,17 +22,17 @@
         <translation>Heute</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="228"/>
+        <location filename="../qml/AllNotesPage.qml" line="229"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="229"/>
+        <location filename="../qml/AllNotesPage.qml" line="230"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/AllNotesPage.qml" line="281"/>
+        <location filename="../qml/AllNotesPage.qml" line="282"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
@@ -1558,6 +1558,14 @@
         <source>Frame on</source>
         <translation>Bild vor</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../qml/PlayerView.qml" line="681"/>
+        <source>Training done: %n technique(s). They count as a practice day in the statistics.</source>
+        <translation>
+            <numerusform>Training fertig: %n Technik. Das zählt als Übungstag in der Statistik.</numerusform>
+            <numerusform>Training fertig: %n Techniken. Das zählt als Übungstag in der Statistik.</numerusform>
+        </translation>
+    </message>
     <message>
         <location filename="../qml/PlayerView.qml" line="747"/>
         <source>Playback</source>
@@ -1618,14 +1626,6 @@
         <location filename="../qml/PlayerView.qml" line="436"/>
         <source>Volume %1 %</source>
         <translation>Lautstärke %1 %</translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="681"/>
-        <source>%n technique(s) practised today. They count as a practice day in the statistics.</source>
-        <translation>
-            <numerusform>%n Technik heute geübt. Das zählt als Übungstag in der Statistik.</numerusform>
-            <numerusform>%n Techniken heute geübt. Das zählt als Übungstag in der Statistik.</numerusform>
-        </translation>
     </message>
     <message>
         <location filename="../qml/PlayerView.qml" line="769"/>
@@ -1717,22 +1717,22 @@
 <context>
     <name>ProgrammePage</name>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="54"/>
+        <location filename="../qml/ProgrammePage.qml" line="55"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="59"/>
+        <location filename="../qml/ProgrammePage.qml" line="60"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="64"/>
+        <location filename="../qml/ProgrammePage.qml" line="65"/>
         <source>All notes</source>
         <translation>Alle Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="101"/>
+        <location filename="../qml/ProgrammePage.qml" line="102"/>
         <source>%1, %2 of %3 exam-ready</source>
         <translation>%1, %2 von %3 prüfungsreif</translation>
     </message>
@@ -1926,7 +1926,7 @@
     <message>
         <location filename="../qml/SettingsPage.qml" line="60"/>
         <source>Without a bundle: a folder with the videos, folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</source>
-        <translation>Ohne Bundle: ein Ordner mit den Videos, Ordner und Namen wie auf den DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</translation>
+        <translation>Ohne Paket: ein Ordner mit den Videos, Ordner und Namen wie auf den DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</translation>
     </message>
     <message>
         <location filename="../qml/SettingsPage.qml" line="61"/>
@@ -2228,7 +2228,7 @@
     <message>
         <location filename="../qml/StartPage.qml" line="170"/>
         <source>Exam mode</source>
-        <translation>Prüfungsmodus</translation>
+        <translation>Prüfung</translation>
     </message>
     <message>
         <location filename="../qml/StartPage.qml" line="171"/>
@@ -2517,87 +2517,87 @@
 <context>
     <name>TechniqueSheet</name>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="146"/>
+        <location filename="../qml/TechniqueSheet.qml" line="148"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="184"/>
+        <location filename="../qml/TechniqueSheet.qml" line="186"/>
         <source>Uchidachi</source>
         <translation>Uchidachi</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="184"/>
+        <location filename="../qml/TechniqueSheet.qml" line="186"/>
         <source>Shidachi</source>
         <translation>Shidachi</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="185"/>
+        <location filename="../qml/TechniqueSheet.qml" line="187"/>
         <source>Hit</source>
         <translation>Treffer</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="185"/>
+        <location filename="../qml/TechniqueSheet.qml" line="187"/>
         <source>Zanshin</source>
         <translation>Zanshin</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="202"/>
+        <location filename="../qml/TechniqueSheet.qml" line="204"/>
         <source>Open question: the sources do not agree here, it is not settled yet.</source>
         <translation>Offene Frage: Die Vorlagen sind sich hier nicht einig, das ist noch nicht geklärt.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="216"/>
+        <location filename="../qml/TechniqueSheet.qml" line="218"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="217"/>
+        <location filename="../qml/TechniqueSheet.qml" line="219"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="219"/>
+        <location filename="../qml/TechniqueSheet.qml" line="221"/>
         <source>Last note, %1: %2</source>
         <translation>Letzte Notiz, %1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="231"/>
+        <location filename="../qml/TechniqueSheet.qml" line="233"/>
         <source>Video not loaded. The DVD&apos;s code loads it onto the device.</source>
         <translation>Video nicht geladen. Der Code der DVD lädt es aufs Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="232"/>
+        <location filename="../qml/TechniqueSheet.qml" line="234"/>
         <source>There is no video of this technique.</source>
         <translation>Zu dieser Technik gibt es kein Video.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="237"/>
+        <location filename="../qml/TechniqueSheet.qml" line="239"/>
         <source>Enter code</source>
         <translation>Code eingeben</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="246"/>
+        <location filename="../qml/TechniqueSheet.qml" line="248"/>
         <source>DVD on shinkiryu.de</source>
         <translation>DVD auf shinkiryu.de</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="260"/>
+        <location filename="../qml/TechniqueSheet.qml" line="262"/>
         <source>Watch video</source>
         <translation>Video ansehen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="266"/>
+        <location filename="../qml/TechniqueSheet.qml" line="268"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="266"/>
+        <location filename="../qml/TechniqueSheet.qml" line="268"/>
         <source>Notes (%1)</source>
         <translation>Notizen (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="275"/>
+        <location filename="../qml/TechniqueSheet.qml" line="277"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>
@@ -2769,7 +2769,7 @@
     <message>
         <location filename="../qml/VideosPage.qml" line="57"/>
         <source>This code does not open its bundle.</source>
-        <translation>Dieser Code öffnet sein Bundle nicht.</translation>
+        <translation>Dieser Code öffnet sein Paket nicht.</translation>
     </message>
     <message>
         <location filename="../qml/VideosPage.qml" line="85"/>
@@ -2800,7 +2800,7 @@
     <message>
         <location filename="../qml/VideosPage.qml" line="138"/>
         <source>Bundles</source>
-        <translation>Bundles</translation>
+        <translation>Videopakete</translation>
     </message>
     <message>
         <location filename="../qml/VideosPage.qml" line="143"/>
@@ -2810,7 +2810,7 @@
     <message>
         <location filename="../qml/VideosPage.qml" line="149"/>
         <source>A bundle has 70–600 MB.</source>
-        <translation>Ein Bundle hat 70–600 MB.</translation>
+        <translation>Ein Paket hat 70–600 MB.</translation>
     </message>
     <message>
         <location filename="../qml/VideosPage.qml" line="156"/>
@@ -2819,8 +2819,8 @@
     </message>
     <message>
         <location filename="../qml/VideosPage.qml" line="158"/>
-        <source>The list of videos could not be loaded. Check the connection and reload.</source>
-        <translation>Die Videoliste ließ sich nicht laden. Verbindung prüfen und neu laden.</translation>
+        <source>The list of videos could not be loaded. Reload later, or check the connection.</source>
+        <translation>Die Videoliste ließ sich nicht laden. Später neu laden oder die Verbindung prüfen.</translation>
     </message>
     <message>
         <location filename="../qml/VideosPage.qml" line="159"/>

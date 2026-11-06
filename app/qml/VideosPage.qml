@@ -100,7 +100,7 @@ Kirigami.ScrollablePage {
 
                 objectName: "codeField"
                 Layout.fillWidth: true
-                placeholderText: "XXXXX-XXXXX-XXXXX-XXXXX"
+                placeholderText: "XXXXX-XXXXX-…"
                 font: Look.monoFont(Look.defaultFont.pointSize)
                 inputMethodHints: Qt.ImhUppercaseOnly | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
                 Accessible.name: qsTr("Code of the DVD")
@@ -155,7 +155,7 @@ Kirigami.ScrollablePage {
             Layout.fillWidth: true
             text: Bundles.manifestState === Bundles.ManifestState.Loading ? qsTr("Loading the list of videos …")
                 : Bundles.manifestState === Bundles.ManifestState.Failed && Bundles.bundles.length === 0
-                  ? qsTr("The list of videos could not be loaded. Check the connection and reload.")
+                  ? qsTr("The list of videos could not be loaded. Reload later, or check the connection.")
                 : qsTr("On this device: %1 of videos.").arg(page.megabytes(Bundles.size))
             color: Look.mutedTextColor
             wrapMode: Text.Wrap

@@ -51,6 +51,8 @@ Kirigami.Dialog {
 
     // Not a content child: the dialog's scroll view sizes itself by its only child, the column.
     property Item lookScope: LookScope { target: sheet.contentItem }
+    // The head lies beside the content: without it, its title and ✕ kept the platform's colours.
+    property Item headScope: LookScope { target: sheet.header }
 
     // Up/Down, Page Up/Down, Home and End scroll a sheet taller than the window (the Kamae
     // exercise on a phone); the mouse wheel does already. From the content and from the header

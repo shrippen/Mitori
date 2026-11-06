@@ -678,7 +678,7 @@ Item {
                     visible: page.trainingDone
                     importance: LookHint.Importance.Info
                     titleText: qsTr("Done")
-                    text: qsTr("%n technique(s) practised today. They count as a practice day in the statistics.", "", page.practisedCount)
+                    text: qsTr("Training done: %n technique(s). They count as a practice day in the statistics.", "", page.practisedCount)
 
                     LookButton {
                         visible: !page.compact
