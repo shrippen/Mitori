@@ -51,6 +51,8 @@ Kirigami.Dialog {
 
     // Not a content child: the dialog's scroll view sizes itself by its only child, the column.
     property Item lookScope: LookScope { target: sheet.contentItem }
+    // The head lies beside the content: without it, its title and ✕ kept the platform's colours.
+    property Item headScope: LookScope { target: sheet.header }
 
     // Up/Down, Page Up/Down, Home and End scroll a sheet taller than the window (the Kamae
     // exercise on a phone); the mouse wheel does already. From the content and from the header
@@ -80,6 +82,16 @@ Kirigami.Dialog {
         height: sheet.shinkiSheet ? 0 : implicitHeight
         contentItem: Kirigami.DialogHeaderTopContent {
             dialog: sheet
+            // Kirigami's ✕ keeps the platform's colour whatever the scope says: dark on Kante's dark.
+            showCloseButton: false
+
+            LookToolButton {
+                objectName: "sheetClose"
+                icon.name: "window-close-symbolic"
+                text: qsTr("Close")
+                display: QQC2.AbstractButton.IconOnly
+                onClicked: sheet.close()
+            }
         }
         Keys.onPressed: event => sheet.scrollKey(event)
     }
