@@ -31,9 +31,9 @@ class AllNotes : public KeyedListModel
     Q_PROPERTY(int count READ count NOTIFY rowsChanged)
 
 public:
-    static constexpr auto kCourses = "courses";
+    explicit AllNotes(QObject *parent = nullptr);
 
-    using KeyedListModel::KeyedListModel;
+    static constexpr auto kCourses = "courses";
 
     Practice *practice() const { return m_practice; }
     void setPractice(Practice *practice);
@@ -52,6 +52,9 @@ public:
 signals:
     void sourcesChanged();
     void filterChanged();
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     void collect();

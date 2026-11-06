@@ -10,7 +10,7 @@ Kirigami.ApplicationWindow {
     width: KanteStyle.unit(420)
     height: KanteStyle.unit(800)
 
-    // The style Mitori started with (Appearance): Breeze and Material are the platform's
+    // The style the window is built in (Appearance): Breeze and Material are the platform's
     // colours, Kante dark, Leinen light, Shinki the club newspaper's (paper, ink, one red).
     // Shinki and Kante are two themes of their own: neither takes the other's colours.
     readonly property bool platformStyle: Appearance.running === Appearance.Style.Breeze
@@ -74,11 +74,65 @@ Kirigami.ApplicationWindow {
         })
     }
     pageStack.initialPage: StartPage {}
+
+    // After a change of style (Appearance::rebuild) the pages of the old window, as keptPageList gave
+    // them. A page names itself with `keptPage` (and `keptState`, its properties); only pages
+    // without an unsaved input of their own do, and those are the only ways to the style choice.
+    property var keptPages: []
+    function keptPageList() {
+        // A field in focus saves when it is left.
+        root.contentItem.forceActiveFocus()
+        const pages = []
+        for (let i = 1; i <= root.pageStack.currentIndex; i++) {
+            const page = root.pageStack.get(i)
+            const name = page ? page["keptPage"] : undefined
+            if (!name) {
+                break
+            }
+            pages.push({ page: name, state: page["keptState"] ?? {}, contentY: page.flickable ? page.flickable.contentY : 0 })
+        }
+        return pages
+    }
+    // At once, without the slide: the window opens as it was.
+    function restorePages() {
+        const duration = root.pageStack.columnView.scrollDuration
+        root.pageStack.columnView.scrollDuration = 0
+        for (const kept of root.keptPages) {
+            const page = root.pageStack.push(Qt.resolvedUrl(kept.page), kept.state)
+            if (page.flickable && kept.contentY > 0) {
+                root.scrollTo(page.flickable, kept.contentY)
+            }
+        }
+        Qt.callLater(() => { root.pageStack.columnView.scrollDuration = duration })
+    }
+
+    // The old place, once the page is that tall: the previews on it come a moment later.
+    function scrollTo(flickable, y) {
+        const place = () => {
+            if (flickable.contentHeight - flickable.height < y) {
+                return
+            }
+            flickable.contentHeightChanged.disconnect(place)
+            flickable.contentY = y
+        }
+        flickable.contentHeightChanged.connect(place)
+        Qt.callLater(place)
+    }
+
     // The first start: the wizard over the start menu (it goes back there).
     Component.onCompleted: {
+        Appearance.adopt(root)
+        restorePages()
         if (!Appearance.welcomed) {
             pageStack.push(Qt.resolvedUrl("WelcomePage.qml"))
         }
+    }
+
+    // Android's bars in the window's ground.
+    Binding {
+        target: Appearance
+        property: "barColor"
+        value: Look.backgroundColor
     }
 
     // The sync: after it brought something the services read anew; a change asks for one soon.

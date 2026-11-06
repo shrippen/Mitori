@@ -5,8 +5,8 @@
 
 #include "appearance.h"
 
-// The style and language choice: saved for the next start, Breeze only where it exists, the
-// start falls back to the default for a style the device does not offer.
+// The style and language choice: saved and at once in the app, Breeze only where it exists,
+// one controls style in a run, the start falls back to the default for a style the device does not offer.
 class TstAppearance : public QObject
 {
     Q_OBJECT
@@ -26,23 +26,22 @@ private slots:
         QCOMPARE(a.style(), Appearance::Style::Leinen);
         QCOMPARE(a.language(), Appearance::Language::System);
         QVERIFY(!a.welcomed());
-        QVERIFY(!a.restartNeeded());
     }
 
-    // A choice applies at the next start: until then a restart is needed.
-    void choiceAppliesAtStart()
+    // A choice counts at once, and the next start begins with it. Without a window nothing is
+    // to be built anew.
+    void choiceSaved()
     {
         QCOMPARE(Appearance::startStyle({}), Appearance::Style::Leinen);
         Appearance a;
         QSignalSpy changed(&a, &Appearance::changed);
         a.setStyle(Appearance::Style::Kante);
         QCOMPARE(changed.count(), 1);
-        QVERIFY(a.restartNeeded());
-        QCOMPARE(a.running(), Appearance::Style::Leinen);
+        QCOMPARE(a.running(), Appearance::Style::Kante);
+        a.setStyle(Appearance::Style::Kante);
+        QCOMPARE(changed.count(), 1);
         QCOMPARE(Appearance::startStyle({}), Appearance::Style::Kante);
-        Appearance next;
-        QVERIFY(!next.restartNeeded());
-        QCOMPARE(next.running(), Appearance::Style::Kante);
+        QCOMPARE(Appearance().running(), Appearance::Style::Kante);
     }
 
     // Without Plasma's controls style no Breeze: not offered, and a saved Breeze starts as the default.
@@ -60,6 +59,29 @@ private slots:
         QCOMPARE(Appearance::controlsStyle(Appearance::Style::Kante, {}), QStringLiteral("Material"));
     }
 
+    // On Plasma Breeze in place of Material: Qt's controls style cannot change in a run, so all
+    // styles a device offers share one, and every change works without a restart.
+    void oneControlsStyle()
+    {
+        QTemporaryDir plasma;
+        QVERIFY(QDir(plasma.path()).mkpath(QStringLiteral("org/kde/desktop")));
+        qputenv("KDE_FULL_SESSION", "true");
+        Appearance a;
+        const QStringList paths{plasma.path()};
+        QStringList controls;
+        for (const Appearance::Style style : {Appearance::Style::Breeze, Appearance::Style::Kante,
+                                              Appearance::Style::Leinen, Appearance::Style::Shinki}) {
+            controls << Appearance::controlsStyle(style, paths);
+        }
+        controls.removeDuplicates();
+        QCOMPARE(controls, QStringList{QStringLiteral("org.kde.desktop")});
+
+        QSettings().setValue(QStringLiteral("look/style"), int(Appearance::Style::Material));
+        QCOMPARE(Appearance::startStyle(paths), Appearance::Style::Leinen);
+        qunsetenv("KDE_FULL_SESSION");
+        QCOMPARE(Appearance::startStyle({}), Appearance::Style::Material);
+    }
+
     // Shinki comes only with -DMITORI_SHINKI=ON (until every page reaches it).
     void shinkiOnlyInDevelopment()
     {
@@ -75,17 +97,23 @@ private slots:
 #endif
     }
 
-    // The language: the user's, or German or English whatever the system says.
+    // The language: the user's, or German or English whatever the system says; dates and numbers
+    // follow at once.
     void language()
     {
         Appearance a;
+        QSignalSpy changed(&a, &Appearance::languageChanged);
         a.setLanguage(Appearance::Language::German);
-        QCOMPARE(Appearance::startLocale(), QStringLiteral("de"));
-        QVERIFY(a.restartNeeded());
+        QCOMPARE(changed.count(), 1);
+        QCOMPARE(QLocale().language(), QLocale::German);
+        QCOMPARE(QLocale().toString(1.5, 'f', 1), QStringLiteral("1,5"));
+        QCOMPARE(Appearance().language(), Appearance::Language::German);
         a.setLanguage(Appearance::Language::English);
-        QCOMPARE(Appearance::startLocale(), QStringLiteral("en"));
+        QCOMPARE(QLocale().language(), QLocale::English);
+        QCOMPARE(QLocale().toString(1.5, 'f', 1), QStringLiteral("1.5"));
         a.setLanguage(Appearance::Language::System);
-        QVERIFY(Appearance::startLocale().isEmpty());
+        QCOMPARE(QLocale().language(), QLocale::system().language());
+        QVERIFY(Appearance::localeName(Appearance::Language::System).isEmpty());
     }
 
     void welcome()

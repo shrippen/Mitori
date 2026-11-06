@@ -4,7 +4,7 @@
 <context>
     <name>AllNotes</name>
     <message>
-        <location filename="../services/allnotes.cpp" line="94"/>
+        <location filename="../services/allnotes.cpp" line="114"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
@@ -83,54 +83,74 @@
 <context>
     <name>Appearance</name>
     <message>
-        <location filename="../services/appearance.cpp" line="128"/>
+        <location filename="../services/appearance.cpp" line="184"/>
         <source>Breeze</source>
         <translation>Breeze</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="128"/>
+        <location filename="../services/appearance.cpp" line="184"/>
         <source>Plasma&apos;s own look, with its colours</source>
         <translation>Plasmas eigenes Aussehen, mit seinen Farben</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="129"/>
+        <location filename="../services/appearance.cpp" line="185"/>
         <source>Material</source>
         <translation>Material</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="129"/>
+        <location filename="../services/appearance.cpp" line="185"/>
         <source>Android&apos;s look, light</source>
         <translation>Das Aussehen von Android, hell</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="130"/>
+        <location filename="../services/appearance.cpp" line="186"/>
         <source>Kante</source>
         <translation>Kante</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="130"/>
+        <location filename="../services/appearance.cpp" line="186"/>
         <source>Dark, sharp edges, yellow accent</source>
         <translation>Dunkel, scharfe Kanten, gelber Akzent</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="131"/>
+        <location filename="../services/appearance.cpp" line="187"/>
         <source>Leinen</source>
         <translation>Leinen</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="131"/>
+        <location filename="../services/appearance.cpp" line="187"/>
         <source>Kante in light linen</source>
         <translation>Kante in hellem Leinen</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="132"/>
+        <location filename="../services/appearance.cpp" line="188"/>
         <source>Shinki</source>
         <translation>Shinki</translation>
     </message>
     <message>
-        <location filename="../services/appearance.cpp" line="132"/>
+        <location filename="../services/appearance.cpp" line="188"/>
         <source>Paper, ink and one red, as the Shinki News</source>
         <translation>Papier, Tusche und ein Rot, wie die Shinki News</translation>
+    </message>
+    <message>
+        <location filename="../services/appearance.cpp" line="259"/>
+        <source>Practice today</source>
+        <translation>Heute üben</translation>
+    </message>
+    <message>
+        <location filename="../services/appearance.cpp" line="260"/>
+        <source>Tap a technique: its place in the exam video plays.</source>
+        <translation>Technik antippen: die Stelle im Prüfungsvideo läuft.</translation>
+    </message>
+    <message>
+        <location filename="../services/appearance.cpp" line="261"/>
+        <source>exam-ready</source>
+        <translation>prüfungsreif</translation>
+    </message>
+    <message>
+        <location filename="../services/appearance.cpp" line="262"/>
+        <source>Videos</source>
+        <translation>Videos</translation>
     </message>
 </context>
 <context>
@@ -141,52 +161,37 @@
         <translation>Darstellung</translation>
     </message>
     <message>
-        <location filename="../qml/AppearancePage.qml" line="18"/>
-        <source>System</source>
-        <translation>System</translation>
-    </message>
-    <message>
-        <location filename="../qml/AppearancePage.qml" line="26"/>
+        <location filename="../qml/AppearancePage.qml" line="25"/>
         <source>Style</source>
         <translation>Stil</translation>
     </message>
     <message>
-        <location filename="../qml/AppearancePage.qml" line="35"/>
+        <location filename="../qml/AppearancePage.qml" line="34"/>
         <source>Language</source>
         <translation>Sprache</translation>
     </message>
     <message>
-        <location filename="../qml/AppearancePage.qml" line="49"/>
-        <source>At the next start</source>
-        <translation>Beim nächsten Start</translation>
-    </message>
-    <message>
-        <location filename="../qml/AppearancePage.qml" line="50"/>
-        <source>Style and language change when Mitori starts again.</source>
-        <translation>Stil und Sprache ändern sich, wenn Mitori neu startet.</translation>
-    </message>
-    <message>
-        <location filename="../qml/AppearancePage.qml" line="56"/>
+        <location filename="../qml/AppearancePage.qml" line="43"/>
         <source>Show the introduction</source>
         <translation>Einführung zeigen</translation>
     </message>
     <message>
-        <location filename="../qml/AppearancePage.qml" line="63"/>
+        <location filename="../qml/AppearancePage.qml" line="50"/>
         <source>About Mitori</source>
         <translation>Über Mitori</translation>
     </message>
     <message>
-        <location filename="../qml/AppearancePage.qml" line="76"/>
+        <location filename="../qml/AppearancePage.qml" line="63"/>
         <source>Programme data %1</source>
         <translation>Programmdaten %1</translation>
     </message>
     <message>
-        <location filename="../qml/AppearancePage.qml" line="69"/>
+        <location filename="../qml/AppearancePage.qml" line="56"/>
         <source>Mitori %1. The exam programmes of Aikido Shinki Rengo, Daitoryu and Itto-den Shinki Toho, with the exam videos of the DVDs.</source>
         <translation>Mitori %1. Die Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho, mit den Prüfungsvideos der DVDs.</translation>
     </message>
     <message>
-        <location filename="../qml/AppearancePage.qml" line="95"/>
+        <location filename="../qml/AppearancePage.qml" line="82"/>
         <source>Sources: the exam regulations and lists of the dojo, the comments of shinkiryu.de and the Aiki-Budo lexicon.</source>
         <translation>Quellen: die Prüfungsordnungen und Listen des Dojo, die Kommentare von shinkiryu.de und das Aiki-Budo-Lexikon.</translation>
     </message>
@@ -1210,6 +1215,14 @@
     </message>
 </context>
 <context>
+    <name>LanguageChoice</name>
+    <message>
+        <location filename="../qml/LanguageChoice.qml" line="15"/>
+        <source>System</source>
+        <translation>System</translation>
+    </message>
+</context>
+<context>
     <name>Main</name>
     <message>
         <location filename="../qml/Main.qml" line="51"/>
@@ -1649,52 +1662,52 @@
 <context>
     <name>Practice</name>
     <message>
-        <location filename="../services/practice.cpp" line="43"/>
+        <location filename="../services/practice.cpp" line="57"/>
         <source>The practice log could not be opened: %1</source>
         <translation>Das Übungsprotokoll lässt sich nicht öffnen: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="78"/>
+        <location filename="../services/practice.cpp" line="92"/>
         <source>not rated</source>
         <translation>offen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="78"/>
+        <location filename="../services/practice.cpp" line="92"/>
         <source>seen</source>
         <translation>gesehen</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="78"/>
+        <location filename="../services/practice.cpp" line="92"/>
         <source>with help</source>
         <translation>mit Hilfe</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="78"/>
+        <location filename="../services/practice.cpp" line="92"/>
         <source>sure</source>
         <translation>sicher</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="78"/>
+        <location filename="../services/practice.cpp" line="92"/>
         <source>exam-ready</source>
         <translation>prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="88"/>
+        <location filename="../services/practice.cpp" line="102"/>
         <source>The rating could not be saved: %1</source>
         <translation>Die Einschätzung wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="323"/>
+        <location filename="../services/practice.cpp" line="337"/>
         <source>The note could not be saved: %1</source>
         <translation>Die Notiz wurde nicht gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="388"/>
+        <location filename="../services/practice.cpp" line="402"/>
         <source>Not every point of the exam round is rated.</source>
         <translation>Nicht jeder Punkt der Prüfungsrunde ist eingeschätzt.</translation>
     </message>
     <message>
-        <location filename="../services/practice.cpp" line="409"/>
+        <location filename="../services/practice.cpp" line="423"/>
         <source>The exam round could not be saved: %1</source>
         <translation>Die Prüfungsrunde konnte nicht gespeichert werden: %1</translation>
     </message>
@@ -1927,142 +1940,142 @@
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="28"/>
+        <location filename="../qml/SettingsPage.qml" line="30"/>
         <source>Appearance</source>
         <translation>Darstellung</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="32"/>
+        <location filename="../qml/SettingsPage.qml" line="34"/>
         <source>Style, language, about Mitori</source>
         <translation>Stil, Sprache, über Mitori</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="37"/>
+        <location filename="../qml/SettingsPage.qml" line="39"/>
         <source>Exam videos</source>
         <translation>Prüfungsvideos</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="41"/>
+        <location filename="../qml/SettingsPage.qml" line="43"/>
         <source>Videos and DVD codes</source>
         <translation>Videos und DVD-Codes</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="46"/>
+        <location filename="../qml/SettingsPage.qml" line="48"/>
         <source>Video folder</source>
         <translation>Videoordner</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="60"/>
+        <location filename="../qml/SettingsPage.qml" line="63"/>
         <source>Without a bundle: a folder with the videos, folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</source>
         <translation>Ohne Paket: ein Ordner mit den Videos, Ordner und Namen wie auf den DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="61"/>
+        <location filename="../qml/SettingsPage.qml" line="64"/>
         <source>The Flatpak can read folders under ~/Videos only.</source>
         <translation>Das Flatpak liest nur Ordner unter ~/Videos.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="66"/>
+        <location filename="../qml/SettingsPage.qml" line="69"/>
         <source>Backup</source>
         <translation>Sicherung</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="72"/>
+        <location filename="../qml/SettingsPage.qml" line="75"/>
         <source>Save backup …</source>
         <translation>Sicherung speichern …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="82"/>
+        <location filename="../qml/SettingsPage.qml" line="85"/>
         <source>Read backup …</source>
         <translation>Sicherung einlesen …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="90"/>
+        <location filename="../qml/SettingsPage.qml" line="93"/>
         <source>One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back merges it: what is newer stays, nothing gets lost. DVD codes are not in it.</source>
         <translation>Eine Datei mit Einschätzungen, Notizen, Prüfungsrunden, Notizbüchern, Graden, Fotos und Sprachnotizen. Beim Einlesen wird zusammengeführt: das Neuere bleibt, nichts geht verloren. DVD-Codes sind nicht enthalten.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="114"/>
+        <location filename="../qml/SettingsPage.qml" line="117"/>
         <source>Sync between devices</source>
         <translation>Abgleich zwischen Geräten</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="117"/>
+        <location filename="../qml/SettingsPage.qml" line="120"/>
         <source>WebDAV / Nextcloud</source>
         <translation>WebDAV / Nextcloud</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="120"/>
+        <location filename="../qml/SettingsPage.qml" line="123"/>
         <source>Sync</source>
         <translation>Abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="126"/>
+        <location filename="../qml/SettingsPage.qml" line="129"/>
         <source>Folder on the server</source>
         <translation>Ordner auf dem Server</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="140"/>
+        <location filename="../qml/SettingsPage.qml" line="143"/>
         <source>User</source>
         <translation>Benutzer</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="152"/>
+        <location filename="../qml/SettingsPage.qml" line="155"/>
         <source>App password</source>
         <translation>App-Passwort</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="159"/>
+        <location filename="../qml/SettingsPage.qml" line="162"/>
         <source>saved</source>
         <translation>gespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="164"/>
+        <location filename="../qml/SettingsPage.qml" line="167"/>
         <source>This device</source>
         <translation>Dieses Gerät</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="176"/>
+        <location filename="../qml/SettingsPage.qml" line="179"/>
         <source>Sync after every change</source>
         <translation>Nach jeder Änderung abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="186"/>
+        <location filename="../qml/SettingsPage.qml" line="189"/>
         <source>Otherwise when Mitori starts and once a day. Every rating and note is an entry of its own with a time; changes from several devices are merged. Mitori asks only when the same note was changed on two devices.</source>
         <translation>Sonst beim Start und einmal am Tag. Jede Einschätzung und jede Notiz ist ein eigener Eintrag mit Zeitstempel; Änderungen von mehreren Geräten werden zusammengeführt. Mitori fragt nur nach, wenn dieselbe Notiz auf zwei Geräten geändert wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="193"/>
+        <location filename="../qml/SettingsPage.qml" line="196"/>
         <source>Syncing …</source>
         <translation>Gleiche ab …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="193"/>
+        <location filename="../qml/SettingsPage.qml" line="196"/>
         <source>Sync now</source>
         <translation>Jetzt abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="207"/>
+        <location filename="../qml/SettingsPage.qml" line="210"/>
         <source>Last synced: %1</source>
         <translation>Zuletzt abgeglichen: %1</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="208"/>
+        <location filename="../qml/SettingsPage.qml" line="211"/>
         <source>Not synced yet.</source>
         <translation>Noch nicht abgeglichen.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="216"/>
+        <location filename="../qml/SettingsPage.qml" line="219"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="216"/>
+        <location filename="../qml/SettingsPage.qml" line="219"/>
         <source>Device</source>
         <translation>Gerät</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="224"/>
+        <location filename="../qml/SettingsPage.qml" line="227"/>
         <source>%n conflict(s): solve …</source>
         <translation>
             <numerusform>%n Konflikt: lösen …</numerusform>
@@ -2070,68 +2083,68 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="241"/>
+        <location filename="../qml/SettingsPage.qml" line="244"/>
         <source>Save backup</source>
         <translation>Sicherung speichern</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="244"/>
-        <location filename="../qml/SettingsPage.qml" line="256"/>
+        <location filename="../qml/SettingsPage.qml" line="247"/>
+        <location filename="../qml/SettingsPage.qml" line="259"/>
         <source>ZIP archives (*.zip)</source>
         <translation>ZIP-Archive (*.zip)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="247"/>
+        <location filename="../qml/SettingsPage.qml" line="250"/>
         <source>Backup saved.</source>
         <translation>Sicherung gespeichert.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="247"/>
+        <location filename="../qml/SettingsPage.qml" line="250"/>
         <source>Backup saved: %1</source>
         <translation>Sicherung gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="254"/>
+        <location filename="../qml/SettingsPage.qml" line="257"/>
         <source>Read backup</source>
         <translation>Sicherung einlesen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="271"/>
+        <location filename="../qml/SettingsPage.qml" line="274"/>
         <source>Ratings</source>
         <translation>Einschätzungen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="271"/>
+        <location filename="../qml/SettingsPage.qml" line="274"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="271"/>
+        <location filename="../qml/SettingsPage.qml" line="274"/>
         <source>Exam rounds</source>
         <translation>Prüfungsrunden</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="272"/>
+        <location filename="../qml/SettingsPage.qml" line="275"/>
         <source>Notebooks</source>
         <translation>Notizbücher</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="272"/>
+        <location filename="../qml/SettingsPage.qml" line="275"/>
         <source>Notebook entries</source>
         <translation>Einträge in Notizbüchern</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="272"/>
+        <location filename="../qml/SettingsPage.qml" line="275"/>
         <source>Grades</source>
         <translation>Grade</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="273"/>
+        <location filename="../qml/SettingsPage.qml" line="276"/>
         <source>Start of training</source>
         <translation>Trainingsbeginn</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="279"/>
+        <location filename="../qml/SettingsPage.qml" line="282"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n neu</numerusform>
@@ -2139,7 +2152,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="282"/>
+        <location filename="../qml/SettingsPage.qml" line="285"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n geändert</numerusform>
@@ -2147,7 +2160,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="289"/>
+        <location filename="../qml/SettingsPage.qml" line="292"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Fotos und Sprachnotizen: %n neu</numerusform>
@@ -2155,27 +2168,27 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="291"/>
+        <location filename="../qml/SettingsPage.qml" line="294"/>
         <source>Nothing new: this device has everything in the backup.</source>
         <translation>Nichts Neues: dieses Gerät hat schon alles aus der Sicherung.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="302"/>
+        <location filename="../qml/SettingsPage.qml" line="305"/>
         <source>Merge backup?</source>
         <translation>Sicherung zusammenführen?</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="303"/>
+        <location filename="../qml/SettingsPage.qml" line="306"/>
         <source>Merge</source>
         <translation>Zusammenführen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="305"/>
+        <location filename="../qml/SettingsPage.qml" line="308"/>
         <source>Backup merged.</source>
         <translation>Sicherung zusammengeführt.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="316"/>
+        <location filename="../qml/SettingsPage.qml" line="319"/>
         <source>Backup of %1.</source>
         <translation>Sicherung vom %1.</translation>
     </message>
@@ -3009,7 +3022,7 @@
     <name>WelcomePage</name>
     <message>
         <location filename="../qml/WelcomePage.qml" line="18"/>
-        <location filename="../qml/WelcomePage.qml" line="66"/>
+        <location filename="../qml/WelcomePage.qml" line="70"/>
         <source>Welcome</source>
         <translation>Willkommen</translation>
     </message>
@@ -3064,72 +3077,67 @@
         <translation>Die Lehrgänge aus dem Kalender, zu jedem ein Notizbuch.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="54"/>
+        <location filename="../qml/WelcomePage.qml" line="58"/>
         <source>Skip</source>
         <translation>Überspringen</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="66"/>
+        <location filename="../qml/WelcomePage.qml" line="70"/>
         <source>Style</source>
         <translation>Stil</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="66"/>
+        <location filename="../qml/WelcomePage.qml" line="70"/>
         <source>Tour</source>
         <translation>Rundgang</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="68"/>
+        <location filename="../qml/WelcomePage.qml" line="72"/>
         <source>Step %1 of %2</source>
         <translation>Schritt %1 von %2</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="69"/>
+        <location filename="../qml/WelcomePage.qml" line="73"/>
         <source>done</source>
         <translation>erledigt</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="69"/>
+        <location filename="../qml/WelcomePage.qml" line="73"/>
         <source>current</source>
         <translation>aktuell</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="69"/>
+        <location filename="../qml/WelcomePage.qml" line="73"/>
         <source>to come</source>
         <translation>offen</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="69"/>
+        <location filename="../qml/WelcomePage.qml" line="73"/>
         <source>skipped</source>
         <translation>übersprungen</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="88"/>
+        <location filename="../qml/WelcomePage.qml" line="92"/>
         <source>Mitori means learning by watching. Here are the exam programmes of Aikido Shinki Rengo, Daitoryu and Itto-den Shinki Toho, with the exam videos of the DVDs: watch, practise, rate, note.</source>
         <translation>Mitori heißt Lernen durch Zuschauen. Hier stehen die Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho, mit den Prüfungsvideos der DVDs: zusehen, üben, einschätzen, notieren.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="98"/>
+        <location filename="../qml/WelcomePage.qml" line="102"/>
         <source>How should Mitori look? You can change it later in Settings → Appearance.</source>
         <translation>Wie soll Mitori aussehen? Später lässt es sich unter Einstellungen → Darstellung ändern.</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="108"/>
-        <source>The style changes when Mitori starts again.</source>
-        <translation>Der Stil ändert sich, wenn Mitori neu startet.</translation>
-    </message>
-    <message>
-        <location filename="../qml/WelcomePage.qml" line="163"/>
+        <location filename="../qml/WelcomePage.qml" line="160"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="171"/>
+        <location filename="../qml/WelcomePage.qml" line="168"/>
         <source>Next</source>
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="171"/>
+        <location filename="../qml/WelcomePage.qml" line="168"/>
         <source>Start</source>
         <translation>Los</translation>
     </message>

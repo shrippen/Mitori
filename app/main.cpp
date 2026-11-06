@@ -1,10 +1,8 @@
 #include <QDir>
 #include <QGuiApplication>
 #include <QIcon>
-#include <QLocale>
-#include <QQmlApplicationEngine>
+#include <QQmlEngine>
 #include <QQuickStyle>
-#include <QTranslator>
 #include <QtQml/QQmlExtensionPlugin>
 
 #include "appearance.h"
@@ -28,14 +26,7 @@ int main(int argc, char *argv[])
 
     // The language chosen in Appearance, else the first of the user's languages with a catalog
     // (de, en); otherwise the English of the code. Dates follow the chosen language too.
-    const QString chosen = Appearance::startLocale();
-    if (!chosen.isEmpty()) {
-        QLocale::setDefault(QLocale(chosen));
-    }
-    QTranslator translator;
-    if (translator.load(QLocale(), QStringLiteral("mitori"), QStringLiteral("_"), QStringLiteral(":/i18n"))) {
-        QCoreApplication::installTranslator(&translator);
-    }
+    Appearance::startLanguage();
 
 #ifdef MITORI_DEMO
     // scripts/check-no-demo.sh looks for this mark in the binary: a release that carries it fails.
@@ -43,15 +34,23 @@ int main(int argc, char *argv[])
     qInfo("MITORI-DEMO" "-BUILD");
 #endif
 
-    QQmlApplicationEngine engine;
+    // A plain engine: a change of style replaces the window (Appearance::rebuild), which
+    // QQmlApplicationEngine's list of root objects does not allow for.
+    QQmlEngine engine;
+    QObject::connect(&engine, &QQmlEngine::quit, &app, &QCoreApplication::quit);
+    QObject::connect(&engine, &QQmlEngine::exit, &app, &QCoreApplication::exit);
     // The controls style of the chosen style (Appearance), before the first window.
     const Appearance::Style style = Appearance::startStyle(engine.importPathList());
     Appearance::prepare(style, &engine);
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
         QQuickStyle::setStyle(Appearance::controlsStyle(style, engine.importPathList()));
     }
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
-                     [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);
-    engine.loadFromModule("Mitori", "Main");
-    return app.exec();
+    if (!Appearance::openWindow(&engine)) {
+        return 1;
+    }
+    const int code = app.exec();
+
+    // Before the engine: the pages' last words need it (NoteRow saves a draft).
+    delete engine.singletonInstance<Appearance *>("Mitori", "Appearance")->window();
+    return code;
 }

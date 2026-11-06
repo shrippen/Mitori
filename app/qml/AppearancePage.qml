@@ -4,8 +4,8 @@ import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Mitori
 
-// Settings → Appearance: the style and the language (both apply at the next start), the
-// introduction again, and about Mitori (version, programme data, sources).
+// Settings → Appearance: the style and the language, each with a preview and applied by one tap;
+// the introduction again, and about Mitori (version, programme data, sources).
 Kirigami.ScrollablePage {
     id: page
 
@@ -13,9 +13,8 @@ Kirigami.ScrollablePage {
     background: Rectangle { color: Look.backgroundColor }
 
     title: qsTr("Appearance")
-
-    // The languages in the order of Appearance.Language.
-    readonly property var languages: [qsTr("System"), "Deutsch", "English"]
+    // A new window (a change of style) comes back here (Main.keptPageList).
+    readonly property string keptPage: "AppearancePage.qml"
 
     ColumnLayout {
         spacing: Look.unit(12)
@@ -34,20 +33,8 @@ Kirigami.ScrollablePage {
             rule: true
             text: qsTr("Language")
         }
-        LookSegmented {
-            objectName: "languageChoice"
+        LanguageChoice {
             Layout.fillWidth: true
-            model: page.languages
-            currentIndex: Appearance.language
-            onActivated: index => Appearance.setLanguage(index)
-        }
-
-        LookHint {
-            objectName: "restartHint"
-            Layout.fillWidth: true
-            visible: Appearance.restartNeeded
-            titleText: qsTr("At the next start")
-            text: qsTr("Style and language change when Mitori starts again.")
         }
 
         LookButton {

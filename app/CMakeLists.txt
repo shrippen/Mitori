@@ -99,9 +99,13 @@ qt_add_qml_module(mitori_app
         qml/ConflictsPage.qml
         qml/YearsPage.qml
         qml/StyleChoice.qml
+        qml/LanguageChoice.qml
+        qml/ChoiceTile.qml
+        qml/LookSample.qml
         qml/AppearancePage.qml
         qml/WelcomePage.qml
         qml/Look/Look.qml
+        qml/Look/LookRoles.qml
         qml/Look/LookTile.qml
         qml/Look/LookHint.qml
         qml/Look/LookButton.qml
@@ -185,6 +189,10 @@ qt_add_qml_module(mitori_app
         services/levels.cpp
         services/appearance.h
         services/appearance.cpp
+        services/lookpreview.h
+        services/lookpreview.cpp
+        platform/systembars.h
+        platform/systembars.cpp
         store/bundlecrypto.h
         store/bundlecrypto.cpp
         store/bundleshelf.h
@@ -256,7 +264,7 @@ qt_add_resources(mitori_app "kante"
 
 # Shinki (shinki/, the club newspaper's style) as a separate QML module "Shinki" with
 # its fonts, and the Look layer's Shinki files (app/qml/Look/+shinki, chosen by the file selector
-# "shinki" at start, Appearance). Only where Shinki can be chosen or is tested: its fonts are
+# "shinki", Appearance::prepare). Only where Shinki can be chosen or is tested: its fonts are
 # 1.3 MB. `app/qml/Look/+shinki/*.qml`
 # imports "Shinki", which the import scanner finds in the separate module target.
 if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
@@ -530,8 +538,9 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     set_target_properties(tst_levels PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME levels COMMAND tst_levels)
 
-    qt_add_executable(tst_appearance tests/tst_appearance.cpp services/appearance.cpp services/appearance.h)
-    target_include_directories(tst_appearance PRIVATE services)
+    qt_add_executable(tst_appearance tests/tst_appearance.cpp services/appearance.cpp services/appearance.h
+        platform/systembars.cpp platform/systembars.h)
+    target_include_directories(tst_appearance PRIVATE services platform)
     target_link_libraries(tst_appearance PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Test)
     set_target_properties(tst_appearance PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     if(MITORI_SHINKI)
@@ -555,6 +564,13 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME ui_shinki COMMAND tst_ui)
     set_tests_properties(ui_shinki PROPERTIES ENVIRONMENT
         "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material;MITORI_TEST_STYLE=shinki")
+    # Style and language changed while the app runs, from Leinen and from Shinki. A file of its own:
+    # no other test holds a page's compiled types in the engine's cache (tst_look.qml).
+    add_test(NAME look COMMAND tst_ui -input ${CMAKE_CURRENT_SOURCE_DIR}/tests/qml-look/tst_look.qml)
+    set_tests_properties(look PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material")
+    add_test(NAME look_shinki COMMAND tst_ui -input ${CMAKE_CURRENT_SOURCE_DIR}/tests/qml-look/tst_look.qml)
+    set_tests_properties(look_shinki PROPERTIES ENVIRONMENT
+        "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material;MITORI_TEST_STYLE=shinki")
     # The pages' times with five years of use (budgets catch what became slow).
     qt_add_executable(tst_perf tests/tst_perf.cpp)
     target_link_libraries(tst_perf PRIVATE mitori_app mitori_appplugin Qt6::QuickTest Qt6::Sql)
@@ -565,7 +581,7 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME perf COMMAND tst_perf)
     set_tests_properties(perf PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_CONTROLS_STYLE=Material")
     # Both runs share the test data (ui-data): never at the same time.
-    set_tests_properties(ui ui_shinki PROPERTIES RESOURCE_LOCK ui_data)
+    set_tests_properties(ui ui_shinki look look_shinki PROPERTIES RESOURCE_LOCK ui_data)
 endif()
 
 install(TARGETS mitori

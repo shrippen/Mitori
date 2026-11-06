@@ -237,9 +237,10 @@ Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Contr
 
 - **Wahl.** Der Einrichtungsassistent beim ersten Start fragt nach dem Stil. Er zeigt dazu ein kleines
   Tutorial zu den Funktionen. Später lässt sich der Stil in Einstellungen → Darstellung ändern. Der Wechsel
-  gilt nach dem Neustart, denn Qt setzt den Controls-Stil nur vor dem ersten Fenster. Breeze bietet Mitori
-  nur dort an, wo es den Stil gibt: in einer Plasma-Sitzung mit qqc2-desktop-style. AppImage, Flatpak ohne
-  KDE-Laufzeit und Android haben nur Material.
+  gilt sofort, mit Vorschau je Stil: Mitori baut das Fenster neu (`Appearance::rebuild`). Der Controls-Stil
+  steht fest, sobald das erste Fenster da ist; darum bietet ein Gerät nur Stile mit demselben Controls-Stil an.
+  Breeze gibt es dort, wo es den Stil gibt: in einer Plasma-Sitzung mit qqc2-desktop-style, dort ohne Material.
+  AppImage, Flatpak ohne KDE-Laufzeit und Android haben nur Material.
 - **`ShinkiStyle`** ist ein Singleton mit den Rollen, Stufen, Schriften und Größen aus `tokens.json`. Es ist
   die einzige Stelle mit Werten; jeder Wert dieser Bibel steht in `tokens.json`. `tools/shinki_style.py`
   erzeugt es, ein Test prüft, dass es aktuell ist. Die Namen: `paper`, `levelColor(3)`, `bookFamily`,
@@ -256,12 +257,13 @@ Controls (QQC2)         Breeze: org.kde.desktop                Shinki: der Contr
 - **Look** hat für jeden dieser Bausteine einen `Look…`-Baustein mit derselben Schnittstelle unter Kante und
   Shinki: `app/qml/Look/LookTile.qml` ist der Kante-Baustein, `app/qml/Look/+shinki/LookTile.qml` der
   Shinki-Baustein. Welche Datei gilt, entscheidet der QML-Dateiselektor „shinki“, den `Appearance::prepare`
-  beim Start setzt (der Stil wechselt ohnehin erst nach dem Neustart); kein Loader, keine Weiterleitung jeder
-  Eigenschaft. Die `+shinki`-Dateien stehen in den Ressourcen, nicht als QML-Typen (sonst gälte die letzte
+  je Engine setzt; ein Stilwechsel leert den Komponenten-Cache und baut das Fenster neu; kein Loader, keine
+  Weiterleitung jeder Eigenschaft eines Bausteins. Die `+shinki`-Dateien stehen in den Ressourcen, nicht als QML-Typen (sonst gälte die letzte
   Datei des qmldir). Dazu kommt das Singleton `Look` mit den Rollen und Schriften, die Seiten heute direkt aus
   `KanteStyle` lesen: Grund, Karte, Bühne, Text, Nebentext, deaktiviert, Akzent, Fokus, positiv, negativ, Linien,
-  `levelColor`, die kleine, japanische und Titelschrift. Unter Shinki bildet `+shinki/Look.qml` sie auf
-  `ShinkiStyle` ab.
+  `levelColor`, die kleine, japanische und Titelschrift. Ein Singleton überlebt den Wechsel: `Look` reicht die Rollen aus `LookRoles` weiter, das unter Shinki
+  `+shinki/LookRoles.qml` ist und sie auf `ShinkiStyle` abbildet. Die Vorschau in Darstellung zeichnet jeder
+  Stil selbst, in einer eigenen Engine mit eigenem Selektor (`LookPreview`, `LookSample.qml`).
 - **Übergang.** Die Seiten ziehen Baustein für Baustein von `Kante…` auf `Look…` um, angefangen bei
   Startmenü, Programm, Blatt und Player. Sobald es `app/qml/Look` gibt, nimmt jede neue oder geänderte Seite
   `Look`. Eine noch nicht umgezogene Seite liest ihre Farben aus `KanteStyle`, einem Singleton, das kein

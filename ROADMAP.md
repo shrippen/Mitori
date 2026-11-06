@@ -239,7 +239,7 @@ Fehlt in Kante und kommt dort hinzu (GUI-Regel), bevor Mitori es endgültig nutz
   `ctest ui_shinki`. Offen: Controls-Stil, die übrigen Bausteine, alle Seiten umziehen (Kopfzeile: erledigt, #62).
 - **Stil wählbar** (Owner, 03.11.2026): Breeze, Material, Kante, Leinen, Shinki; gefragt im
   **Einrichtungsassistenten beim ersten Start** mit kurzem Rundgang, später in Einstellungen → Darstellung
-  (`services/appearance`, gilt nach dem Neustart). Shinki steht nur mit `-DMITORI_SHINKI=ON` zur Wahl, bis alle
+  (`services/appearance`, gilt sofort, mit Vorschau). Shinki steht nur mit `-DMITORI_SHINKI=ON` zur Wahl, bis alle
   Seiten über `app/qml/Look` gehen; bis dahin sieht es aus wie Leinen.
 - **Videos ausliefern**: beschnitten (Aikido `crop=720:372:0:64`, Daitoryu `crop=720:374:0:50`,
   Shinki Toho ohne), HEVC, als versionierte Bundles: Dateien statisch über Caddy, immer nur die aktuelle Version; das Manifest (Gitea-Paket) nennt ihre Adressen und Schnittpunkte.
