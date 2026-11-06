@@ -22,6 +22,7 @@ Kirigami.Page {
     // For the callers and the UI test: the view's state and actions.
     readonly property alias current: view.current
     readonly property alias video: view.video
+    readonly property alias source: view.source
     readonly property alias from: view.from
     readonly property alias to: view.to
     readonly property alias end: view.end

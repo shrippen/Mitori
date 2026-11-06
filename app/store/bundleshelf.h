@@ -13,7 +13,7 @@
 // again without the code (also when the code was blocked since).
 //
 //   <root>/shelf.json                 {"aikido-kyu": {"code", "key", "version", "videos": {"aikido/k5":
-//   <root>/aikido-kyu/aikido-k5.mkv                    {"file", "cropped", "cuts": {"<technique>": [von, bis]}}}}}
+//   <root>/aikido-kyu/aikido-k5.v2.mkv                 {"file", "cropped", "cuts": {"<technique>": [von, bis]}}}}}
 //   <root>/manifest.json              the manifest as last loaded (Bundles)
 // Tells the users of the shared shelf that bundles came or went (Videos re-reads its files).
 class BundleShelfNotifier : public QObject

@@ -19,6 +19,7 @@ namespace {
 // The public manifest (tools/bundle.py hochladen): which bundles exist, their files, the codes'
 // entries. It holds no code and no key.
 const QUrl kManifest(QStringLiteral("https://git.arianw.de/api/packages/shrippen/generic/mitori-manifest/1/manifest.json"));
+constexpr int kHttpError = 400;                 // from this status on a body is an error page
 constexpr int kFormat = 2;                      // "format" of the manifest
 constexpr auto kWifiOnlyKey = "videos/wifiOnly";
 constexpr qint64 kFreshSeconds = 6 * 60 * 60;
@@ -43,10 +44,11 @@ QHash<QString, BundleShelf::Cut> cutsOf(const QJsonObject &file)
     return cuts;
 }
 
-// The file a video gets on the device: "aikido-k5.mvb" → "aikido-k5.mkv".
-QString plainName(const QString &file)
+// The file a video gets on the device: "aikido-k5.mvb", version 2 → "aikido-k5.v2.mkv". With the
+// version, so that a player showing the old file sees that it changed.
+QString plainName(const QString &file, int version)
 {
-    return QFileInfo(file).completeBaseName() + QStringLiteral(".mkv");
+    return QFileInfo(file).completeBaseName() + QStringLiteral(".v%1.mkv").arg(version);
 }
 
 } // namespace
@@ -360,7 +362,7 @@ void Bundles::next(Job &job)
         fail(id, tr("The manifest names a file that cannot be loaded."));
         return;
     }
-    job.part = std::make_unique<QFile>(QDir(partDir).filePath(plainName(file)));
+    job.part = std::make_unique<QFile>(QDir(partDir).filePath(plainName(file, job.version)));
     if (!job.part->open(QIODevice::WriteOnly)) {
         fail(id, tr("The videos could not be saved on this device."));
         return;
@@ -376,6 +378,10 @@ void Bundles::next(Job &job)
     connect(reply, &QNetworkReply::readyRead, this, [this, id, reply] {
         const auto j = m_jobs.value(id);
         if (!j || j->reply != reply) {
+            return;
+        }
+        // An error page is no video: `finished` says what happened.
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() >= kHttpError) {
             return;
         }
         const QByteArray data = reply->readAll();

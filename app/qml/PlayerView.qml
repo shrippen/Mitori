@@ -37,8 +37,9 @@ Item {
                                         .filter(x => !!x).join(" · ")
     // How many of the playlist are rated today (the training's progress).
     readonly property int practisedCount: Practice.revision >= 0 ? playlist.filter(r => Practice.ratedToday(r.id)).length : 0
-    // A loaded bundle brings its own cut points; they fit its file.
-    readonly property var place: current.video ? Videos.place(current.id, current.video) : null
+    // A loaded bundle brings its own cut points; they fit its file. Reads Videos.folder like the
+    // player's source: when a bundle comes or goes, file and times change together.
+    readonly property var place: current.video && Videos.folder !== undefined ? Videos.place(current.id, current.video) : null
     readonly property real from: place ? place.von * 1000 : 0
     readonly property real to: place ? place.bis * 1000 : 0
     // Where the loop turns: the chapter end, but never the end of the file (the last chapter of a
@@ -103,6 +104,7 @@ Item {
     readonly property alias playing: player.playing
     readonly property alias duration: player.duration
     readonly property alias rate: player.playbackRate
+    readonly property alias source: player.source
 
     // The entry on screen, for the programme list to mark it when the user comes back.
     signal shown(string id)
@@ -193,7 +195,7 @@ Item {
     MediaPlayer {
         id: player
 
-        source: Videos.source(page.video)
+        source: Videos.folder !== undefined ? Videos.source(page.video) : ""
         videoOutput: output
         audioOutput: AudioOutput {
             muted: player.playbackRate < 1 || !Levels.sound

@@ -1589,6 +1589,24 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // A bundle loaded while the player is open: file and cut points change together, never the
+    // new times over the old file. (After test_9n_videos: unlocked, nothing loaded.)
+    function test_9n_videos_player() {
+        failOnWarning(/ReferenceError|TypeError|Binding loop/)
+        const entry = {id: "test/tech", title: "T", video: {video: "test/v", von: 10, bis: 20}}
+        const player = push("PlayerPage", {playlist: [entry], index: 0})
+        compare(player.from, 10000, "the app's own time")
+        compare(player.source.toString(), "")
+        Bundles.load("test-bundle", Bundles.Network.Any)
+        tryCompare(player, "from", 1500, 10000)
+        compare(player.to, 2500)
+        verify(player.source.toString().indexOf("test") > 0, player.source)
+        verify(Bundles.remove("test-bundle"))
+        tryCompare(player, "from", 10000)
+        compare(player.source.toString(), "")
+        window.pageStack.pop()
+    }
+
     // My grades and a planned exam: a passed grade sets the next one and its waiting time; an
     // exam planned on a coming course shows in the start menu, today's practice and the exam mode.
     function test_9o_grades() {

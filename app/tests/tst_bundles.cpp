@@ -480,8 +480,51 @@ private slots:
 
         QSignalSpy installed(&b, &Bundles::installed);
         b.load(u"test-bundle"_s, Bundles::Network::Any);
+        const QString before = BundleShelf(root).path(u"test/v"_s);
         QVERIFY(installed.wait(10000));
         QCOMPARE(BundleShelf(root).cut(u"test/v"_s, u"test/tech"_s)->von, 7.0);
+        // Another path: a player that has the old file open sees that it changed.
+        const QString after = BundleShelf(root).path(u"test/v"_s);
+        QVERIFY(QFile::exists(after));
+        QVERIFY2(after != before, qPrintable(after));
+        QVERIFY(!QFile::exists(before));
+    }
+
+    // A server's error page is no video: "gone" counts, not "damaged", and the manifest is read again.
+    void errorPageIsNoDamagedVideo()
+    {
+        const QUrl manifest = publish(u"errorpage"_s);
+        QTcpServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+        QObject::connect(&server, &QTcpServer::newConnection, &server, [&server] {
+            QTcpSocket *socket = server.nextPendingConnection();
+            QObject::connect(socket, &QTcpSocket::readyRead, socket, [socket] {
+                const QByteArray page(200, 'x');
+                socket->readAll();
+                socket->write("HTTP/1.1 404 Not Found\r\nContent-Length: " + QByteArray::number(page.size())
+                              + "\r\nConnection: close\r\n\r\n" + page);
+                socket->disconnectFromHost();
+            });
+        });
+        editManifest(manifest, [&](QJsonObject &o) {
+            setFirstVideo(o, [&](QJsonObject &v) { v.insert(u"url"_s, u"http://127.0.0.1:%1/test.mvb"_s.arg(server.serverPort())); });
+        });
+        Bundles b(manifest, m_dir.filePath(u"errorpage-shelf"_s));
+        waitReady(b);
+        QSignalSpy unlocked(&b, &Bundles::unlocked);
+        b.unlock(m_code);
+        QVERIFY(unlocked.wait(10000));
+        editManifest(manifest, [&](QJsonObject &o) {
+            QJsonArray list = o.value(u"bundles"_s).toArray();
+            QJsonObject bundle = list.first().toObject();
+            bundle.insert(u"version"_s, 2);
+            list[0] = bundle;
+            o.insert(u"bundles"_s, list);
+        });
+        b.load(u"test-bundle"_s, Bundles::Network::Any);
+        QTRY_COMPARE_WITH_TIMEOUT(state(b), Bundles::State::Failed, 5000);
+        QVERIFY2(!b.errorString().contains(u"damaged"_s), qPrintable(b.errorString()));
+        QTRY_COMPARE_WITH_TIMEOUT(first(b).value(u"version"_s).toInt(), 2, 5000);
     }
 
     // Nonsense in the manifest moves no player: the times of the app count then.

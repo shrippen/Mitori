@@ -5,7 +5,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QJsonArray>
-#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QRegularExpression>
