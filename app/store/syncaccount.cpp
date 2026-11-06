@@ -77,12 +77,30 @@ void SyncAccount::setAccount(const WebDav::Account &account)
     s->sync();
     QFile::setPermissions(s->fileName(), QFile::ReadOwner | QFile::WriteOwner);
 
-    if (account.password.isEmpty() || account.password == m_password) {
+    // The same one again counts when it is not on record: that is how the note repairs it.
+    const bool onRecord = m_secret != Secret::NotRecorded && m_secret != Secret::NotSaved;
+    if (account.password.isEmpty() || (account.password == m_password && onRecord)) {
         return;
     }
     m_password = account.password;
     setSecret(Secret::Asking);
     storeSecret();
+}
+
+bool SyncAccount::passwordSaved() const
+{
+    switch (m_secret) {
+    case Secret::Unasked:
+    case Secret::KeyStore:
+    case Secret::Moving:
+    case Secret::File:
+    case Secret::NotRemoved:
+        return true;
+    case Secret::Asking:
+        return m_password.isEmpty();    // reading a saved one, not holding a new one
+    default:
+        return false;
+    }
 }
 
 void SyncAccount::loadSecret()
@@ -167,19 +185,59 @@ void SyncAccount::checkStored()
 void SyncAccount::commitStored()
 {
     const auto s = settings();
+    const QString inFile = s->value(kPassword).toString();
+    const bool marked = s->value(kInStore, false).toBool();
+
     s->remove(kPassword);
     s->setValue(kInStore, true);
     s->sync();
-    setSecret(s->status() == QSettings::NoError ? Secret::KeyStore : Secret::NotRemoved);
+    if (s->status() == QSettings::NoError) {
+        setSecret(Secret::KeyStore);
+        return;
+    }
+
+    // Not written: back to what the file says, so that what follows judges by that.
+    restoreFile(*s, inFile);
+    if (!marked) {
+        s->remove(kInStore);
+    }
+    if (inFile == m_password) {
+        setSecret(Secret::NotRemoved);
+        return;
+    }
+    setSecret(inFile.isEmpty() && marked ? Secret::KeyStore : Secret::NotRecorded);
 }
 
 void SyncAccount::keepInFile()
 {
     const auto s = settings();
+    const QString inFile = s->value(kPassword).toString();
+
+    // Already there: a file that cannot be written loses nothing.
+    if (inFile == m_password) {
+        setSecret(Secret::File);
+        return;
+    }
+
     s->setValue(kPassword, m_password);
     s->sync();
+    if (s->status() != QSettings::NoError) {
+        restoreFile(*s, inFile);
+        setSecret(Secret::NotSaved);
+        return;
+    }
     QFile::setPermissions(s->fileName(), QFile::ReadOwner | QFile::WriteOwner);
-    setSecret(s->status() == QSettings::NoError ? Secret::File : Secret::NotSaved);
+    setSecret(Secret::File);
+}
+
+// QSettings keeps a failed write pending and serves it as if done.
+void SyncAccount::restoreFile(QSettings &s, const QString &inFile)
+{
+    if (inFile.isEmpty()) {
+        s.remove(kPassword);
+    } else {
+        s.setValue(kPassword, inFile);
+    }
 }
 
 void SyncAccount::setSecret(Secret secret)

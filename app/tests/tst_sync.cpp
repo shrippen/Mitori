@@ -11,6 +11,9 @@
 #include <QTest>
 #include <QTimer>
 
+#include <csignal>
+#include <sys/resource.h>
+
 #include "coursebook.h"
 #include "mediastore.h"
 #include "practicelog.h"
@@ -253,12 +256,25 @@ class TstSync : public QObject
         QVERIFY(QTest::qWaitFor([&] { return !d.store->entries.isEmpty() && fileHas(d, "passwordInStore"); }, 5000));
     }
 
-    // A folder in the file's place: no write can succeed, also for root (the CI's container).
-    static void blockFile(const Device &d)
+    // While it lives no file can be written, as on a full disk: the account stays readable. Works
+    // for root too (the CI's container), unlike file rights.
+    class WriteBlock
     {
-        QVERIFY(QFile::remove(accountFile(d)));
-        QVERIFY(QDir().mkdir(accountFile(d)));
-    }
+    public:
+        WriteBlock()
+        {
+            signal(SIGXFSZ, SIG_IGN);
+            getrlimit(RLIMIT_FSIZE, &m_before);
+            rlimit none = m_before;
+            none.rlim_cur = 0;
+            setrlimit(RLIMIT_FSIZE, &none);
+        }
+        ~WriteBlock() { lift(); }
+        void lift() { setrlimit(RLIMIT_FSIZE, &m_before); }
+
+    private:
+        rlimit m_before;
+    };
 
     static bool fileHas(const Device &d, const QByteArray &text)
     {
@@ -524,6 +540,7 @@ private slots:
             Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
             QTRY_VERIFY(sync.passwordUnreadable());
             QVERIFY(sync.hasPassword());
+            QVERIFY(!sync.passwordSaved());     // the field does not claim it
             QVERIFY(fileHas(d, "passwordInStore"));
         }
 
@@ -630,9 +647,116 @@ private slots:
         d.store->held = true;
         Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
         QCOMPARE(sync.passwordNote(), Sync::PasswordNote::MovingToStore);
-        blockFile(d);
+        WriteBlock block;
         d.store->release();
         QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NotRemovedFromFile);
+    }
+
+    // P1 in the file, P2 in the store, the file cannot be rewritten. The next start would take P1
+    // back (the file counts as newest), so the note asks for P2 again; that repairs it for good.
+    void newerNotRecorded()
+    {
+        FakeDav dav;
+        const Device d = device(u"neuerer"_s);
+        oldAccount(d, dav.url(), u"alt"_s);
+        d.store->answer = SecretStore::Result::Failed;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_VERIFY(d.store->asked > 0);
+        QTest::qWait(10);
+
+        d.store->answer = SecretStore::Result::Ok;
+        d.store->held = true;
+        sync.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"X"_s);
+        WriteBlock block;
+        d.store->release();
+        QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NotRecorded);
+        QVERIFY(!sync.passwordSaved());
+        QCOMPARE(d.store->entries.values(), QStringList{u"geheim"_s});
+
+        block.lift();
+        sync.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"X"_s);
+        QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NoNote);
+        QTRY_VERIFY(!fileHas(d, "alt"));
+
+        Sync next(d.practice, d.courses, d.media, d.folder, d.store);
+        QVERIFY2(synced(next), qPrintable(next.errorString()));
+    }
+
+    // The same, restarted before entering it again: P1 is back, as the note warned, and shows as
+    // in the file; entering P2 still repairs it.
+    void newerNotRecordedRestart()
+    {
+        FakeDav dav;
+        const Device d = device(u"neuerer2"_s);
+        oldAccount(d, dav.url(), u"alt"_s);
+        d.store->answer = SecretStore::Result::Failed;
+        {
+            Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+            QTRY_VERIFY(d.store->asked > 0);
+            QTest::qWait(10);
+
+            d.store->answer = SecretStore::Result::Ok;
+            d.store->held = true;
+            sync.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"X"_s);
+            WriteBlock block;
+            d.store->release();
+            QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NotRecorded);
+        }
+        QVERIFY(fileHas(d, "alt"));
+
+        Sync next(d.practice, d.courses, d.media, d.folder, d.store);
+        next.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"X"_s);
+        QTRY_COMPARE(next.passwordNote(), Sync::PasswordNote::NoNote);
+        QTRY_VERIFY(!fileHas(d, "alt"));
+        QVERIFY2(synced(next), qPrintable(next.errorString()));
+    }
+
+    // A first password, the file cannot take the mark: the next start would not look in the store.
+    void firstNotRecorded()
+    {
+        const Device d = device(u"erstes"_s);
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        d.store->held = true;
+        sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, u"geheim"_s, u"X"_s);
+        QVERIFY(!sync.passwordSaved());         // in memory only, until the store confirms
+        WriteBlock block;
+        d.store->release();
+        QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NotRecorded);
+        QVERIFY(!sync.passwordInFile());
+    }
+
+    // The mark stands and no password lies in the file: the file already leads to the store, the
+    // write it cannot do changes nothing.
+    void markAlreadyStands()
+    {
+        FakeDav dav;
+        const Device d = device(u"markesteht"_s);
+        saved(d, dav.url());
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_VERIFY(sync.passwordSaved());
+        QTest::qWait(10);
+        d.store->held = true;
+        sync.setAccount(dav.url(), u"ich"_s, u"neu"_s, u"X"_s);
+        WriteBlock block;
+        d.store->release();
+        QTRY_COMPARE(d.store->entries.values(), QStringList{u"neu"_s});
+        QTest::qWait(10);
+        QCOMPARE(sync.passwordNote(), Sync::PasswordNote::NoNote);
+        QVERIFY(sync.passwordSaved());
+    }
+
+    // The store refuses, the file cannot be written, but it already holds this password: not gone.
+    void fileStillHoldsIt()
+    {
+        const Device d = device(u"haeltnoch"_s);
+        oldAccount(d, u"https://example.org/dav/"_s, u"geheim"_s);
+        d.store->held = true;
+        d.store->answer = SecretStore::Result::Failed;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        WriteBlock block;
+        d.store->release();
+        QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::RefusedByStore);
+        QVERIFY(sync.passwordSaved());
     }
 
     // Neither store nor file: "in memory only", no claim that it lies in a file.
@@ -643,10 +767,11 @@ private slots:
         d.store->held = true;
         d.store->answer = SecretStore::Result::Failed;
         sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, u"geheim"_s, u"X"_s);
-        blockFile(d);
+        WriteBlock block;
         d.store->release();
         QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NotSaved);
         QVERIFY(!sync.passwordInFile());
+        QVERIFY(!sync.passwordSaved());
     }
 
     // Nobody who has no password is bothered by a wallet's unlock prompt.

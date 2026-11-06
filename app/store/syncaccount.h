@@ -60,7 +60,9 @@ public:
         KeyStore,
         Moving,         // in the file; the store did not answer yet (with sync off: was not asked)
         File,           // in the file: the store did not take it
-        NotRemoved,     // the store holds it, but the file could not be rewritten: in both
+        NotRemoved,     // the store holds it, the file could not be rewritten and holds it too
+        NotRecorded,    // the store holds it, the file could not be rewritten and leads elsewhere:
+                        // an older password in it comes back, or no mark. Only entering it again helps
         NotSaved,       // neither store nor file took it: in memory only
         Unreadable,     // marked, the store does not give it out
     };
@@ -72,6 +74,9 @@ public:
     // place changes.
     void loadSecret();
     Secret secret() const { return m_secret; }
+
+    // The next start finds it as things are (not: it is known now).
+    bool passwordSaved() const;
 
     // With the password as far as known: empty while the store is read and when Unreadable.
     WebDav::Account account() const;
@@ -109,6 +114,7 @@ private:
     void checkStored();
     void commitStored();
     void keepInFile();
+    static void restoreFile(QSettings &s, const QString &inFile);
     void found(SecretStore::Result result, const QString &password);
 
     QString m_folder;

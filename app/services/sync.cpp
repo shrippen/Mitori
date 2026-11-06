@@ -127,6 +127,8 @@ Sync::PasswordNote Sync::passwordNote() const
         return PasswordNote::RefusedByStore;
     case SyncAccount::Secret::NotRemoved:
         return PasswordNote::NotRemovedFromFile;
+    case SyncAccount::Secret::NotRecorded:
+        return PasswordNote::NotRecorded;
     case SyncAccount::Secret::NotSaved:
         return PasswordNote::NotSaved;
     case SyncAccount::Secret::Unreadable:

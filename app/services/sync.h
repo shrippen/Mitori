@@ -29,6 +29,9 @@ class Sync : public QObject
     Q_PROPERTY(bool hasPassword READ hasPassword NOTIFY accountChanged)
     // Why the password is not simply in the key store; the settings say so.
     Q_PROPERTY(PasswordNote passwordNote READ passwordNote NOTIFY accountChanged)
+    Q_PROPERTY(bool passwordInFile READ passwordInFile NOTIFY accountChanged)
+    // It survives a restart as it is (not: known right now).
+    Q_PROPERTY(bool passwordSaved READ passwordSaved NOTIFY accountChanged)
     Q_PROPERTY(QString deviceName READ deviceName NOTIFY accountChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(QDateTime lastSync READ lastSync NOTIFY stateChanged)
@@ -40,7 +43,7 @@ public:
     enum class Choice { Mine, Theirs, Both };
     Q_ENUM(Choice)
 
-    enum class PasswordNote { NoNote, MovingToStore, RefusedByStore, NotRemovedFromFile, NotSaved, Unreadable };
+    enum class PasswordNote { NoNote, MovingToStore, RefusedByStore, NotRemovedFromFile, NotRecorded, NotSaved, Unreadable };
     Q_ENUM(PasswordNote)
 
     explicit Sync(QObject *parent = nullptr);
@@ -57,6 +60,7 @@ public:
     QString user() const { return m_account.account().user; }
     bool hasPassword() const { return m_account.secret() != SyncAccount::Secret::None; }
     PasswordNote passwordNote() const;
+    bool passwordSaved() const { return m_account.passwordSaved(); }
     bool passwordInFile() const;
     bool passwordUnreadable() const { return m_account.secret() == SyncAccount::Secret::Unreadable; }
     QString deviceName() const;

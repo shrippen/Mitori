@@ -686,6 +686,7 @@ TestCase {
         shot("4e-sync-password-file")
         Sync.enabled = false
         verify(hint.visible, "it still lies there with sync off")
+        verify(hint.text.indexOf("With sync on") >= 0, hint.text)
         window.pageStack.pop()
     }
 

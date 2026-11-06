@@ -156,33 +156,35 @@ Kirigami.ScrollablePage {
 
                 Layout.fillWidth: true
                 echoMode: TextInput.Password
-                placeholderText: Sync.hasPassword ? qsTr("saved") : ""
+                placeholderText: Sync.passwordSaved ? qsTr("saved") : ""
                 onEditingFinished: page.saveAccount()
             }
         }
-        // Where the password is when not simply in the key store; with sync off too, it still lies there.
+        // Where the password is when not simply in the key store. With sync off only what lies in
+        // the file: it still does, while the field and "Sync now" the others speak of are hidden.
         LookHint {
             readonly property bool android: Qt.platform.os === "android"
 
             objectName: "syncPasswordNote"
             Layout.fillWidth: true
-            visible: Sync.passwordNote !== Sync.NoNote
+            visible: Sync.passwordNote !== Sync.NoNote && (Sync.enabled || Sync.passwordInFile)
             importance: Sync.passwordNote === Sync.MovingToStore && Sync.enabled ? LookHint.Importance.Info
                       : Sync.passwordNote === Sync.Unreadable || Sync.passwordNote === Sync.NotSaved ? LookHint.Importance.Error
                       : LookHint.Importance.Important
             titleText: {
                 switch (Sync.passwordNote) {
                 case Sync.Unreadable: return qsTr("App password cannot be read")
+                case Sync.NotRecorded: return qsTr("Enter the app password again")
                 case Sync.NotSaved: return qsTr("App password not saved")
                 default: return qsTr("App password lies in a file")
                 }
             }
             text: {
+                if (!Sync.enabled) {
+                    return qsTr("It lies unencrypted in Mitori's sync folder. With sync on, Mitori moves it to the key store.")
+                }
                 switch (Sync.passwordNote) {
                 case Sync.MovingToStore:
-                    if (!Sync.enabled) {
-                        return qsTr("It lies unencrypted in Mitori's sync folder. With sync on, Mitori moves it to the key store.")
-                    }
                     return android ? qsTr("Mitori is handing it to the Android key store. Until that is confirmed, it lies unencrypted in Mitori's sync folder.")
                                    : qsTr("Mitori is handing it to the key store. Until that is confirmed, it lies unencrypted in Mitori's sync folder. If the key store asks to be unlocked, unlock it.")
                 case Sync.RefusedByStore:
@@ -190,6 +192,8 @@ Kirigami.ScrollablePage {
                                    : qsTr("No key store took it, so it lies unencrypted in Mitori's sync folder. Set up and unlock KWallet, GNOME Keyring or another Secret Service (for the Flatpak: with the desktop's secrets portal), then restart Mitori: it moves the password by itself.")
                 case Sync.NotRemovedFromFile:
                     return qsTr("The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so it also still lies there unencrypted. Check the free space and the folder's rights, then restart Mitori.")
+                case Sync.NotRecorded:
+                    return qsTr("The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder's rights, then enter it again.")
                 case Sync.NotSaved:
                     return qsTr("Neither the key store nor the file konto.ini took it: it is gone when Mitori closes. Check the free space and the sync folder's rights, then enter it again.")
                 case Sync.Unreadable:
