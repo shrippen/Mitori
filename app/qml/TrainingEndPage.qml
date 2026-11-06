@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Mitori
@@ -43,16 +44,29 @@ Kirigami.ScrollablePage {
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
 
-        LookKpi {
-            objectName: "practisedCount"
-            value: String(page.count)
-            label: qsTr("technique(s) practised and rated", "", page.count)
-        }
-        LookLabel {
+        // Number and sentence in one card, as the clickdummy.
+        QQC2.Control {
+            objectName: "endCard"
             Layout.fillWidth: true
-            text: qsTr("Today counts as a practice day in the statistics.")
-            color: Look.mutedTextColor
-            wrapMode: Text.Wrap
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 30     // a tablet: a width that reads
+            padding: Kirigami.Units.largeSpacing
+            background: LookCard {}
+
+            contentItem: ColumnLayout {
+                spacing: Kirigami.Units.smallSpacing
+
+                LookKpi {
+                    objectName: "practisedCount"
+                    value: String(page.count)
+                }
+                LookLabel {
+                    objectName: "practisedText"
+                    Layout.fillWidth: true
+                    text: qsTr("Technique(s) practised and rated. Today counts as a practice day in the statistics.", "", page.count)
+                    color: Look.mutedTextColor
+                    wrapMode: Text.Wrap
+                }
+            }
         }
         LookButton {
             objectName: "backToToday"

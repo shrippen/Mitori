@@ -128,7 +128,14 @@ Kirigami.Page {
         const stack = page.Kirigami.PageStack.pageStack
         const end = Qt.resolvedUrl("TrainingEndPage.qml")
         const count = view.practisedCount
+
+        // Off this page without a slide: a page pushed during a running slide keeps the platform's
+        // head under Kante, after a slide of its own the style's.
+        const column = stack.columnView
+        const duration = column.scrollDuration
+        column.scrollDuration = 0
         leave()
+        column.scrollDuration = duration
         stack.push(end, { count: count })
     }
 

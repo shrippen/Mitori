@@ -1487,7 +1487,7 @@
 <context>
     <name>PlayerPage</name>
     <message>
-        <location filename="../qml/PlayerPage.qml" line="171"/>
+        <location filename="../qml/PlayerPage.qml" line="178"/>
         <source>practised</source>
         <translation>geübt</translation>
     </message>
@@ -1720,87 +1720,87 @@
 <context>
     <name>ProgrammePage</name>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="58"/>
+        <location filename="../qml/ProgrammePage.qml" line="64"/>
         <source>Programme</source>
         <translation>Programm</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="63"/>
+        <location filename="../qml/ProgrammePage.qml" line="69"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="68"/>
+        <location filename="../qml/ProgrammePage.qml" line="74"/>
         <source>All notes</source>
         <translation>Alle Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="105"/>
+        <location filename="../qml/ProgrammePage.qml" line="111"/>
         <source>%1, %2 of %3 exam-ready</source>
         <translation>%1, %2 von %3 prüfungsreif</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="106"/>
+        <location filename="../qml/ProgrammePage.qml" line="112"/>
         <source>%1, no forms yet</source>
         <translation>%1, noch keine Formen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="174"/>
+        <location filename="../qml/ProgrammePage.qml" line="181"/>
         <source>Waiting time: %1</source>
         <translation>Wartezeit: %1</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="184"/>
+        <location filename="../qml/ProgrammePage.qml" line="191"/>
         <source>The Japanese writing of these names is a proposal, not yet confirmed.</source>
         <translation>Die japanische Schreibweise dieser Namen ist ein Vorschlag, noch nicht bestätigt.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="209"/>
+        <location filename="../qml/ProgrammePage.qml" line="216"/>
         <source>Meaning</source>
         <translation>Bedeutung</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="210"/>
+        <location filename="../qml/ProgrammePage.qml" line="217"/>
         <source>Content</source>
         <translation>Inhalt</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="211"/>
+        <location filename="../qml/ProgrammePage.qml" line="218"/>
         <source>Waiting time</source>
         <translation>Wartezeit</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="230"/>
+        <location filename="../qml/ProgrammePage.qml" line="237"/>
         <source>The forms of this grade are not in the app yet.</source>
         <translation>Die Formen dieses Grades sind noch nicht in der App.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="248"/>
+        <location filename="../qml/ProgrammePage.qml" line="255"/>
         <source>Exam videos</source>
         <translation>Prüfungsvideos</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="250"/>
+        <location filename="../qml/ProgrammePage.qml" line="257"/>
         <source>There is no video for this grade.</source>
         <translation>Zu diesem Grad gibt es kein Video.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="251"/>
+        <location filename="../qml/ProgrammePage.qml" line="258"/>
         <source>The videos are on the DVDs of the Shinkiryu association. With the DVD&apos;s code Mitori loads them onto this device.</source>
         <translation>Die Videos sind auf den DVDs des Shinkiryu-Verbands. Mit dem Code der DVD lädt Mitori sie auf dieses Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="261"/>
+        <location filename="../qml/ProgrammePage.qml" line="268"/>
         <source>Enter code</source>
         <translation>Code eingeben</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="266"/>
+        <location filename="../qml/ProgrammePage.qml" line="273"/>
         <source>Order on shinkiryu.de</source>
         <translation>Auf shinkiryu.de bestellen</translation>
     </message>
     <message>
-        <location filename="../qml/ProgrammePage.qml" line="348"/>
+        <location filename="../qml/ProgrammePage.qml" line="355"/>
         <source>Play</source>
         <translation>Abspielen</translation>
     </message>
@@ -2759,25 +2759,20 @@
 <context>
     <name>TrainingEndPage</name>
     <message>
-        <location filename="../qml/TrainingEndPage.qml" line="20"/>
+        <location filename="../qml/TrainingEndPage.qml" line="21"/>
         <source>Done</source>
         <translation>Geschafft</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TrainingEndPage.qml" line="49"/>
-        <source>technique(s) practised and rated</source>
+        <location filename="../qml/TrainingEndPage.qml" line="64"/>
+        <source>Technique(s) practised and rated. Today counts as a practice day in the statistics.</source>
         <translation>
-            <numerusform>Technik geübt und eingeschätzt</numerusform>
-            <numerusform>Techniken geübt und eingeschätzt</numerusform>
+            <numerusform>Technik geübt und eingeschätzt. Der Tag zählt als Übungstag in der Statistik.</numerusform>
+            <numerusform>Techniken geübt und eingeschätzt. Der Tag zählt als Übungstag in der Statistik.</numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../qml/TrainingEndPage.qml" line="53"/>
-        <source>Today counts as a practice day in the statistics.</source>
-        <translation>Der Tag zählt als Übungstag in der Statistik.</translation>
-    </message>
-    <message>
-        <location filename="../qml/TrainingEndPage.qml" line="60"/>
+        <location filename="../qml/TrainingEndPage.qml" line="73"/>
         <source>Back to today</source>
         <translation>Zurück zu Heute</translation>
     </message>

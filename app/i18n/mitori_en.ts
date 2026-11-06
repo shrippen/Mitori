@@ -225,11 +225,11 @@
 <context>
     <name>TrainingEndPage</name>
     <message numerus="yes">
-        <location filename="../qml/TrainingEndPage.qml" line="49"/>
-        <source>technique(s) practised and rated</source>
+        <location filename="../qml/TrainingEndPage.qml" line="64"/>
+        <source>Technique(s) practised and rated. Today counts as a practice day in the statistics.</source>
         <translation>
-            <numerusform>technique practised and rated</numerusform>
-            <numerusform>techniques practised and rated</numerusform>
+            <numerusform>Technique practised and rated. Today counts as a practice day in the statistics.</numerusform>
+            <numerusform>Techniques practised and rated. Today counts as a practice day in the statistics.</numerusform>
         </translation>
     </message>
 </context>

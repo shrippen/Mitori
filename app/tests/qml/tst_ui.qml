@@ -1317,7 +1317,7 @@ TestCase {
     }
 
     // Training without videos (CI): every due technique comes in, shown as a card, with the
-    // playlist (✓, tap jumps), the position and an end hint with the count.
+    // playlist (✓, tap jumps), the position and an end page with the count.
     function test_7c_training_list() {
         Programme.discipline = "daitoryu"
         Programme.setGrade("daitoryu", "k4")
@@ -1430,6 +1430,29 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem === pages.today, 2000)
         tryVerify(() => window.pageStack.depth === pages.today.Kirigami.ColumnView.index + 1, 2000, "nothing above today")
         verify(!hasPlayer())
+    }
+
+    // The end page's head has the style's ground, as any page that slid in (it stood in the
+    // platform's colours). Shinki's head is the window's.
+    function test_7d_training_end_head_data() {
+        return [{ tag: "upright", width: 420, height: 800 }, { tag: "sideways", width: 800, height: 420 }]
+    }
+    function test_7d_training_end_head(data) {
+        if (uiShinki) {
+            skip("Shinki's head is the window's")
+        }
+        window.width = data.width
+        window.height = data.height
+        wait(200)
+        const rows = freshRows(1)
+        const pages = trainingOver(rows)
+        wait(1500)      // at rest, as after practising: no slide still running
+        findPicker(pages.player, rows[0].id).picked(3)
+        tryVerify(() => window.pageStack.currentItem.count === 1)
+        const page = window.pageStack.currentItem
+        const ground = () => page.Kirigami.ColumnView.globalHeader.item.background.color
+        tryVerify(() => Qt.colorEqual(ground(), KanteStyle.dialogColor), 2000,
+                  "head " + ground() + ", expected " + KanteStyle.dialogColor)
     }
 
     // Full screen has no rating; should one come, the window comes back as it was.
