@@ -4,6 +4,8 @@
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
+#include <QSqlDatabase>
+#include <QSqlQuery>
 #include <QTest>
 
 #include "backup.h"
@@ -338,6 +340,176 @@ private slots:
         QCOMPARE(book.courses().size(), 1);
         QCOMPARE(book.entries(course).size(), 1);
         QCOMPARE(book.entries(course).first().text, u"nach der Löschung"_s);
+    }
+
+    // Links between devices, through backups both ways.
+    void linksBackAndForth()
+    {
+        const Device a = device(u"link-a"_s);
+        const Device b = device(u"link-b"_s);
+        const QString tech = u"aikido/t1"_s;
+        const QString other = u"aikido/t2"_s;
+        CourseBook::Course c;
+        c.title = u"Winter"_s;
+        c.first = c.last = QDate(2026, 12, 5);
+        QString course;
+        QString entry;
+        QString second;
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            course = book.addCourse(c, at(7), u"a"_s).uid;
+            entry = book.addEntry(course, u"Ikkyo"_s, at(7), u"a"_s).uid;
+            second = book.addEntry(course, u"Nikyo"_s, at(7), u"a"_s).uid;
+            QVERIFY(book.addTag(entry, tech, at(8), u"a"_s));
+        }
+        QVERIFY(QFile::copy(a.courses, b.courses));
+        Backup backupA(a.practice, a.courses, a.media, a.work);
+        Backup backupB(b.practice, b.courses, b.media, b.work);
+        const QString zipA = m_dir.filePath(u"link-a.zip"_s);
+        const QString zipB = m_dir.filePath(u"link-b.zip"_s);
+        const auto restoreOn = [](Backup &backup, const QString &zip) {
+            const QVariantMap summary = backup.inspect(QUrl::fromLocalFile(zip));
+            return summary.isEmpty() || !backup.restore() ? QVariantMap() : summary;
+        };
+        const auto linksOn = [&](const Device &d, const QString &technique) {
+            CourseBook book;
+            return book.open(d.courses) ? book.linkedEntries(technique).size() : -1;
+        };
+
+        // A link made on B, the same link made on both: one row, A gets the new one.
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            QVERIFY(book.addTag(entry, other, at(9), u"b"_s));
+            QVERIFY(book.addTag(second, tech, at(9), u"b"_s));
+        }
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QVERIFY(book.addTag(second, tech, at(10), u"a"_s));
+        }
+        QVERIFY(backupB.save(QUrl::fromLocalFile(zipB)));
+        const QVariantMap summary = restoreOn(backupA, zipB);
+        QCOMPARE(summary.value(u"links"_s).toMap().value(u"added"_s).toInt(), 1);
+        QCOMPARE(linksOn(a, tech), 2);
+        QCOMPARE(linksOn(a, other), 1);
+
+        // Removed on A later: the removal wins on B, and an old backup does not bring it back.
+        const QString old = m_dir.filePath(u"link-old.zip"_s);
+        QVERIFY(backupA.save(QUrl::fromLocalFile(old)));
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QVERIFY(book.removeTag(entry, tech, at(11)));
+        }
+        QVERIFY(backupA.save(QUrl::fromLocalFile(zipA)));
+        QVERIFY(!restoreOn(backupB, zipA).isEmpty());
+        QCOMPARE(linksOn(b, tech), 1);
+        QVERIFY(!restoreOn(backupA, old).isEmpty());
+        QCOMPARE(linksOn(a, tech), 1);
+
+        // The entry deleted on A: its links go on B too. Linked again on B after that (the deletion
+        // has not reached it): the link goes with the entry.
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QVERIFY(book.deleteEntry(second, at(12)));
+        }
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            QVERIFY(book.addTag(second, u"aikido/t3"_s, at(13), u"b"_s));
+        }
+        QVERIFY(backupA.save(QUrl::fromLocalFile(zipA)));
+        QVERIFY(backupB.save(QUrl::fromLocalFile(zipB)));
+        QVERIFY(!restoreOn(backupB, zipA).isEmpty());
+        QVERIFY(!restoreOn(backupA, zipB).isEmpty());
+        for (const Device &d : {a, b}) {
+            QCOMPARE(linksOn(d, tech), 0);
+            QCOMPARE(linksOn(d, u"aikido/t3"_s), 0);
+            QCOMPARE(linksOn(d, other), 1);
+        }
+
+        // An entry that comes back (changed on B after A deleted it) has its links again, one the
+        // user removed stays removed.
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QVERIFY(book.removeTag(entry, other, at(14)));
+            QVERIFY(book.addTag(entry, tech, at(14), u"a"_s));
+            QVERIFY(book.removeTag(entry, tech, at(14)));
+            QVERIFY(book.addTag(entry, u"aikido/t4"_s, at(14), u"a"_s));
+            QVERIFY(book.deleteEntry(entry, at(15)));
+        }
+        QVERIFY(backupA.save(QUrl::fromLocalFile(zipA)));
+        QVERIFY(!restoreOn(backupB, zipA).isEmpty());
+        QCOMPARE(linksOn(b, u"aikido/t4"_s), 0);
+        {
+            // B had changed the entry later than A's deletion: as in a sync that crossed.
+            QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"crossed"_s);
+            db.setDatabaseName(b.courses);
+            QVERIFY(db.open());
+            QSqlQuery q(db);
+            QVERIFY(q.exec(u"UPDATE entries SET deleted = 0, text = 'neu', changed = %1 WHERE uid = '%2'"_s
+                               .arg(at(16).toMSecsSinceEpoch()).arg(entry)));
+            q.finish();
+            db.close();
+        }
+        QSqlDatabase::removeDatabase(u"crossed"_s);
+        QVERIFY(backupB.save(QUrl::fromLocalFile(zipB)));
+        QVERIFY(!restoreOn(backupA, zipB).isEmpty());
+        QCOMPARE(linksOn(a, u"aikido/t4"_s), 1);
+        QCOMPARE(linksOn(a, tech), 0);
+        QCOMPARE(linksOn(a, other), 0);
+
+        // The notebook deleted: its links are gone from the technique on both sides.
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QVERIFY(book.deleteCourse(course, QDateTime::currentDateTimeUtc()));
+        }
+        QVERIFY(backupA.save(QUrl::fromLocalFile(zipA)));
+        QVERIFY(!restoreOn(backupB, zipA).isEmpty());
+        QCOMPARE(linksOn(a, u"aikido/t4"_s), 0);
+        QCOMPARE(linksOn(b, u"aikido/t4"_s), 0);
+    }
+
+    // A backup of schema 4 (without links), opened as unpack() does: the links here stay.
+    void backupWithoutLinks()
+    {
+        const Device a = device(u"s4-a"_s);
+        const Device b = device(u"s4-b"_s);
+        CourseBook::Course c;
+        c.title = u"Winter"_s;
+        c.first = c.last = QDate(2026, 12, 5);
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            const QString entry = book.addEntry(book.addCourse(c, at(7), u"a"_s).uid, u"Ikkyo"_s, at(7), u"a"_s).uid;
+            QVERIFY(book.addTag(entry, u"aikido/t1"_s, at(8), u"a"_s));
+        }
+        QVERIFY(QFile::copy(a.courses, b.courses));
+        {
+            QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"setback"_s);
+            db.setDatabaseName(b.courses);
+            QVERIFY(db.open());
+            QSqlQuery q(db);
+            QVERIFY(q.exec(u"DROP TABLE entry_tags"_s));
+            QVERIFY(q.exec(u"PRAGMA user_version = 4"_s));
+            q.finish();
+            db.close();
+        }
+        QSqlDatabase::removeDatabase(u"setback"_s);
+        {
+            CourseBook old;
+            QVERIFY(old.open(b.courses));
+        }
+        CourseBook book;
+        QVERIFY(book.open(a.courses));
+        TableMerge::Result result;
+        QVERIFY2(book.merge(b.courses, TableMerge::Mode::Apply, &result), qPrintable(book.errorString()));
+        QCOMPARE(book.linkedEntries(u"aikido/t1"_s).size(), 1);
     }
 
     // A photo whose note was deleted after the backup does not come back from it.

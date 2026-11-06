@@ -234,6 +234,7 @@ bool Backup::merge(Step step, QVariantMap *summary)
                 {QStringLiteral("entries"), counts(fromBook, QStringLiteral("entries"))},
                 {QStringLiteral("grades"), counts(fromBook, QStringLiteral("grades"))},
                 {QStringLiteral("starts"), counts(fromBook, QStringLiteral("starts"))},
+                {QStringLiteral("links"), counts(fromBook, QStringLiteral("entry_tags"))},
                 {QStringLiteral("media"), media}};
     return setError({});
 }
