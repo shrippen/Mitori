@@ -3108,6 +3108,8 @@ TestCase {
                 const sheet = findChild(page, "techniqueSheet")
                 tryVerify(() => sheet.opened)
                 look("sheet", sheet.contentItem)
+                // The head has the style's colours, as the content (it lies beside it).
+                compare(String(sheet.header.Kirigami.Theme.textColor), String(sheet.contentItem.Kirigami.Theme.textColor))
                 sheet.close()
                 tryVerify(() => !sheet.visible)
             }
