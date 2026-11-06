@@ -864,8 +864,25 @@ TestCase {
         tryCompare(window.pageStack, "depth", 1)
     }
 
+    // Until a page's item stands still in the window. Clicking earlier hits what is under it: a tile
+    // of the start menu, whose push then replaces the page the test is on (and destroys `item`).
+    // A fixed wait is too short for the first page of a run, which still compiles, or under load.
+    function standStill(item) {
+        const kStillReads = 3
+        let last = null, still = 0
+        tryVerify(() => {
+            wait(100)
+            const at = item.mapToItem(window.contentItem, 0, 0)
+            still = last && at.x === last.x && at.y === last.y && at.x >= 0 && at.x < window.width ? still + 1 : 0
+            last = at
+            return still >= kStillReads
+        }, 15000, "the item stands still")
+    }
+
     // A click lands only once the page has slid in: again until it did what it should.
     function clickUntil(item, done) {
+        verify(item, "something to click")
+        standStill(item)
         tryVerify(() => {
             if (!done()) {
                 mouseClick(item)
@@ -1270,6 +1287,24 @@ TestCase {
         window.pageStack.currentItem.close()
         tryVerify(() => window.pageStack.currentItem === today)
         window.pageStack.pop()
+    }
+
+    // Training on a tablet sideways: "Comment" beside the list opens the technique's comment.
+    function test_7a_training_comment() {
+        const rows = Programme.entries("shinkitoho", "shoden").filter(r => r.kind === "entry" && r.comment).slice(0, 2)
+        verify(rows.length > 0, "Shinki Toho has comments")
+        window.width = 1280
+        window.height = 800
+        wait(200)
+        const player = push("PlayerPage", { playlist: rows, index: 0, training: true })
+        tryVerify(() => player.split)
+        const button = findChild(player, "commentButton")
+        tryVerify(() => button.visible)
+        button.clicked()
+        tryVerify(() => window.pageStack.currentItem !== player, 2000, "the comment page opens")
+        compare(window.pageStack.currentItem.entry.id, rows[0].id)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === player)
     }
 
     // Sideways the training keeps its ratings: the list beside the small player (clickdummy
@@ -2075,7 +2110,6 @@ TestCase {
         // "Mock exam" on Today opens the exam at the planned grade and makes it the practice grade.
         PracticeGrade.setGrade("aikido", "k5")
         const today1 = push("TodayPage")
-        wait(1000)      // the page has slid in
         clickUntil(findChild(today1, "toMockExam"), () => window.pageStack.currentItem !== today1)
         tryCompare(window.pageStack.currentItem, "title", qsTranslate("ExamPage", "Exam mode"))
         compare(window.pageStack.currentItem.grade, "k4")
@@ -3548,7 +3582,6 @@ TestCase {
         verify(hints[2].indexOf("4. Kyu") >= 0, hints[2])
 
         const page = push("ProgrammePage")
-        wait(500)       // Kirigami slides the page in
         compare(page.grade, "k4")
         const chips = findChild(page, "gradeChips")
         const k2 = chips.itemAt(page.grades.findIndex(g => g.id === "k2"))
@@ -3594,10 +3627,9 @@ TestCase {
         const examTile = findChild(start, "examTile")
 
         const today = push("TodayPage")
-        wait(500)       // Kirigami slides the page in
         const hint = findChild(today, "practiceGradeHint")
         compare(today.grade, "k5")
-        compare(hint.text, qsTranslate("TodayPage", "up to %1 (first grade, nothing in My grades yet)").arg("5. Kyu"))
+        compare(hint.text, qsTranslate("TodayPage", "up to %1 (first grade, nothing for this discipline in My grades yet)").arg("5. Kyu"))
         const dueIds = () => today.due.map(r => r.id).join()
         const dueUpToK5 = dueIds()
 
@@ -3626,7 +3658,6 @@ TestCase {
 
         // By hand in the exam: Today and the start menu follow.
         const exam = push("ExamPage")
-        wait(500)       // Kirigami slides the page in
         compare(exam.grade, "k2")
         clickUntil(findChild(exam, "grade_k5"), () => exam.grade === "k5")
         compare(PracticeGrade.grade(discipline), "k5")
