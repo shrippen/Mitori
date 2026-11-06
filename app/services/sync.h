@@ -27,6 +27,9 @@ class Sync : public QObject
     Q_PROPERTY(QString server READ server NOTIFY accountChanged)
     Q_PROPERTY(QString user READ user NOTIFY accountChanged)
     Q_PROPERTY(bool hasPassword READ hasPassword NOTIFY accountChanged)
+    // No key store took the password, it lies in a file; or the store does not give it out.
+    Q_PROPERTY(bool passwordInFile READ passwordInFile NOTIFY accountChanged)
+    Q_PROPERTY(bool passwordUnreadable READ passwordUnreadable NOTIFY accountChanged)
     Q_PROPERTY(QString deviceName READ deviceName NOTIFY accountChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(QDateTime lastSync READ lastSync NOTIFY stateChanged)
@@ -39,9 +42,9 @@ public:
     Q_ENUM(Choice)
 
     explicit Sync(QObject *parent = nullptr);
-    // For tests: files and folders of their own, no timers.
+    // For tests: files, folders and key store of their own, no timers.
     Sync(const QString &practice, const QString &courses, const QString &media, const QString &folder,
-         QObject *parent = nullptr);
+         std::shared_ptr<SecretStore> store, QObject *parent = nullptr);
     ~Sync() override;
 
     bool enabled() const { return m_account.enabled(); }
@@ -50,7 +53,9 @@ public:
     void setAutomatic(bool on);
     QString server() const { return m_account.account().folder.toString(); }
     QString user() const { return m_account.account().user; }
-    bool hasPassword() const { return !m_account.account().password.isEmpty(); }
+    bool hasPassword() const { return m_account.secret() != SyncAccount::Secret::None; }
+    bool passwordInFile() const { return m_account.secret() == SyncAccount::Secret::File; }
+    bool passwordUnreadable() const { return m_account.secret() == SyncAccount::Secret::Unreadable; }
     QString deviceName() const;
     bool busy() const { return m_busy; }
     QDateTime lastSync() const { return m_account.last(); }
@@ -62,7 +67,7 @@ public:
     // app password ("" keeps the saved one), this device's name.
     Q_INVOKABLE void setAccount(const QString &server, const QString &user, const QString &password,
                                 const QString &name);
-    // Starts a sync unless one runs; false when there is no account.
+    // Starts a sync unless one runs (or once the key store answered); false when there is no account.
     Q_INVOKABLE bool syncNow();
     // A change was made: with `automatic`, a sync follows soon.
     Q_INVOKABLE void touched();
@@ -85,6 +90,7 @@ private:
     void finished();
     void setError(const QString &error);
     void announce();
+    void secretFound();
 
     QString m_practice;
     QString m_courses;
@@ -98,4 +104,5 @@ private:
     bool m_busy = false;
     bool m_merging = false;     // while merged() runs: the services reading anew are no change
     bool m_again = false;       // asked for while one ran
+    bool m_waiting = false;     // asked for before the key store answered
 };

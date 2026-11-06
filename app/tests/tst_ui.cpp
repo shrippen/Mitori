@@ -64,6 +64,7 @@ public slots:
         QFile::remove(Practice::defaultPath());
         QFile::remove(Courses::defaultPath());
         QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)).remove(QStringLiteral("lehrgaenge.ics"));
+        QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QStringLiteral("/sync")).removeRecursively();
         // The course calendar from a file, dates relative to today: never the network.
         const auto day = [](int offset) { return QDate::currentDate().addDays(offset).toString(QStringLiteral("yyyyMMdd")).toUtf8(); };
         QDir().mkpath(QStringLiteral(UI_DATA_DIR));

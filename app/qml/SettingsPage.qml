@@ -160,6 +160,24 @@ Kirigami.ScrollablePage {
                 onEditingFinished: page.saveAccount()
             }
         }
+        LookHint {
+            objectName: "syncPasswordInFile"
+            Layout.fillWidth: true
+            visible: Sync.enabled && Sync.passwordInFile
+            importance: LookHint.Importance.Important
+            titleText: qsTr("App password lies in a file")
+            text: Qt.platform.os === "android"
+                  ? qsTr("The Android key store did not take it, so it lies unencrypted in Mitori's sync folder. Restart Mitori: it tries again by itself. If this note stays, use an app password you can revoke on the server.")
+                  : qsTr("No key store took it, so it lies unencrypted in Mitori's sync folder. Set up and unlock KWallet, GNOME Keyring or another Secret Service (for the Flatpak: with the desktop's secrets portal), then restart Mitori: it moves the password by itself.")
+        }
+        LookHint {
+            objectName: "syncPasswordUnreadable"
+            Layout.fillWidth: true
+            visible: Sync.enabled && Sync.passwordUnreadable
+            importance: LookHint.Importance.Error
+            titleText: qsTr("App password cannot be read")
+            text: qsTr("The key store does not give it out, so Mitori cannot sync. Unlock it and press “Sync now”, or enter the password again.")
+        }
         LookFormRow {
             label: qsTr("This device")
             visible: Sync.enabled

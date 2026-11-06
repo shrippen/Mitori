@@ -1,4 +1,6 @@
+#include <QBuffer>
 #include <QMap>
+#include <QPointer>
 #include <QSet>
 #include <QSettings>
 #include <QSignalSpy>
@@ -7,12 +9,14 @@
 #include <QTcpSocket>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTimer>
 
 #include "coursebook.h"
 #include "mediastore.h"
 #include "practicelog.h"
 #include "sync.h"
 #include "webdav.h"
+#include "zipreader.h"
 
 using namespace Qt::StringLiterals;
 
@@ -139,6 +143,61 @@ private:
     }
 };
 
+// A key store in memory, late as the real one. `answer` is what it says; with `held` it waits for
+// release(), like a wallet waiting to be unlocked.
+class FakeSecretStore : public SecretStore
+{
+public:
+    QHash<QString, QString> entries;
+    Result answer = Result::Ok;
+    bool held = false;
+    int asked = 0;
+
+    void read(const QString &key, QObject *context, ReadDone done) override
+    {
+        ++asked;
+        respond(context, [this, key, done = std::move(done)] {
+            const Result result = answer == Result::Ok && !entries.contains(key) ? Result::NotFound : answer;
+            done(result, result == Result::Ok ? entries.value(key) : QString());
+        });
+    }
+
+    void write(const QString &key, const QString &secret, QObject *context, WriteDone done) override
+    {
+        ++asked;
+        respond(context, [this, key, secret, done = std::move(done)] {
+            if (answer == Result::Ok) {
+                entries.insert(key, secret);
+            }
+            done(answer);
+        });
+    }
+
+    void release()
+    {
+        held = false;
+        for (const auto &answerNow : std::exchange(m_held, {})) {
+            answerNow();
+        }
+    }
+
+private:
+    QList<std::function<void()>> m_held;
+
+    void respond(QObject *context, std::function<void()> answerNow)
+    {
+        if (held) {
+            m_held << [guard = QPointer(context), answerNow] {
+                if (guard) {
+                    answerNow();
+                }
+            };
+            return;
+        }
+        QTimer::singleShot(0, context, answerNow);
+    }
+};
+
 // The sync: two devices through one WebDAV folder, a conflict on both, and a wrong password.
 class TstSync : public QObject
 {
@@ -151,6 +210,7 @@ class TstSync : public QObject
         QString courses;
         QString media;
         QString folder;
+        std::shared_ptr<FakeSecretStore> store = std::make_shared<FakeSecretStore>();
     };
 
     Device device(const QString &name) const
@@ -160,12 +220,32 @@ class TstSync : public QObject
         return {root + u"/mitori.sqlite"_s, root + u"/lehrgaenge.sqlite"_s, root + u"/medien"_s, root + u"/sync"_s};
     }
 
+    static QString accountFile(const Device &d) { return d.folder + u"/konto.ini"_s; }
+
+    // konto.ini as an older version left it: enabled, with the password in plain text.
+    static void oldAccount(const Device &d, const QString &server, const QString &password)
+    {
+        QDir().mkpath(d.folder);
+        QSettings s(accountFile(d), QSettings::IniFormat);
+        s.setValue(u"konto/server"_s, server);
+        s.setValue(u"konto/user"_s, u"ich"_s);
+        s.setValue(u"konto/password"_s, password);
+        s.setValue(u"konto/enabled"_s, true);
+    }
+
+    static bool fileHas(const Device &d, const QByteArray &text)
+    {
+        QFile file(accountFile(d));
+        return file.open(QIODevice::ReadOnly) && file.readAll().contains(text);
+    }
+
     static bool synced(Sync &sync)
     {
         if (!sync.syncNow()) {
             return false;
         }
-        if (!QTest::qWaitFor([&] { return !sync.busy(); }, 20000)) {
+        const auto waits = [&] { return sync.errorString().contains(u"Waiting"_s); };   // for the key store
+        if (!QTest::qWaitFor([&] { return !sync.busy() && !waits(); }, 20000)) {
             return false;
         }
         return sync.errorString().isEmpty();
@@ -202,11 +282,203 @@ private slots:
     void accountFileIsPrivate()
     {
         QTemporaryDir dir;
-        SyncAccount account(dir.path());
+        auto store = std::make_shared<FakeSecretStore>();
+        store->answer = SecretStore::Result::Failed;
+        SyncAccount account(dir.path(), store);
         account.setAccount({QUrl(u"https://example.org/dav/"_s), u"user"_s, u"geheim"_s});
+        QTRY_COMPARE(account.secret(), SyncAccount::Secret::File);
         const QFile::Permissions p = QFile::permissions(dir.filePath(u"konto.ini"_s));
         QVERIFY(p != QFile::Permissions());
         QVERIFY(!(p & (QFile::ReadGroup | QFile::ReadOther | QFile::WriteGroup | QFile::WriteOther)));
+    }
+
+    // Migration: the password of an older version moves to the store, the file is clean after.
+    void passwordMoves()
+    {
+        const Device d = device(u"umzug"_s);
+        oldAccount(d, u"https://example.org/dav/"_s, u"geheim"_s);
+        d.store->held = true;
+        {
+            Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+
+            // Not confirmed yet: still in the file, and usable.
+            QTest::qWait(10);
+            QVERIFY(fileHas(d, "geheim"));
+            QVERIFY(sync.passwordInFile());
+
+            d.store->release();
+            QTRY_VERIFY(!sync.passwordInFile());
+            QVERIFY(sync.hasPassword());
+        }
+        QVERIFY(!fileHas(d, "geheim"));
+        QCOMPARE(d.store->entries.values(), QStringList{u"geheim"_s});
+
+        // The next start reads it from the store: a sync goes through.
+        FakeDav dav;
+        QSettings(accountFile(d), QSettings::IniFormat).setValue(u"konto/server"_s, dav.url());
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QVERIFY2(synced(sync), qPrintable(sync.errorString()));
+    }
+
+    // Migration with a failing store: nothing lost, the file stays, the note shows, the sync works.
+    // A later start with a working store moves it.
+    void passwordStaysOnFailure()
+    {
+        FakeDav dav;
+        const Device d = device(u"ohnespeicher"_s);
+        oldAccount(d, dav.url(), u"geheim"_s);
+        d.store->answer = SecretStore::Result::Failed;
+        {
+            Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+            QTRY_VERIFY(d.store->asked > 0);
+            QTest::qWait(10);
+            QVERIFY(sync.passwordInFile());
+            QVERIFY(fileHas(d, "geheim"));
+            QVERIFY2(synced(sync), qPrintable(sync.errorString()));
+        }
+        QVERIFY(fileHas(d, "geheim"));
+        QVERIFY(d.store->entries.isEmpty());
+
+        d.store->answer = SecretStore::Result::Ok;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_VERIFY(!sync.passwordInFile());
+        QVERIFY(!fileHas(d, "geheim"));
+        QCOMPARE(d.store->entries.values(), QStringList{u"geheim"_s});
+    }
+
+    // A new password goes to the store and never touches the file; a failing store: into the file.
+    void newPassword()
+    {
+        const Device d = device(u"neu"_s);
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, u"erstes"_s, u"X"_s);
+        QVERIFY(sync.hasPassword());
+        QTRY_COMPARE(d.store->entries.values(), QStringList{u"erstes"_s});
+        QTest::qWait(10);
+        QVERIFY(!fileHas(d, "erstes"));
+        QVERIFY(!sync.passwordInFile());
+
+        d.store->answer = SecretStore::Result::Failed;
+        sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, u"zweites"_s, u"X"_s);
+        QTRY_VERIFY(sync.passwordInFile());
+        QVERIFY(fileHas(d, "zweites"));
+    }
+
+    // Two passwords in a row while the store waits: the last one counts, in the store and in memory.
+    void newPasswordWins()
+    {
+        const Device d = device(u"zweimal"_s);
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        d.store->held = true;
+        sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, u"alt"_s, u"X"_s);
+        sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, u"neu"_s, u"X"_s);
+        d.store->release();
+        QTRY_COMPARE(d.store->entries.values(), QStringList{u"neu"_s});
+        QTRY_VERIFY(!sync.passwordInFile());
+        QVERIFY(!fileHas(d, "neu"));
+    }
+
+    // The race on start: a sync asked for before the store answered waits, with a word, and runs
+    // with the password afterwards; never with an empty one.
+    void syncWaitsForStore()
+    {
+        FakeDav dav;
+        const Device d = device(u"wartet"_s);
+        {
+            Sync first(d.practice, d.courses, d.media, d.folder, d.store);
+            first.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"X"_s);
+            first.setEnabled(true);
+            QTRY_VERIFY(!d.store->entries.isEmpty());
+            QTest::qWait(10);
+        }
+
+        d.store->held = true;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QVERIFY(sync.hasPassword());
+        QVERIFY(sync.syncNow());
+        QVERIFY(!sync.busy());
+        QVERIFY(!sync.errorString().isEmpty());
+        QTest::qWait(20);
+        QCOMPARE(dav.requests, 0);
+
+        d.store->release();
+        QTRY_VERIFY(sync.lastSync().isValid());
+        QVERIFY2(sync.errorString().isEmpty(), qPrintable(sync.errorString()));
+        QVERIFY(dav.requests > 0);
+    }
+
+    // The store does not give it out (locked, refused): no request with an empty password, the
+    // note shows, entering it again works.
+    void storeUnreadable()
+    {
+        FakeDav dav;
+        const Device d = device(u"gesperrt"_s);
+        {
+            Sync first(d.practice, d.courses, d.media, d.folder, d.store);
+            first.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"X"_s);
+            first.setEnabled(true);
+            QTRY_VERIFY(!d.store->entries.isEmpty());
+            QTest::qWait(10);
+        }
+
+        d.store->answer = SecretStore::Result::Failed;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_VERIFY(sync.passwordUnreadable());
+        QVERIFY(sync.syncNow());
+        QTRY_VERIFY(!sync.errorString().contains(u"Waiting"_s));
+        QVERIFY2(sync.errorString().contains(u"key store"_s), qPrintable(sync.errorString()));
+        QCOMPARE(dav.requests, 0);
+
+        // Unlocked again: the same button finds it.
+        d.store->answer = SecretStore::Result::Ok;
+        QVERIFY2(synced(sync), qPrintable(sync.errorString()));
+        QVERIFY(!sync.passwordUnreadable());
+    }
+
+    // Nobody who has no password is bothered by a wallet's unlock prompt.
+    void noAccountNoStore()
+    {
+        const Device d = device(u"niemand"_s);
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTest::qWait(10);
+        QVERIFY(!sync.hasPassword());
+        QCOMPARE(d.store->asked, 0);
+    }
+
+    // What leaves the device holds no password, in any file of the archive, nor does its folder
+    // on the server. (Backup and sync share BackupArchive, which reads the databases and media only.)
+    void noPasswordInArchive()
+    {
+        FakeDav dav;
+        const Device d = device(u"archiv"_s);
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        sync.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"X"_s);
+        sync.setEnabled(true);
+        {
+            PracticeLog log;
+            QVERIFY(log.open(d.practice));
+            log.addNote(u"aikido/k5/a"_s, u"Hüfte"_s, now(), u"a"_s);
+        }
+        QVERIFY2(synced(sync), qPrintable(sync.errorString()));
+
+        int archives = 0;
+        for (auto it = dav.files.cbegin(); it != dav.files.cend(); ++it) {
+            QVERIFY2(!it.value().contains("geheim"), qPrintable(it.key()));
+            QBuffer buffer;
+            buffer.setData(it.value());
+            buffer.open(QIODevice::ReadOnly);
+            ZipReader zip;
+            if (!zip.open(&buffer)) {
+                continue;
+            }
+            ++archives;
+            for (const QString &name : zip.names()) {
+                QByteArray data;
+                QVERIFY(zip.read(name, &data));
+                QVERIFY2(!data.contains("geheim"), qPrintable(name));
+            }
+        }
+        QCOMPARE(archives, 1);
     }
 
     void twoDevices()
@@ -214,8 +486,8 @@ private slots:
         FakeDav dav;
         const Device a = device(u"telefon"_s);
         const Device b = device(u"tablet"_s);
-        Sync phone(a.practice, a.courses, a.media, a.folder);
-        Sync tablet(b.practice, b.courses, b.media, b.folder);
+        Sync phone(a.practice, a.courses, a.media, a.folder, a.store);
+        Sync tablet(b.practice, b.courses, b.media, b.folder, b.store);
         for (Sync *s : {&phone, &tablet}) {
             s->setAccount(dav.url(), u"ich"_s, u"geheim"_s, s == &phone ? u"Telefon"_s : u"Tablet"_s);
             s->setEnabled(true);
@@ -292,8 +564,8 @@ private slots:
         FakeDav dav;
         const Device a = device(u"spaet-a"_s);
         const Device b = device(u"spaet-b"_s);
-        Sync phone(a.practice, a.courses, a.media, a.folder);
-        Sync tablet(b.practice, b.courses, b.media, b.folder);
+        Sync phone(a.practice, a.courses, a.media, a.folder, a.store);
+        Sync tablet(b.practice, b.courses, b.media, b.folder, b.store);
         for (Sync *s : {&phone, &tablet}) {
             s->setAccount(dav.url(), u"ich"_s, u"geheim"_s, s == &phone ? u"Telefon"_s : u"Tablet"_s);
             s->setEnabled(true);
@@ -322,8 +594,8 @@ private slots:
         FakeDav dav;
         const Device a = device(u"nach-a"_s);
         const Device b = device(u"nach-b"_s);
-        Sync phone(a.practice, a.courses, a.media, a.folder);
-        Sync tablet(b.practice, b.courses, b.media, b.folder);
+        Sync phone(a.practice, a.courses, a.media, a.folder, a.store);
+        Sync tablet(b.practice, b.courses, b.media, b.folder, b.store);
         for (Sync *s : {&phone, &tablet}) {
             s->setAccount(dav.url(), u"ich"_s, u"geheim"_s, s == &phone ? u"Telefon"_s : u"Tablet"_s);
             s->setEnabled(true);
@@ -355,8 +627,8 @@ private slots:
         FakeDav dav;
         const Device a = device(u"bleibt-a"_s);
         const Device b = device(u"bleibt-b"_s);
-        Sync phone(a.practice, a.courses, a.media, a.folder);
-        Sync tablet(b.practice, b.courses, b.media, b.folder);
+        Sync phone(a.practice, a.courses, a.media, a.folder, a.store);
+        Sync tablet(b.practice, b.courses, b.media, b.folder, b.store);
         for (Sync *s : {&phone, &tablet}) {
             s->setAccount(dav.url(), u"ich"_s, u"geheim"_s, s == &phone ? u"Telefon"_s : u"Tablet"_s);
             s->setEnabled(true);
@@ -388,8 +660,8 @@ private slots:
         FakeDav dav;
         const Device a = device(u"e-a"_s);
         const Device b = device(u"e-b"_s);
-        Sync one(a.practice, a.courses, a.media, a.folder);
-        Sync two(b.practice, b.courses, b.media, b.folder);
+        Sync one(a.practice, a.courses, a.media, a.folder, a.store);
+        Sync two(b.practice, b.courses, b.media, b.folder, b.store);
         for (Sync *s : {&one, &two}) {
             s->setAccount(dav.url(), u"ich"_s, u"geheim"_s, s == &one ? u"Eins"_s : u"Zwei"_s);
             s->setEnabled(true);
@@ -431,7 +703,7 @@ private slots:
     {
         FakeDav dav;
         const Device d = device(u"falsch"_s);
-        Sync sync(d.practice, d.courses, d.media, d.folder);
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
         QVERIFY(!sync.syncNow());               // no account yet
         sync.setAccount(dav.url(), u"ich"_s, u"falsch"_s, u"X"_s);
         sync.setEnabled(true);

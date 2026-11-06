@@ -33,7 +33,7 @@ const QString kLocalHost = QStringLiteral("localhost");
 
 Sync::Sync(QObject *parent)
     : Sync(Practice::defaultPath(), Courses::defaultPath(), MediaStore::defaultRoot(), SyncAccount::defaultFolder(),
-           parent)
+           SecretStore::system(SyncAccount::defaultFolder()), parent)
 {
     // After the start (the app is up first), then once a day while it runs.
     m_daily.setInterval(kDailyMs);
@@ -45,17 +45,19 @@ Sync::Sync(QObject *parent)
 }
 
 Sync::Sync(const QString &practice, const QString &courses, const QString &media, const QString &folder,
-           QObject *parent)
+           std::shared_ptr<SecretStore> store, QObject *parent)
     : QObject(parent)
     , m_practice(practice)
     , m_courses(courses)
     , m_media(media)
     , m_work(QDir(folder).filePath(QStringLiteral("arbeit")))
-    , m_account(folder)
+    , m_account(folder, std::move(store))
 {
     m_soon.setSingleShot(true);
     connect(&m_soon, &QTimer::timeout, this, &Sync::syncNow);
     connect(&m_watcher, &QFutureWatcher<SyncJob::Output>::finished, this, &Sync::finished);
+    connect(&m_account, &SyncAccount::secretChanged, this, &Sync::secretFound);
+    m_account.loadSecret();
 }
 
 Sync::~Sync()
@@ -127,12 +129,48 @@ bool Sync::syncNow()
         setError(tr("Enter the server, user and app password first."));
         return false;
     }
+
+    // The password is still on its way: the sync follows (secretFound). An unreadable one is
+    // asked for again; without a password the server would only count a failed login.
+    if (m_account.secret() == SyncAccount::Secret::Unreadable) {
+        m_account.loadSecret();
+    }
+    if (m_account.secret() == SyncAccount::Secret::Asking && account.password.isEmpty()) {
+        m_waiting = true;
+        setError(tr("Waiting for the system's key store …"));
+        return true;
+    }
+    if (account.password.isEmpty()) {
+        setError(tr("Enter the server, user and app password first."));
+        return false;
+    }
+
     const SyncJob::Input input{account,  m_account.id(), deviceName(), deviceId(),     m_account.base(),
                                m_account.conflicts(), m_practice, m_courses, m_media, m_work};
     m_busy = true;
     emit busyChanged();
     m_watcher.setFuture(QtConcurrent::run(&SyncJob::run, input));
     return true;
+}
+
+void Sync::secretFound()
+{
+    emit accountChanged();
+
+    // The answer a sync waited for.
+    if (!m_waiting || m_account.secret() == SyncAccount::Secret::Asking) {
+        return;
+    }
+    m_waiting = false;
+    if (passwordUnreadable()) {
+        setError(tr("The key store does not give out the app password. Unlock it, or enter the password again."));
+        return;
+    }
+    if (!enabled()) {
+        setError({});
+        return;
+    }
+    syncNow();
 }
 
 void Sync::touched()

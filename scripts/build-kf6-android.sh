@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Build the KF6 prefix the Android app needs: extra-cmake-modules, KCoreAddons (a Kirigami
-# dependency) and Kirigami, cross-compiled for android_arm64_v8a.
+# dependency) and Kirigami, cross-compiled for android_arm64_v8a, and QtKeychain (static: nothing
+# more to package).
 #
 # Usage: ./scripts/build-kf6-android.sh [-f|--force] [prefix]   (prefix default $HOME/kf6-android)
-# Skips itself when the prefix already has this KF6 version. Needs the NDK and Qt for Android
-# + host tools (scripts/build-android.sh installs both) and network access to invent.kde.org.
+# Skips what the prefix already has in this version. Needs the NDK and Qt for Android + host tools
+# (scripts/build-android.sh installs both) and network access to invent.kde.org and github.com.
 set -euo pipefail
 
 FORCE=0
@@ -12,6 +13,7 @@ if [ "${1:-}" = "-f" ] || [ "${1:-}" = "--force" ]; then FORCE=1; shift; fi
 PREFIX="${1:-$HOME/kf6-android}"
 
 KF6_VERSION="6.30.0"
+QTKEYCHAIN_VERSION="0.17.0"
 SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
 QT_VER="6.11.3"
 QT_ANDROID="$HOME/Qt/$QT_VER/android_arm64_v8a"
@@ -26,16 +28,8 @@ NDK_PATH=$(ls -d "$SDK_ROOT"/ndk/27.2.* 2>/dev/null | head -1)
 [ -d "$NDK_PATH" ] || error "Android NDK not found under $SDK_ROOT/ndk (scripts/build-android.sh installs it)"
 [ -d "$QT_ANDROID" ] && [ -d "$QT_HOST" ] || error "Qt $QT_VER not found under \$HOME/Qt (scripts/build-android.sh installs it)"
 
-if [ "$FORCE" -ne 1 ] && grep -qs "\"$KF6_VERSION\"" "$PREFIX/lib/cmake/KF6Kirigami/KF6KirigamiConfigVersion.cmake"; then
-    info "$PREFIX already has KF6Kirigami $KF6_VERSION, skipping (-f rebuilds)"
-    exit 0
-fi
-# Another KF6 version (built against another Qt) must not mix with this one.
-rm -rf "${PREFIX:?}"
-
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
-mkdir -p "$PREFIX"
 
 CROSS_ARGS=(
     -DCMAKE_TOOLCHAIN_FILE="$NDK_PATH/build/cmake/android.toolchain.cmake"
@@ -48,6 +42,28 @@ CROSS_ARGS=(
     -DECM_DIR="$PREFIX/share/ECM/cmake"
     -DBUILD_TESTING=OFF -DBUILD_QCH=OFF
 )
+
+# The keystore's access (store/secretstore), added to a prefix that lacks it.
+keychain() {
+    if grep -qs "\"$QTKEYCHAIN_VERSION\"" "$PREFIX/lib/cmake/Qt6Keychain/Qt6KeychainConfigVersion.cmake"; then
+        return
+    fi
+    info "Building QtKeychain $QTKEYCHAIN_VERSION..."
+    git clone --quiet --depth 1 --branch "$QTKEYCHAIN_VERSION" https://github.com/frankosterfeld/qtkeychain.git "$WORK/qtkeychain"
+    cmake -B "$WORK/qtkeychain/build" -S "$WORK/qtkeychain" "${CROSS_ARGS[@]}" \
+        -DBUILD_SHARED_LIBS=OFF -DBUILD_TRANSLATIONS=OFF
+    cmake --build "$WORK/qtkeychain/build" -j"$(nproc)"
+    cmake --install "$WORK/qtkeychain/build"
+}
+
+if [ "$FORCE" -ne 1 ] && grep -qs "\"$KF6_VERSION\"" "$PREFIX/lib/cmake/KF6Kirigami/KF6KirigamiConfigVersion.cmake"; then
+    info "$PREFIX already has KF6Kirigami $KF6_VERSION, skipping (-f rebuilds)"
+    keychain
+    exit 0
+fi
+# Another KF6 version (built against another Qt) must not mix with this one.
+rm -rf "${PREFIX:?}"
+mkdir -p "$PREFIX"
 
 info "Cloning extra-cmake-modules, kcoreaddons, kirigami @ v$KF6_VERSION..."
 for repo in extra-cmake-modules kcoreaddons kirigami; do
@@ -72,5 +88,7 @@ cmake -B "$WORK/kirigami/build" -S "$WORK/kirigami" "${CROSS_ARGS[@]}" \
     -DBUILD_EXAMPLES=OFF -DDESKTOP_ENABLED=OFF
 cmake --build "$WORK/kirigami/build" -j"$(nproc)"
 cmake --install "$WORK/kirigami/build"
+
+keychain
 
 info "KF6 for Android ready at $PREFIX"

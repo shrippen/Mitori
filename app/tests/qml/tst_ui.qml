@@ -659,6 +659,24 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // No key store answers (the test's environment): the password lands in the file, the note says
+    // so and what to do. Runs after the case without an account.
+    function test_3e_sync_password_in_file() {
+        const page = push("SettingsPage")
+        Sync.enabled = true
+        const hint = findChild(page, "syncPasswordInFile")
+        verify(!hint.visible)
+        Sync.setAccount("https://cloud.example.org/dav/", "ich", "nur-ein-test", "")
+        tryVerify(() => hint.visible, 10000)
+        verify(hint.text.indexOf("restart Mitori") >= 0, hint.text)
+        verify(Sync.hasPassword)
+        page.flickable.contentY = hint.mapToItem(page.flickable.contentItem, 0, 0).y - 20
+        wait(50)
+        shot("4e-sync-password-file")
+        Sync.enabled = false
+        window.pageStack.pop()
+    }
+
     // Backup: saved, read back on the same device it changes nothing; merging says so.
     function test_3c_backup() {
         const page = push("SettingsPage")

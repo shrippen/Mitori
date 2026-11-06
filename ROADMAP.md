@@ -206,7 +206,7 @@ Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
 - Übungsgrad getrennt vom Blättern im Programm.
 - Lehrgangsnotizen mit Technik verbinden (⌗, Eintrag auch bei der Technik), QR-Code, Tablet nach Vorlage (Blatt
   rechts, zwei Spalten, Lehrgänge und Einstellungen als Liste und Seite), Export als Blatt.
-- Programmdaten auf Englisch, App-Passwort im Schlüsselbund, Abschlussseite des Trainings.
+- Programmdaten auf Englisch, Abschlussseite des Trainings.
 - Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).
 
 Offen, klein:
