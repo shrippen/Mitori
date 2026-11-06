@@ -174,13 +174,16 @@ Kirigami.ScrollablePage {
             titleText: {
                 switch (Sync.passwordNote) {
                 case Sync.Unreadable: return qsTr("App password cannot be read")
-                case Sync.NotRecorded: return qsTr("Enter the app password again")
+                case Sync.NotRecorded: return Sync.enabled ? qsTr("App password not on record") : qsTr("App password lies in a file")
                 case Sync.NotSaved: return qsTr("App password not saved")
                 default: return qsTr("App password lies in a file")
                 }
             }
             text: {
                 if (!Sync.enabled) {
+                    if (Sync.passwordNote === Sync.NotRecorded) {
+                        return qsTr("An older app password lies unencrypted in Mitori's sync folder. Switch sync on to see what to do.")
+                    }
                     return qsTr("It lies unencrypted in Mitori's sync folder. With sync on, Mitori moves it to the key store.")
                 }
                 switch (Sync.passwordNote) {
@@ -193,7 +196,7 @@ Kirigami.ScrollablePage {
                 case Sync.NotRemovedFromFile:
                     return qsTr("The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so it also still lies there unencrypted. Check the free space and the folder's rights, then restart Mitori.")
                 case Sync.NotRecorded:
-                    return qsTr("The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder's rights, then enter it again.")
+                    return qsTr("The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder's rights, then press “Sync now”. Restarting before that loses this password here: an older one in the file comes back and replaces it in the key store.")
                 case Sync.NotSaved:
                     return qsTr("Neither the key store nor the file konto.ini took it: it is gone when Mitori closes. Check the free space and the sync folder's rights, then enter it again.")
                 case Sync.Unreadable:

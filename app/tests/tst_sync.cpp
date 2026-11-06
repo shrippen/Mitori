@@ -682,8 +682,8 @@ private slots:
         QVERIFY2(synced(next), qPrintable(next.errorString()));
     }
 
-    // The same, restarted before entering it again: P1 is back, as the note warned, and shows as
-    // in the file; entering P2 still repairs it.
+    // The same, restarted before "Sync now": P1 is back and replaces P2 in the store, as the note
+    // warns; entering P2 still repairs it.
     void newerNotRecordedRestart()
     {
         FakeDav dav;
@@ -705,10 +705,41 @@ private slots:
         QVERIFY(fileHas(d, "alt"));
 
         Sync next(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_COMPARE(d.store->entries.values(), QStringList{u"alt"_s});
+        QTRY_VERIFY(!fileHas(d, "alt"));
+        d.store->entries.clear();
         next.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"X"_s);
         QTRY_COMPARE(next.passwordNote(), Sync::PasswordNote::NoNote);
         QTRY_VERIFY(!fileHas(d, "alt"));
         QVERIFY2(synced(next), qPrintable(next.errorString()));
+    }
+
+    // Sync off and on again is no restart: the newer password in memory stays, and with it the note.
+    // With sync off the older one in the file still shows.
+    void offOnKeepsNewer()
+    {
+        const Device d = device(u"ausan"_s);
+        oldAccount(d, u"https://example.org/dav/"_s, u"alt"_s);
+        d.store->answer = SecretStore::Result::Failed;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_VERIFY(d.store->asked > 0);
+        QTest::qWait(10);
+
+        d.store->answer = SecretStore::Result::Ok;
+        d.store->held = true;
+        sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, u"neu"_s, u"X"_s);
+        {
+            WriteBlock block;
+            d.store->release();
+            QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NotRecorded);
+        }
+
+        sync.setEnabled(false);
+        QVERIFY(sync.passwordInFile());
+        sync.setEnabled(true);
+        QTest::qWait(10);
+        QCOMPARE(sync.passwordNote(), Sync::PasswordNote::NotRecorded);
+        QCOMPARE(d.store->entries.values(), QStringList{u"neu"_s});
     }
 
     // A first password, the file cannot take the mark: the next start would not look in the store.
@@ -772,6 +803,12 @@ private slots:
         QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NotSaved);
         QVERIFY(!sync.passwordInFile());
         QVERIFY(!sync.passwordSaved());
+
+        // Sync on again keeps what only memory holds.
+        block.lift();
+        sync.setEnabled(true);
+        QTest::qWait(10);
+        QCOMPARE(sync.passwordNote(), Sync::PasswordNote::NotSaved);
     }
 
     // Nobody who has no password is bothered by a wallet's unlock prompt.

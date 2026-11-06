@@ -2022,117 +2022,123 @@
         <translation>App-Passwort nicht lesbar</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="177"/>
-        <source>Enter the app password again</source>
-        <translation>App-Passwort neu eingeben</translation>
-    </message>
-    <message>
         <location filename="../qml/SettingsPage.qml" line="178"/>
         <source>App password not saved</source>
         <translation>App-Passwort nicht gespeichert</translation>
     </message>
     <message>
+        <location filename="../qml/SettingsPage.qml" line="177"/>
         <location filename="../qml/SettingsPage.qml" line="179"/>
         <source>App password lies in a file</source>
         <translation>App-Passwort liegt in einer Datei</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="184"/>
+        <location filename="../qml/SettingsPage.qml" line="177"/>
+        <source>App password not on record</source>
+        <translation>App-Passwort nicht vermerkt</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="185"/>
+        <source>An older app password lies unencrypted in Mitori&apos;s sync folder. Switch sync on to see what to do.</source>
+        <translation>Ein älteres App-Passwort liegt unverschlüsselt in Mitoris Abgleich-Ordner. Schalte den Abgleich ein, um zu sehen, was zu tun ist.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsPage.qml" line="187"/>
         <source>It lies unencrypted in Mitori&apos;s sync folder. With sync on, Mitori moves it to the key store.</source>
         <translation>Es liegt unverschlüsselt in Mitoris Abgleich-Ordner. Bei eingeschaltetem Abgleich verschiebt Mitori es in den Schlüsselbund.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="188"/>
+        <location filename="../qml/SettingsPage.qml" line="191"/>
         <source>Mitori is handing it to the Android key store. Until that is confirmed, it lies unencrypted in Mitori&apos;s sync folder.</source>
         <translation>Mitori übergibt es dem Android-Schlüsselspeicher. Bis das bestätigt ist, liegt es unverschlüsselt in Mitoris Abgleich-Ordner.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="189"/>
+        <location filename="../qml/SettingsPage.qml" line="192"/>
         <source>Mitori is handing it to the key store. Until that is confirmed, it lies unencrypted in Mitori&apos;s sync folder. If the key store asks to be unlocked, unlock it.</source>
         <translation>Mitori übergibt es dem Schlüsselbund. Bis das bestätigt ist, liegt es unverschlüsselt in Mitoris Abgleich-Ordner. Fragt der Schlüsselbund nach dem Entsperren, entsperre ihn.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="191"/>
+        <location filename="../qml/SettingsPage.qml" line="194"/>
         <source>The Android key store did not take it, so it lies unencrypted in Mitori&apos;s sync folder. Restart Mitori: it tries again by itself. If this note stays, use an app password you can revoke on the server.</source>
         <translation>Der Android-Schlüsselspeicher hat es nicht angenommen, darum liegt es unverschlüsselt in Mitoris Abgleich-Ordner. Starte Mitori neu: Es versucht es von selbst noch einmal. Bleibt dieser Hinweis, nimm ein App-Passwort, das du auf dem Server widerrufen kannst.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="192"/>
+        <location filename="../qml/SettingsPage.qml" line="195"/>
         <source>No key store took it, so it lies unencrypted in Mitori&apos;s sync folder. Set up and unlock KWallet, GNOME Keyring or another Secret Service (for the Flatpak: with the desktop&apos;s secrets portal), then restart Mitori: it moves the password by itself.</source>
         <translation>Kein Schlüsselbund hat es angenommen, darum liegt es unverschlüsselt in Mitoris Abgleich-Ordner. Richte KWallet, GNOME Schlüsselbund oder einen anderen Secret Service ein und entsperre ihn (für das Flatpak: mit dem Secret-Portal des Desktops), dann starte Mitori neu: Es verschiebt das Passwort von selbst.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="194"/>
+        <location filename="../qml/SettingsPage.qml" line="197"/>
         <source>The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so it also still lies there unencrypted. Check the free space and the folder&apos;s rights, then restart Mitori.</source>
         <translation>Der Schlüsselbund hat es, aber Mitori konnte die Datei konto.ini in seinem Abgleich-Ordner nicht neu schreiben, darum liegt es dort auch noch unverschlüsselt. Prüfe den freien Platz und die Rechte des Ordners, dann starte Mitori neu.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="196"/>
-        <source>The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder&apos;s rights, then enter it again.</source>
-        <translation>Der Schlüsselbund hat es, aber Mitori konnte die Datei konto.ini in seinem Abgleich-Ordner nicht neu schreiben, darum würde der nächste Start es nicht verwenden. Prüfe den freien Platz und die Rechte des Ordners, dann gib es neu ein.</translation>
+        <location filename="../qml/SettingsPage.qml" line="199"/>
+        <source>The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so the next start would not use it. Check the free space and the folder&apos;s rights, then press “Sync now”. Restarting before that loses this password here: an older one in the file comes back and replaces it in the key store.</source>
+        <translation>Der Schlüsselbund hat es, aber Mitori konnte die Datei konto.ini in seinem Abgleich-Ordner nicht neu schreiben, darum würde der nächste Start es nicht verwenden. Prüfe den freien Platz und die Rechte des Ordners, dann tippe auf „Jetzt abgleichen“. Ein Neustart davor verliert dieses Passwort hier: Ein älteres aus der Datei kommt zurück und ersetzt es im Schlüsselbund.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="198"/>
+        <location filename="../qml/SettingsPage.qml" line="201"/>
         <source>Neither the key store nor the file konto.ini took it: it is gone when Mitori closes. Check the free space and the sync folder&apos;s rights, then enter it again.</source>
         <translation>Weder der Schlüsselbund noch die Datei konto.ini haben es angenommen: Es ist weg, sobald Mitori schließt. Prüfe den freien Platz und die Rechte des Abgleich-Ordners, dann gib es neu ein.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="200"/>
+        <location filename="../qml/SettingsPage.qml" line="203"/>
         <source>The Android key store does not give it out or no longer holds it, so Mitori cannot sync. Press “Sync now” to ask again, or enter the password again.</source>
         <translation>Der Android-Schlüsselspeicher gibt es nicht heraus oder hat es nicht mehr, darum kann Mitori nicht abgleichen. Tippe auf „Jetzt abgleichen“, um erneut zu fragen, oder gib das Passwort neu ein.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="201"/>
+        <location filename="../qml/SettingsPage.qml" line="204"/>
         <source>The key store does not give it out or no longer holds it, so Mitori cannot sync. Unlock it and press “Sync now”, or enter the password again.</source>
         <translation>Der Schlüsselbund gibt es nicht heraus oder hat es nicht mehr, darum kann Mitori nicht abgleichen. Entsperre ihn und tippe auf „Jetzt abgleichen“, oder gib das Passwort neu ein.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="208"/>
+        <location filename="../qml/SettingsPage.qml" line="211"/>
         <source>This device</source>
         <translation>Dieses Gerät</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="220"/>
+        <location filename="../qml/SettingsPage.qml" line="223"/>
         <source>Sync after every change</source>
         <translation>Nach jeder Änderung abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="230"/>
+        <location filename="../qml/SettingsPage.qml" line="233"/>
         <source>Otherwise when Mitori starts and once a day. Every rating and note is an entry of its own with a time; changes from several devices are merged. Mitori asks only when the same note was changed on two devices.</source>
         <translation>Sonst beim Start und einmal am Tag. Jede Einschätzung und jede Notiz ist ein eigener Eintrag mit Zeitstempel; Änderungen von mehreren Geräten werden zusammengeführt. Mitori fragt nur nach, wenn dieselbe Notiz auf zwei Geräten geändert wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="237"/>
+        <location filename="../qml/SettingsPage.qml" line="240"/>
         <source>Syncing …</source>
         <translation>Gleiche ab …</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="237"/>
+        <location filename="../qml/SettingsPage.qml" line="240"/>
         <source>Sync now</source>
         <translation>Jetzt abgleichen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="251"/>
+        <location filename="../qml/SettingsPage.qml" line="254"/>
         <source>Last synced: %1</source>
         <translation>Zuletzt abgeglichen: %1</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="252"/>
+        <location filename="../qml/SettingsPage.qml" line="255"/>
         <source>Not synced yet.</source>
         <translation>Noch nicht abgeglichen.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="260"/>
+        <location filename="../qml/SettingsPage.qml" line="263"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="260"/>
+        <location filename="../qml/SettingsPage.qml" line="263"/>
         <source>Device</source>
         <translation>Gerät</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="268"/>
+        <location filename="../qml/SettingsPage.qml" line="271"/>
         <source>%n conflict(s): solve …</source>
         <translation>
             <numerusform>%n Konflikt: lösen …</numerusform>
@@ -2140,68 +2146,68 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="285"/>
+        <location filename="../qml/SettingsPage.qml" line="288"/>
         <source>Save backup</source>
         <translation>Sicherung speichern</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="288"/>
-        <location filename="../qml/SettingsPage.qml" line="300"/>
+        <location filename="../qml/SettingsPage.qml" line="291"/>
+        <location filename="../qml/SettingsPage.qml" line="303"/>
         <source>ZIP archives (*.zip)</source>
         <translation>ZIP-Archive (*.zip)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="291"/>
+        <location filename="../qml/SettingsPage.qml" line="294"/>
         <source>Backup saved.</source>
         <translation>Sicherung gespeichert.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="291"/>
+        <location filename="../qml/SettingsPage.qml" line="294"/>
         <source>Backup saved: %1</source>
         <translation>Sicherung gespeichert: %1</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="298"/>
+        <location filename="../qml/SettingsPage.qml" line="301"/>
         <source>Read backup</source>
         <translation>Sicherung einlesen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="315"/>
+        <location filename="../qml/SettingsPage.qml" line="318"/>
         <source>Ratings</source>
         <translation>Einschätzungen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="315"/>
+        <location filename="../qml/SettingsPage.qml" line="318"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="315"/>
+        <location filename="../qml/SettingsPage.qml" line="318"/>
         <source>Exam rounds</source>
         <translation>Prüfungsrunden</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="316"/>
+        <location filename="../qml/SettingsPage.qml" line="319"/>
         <source>Notebooks</source>
         <translation>Notizbücher</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="316"/>
+        <location filename="../qml/SettingsPage.qml" line="319"/>
         <source>Notebook entries</source>
         <translation>Einträge in Notizbüchern</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="316"/>
+        <location filename="../qml/SettingsPage.qml" line="319"/>
         <source>Grades</source>
         <translation>Grade</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="317"/>
+        <location filename="../qml/SettingsPage.qml" line="320"/>
         <source>Start of training</source>
         <translation>Trainingsbeginn</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="323"/>
+        <location filename="../qml/SettingsPage.qml" line="326"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n neu</numerusform>
@@ -2209,7 +2215,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="326"/>
+        <location filename="../qml/SettingsPage.qml" line="329"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n geändert</numerusform>
@@ -2217,7 +2223,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="333"/>
+        <location filename="../qml/SettingsPage.qml" line="336"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Fotos und Sprachnotizen: %n neu</numerusform>
@@ -2225,27 +2231,27 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="335"/>
+        <location filename="../qml/SettingsPage.qml" line="338"/>
         <source>Nothing new: this device has everything in the backup.</source>
         <translation>Nichts Neues: dieses Gerät hat schon alles aus der Sicherung.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="346"/>
+        <location filename="../qml/SettingsPage.qml" line="349"/>
         <source>Merge backup?</source>
         <translation>Sicherung zusammenführen?</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="347"/>
+        <location filename="../qml/SettingsPage.qml" line="350"/>
         <source>Merge</source>
         <translation>Zusammenführen</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="349"/>
+        <location filename="../qml/SettingsPage.qml" line="352"/>
         <source>Backup merged.</source>
         <translation>Sicherung zusammengeführt.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="360"/>
+        <location filename="../qml/SettingsPage.qml" line="363"/>
         <source>Backup of %1.</source>
         <translation>Sicherung vom %1.</translation>
     </message>
@@ -2546,23 +2552,23 @@
 <context>
     <name>Sync</name>
     <message>
-        <location filename="../services/sync.cpp" line="164"/>
-        <location filename="../services/sync.cpp" line="179"/>
+        <location filename="../services/sync.cpp" line="165"/>
+        <location filename="../services/sync.cpp" line="180"/>
         <source>Enter the server, user and app password first.</source>
         <translation>Zuerst Server, Benutzer und App-Passwort eintragen.</translation>
     </message>
     <message>
-        <location filename="../services/sync.cpp" line="175"/>
+        <location filename="../services/sync.cpp" line="176"/>
         <source>Waiting for the system&apos;s key store …</source>
         <translation>Warte auf den Schlüsselbund des Systems …</translation>
     </message>
     <message>
-        <location filename="../services/sync.cpp" line="201"/>
+        <location filename="../services/sync.cpp" line="202"/>
         <source>The key store did not give out the app password: see the note at the password.</source>
         <translation>Der Schlüsselbund hat das App-Passwort nicht herausgegeben: siehe den Hinweis beim Passwort.</translation>
     </message>
     <message>
-        <location filename="../services/sync.cpp" line="242"/>
+        <location filename="../services/sync.cpp" line="243"/>
         <source>The sync failed: %1</source>
         <translation>Der Abgleich ist fehlgeschlagen: %1</translation>
     </message>

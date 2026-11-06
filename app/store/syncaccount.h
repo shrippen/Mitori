@@ -61,8 +61,9 @@ public:
         Moving,         // in the file; the store did not answer yet (with sync off: was not asked)
         File,           // in the file: the store did not take it
         NotRemoved,     // the store holds it, the file could not be rewritten and holds it too
-        NotRecorded,    // the store holds it, the file could not be rewritten and leads elsewhere:
-                        // an older password in it comes back, or no mark. Only entering it again helps
+        NotRecorded,    // the store holds it, the file could not be rewritten and leads elsewhere.
+                        // setAccount() again ("Sync now" does) repairs it; a restart before that
+                        // brings an older password back, which replaces this one in the store
         NotSaved,       // neither store nor file took it: in memory only
         Unreadable,     // marked, the store does not give it out
     };
@@ -77,6 +78,7 @@ public:
 
     // The next start finds it as things are (not: it is known now).
     bool passwordSaved() const;
+    bool fileHoldsPassword() const;
 
     // With the password as far as known: empty while the store is read and when Unreadable.
     WebDav::Account account() const;

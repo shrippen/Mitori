@@ -103,9 +103,16 @@ bool SyncAccount::passwordSaved() const
     }
 }
 
+bool SyncAccount::fileHoldsPassword() const
+{
+    return !settings()->value(kPassword).toString().isEmpty();
+}
+
 void SyncAccount::loadSecret()
 {
-    if (m_secret == Secret::Asking || m_secret == Secret::KeyStore) {
+    // Known, or held in memory alone: the file must not replace it.
+    if (m_secret == Secret::Asking || m_secret == Secret::KeyStore || m_secret == Secret::NotRecorded
+        || m_secret == Secret::NotSaved) {
         return;
     }
     const auto s = settings();
