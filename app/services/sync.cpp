@@ -72,6 +72,7 @@ void Sync::setEnabled(bool on)
     }
     m_account.setEnabled(on ? SyncAccount::Toggle::On : SyncAccount::Toggle::Off);
     if (on) {
+        m_account.setReplaced(SyncAccount::Toggle::Off);
         m_account.loadSecret();
         m_daily.start();
     } else {
@@ -254,6 +255,18 @@ void Sync::announce()
     m_merging = true;
     emit merged();
     m_merging = false;
+}
+
+void Sync::dataReplaced()
+{
+    m_account.setConflicts({});
+    if (enabled() || !m_account.account().folder.isEmpty()) {
+        m_account.setReplaced(SyncAccount::Toggle::On);
+    }
+    m_error.clear();        // a failed run before this says nothing about the new state
+    setEnabled(false);
+    emit accountChanged();
+    emit stateChanged();
 }
 
 void Sync::setError(const QString &error)

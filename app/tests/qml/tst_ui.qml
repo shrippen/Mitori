@@ -706,6 +706,216 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Both ways of reading a backup: merging keeps what the backup lacks; replacing asks a second
+    // time with what goes, cancelling leads back, numbers follow a sync that brought something, a
+    // running sync refuses it plainly, and accepting takes it away, turns the sync off and reloads
+    // Practice.
+    function test_3d_backup_choices() {
+        const page = push("SettingsPage")
+        const url = "file://" + uiShotsDir + "/sicherung-wahl.zip"
+        verify(Backup.save(url), Backup.errorString)
+        const entry = Programme.entries("aikido", "k4").filter(r => r.kind === "entry")[0].id
+        const notes = Practice.notes(entry).length
+        verify(Practice.addNote(entry, "nicht in der Sicherung"))
+        const mergeDialog = findChild(page, "mergeBackup")
+        const replaceDialog = findChild(page, "replaceBackup")
+
+        // Merge, the dialog's main button: the note stays.
+        page.inspect(url)
+        tryVerify(() => mergeDialog.opened)
+        const text = findChild(page, "mergeText")
+        verify(text.text.indexOf("It holds") >= 0, text.text)
+        verify(text.text.indexOf("newer deletion") >= 0, text.text)
+        verify(text.text.indexOf("only added") >= 0, text.text)
+        verify(text.text.indexOf("a notebook the backup deleted later") >= 0, text.text)
+        verify(text.text.indexOf("two notebooks of one course become one") >= 0, text.text)
+        verify(text.text.indexOf("one grade entered twice") >= 0, text.text)
+        verify(text.text.indexOf("keeps everything") < 0, text.text)
+        verify(text.text.indexOf("Nothing new") >= 0, text.text)
+        verify(text.text.indexOf("On this device it changes") < 0, text.text)
+
+        // What changed and stays, beside what goes (a mark in `changed`, a clean-up's row only in `removed`).
+        const counted = page.changes({ "entries": { "added": 0, "changed": 2, "edited": 1, "removed": 2 } })
+        verify(counted.indexOf("1 changed, 2 deleted") >= 0, counted)
+        tryVerify(() => mergeDialog.contentHeight >= findChild(page, "replaceInstead").y + findChild(page, "replaceInstead").height, 1000,
+                  "the column fits: " + mergeDialog.contentHeight)
+        shot("4c-backup-choice", true)
+        mergeDialog.accept()
+        tryVerify(() => !mergeDialog.visible)
+        compare(Practice.notes(entry).length, notes + 1)
+
+        // Replace: the second step says what goes, Cancel leads back to the first.
+        Sync.enabled = true
+        page.inspect(url)
+        tryVerify(() => mergeDialog.opened)
+        findChild(page, "replaceInstead").clicked()
+        tryVerify(() => replaceDialog.opened)
+        verify(!mergeDialog.visible)
+        const warning = findChild(page, "replaceText")
+        verify(warning.text.indexOf("cannot be undone") >= 0, warning.text)
+        verify(warning.text.indexOf("Notes: 1") >= 0, warning.text)
+        verify(warning.text.indexOf("Sync is turned off") >= 0, warning.text)
+        verify(warning.text.indexOf("changes and deletions") >= 0, warning.text)
+        verify(warning.text.indexOf("what you restored from the backup can go again") >= 0, warning.text)
+
+        // A sync brings something while the dialog is open: the numbers follow.
+        verify(Practice.addNote(entry, "kam mit dem Abgleich"))
+        Sync.merged()
+        tryVerify(() => warning.text.indexOf("Notes: 2") >= 0, 2000, warning.text)
+        tryVerify(() => replaceDialog.contentHeight >= warning.implicitHeight, 1000,
+                  "the text fits: " + replaceDialog.contentHeight + " for " + warning.implicitHeight)
+        shot("4c-backup-replace", true)
+
+        // A phone held sideways: the dialog stays in the window, the text scrolls.
+        window.width = 800
+        window.height = 360
+        const scroll = findChild(page, "replaceScroll")
+        tryVerify(() => replaceDialog.height <= window.height, 1000, "dialog " + replaceDialog.height)
+        tryVerify(() => scroll.contentItem.contentHeight > scroll.height, 1000, "the text scrolls")
+        shot("4c-backup-replace-sideways", true)
+        window.width = 420
+        window.height = 800
+        replaceDialog.reject()
+        tryVerify(() => mergeDialog.opened)
+        compare(Practice.notes(entry).length, notes + 2)
+
+        // While a sync runs: not replaced, and it says so. (A real run needs a password, which would
+        // go to this computer's key store; so the page is told. tst_sync runs real ones.)
+        mergeDialog.close()
+        tryVerify(() => !mergeDialog.visible)
+        page.replaceData(true)
+        const refused = findChild(page, "backupError")
+        verify(refused.visible)
+        verify(refused.text.indexOf("Not replaced") >= 0, refused.text)
+        compare(findChild(page, "backupDone").visible, false)
+        compare(Practice.notes(entry).length, notes + 2)
+
+        // Saving says how that went, not the refusal before it.
+        verify(page.saveBackup("file://" + uiShotsDir + "/sicherung-wahl-2.zip"))
+        verify(!refused.visible, refused.text)
+
+        // Read again and accepted: as in the backup, Practice read anew, the sync off, and it says so.
+        page.inspect(url)
+        verify(!refused.visible)
+        tryVerify(() => mergeDialog.opened)
+        findChild(page, "replaceInstead").clicked()
+        tryVerify(() => replaceDialog.opened)
+        replaceDialog.accept()
+        const done = findChild(page, "backupDone")
+        tryVerify(() => done.visible)
+        verify(done.text.indexOf("Sync is off") >= 0, done.text)
+        compare(refused.visible, false)
+        compare(Practice.notes(entry).length, notes)
+        verify(!Sync.enabled)
+        tryVerify(() => !replaceDialog.visible)
+
+        // Beside the switch until it is on again: what turning it on brings back.
+        const note = findChild(page, "syncAfterReplace")
+        verify(note.visible)
+        verify(note.text.indexOf("changes and deletions") >= 0, note.text)
+        Sync.enabled = true
+        verify(!note.visible)
+        Sync.enabled = false
+        window.pageStack.pop()
+    }
+
+    // Mitori asks which: both choices in view without scrolling, on small phones and sideways, with
+    // the longest preview; only the text scrolls.
+    function test_3d_backup_choice_sizes() {
+        const page = push("SettingsPage")
+        const url = "file://" + uiShotsDir + "/sicherung-groessen.zip"
+        verify(Backup.save(url), Backup.errorString)
+        page.inspect(url)
+        const dialog = findChild(page, "mergeBackup")
+        tryVerify(() => dialog.opened)
+        const row = { "added": 3, "edited": 2, "removed": 1, "holds": 9 }
+        page.summary = { "created": page.summary.created, "ratings": row, "notes": row, "rounds": row, "notebooks": row,
+                         "entries": row, "grades": row, "starts": row, "media": 2, "mediaRemoved": 1, "mediaHolds": 4 }
+
+        const merge = dialog.standardButton(QQC2.Dialog.Ok)
+        const replace = findChild(page, "replaceInstead")
+        const scroll = findChild(page, "mergeScroll")
+        const inside = () => {
+            const at = replace.mapToItem(dialog.contentItem, 0, 0)
+            return replace.visible && at.x >= 0 && at.y >= 0 && at.x + replace.width <= dialog.contentItem.width
+                   && at.y + replace.height <= dialog.contentItem.height
+        }
+        for (const [width, height] of [[360, 640], [640, 360], [320, 568]]) {
+            window.width = width
+            window.height = height
+            tryVerify(() => dialog.width <= width && dialog.height <= height && inside(), 2000,
+                      width + "x" + height + ": dialog " + dialog.height + ", button at "
+                      + replace.mapToItem(dialog.contentItem, 0, 0).y + " in " + dialog.contentItem.height)
+            verify(merge.visible && merge.width > 0)
+            tryVerify(() => scroll.contentItem.contentHeight > scroll.height, 2000, "the text scrolls")
+            shot("4c-backup-choice-" + width + "x" + height, true)
+        }
+        dialog.reject()
+        tryVerify(() => !dialog.visible)
+        window.pageStack.pop()
+    }
+
+    // The German words on the smallest phone: every footer button of both dialogs lies inside its
+    // dialog. And what replacing does is the first thing to read.
+    function test_3d_backup_german_footer() {
+        window.width = 320
+        window.height = 568
+        const page = push("SettingsPage")
+        const url = "file://" + uiShotsDir + "/sicherung-deutsch.zip"
+        verify(Backup.save(url), Backup.errorString)
+        page.inspect(url)
+        const first = findChild(page, "mergeBackup")
+        tryVerify(() => first.opened)
+        tryVerify(() => first.width <= 320)
+
+        const hint = findChild(page, "replaceHint")
+        verify(hint.y < findChild(page, "mergeText").y, "hint at " + hint.y)
+
+        // The dialog's height follows the text, not its first lines.
+        const firstArea = findChild(page, "mergeScroll")
+        const wanted = hint.implicitHeight + findChild(page, "mergeText").implicitHeight
+        tryVerify(() => firstArea.height >= Math.min(wanted, 200), 2000, "shows " + firstArea.height + " of " + wanted)
+
+        const fits = (dialog, word) => {
+            const accept = dialog.standardButton(QQC2.Dialog.Ok)
+            const cancel = dialog.standardButton(QQC2.Dialog.Cancel)
+            dialog.acceptText = word
+            cancel.text = "Abbrechen"
+            tryVerify(() => accept.text === word && cancel.text === "Abbrechen")
+            wait(50)   // the button box lays the new widths out
+            for (const button of [accept, cancel]) {
+                const at = button.mapToItem(dialog.parent, 0, 0)
+                verify(at.x >= dialog.x && at.x + button.width <= dialog.x + dialog.width,
+                       button.text + " from " + at.x + " to " + (at.x + button.width)
+                       + " in a dialog from " + dialog.x + " to " + (dialog.x + dialog.width))
+            }
+        }
+        fits(first, uiCatalog.german("SettingsPage", "Merge"))
+        shot("4c-backup-choice-de-320", true)
+
+        findChild(page, "replaceInstead").clicked()
+        const second = findChild(page, "replaceBackup")
+        tryVerify(() => second.opened)
+        fits(second, uiCatalog.german("SettingsPage", "Delete and replace"))
+
+        // The warning shows, not one line of it (the dialog's height follows the text).
+        const warning = findChild(page, "replaceText")
+        const warningArea = findChild(page, "replaceScroll")
+        tryVerify(() => warningArea.height >= warning.implicitHeight, 2000,
+                  "shows " + warningArea.height + " of " + warning.implicitHeight)
+        shot("4c-backup-replace-de-320", true)
+
+        second.acceptText = "Delete and replace"
+        first.acceptText = "Merge"
+        second.standardButton(QQC2.Dialog.Cancel).text = "Cancel"
+        first.standardButton(QQC2.Dialog.Cancel).text = "Cancel"
+        second.reject()
+        tryVerify(() => first.opened)
+        first.reject()
+        tryVerify(() => !first.visible)
+        window.pageStack.pop()
+    }
+
     // The player's switches: the screen stays on while a video plays (and the switch on);
     // sound off mutes also at full tempo; both switches stay for the next start. "Noted today" lists
     // the day's notes on the technique.

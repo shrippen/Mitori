@@ -5,10 +5,12 @@
 #include <QSet>
 #include <QSqlQuery>
 #include <QTimeZone>
+#include <QUuid>
 
 namespace {
 
 const QString kOther = QStringLiteral("other");
+const QString kMain = QStringLiteral("main");
 
 bool failed(const QSqlQuery &q, QString *error)
 {
@@ -94,8 +96,9 @@ bool hold(QSqlDatabase &db, const TableMerge::Watch &watch, QString *error)
     return true;
 }
 
-// The media files the rows that are not deleted name.
-QSet<QString> liveMedia(QSqlDatabase &db, const QList<TableMerge::Table> &tables, bool *ok, QString *error)
+// The media files the rows of one side that are not deleted name.
+QSet<QString> liveMedia(QSqlDatabase &db, const QString &side, const QList<TableMerge::Table> &tables, bool *ok,
+                        QString *error)
 {
     QSet<QString> names;
     QSqlQuery q(db);
@@ -103,7 +106,7 @@ QSet<QString> liveMedia(QSqlDatabase &db, const QList<TableMerge::Table> &tables
         if (t.media.isEmpty()) {
             continue;
         }
-        if (!q.exec(QStringLiteral("SELECT %1 FROM main.%2 WHERE deleted = 0 AND %1 <> ''").arg(t.media, t.name))) {
+        if (!q.exec(QStringLiteral("SELECT %1 FROM %2.%3 WHERE deleted = 0 AND %1 <> ''").arg(t.media, side, t.name))) {
             *ok = failed(q, error);
             return {};
         }
@@ -112,6 +115,151 @@ QSet<QString> liveMedia(QSqlDatabase &db, const QList<TableMerge::Table> &tables
         }
     }
     return names;
+}
+
+using RowSets = QHash<QString, QSet<QString>>;
+
+// The rows of the editable tables that are not deleted, by table.
+RowSets liveRows(QSqlDatabase &db, const QList<TableMerge::Table> &tables, bool *ok, QString *error)
+{
+    RowSets rows;
+    QSqlQuery q(db);
+    for (const TableMerge::Table &t : tables) {
+        if (t.kind == TableMerge::Kind::Log) {
+            continue;
+        }
+        if (!q.exec(QStringLiteral("SELECT %1 FROM main.%2 WHERE deleted = 0").arg(t.columns.first(), t.name))) {
+            *ok = failed(q, error);
+            return {};
+        }
+        while (q.next()) {
+            rows[t.name].insert(q.value(0).toString());
+        }
+    }
+    return rows;
+}
+
+// The rows of the editable tables the other has a newer state of, not a deletion mark.
+RowSets newerRows(QSqlDatabase &db, const QList<TableMerge::Table> &tables, bool *ok, QString *error)
+{
+    RowSets rows;
+    QSqlQuery q(db);
+    for (const TableMerge::Table &t : tables) {
+        if (t.kind == TableMerge::Kind::Log) {
+            continue;
+        }
+        if (!q.exec(QStringLiteral("SELECT o.%1 FROM %2.%3 o JOIN main.%3 m ON m.%1 = o.%1"
+                                   " WHERE o.changed > m.changed AND o.deleted = 0")
+                        .arg(t.columns.first(), kOther, t.name))) {
+            *ok = failed(q, error);
+            return {};
+        }
+        while (q.next()) {
+            rows[t.name].insert(q.value(0).toString());
+        }
+    }
+    return rows;
+}
+
+// What the merge did to the rows here, by comparing before and after, so that also the clean-up
+// counts (an entry going with its notebook), which no comparison of the two copies shows:
+// removed  live before, not after
+// edited   a newer state taken, live after (a row the clean-up then deleted is only removed)
+void countOutcome(const RowSets &before, const RowSets &newer, const RowSets &after, TableMerge::Result *result)
+{
+    for (auto it = before.cbegin(); it != before.cend(); ++it) {
+        result->removed[it.key()] = (it.value() - after.value(it.key())).size();
+    }
+    for (auto it = newer.cbegin(); it != newer.cend(); ++it) {
+        result->edited[it.key()] = (QSet<QString>(it.value()) & after.value(it.key())).size();
+    }
+}
+
+// One number from a query.
+bool countRows(QSqlQuery &q, const QString &sql, int *count, QString *error)
+{
+    if (!q.exec(sql) || !q.next()) {
+        return failed(q, error);
+    }
+    *count = q.value(0).toInt();
+    q.finish();
+    return true;
+}
+
+// What replacing would do, before any merge step: the rows the other holds, and the rows here it
+// does not hold in this version or a newer one (a log's row is gone; an editable one gone or set back).
+bool compare(QSqlDatabase &db, const QList<TableMerge::Table> &tables, TableMerge::Result *result, QString *error)
+{
+    QSqlQuery q(db);
+    for (const TableMerge::Table &t : tables) {
+        const bool log = t.kind == TableMerge::Kind::Log;
+        const QString uid = t.columns.first();
+        const QString held = QStringLiteral("SELECT COUNT(*) FROM %1.%2%3")
+                                 .arg(kOther, t.name, log ? QString() : QStringLiteral(" WHERE deleted = 0"));
+        const QString lost = QStringLiteral("SELECT COUNT(*) FROM main.%1 m WHERE %2NOT EXISTS (SELECT 1 FROM %3.%1 o"
+                                            " WHERE o.%4 = m.%4%5)")
+                                 .arg(t.name, log ? QString() : QStringLiteral("m.deleted = 0 AND "), kOther, uid,
+                                      log ? QString() : QStringLiteral(" AND o.deleted = 0 AND o.changed >= m.changed"));
+        if (!countRows(q, held, &result->holds[t.name], error) || !countRows(q, lost, &result->lost[t.name], error)) {
+            return false;
+        }
+    }
+    bool ok = true;
+    result->theirMedia = liveMedia(db, kOther, tables, &ok, error).values();
+    return ok;
+}
+
+bool attach(QSqlDatabase &db, const QString &path, const QString &name, QString *error)
+{
+    QSqlQuery q(db);
+    q.prepare(QStringLiteral("ATTACH DATABASE ? AS %1").arg(name));
+    q.addBindValue(path);
+    return q.exec() || failed(q, error);
+}
+
+// The tables of one copy from the other file, in its order (rows of one time stay in order).
+bool takeRows(QSqlDatabase &db, const QString &here, const QString &there, const QList<TableMerge::Table> &tables,
+              QString *error)
+{
+    QSqlQuery q(db);
+    for (const TableMerge::Table &t : tables) {
+        const QString all = t.columns.join(u", ");
+        if (!q.exec(QStringLiteral("DELETE FROM %1.%2").arg(here, t.name))
+            || !q.exec(QStringLiteral("INSERT INTO %1.%2 (%3) SELECT %3 FROM %4.%2 ORDER BY rowid")
+                           .arg(here, t.name, all, there))) {
+            return failed(q, error);
+        }
+    }
+    return true;
+}
+
+// The first copy's file is the connection's main (the journal over all files needs a file there).
+bool replaceAll(QSqlDatabase &db, const QList<TableMerge::Copy> &copies, QString *error)
+{
+    const auto here = [](qsizetype i) { return i == 0 ? kMain : QStringLiteral("here%1").arg(i); };
+    const auto there = [](qsizetype i) { return kOther + QString::number(i); };
+    for (qsizetype i = 0; i < copies.size(); ++i) {
+        if ((i > 0 && !attach(db, copies.at(i).path, here(i), error)) || !attach(db, copies.at(i).other, there(i), error)) {
+            return false;
+        }
+    }
+
+    if (!db.transaction()) {
+        *error = db.lastError().text();
+        return false;
+    }
+    bool ok = true;
+    for (qsizetype i = 0; ok && i < copies.size(); ++i) {
+        ok = takeRows(db, here(i), there(i), copies.at(i).tables, error);
+    }
+    if (ok && !db.commit()) {
+        *error = db.lastError().text();
+        ok = false;
+    }
+    if (!ok) {
+        db.rollback();
+    }
+    return ok;
 }
 
 } // namespace
@@ -132,16 +280,23 @@ bool TableMerge::run(QSqlDatabase &db, const QString &otherPath, const QList<Tab
     if (!ok) {
         *error = db.lastError().text();
     }
-    const QSet<QString> before = ok ? liveMedia(db, tables, &ok, error) : QSet<QString>();
+    const QSet<QString> before = ok ? liveMedia(db, kMain, tables, &ok, error) : QSet<QString>();
+    ok = ok && (mode != Mode::Preview || compare(db, tables, result, error));
+    result->mine = before.values();
+    const RowSets rowsBefore = ok && mode == Mode::Preview ? liveRows(db, tables, &ok, error) : RowSets();
+    const RowSets rowsNewer = ok && mode == Mode::Preview ? newerRows(db, tables, &ok, error) : RowSets();
     ok = ok && hold(db, watch, error);
     for (const Table &t : tables) {
         ok = ok && mergeTable(db, t, watch, result, error);
     }
     ok = ok && (!after || after(db, error));
+    if (ok && mode == Mode::Preview) {
+        countOutcome(rowsBefore, rowsNewer, liveRows(db, tables, &ok, error), result);
+    }
 
     // The media the rows name after the merge: only those come from the backup (a deleted note's
     // photo not); what they named before and no more goes.
-    const QSet<QString> named = ok ? liveMedia(db, tables, &ok, error) : QSet<QString>();
+    const QSet<QString> named = ok ? liveMedia(db, kMain, tables, &ok, error) : QSet<QString>();
     result->media = named.values();
     result->orphans = (before - named).values();
     if (ok && mode == Mode::Apply) {
@@ -155,5 +310,23 @@ bool TableMerge::run(QSqlDatabase &db, const QString &otherPath, const QList<Tab
     }
 
     q.exec(QStringLiteral("DETACH DATABASE %1").arg(kOther));
+    return ok;
+}
+
+bool TableMerge::replace(const QList<Copy> &copies, QString *error)
+{
+    const QString name = QStringLiteral("tablemerge-") + QUuid::createUuid().toString(QUuid::WithoutBraces);
+    bool ok = false;
+    {
+        QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), name);
+        db.setDatabaseName(copies.first().path);
+        ok = db.open();
+        if (!ok) {
+            *error = db.lastError().text();
+        }
+        ok = ok && replaceAll(db, copies, error);
+        db.close();
+    }
+    QSqlDatabase::removeDatabase(name);
     return ok;
 }

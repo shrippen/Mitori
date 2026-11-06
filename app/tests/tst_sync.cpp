@@ -335,6 +335,135 @@ private slots:
         QVERIFY(!(p & (QFile::ReadGroup | QFile::ReadOther | QFile::WriteGroup | QFile::WriteOther)));
     }
 
+    // What a replace means for the sync. Alone in the folder, it holds: the device never reads its
+    // own archive back. With another device, a merge brings back what that one holds, ratings too,
+    // so replacing turns the sync off, until the user turns it on again.
+    void replacedData()
+    {
+        FakeDav dav;
+        const Device a = device(u"ersetzt-a"_s);
+        const Device b = device(u"ersetzt-b"_s);
+        Sync phone(a.practice, a.courses, a.media, a.folder, a.store);
+        phone.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"Telefon"_s);
+        phone.setEnabled(true);
+        {
+            PracticeLog log;
+            QVERIFY(log.open(a.practice));
+            QVERIFY(!log.addNote(u"aikido/k5/a"_s, u"Stand"_s, now(), u"a"_s).uid.isEmpty());
+        }
+        QVERIFY(synced(phone));
+
+        // A state to go back to, then more, synced.
+        const QString practice = a.practice + u".stand"_s;
+        const QString courses = a.courses + u".stand"_s;
+        {
+            PracticeLog log;
+            CourseBook book;
+            QVERIFY(log.open(a.practice) && log.snapshot(practice));
+            QVERIFY(book.open(a.courses) && book.snapshot(courses));
+        }
+        const auto goBack = [&] {
+            QString why;
+            QVERIFY2(TableMerge::replace({{a.practice, practice, PracticeLog::tables()},
+                                          {a.courses, courses, CourseBook::tables()}}, &why), qPrintable(why));
+        };
+        const auto addMore = [&](const QString &text) {
+            PracticeLog log;
+            QVERIFY(log.open(a.practice));
+            QVERIFY(!log.addNote(u"aikido/k5/a"_s, text, now(), u"a"_s).uid.isEmpty());
+            QVERIFY(!log.add(u"aikido/k5/a"_s, 3, now(), u"a"_s).uid.isEmpty());
+        };
+        const auto ratings = [&] {
+            PracticeLog log;
+            log.open(a.practice);
+            return log.history(u"aikido/k5/a"_s).size();
+        };
+
+        // Alone: nothing comes back from the folder.
+        addMore(u"weg"_s);
+        QVERIFY(synced(phone));
+        goBack();
+        QVERIFY(synced(phone));
+        QCOMPARE(texts(a.practice), QStringList{u"Stand"_s});
+        QCOMPARE(ratings(), 0);
+
+        // Another device has merged more: it comes back at the next sync, unless the sync is off.
+        addMore(u"beim Tablet"_s);
+        QVERIFY(synced(phone));
+        Sync tablet(b.practice, b.courses, b.media, b.folder, b.store);
+        tablet.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"Tablet"_s);
+        tablet.setEnabled(true);
+        QVERIFY(synced(tablet));
+        goBack();
+
+        // An open conflict names a row that is gone: it goes with it, and so does the sync.
+        TableMerge::Conflict open;
+        open.table = u"notes"_s;
+        open.uid = u"weg"_s;
+        open.parent = u"aikido/k5/a"_s;
+        SyncAccount(a.folder, a.store).setConflicts({open});
+        QCOMPARE(phone.conflicts().size(), 1);
+        phone.dataReplaced();
+        QVERIFY(phone.conflicts().isEmpty());
+        QVERIFY(!phone.enabled());
+        QVERIFY(!phone.syncNow());
+        QCOMPARE(texts(a.practice), QStringList{u"Stand"_s});
+
+        // The settings warn before it is turned on again, also after a restart; on, that is over.
+        QVERIFY(phone.property("afterReplace").toBool());
+        QVERIFY(Sync(a.practice, a.courses, a.media, a.folder, a.store).property("afterReplace").toBool());
+
+        phone.setEnabled(true);
+        QVERIFY(!phone.property("afterReplace").toBool());
+        QVERIFY(synced(phone));
+        QCOMPARE(texts(a.practice), (QStringList{u"Stand"_s, u"beim Tablet"_s}));
+        QCOMPARE(ratings(), 1);
+
+        // Not only rows come: the tablet deletes the note, the phone restores it by replacing, and
+        // the sync, on again, deletes it once more. The newer deletion wins, without a conflict.
+        QVERIFY(synced(tablet));
+        {
+            PracticeLog log;
+            QVERIFY(log.open(b.practice));
+            bool found = false;
+            for (const PracticeLog::Note &n : log.allNotes()) {
+                if (n.text == u"Stand"_s) {
+                    found = log.deleteNote(n.uid, now());
+                }
+            }
+            QVERIFY(found);
+        }
+        QVERIFY(synced(tablet));
+        QVERIFY(synced(phone));
+        QCOMPARE(texts(a.practice), QStringList{u"beim Tablet"_s});
+        goBack();
+        phone.dataReplaced();
+        QCOMPARE(texts(a.practice), QStringList{u"Stand"_s});
+        phone.setEnabled(true);
+        QVERIFY(synced(phone));
+        QVERIFY(phone.conflicts().isEmpty());
+        QCOMPARE(texts(a.practice), QStringList{u"beim Tablet"_s});
+    }
+
+    // A sync waiting for the key store when the data is replaced: it does not follow, and no error
+    // about a missing password shows once the store answers.
+    void replacedWhileWaiting()
+    {
+        FakeDav dav;
+        const Device d = device(u"ersetzt-wartet"_s);
+        saved(d, dav.url());
+        d.store->held = true;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QVERIFY(sync.syncNow());
+        QVERIFY(sync.errorString().contains(u"Waiting"_s));
+
+        sync.dataReplaced();
+        d.store->release();
+        QTest::qWait(50);
+        QVERIFY(!sync.busy());
+        QVERIFY2(sync.errorString().isEmpty(), qPrintable(sync.errorString()));
+    }
+
     // Migration: the password of an older version moves to the store, the file is clean after.
     void passwordMoves()
     {
