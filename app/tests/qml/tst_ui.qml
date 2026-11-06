@@ -5227,6 +5227,70 @@ TestCase {
         wait(100)
     }
 
+    // One breakpoint for all pages: a tablet sideways, not a phone sideways, nor anything upright.
+    function test_8q_tablet_breakpoint() {
+        compare(Tablet.minHeight, Kirigami.Units.gridUnit * 26)
+        verify(Tablet.wide(1280, 800))
+        verify(Tablet.wide(1024, 768))
+        verify(!Tablet.wide(800, 1280))
+        verify(!Tablet.wide(915, 412), "a phone held sideways")
+        verify(!Tablet.wide(800, 800))
+    }
+
+    // Today, Statistics and My grades on a tablet sideways: two columns in a page of at most 880
+    // units, in the middle (the clickdummy's `.tab .page`, `.tab .grid2`). Upright and on a phone
+    // one column, nothing past the edge.
+    function test_8q_pages_columns_data() {
+        const sizes = [ { size: "1280x800", width: 1280, height: 800, two: true }, { size: "1024x768", width: 1024, height: 768, two: true },
+                        { size: "800x1280", width: 800, height: 1280, two: false }, { size: "360", width: 360, height: 800, two: false },
+                        { size: "320", width: 320, height: 800, two: false } ]
+        const pages = [ { name: "TodayPage", pairs: [["dueLeft", "dueRight"]] },
+                        { name: "StatsPage", pairs: [["last30Column", "daysColumn"], ["gradesColumn", "examColumn"]] },
+                        { name: "GradesPage", pairs: [["grades_aikido", "grades_daitoryu"]] } ]
+        const rows = []
+        for (const page of pages) {
+            for (const size of sizes) {
+                rows.push(Object.assign({ tag: page.name + " " + size.size }, page, size))
+            }
+        }
+        return rows
+    }
+    function test_8q_pages_columns(data) {
+        window.width = data.width
+        window.height = data.height
+        wait(100)
+        const page = push(data.name)
+        tryVerify(() => Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1, 3000)
+        wait(300)
+
+        const box = name => {
+            const item = findChild(page, name)
+            verify(item && item.visible, name)
+            const at = item.mapToItem(null, 0, 0)
+            return { left: at.x, top: at.y, right: at.x + item.width }
+        }
+        for (const [first, second] of data.pairs) {
+            const a = box(first), b = box(second)
+            if (data.two) {
+                verify(a.right <= b.left + 0.5, first + " beside " + second + ": " + a.right + " / " + b.left)
+            } else {
+                verify(b.top > a.top, second + " below " + first)
+                verify(Math.abs(a.left - b.left) < Look.unit(16), first + " and " + second + " in one column")
+            }
+        }
+        compare(overflowing(page, data.width), [])
+
+        // Both columns together: at most 880 on a tablet, in the middle.
+        if (data.two) {
+            const a = box(data.pairs[0][0]), b = box(data.pairs[0][1])
+            verify(b.right - a.left <= Look.unit(880) + 0.5, "the page's width: " + (b.right - a.left))
+            verify(Math.abs(a.left - (data.width - b.right)) < Look.unit(24), "in the middle: " + a.left + " / " + b.right)
+        }
+        if (data.width === 1280) {
+            shot("8q-" + data.name)
+        }
+    }
+
     function test_8o_nothing_past_the_edge_data() {
         // Twice the scale on a phone (206 px) is not there yet: ROADMAP, QA round of 5 Nov 2026.
         return [{ tag: "360", width: 360, height: 800 }]

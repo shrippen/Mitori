@@ -60,7 +60,7 @@ Item {
     readonly property bool landscape: !compact && hasVideo && (big || width > Window.height)
     // On the rail: 62 px on the phone (CD .qrail), 84 px on a tablet in landscape (CD .tab .qrail).
     // The phone held sideways is about 360 dp tall, a tablet sideways 720 dp.
-    readonly property bool tabletSideways: page.landscape && height >= Kirigami.Units.gridUnit * 26
+    readonly property bool tabletSideways: page.landscape && height >= Tablet.minHeight
     // Enough room above and below the picture (a tablet 16:10, a wide video): the title and the
     // controls stand there instead of on the rail (the clickdummy's `.qbands`).
     readonly property bool bands: landscape && bandHeight * 2 >= Look.unit(120)

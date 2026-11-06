@@ -45,9 +45,7 @@ Kirigami.ScrollablePage {
         Bundles.reload(Bundles.Reload.Older)
     }
 
-    // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
-    // not a phone held sideways, about 20).
-    readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 26
+    readonly property bool wide: Tablet.wide(width, height)
 
     actions: [
         Kirigami.Action {

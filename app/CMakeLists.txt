@@ -56,6 +56,7 @@ add_compile_definitions(MITORI_VERSION="${PROJECT_VERSION}")
 
 qt_add_library(mitori_app STATIC)
 set_source_files_properties(qml/Look/Look.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(qml/Tablet.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_add_qml_module(mitori_app
     URI Mitori
     QML_FILES
@@ -65,6 +66,8 @@ qt_add_qml_module(mitori_app
         qml/TechniqueSheet.qml
         qml/TechniqueBody.qml
         qml/StepList.qml
+        qml/Tablet.qml
+        qml/TwoColumns.qml
         qml/CommentPage.qml
         qml/PlayerPage.qml
         qml/PlayerView.qml

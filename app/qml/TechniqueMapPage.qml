@@ -30,8 +30,7 @@ Kirigami.ScrollablePage {
     property string group: ""
     readonly property var shown: grids.find(g => g.title === group) || grids[0] || null
     readonly property bool matrix: !!shown && shown.kind === "matrix"
-    // A tablet in landscape: a page at least 26 grid units high (a phone held sideways has about 20).
-    readonly property bool wide: width > height && height >= Kirigami.Units.gridUnit * 26
+    readonly property bool wide: Tablet.wide(width, height)
 
     title: qsTr("Technique map")
 
