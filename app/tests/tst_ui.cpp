@@ -72,16 +72,22 @@ public slots:
         QDir(MediaStore::defaultRoot()).removeRecursively();
         QDir().mkpath(MediaStore::defaultRoot());
         QFile::copy(QStringLiteral(TEST_MEDIA_DIR "/stimme.m4a"), MediaStore::shared().path(QStringLiteral("test-stimme.m4a")));
+        // Two folders for the player, each with a file it really plays (sound only, no picture).
+        for (const QString &name : {QStringLiteral("a"), QStringLiteral("b")}) {
+            const QString played = QStringLiteral(UI_DATA_DIR "/played-") + name + QStringLiteral("/Aikido/5. Kyu.mkv");
+            QDir().mkpath(QFileInfo(played).absolutePath());
+            QFile::remove(played);
+            QFile::copy(QStringLiteral(TEST_MEDIA_DIR "/stimme.m4a"), played);
+        }
         const QString packages = QStringLiteral(UI_DATA_DIR "/packages");
-        QDir().mkpath(packages + QStringLiteral("/mitori-test-bundle/1"));
-        QFile::remove(packages + QStringLiteral("/mitori-test-bundle/1/test.mvb"));
-        QFile::copy(QStringLiteral(TEST_BUNDLE_DIR "/test.mvb"), packages + QStringLiteral("/mitori-test-bundle/1/test.mvb"));
+        const QString video = packages + QStringLiteral("/test-bundle/1/test.mvb");
+        QDir().mkpath(QFileInfo(video).absolutePath());
+        QFile::remove(video);
+        QFile::copy(QStringLiteral(TEST_BUNDLE_DIR "/test.mvb"), video);
         QFile source(QStringLiteral(TEST_BUNDLE_DIR "/manifest.json"));
         QFile manifest(QStringLiteral(UI_DATA_DIR "/manifest.json"));
         if (source.open(QIODevice::ReadOnly) && manifest.open(QIODevice::WriteOnly)) {
-            QJsonObject m = QJsonDocument::fromJson(source.readAll()).object();
-            m.insert(QStringLiteral("basis"), QUrl::fromLocalFile(packages).toString());
-            manifest.write(QJsonDocument(m).toJson());
+            manifest.write(source.readAll().replace("file:///unused/test.mvb", QUrl::fromLocalFile(video).toEncoded()));
         }
         qputenv("MITORI_BUNDLES_MANIFEST", QUrl::fromLocalFile(manifest.fileName()).toString().toUtf8());
     }
@@ -94,6 +100,7 @@ public slots:
         const bool shinki = qEnvironmentVariable("MITORI_TEST_STYLE") == QLatin1String("shinki");
         const QString shots = QStringLiteral(UI_SHOTS_DIR) + (shinki ? QStringLiteral("/shinki") : QString());
         QDir().mkpath(shots);
+        engine->rootContext()->setContextProperty(QStringLiteral("uiDataDir"), QStringLiteral(UI_DATA_DIR));
         engine->rootContext()->setContextProperty(QStringLiteral("uiShotsDir"), shots);
         engine->rootContext()->setContextProperty(QStringLiteral("uiShinki"), shinki);
         // The second run (ctest ui_shinki): the pages through Look as Shinki. The running style

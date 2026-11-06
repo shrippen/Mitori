@@ -1589,6 +1589,58 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // A bundle loaded while the player is open: file and cut points change together, never the
+    // new times over the old file. (After test_9n_videos: unlocked, nothing loaded.)
+    function test_9n_videos_player() {
+        failOnWarning(/ReferenceError|TypeError|Binding loop/)
+        const entry = {id: "test/tech", title: "T", video: {video: "test/v", von: 10, bis: 20}}
+        const player = push("PlayerPage", {playlist: [entry], index: 0})
+        compare(player.from, 10000, "the app's own time")
+        compare(player.source.toString(), "")
+        verify(!player.hasVideo)
+        Bundles.load("test-bundle", Bundles.Network.Any)
+        tryCompare(player, "from", 1500, 10000)
+        compare(player.to, 2500)
+        verify(player.source.toString().indexOf("test") > 0, player.source)
+        verify(player.hasVideo, "no sound behind the card: the picture and its controls come too")
+        verify(Bundles.remove("test-bundle"))
+        tryCompare(player, "from", 10000)
+        compare(player.source.toString(), "")
+        verify(!player.hasVideo)
+        window.pageStack.pop()
+    }
+
+    // Saving the shelf for another bundle leaves a playing video alone; a new file of this video
+    // (an update, here another folder) loads at the chapter's start and waits, no sudden sound.
+    function test_9n_videos_player_keeps_playing() {
+        failOnWarning(/ReferenceError|TypeError|Binding loop/)
+        const before = Videos.folder
+        const folder = name => uiDataDir + "/played-" + name
+        Videos.folder = folder("a")
+        const entry = {id: "x", title: "T", video: {video: "aikido/k5", von: 0.1, bis: 60}}
+        const player = push("PlayerPage", {playlist: [entry], index: 0})
+        tryVerify(() => player.playing, 10000)
+        tryVerify(() => player.position > 300 && player.position < 700, 10000)
+        const at = player.position
+
+        Videos.folderChanged()
+        wait(150)
+        verify(player.playing, "still playing")
+        verify(player.position >= at, player.position + " after " + at)
+
+        Videos.folder = folder("b")
+        tryVerify(() => player.source.toString().indexOf("played-b") > 0)
+        tryVerify(() => player.position === player.from && !player.playing, 10000)
+        wait(300)
+        verify(!player.playing, "it waits for a tap")
+
+        // The next technique plays as usual again.
+        player.togglePlay()
+        tryVerify(() => player.playing, 5000)
+        window.pageStack.pop()
+        Videos.folder = before
+    }
+
     // My grades and a planned exam: a passed grade sets the next one and its waiting time; an
     // exam planned on a coming course shows in the start menu, today's practice and the exam mode.
     function test_9o_grades() {
