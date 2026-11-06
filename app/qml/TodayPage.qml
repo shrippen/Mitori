@@ -47,7 +47,8 @@ Kirigami.ScrollablePage {
         return qsTr("not practised for %n day(s)", "", row.days)
     }
 
-    // Every due technique; one without a video on the device shows as a card in the player.
+    // Every due technique; one without a video on the device shows as a card in the player. What
+    // was rated today is not due: a training done today has nothing to open again.
     function startTraining() {
         const playlist = page.due
         if (playlist.length === 0) {
@@ -116,6 +117,7 @@ Kirigami.ScrollablePage {
             }
         }
         LookButton {
+            objectName: "startTraining"
             visible: page.due.length > 0
             role: LookButton.Role.Primary
             icon.name: "media-playback-start"

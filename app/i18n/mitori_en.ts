@@ -84,17 +84,6 @@
     </message>
 </context>
 <context>
-    <name>PlayerView</name>
-    <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="681"/>
-        <source>Training done: %n technique(s). They count as a practice day in the statistics.</source>
-        <translation>
-            <numerusform>Training done: %n technique. It counts as a practice day in the statistics.</numerusform>
-            <numerusform>Training done: %n techniques. They count as a practice day in the statistics.</numerusform>
-        </translation>
-    </message>
-</context>
-<context>
     <name>SearchPage</name>
     <message numerus="yes">
         <location filename="../qml/SearchPage.qml" line="145"/>
@@ -217,7 +206,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="128"/>
+        <location filename="../qml/TodayPage.qml" line="130"/>
         <source>%n of them without a video on this device: the training shows their name, practise from memory.</source>
         <translation>
             <numerusform>%n of them has no video on this device: the training shows its name, practise it from memory.</numerusform>
@@ -225,11 +214,22 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="147"/>
+        <location filename="../qml/TodayPage.qml" line="149"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>
             <numerusform>%n techniques</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>TrainingEndPage</name>
+    <message numerus="yes">
+        <location filename="../qml/TrainingEndPage.qml" line="49"/>
+        <source>technique(s) practised and rated</source>
+        <translation>
+            <numerusform>technique practised and rated</numerusform>
+            <numerusform>techniques practised and rated</numerusform>
         </translation>
     </message>
 </context>
