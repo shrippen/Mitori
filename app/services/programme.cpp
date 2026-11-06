@@ -189,10 +189,7 @@ QVariantList Programme::grades(const QString &disciplineId) const
     const QVariantMap d = findDiscipline(disciplineId);
     for (const QVariant &g : d.value(QStringLiteral("grade")).toList()) {
         QVariantMap grade = g.toMap();
-        int count = 0;
-        for (const QVariant &e : gradeRows(disciplineId, grade.value(QStringLiteral("id")).toString())) {
-            count += e.toMap().value(QStringLiteral("kind")) == QLatin1String("entry");
-        }
+        const int count = entryCount(disciplineId, grade.value(QStringLiteral("id")).toString());
         if (count == 0) {
             continue;
         }
@@ -200,6 +197,31 @@ QVariantList Programme::grades(const QString &disciplineId) const
         result << grade;
     }
     return result;
+}
+
+QVariantList Programme::gradeChips(const QString &disciplineId) const
+{
+    QVariantList result;
+    const QVariantMap d = findDiscipline(disciplineId);
+    for (const QVariant &g : d.value(QStringLiteral("grade")).toList()) {
+        QVariantMap grade = g.toMap();
+        const int count = entryCount(disciplineId, grade.value(QStringLiteral("id")).toString());
+        if (count == 0 && grade.value(QStringLiteral("inhalt")).toString().isEmpty()) {
+            continue;
+        }
+        grade[QStringLiteral("count")] = count;
+        result << grade;
+    }
+    return result;
+}
+
+int Programme::entryCount(const QString &disciplineId, const QString &grade) const
+{
+    int count = 0;
+    for (const QVariant &e : gradeRows(disciplineId, grade)) {
+        count += e.toMap().value(QStringLiteral("kind")) == QLatin1String("entry");
+    }
+    return count;
 }
 
 QVariantList Programme::practiceEntries(const QString &disciplineId) const
