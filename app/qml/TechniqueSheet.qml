@@ -12,6 +12,7 @@ Kirigami.Dialog {
     property bool playable: false
     readonly property bool hasVideo: column.hasVideo
     readonly property var steps: column.steps
+    readonly property int noteCount: column.noteCount
     // The dialog's scrolling content (Kirigami puts the column into a ScrollView).
     readonly property Flickable flickable: ((contentItem as QQC2.ScrollView)?.contentItem as Flickable) ?? null
 
