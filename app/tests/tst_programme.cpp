@@ -304,7 +304,6 @@ private slots:
         QCOMPARE(practice.grade(aikido), QStringLiteral("k2"));
     }
 
-    // Search across disciplines: every word must match; case, accents and hyphens do not matter.
     // What a text names: however it is written, whole words only, the attack narrows it.
     void suggestFromText()
     {
@@ -422,6 +421,43 @@ private slots:
                  QStringLiteral("Ryote-ryote-dori"));
     }
 
+    // A list is no name: punctuation, a line break or a dash between spaces ends a run of words;
+    // a hyphen or a space still joins.
+    void suggestAcrossPunctuation()
+    {
+        const auto titles = [&](const QString &text) {
+            QStringList list;
+            for (const QVariant &r : programme.suggest(text, 200)) {
+                list << r.toMap().value(QStringLiteral("title")).toString();
+            }
+            return list;
+        };
+        const QString ikkyo = QStringLiteral("Ikkyo");
+        const QString shiho = QStringLiteral("Shiho-nage");
+        const QString joined = QStringLiteral("Ikkyo-shiho-nage");
+        for (const QString &text : {QStringLiteral("Ikkyo, Shiho-nage"), QStringLiteral("Ikkyo. Shiho-nage."),
+                                    QStringLiteral("Ikkyo; Shiho-nage"), QStringLiteral("Ikkyo\nShiho-nage"),
+                                    QStringLiteral("Ikkyo – Shiho-nage"), QStringLiteral("Ikkyo - Shiho-nage"),
+                                    QStringLiteral("(Ikkyo) Shiho-nage")}) {
+            const QStringList list = titles(text);
+            QVERIFY2(list.contains(ikkyo) && list.contains(shiho), qPrintable(text + u": " + list.join(u',')));
+            QVERIFY2(!list.contains(joined), qPrintable(text + u": " + list.join(u',')));
+        }
+        const QStringList three = titles(QStringLiteral("Ikkyo. Shiho-nage. Kote-gaeshi."));
+        QVERIFY2(three.contains(ikkyo) && three.contains(shiho) && three.contains(QStringLiteral("Kote-gaeshi")), qPrintable(three.join(u',')));
+        QVERIFY2(!three.contains(joined), qPrintable(three.join(u',')));
+
+        // Hyphens and spaces join.
+        for (const QString &text : {QStringLiteral("Ikkyo-shiho-nage"), QStringLiteral("Ikkyo shiho nage"), QStringLiteral("Ikkyoshihonage.")}) {
+            const QStringList list = titles(text);
+            QVERIFY2(!list.isEmpty() && list.first() == joined, qPrintable(text + u": " + list.join(u',')));
+            QVERIFY2(!list.contains(ikkyo) && !list.contains(shiho), qPrintable(text + u": " + list.join(u',')));
+        }
+
+        // A point before a number is no end: "Nr. 5".
+        QCOMPARE(programme.suggest(QStringLiteral("Ô-dachi Nr. 5")).size(), 1);
+    }
+
     // Those left out make room: the next ones move up.
     void suggestWithout()
     {
@@ -458,6 +494,7 @@ private slots:
         QVERIFY2(label.contains(QStringLiteral(" · Aikido ")), qPrintable(label));
     }
 
+    // Search across disciplines: every word must match; case, accents and hyphens do not matter.
     void searchFindsTechniques()
     {
         const QVariantList ikkyo = programme.search(QStringLiteral("ikkyo"));

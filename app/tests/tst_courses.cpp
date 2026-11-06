@@ -217,6 +217,13 @@ private slots:
         QVERIFY(c->unlinkTechnique(entry.value(u"uid"_s).toString(), u"aikido/t1"_s));
         QVERIFY(c->linkedEntries(u"aikido/t1"_s).isEmpty());
 
+        // A notebook that is gone takes no entry (a page of it still open).
+        QVERIFY(c->remove(uid));
+        QVERIFY(!c->addEntry(uid, u"zu spät"_s));
+        QVERIFY(!c->errorString().isEmpty());
+        QVERIFY(c->entries(uid).isEmpty());
+        QVERIFY(c->addEntry(c->create(u"Neu"_s, u"2026-07-04"_s, {}, {}, {}), u"geht"_s));
+
         // A failed link says why.
         QVERIFY(!c->linkTechnique(u"nope"_s, u"aikido/t1"_s));
         QVERIFY(!c->errorString().isEmpty());

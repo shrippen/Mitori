@@ -333,6 +333,12 @@ bool Courses::addEntry(const QString &course, const QString &text, const QString
     if (!m_open || (text.trimmed().isEmpty() && media.isEmpty())) {
         return false;
     }
+    // A page of a notebook deleted a moment ago: the entry would hang on nothing.
+    if (notebook(course).isEmpty()) {
+        m_error = tr("The entry could not be saved: %1").arg(tr("the notebook is gone"));
+        emit errorChanged();
+        return false;
+    }
     const CourseBook::Entry e = m_book->addEntry(course, text, QDateTime::currentDateTimeUtc(), deviceId(), media);
     return saved(!e.uid.isEmpty(), tr("The entry could not be saved: %1"));
 }

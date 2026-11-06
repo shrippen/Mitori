@@ -89,14 +89,26 @@ inline QString withoutHiragana(const QString &text)
 
 // A text asked whether it names something (a technique in a note): the name's words joined must be
 // a run of whole words of the text, so that spaces and hyphens do not matter ("Shihô-nage" in "shiho
-// nage aus" and "Shihonage,") but word ends do (not in "Shihonagen"). With kanji anywhere: Japanese
-// has no spaces, and okurigana may differ.
+// nage aus" and "Shihonage,") but word ends do (not in "Shihonagen"). Punctuation, a line break or a
+// dash between spaces part names: "Ikkyo, Shiho-nage" does not name Ikkyo-shiho-nage. With kanji
+// anywhere: Japanese has no spaces, and okurigana may differ.
 class NamedIn
 {
 public:
     explicit NamedIn(const QString &text)
-        : m_words(searchKey(text).split(u' ', Qt::SkipEmptyParts))
     {
+        const QList<uint> points = text.toUcs4();
+        QString clause;
+        for (qsizetype i = 0; i <= points.size(); ++i) {
+            if (i < points.size() && !endsClause(points, i)) {
+                const char32_t c = points[i];
+                clause += QString::fromUcs4(&c, 1);
+                continue;
+            }
+            m_words += searchKey(clause).split(u' ', Qt::SkipEmptyParts);
+            m_ends << m_words.size();
+            clause.clear();
+        }
     }
 
     // Where a name stands: from word `first` to word `last` of the text.
@@ -119,9 +131,10 @@ public:
             return found;
         }
         for (qsizetype i = 0; i < m_words.size(); ++i) {
+            const qsizetype end = *std::upper_bound(m_ends.cbegin(), m_ends.cend(), i);
             QString run;
             qsizetype j = i;
-            for (; j < m_words.size() && run.size() < joined.size(); ++j) {
+            for (; j < end && run.size() < joined.size(); ++j) {
                 run += m_words.at(j);
             }
             if (run == joined) {
@@ -142,7 +155,38 @@ public:
     }
 
 private:
+    // Whether the character parts names. Not a hyphen, an apostrophe, a point or comma in a number,
+    // or a point before one ("Nr. 5").
+    static bool endsClause(const QList<uint> &points, qsizetype i)
+    {
+        const char32_t c = points[i];
+        const auto space = [&points](qsizetype at) {
+            return at >= 0 && at < points.size() && QChar::isSpace(char32_t(points[at]));
+        };
+        if (c == u'\n' || c == u'\r' || c == 0x2028 || c == 0x2029) {
+            return true;
+        }
+        if (isApostrophe(c)) {
+            return false;
+        }
+        if (isDash(c)) {
+            return space(i - 1) || space(i + 1);
+        }
+        if (c == u'.' || c == u',') {
+            qsizetype next = i + 1;
+            while (c == u'.' && space(next)) {
+                ++next;
+            }
+            if (next < points.size() && QChar::isDigit(char32_t(points[next]))
+                && (c == u'.' || (i > 0 && QChar::isDigit(char32_t(points[i - 1]))))) {
+                return false;
+            }
+        }
+        return QChar::isPunct(c) || QChar::isSymbol(c);
+    }
+
     QStringList m_words;
+    QList<qsizetype> m_ends;        // where each clause ends in m_words
 };
 
 // A text to search (a technique's fields, a note): whether every word of a query occurs in it.

@@ -346,22 +346,22 @@
         <translation>ein Lehrgang braucht einen Titel und einen ersten Tag</translation>
     </message>
     <message>
-        <location filename="../store/coursebook.cpp" line="362"/>
+        <location filename="../store/coursebook.cpp" line="366"/>
         <source>a grade needs a discipline, a grade and a day</source>
         <translation>ein Grad braucht Sparte, Grad und Tag</translation>
     </message>
     <message>
-        <location filename="../store/coursebook.cpp" line="423"/>
+        <location filename="../store/coursebook.cpp" line="427"/>
         <source>an entry needs a text and a course</source>
         <translation>ein Eintrag braucht einen Text und einen Lehrgang</translation>
     </message>
     <message>
-        <location filename="../store/coursebook.cpp" line="506"/>
+        <location filename="../store/coursebook.cpp" line="510"/>
         <source>a link needs a technique</source>
         <translation>eine Verbindung braucht eine Technik</translation>
     </message>
     <message>
-        <location filename="../store/coursebook.cpp" line="513"/>
+        <location filename="../store/coursebook.cpp" line="517"/>
         <source>the entry is gone</source>
         <translation>der Eintrag ist nicht mehr da</translation>
     </message>
@@ -473,47 +473,47 @@
 <context>
     <name>CoursePage</name>
     <message>
-        <location filename="../qml/CoursePage.qml" line="71"/>
+        <location filename="../qml/CoursePage.qml" line="78"/>
         <source>Notebook</source>
         <translation>Notizbuch</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="78"/>
+        <location filename="../qml/CoursePage.qml" line="85"/>
         <source>Export</source>
         <translation>Exportieren</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="87"/>
+        <location filename="../qml/CoursePage.qml" line="94"/>
         <source>Delete notebook</source>
         <translation>Notizbuch löschen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="128"/>
+        <location filename="../qml/CoursePage.qml" line="135"/>
         <source>from the calendar</source>
         <translation>aus dem Kalender</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="128"/>
+        <location filename="../qml/CoursePage.qml" line="135"/>
         <source>own entry</source>
         <translation>eigener Eintrag</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="149"/>
+        <location filename="../qml/CoursePage.qml" line="156"/>
         <source>In the calendar</source>
         <translation>In den Kalender</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="160"/>
+        <location filename="../qml/CoursePage.qml" line="167"/>
         <source>Announcement</source>
         <translation>Ausschreibung</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="168"/>
+        <location filename="../qml/CoursePage.qml" line="175"/>
         <source>Exported: %1</source>
         <translation>Exportiert: %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="169"/>
+        <location filename="../qml/CoursePage.qml" line="176"/>
         <source>%n file(s) were not on this device and are missing.</source>
         <translation>
             <numerusform>%n Datei war nicht auf diesem Gerät und fehlt.</numerusform>
@@ -521,144 +521,144 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="178"/>
+        <location filename="../qml/CoursePage.qml" line="185"/>
         <source>No calendar app could be opened.</source>
         <translation>Es ließ sich keine Kalender-App öffnen.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="198"/>
+        <location filename="../qml/CoursePage.qml" line="205"/>
         <source>Exam %1</source>
         <translation>Prüfung %1</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="215"/>
+        <location filename="../qml/CoursePage.qml" line="222"/>
         <source>Change</source>
         <translation>Ändern</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="223"/>
+        <location filename="../qml/CoursePage.qml" line="230"/>
         <source>Plan an exam here …</source>
         <translation>Prüfung hier ablegen …</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="240"/>
+        <location filename="../qml/CoursePage.qml" line="247"/>
         <source>Plan an exam here</source>
         <translation>Prüfung hier ablegen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="250"/>
+        <location filename="../qml/CoursePage.qml" line="257"/>
         <source>Discipline</source>
         <translation>Sparte</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="264"/>
+        <location filename="../qml/CoursePage.qml" line="271"/>
         <source>next</source>
         <translation>nächster</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="264"/>
+        <location filename="../qml/CoursePage.qml" line="271"/>
         <source>passed</source>
         <translation>abgelegt</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="275"/>
+        <location filename="../qml/CoursePage.qml" line="282"/>
         <source>Waiting time: %1</source>
         <translation>Wartezeit: %1</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="275"/>
+        <location filename="../qml/CoursePage.qml" line="282"/>
         <source>All grades passed.</source>
         <translation>Alle Grade abgelegt.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="287"/>
+        <location filename="../qml/CoursePage.qml" line="294"/>
         <source>Plan</source>
         <translation>Vormerken</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="296"/>
+        <location filename="../qml/CoursePage.qml" line="303"/>
         <source>No exam</source>
         <translation>Keine Prüfung</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="304"/>
+        <location filename="../qml/CoursePage.qml" line="311"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="323"/>
+        <location filename="../qml/CoursePage.qml" line="330"/>
         <source>No entries yet. Write below what was shown.</source>
         <translation>Noch keine Einträge. Unten schreiben, was gezeigt wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="377"/>
+        <location filename="../qml/CoursePage.qml" line="384"/>
         <source>Change or delete</source>
         <translation>Ändern oder löschen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="412"/>
-        <location filename="../qml/CoursePage.qml" line="416"/>
+        <location filename="../qml/CoursePage.qml" line="419"/>
+        <location filename="../qml/CoursePage.qml" line="423"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="424"/>
-        <location filename="../qml/CoursePage.qml" line="429"/>
+        <location filename="../qml/CoursePage.qml" line="431"/>
+        <location filename="../qml/CoursePage.qml" line="436"/>
         <source>Link technique</source>
         <translation>Technik verbinden</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="447"/>
+        <location filename="../qml/CoursePage.qml" line="454"/>
         <source>What was shown?</source>
         <translation>Was wurde gezeigt?</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="448"/>
+        <location filename="../qml/CoursePage.qml" line="455"/>
         <source>New entry</source>
         <translation>Neuer Eintrag</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="467"/>
+        <location filename="../qml/CoursePage.qml" line="474"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="482"/>
+        <location filename="../qml/CoursePage.qml" line="489"/>
         <source>Export notebook</source>
         <translation>Notizbuch exportieren</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="485"/>
+        <location filename="../qml/CoursePage.qml" line="492"/>
         <source>ZIP archives (*.zip)</source>
         <translation>ZIP-Archive (*.zip)</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="502"/>
+        <location filename="../qml/CoursePage.qml" line="509"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="502"/>
+        <location filename="../qml/CoursePage.qml" line="509"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="508"/>
+        <location filename="../qml/CoursePage.qml" line="515"/>
         <source>Entry</source>
         <translation>Eintrag</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="520"/>
+        <location filename="../qml/CoursePage.qml" line="527"/>
         <source>Delete notebook?</source>
         <translation>Notizbuch löschen?</translation>
     </message>
     <message>
-        <location filename="../qml/CoursePage.qml" line="521"/>
+        <location filename="../qml/CoursePage.qml" line="528"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="531"/>
+        <location filename="../qml/CoursePage.qml" line="534"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>Das Notizbuch und sein %n Eintrag verschwinden von diesem Gerät.</numerusform>
@@ -704,53 +704,59 @@
         <translation>Das Notizbuch ließ sich nicht löschen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="337"/>
-        <location filename="../services/courses.cpp" line="345"/>
+        <location filename="../services/courses.cpp" line="338"/>
+        <location filename="../services/courses.cpp" line="343"/>
+        <location filename="../services/courses.cpp" line="351"/>
         <source>The entry could not be saved: %1</source>
         <translation>Der Eintrag ließ sich nicht speichern: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="351"/>
+        <location filename="../services/courses.cpp" line="338"/>
+        <source>the notebook is gone</source>
+        <translation>das Notizbuch ist nicht mehr da</translation>
+    </message>
+    <message>
+        <location filename="../services/courses.cpp" line="357"/>
         <source>The entry could not be deleted: %1</source>
         <translation>Der Eintrag ließ sich nicht löschen: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="361"/>
+        <location filename="../services/courses.cpp" line="367"/>
         <source>The technique could not be linked: %1</source>
         <translation>Die Technik konnte nicht verbunden werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="367"/>
+        <location filename="../services/courses.cpp" line="373"/>
         <source>The link could not be removed: %1</source>
         <translation>Die Verbindung konnte nicht entfernt werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="400"/>
+        <location filename="../services/courses.cpp" line="406"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="452"/>
+        <location filename="../services/courses.cpp" line="458"/>
         <source>The grade could not be saved: %1</source>
         <translation>Der Grad konnte nicht gespeichert werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="457"/>
+        <location filename="../services/courses.cpp" line="463"/>
         <source>The grade could not be deleted: %1</source>
         <translation>Der Grad konnte nicht gelöscht werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="544"/>
+        <location filename="../services/courses.cpp" line="550"/>
         <source>The start of training could not be saved: %1</source>
         <translation>Der Trainingsbeginn ließ sich nicht speichern: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="560"/>
+        <location filename="../services/courses.cpp" line="566"/>
         <source>The exam could not be planned: %1</source>
         <translation>Die Prüfung konnte nicht vorgemerkt werden: %1</translation>
     </message>
     <message>
-        <location filename="../services/courses.cpp" line="626"/>
+        <location filename="../services/courses.cpp" line="632"/>
         <source>The notebook could not be exported: %1</source>
         <translation>Das Notizbuch konnte nicht exportiert werden: %1</translation>
     </message>
@@ -2592,58 +2598,58 @@
 <context>
     <name>TechniquePickerPage</name>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="36"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="37"/>
         <source>Link technique</source>
         <translation>Technik verbinden</translation>
     </message>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="44"/>
         <location filename="../qml/TechniquePickerPage.qml" line="45"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="46"/>
         <source>Search techniques</source>
         <translation>Techniken suchen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="70"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="71"/>
         <source>Linked; removes the link</source>
         <translation>Verbunden; entfernt die Verbindung</translation>
     </message>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="70"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="71"/>
         <source>Links the technique</source>
         <translation>Verbindet die Technik</translation>
     </message>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="100"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="101"/>
         <source>Linked</source>
         <translation>Verbunden</translation>
     </message>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="106"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="107"/>
         <source>Technique no longer in the programme</source>
         <translation>Technik nicht mehr im Programm</translation>
     </message>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="115"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="116"/>
         <source>Named in this entry</source>
         <translation>In diesem Eintrag genannt</translation>
     </message>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="128"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="129"/>
         <source>No other technique is named in this entry. Search above.</source>
         <translation>Dieser Eintrag nennt keine weitere Technik. Oben suchen.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="136"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="137"/>
         <source>Found</source>
         <translation>Gefunden</translation>
     </message>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="148"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="149"/>
         <source>No technique found.</source>
         <translation>Keine Technik gefunden.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniquePickerPage.qml" line="155"/>
+        <location filename="../qml/TechniquePickerPage.qml" line="156"/>
         <source>More than %1 techniques found. Add a word to narrow the search.</source>
         <translation>Mehr als %1 Techniken gefunden. Ein weiteres Wort grenzt die Suche ein.</translation>
     </message>
@@ -2651,88 +2657,88 @@
 <context>
     <name>TechniqueSheet</name>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="91"/>
-        <location filename="../qml/TechniqueSheet.qml" line="158"/>
+        <location filename="../qml/TechniqueSheet.qml" line="93"/>
+        <location filename="../qml/TechniqueSheet.qml" line="160"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="196"/>
+        <location filename="../qml/TechniqueSheet.qml" line="198"/>
         <source>Uchidachi</source>
         <translation>Uchidachi</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="196"/>
+        <location filename="../qml/TechniqueSheet.qml" line="198"/>
         <source>Shidachi</source>
         <translation>Shidachi</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="197"/>
+        <location filename="../qml/TechniqueSheet.qml" line="199"/>
         <source>Hit</source>
         <translation>Treffer</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="197"/>
+        <location filename="../qml/TechniqueSheet.qml" line="199"/>
         <source>Zanshin</source>
         <translation>Zanshin</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="214"/>
+        <location filename="../qml/TechniqueSheet.qml" line="216"/>
         <source>Open question: the sources do not agree here, it is not settled yet.</source>
         <translation>Offene Frage: Die Vorlagen sind sich hier nicht einig, das ist noch nicht geklärt.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="228"/>
+        <location filename="../qml/TechniqueSheet.qml" line="230"/>
         <source>Photo</source>
         <translation>Foto</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="229"/>
+        <location filename="../qml/TechniqueSheet.qml" line="231"/>
         <source>Voice note</source>
         <translation>Sprachnotiz</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="231"/>
+        <location filename="../qml/TechniqueSheet.qml" line="233"/>
         <source>Last note, %1: %2</source>
         <translation>Letzte Notiz, %1: %2</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="243"/>
+        <location filename="../qml/TechniqueSheet.qml" line="245"/>
         <source>Video not loaded. The DVD&apos;s code loads it onto the device.</source>
         <translation>Video nicht geladen. Der Code der DVD lädt es aufs Gerät.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="244"/>
+        <location filename="../qml/TechniqueSheet.qml" line="246"/>
         <source>There is no video of this technique.</source>
         <translation>Zu dieser Technik gibt es kein Video.</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="249"/>
+        <location filename="../qml/TechniqueSheet.qml" line="251"/>
         <source>Enter code</source>
         <translation>Code eingeben</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="258"/>
+        <location filename="../qml/TechniqueSheet.qml" line="260"/>
         <source>DVD on shinkiryu.de</source>
         <translation>DVD auf shinkiryu.de</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="272"/>
+        <location filename="../qml/TechniqueSheet.qml" line="274"/>
         <source>Watch video</source>
         <translation>Video ansehen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="278"/>
+        <location filename="../qml/TechniqueSheet.qml" line="280"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="278"/>
+        <location filename="../qml/TechniqueSheet.qml" line="280"/>
         <source>Notes (%1)</source>
         <translation>Notizen (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/TechniqueSheet.qml" line="287"/>
+        <location filename="../qml/TechniqueSheet.qml" line="289"/>
         <source>Comment</source>
         <translation>Kommentar</translation>
     </message>

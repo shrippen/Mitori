@@ -3597,7 +3597,32 @@ TestCase {
         tryCompare(page.courseNotes, "length", 0)
         verify(!findChild(page, "fromCourses").visible)
         window.pageStack.pop()
+    }
+
+    // Deleting a notebook opened twice (through a technique's notes): no page of it stays behind.
+    function test_8f_note_techniques_gone() {
+        const course = Courses.create("Zweimal offen", "2026-05-01", "", "", "")
+        verify(Courses.addEntry(course, "Ikkyo"))
+        const entry = Courses.entries(course)[0]
+        const technique = Programme.search("Ikkyo", 1)[0]
+        verify(Courses.linkTechnique(entry.uid, technique.id))
+        const depth = window.pageStack.depth
+
+        const first = push("CoursePage", { uid: course })
+        const notes = push("NotesPage", { entry: technique })
+        const second = push("CoursePage", { uid: course, entryUid: entry.uid })
+        wait(500)       // Kirigami slides the page in
+        compare(window.pageStack.depth, depth + 3)
+        const remove = findChild(second, "removeCourse")
+        remove.open()
+        tryVerify(() => remove.opened)
+        remove.accept()
+        tryCompare(window.pageStack, "depth", depth + 1)
+        verify(window.pageStack.currentItem === notes)
+        compare(notes.courseNotes.length, 0)
         window.pageStack.pop()
+        compare(window.pageStack.depth, depth)
+        verify(window.pageStack.currentItem.uid === undefined, "no dead page")
     }
 
     // Linked techniques do not use up the suggestions: the list fills up, and "no other technique"
@@ -3614,6 +3639,15 @@ TestCase {
         tryCompare(picker.linked, "length", 8)
         tryVerify(() => picker.named.length > 0, 2000, "more are named")
         verify(!findChild(picker, "pickerNoneNamed").visible)
+
+        // A search that only finds a linked one did find it.
+        verify(Courses.linkTechnique(entry.uid, "shinkitoho/odachi/5"))
+        const field = findChild(picker, "pickerSearch")
+        field.text = "Gohon-me"
+        tryVerify(() => picker.found.length === 1)
+        compare(picker.foundShown.length, 0)
+        verify(!findChild(picker, "pickerNotFound").visible, "it stands under Linked")
+        field.text = ""
         window.pageStack.pop()
 
         // The technique's sheet counts the linked entries with its notes.

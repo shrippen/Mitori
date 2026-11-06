@@ -137,7 +137,6 @@ private slots:
         QVERIFY(md.contains(u"verloren  \n(Voice note not on the device)"_s));
     }
 
-    // Characters a URL or a file system takes for something else stay out of the name.
     // An entry's techniques stand with it, by name; one no longer in the programme says so.
     void namesTechniques()
     {
@@ -175,6 +174,7 @@ private slots:
         QVERIFY(!back.contains(u"gibt/es/nicht"_s));
     }
 
+    // Characters a URL or a file system takes for something else stay out of the name.
     void safeFileName()
     {
         CourseBook::Course c;

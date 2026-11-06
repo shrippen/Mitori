@@ -145,7 +145,7 @@ Kirigami.ScrollablePage {
         LookLabel {
             objectName: "pickerNotFound"
             Layout.fillWidth: true
-            visible: page.query.trim() !== "" && page.foundShown.length === 0
+            visible: page.query.trim() !== "" && page.found.length === 0
             text: qsTr("No technique found.")
             color: Look.mutedTextColor
             wrapMode: Text.Wrap

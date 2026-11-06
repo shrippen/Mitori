@@ -26,6 +26,12 @@ Kirigami.ScrollablePage {
     background: Rectangle { color: Look.backgroundColor }
 
     required property string uid
+    // Out of the stack, also from the middle; the top page stays the one shown.
+    function leave() {
+        const row = page.Kirigami.PageStack.pageStack
+        row.removePage(page)
+        row.currentIndex = row.depth - 1
+    }
     // An entry to show on opening (from a technique's notes): scrolled to, with the focus.
     property string entryUid: ""
     property Item entryShown: null
@@ -52,6 +58,13 @@ Kirigami.ScrollablePage {
         }
     }
     readonly property var course: Courses.revision >= 0 ? Courses.notebook(uid) : ({})
+    // The notebook deleted (here, on a second page of it, by a sync): no empty page stays behind.
+    readonly property bool gone: !course.uid
+    onGoneChanged: {
+        if (gone) {
+            Qt.callLater(page.leave)
+        }
+    }
     readonly property var entries: Courses.revision >= 0 ? Courses.entries(uid) : []
     // [{key, day: Date, entries: [...]}] in the order written (a course's days run forward).
     readonly property var days: {
@@ -520,11 +533,7 @@ Kirigami.ScrollablePage {
         title: qsTr("Delete notebook?")
         acceptText: qsTr("Delete")
         standardButtons: QQC2.Dialog.Ok | QQC2.Dialog.Cancel
-        onAccepted: {
-            if (Courses.remove(page.uid)) {
-                page.Kirigami.PageStack.pop()
-            }
-        }
+        onAccepted: Courses.remove(page.uid)
 
         LookLabel {
             width: parent.width
