@@ -1,11 +1,14 @@
 #include <QFile>
 #include <QSettings>
+#include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QTest>
 
 #include <algorithm>
 
+#include "courses.h"
+#include "practicegrade.h"
 #include "programme.h"
 #include "searchkey.h"
 
@@ -78,6 +81,21 @@ class TstProgramme : public QObject
     }
     Programme programme{loaded()};
 
+    // A new Courses with an empty book, and no practice grade or old grade stored.
+    std::unique_ptr<Courses> emptyCourses(const QTemporaryDir &dir)
+    {
+        QSettings settings;
+        settings.remove(QStringLiteral("practiceGrade"));
+        settings.remove(QStringLiteral("programme/grade"));
+        return std::make_unique<Courses>(dir.filePath(QStringLiteral("book.sqlite")), QUrl(),
+                                         dir.filePath(QStringLiteral("cal.ics")), loaded());
+    }
+
+    static bool pass(Courses &courses, const QString &discipline, const QString &grade)
+    {
+        return courses.addGrade(discipline, grade, QStringLiteral("2024-03-01"), QString());
+    }
+
 private slots:
     void initTestCase()
     {
@@ -115,26 +133,175 @@ private slots:
         for (const QString &other : {QStringLiteral("aikido"), QStringLiteral("daitoryu")}) {
             QCOMPARE(programme.gradeChips(other), programme.grades(other));
         }
-
-        // The grade asked for elsewhere is never one without forms, even if it were stored.
-        QSettings().setValue(QStringLiteral("programme/grade/") + toho, QStringLiteral("kaiden"));
-        QCOMPARE(programme.grade(toho), withForms.first());
-        QSettings().remove(QStringLiteral("programme/grade/") + toho);
     }
 
-    // Today's practice draws from every grade up to the chosen one; only the chosen is current.
-    void practiceEntriesUpToTheChosenGrade()
+    // Today's practice draws from every grade up to the given one; only that one is current.
+    void practiceEntriesUpToTheGrade()
     {
-        programme.setGrade(QStringLiteral("aikido"), QStringLiteral("k4"));
-        const QVariantList rows = programme.practiceEntries(QStringLiteral("aikido"));
+        const QVariantList rows = programme.practiceEntries(QStringLiteral("aikido"), QStringLiteral("k4"));
         const int k5 = count(programme.entries(QStringLiteral("aikido"), QStringLiteral("k5")), QStringLiteral("entry"));
         const int k4 = count(programme.entries(QStringLiteral("aikido"), QStringLiteral("k4")), QStringLiteral("entry"));
         QCOMPARE(rows.size(), k5 + k4);
         QVERIFY(!rows.first().toMap().value(QStringLiteral("current")).toBool());
         QVERIFY(rows.last().toMap().value(QStringLiteral("current")).toBool());
         QCOMPARE(rows.last().toMap().value(QStringLiteral("gradeName")).toString(), QStringLiteral("4. Kyu"));
-        programme.setGrade(QStringLiteral("aikido"), QStringLiteral("k5"));
-        QCOMPARE(programme.practiceEntries(QStringLiteral("aikido")).size(), k5);
+        QCOMPARE(programme.practiceEntries(QStringLiteral("aikido"), QStringLiteral("k5")).size(), k5);
+    }
+
+    // Nothing entered, nothing chosen: the first grade. Then the one after the highest passed.
+    void practiceGradeFollowsPassedGrades()
+    {
+        const QString aikido = QStringLiteral("aikido");
+        QTemporaryDir dir;
+        const auto courses = emptyCourses(dir);
+        PracticeGrade practice(&programme, courses.get());
+        QSignalSpy changed(&practice, &PracticeGrade::changed);
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k5"));
+        QVERIFY(!practice.manual(aikido));
+
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k5")));
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k4"));
+        QCOMPARE(changed.size(), 1);
+
+        // By rank, not by day; other disciplines stay.
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k3")));
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k2"));
+        QCOMPARE(practice.grade(QStringLiteral("daitoryu")), QStringLiteral("k5"));
+
+        // A note changes Courses, not the practice grade: no signal.
+        changed.clear();
+        const QString notebook = courses->create(QStringLiteral("Kurs"), QStringLiteral("2026-01-01"),
+                                                 QStringLiteral("2026-01-01"), QString(), QString());
+        QVERIFY(!notebook.isEmpty());
+        QCOMPARE(changed.size(), 0);
+    }
+
+    // After the last grade with forms (next: Hon-Menkyo, then none at all) it stays on that one;
+    // a grade without forms is never one.
+    void practiceGradeHasForms()
+    {
+        const QString toho = QStringLiteral("shinkitoho");
+        QTemporaryDir dir;
+        const auto courses = emptyCourses(dir);
+        PracticeGrade practice(&programme, courses.get());
+        const QVariantList grades = programme.grades(toho);
+        const QString last = grades.last().toMap().value(QStringLiteral("id")).toString();
+
+        QVERIFY(pass(*courses, toho, last));
+        QCOMPARE(courses->nextGrade(toho), QStringLiteral("honmenkyo"));
+        QCOMPARE(practice.grade(toho), last);
+
+        QVERIFY(pass(*courses, toho, QStringLiteral("kaiden")));
+        QCOMPARE(courses->nextGrade(toho), QString());
+        QCOMPARE(practice.grade(toho), last);
+
+        practice.setGrade(toho, QStringLiteral("kaiden"));
+        QCOMPARE(practice.grade(toho), last);
+        practice.setGrade(toho, QStringLiteral("nonsense"));
+        QCOMPARE(practice.grade(toho), last);
+        QVERIFY(!practice.manual(toho));
+    }
+
+    // A choice holds, also below the suggestion and across a new start.
+    void practiceGradeByHand()
+    {
+        const QString aikido = QStringLiteral("aikido");
+        QTemporaryDir dir;
+        const auto courses = emptyCourses(dir);
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k4")));
+        PracticeGrade practice(&programme, courses.get());
+        QSignalSpy changed(&practice, &PracticeGrade::changed);
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k3"));
+
+        practice.setGrade(aikido, QStringLiteral("k5"));
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k5"));
+        QVERIFY(practice.manual(aikido));
+        QCOMPARE(changed.size(), 1);
+        PracticeGrade restarted(&programme, courses.get());
+        QCOMPARE(restarted.grade(aikido), QStringLiteral("k5"));
+
+        // The suggested grade again: follows "My grades" from here on.
+        practice.setGrade(aikido, QStringLiteral("k3"));
+        QVERIFY(!practice.manual(aikido));
+        QCOMPARE(changed.size(), 2);
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k3")));
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k2"));
+    }
+
+    // A passed grade moves a choice forward unless it is further already.
+    void practiceGradeAfterPassing()
+    {
+        const QString aikido = QStringLiteral("aikido");
+        QTemporaryDir dir;
+        const auto courses = emptyCourses(dir);
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k4")));
+        PracticeGrade practice(&programme, courses.get());
+
+        // Behind: moves to the new suggestion.
+        practice.setGrade(aikido, QStringLiteral("k5"));
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k3")));
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k2"));
+        QVERIFY(!practice.manual(aikido));
+
+        // Further: stays, until the suggestion passes it.
+        practice.setGrade(aikido, QStringLiteral("k1"));
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k2")));
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k1"));
+        QVERIFY(practice.manual(aikido));
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k1")));
+        QCOMPARE(practice.grade(aikido), courses->nextGrade(aikido));
+        QVERIFY(!practice.manual(aikido));
+    }
+
+    // A passed grade taken back gives the choice back.
+    void practiceGradeAfterRemoving()
+    {
+        const QString aikido = QStringLiteral("aikido");
+        QTemporaryDir dir;
+        const auto courses = emptyCourses(dir);
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k5")));
+        PracticeGrade practice(&programme, courses.get());
+        practice.setGrade(aikido, QStringLiteral("k5"));
+
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k4")));
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k3"));
+        const QVariantList grades = courses->grades();
+        const auto k4 = std::find_if(grades.cbegin(), grades.cend(), [](const QVariant &g) {
+            return g.toMap().value(QStringLiteral("grade")) == QLatin1String("k4");
+        });
+        QVERIFY(courses->removeGrade(k4->toMap().value(QStringLiteral("uid")).toString()));
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k5"));
+    }
+
+    // The one old grade becomes the choice once: nothing moves on the update, a later passed
+    // grade counts. A value without forms goes.
+    void practiceGradeMigrates()
+    {
+        const QString aikido = QStringLiteral("aikido");
+        const QString toho = QStringLiteral("shinkitoho");
+        const QString oldAikido = QStringLiteral("programme/grade/") + aikido;
+        const QString oldToho = QStringLiteral("programme/grade/") + toho;
+        QTemporaryDir dir;
+        const auto courses = emptyCourses(dir);
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k4")));
+        QSettings().setValue(oldAikido, QStringLiteral("k5"));
+        QSettings().setValue(oldToho, QStringLiteral("kaiden"));
+
+        PracticeGrade practice(&programme, courses.get());
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k5"));
+        QVERIFY(practice.manual(aikido));
+        QVERIFY(!QSettings().contains(oldAikido));
+        QVERIFY(!QSettings().contains(oldToho));
+        QCOMPARE(practice.grade(toho), programme.grades(toho).first().toMap().value(QStringLiteral("id")).toString());
+
+        // Once: a choice made after it stays.
+        practice.setGrade(aikido, QStringLiteral("k1"));
+        PracticeGrade restarted(&programme, courses.get());
+        QCOMPARE(restarted.grade(aikido), QStringLiteral("k1"));
+
+        practice.setGrade(aikido, QStringLiteral("k5"));
+        QVERIFY(pass(*courses, aikido, QStringLiteral("k3")));
+        QCOMPARE(practice.grade(aikido), QStringLiteral("k2"));
     }
 
     // Search across disciplines: every word must match; case, accents and hyphens do not matter.
@@ -226,14 +393,9 @@ private slots:
     void selectionIsKept()
     {
         QCOMPARE(programme.discipline(), QStringLiteral("aikido"));
-        QCOMPARE(programme.grade(QStringLiteral("aikido")), QStringLiteral("k5"));
         programme.setDiscipline(QStringLiteral("daitoryu"));
-        programme.setGrade(QStringLiteral("daitoryu"), QStringLiteral("k3"));
         Programme other{loaded()};
         QCOMPARE(other.discipline(), QStringLiteral("daitoryu"));
-        QCOMPARE(other.grade(QStringLiteral("daitoryu")), QStringLiteral("k3"));
-        programme.setGrade(QStringLiteral("daitoryu"), QStringLiteral("nonsense"));
-        QCOMPARE(other.grade(QStringLiteral("daitoryu")), QStringLiteral("k5"));
         programme.setDiscipline(QStringLiteral("nonsense"));
         QCOMPARE(other.discipline(), QStringLiteral("daitoryu"));
     }
@@ -304,7 +466,7 @@ private slots:
         QVERIFY(programme.entry(QStringLiteral("shinkitoho/kamae/1")).isEmpty());
         QVERIFY(programme.entry(QStringLiteral("shinkitoho/odachi/1")).value(QStringLiteral("steps")).toList().isEmpty());
         // Today's practice and the search hold it once; a position finds it.
-        QCOMPARE(ids(programme.practiceEntries(QStringLiteral("shinkitoho"))).count(QStringLiteral("shinkitoho/kamae")), 1);
+        QCOMPARE(ids(programme.practiceEntries(QStringLiteral("shinkitoho"), QStringLiteral("shoden"))).count(QStringLiteral("shinkitoho/kamae")), 1);
         QVERIFY(ids(programme.search(QStringLiteral("jodan ura gasumi"))).contains(QStringLiteral("shinkitoho/kamae")));
         QVERIFY(ids(programme.search(QStringLiteral("開太刀"))).contains(QStringLiteral("shinkitoho/kamae")));
     }

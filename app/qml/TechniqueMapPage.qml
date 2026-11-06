@@ -22,8 +22,8 @@ Kirigami.ScrollablePage {
 
     property string discipline: Programme.discipline
     readonly property var grades: Programme.grades(discipline)
-    // Up to which grade; the programme's choice at first.
-    property string grade: Programme.grade(discipline)
+    // Up to which grade: starts at the practice grade, then only this page's (browsing).
+    property string grade: PracticeGrade.grade(discipline)
     readonly property string gradeName: (grades.find(g => g.id === grade) || {}).name || ""
     readonly property var grids: Programme.techniqueMap(discipline, grade)
     // The group shown, by title; the first one when the chosen one has nothing up to this grade.
@@ -44,7 +44,7 @@ Kirigami.ScrollablePage {
             currentIndex: Programme.disciplines.findIndex(d => d.id === page.discipline)
             onActivated: index => {
                 page.discipline = Programme.disciplines[index].id
-                page.grade = Programme.grade(page.discipline)
+                page.grade = PracticeGrade.grade(page.discipline)
             }
         }
 
