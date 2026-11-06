@@ -108,6 +108,9 @@ public:
     bool merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result,
                const TableMerge::Watch &watch = {});
 
+    // The tables a backup holds and merge() takes.
+    static QList<TableMerge::Table> tables();
+
     static constexpr int schemaVersion = 6;
 
 private:

@@ -24,6 +24,7 @@ class Sync : public QObject
 
     Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY accountChanged)
     Q_PROPERTY(bool automatic READ automatic WRITE setAutomatic NOTIFY accountChanged)
+    Q_PROPERTY(bool afterReplace READ afterReplace NOTIFY accountChanged)
     Q_PROPERTY(QString server READ server NOTIFY accountChanged)
     Q_PROPERTY(QString user READ user NOTIFY accountChanged)
     Q_PROPERTY(bool hasPassword READ hasPassword NOTIFY accountChanged)
@@ -56,6 +57,9 @@ public:
     void setEnabled(bool on);
     bool automatic() const { return m_account.automatic(); }
     void setAutomatic(bool on);
+    // The data was replaced (dataReplaced) and the sync not turned on since: turning it on brings back
+    // what other devices hold, the settings say so.
+    bool afterReplace() const { return m_account.replaced(); }
     QString server() const { return m_account.account().folder.toString(); }
     QString user() const { return m_account.account().user; }
     bool hasPassword() const { return m_account.secret() != SyncAccount::Secret::None; }
@@ -79,6 +83,11 @@ public:
     // A change was made: with `automatic`, a sync follows soon.
     Q_INVOKABLE void touched();
     Q_INVOKABLE bool resolve(int index, Choice choice);
+    // The device's data was replaced by a backup (not during a sync, see `busy`): sync off, else
+    // the next run merges what the other devices' archives hold: rows the backup lacks come back
+    // (ratings and exam rounds have no deletion marks), and a newer change or deletion there takes
+    // what the backup restored. Open conflicts go: they name rows that are gone.
+    Q_INVOKABLE void dataReplaced();
 
     // Waits for a running sync (tests).
     void wait();

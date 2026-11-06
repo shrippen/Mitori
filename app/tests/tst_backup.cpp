@@ -2,11 +2,12 @@
 #include <QFile>
 #include <QSettings>
 #include <QSignalSpy>
-#include <QStandardPaths>
-#include <QTemporaryDir>
 #include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QStandardPaths>
+#include <QTemporaryDir>
 #include <QTest>
+#include <QUuid>
 
 #include "backup.h"
 #include "backuparchive.h"
@@ -43,6 +44,120 @@ class TstBackup : public QObject
     static QDateTime at(int hour)
     {
         return QDateTime(QDate(2026, 11, 1), QTime(hour, 0), QTimeZone::UTC);
+    }
+
+    enum class Failure { DamagedMedia, MediaUnwritable, SecondDatabase, ArchiveGoneBad };
+
+    static constexpr QByteArrayView kOnlyPhoneBytes = "nur-telefon-ton";
+
+    // One row of each kind and two files on the phone; returns the note both will share.
+    QString seedPhone(const Device &phone) const
+    {
+        MediaStore media(phone.media);
+        media.adopt(u"beide.jpg"_s, "beide-bild");
+        media.adopt(u"nur-telefon.m4a"_s, kOnlyPhoneBytes.toByteArray());
+        PracticeLog log;
+        log.open(phone.practice);
+        log.add(u"aikido/k5/a"_s, 3, at(9), u"telefon"_s);
+        const QString shared = log.addNote(u"aikido/k5/a"_s, u"Telefon"_s, at(9), u"telefon"_s, u"beide.jpg"_s).uid;
+        log.addNote(u"aikido/k5/b"_s, {}, at(9), u"telefon"_s, u"nur-telefon.m4a"_s);
+        PracticeLog::ExamRound round;
+        round.at = at(9);
+        round.discipline = u"aikido"_s;
+        round.grade = u"k5"_s;
+        round.count = 1;
+        round.average = 3;
+        round.device = u"telefon"_s;
+        log.addRound(round, {});
+
+        CourseBook book;
+        book.open(phone.courses);
+        CourseBook::Course c;
+        c.title = u"Telefon-Kurs"_s;
+        c.first = c.last = QDate(2026, 7, 4);
+        const QString course = book.addCourse(c, at(9), u"telefon"_s).uid;
+        book.addEntry(course, u"vom Telefon"_s, at(9), u"telefon"_s);
+        CourseBook::Grade g{{}, u"aikido"_s, u"k5"_s, QDate(2026, 7, 4), u"Mainz"_s};
+        book.addGrade(g, at(9), u"telefon"_s);
+        book.setStart(u"aikido"_s, QDate(2024, 9, 1), at(9), u"telefon"_s);
+        return shared;
+    }
+
+    // The tablet: all of the phone's rows, then its own of each kind, and its files.
+    void seedTablet(const Device &phone, const Device &tablet, const QString &shared) const
+    {
+        QFile::copy(phone.practice, tablet.practice);
+        QFile::copy(phone.courses, tablet.courses);
+        MediaStore media(tablet.media);
+        media.adopt(u"beide.jpg"_s, "beide-bild");
+        media.adopt(u"tablet.jpg"_s, "tablet-bild");
+        media.adopt(u"eintrag.jpg"_s, "eintrag-bild");
+        media.adopt(u"ungenannt.jpg"_s, "ungenannt");
+        PracticeLog log;
+        log.open(tablet.practice);
+        log.add(u"aikido/k5/z"_s, 4, at(10), u"tablet"_s);
+        log.changeNote(shared, u"Tablet neuer"_s, at(11));
+        log.addNote(u"aikido/k5/z"_s, u"nur Tablet"_s, at(10), u"tablet"_s, u"tablet.jpg"_s);
+        PracticeLog::ExamRound round;
+        round.at = at(10);
+        round.discipline = u"aikido"_s;
+        round.grade = u"k4"_s;
+        round.count = 1;
+        round.average = 4;
+        round.device = u"tablet"_s;
+        log.addRound(round, {});
+
+        CourseBook book;
+        book.open(tablet.courses);
+        CourseBook::Course c;
+        c.title = u"Tablet-Kurs"_s;
+        c.first = c.last = QDate(2026, 8, 1);
+        const QString course = book.addCourse(c, at(10), u"tablet"_s).uid;
+        const QString entry = book.addEntry(course, u"vom Tablet"_s, at(10), u"tablet"_s, u"eintrag.jpg"_s).uid;
+        book.addTag(entry, u"aikido/k5/a"_s, at(10), u"tablet"_s);
+        CourseBook::Grade g{{}, u"daitoryu"_s, u"k5"_s, QDate(2026, 8, 1), u"Bonn"_s};
+        book.addGrade(g, at(10), u"tablet"_s);
+        book.setStart(u"daitoryu"_s, QDate(2025, 1, 1), at(10), u"tablet"_s);
+    }
+
+    QString saved(const Device &d, const QString &name) const
+    {
+        Backup backup(d.practice, d.courses, d.media, d.work);
+        const QString zip = m_dir.filePath(name);
+        return backup.save(QUrl::fromLocalFile(zip)) ? zip : QString();
+    }
+
+    // Every row of every table a backup holds, and the media files: to compare whole devices.
+    static QStringList state(const Device &d)
+    {
+        QStringList lines;
+        const QString connection = u"state-"_s + QUuid::createUuid().toString(QUuid::WithoutBraces);
+        {
+            QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, connection);
+            for (const auto &[path, tables] : {std::pair{d.practice, PracticeLog::tables()},
+                                               std::pair{d.courses, CourseBook::tables()}}) {
+                db.setDatabaseName(path);
+                db.open();
+                QSqlQuery q(db);
+                for (const TableMerge::Table &t : tables) {
+                    q.exec(u"SELECT %1 FROM %2 ORDER BY %3"_s.arg(t.columns.join(u", "), t.name, t.columns.first()));
+                    while (q.next()) {
+                        QStringList row{u"row"_s, t.name};
+                        for (int i = 0; i < t.columns.size(); ++i) {
+                            row << q.value(i).toString();
+                        }
+                        lines << row.join(u' ');
+                    }
+                }
+                q.finish();
+                db.close();
+            }
+        }
+        QSqlDatabase::removeDatabase(connection);
+        for (const QString &name : MediaStore(d.media).names()) {
+            lines << u"file "_s + name;
+        }
+        return lines;
     }
 
 private slots:
@@ -182,6 +297,8 @@ private slots:
         QCOMPARE(summary.value(u"grades"_s).toMap().value(u"added"_s).toInt(), 1);
         QCOMPARE(summary.value(u"media"_s).toInt(), 1);
         QCOMPARE(summary.value(u"starts"_s).toMap().value(u"added"_s).toInt(), 1);
+        QCOMPARE(summary.value(u"notes"_s).toMap().value(u"removed"_s).toInt(), 1);   // deleted
+        QCOMPARE(summary.value(u"mediaRemoved"_s).toInt(), 1);                        // its photo
         QVERIFY(summary.value(u"created"_s).toDateTime().isValid());
         QFile f(tablet.practice);
         QVERIFY(f.open(QIODevice::ReadOnly));
@@ -316,7 +433,10 @@ private slots:
         Backup backupB(b.practice, b.courses, b.media, b.work);
         const QString fromB = m_dir.filePath(u"weg-b.zip"_s);
         QVERIFY(backupB.save(QUrl::fromLocalFile(fromB)));
-        QVERIFY(!backupA.inspect(QUrl::fromLocalFile(fromB)).isEmpty());
+        const QVariantMap s = backupA.inspect(QUrl::fromLocalFile(fromB));
+        QCOMPARE(s.value(u"notebooks"_s).toMap().value(u"removed"_s).toInt(), 1);
+        QCOMPARE(s.value(u"entries"_s).toMap().value(u"removed"_s).toInt(), 1);       // goes with its notebook
+        QCOMPARE(s.value(u"mediaRemoved"_s).toInt(), 1);
         QVERIFY(backupA.restore());
         {
             CourseBook book;
@@ -512,6 +632,94 @@ private slots:
         QCOMPARE(book.linkedEntries(u"aikido/t1"_s).size(), 1);
     }
 
+    // The preview's numbers when rows change and go side by side: `changed` also holds deletion marks,
+    // `removed` also rows the clean-up deleted; `edited` is what changed and stays.
+    void mergeCounts()
+    {
+        const Device a = device(u"zahlen-a"_s);
+        const Device b = device(u"zahlen-b"_s);
+        QString gone;
+        QString kept;
+        QString keptEntry;
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            CourseBook::Course c;
+            c.title = u"Weg"_s;
+            c.first = c.last = QDate(2026, 7, 4);
+            gone = book.addCourse(c, at(7), u"a"_s).uid;
+            QVERIFY(!book.addEntry(gone, u"auf beiden"_s, at(7), u"a"_s).uid.isEmpty());
+            c.title = u"Bleibt"_s;
+            kept = book.addCourse(c, at(7), u"a"_s).uid;
+            keptEntry = book.addEntry(kept, u"alt"_s, at(7), u"a"_s).uid;
+        }
+        QVERIFY(QFile::copy(a.courses, b.courses));
+        {
+            // A writes in the notebook B deletes later: the clean-up takes that entry, no mark does.
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QVERIFY(!book.addEntry(gone, u"nur hier"_s, at(8), u"a"_s).uid.isEmpty());
+        }
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            QVERIFY(book.changeEntry(keptEntry, u"neu"_s, at(9)));
+            QVERIFY(book.deleteCourse(gone, at(10)));
+        }
+
+        const QString zip = saved(b, u"zahlen.zip"_s);
+        Backup backup(a.practice, a.courses, a.media, a.work);
+        const QVariantMap entries = backup.inspect(QUrl::fromLocalFile(zip)).value(u"entries"_s).toMap();
+        QCOMPARE(entries.value(u"changed"_s).toInt(), 2);   // the changed one and a mark
+        QCOMPARE(entries.value(u"removed"_s).toInt(), 2);   // the mark, and the one only here
+        QCOMPARE(entries.value(u"edited"_s).toInt(), 1);
+        backup.discard();
+    }
+
+    // A newer state taken of a row the clean-up then deletes: gone, not changed. G1 is newer in the
+    // backup, but this device also holds the same grade as G2, newer still.
+    void mergeCountsGrade()
+    {
+        const Device a = device(u"grad-a"_s);
+        const Device b = device(u"grad-b"_s);
+        CourseBook::Grade g{{}, u"aikido"_s, u"k5"_s, QDate(2026, 7, 4), u"Mainz"_s};
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QVERIFY(!book.addGrade(g, at(8), u"a"_s).uid.isEmpty());
+        }
+        QVERIFY(QFile::copy(a.courses, b.courses));
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            g.place = u"Bonn"_s;
+            QVERIFY(!book.addGrade(g, at(9), u"b"_s).uid.isEmpty());
+        }
+        {
+            // The app keeps one row per grade: the second comes in by hand, as from an older merge.
+            QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"grad"_s);
+            db.setDatabaseName(a.courses);
+            QVERIFY(db.open());
+            QSqlQuery q(db);
+            q.prepare(u"INSERT INTO grades (uid, discipline, grade, day, place, created, changed, device, deleted)"
+                      " VALUES ('g2', 'aikido', 'k5', '2026-07-05', 'Trier', ?, ?, 'a', 0)"_s);
+            q.addBindValue(at(10).toMSecsSinceEpoch());
+            q.addBindValue(at(10).toMSecsSinceEpoch());
+            QVERIFY(q.exec());
+            q.finish();
+            db.close();
+        }
+        QSqlDatabase::removeDatabase(u"grad"_s);
+
+        const QString zip = saved(b, u"grad.zip"_s);
+        Backup backup(a.practice, a.courses, a.media, a.work);
+        const QVariantMap grades = backup.inspect(QUrl::fromLocalFile(zip)).value(u"grades"_s).toMap();
+        QCOMPARE(grades.value(u"changed"_s).toInt(), 1);
+        QCOMPARE(grades.value(u"removed"_s).toInt(), 1);
+        QCOMPARE(grades.value(u"edited"_s).toInt(), 0);
+        backup.discard();
+    }
+
     // A photo whose note was deleted after the backup does not come back from it.
     void deletedMediaStays()
     {
@@ -538,6 +746,160 @@ private slots:
         QCOMPARE(summary.value(u"media"_s).toInt(), 0);
         QVERIFY(backup.restore());
         QVERIFY(!media.has(u"x.jpg"_s));
+    }
+
+    // Replace: the tablet ends with the phone's backup, its own data and files gone; the preview
+    // counts it and changes nothing.
+    void replaceTakesBackup()
+    {
+        const Device phone = device(u"ersetzen-telefon"_s);
+        const Device tablet = device(u"ersetzen-tablet"_s);
+        const QString shared = seedPhone(phone);
+        seedTablet(phone, tablet, shared);
+        const QString zip = saved(phone, u"ersetzen.zip"_s);
+
+        Backup backup(tablet.practice, tablet.courses, tablet.media, tablet.work);
+        const QStringList before = state(tablet);
+        const QVariantMap s = backup.inspect(QUrl::fromLocalFile(zip));
+        QVERIFY2(!s.isEmpty(), qPrintable(backup.errorString()));
+        QCOMPARE(state(tablet), before);
+
+        const auto number = [&s](const QString &table, const QString &key) {
+            return s.value(table).toMap().value(key).toInt();
+        };
+        QCOMPARE(number(u"ratings"_s, u"holds"_s), 1);
+        QCOMPARE(number(u"notes"_s, u"holds"_s), 2);
+        QCOMPARE(number(u"rounds"_s, u"holds"_s), 1);
+        QCOMPARE(number(u"notebooks"_s, u"holds"_s), 1);
+        QCOMPARE(number(u"entries"_s, u"holds"_s), 1);
+        QCOMPARE(number(u"grades"_s, u"holds"_s), 1);
+        QCOMPARE(number(u"starts"_s, u"holds"_s), 1);
+        QCOMPARE(s.value(u"mediaHolds"_s).toInt(), 2);
+        QCOMPARE(number(u"ratings"_s, u"lost"_s), 1);
+        QCOMPARE(number(u"notes"_s, u"lost"_s), 2);     // the tablet's own, and the shared one set back
+        QCOMPARE(number(u"rounds"_s, u"lost"_s), 1);
+        QCOMPARE(number(u"notebooks"_s, u"lost"_s), 1);
+        QCOMPARE(number(u"entries"_s, u"lost"_s), 1);
+        QCOMPARE(number(u"grades"_s, u"lost"_s), 1);
+        QCOMPARE(number(u"starts"_s, u"lost"_s), 1);
+        QCOMPARE(number(u"links"_s, u"lost"_s), 1);
+        QCOMPARE(s.value(u"mediaLost"_s).toInt(), 2);
+
+        QSignalSpy restored(&backup, &Backup::restored);
+        QVERIFY2(backup.replace(), qPrintable(backup.errorString()));
+        QCOMPARE(restored.count(), 1);
+        QVERIFY(!QFile::exists(tablet.work + u"/eingelesen.zip"_s));
+
+        // Row for row and file for file as the phone. A file no row named stays: it is no one's data.
+        QCOMPARE(state(tablet).filter(u"row "_s), state(phone).filter(u"row "_s));
+        QCOMPARE(MediaStore(tablet.media).names(), (QStringList{u"beide.jpg"_s, u"nur-telefon.m4a"_s, u"ungenannt.jpg"_s}));
+        PracticeLog log;
+        QVERIFY(log.open(tablet.practice));
+        QCOMPARE(log.notes(u"aikido/k5/a"_s).first().text, u"Telefon"_s);
+        QVERIFY(log.notes(u"aikido/k5/z"_s).isEmpty());
+        QCOMPARE(log.history(u"aikido/k5/z"_s).size(), 0);
+        QVERIFY(!backup.replace());      // the inspected backup is used up
+    }
+
+    // Technique links arrive by replace: counted among what the backup holds, the row in the table.
+    void replaceBringsLinks()
+    {
+        const Device phone = device(u"verweis-telefon"_s);
+        const Device tablet = device(u"verweis-tablet"_s);
+        QString entry;
+        {
+            CourseBook book;
+            QVERIFY(book.open(phone.courses));
+            CourseBook::Course c;
+            c.title = u"Kurs"_s;
+            c.first = c.last = QDate(2026, 7, 4);
+            const QString course = book.addCourse(c, at(9), u"telefon"_s).uid;
+            entry = book.addEntry(course, u"mit Verweis"_s, at(9), u"telefon"_s).uid;
+            QVERIFY(book.addTag(entry, u"aikido/k5/a"_s, at(9), u"telefon"_s));
+        }
+        const QString zip = saved(phone, u"verweis.zip"_s);
+
+        Backup backup(tablet.practice, tablet.courses, tablet.media, tablet.work);
+        const QVariantMap s = backup.inspect(QUrl::fromLocalFile(zip));
+        QCOMPARE(s.value(u"links"_s).toMap().value(u"holds"_s).toInt(), 1);
+        QVERIFY2(backup.replace(), qPrintable(backup.errorString()));
+
+        CourseBook book;
+        QVERIFY(book.open(tablet.courses));
+        QCOMPARE(book.linkedEntries(u"aikido/k5/a"_s).size(), 1);
+        QVERIFY(state(tablet).filter(u"row entry_tags"_s).size() == 1);
+    }
+
+    // Each way a replace can fail, before and after the first file's rows are written: the device
+    // stays as it was, nothing of the backup stays behind, no restored().
+    void replaceFails_data()
+    {
+        QTest::addColumn<int>("failure");
+        QTest::newRow("damaged photo") << int(Failure::DamagedMedia);
+        QTest::newRow("disk refuses files") << int(Failure::MediaUnwritable);
+        QTest::newRow("second database fails") << int(Failure::SecondDatabase);
+        QTest::newRow("archive gone bad") << int(Failure::ArchiveGoneBad);
+    }
+
+    void replaceFails()
+    {
+        QFETCH(int, failure);
+        const QString tag = QString::fromLatin1(QTest::currentDataTag()).replace(u' ', u'-');
+        const Device phone = device(u"fehler-telefon-"_s + tag);
+        const Device tablet = device(u"fehler-tablet-"_s + tag);
+        const QString shared = seedPhone(phone);
+        seedTablet(phone, tablet, shared);
+        const QString zip = saved(phone, tag + u".zip"_s);
+
+        if (failure == int(Failure::DamagedMedia)) {
+            // Stored, not compressed: one byte of the last photo fails its CRC, only when read.
+            QFile f(zip);
+            QVERIFY(f.open(QIODevice::ReadWrite));
+            QByteArray raw = f.readAll();
+            const qsizetype at = raw.indexOf(kOnlyPhoneBytes);
+            QVERIFY(at >= 0);
+            raw[at] = 'X';
+            f.seek(0);
+            f.write(raw);
+            f.close();
+
+            // The tablet lacks the first photo: it comes in before the damaged one stops all, and must go again.
+            QVERIFY(MediaStore(tablet.media).remove(u"beide.jpg"_s));
+        }
+        if (failure == int(Failure::SecondDatabase)) {
+            // The courses' rows fail after the practice log's are written.
+            QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, tag);
+            db.setDatabaseName(tablet.courses);
+            QVERIFY(db.open());
+            QSqlQuery q(db);
+            QVERIFY(q.exec(u"CREATE TRIGGER voll BEFORE INSERT ON grades BEGIN SELECT RAISE(ABORT, 'voll'); END"_s));
+            q.finish();
+            db.close();
+        }
+        if (failure == int(Failure::MediaUnwritable)) {
+            // The media folder cannot be written: a file stands in its place.
+            QVERIFY(QDir(tablet.media).removeRecursively());
+            QFile f(tablet.media);
+            QVERIFY(f.open(QIODevice::WriteOnly));
+            f.close();
+        }
+
+        Backup backup(tablet.practice, tablet.courses, tablet.media, tablet.work);
+        QVERIFY2(!backup.inspect(QUrl::fromLocalFile(zip)).isEmpty(), qPrintable(backup.errorString()));
+        if (failure == int(Failure::ArchiveGoneBad)) {
+            QFile f(tablet.work + u"/eingelesen.zip"_s);
+            QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Truncate));
+            f.write("kein zip");
+            f.close();
+        }
+
+        const QStringList before = state(tablet);
+        QVERIFY(before.contains(u"file tablet.jpg"_s) || failure == int(Failure::MediaUnwritable));
+        QSignalSpy restored(&backup, &Backup::restored);
+        QVERIFY(!backup.replace());
+        QVERIFY(!backup.errorString().isEmpty());
+        QCOMPARE(restored.count(), 0);
+        QCOMPARE(state(tablet), before);
     }
 
     // Exactly the file it is given: a portal's path is the granted file, another name would be a

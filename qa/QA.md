@@ -58,8 +58,8 @@ Erwartet: nichts abgeschnitten, nichts nur über Farbe, Kontrast genügt.
 **J-I2 Nur Tastatur** · P7. Alle Seiten nur mit Tab, Enter, Leertaste, Esc, Pfeilen; Player mit Tasten.
 Erwartet: Fokus immer sichtbar, jedes Element erreichbar, nichts fängt die Tastatur ein.
 
-**J-J1 Sicherung** · P7. Export, Import (Ersetzen und Zusammenführen), Abgleich ohne Server, Konflikte, Darstellung wechseln, Sprache wechseln.
-Erwartet: klare Meldung bei jedem Fehler; Daten bleiben; sagt, wo die Datei liegt.
+**J-J1 Sicherung** · P7. Export, Import (Zusammenführen, und Ersetzen über die zweite Rückfrage mit den Zahlen dessen, was geht), Abgleich ohne Server, Konflikte, Darstellung wechseln, Sprache wechseln.
+Erwartet: klare Meldung bei jedem Fehler; Daten bleiben (auch wenn Ersetzen fehlschlägt); Zusammenführen ist die Vorgabe; Ersetzen schaltet einen eingerichteten Abgleich aus und sagt es vorher; sagt, wo die Datei liegt.
 
 ## Grenzen der Sitzung
 

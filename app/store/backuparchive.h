@@ -11,7 +11,7 @@ class QIODevice;
 
 // A backup of everything the user wrote, as one ZIP (Einstellungen → Sicherung): both databases
 // as consistent copies and the photos and voice notes. Read back, it is merged into the device's
-// data (TableMerge), so an older backup never loses what came after it.
+// data (TableMerge), so an older backup's rows never overwrite newer ones, or replaces it (Backup).
 //
 //   manifest.json        {"app": "Mitori", "format": 1, "version": "0.3.0",
 //                         "created": "2026-11-02T18:00:00Z", "device": "…"}

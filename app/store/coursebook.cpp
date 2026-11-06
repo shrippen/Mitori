@@ -709,12 +709,11 @@ bool joinDoubles(QSqlDatabase &db, QString *error)
 
 } // namespace
 
-bool CourseBook::merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result,
-                   const TableMerge::Watch &watch)
+QList<TableMerge::Table> CourseBook::tables()
 {
     using namespace Qt::StringLiterals;
     using TableMerge::Kind;
-    static const QList<TableMerge::Table> tables = {
+    return {
         {QStringLiteral("courses"),
          {u"uid"_s, u"calendar_uid"_s, u"title"_s, u"first"_s, u"last"_s, u"place"_s, u"teacher"_s, u"info"_s,
           u"announcement"_s, u"created"_s, u"changed"_s, u"device"_s, u"deleted"_s, u"exam_discipline"_s,
@@ -733,7 +732,12 @@ bool CourseBook::merge(const QString &otherPath, TableMerge::Mode mode, TableMer
          {u"uid"_s, u"entry"_s, u"technique"_s, u"created"_s, u"changed"_s, u"device"_s, u"deleted"_s},
          Kind::Editable, {}},
     };
+}
+
+bool CourseBook::merge(const QString &otherPath, TableMerge::Mode mode, TableMerge::Result *result,
+                   const TableMerge::Watch &watch)
+{
     m_error.clear();
     QSqlDatabase db = QSqlDatabase::database(m_connection);
-    return TableMerge::run(db, otherPath, tables, mode, result, &m_error, joinDoubles, watch);
+    return TableMerge::run(db, otherPath, tables(), mode, result, &m_error, joinDoubles, watch);
 }

@@ -19,10 +19,20 @@ namespace {
 const QString kInspected = QStringLiteral("eingelesen.zip");
 const QString kCopyPrefix = QStringLiteral("kopie-");
 
-// {added, changed} of one table for QML.
+// {added, changed, edited, removed, holds, lost} of one table for QML.
 QVariantMap counts(const TableMerge::Result &r, const QString &table)
 {
-    return {{QStringLiteral("added"), r.added.value(table)}, {QStringLiteral("changed"), r.changed.value(table)}};
+    return {{QStringLiteral("added"), r.added.value(table)},
+            {QStringLiteral("changed"), r.changed.value(table)},
+            {QStringLiteral("edited"), r.edited.value(table)},
+            {QStringLiteral("removed"), r.removed.value(table)},
+            {QStringLiteral("holds"), r.holds.value(table)},
+            {QStringLiteral("lost"), r.lost.value(table)}};
+}
+
+QSet<QString> nameSet(const QStringList &names)
+{
+    return QSet<QString>(names.cbegin(), names.cend());
 }
 
 } // namespace
@@ -154,6 +164,19 @@ bool Backup::restore()
     return ok;
 }
 
+bool Backup::replace()
+{
+    if (!m_inspected) {
+        return false;
+    }
+    const bool ok = swapIn();
+    discard();
+    if (ok) {
+        emit restored();
+    }
+    return ok;
+}
+
 void Backup::discard()
 {
     m_inspected = false;
@@ -166,20 +189,102 @@ void Backup::discard()
     }
 }
 
+QString Backup::copyPath(const QString &name) const
+{
+    return QDir(m_work).filePath(kCopyPrefix + name);
+}
+
+// The inspected archive open, its databases as files, migrated to this app's schema.
+bool Backup::unpacked(QFile *file, BackupArchive *archive)
+{
+    file->setFileName(QDir(m_work).filePath(kInspected));
+    if (!file->open(QIODevice::ReadOnly) || !archive->open(file)) {
+        return setError(tr("The backup could not be read: %1").arg(file->isOpen() ? archive->errorString() : file->errorString()));
+    }
+    if (!archive->unpack(copyPath(BackupArchive::kPractice), copyPath(BackupArchive::kCourses))) {
+        return setError(tr("The backup could not be read: %1").arg(archive->errorString()));
+    }
+    return true;
+}
+
+// All or nothing, in the order that allows it:
+//   1  the media files the backup's rows name and this device lacks (a damaged or unwritable one
+//      stops here; what came so far goes again)
+//   2  all rows of both databases in one transaction
+//   3  the files only the old rows named; after the commit, so a failure never loses one (a file
+//      that stays is unused, no harm)
+bool Backup::swapIn()
+{
+    QFile file;
+    BackupArchive archive;
+    if (!unpacked(&file, &archive)) {
+        return false;
+    }
+    const QString practice = copyPath(BackupArchive::kPractice);
+    const QString courses = copyPath(BackupArchive::kCourses);
+
+    // Both stores open and migrated; the preview says what each side's rows name.
+    TableMerge::Result fromLog;
+    TableMerge::Result fromBook;
+    {
+        PracticeLog log;
+        CourseBook book;
+        if (!log.open(m_practice) || !log.merge(practice, TableMerge::Mode::Preview, &fromLog)) {
+            return setError(tr("The backup could not be restored: %1").arg(log.errorString()));
+        }
+        if (!book.open(m_courses) || !book.merge(courses, TableMerge::Mode::Preview, &fromBook)) {
+            return setError(tr("The backup could not be restored: %1").arg(book.errorString()));
+        }
+    }
+    const QSet<QString> named = nameSet(fromLog.theirMedia + fromBook.theirMedia);
+
+    QStringList adopted;
+    QString why;
+    for (const QString &name : archive.media()) {
+        if (!named.contains(name) || m_media.has(name)) {
+            continue;
+        }
+        QByteArray data;
+        if (!archive.readMedia(name, &data)) {
+            why = archive.errorString();
+            break;
+        }
+        if (!m_media.adopt(name, data)) {
+            why = tr("%1 could not be saved").arg(name);
+            break;
+        }
+        adopted << name;
+    }
+
+    const bool ok = why.isEmpty()
+                    && TableMerge::replace({{m_practice, practice, PracticeLog::tables()},
+                                            {m_courses, courses, CourseBook::tables()}}, &why);
+    if (!ok) {
+        for (const QString &name : std::as_const(adopted)) {
+            m_media.remove(name);
+        }
+        return setError(tr("The backup could not be restored: %1").arg(why));
+    }
+
+    for (const QString &name : fromLog.mine + fromBook.mine) {
+        if (!named.contains(name)) {
+            m_media.remove(name);
+        }
+    }
+    return setError({});
+}
+
 // Both databases of the archive as files, migrated to this app's schema, then merged into the
 // device's (Preview rolls back), then the media files the merged rows name.
 bool Backup::merge(Step step, QVariantMap *summary)
 {
-    QFile file(QDir(m_work).filePath(kInspected));
+    QFile file;
     BackupArchive archive;
-    if (!file.open(QIODevice::ReadOnly) || !archive.open(&file)) {
-        return setError(tr("The backup could not be read: %1").arg(file.isOpen() ? archive.errorString() : file.errorString()));
+    if (!unpacked(&file, &archive)) {
+        return false;
     }
-    const QString practice = QDir(m_work).filePath(kCopyPrefix + BackupArchive::kPractice);
-    const QString courses = QDir(m_work).filePath(kCopyPrefix + BackupArchive::kCourses);
-    if (!archive.unpack(practice, courses)) {
-        return setError(tr("The backup could not be read: %1").arg(archive.errorString()));
-    }
+    const QString practice = copyPath(BackupArchive::kPractice);
+    const QString courses = copyPath(BackupArchive::kCourses);
 
     const TableMerge::Mode mode = step == Step::Apply ? TableMerge::Mode::Apply : TableMerge::Mode::Preview;
     PracticeLog log;
@@ -220,6 +325,23 @@ bool Backup::merge(Step step, QVariantMap *summary)
         }
     }
 
+    // The files a merge deletes here (Preview; Apply has removed them above).
+    int mediaRemoved = 0;
+    for (const QString &name : fromLog.orphans + fromBook.orphans) {
+        mediaRemoved += m_media.has(name) ? 1 : 0;
+    }
+
+    // For replace(): the media the backup's rows name and it holds, and those that would go here.
+    const QSet<QString> theirs = nameSet(fromLog.theirMedia + fromBook.theirMedia);
+    int mediaHolds = 0;
+    for (const QString &name : archive.media()) {
+        mediaHolds += theirs.contains(name) ? 1 : 0;
+    }
+    int mediaLost = 0;
+    for (const QString &name : fromLog.mine + fromBook.mine) {
+        mediaLost += !theirs.contains(name) && m_media.has(name) ? 1 : 0;
+    }
+
     const BackupArchive::Manifest m = archive.manifest();
     *summary = {{QStringLiteral("created"), m.created},
                 {QStringLiteral("device"), m.device},
@@ -232,6 +354,9 @@ bool Backup::merge(Step step, QVariantMap *summary)
                 {QStringLiteral("grades"), counts(fromBook, QStringLiteral("grades"))},
                 {QStringLiteral("starts"), counts(fromBook, QStringLiteral("starts"))},
                 {QStringLiteral("links"), counts(fromBook, QStringLiteral("entry_tags"))},
-                {QStringLiteral("media"), media}};
+                {QStringLiteral("media"), media},
+                {QStringLiteral("mediaRemoved"), mediaRemoved},
+                {QStringLiteral("mediaHolds"), mediaHolds},
+                {QStringLiteral("mediaLost"), mediaLost}};
     return setError({});
 }
