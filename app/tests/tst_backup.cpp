@@ -505,6 +505,50 @@ private slots:
         backup.discard();
     }
 
+    // A newer state taken of a row the clean-up then deletes: gone, not changed. G1 is newer in the
+    // backup, but this device also holds the same grade as G2, newer still.
+    void mergeCountsGrade()
+    {
+        const Device a = device(u"grad-a"_s);
+        const Device b = device(u"grad-b"_s);
+        CourseBook::Grade g{{}, u"aikido"_s, u"k5"_s, QDate(2026, 7, 4), u"Mainz"_s};
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QVERIFY(!book.addGrade(g, at(8), u"a"_s).uid.isEmpty());
+        }
+        QVERIFY(QFile::copy(a.courses, b.courses));
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            g.place = u"Bonn"_s;
+            QVERIFY(!book.addGrade(g, at(9), u"b"_s).uid.isEmpty());
+        }
+        {
+            // The app keeps one row per grade: the second comes in by hand, as from an older merge.
+            QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"grad"_s);
+            db.setDatabaseName(a.courses);
+            QVERIFY(db.open());
+            QSqlQuery q(db);
+            q.prepare(u"INSERT INTO grades (uid, discipline, grade, day, place, created, changed, device, deleted)"
+                      " VALUES ('g2', 'aikido', 'k5', '2026-07-05', 'Trier', ?, ?, 'a', 0)"_s);
+            q.addBindValue(at(10).toMSecsSinceEpoch());
+            q.addBindValue(at(10).toMSecsSinceEpoch());
+            QVERIFY(q.exec());
+            q.finish();
+            db.close();
+        }
+        QSqlDatabase::removeDatabase(u"grad"_s);
+
+        const QString zip = saved(b, u"grad.zip"_s);
+        Backup backup(a.practice, a.courses, a.media, a.work);
+        const QVariantMap grades = backup.inspect(QUrl::fromLocalFile(zip)).value(u"grades"_s).toMap();
+        QCOMPARE(grades.value(u"changed"_s).toInt(), 1);
+        QCOMPARE(grades.value(u"removed"_s).toInt(), 1);
+        QCOMPARE(grades.value(u"edited"_s).toInt(), 0);
+        backup.discard();
+    }
+
     // A photo whose note was deleted after the backup does not come back from it.
     void deletedMediaStays()
     {

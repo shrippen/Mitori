@@ -368,46 +368,55 @@ Kirigami.ScrollablePage {
         onAccepted: page.done = Backup.restore() ? qsTr("Backup merged.") : ""
         onRejected: Backup.discard()
 
-        LookScrollView {
-            id: mergeScroll
-
-            objectName: "mergeScroll"
+        // The second choice beside the first, right above the buttons: the text scrolls, the choices never
+        // do. Not in the footer: three buttons do not fit one row on a phone.
+        ColumnLayout {
             anchors.fill: parent
-            contentWidth: availableWidth
-            rightPadding: Look.unit(8)      // the bar stands beside the text
-            clip: true
+            spacing: Look.unit(8)
 
-            ColumnLayout {
-                width: mergeScroll.availableWidth
-                spacing: Look.unit(16)
+            LookScrollView {
+                id: mergeScroll
 
-                LookLabel {
-                    id: mergeText
+                objectName: "mergeScroll"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                contentWidth: availableWidth
+                rightPadding: Look.unit(8)      // the bar stands beside the text
+                clip: true
 
-                    objectName: "mergeText"
-                    Layout.fillWidth: true
-                    wrapMode: Text.Wrap
-                    // Closed it measures nothing: a window turning (full screen) made a page still on its way
-                    // out wrap this text anew, a binding loop in the dialog's height.
-                    text: !mergeDialog.visible ? "" : (page.summary.created ? qsTr("Backup of %1.").arg(page.summary.created.toLocaleString(Qt.locale(), Locale.ShortFormat)) + "\n\n" : "")
-                          + qsTr("It holds: %1").arg(page.amounts(page.summary, "holds", page.summary.mediaHolds).join(", ") || qsTr("nothing"))
-                          + "\n\n" + qsTr("Merging: ratings and exam rounds are only added. For everything else the newer state wins: a newer text replaces this device's, a newer deletion deletes here too, with the photo. What the backup lacks stays, except: an entry in a notebook the backup deleted later goes with it; two notebooks of one course become one, the entries move, the younger one's details go; of one grade entered twice the newer stays.")
-                          + "\n\n"
-                          + page.changes(page.summary)
-                }
-                LookLabel {
-                    Layout.fillWidth: true
-                    wrapMode: Text.Wrap
-                    text: !mergeDialog.visible ? "" : qsTr("Replacing deletes what is on this device and puts the backup's state in its place. It asks once more.")
-                }
-                LookButton {
-                    objectName: "replaceInstead"
-                    icon.name: "edit-delete"
-                    text: qsTr("Replace instead …")
-                    onClicked: {
-                        mergeDialog.close()
-                        replaceDialog.open()
+                ColumnLayout {
+                    width: mergeScroll.availableWidth
+                    spacing: Look.unit(16)
+
+                    LookLabel {
+                        id: mergeText
+
+                        objectName: "mergeText"
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        // Closed it measures nothing: a window turning (full screen) made a page still on its way
+                        // out wrap this text anew, a binding loop in the dialog's height.
+                        text: !mergeDialog.visible ? "" : (page.summary.created ? qsTr("Backup of %1.").arg(page.summary.created.toLocaleString(Qt.locale(), Locale.ShortFormat)) + "\n\n" : "")
+                              + qsTr("It holds: %1").arg(page.amounts(page.summary, "holds", page.summary.mediaHolds).join(", ") || qsTr("nothing"))
+                              + "\n\n" + qsTr("Merging: ratings and exam rounds are only added. For everything else the newer state wins: a newer text replaces this device's, a newer deletion deletes here too, with the photo. What the backup lacks stays, except: an entry in a notebook the backup deleted later goes with it; two notebooks of one course become one, the entries move, the younger one's details go; of one grade entered twice the newer stays.")
+                              + "\n\n"
+                              + page.changes(page.summary)
                     }
+                    LookLabel {
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        text: !mergeDialog.visible ? "" : qsTr("Replacing deletes what is on this device and puts the backup's state in its place. It asks once more.")
+                    }
+                }
+            }
+            LookButton {
+                objectName: "replaceInstead"
+                Layout.alignment: Qt.AlignRight
+                icon.name: "edit-delete"
+                text: qsTr("Replace …")
+                onClicked: {
+                    mergeDialog.close()
+                    replaceDialog.open()
                 }
             }
         }

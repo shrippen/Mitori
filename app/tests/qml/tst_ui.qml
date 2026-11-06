@@ -793,6 +793,42 @@ TestCase {
         window.pageStack.pop()
     }
 
+    // Mitori asks which: both choices in view without scrolling, on small phones and sideways, with
+    // the longest preview; only the text scrolls.
+    function test_3d_backup_choice_sizes() {
+        const page = push("SettingsPage")
+        const url = "file://" + uiShotsDir + "/sicherung-groessen.zip"
+        verify(Backup.save(url), Backup.errorString)
+        page.inspect(url)
+        const dialog = findChild(page, "mergeBackup")
+        tryVerify(() => dialog.opened)
+        const row = { "added": 3, "edited": 2, "removed": 1, "holds": 9 }
+        page.summary = { "created": page.summary.created, "ratings": row, "notes": row, "rounds": row, "notebooks": row,
+                         "entries": row, "grades": row, "starts": row, "media": 2, "mediaRemoved": 1, "mediaHolds": 4 }
+
+        const merge = dialog.standardButton(QQC2.Dialog.Ok)
+        const replace = findChild(page, "replaceInstead")
+        const scroll = findChild(page, "mergeScroll")
+        const inside = () => {
+            const at = replace.mapToItem(dialog.contentItem, 0, 0)
+            return replace.visible && at.x >= 0 && at.y >= 0 && at.x + replace.width <= dialog.contentItem.width
+                   && at.y + replace.height <= dialog.contentItem.height
+        }
+        for (const [width, height] of [[360, 640], [640, 360], [320, 568]]) {
+            window.width = width
+            window.height = height
+            tryVerify(() => dialog.width <= width && dialog.height <= height && inside(), 2000,
+                      width + "x" + height + ": dialog " + dialog.height + ", button at "
+                      + replace.mapToItem(dialog.contentItem, 0, 0).y + " in " + dialog.contentItem.height)
+            verify(merge.visible && merge.width > 0)
+            tryVerify(() => scroll.contentItem.contentHeight > scroll.height, 2000, "the text scrolls")
+            shot("4c-backup-choice-" + width + "x" + height, true)
+        }
+        dialog.reject()
+        tryVerify(() => !dialog.visible)
+        window.pageStack.pop()
+    }
+
     // The player's switches: the screen stays on while a video plays (and the switch on);
     // sound off mutes also at full tempo; both switches stay for the next start. "Noted today" lists
     // the day's notes on the technique.
