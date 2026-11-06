@@ -2,8 +2,9 @@ name: Release
 
 # A tag v* reaches GitHub through the Gitea push mirror; the Gitea release (notes only) is made
 # there with tea. Here the GitHub release is created with the same notes (scripts/release-notes.sh)
-# and the files are built and attached: the signed APK, the AppImage and the Flatpak bundle
-# (agent.md, "Release rule"). Each package is checked for demo code first (scripts/check-no-demo.sh).
+# and the files are built and attached: the signed APK, the AppImage and the Flatpak bundles for
+# x86_64 and aarch64 (agent.md, "Release rule"). Each package is checked for demo code first
+# (scripts/check-no-demo.sh).
 #
 # Run by hand (workflow_dispatch):
 #   - without `tag`: builds everything as a test, no release (the APK is signed and checked
@@ -167,7 +168,15 @@ jobs:
 
   flatpak:
     needs: release
-    runs-on: ubuntu-latest
+    # Built natively on each architecture; aarch64 is for Plasma Mobile devices.
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
@@ -186,9 +195,9 @@ jobs:
           MITORI_FLATPAK_WORK: ${{ runner.temp }}/flatpak
         run: |
           scripts/build-flatpak.sh "${{ needs.release.outputs.version }}"
-          mkdir -p assets && mv dist/flatpak/*.flatpak assets/
+          mkdir -p assets && mv dist/flatpak/*-${{ matrix.arch }}.flatpak assets/
 
       - uses: ./.github/actions/release-asset
         with:
           tag: ${{ needs.release.outputs.tag }}
-          name: flatpak
+          name: flatpak-${{ matrix.arch }}
