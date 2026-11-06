@@ -2922,12 +2922,13 @@ TestCase {
     function test_2u_c_full_screen_state_follows(data) {
         const page = tabletProgramme(clipFolder("long"))
         chapterLoaded(page)
-        const place = page.player.from + 5000
+        const place = page.player.from + 100000
         page.player.seek(place)
         tryVerify(() => Math.abs(page.player.position - place) < 500, 5000)
         page.openBig()
         const big = window.pageStack.currentItem
-        tryVerify(() => big.big && big.playing && big.position > place, 10000, "full screen goes on at the small player's place")
+        tryVerify(() => big.big && big.playing, 10000)
+        tryVerify(() => Math.abs(big.position - place) < 3000, 3000, big.position + ", small player at " + place)
         if (!data.playing) {
             big.togglePlay()
             tryVerify(() => !big.playing)
@@ -2949,6 +2950,16 @@ TestCase {
         remakePane(page)
         tryVerify(() => page.player.duration > 0, 10000)
         check()
+    }
+
+    // Left before its file loaded: it was going to play, so the small player plays.
+    function test_2u_c_full_screen_left_while_loading() {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        page.openBig()
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem === page)
+        tryVerify(() => page.player.playing, 5000, "plays on")
     }
 
     // Saved while the file loads: the place a pane still has to go to, not the file's start.
@@ -2977,7 +2988,10 @@ TestCase {
     }
 
     // A file changed while no pane stood: the pane waits at the chapter's start, as an open player.
-    function test_2u_c_new_file_waits() {
+    function test_2u_c_new_file_waits_data() {
+        return [ { tag: "from the pane", big: false }, { tag: "from full screen", big: true } ]
+    }
+    function test_2u_c_new_file_waits(data) {
         const page = tabletProgramme(clipFolder("long"))
         chapterLoaded(page)
         rowPlays(page, 1)
@@ -2985,6 +2999,9 @@ TestCase {
         window.height = 1280
         tryVerify(() => !page.split)
         Videos.folder = clipFolder("long2")
+        if (data.big) {
+            page.bigResume = { position: 210000, rate: 1, looping: true, playing: true }
+        }
         window.width = 1280
         window.height = 800
         tryVerify(() => page.split && page.player && page.player.duration > 0, 10000)
@@ -2998,6 +3015,15 @@ TestCase {
         page.player.looping = false
         remakePane(page)
         compare(page.player.looping, false)
+
+        // Another technique chosen while no pane stood: as in a live pane.
+        window.width = 700
+        tryVerify(() => !page.split)
+        page.grade = "k4"
+        window.width = 1280
+        tryVerify(() => page.split && page.player)
+        compare(page.player.video, "aikido/k4")
+        compare(page.player.looping, false, "another technique")
     }
 
     // A save while another technique's file loads is no file changed under it either.

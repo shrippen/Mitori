@@ -123,14 +123,17 @@ Item {
         if (!current.id || current.id === shownEntry) {
             return
         }
+        // On creating the page there was no technique before: startAt is the caller's (full screen).
+        if (shownEntry !== "") {
+            startAt = -1
+        }
         shownEntry = current.id
         shown(current.id)
         player.playbackRate = normalRate
 
-        // What waited for a tap, was loaded or was its place belonged to the technique before.
+        // What waited for a tap or was loaded belonged to the technique before.
         holdStart = false
         loadedSource = ""
-        startAt = -1
 
         // After the bindings of the new entry (from, to): onCurrentChanged runs before them.
         Qt.callLater(page.restartLoaded)

@@ -96,7 +96,7 @@ Kirigami.Page {
             return
         }
         if (bigOnly && big) {
-            bigEnded(view.position, view.rate, view.looping, view.playing)
+            bigEnded(view.position, view.rate, view.looping, view.willPlay())
         }
         big = false
         view.pause()
@@ -180,7 +180,7 @@ Kirigami.Page {
         onBigRequested: page.big = true
         onBigLeft: {
             if (page.bigOnly) {
-                page.bigEnded(view.position, view.rate, view.looping, view.playing)
+                page.bigEnded(view.position, view.rate, view.looping, view.willPlay())
                 page.leave()
                 return
             }

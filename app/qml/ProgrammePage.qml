@@ -559,7 +559,7 @@ Kirigami.Page {
             page.playBeside(entry)
             return
         }
-        page.paneRest = { playing: false }   // a new player page starts at 1×, and so does the pane after it; it stands
+        page.paneRest = { playing: false, looping: true }   // a new player page starts anew, and so does the pane after it; it stands
         page.cameFromPlayer = true
         const playlist = page.rows.filter(r => page.playable(r))
         // The window's page stack returns the new page (the attached PageStack.push returns nothing).
@@ -583,8 +583,9 @@ Kirigami.Page {
     }
 
     // A pane made anew (the tablet turned, the window narrowed, back from the grade card): playing
-    // plays on, standing stands. The same technique keeps its tempo, loop and place; another one
-    // chosen meanwhile starts at 1×. A new file of it waits at the chapter's start, as in an open player.
+    // plays on, standing stands, the loop stays. The same technique keeps its tempo and place; another
+    // one chosen meanwhile starts at 1×. A new file of it waits at the chapter's start, as in an open
+    // player, also when full screen left a place in the old one.
     function restorePane() {
         const now = page.player
         const rest = page.paneRest
@@ -594,16 +595,17 @@ Kirigami.Page {
         }
 
         now.holdStart = !rest.playing
+        now.looping = rest.looping
         if (rest.id !== now.current.id) {
             return
         }
 
         now.setSpeed(rest.rate)
-        now.looping = rest.looping
         if (rest.source === now.source.toString()) {
             now.startAt = rest.position
         } else {
             now.holdStart = true
+            page.bigResume = null
         }
     }
 
