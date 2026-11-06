@@ -35,7 +35,6 @@ Kirigami.Page {
     property alias looping: view.looping
     function setSpeed(rate) { view.setSpeed(rate) }
     function seek(ms) { view.seek(ms) }
-    readonly property alias trainingDone: view.trainingDone
     readonly property alias practisedCount: view.practisedCount
     readonly property alias hasVideo: view.hasVideo
     function go(direction) { view.go(direction) }
@@ -117,6 +116,29 @@ Kirigami.Page {
         stack.pop(stack.currentItem)
     }
 
+    // The last rating of a training: its end takes this page's place, so that Back leads to where
+    // the training began. Once: a second tap on the rating still reaches the page going.
+    property bool ended: false
+    function endTraining() {
+        if (ended) {
+            return
+        }
+        ended = true
+
+        const stack = page.Kirigami.PageStack.pageStack
+        const end = Qt.resolvedUrl("TrainingEndPage.qml")
+        const count = view.practisedCount
+
+        // Off this page without a slide: a page pushed during a running slide keeps the platform's
+        // head under Kante, after a slide of its own the style's.
+        const column = stack.columnView
+        const duration = column.scrollDuration
+        column.scrollDuration = 0
+        leave()
+        column.scrollDuration = duration
+        stack.push(end, { count: count })
+    }
+
     // Keys reach the view (Space, arrows, the transport bar's keys) as soon as the page opens.
     Keys.forwardTo: [view]
 
@@ -177,6 +199,7 @@ Kirigami.Page {
         onShown: id => page.shown(id)
         big: page.big
         onBackRequested: page.leave()
+        onTrainingEnded: page.endTraining()
         onBigRequested: page.big = true
         onBigLeft: {
             if (page.bigOnly) {

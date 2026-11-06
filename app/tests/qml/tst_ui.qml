@@ -1262,16 +1262,12 @@ TestCase {
         if (player.playlist.length > 2) {
             compare(player.index, 2, "rating moves on")
         }
-        // The last one (and every one before it) practised: done, with a way back.
-        for (let i = 1; i < player.playlist.length; ++i) {
-            player.index = i
-            if (!Practice.ratedToday(player.current.id)) {
-                Practice.rate(player.current.id, 2)
-            }
+        // The last one rated: the player goes, its end stands above today's page.
+        while (window.pageStack.currentItem === player) {
+            findPicker(player, player.current.id).picked(2)
         }
-        verify(player.trainingDone)
-        verify(findChild(player, "trainingDone").visible)
-        window.pageStack.pop()
+        verify(window.pageStack.currentItem.count > 0)
+        window.pageStack.currentItem.close()
         tryVerify(() => window.pageStack.currentItem === today)
         window.pageStack.pop()
     }
@@ -1331,7 +1327,7 @@ TestCase {
     }
 
     // Training without videos (CI): every due technique comes in, shown as a card, with the
-    // playlist (✓, tap jumps), the position and an end hint with the count.
+    // playlist (✓, tap jumps), the position and an end page with the count.
     function test_7c_training_list() {
         Programme.discipline = "daitoryu"
         PracticeGrade.setGrade("daitoryu", "k4")
@@ -1362,21 +1358,223 @@ TestCase {
         verify(place.text.endsWith("2 / " + player.playlist.length), place.text)
         shot("7c-training-list")
 
-        // Rating ticks the row; all rated: the end hint counts them.
+        // Rating ticks the row; all rated: the end counts them.
         const before = player.practisedCount
+        const practised = player.playlist.length
         findPicker(player, player.current.id).picked(3)
         verify(rows[1].done)
         compare(player.practisedCount, before + 1)
-        for (let i = 0; i < player.playlist.length; ++i) {
-            if (!Practice.ratedToday(player.playlist[i].id)) {
-                Practice.rate(player.playlist[i].id, 2)
-            }
+        while (window.pageStack.currentItem === player) {
+            findPicker(player, player.current.id).picked(2)
         }
-        verify(player.trainingDone)
-        verify(findChild(player, "trainingDone").text.indexOf(String(player.playlist.length)) >= 0)
-        window.pageStack.pop()
+        const end = window.pageStack.currentItem
+        compare(end.count, practised)
+        compare(findChild(end, "practisedCount").value, String(practised))
+        end.close()
         tryVerify(() => window.pageStack.currentItem === today)
         window.pageStack.pop()
+    }
+
+    // Up to `length` techniques not rated today, new for each case (the log stays for the run).
+    function freshRows(length) {
+        return Programme.entries("aikido", "k1").filter(r => r.kind === "entry" && !Practice.ratedToday(r.id)).slice(0, length)
+    }
+
+    // Today's page with a training above it, as startTraining leaves them.
+    function trainingOver(rows) {
+        const today = push("TodayPage")
+        const player = push("PlayerPage", { playlist: rows, index: 0, training: true })
+        tryVerify(() => window.pageStack.currentItem === player)
+        return { today: today, player: player }
+    }
+
+    function hasPlayer() {
+        return window.pageStack.items.some(p => p.playlist !== undefined)
+    }
+
+    // The last rating leaves the player for the end page, on a phone and a tablet (the list beside
+    // the small player); each way back leads to today's page, no player left behind.
+    function test_7d_training_end_data() {
+        const button = () => findChild(window.pageStack.currentItem, "backToToday").clicked()
+        return [
+            { tag: "phone, button", width: 420, height: 800, back: button },
+            { tag: "phone, Esc", width: 420, height: 800, back: () => keyClick(Qt.Key_Escape) },
+            { tag: "phone, Back key", width: 420, height: 800, back: () => window.pageStack.goBack() },
+            { tag: "phone, the head's Back", width: 420, height: 800, back: () => window.back() },
+            { tag: "360 px, button", width: 360, height: 640, back: button },
+            { tag: "tablet sideways, Esc", width: 1280, height: 800, videos: true, back: () => keyClick(Qt.Key_Escape) },
+            { tag: "tablet sideways, Back key", width: 1280, height: 800, videos: true, back: () => window.pageStack.goBack() },
+            { tag: "tablet upright, button", width: 800, height: 1280, videos: true, back: button }
+        ]
+    }
+    function test_7d_training_end(data) {
+        failOnWarning(/ReferenceError|TypeError/)
+        if (data.videos) {
+            realFolder = Videos.folder
+            Videos.folder = standInVideos
+        }
+        window.width = data.width
+        window.height = data.height
+        wait(200)
+
+        const rows = freshRows(2)
+        const pages = trainingOver(rows)
+        findPicker(pages.player, rows[0].id).picked(3)
+        compare(window.pageStack.currentItem, pages.player, "one is open")
+        compare(pages.player.index, 1)
+        findPicker(pages.player, rows[1].id).picked(2)
+
+        // Not the player any more, and nothing of it under the end.
+        tryVerify(() => window.pageStack.currentItem.count === 2)
+        const end = window.pageStack.currentItem
+        compare(window.pageStack.depth, pages.today.Kirigami.ColumnView.index + 2)
+        compare(end.Kirigami.ColumnView.index, pages.today.Kirigami.ColumnView.index + 1)
+        verify(!hasPlayer(), "the player is gone")
+        compare(findChild(end, "practisedCount").value, "2")
+        tryVerify(() => Math.abs(end.mapToItem(window.contentItem, 0, 0).x) < 1, 3000)
+        wait(300)
+        compare(JSON.stringify(overflowing(end, data.width)), "[]")
+        shot("7d-training-end-" + data.width)
+
+        data.back()
+        tryVerify(() => window.pageStack.currentItem === pages.today, 2000)
+        tryVerify(() => window.pageStack.depth === pages.today.Kirigami.ColumnView.index + 1, 2000, "nothing above today")
+        verify(!hasPlayer())
+    }
+
+    // The end page's head has the style's ground, as any page that slid in (it stood in the
+    // platform's colours). Shinki's head is the window's.
+    function test_7d_training_end_head_data() {
+        return [{ tag: "upright", width: 420, height: 800 }, { tag: "sideways", width: 800, height: 420 }]
+    }
+    function test_7d_training_end_head(data) {
+        if (uiShinki) {
+            skip("Shinki's head is the window's")
+        }
+        window.width = data.width
+        window.height = data.height
+        wait(200)
+        const rows = freshRows(1)
+        const pages = trainingOver(rows)
+        wait(1500)      // at rest, as after practising: no slide still running
+        findPicker(pages.player, rows[0].id).picked(3)
+        tryVerify(() => window.pageStack.currentItem.count === 1)
+        const page = window.pageStack.currentItem
+        const ground = () => page.Kirigami.ColumnView.globalHeader.item.background.color
+        tryVerify(() => Qt.colorEqual(ground(), KanteStyle.dialogColor), 2000,
+                  "head " + ground() + ", expected " + KanteStyle.dialogColor)
+    }
+
+    // Full screen has no rating; should one come, the window comes back as it was.
+    function test_7d_training_end_big() {
+        realFolder = Videos.folder
+        Videos.folder = standInVideos
+        const before = window.visibility
+        const rows = freshRows(1)
+        const pages = trainingOver(rows)
+        pages.player.big = true
+        compare(window.visibility, Window.FullScreen)
+        verify(Practice.rate(rows[0].id, 2))
+        findChild(pages.player, "ratingRow").rated(2)
+        tryVerify(() => window.pageStack.currentItem.count === 1)
+        compare(window.visibility, before)
+        verify(!hasPlayer())
+    }
+
+    // A second tap on the last rating: one end page, not two.
+    function test_7d_training_end_once() {
+        const rows = freshRows(1)
+        const pages = trainingOver(rows)
+        const row = findChild(pages.player, "ratingRow")
+        verify(Practice.rate(rows[0].id, 2))
+        row.rated(2)
+        row.rated(2)
+        tryVerify(() => window.pageStack.currentItem.count === 1)
+        compare(window.pageStack.depth, pages.today.Kirigami.ColumnView.index + 2)
+        window.pageStack.currentItem.close()
+        tryVerify(() => window.pageStack.currentItem === pages.today)
+    }
+
+    // Rating one already done again, others open: on to the open one, no end. With all done before
+    // the player opened (a sync, midnight): it plays, and the next rating ends it, no loop.
+    function test_7d_training_rated_again() {
+        const rows = freshRows(2)
+        const pages = trainingOver(rows)
+        findPicker(pages.player, rows[0].id).picked(3)
+        pages.player.index = 0
+        findPicker(pages.player, rows[0].id).picked(4)
+        compare(window.pageStack.currentItem, pages.player)
+        compare(pages.player.index, 1)
+        findPicker(pages.player, rows[1].id).picked(3)
+        tryVerify(() => window.pageStack.currentItem.count === 2)
+        window.pageStack.currentItem.close()
+        tryVerify(() => window.pageStack.currentItem === pages.today)
+
+        const again = push("PlayerPage", { playlist: rows, index: 1, training: true })
+        tryVerify(() => window.pageStack.currentItem === again)
+        compare(again.index, 1, "it stays where it was opened")
+        findPicker(again, rows[1].id).picked(4)
+        tryVerify(() => window.pageStack.currentItem.count === 2)
+        window.pageStack.currentItem.close()
+        tryVerify(() => window.pageStack.currentItem === pages.today)
+    }
+
+    // A training done today: not due any more, so today's page offers none and opens nothing.
+    function test_7d_training_done_today() {
+        const grade = PracticeGrade.grade("daitoryu")
+        Programme.discipline = "daitoryu"
+        PracticeGrade.setGrade("daitoryu", "k3")
+        const today = push("TodayPage")
+        verify(today.due.length > 0, "new techniques are due")
+        const button = findChild(today, "startTraining")
+        verify(button.visible)
+        button.clicked()
+        tryVerify(() => window.pageStack.currentItem.training === true)
+        const player = window.pageStack.currentItem
+        while (window.pageStack.currentItem === player) {
+            findPicker(player, player.current.id).picked(3)
+        }
+        window.pageStack.currentItem.close()
+        tryVerify(() => window.pageStack.currentItem === today)
+        const depth = today.Kirigami.ColumnView.index + 1
+        tryVerify(() => window.pageStack.depth === depth)
+
+        compare(today.due.length, 0)
+        verify(!button.visible)
+        today.startTraining()
+        wait(50)
+        compare(window.pageStack.currentItem, today)
+        compare(window.pageStack.depth, depth)
+        PracticeGrade.setGrade("daitoryu", grade)
+    }
+
+    // A clip that plays: the last rating stops it, also after the window turned (Kirigami's pop()
+    // then keeps a page, PlayerPage.leave). Needs MITORI_VIDEOS (none in the repository).
+    function test_7d_training_end_stops_data() {
+        return [{ tag: "upright", turned: false }, { tag: "turned sideways", turned: true }]
+    }
+    function test_7d_training_end_stops(data) {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video && Videos.available(r.video.video)
+                                                                   && !Practice.ratedToday(r.id)).slice(0, 1)
+        if (rows.length === 0) {
+            skip("no video (set MITORI_VIDEOS)")
+        }
+        const pages = trainingOver(rows)
+        tryVerify(() => pages.player.playing, 10000)
+        if (data.turned) {
+            window.width = 800
+            window.height = 420
+            tryVerify(() => pages.player.split)
+            wait(200)
+        }
+
+        // The player's last word: it goes at once, so ask it as it goes.
+        let stopped = false
+        pages.player.playingChanged.connect(() => stopped = true)
+        findPicker(pages.player, rows[0].id).picked(3)
+        tryVerify(() => window.pageStack.currentItem.count === 1)
+        verify(stopped, "it stopped playing")
+        verify(!hasPlayer())
     }
 
     // Notes: add one for today from the field, change it and delete it (press and hold).
@@ -2624,7 +2822,7 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // The Kamae player: its 26 positions come last, so "Done" stays where it is for a technique
+    // The Kamae player: its 26 positions come last, so the rating stays where it is for a technique
     // without positions (in view without scrolling), and a large tablet keeps the picture as large.
     // Sideways there is only the rail (test_4_player).
     function test_9y_kamae_player() {
@@ -2634,15 +2832,12 @@ TestCase {
         if (!kamae.video || !Videos.available(kamae.video.video)) {
             skip("no video for the Kamae exercise (set MITORI_VIDEOS)")
         }
-        verify(Practice.rate(kamae.id, 2))      // rated today: the training is done at once
-        verify(Practice.rate(suburi.id, 2))
         // [width, height, training, the item that must be in view]
-        for (const c of [[420, 800, true, "trainingDone"]]) {
+        for (const c of [[420, 800, true, "ratingRow"]]) {
             window.width = c[0]
             window.height = c[1]
             const at = entry => {
                 const page = push("PlayerPage", { playlist: [entry], index: 0, training: c[2] })
-                tryVerify(() => page.trainingDone === c[2])
                 wait(500)
                 const view = findChild(page, "controlsView")
                 compare(view.contentY, 0)
@@ -2658,7 +2853,7 @@ TestCase {
             compare(k.steps, 26)
             compare(s.steps, 0)
             verify(Math.abs(k.y - s.y) < 1, c[3] + " at " + c + ": " + k.y + " with the positions, " + s.y + " without")
-            // Done and Back stand first: in view upright and sideways.
+            // The rating stands before them: in view upright.
             verify(k.bottom <= k.height, c[3] + " in view at " + c + " (" + k.bottom + " of " + k.height + ")")
         }
         // A large tablet beside the list: the picture as large as for a technique without positions.
@@ -4028,6 +4223,7 @@ TestCase {
                                      ["SettingsPage", {}], ["VideosPage", {}], ["AppearancePage", {}], ["ExamPage", {}],
                                      ["ExamRoundPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["ExamEndPage", { points: round, discipline: "aikido", grade: "k5" }],
+                                     ["TrainingEndPage", { count: 12 }],
                                      ["NotesPage", { entry: rows[0] }], ["WelcomePage", {}],
                                      ["PlayerPage", { playlist: rows, index: 0 }]]) {
             const page = push(file, props)
