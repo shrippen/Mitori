@@ -2,6 +2,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUrl>
@@ -16,6 +17,7 @@
 #include "appearance.h"
 #include "courses.h"
 #include "bundleshelf.h"
+#include "catalog.h"
 #include "mediastore.h"
 #include "practice.h"
 
@@ -111,6 +113,19 @@ public slots:
             Appearance::prepare(Appearance::Style::Shinki, engine);
         }
         engine->rootContext()->setContextProperty(QStringLiteral("testMediaDir"), QStringLiteral(TEST_MEDIA_DIR));
+        // Empty files under the catalog's names: pages take them for videos, nothing plays. The
+        // tablet's page can be tested without the videos (the CI has none).
+        const QString stand = QStringLiteral(UI_DATA_DIR "/stand-in-videos");
+        const QVariantMap videos = Catalog::bundled().videos();
+        for (const QVariant &video : videos) {
+            const QString file = stand + QLatin1Char('/') + video.toMap().value(QStringLiteral("datei")).toString();
+            QDir().mkpath(QFileInfo(file).path());
+            QFile standIn(file);
+            if (!standIn.open(QIODevice::WriteOnly)) {
+                qFatal("no stand-in video: %s", qPrintable(file));
+            }
+        }
+        engine->rootContext()->setContextProperty(QStringLiteral("standInVideos"), stand);
     }
 };
 

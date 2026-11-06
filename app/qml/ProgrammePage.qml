@@ -9,7 +9,8 @@ import Mitori
 // Programme (clickdummy "Programm"): discipline, grade, and the grade's own material. A row opens
 // the technique sheet first; ▶ goes straight to the player. On a tablet in landscape
 // (app-entscheidungen.md, "Tablet quer") list and small player are one page: a row with a video
-// plays beside the list, one without opens the sheet.
+// plays beside the list, one without opens the sheet. Opened, the page is silent: the video stands
+// until the first tap.
 Kirigami.Page {
     id: page
 
@@ -51,6 +52,11 @@ Kirigami.Page {
     readonly property bool split: wide && playlist.length > 0
     // The small player beside the list (tablet), typed for the calls below.
     readonly property PlayerView player: pane.item as PlayerView
+    // The first tap came (play control, a row, full screen): chosen techniques now play at once.
+    // Here, not in the player: turning the tablet makes the pane anew.
+    property bool started: false
+    // The tempo of the technique in the small player, for a pane made anew (same reason).
+    property var paneTempo: null
 
     title: qsTr("Programme")
 
@@ -310,11 +316,18 @@ Kirigami.Page {
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
-            onLoaded: page.resumeFromBig()
+            onLoaded: {
+                page.restoreTempo()
+                page.resumeFromBig()    // second: what full screen left is newer
+            }
 
             sourceComponent: PlayerView {
+                id: paneView
+
                 compact: true
-                autoPlay: page.isCurrentPage
+                autoPlay: page.isCurrentPage && page.started
+                onPlayTapped: page.started = true
+                onRateChanged: page.paneTempo = { id: paneView.current.id, rate: paneView.rate }
                 playlist: page.playlist
                 // The chosen technique (also after the pane is made anew, turning the tablet); bound
                 // only until the player moves on by itself (next, previous).
@@ -456,7 +469,7 @@ Kirigami.Page {
 
     function open(entry) {
         if (page.split && page.playable(entry)) {
-            page.lastId = entry.id
+            page.playBeside(entry)
             return
         }
         if (entry.kind === "info") {
@@ -472,9 +485,10 @@ Kirigami.Page {
         sheet.close()
         bigResume = null
         if (page.split) {
-            page.lastId = entry.id
+            page.playBeside(entry)
             return
         }
+        page.paneTempo = null   // a new player page starts at 1×, and so does the pane after it
         page.cameFromPlayer = true
         const playlist = page.rows.filter(r => page.playable(r))
         // The window's page stack returns the new page (the attached PageStack.push returns nothing).
@@ -484,6 +498,26 @@ Kirigami.Page {
         }) as PlayerPage
         page.lastId = entry.id
         player.shown.connect(id => page.lastId = id)
+    }
+
+    // A row beside the list. As the first tap it also starts the technique standing there: its
+    // row is already chosen, so nothing else would make it play.
+    function playBeside(entry) {
+        const standing = !page.started && page.player && page.player.current.id === entry.id
+        page.started = true
+        page.lastId = entry.id
+        if (standing) {
+            page.player.togglePlay()
+        }
+    }
+
+    // A pane made anew (the tablet turned, the window narrowed) starts at 1×: the same technique
+    // keeps its tempo. The id: another technique chosen meanwhile starts at 1×.
+    function restoreTempo() {
+        const now = page.player
+        if (now && page.paneTempo && page.paneTempo.id === now.current.id) {
+            now.setSpeed(page.paneTempo.rate)
+        }
     }
 
     // The small player goes full screen where it stands; back here it stays where it was. The
@@ -505,6 +539,7 @@ Kirigami.Page {
         bigResume = null
     }
     function openBig() {
+        page.started = true     // full screen plays
         page.cameFromPlayer = true
         const small = page.player
         const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow

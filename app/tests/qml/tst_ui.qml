@@ -15,6 +15,8 @@ TestCase {
     when: windowShown
 
     property var window: null
+    // The video folder while a case uses the stand-ins.
+    property string realFolder: ""
 
     function initTestCase() {
         const component = Qt.createComponent("Mitori", "Main")
@@ -31,6 +33,10 @@ TestCase {
         window.height = 800
         while (window.pageStack.depth > 1)
             window.pageStack.pop()
+        if (realFolder !== "") {
+            Videos.folder = realFolder
+            realFolder = ""
+        }
     }
 
     function cleanupTestCase() {
@@ -673,7 +679,7 @@ TestCase {
     }
 
     // The player's switches: the screen stays on while a video plays (and the switch on);
-    // sound off mutes also at full tempo; both stay for the next start. "Noted today" lists
+    // sound off mutes also at full tempo; both switches stay for the next start. "Noted today" lists
     // the day's notes on the technique.
     function test_4t_player_switches() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
@@ -2586,6 +2592,144 @@ TestCase {
         compare(tile.days, 1)
     }
 
+    // The programme on a tablet, with stand-ins for the videos: nothing plays, but what would is
+    // the player's autoPlay.
+    function tabletProgramme() {
+        if (realFolder === "") {
+            realFolder = Videos.folder
+        }
+        Videos.folder = standInVideos
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        window.width = 1280
+        window.height = 800
+        const page = push("ProgrammePage")
+        tryVerify(() => page.split && page.player)
+        return page
+    }
+
+    // Opening the programme is silent: the first tap starts, and from then on a row plays at once.
+    function test_2t_a_stands_until_first_tap_data() {
+        return [
+            { tag: "play control", tap: page => findChild(page.player, "transportBar").playToggled(), at: 0 },
+            { tag: "picture or key", tap: page => page.player.togglePlay(), at: 0 },
+            { tag: "row", tap: page => page.open(page.playlist[1]), at: 1 },
+            { tag: "the row standing there", tap: page => page.open(page.playlist[0]), at: 0 },
+            { tag: "row's play button", tap: page => page.play(page.playlist[1]), at: 1 }
+        ]
+    }
+    function test_2t_a_stands_until_first_tap(data) {
+        const page = tabletProgramme()
+        compare(page.player.index, 0)
+        verify(!page.player.autoPlay, "opening the page starts nothing")
+
+        data.tap(page)
+        verify(page.player.autoPlay, "the first tap starts")
+        compare(page.player.current.id, page.playlist[data.at].id)
+        compare(window.pageStack.currentItem, page)
+
+        // Under another page it rests, and the started state outlives that.
+        push("SearchPage")
+        tryVerify(() => !page.player.autoPlay)
+        window.pageStack.pop()
+        tryVerify(() => page.player.autoPlay)
+        window.pageStack.pop()
+
+        // The next opening stands again.
+        const again = tabletProgramme()
+        verify(!again.player.autoPlay)
+    }
+
+    // Moving on is no first tap (only the list and the play control are); pausing takes nothing back.
+    function test_2t_b_next_stays_standing() {
+        const page = tabletProgramme()
+        page.player.go(1)
+        compare(page.player.current.id, page.playlist[1].id)
+        verify(!page.player.autoPlay)
+        page.open(page.playlist[2])
+        verify(page.player.autoPlay)
+        page.player.pause()
+        verify(page.player.autoPlay)
+    }
+
+    // Turning the tablet makes the pane anew: standing stays standing, started stays started.
+    function test_2t_c_turning_keeps_the_start() {
+        const page = tabletProgramme()
+        const turn = () => {
+            window.width = 800
+            window.height = 1280
+            tryVerify(() => !page.split)
+            window.width = 1280
+            window.height = 800
+            tryVerify(() => page.split && page.player)
+        }
+        turn()
+        verify(!page.player.autoPlay)
+        page.open(page.playlist[1])
+        turn()
+        verify(page.player.autoPlay)
+        compare(page.player.current.id, page.playlist[1].id)
+    }
+
+    // Upright no pane stands: a technique opens the player page at once.
+    function test_2t_d_upright_opens_the_player() {
+        const page = tabletProgramme()
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        page.play(page.playlist[0])
+        tryVerify(() => window.pageStack.currentItem !== page)
+        compare(window.pageStack.currentItem.current.id, page.playlist[0].id)
+    }
+
+    // With a video to play: it stands at the chapter start, and the first tap makes it run.
+    function test_2t_e_first_tap_plays() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        window.width = 1280
+        window.height = 800
+        let page = push("ProgrammePage")
+        tryVerify(() => page.player && page.player.duration > 0, 5000)
+        wait(500)
+        verify(!page.player.playing, "opening makes no sound")
+        verify(Math.abs(page.player.position - page.player.from) < 500, page.player.position)
+        findChild(page.player, "transportBar").playToggled()
+        tryVerify(() => page.player.playing, 5000)
+        page.open(page.playlist[1])
+        tryCompare(page.player.current, "id", page.playlist[1].id, 3000)
+        tryVerify(() => page.player.playing && page.player.position >= page.player.from, 5000)
+        window.pageStack.pop()
+
+        // The row standing there.
+        page = push("ProgrammePage")
+        tryVerify(() => page.player && page.player.duration > 0, 5000)
+        verify(!page.player.playing)
+        page.open(page.playlist[0])
+        tryVerify(() => page.player.playing, 5000)
+        window.pageStack.pop()
+
+        // From full screen (it plays there) into a pane made anew: it goes on.
+        page = push("ProgrammePage")
+        tryVerify(() => page.player && page.player.duration > 0, 5000)
+        page.openBig()
+        const big = window.pageStack.currentItem
+        tryVerify(() => big.big && big.playing, 5000)
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem === page)
+        tryVerify(() => page.split && page.player)
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => page.player && page.player.playing, 5000)
+        window.pageStack.pop()
+    }
+
     // Tablet in landscape: list and small player on one page; a row with a video plays beside the
     // list, the player moving on marks its row.
     function test_2t_tablet() {
@@ -2600,7 +2744,9 @@ TestCase {
         const page = push("ProgrammePage")
         tryVerify(() => page.split, 2000, "list and player side by side")
         const pane = findChild(page, "playerPane")
-        tryVerify(() => pane.item && pane.item.playing, 10000)
+        tryVerify(() => pane.item && pane.item.duration > 0, 10000)
+        page.open(rows[0])      // the first tap
+        tryVerify(() => pane.item.playing, 10000)
         compare(pane.item.compact, true)
         // A row with a video plays beside the list, the page stays.
         page.open(rows[1])
@@ -3328,8 +3474,6 @@ TestCase {
         verify(Math.abs(page.player.position - place) < 1500,
                page.player.position + " from " + page.player.from + " to " + page.player.to)
         verify(page.bigResume === null, "taken up once")
-        page.player.setSpeed(1)
-        page.player.looping = true
 
         // Another technique in between: nothing is left to take up.
         window.width = 700
@@ -3381,8 +3525,6 @@ TestCase {
         compare(after.rate, 0.25)
         compare(after.looping, false)
         verify(Math.abs(after.position - reached) < 1500, after.position + " against " + reached)
-        after.setSpeed(1)
-        after.looping = true
         window.pageStack.pop()
         window.width = width
         wait(200)
@@ -3449,19 +3591,128 @@ TestCase {
         window.pageStack.pop()
     }
 
-    function test_8y_tempo_stays_and_speaks_the_locale() {
+    // A technique starts at 1×: next, previous, a jump, a new page. Staying in it keeps the tempo.
+    function test_8y_new_technique_starts_at_1x() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
-        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        const player = push("PlayerPage", { playlist: rows, index: 1 })
+        compare(player.rate, 1)
         player.setSpeed(0.5)
         compare(player.tempoText, (0.5).toLocaleString(Qt.locale(), "f", 1) + "\u00D7")
+        player.go(1)
+        compare(player.rate, 1, "next")
+        player.setSpeed(0.5)
+        player.go(-1)
+        compare(player.rate, 1, "previous")
+        player.setSpeed(0.25)
+        player.index = 3
+        compare(player.rate, 1, "a jump in the list")
+
+        // The same technique in a playlist made anew: no new technique.
+        player.setSpeed(0.25)
+        player.playlist = rows.map(r => Object.assign({}, r))
+        compare(player.current.id, rows[3].id)
+        compare(player.rate, 0.25)
+
         window.back()
         tryVerify(() => window.pageStack.currentItem !== player)
         wait(50)
-        const again = push("PlayerPage", { playlist: rows, index: 0 })
-        compare(again.rate, 0.5, "the clickdummy keeps it")
-        again.setSpeed(1)
+        const again = push("PlayerPage", { playlist: rows, index: 3 })
+        compare(again.rate, 1, "a new page, as a new start of the app")
         window.back()
         wait(50)
+    }
+
+    // Small player and full screen hand over tempo and loop; the next technique starts at 1×.
+    function test_8y_full_screen_keeps_tempo() {
+        const page = tabletProgramme()
+        const small = page.player
+        small.looping = false
+        small.setSpeed(0.5)
+        page.openBig()
+        const big = window.pageStack.currentItem
+        tryVerify(() => big.big)
+        compare(big.rate, 0.5)
+        compare(big.looping, false)
+        big.setSpeed(0.25)
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem === page)
+        tryVerify(() => page.player !== null)
+        compare(page.player.rate, 0.25)
+        compare(page.player.looping, false)
+
+        // Full screen moved on: the small player follows, at that technique's tempo.
+        page.openBig()
+        const big2 = window.pageStack.currentItem
+        tryVerify(() => big2.big)
+        compare(big2.rate, 0.25)
+        big2.go(1)
+        compare(big2.rate, 1)
+        const moved = big2.current.id
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem === page)
+        tryVerify(() => page.player !== null)
+        compare(page.player.current.id, moved)
+        compare(page.player.rate, 1)
+
+        // A row chosen after that: 1× again.
+        page.player.setSpeed(0.5)
+        page.open(page.playlist[0])
+        compare(page.player.rate, 1)
+    }
+
+    // Turning the tablet or narrowing the window makes the pane anew: still the same technique,
+    // so the same tempo. A technique chosen, or a player page opened, in between starts at 1×.
+    function test_8y_new_pane_keeps_tempo() {
+        const page = tabletProgramme()
+        const remake = (width, height) => {
+            window.width = width
+            window.height = height
+            tryVerify(() => !page.split)
+            window.width = 1280
+            window.height = 800
+            tryVerify(() => page.split && page.player)
+        }
+        const old = page.player
+        const chosen = page.player.current.id
+        page.player.setSpeed(0.5)
+        remake(800, 1280)
+        verify(page.player !== old, "a new pane")
+        compare(page.player.current.id, chosen)
+        compare(page.player.rate, 0.5, "turned")
+        remake(700, 800)
+        compare(page.player.rate, 0.5, "window narrowed")
+
+        page.player.go(1)
+        compare(page.player.rate, 1, "the next technique")
+        remake(800, 1280)
+        compare(page.player.rate, 1, "its tempo, not the one before")
+
+        // Upright: the same technique on a player page of its own, then turned back.
+        page.player.setSpeed(0.25)
+        window.width = 800
+        window.height = 1280
+        tryVerify(() => !page.split)
+        page.play(page.rows.find(r => r.id === page.lastId))
+        tryVerify(() => window.pageStack.currentItem !== page)
+        compare(window.pageStack.currentItem.rate, 1)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        window.width = 1280
+        window.height = 800
+        tryVerify(() => page.split && page.player)
+        compare(page.player.rate, 1, "after a new player page")
+    }
+
+    // The pane made anew after full screen takes up the tempo left there, not 1×.
+    function test_8y_pane_made_anew_keeps_tempo() {
+        const page = tabletProgramme()
+        window.width = 700
+        tryVerify(() => !page.split)
+        page.bigResume = { position: 0, rate: 0.5, looping: false }
+        window.width = 1280
+        tryVerify(() => page.player !== null)
+        compare(page.player.rate, 0.5)
+        compare(page.player.looping, false)
     }
 
     function test_8z_frame_buttons_are_not_the_technique_buttons() {
