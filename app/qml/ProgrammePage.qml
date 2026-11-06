@@ -665,7 +665,8 @@ Kirigami.Page {
 
     // Tab and Shift+Tab from row to row in the list's order. The list reuses its rows, so the
     // window's focus chain (the order of the rows as items) left the list after a row or two.
-    // Past the last row, or before the first, the focus leaves the list.
+    // Past the last row the focus leaves the list; before the first it goes to the list's head,
+    // or leaves too when that holds nothing to focus.
     function tabRow(from, step, event) {
         const reason = step > 0 ? Qt.TabFocusReason : Qt.BacktabFocusReason
         event.accepted = true
@@ -681,6 +682,13 @@ Kirigami.Page {
             }
             return
         }
+        // Before the first row the chips, which scroll with the rows.
+        const chip = step < 0 ? page.lastInHead() : null
+        if (chip) {
+            chip.forceActiveFocus(reason)
+            list.positionViewAtBeginning()
+            return
+        }
         // The next item of the window's chain outside the list (the small player, the header).
         let item = page.Window.activeFocusItem
         for (let n = 0; item && n < 1000; n++) {
@@ -689,6 +697,33 @@ Kirigami.Page {
                 item.forceActiveFocus(reason)
                 return
             }
+        }
+    }
+    // The last item that takes the focus in the list's head (on a tablet its chips), or null.
+    function lastInHead() {
+        const head = list.headerItem
+        let last = null
+        let item = head ? head.nextItemInFocusChain(true) : null
+        for (let n = 0; item && n < 1000 && page.inside(item, head); n++) {
+            last = item
+            item = item.nextItemInFocusChain(true)
+        }
+        return last
+    }
+    // Tab stepped along the focus chain into the list's head ("All notes", then Tab): the list shows
+    // it. Focus that only comes back (a page gone, a dialog closed, another window) moves nothing, and
+    // a chip has no focusReason to tell them apart.
+    property Item focusBefore: null
+    readonly property Item focusNow: page.Window.activeFocusItem
+    onFocusNowChanged: {
+        const before = focusBefore
+        focusBefore = focusNow
+        const head = list.headerItem
+        if (!before || !focusNow || !head || !page.inside(focusNow, head)) {
+            return
+        }
+        if (before.nextItemInFocusChain(true) === focusNow || before.nextItemInFocusChain(false) === focusNow) {
+            list.positionViewAtBeginning()
         }
     }
     function inside(item, ancestor) {

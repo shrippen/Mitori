@@ -317,7 +317,7 @@ QObject *Appearance::openWindow(QQmlEngine *engine, const QVariantMap &propertie
 //   prepare          the file selector: LookButton is now the other file...
 //   clear cache      ...once the compiled one has left the engine's cache
 //   Look.reload      the roles of the style (the singleton itself and the services stay)
-//   openWindow       with the kept pages and the old size
+//   openWindow       with the kept pages, the old size and place (X11; Wayland ignores the place)
 void Appearance::rebuild()
 {
     m_rebuildAsked = false;
@@ -330,6 +330,8 @@ void Appearance::rebuild()
     QMetaObject::invokeMethod(m_window.data(), "keptPageList", Q_RETURN_ARG(QVariant, kept));
     const QVariantMap properties{{QStringLiteral("width"), m_window->width()},
                                  {QStringLiteral("height"), m_window->height()},
+                                 {QStringLiteral("x"), m_window->x()},
+                                 {QStringLiteral("y"), m_window->y()},
                                  {QStringLiteral("keptPages"), kept}};
     const QWindow::Visibility visibility = m_window->visibility();
 

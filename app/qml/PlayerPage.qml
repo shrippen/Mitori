@@ -30,6 +30,7 @@ Kirigami.Page {
     readonly property alias position: view.position
     readonly property alias startPending: view.startPending
     readonly property alias playing: view.playing
+    readonly property alias autoPlay: view.autoPlay
     readonly property alias duration: view.duration
     readonly property alias rate: view.rate
     readonly property alias tempoText: view.tempoText
@@ -191,6 +192,8 @@ Kirigami.Page {
         Layout.fillWidth: true
         Layout.fillHeight: true
         compact: page.split
+        // A file still loading stays quiet under the notes or the comment (as on ProgrammePage).
+        autoPlay: page.isCurrentPage
         focus: true
         playlist: page.playlist
         // Both ways: the view moves on (next, training), a caller may set the page's index. Bound

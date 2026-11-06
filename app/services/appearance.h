@@ -25,7 +25,7 @@ class QQmlEngine;
 //   Material   Material               System    (only on Android, owner 06.11.2026)
 //   Kante      Breeze or Material     Kante, dark
 //   Leinen     Breeze or Material     Kante, light ("Leinen")
-//   Shinki     Breeze or Material     Kante, light   (only with -DMITORI_SHINKI=ON; its own
+//   Shinki     Breeze or Material     System    (not with -DMITORI_SHINKI=OFF; its own
 //                                               controls and look come with app/qml/Look)
 class Appearance : public QObject
 {

@@ -133,6 +133,8 @@ TestCase {
         standingPreviews(page)
         shot("look-" + startName)
         page.flickable.contentY = scrolled
+        window.x = 321
+        window.y = 123
 
         const started = Date.now()
         toStyle(otherStyle)
@@ -147,6 +149,8 @@ TestCase {
         compare(window.pageStack.get(1).keptPage, "SettingsPage.qml")
         compare(window.width, 420)
         compare(window.height, 800)
+        compare(window.x, 321, "X11: the window stays where it was")
+        compare(window.y, 123)
         verifyStyle(!uiShinki)
         tryVerify(() => window.pageStack.currentItem.flickable.contentY === scrolled, 5000, "the same place on the page")
         verify(Qt.colorEqual(Appearance.barColor, Look.backgroundColor))

@@ -37,7 +37,8 @@ class QSettings;
 //   move    write, read back, compare; only then out of the file and marked. "Ok" proves nothing:
 //           KWallet reports it for a failed write, and an empty read. Anything else: in the file.
 //
-// A password in the file is the newest: each start tries to move it again. The mark stays until a
+// A password in the file is moved at each start; it is the newest, except beside a new one on
+// record only here (NotRecorded, NotSaved: restarting brings the older back). The mark stays until a
 // new password replaces it: "not found" may be a refused unlock or another backend (Unreadable).
 class SyncAccount : public QObject
 {

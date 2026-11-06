@@ -51,7 +51,15 @@ Kirigami.Page {
         }
         function onForeign() {
             page.foreignSeen = true
+            foreignFade.restart()
         }
+    }
+    // The camera reads ten times a second: this long without a foreign code, it sees something else.
+    Timer {
+        id: foreignFade
+
+        interval: 3000
+        onTriggered: page.foreignSeen = false
     }
 
     CaptureSession {

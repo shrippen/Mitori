@@ -174,8 +174,9 @@ Kirigami.Dialog {
             }
         }
         LookLabel {
+            objectName: "exportAbout"
             Layout.fillWidth: true
-            text: qsTr("A small archive: Markdown, photos and voice notes. Otherwise notes stay private on the device.")
+            text: qsTr("A small archive: Markdown, photos and voice notes.")
             color: Look.mutedTextColor
             font: Look.smallFont
             wrapMode: Text.Wrap

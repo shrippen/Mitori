@@ -677,6 +677,24 @@ TestCase {
         Sync.enabled = false
         verify(hint.visible, "it still lies there with sync off")
         verify(hint.text.indexOf("With sync on") >= 0, hint.text)
+
+        // States only a failing disk reaches (tst_sync): each sentence is true of its state.
+        hint.syncOn = true
+        hint.note = Sync.NotRecorded
+        hint.inFile = false
+        verify(hint.text.indexOf("older one") < 0, "no older password on the first one: " + hint.text)
+        verify(hint.text.indexOf("Sync now") >= 0, hint.text)
+        hint.inFile = true
+        verify(hint.text.indexOf("older one") >= 0, hint.text)
+        hint.note = Sync.NotSaved
+        verify(hint.text.indexOf("Sync now") >= 0, "memory holds it: " + hint.text)
+        verify(hint.text.indexOf("enter it") < 0, "servers show an app password once: " + hint.text)
+        hint.syncOn = false
+        verify(hint.visible, "an older password lies in the file")
+        verify(hint.text.indexOf("older app password") >= 0, hint.text)
+        compare(hint.titleText, qsTr("App password lies in a file"))
+        hint.inFile = false
+        verify(!hint.visible)
         window.pageStack.pop()
     }
 
@@ -1531,8 +1549,53 @@ TestCase {
         button.clicked()
         tryVerify(() => window.pageStack.currentItem !== player, 2000, "the comment page opens")
         compare(window.pageStack.currentItem.entry.id, rows[0].id)
+        compare(player.autoPlay, false, "a file still loading stays quiet under the page")
         window.pageStack.pop()
         tryVerify(() => window.pageStack.currentItem === player)
+        verify(player.autoPlay)
+    }
+
+    // The comment over the training: quiet, whether the file plays or is still loading.
+    function test_7a_training_comment_quiet() {
+        const rows = Programme.entries("shinkitoho", "shoden").filter(r => r.kind === "entry" && r.comment && r.video)
+        if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Shinki Toho Shoden (set MITORI_VIDEOS)")
+        }
+        window.width = 1280
+        window.height = 800
+        wait(200)
+
+        // Still loading another file (the next technique of a training): the tap comes before its
+        // LoadedMedia, in this very event.
+        const other = rows.findIndex(r => r.video.video !== rows[0].video.video)
+        if (other < 0 || !Videos.available(rows[other].video.video)) {
+            skip("no second video for Shinki Toho Shoden (set MITORI_VIDEOS)")
+        }
+        const loading = push("PlayerPage", { playlist: rows, index: 0, training: true })
+        tryVerify(() => loading.playing, 10000)
+        loading.index = other
+        verify(loading.startPending)
+        findChild(loading, "commentButton").clicked()
+        verify(loading.startPending)
+        tryVerify(() => !loading.startPending, 10000)
+        wait(500)
+        verify(!loading.playing, "no sound under the comment")
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === loading)
+        window.pageStack.pop()
+        wait(800)
+
+        // Playing: it rests under the comment.
+        const playing = push("PlayerPage", { playlist: rows, index: 0, training: true })
+        tryVerify(() => playing.playing, 10000)
+        findChild(playing, "commentButton").clicked()
+        tryVerify(() => window.pageStack.currentItem !== playing, 2000)
+        tryVerify(() => !playing.playing, 2000, "it pauses under the comment")
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === playing)
+        verify(!playing.playing, "it waits for a tap")
+        window.pageStack.pop()
+        wait(800)
     }
 
     // Sideways the training keeps its ratings: the list beside the small player (clickdummy
@@ -2262,7 +2325,6 @@ TestCase {
             compare(window.pageStack.currentItem, page, "the videos page stays")
             compare(window.pageStack.depth, depth)
         }
-        page.codeMessage = ""
         leaveThenShowCode(leaving => mouseClick(findChild(leaving, "scanCancel")))
         leaveThenShowCode(() => window.pageStack.pop())
         leaveThenShowCode(leaving => {
@@ -2303,6 +2365,9 @@ TestCase {
         compare(failed.text, qsTr("The camera does not work; another program may be using it. Cancel and type the code instead."))
         verify(hint.visible && hint.text === qsTr("This QR code holds no DVD code. Use the one on the insert of the DVD."))
         scanning.cameraFailed = false
+
+        // Nothing foreign in the picture any more: the sentence goes.
+        tryCompare(hint, "text", asked, 10000)
 
         // A well-formed code nobody knows: back, the same answer as to a typed one, in the field.
         const prefix = "0000000000000000000"
@@ -3945,6 +4010,74 @@ TestCase {
         Programme.discipline = "aikido"
     }
 
+    // By keyboard the chips are in reach and in view: Shift+Tab from the first row reaches them,
+    // and focus coming to them from above takes the scrolled list back to its top.
+    function test_2v_i_chips_by_keyboard() {
+        Programme.discipline = "aikido"
+        PracticeGrade.setGrade("aikido", "k3")
+        window.width = 1280
+        window.height = 800
+        const page = push("ProgrammePage")
+        tryVerify(() => page.wide)
+        tryVerify(() => Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1, 5000)
+        wait(800)
+        const list = findChild(page, "programmeList")
+        const inHead = item => {
+            for (let p = item; p; p = p.parent) {
+                if (p === list.headerItem) {
+                    return true
+                }
+            }
+            return false
+        }
+        list.positionViewAtBeginning()
+        wait(100)
+        let first = 0
+        while (!(list.itemAtIndex(first) && list.itemAtIndex(first).item && list.itemAtIndex(first).item.entry)) {
+            first++
+        }
+        list.itemAtIndex(first).item.forceActiveFocus(Qt.TabFocusReason)
+        keyClick(Qt.Key_Backtab)
+        verify(inHead(window.activeFocusItem), "Shift+Tab on the first row: " + window.activeFocusItem)
+        // Past what else the head holds (the hint about the DVD's code), back to a chip.
+        for (let n = 0; n < 5 && !window.activeFocusItem.checkable; n++) {
+            keyClick(Qt.Key_Backtab)
+        }
+        const chip = window.activeFocusItem
+        verify(inHead(chip) && chip.checkable, "a chip: " + chip)
+
+        // Scrolled down, the focus comes to a chip from outside the list.
+        list.positionViewAtEnd()
+        wait(200)
+        verify(chip.mapToItem(list, 0, 0).y < 0, "scrolled past the chips")
+        const head = list.headerItem
+        head.nextItemInFocusChain(false).forceActiveFocus(Qt.TabFocusReason)
+        verify(!inHead(window.activeFocusItem))
+        keyClick(Qt.Key_Tab)
+        const entered = window.activeFocusItem
+        verify(inHead(entered), "Tab from above: " + entered)
+        tryVerify(() => {
+            const top = entered.mapToItem(list, 0, 0).y
+            return top >= 0 && top + entered.height <= list.height
+        }, 2000, "the head in view")
+
+        // Focus that only comes back moves nothing: a page over it, then gone.
+        chip.forceActiveFocus(Qt.TabFocusReason)
+        list.positionViewAtEnd()
+        wait(200)
+        const scrolled = list.contentY
+        verify(scrolled > list.originY + 100, "scrolled " + scrolled)
+        push("AllNotesPage")
+        wait(800)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        wait(500)
+        verify(inHead(window.activeFocusItem), "the focus is back on the chip: " + window.activeFocusItem)
+        compare(list.contentY, scrolled, "the list stays where it was")
+        PracticeGrade.setGrade("aikido", "k5")
+        window.pageStack.pop()
+    }
+
     // A sheet left beside the list, turned under another page: the dialog of a technique with a
     // video, turned back, shows the player, not the old sheet over it.
     function test_2v_h_old_sheet_stays_gone() {
@@ -4656,6 +4789,8 @@ TestCase {
         verify(text.text.indexOf("<b>Tenkan</b>") > 0, text.text)
         verify(text.text.indexOf("](bilder/02-foto.jpg)") > 0, text.text)
 
+        // No promise about where notes stay: sync and Android's backup carry them off.
+        compare(findChild(sheet, "exportAbout").text, qsTr("A small archive: Markdown, photos and voice notes."))
         verify(!findChild(sheet, "exportShare").visible, "no share dialog on the desktop")
         verify(findChild(sheet, "exportSave").visible)
         wait(200)
@@ -4676,7 +4811,14 @@ TestCase {
         tryVerify(() => !sheet.visible)
         const dialog = findChild(book, "exportDialog")
         // Only for Qt's own dialog: it would rename a portal's answer "…/doc/ab12/y" to "y.zip".
-        compare(dialog.defaultSuffix, SavePlace.asksItself ? "zip" : "")
+        verify(SavePlace.asksItself)
+        compare(dialog.defaultSuffix, "zip")
+        uiCatalog.setFlatpak("io.github.shrippen.Mitori")
+        const portal = Qt.createComponent("Mitori", "SaveFileDialog", Component.PreferSynchronous)
+            .createObject(book, { anchor: book })
+        compare(portal.defaultSuffix, "")
+        portal.destroy()
+        uiCatalog.setFlatpak("")
         tryVerify(() => dialog.visible)
         dialog.close()
         tryVerify(() => !dialog.visible)
