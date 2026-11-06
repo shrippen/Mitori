@@ -130,21 +130,16 @@ Kirigami.Page {
                 id: list
 
                 objectName: "programmeList"
-                // The first moment after opening only: later a chip wrapping anew (a rating) must
-                // not take the list from where it is.
-                property bool settling: true
-                Timer {
-                    interval: 1000
-                    running: true
-                    onTriggered: list.settling = false
-                }
-                function settle() {
-                    if (settling && !moving && headerItem && contentY - originY < headerItem.height) {
+                // The head above the rows changes height (its width, another grade): a list standing
+                // at its top stays there instead of cutting off the first line. One scrolled
+                // anywhere else, by hand or to the playing row, is left alone.
+                property real topBefore: 0
+                onOriginYChanged: {
+                    if (!moving && contentY === topBefore) {
                         Qt.callLater(positionViewAtBeginning)
                     }
+                    topBefore = originY
                 }
-                onHeightChanged: settle()
-                onOriginYChanged: settle()
                 model: page.rows
                 reuseItems: true
                 // Up and Down scroll (the page's keys) also from a focused row; the list has no
@@ -156,10 +151,6 @@ Kirigami.Page {
                 header: ColumnLayout {
                     width: ListView.view.width
                     spacing: Kirigami.Units.smallSpacing
-
-                    // Its height settles after the page opens (its width, the wrapping chips): the
-                    // list stays at its top instead of cutting off the first line.
-                    onHeightChanged: list.settle()
 
                     // A grade's meaning, content and waiting time (Shinki Toho has them).
                     LookLabel {
@@ -514,6 +505,7 @@ Kirigami.Page {
         bigResume = null
     }
     function openBig() {
+        page.cameFromPlayer = true
         const small = page.player
         const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
         const player = window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), {

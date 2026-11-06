@@ -2999,6 +2999,15 @@ TestCase {
         tryVerify(() => programmeList.height < 1000)
         wait(800)
         compare(programmeList.contentY, programmeList.originY, "the list opens at its top")
+        // Another discipline, another head (the grades' meaning): still at its top.
+        Programme.discipline = "shinkitoho"
+        page.grade = Programme.grade("shinkitoho")
+        tryVerify(() => findChild(programmeList.headerItem, "gradeInfo").visible)
+        wait(300)
+        compare(programmeList.contentY, programmeList.originY, "the list stays at its top")
+        Programme.discipline = "aikido"
+        page.grade = "k5"
+        wait(100)
         shot("8p-chips")
         window.pageStack.pop()
         const videos = push("VideosPage")
