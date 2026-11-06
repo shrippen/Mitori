@@ -84,6 +84,44 @@ private slots:
         QSettings().clear();
     }
 
+    // The programme's chips add Hon-Menkyo and Menkyo-Kaiden with what the catalog says of them,
+    // not Hôshu; grades() and the other disciplines stay as they are.
+    void gradeChipsShowGradesWithoutForms()
+    {
+        const QString toho = QStringLiteral("shinkitoho");
+        const auto idsOf = [](const QVariantList &grades) {
+            QStringList result;
+            for (const QVariant &g : grades) {
+                result << g.toMap().value(QStringLiteral("id")).toString();
+            }
+            return result;
+        };
+
+        const QVariantList chips = programme.gradeChips(toho);
+        const QStringList withForms = idsOf(programme.grades(toho));
+        const QStringList noForms{QStringLiteral("honmenkyo"), QStringLiteral("kaiden")};
+        QCOMPARE(idsOf(chips), withForms + noForms);
+        QVERIFY(!withForms.contains(QStringLiteral("honmenkyo")));
+        QVERIFY(chips.first().toMap().value(QStringLiteral("count")).toInt() > 0);
+
+        const QVariantMap honmenkyo = chips.at(withForms.size()).toMap();
+        QCOMPARE(honmenkyo.value(QStringLiteral("count")).toInt(), 0);
+        QCOMPARE(honmenkyo.value(QStringLiteral("name")).toString(), QStringLiteral("Hon-Menkyo"));
+        QCOMPARE(honmenkyo.value(QStringLiteral("jp")).toString(), QStringLiteral("本免許"));
+        QCOMPARE(honmenkyo.value(QStringLiteral("bedeutung")).toString(), QStringLiteral("Diplom"));
+        QVERIFY(honmenkyo.value(QStringLiteral("inhalt")).toString().contains(QStringLiteral("Ko-dachi")));
+        QCOMPARE(honmenkyo.value(QStringLiteral("abstand")).toString(), QStringLiteral("4 Jahre"));
+
+        for (const QString &other : {QStringLiteral("aikido"), QStringLiteral("daitoryu")}) {
+            QCOMPARE(programme.gradeChips(other), programme.grades(other));
+        }
+
+        // The grade asked for elsewhere is never one without forms, even if it were stored.
+        QSettings().setValue(QStringLiteral("programme/grade/") + toho, QStringLiteral("kaiden"));
+        QCOMPARE(programme.grade(toho), withForms.first());
+        QSettings().remove(QStringLiteral("programme/grade/") + toho);
+    }
+
     // Today's practice draws from every grade up to the chosen one; only the chosen is current.
     void practiceEntriesUpToTheChosenGrade()
     {
