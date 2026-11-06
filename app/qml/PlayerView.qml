@@ -37,8 +37,10 @@ Item {
                                         .filter(x => !!x).join(" · ")
     // How many of the playlist are rated today (the training's progress).
     readonly property int practisedCount: Practice.revision >= 0 ? playlist.filter(r => Practice.ratedToday(r.id)).length : 0
-    readonly property real from: current.video ? current.video.von * 1000 : 0
-    readonly property real to: current.video ? current.video.bis * 1000 : 0
+    // A loaded bundle brings its own cut points; they fit its file.
+    readonly property var place: current.video ? Videos.place(current.id, current.video) : null
+    readonly property real from: place ? place.von * 1000 : 0
+    readonly property real to: place ? place.bis * 1000 : 0
     // Where the loop turns: the chapter end, but never the end of the file (the last chapter of a
     // video ends with it, and a player at the end of the file no longer seeks back).
     readonly property real end: player.duration > 0 ? Math.min(to, player.duration - 250) : to

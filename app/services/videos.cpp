@@ -88,3 +88,15 @@ QVariantMap Videos::crop(const QString &video) const
     }
     return {{QStringLiteral("verhaeltnis"), crop.value(QStringLiteral("verhaeltnis"))}};
 }
+
+QVariantMap Videos::place(const QString &id, const QVariantMap &place) const
+{
+    const auto cut = BundleShelf::shared().cut(place.value(QStringLiteral("video")).toString(), id);
+    if (!cut) {
+        return place;
+    }
+    QVariantMap moved = place;
+    moved[QStringLiteral("von")] = cut->von;
+    moved[QStringLiteral("bis")] = cut->bis;
+    return moved;
+}

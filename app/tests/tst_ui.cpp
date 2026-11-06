@@ -73,15 +73,14 @@ public slots:
         QDir().mkpath(MediaStore::defaultRoot());
         QFile::copy(QStringLiteral(TEST_MEDIA_DIR "/stimme.m4a"), MediaStore::shared().path(QStringLiteral("test-stimme.m4a")));
         const QString packages = QStringLiteral(UI_DATA_DIR "/packages");
-        QDir().mkpath(packages + QStringLiteral("/mitori-test-bundle/1"));
-        QFile::remove(packages + QStringLiteral("/mitori-test-bundle/1/test.mvb"));
-        QFile::copy(QStringLiteral(TEST_BUNDLE_DIR "/test.mvb"), packages + QStringLiteral("/mitori-test-bundle/1/test.mvb"));
+        const QString video = packages + QStringLiteral("/test-bundle/1/test.mvb");
+        QDir().mkpath(QFileInfo(video).absolutePath());
+        QFile::remove(video);
+        QFile::copy(QStringLiteral(TEST_BUNDLE_DIR "/test.mvb"), video);
         QFile source(QStringLiteral(TEST_BUNDLE_DIR "/manifest.json"));
         QFile manifest(QStringLiteral(UI_DATA_DIR "/manifest.json"));
         if (source.open(QIODevice::ReadOnly) && manifest.open(QIODevice::WriteOnly)) {
-            QJsonObject m = QJsonDocument::fromJson(source.readAll()).object();
-            m.insert(QStringLiteral("basis"), QUrl::fromLocalFile(packages).toString());
-            manifest.write(QJsonDocument(m).toJson());
+            manifest.write(source.readAll().replace("file:///unused/test.mvb", QUrl::fromLocalFile(video).toEncoded()));
         }
         qputenv("MITORI_BUNDLES_MANIFEST", QUrl::fromLocalFile(manifest.fileName()).toString().toUtf8());
     }

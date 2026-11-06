@@ -507,8 +507,9 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME bundlecrypto COMMAND tst_bundlecrypto)
 
     qt_add_executable(tst_bundles tests/tst_bundles.cpp services/bundles.cpp services/bundles.h
+        services/videos.cpp services/videos.h catalog/catalog.cpp catalog/catalog.h
         store/bundleshelf.cpp store/bundleshelf.h store/bundlecrypto.cpp store/bundlecrypto.h)
-    target_include_directories(tst_bundles PRIVATE services store)
+    target_include_directories(tst_bundles PRIVATE services store catalog)
     target_compile_definitions(tst_bundles PRIVATE TEST_BUNDLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/bundle")
     target_link_libraries(tst_bundles PRIVATE Qt6::Core Qt6::Qml Qt6::Network Qt6::Concurrent Qt6::Test monocypher)
     set_target_properties(tst_bundles PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)

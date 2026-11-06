@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QJsonArray>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QRegularExpression>
@@ -61,6 +62,11 @@ void BundleShelf::load()
             if (f.value(QStringLiteral("cropped")).toBool()) {
                 b.cropped << v.key();
             }
+            const QJsonObject cuts = f.value(QStringLiteral("cuts")).toObject();
+            for (auto c = cuts.begin(); c != cuts.end(); ++c) {
+                const QJsonArray place = c.value().toArray();
+                b.cuts[v.key()][c.key()] = {place.at(0).toDouble(), place.at(1).toDouble()};
+            }
         }
         m_bundles.insert(it.key(), b);
     }
@@ -73,8 +79,14 @@ bool BundleShelf::save() const
     for (auto it = m_bundles.cbegin(); it != m_bundles.cend(); ++it) {
         QJsonObject videos;
         for (auto f = it->files.cbegin(); f != it->files.cend(); ++f) {
+            QJsonObject cuts;
+            const QHash<QString, Cut> places = it->cuts.value(f.key());
+            for (auto c = places.cbegin(); c != places.cend(); ++c) {
+                cuts.insert(c.key(), QJsonArray{c->von, c->bis});
+            }
             videos.insert(f.key(), QJsonObject{{QStringLiteral("file"), f.value()},
-                                               {QStringLiteral("cropped"), it->cropped.contains(f.key())}});
+                                               {QStringLiteral("cropped"), it->cropped.contains(f.key())},
+                                               {QStringLiteral("cuts"), cuts}});
         }
         all.insert(it.key(), QJsonObject{{QStringLiteral("code"), it->code},
                                          {QStringLiteral("key"), QString::fromLatin1(it->key.toBase64())},
@@ -103,7 +115,8 @@ bool BundleShelf::unlock(const QString &id, const QString &code, const QByteArra
     return save();
 }
 
-bool BundleShelf::installed(const QString &id, int version, const QHash<QString, QString> &files, const QStringList &cropped)
+bool BundleShelf::installed(const QString &id, int version, const QHash<QString, QString> &files, const QStringList &cropped,
+                            const Cuts &cuts)
 {
     if (!validId(id)) {
         return false;
@@ -112,6 +125,7 @@ bool BundleShelf::installed(const QString &id, int version, const QHash<QString,
     b.version = version;
     b.files = files;
     b.cropped = cropped;
+    b.cuts = cuts;
     return save();
 }
 
@@ -125,6 +139,7 @@ bool BundleShelf::remove(const QString &id)
     b.version = 0;
     b.files.clear();
     b.cropped.clear();
+    b.cuts.clear();
     return save();
 }
 
@@ -164,6 +179,20 @@ bool BundleShelf::cropped(const QString &video) const
         }
     }
     return false;
+}
+
+std::optional<BundleShelf::Cut> BundleShelf::cut(const QString &video, const QString &id) const
+{
+    for (auto it = m_bundles.cbegin(); it != m_bundles.cend(); ++it) {
+        const QString file = it->files.value(video);
+        if (it->version == 0 || file.isEmpty() || !QFileInfo::exists(QDir(folder(it.key())).filePath(file))) {
+            continue;
+        }
+        const QHash<QString, Cut> places = it->cuts.value(video);
+        const auto place = places.constFind(id);
+        return place == places.cend() ? std::nullopt : std::optional<Cut>(*place);
+    }
+    return std::nullopt;
 }
 
 qint64 BundleShelf::size() const

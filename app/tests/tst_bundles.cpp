@@ -15,6 +15,8 @@
 #include <QTimer>
 
 #include "bundles.h"
+#include "catalog.h"
+#include "videos.h"
 
 using namespace Qt::StringLiterals;
 
@@ -33,30 +35,59 @@ class TstBundles : public QObject
         return f.open(QIODevice::ReadOnly) ? f.readAll() : QByteArray();
     }
 
-    // A package folder as Gitea serves it: <basis>/mitori-<id>/<version>/<file>, and the manifest
-    // pointing there; `damage` changes a byte of the video.
+    // The video folder as Caddy serves it: <id>/<version>/<file>, and a manifest with the file's
+    // address; `damage` changes a byte of the video.
     QUrl publish(const QString &name, bool damage = false)
     {
         const QString base = m_dir.filePath(name + u"-packages"_s);
-        QDir().mkpath(base + u"/mitori-test-bundle/1"_s);
+        QDir().mkpath(base + u"/test-bundle/1"_s);
         QByteArray video = read(u"test.mvb"_s);
         if (damage) {
             video[60] = char(video.at(60) ^ 1);
         }
-        QFile f(base + u"/mitori-test-bundle/1/test.mvb"_s);
+        QFile f(base + u"/test-bundle/1/test.mvb"_s);
         if (!f.open(QIODevice::WriteOnly)) {
             return {};
         }
         f.write(video);
         f.close();
         QJsonObject manifest = QJsonDocument::fromJson(read(u"manifest.json"_s)).object();
-        manifest.insert(u"basis"_s, QUrl::fromLocalFile(base).toString());
+        setFirstVideo(manifest, [&](QJsonObject &v) {
+            v.insert(u"url"_s, QUrl::fromLocalFile(base + u"/test-bundle/1/test.mvb"_s).toString());
+        });
         QFile m(m_dir.filePath(name + u"-manifest.json"_s));
         if (!m.open(QIODevice::WriteOnly)) {
             return {};
         }
         m.write(QJsonDocument(manifest).toJson());
         return QUrl::fromLocalFile(m.fileName());
+    }
+
+    // The first video of the first bundle, changed by `edit`.
+    template<typename Edit>
+    static void setFirstVideo(QJsonObject &manifest, Edit edit)
+    {
+        QJsonArray list = manifest.value(u"bundles"_s).toArray();
+        QJsonObject b = list.first().toObject();
+        QJsonArray videos = b.value(u"videos"_s).toArray();
+        QJsonObject v = videos.first().toObject();
+        edit(v);
+        videos[0] = v;
+        b.insert(u"videos"_s, videos);
+        list[0] = b;
+        manifest.insert(u"bundles"_s, list);
+    }
+
+    // Unlocks the test bundle and loads it, on `b`.
+    void install(Bundles &b)
+    {
+        waitReady(b);
+        QSignalSpy unlocked(&b, &Bundles::unlocked);
+        b.unlock(m_code);
+        QVERIFY(unlocked.wait(10000));
+        QSignalSpy installed(&b, &Bundles::installed);
+        b.load(u"test-bundle"_s, Bundles::Network::Any);
+        QVERIFY(installed.wait(10000));
     }
 
     // The manifest of a published test bundle, changed by `edit`.
@@ -336,11 +367,11 @@ private slots:
         QVERIFY(server.listen(QHostAddress::LocalHost));
         serveInPieces(server, file);
         editManifest(manifest, [&](QJsonObject &o) {
-            o.insert(u"basis"_s, u"http://127.0.0.1:%1"_s.arg(server.serverPort()));
             QJsonArray list = o.value(u"bundles"_s).toArray();
             QJsonObject b = list.first().toObject();
             QJsonArray videos = b.value(u"videos"_s).toArray();
             QJsonObject v = videos.first().toObject();
+            v.insert(u"url"_s, u"http://127.0.0.1:%1/test.mvb"_s.arg(server.serverPort()));
             v.insert(u"groesse"_s, double(file.size()));
             v.insert(u"klar"_s, double(plain.size()));
             v.insert(u"sha256"_s, QString::fromLatin1(QCryptographicHash::hash(file, QCryptographicHash::Sha256).toHex()));
@@ -363,6 +394,179 @@ private slots:
         QVERIFY(installed.wait(30000));
         const qint64 allowed = 4 + clock.elapsed() / 100;      // start, end, and ten a second at most
         QVERIFY2(changed.count() <= allowed, qPrintable(u"%1 changes in %2 ms"_s.arg(changed.count()).arg(clock.elapsed())));
+    }
+
+    // The address comes from the manifest, whatever the host: the videos are not on Gitea.
+    void loadsFromTheManifestsAddress()
+    {
+        const QString root = m_dir.filePath(u"address-shelf"_s);
+        const QUrl manifest = publish(u"address"_s);
+        const QString elsewhere = m_dir.filePath(u"elsewhere.mvb"_s);
+        QVERIFY(QFile::copy(QStringLiteral(TEST_BUNDLE_DIR "/test.mvb"), elsewhere));
+        editManifest(manifest, [&](QJsonObject &o) {
+            setFirstVideo(o, [&](QJsonObject &v) { v.insert(u"url"_s, QUrl::fromLocalFile(elsewhere).toString()); });
+        });
+        Bundles b(manifest, root);
+        install(b);
+        QCOMPARE(read(u"klar.bin"_s), [&] {
+            QFile f(BundleShelf(root).path(u"test/v"_s));
+            return f.open(QIODevice::ReadOnly) ? f.readAll() : QByteArray();
+        }());
+    }
+
+    // No address, no download; the bundle fails with a message instead of asking for nothing.
+    void missingAddressFails()
+    {
+        const QUrl manifest = publish(u"noaddress"_s);
+        editManifest(manifest, [](QJsonObject &o) { setFirstVideo(o, [](QJsonObject &v) { v.remove(u"url"_s); }); });
+        Bundles b(manifest, m_dir.filePath(u"noaddress-shelf"_s));
+        waitReady(b);
+        QSignalSpy unlocked(&b, &Bundles::unlocked);
+        b.unlock(m_code);
+        QVERIFY(unlocked.wait(10000));
+        b.load(u"test-bundle"_s, Bundles::Network::Any);
+        QTRY_COMPARE_WITH_TIMEOUT(state(b), Bundles::State::Failed, 5000);
+        QVERIFY(!b.errorString().isEmpty());
+    }
+
+    // A format 1 manifest has no addresses: as if it were not there.
+    void oldFormatIsNoManifest()
+    {
+        const QUrl manifest = publish(u"format1"_s);
+        editManifest(manifest, [](QJsonObject &o) { o.insert(u"format"_s, 1); });
+        Bundles b(manifest, m_dir.filePath(u"format1-shelf"_s));
+        waitReady(b);
+        QCOMPARE(b.manifestState(), Bundles::ManifestState::Failed);
+        QVERIFY(b.bundles().isEmpty());
+    }
+
+    // The cut points of a loaded version stay with its file, also when the app starts anew.
+    void cutPointsComeWithTheFile()
+    {
+        const QString root = m_dir.filePath(u"cuts-shelf"_s);
+        {
+            Bundles b(publish(u"cuts"_s), root);
+            install(b);
+        }
+        const BundleShelf shelf(root);
+        const auto cut = shelf.cut(u"test/v"_s, u"test/tech"_s);
+        QVERIFY(cut.has_value());
+        QCOMPARE(cut->von, 1.5);
+        QCOMPARE(cut->bis, 2.5);
+        QVERIFY(!shelf.cut(u"test/v"_s, u"test/other"_s).has_value());
+        QVERIFY(!shelf.cut(u"other/v"_s, u"test/tech"_s).has_value());
+    }
+
+    // A newer manifest moves nothing until its version is loaded: the file on the device is the old.
+    void newCutPointsOnlyWithTheNewFile()
+    {
+        const QString root = m_dir.filePath(u"recut-shelf"_s);
+        const QUrl manifest = publish(u"recut"_s);
+        Bundles b(manifest, root);
+        install(b);
+        editManifest(manifest, [](QJsonObject &o) {
+            setFirstVideo(o, [](QJsonObject &v) {
+                v.insert(u"kapitel"_s, QJsonArray{QJsonObject{{u"id"_s, u"test/tech"_s}, {u"von"_s, 7.0}, {u"bis"_s, 8.0}}});
+            });
+            QJsonArray list = o.value(u"bundles"_s).toArray();
+            QJsonObject bundle = list.first().toObject();
+            bundle.insert(u"version"_s, 2);
+            list[0] = bundle;
+            o.insert(u"bundles"_s, list);
+        });
+        waitReady(b);
+        QCOMPARE(state(b), Bundles::State::Update);
+        QCOMPARE(BundleShelf(root).cut(u"test/v"_s, u"test/tech"_s)->von, 1.5);
+
+        QSignalSpy installed(&b, &Bundles::installed);
+        b.load(u"test-bundle"_s, Bundles::Network::Any);
+        QVERIFY(installed.wait(10000));
+        QCOMPARE(BundleShelf(root).cut(u"test/v"_s, u"test/tech"_s)->von, 7.0);
+    }
+
+    // Nonsense in the manifest moves no player: the times of the app count then.
+    void badCutPointsAreSkipped()
+    {
+        const QString root = m_dir.filePath(u"badcut-shelf"_s);
+        const QUrl manifest = publish(u"badcut"_s);
+        editManifest(manifest, [](QJsonObject &o) {
+            setFirstVideo(o, [](QJsonObject &v) {
+                v.insert(u"kapitel"_s, QJsonArray{QJsonObject{{u"id"_s, u"backwards"_s}, {u"von"_s, 5.0}, {u"bis"_s, 2.0}},
+                                                  QJsonObject{{u"id"_s, u"negative"_s}, {u"von"_s, -1.0}, {u"bis"_s, 2.0}},
+                                                  QJsonObject{{u"id"_s, u"text"_s}, {u"von"_s, u"a"_s}, {u"bis"_s, u"b"_s}},
+                                                  QJsonObject{{u"von"_s, 1.0}, {u"bis"_s, 2.0}},
+                                                  QJsonObject{{u"id"_s, u"good"_s}, {u"von"_s, 1.0}, {u"bis"_s, 2.0}}});
+            });
+        });
+        Bundles b(manifest, root);
+        install(b);
+        const BundleShelf shelf(root);
+        QVERIFY(shelf.cut(u"test/v"_s, u"good"_s).has_value());
+        for (const QString &id : {u"backwards"_s, u"negative"_s, u"text"_s, u""_s}) {
+            QVERIFY2(!shelf.cut(u"test/v"_s, id).has_value(), qPrintable(id));
+        }
+    }
+
+    // The server keeps only the current version: a file gone means a new manifest. The app asks for
+    // it, so that the next try loads what is there now.
+    void goneFileReloadsTheManifest()
+    {
+        const QString root = m_dir.filePath(u"gone-shelf"_s);
+        const QUrl manifest = publish(u"gone"_s);
+        Bundles b(manifest, root);
+        waitReady(b);
+        QSignalSpy unlocked(&b, &Bundles::unlocked);
+        b.unlock(m_code);
+        QVERIFY(unlocked.wait(10000));
+
+        // The server moved on after this manifest was read.
+        const QString current = m_dir.filePath(u"gone-v2.mvb"_s);
+        QVERIFY(QFile::copy(QStringLiteral(TEST_BUNDLE_DIR "/test.mvb"), current));
+        QVERIFY(QFile::remove(m_dir.filePath(u"gone-packages/test-bundle/1/test.mvb"_s)));
+        editManifest(manifest, [&](QJsonObject &o) {
+            setFirstVideo(o, [&](QJsonObject &v) { v.insert(u"url"_s, QUrl::fromLocalFile(current).toString()); });
+            QJsonArray list = o.value(u"bundles"_s).toArray();
+            QJsonObject bundle = list.first().toObject();
+            bundle.insert(u"version"_s, 2);
+            list[0] = bundle;
+            o.insert(u"bundles"_s, list);
+        });
+
+        b.load(u"test-bundle"_s, Bundles::Network::Any);
+        QTRY_COMPARE_WITH_TIMEOUT(state(b), Bundles::State::Failed, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(first(b).value(u"version"_s).toInt(), 2, 5000);
+
+        QSignalSpy installed(&b, &Bundles::installed);
+        b.load(u"test-bundle"_s, Bundles::Network::Any);
+        QVERIFY(installed.wait(10000));
+        QCOMPARE(BundleShelf(root).bundle(u"test-bundle"_s).version, 2);
+    }
+
+    // The player asks Videos: a loaded bundle's cut point, else the app's own time.
+    void videosPlaceFollowsTheShelf()
+    {
+        BundleShelf &shelf = BundleShelf::shared();
+        const QString id = u"place-test"_s;
+        QVERIFY(QDir().mkpath(shelf.folder(id)));
+        QFile file(QDir(shelf.folder(id)).filePath(u"v.mkv"_s));
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.close();
+        const QVariantMap own{{u"video"_s, u"place/v"_s}, {u"von"_s, 10.0}, {u"bis"_s, 20.0}};
+        const Catalog catalog;
+        const Videos videos(catalog);
+        QCOMPARE(videos.place(u"tech"_s, own), own);
+
+        QHash<QString, QHash<QString, BundleShelf::Cut>> cuts;
+        cuts[u"place/v"_s][u"tech"_s] = {1.5, 2.5};
+        QVERIFY(shelf.installed(id, 1, {{u"place/v"_s, u"v.mkv"_s}}, {}, cuts));
+        const QVariantMap moved = videos.place(u"tech"_s, own);
+        QCOMPARE(moved.value(u"von"_s).toDouble(), 1.5);
+        QCOMPARE(moved.value(u"bis"_s).toDouble(), 2.5);
+        QCOMPARE(moved.value(u"video"_s).toString(), u"place/v"_s);
+        QCOMPARE(videos.place(u"other"_s, own), own);
+
+        QVERIFY(shelf.remove(id));
+        QCOMPARE(videos.place(u"tech"_s, own), own);
     }
 
     // File names from the manifest may not leave the bundle's folder.

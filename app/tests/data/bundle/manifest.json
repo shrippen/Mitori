@@ -1,6 +1,5 @@
 {
- "format": 1,
- "basis": "file:///unused",
+ "format": 2,
  "bundles": [
   {
    "id": "test-bundle",
@@ -13,7 +12,15 @@
      "groesse": 440,
      "sha256": "04b984b376b06fd067078bfa501cb0f04ef1e65cfd0bc3d380e96b18a5fe4d81",
      "klar": 400,
-     "beschnitten": true
+     "beschnitten": true,
+     "url": "file:///unused/test.mvb",
+     "kapitel": [
+      {
+       "id": "test/tech",
+       "von": 1.5,
+       "bis": 2.5
+      }
+     ]
     }
    ],
    "hinweis": ""
