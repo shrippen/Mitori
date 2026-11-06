@@ -14,7 +14,7 @@ namespace Schedule {
 
 struct Candidate {
     QString id;
-    bool currentGrade = false;  // part of the grade chosen in the programme (new ones come from there)
+    bool currentGrade = false;  // part of the practice grade (new ones come from there)
 };
 
 struct Due {

@@ -24,6 +24,7 @@ Kirigami.ScrollablePage {
     readonly property var grades: Programme.grades(discipline)
     readonly property string grade: PracticeGrade.revision >= 0 ? PracticeGrade.grade(discipline) : ""
     readonly property bool manualGrade: PracticeGrade.revision >= 0 && PracticeGrade.manual(discipline)
+    readonly property bool anyPassed: Courses.revision >= 0 && Courses.ladder(discipline).some(g => g.passed)
     readonly property string gradeName: (grades.find(g => g.id === grade) || {}).name || ""
     // The calendar of the last 12 weeks (clickdummy "Heute"); the levels as in the statistics.
     readonly property var perDay: Practice.revision >= 0 && Practice.today.getTime() > 0 ? Practice.practisedPerDay(84) : ({})
@@ -96,7 +97,8 @@ Kirigami.ScrollablePage {
             objectName: "practiceGradeHint"
             Layout.fillWidth: true
             text: page.manualGrade ? qsTr("up to %1 (chosen by you)").arg(page.gradeName)
-                                   : qsTr("up to %1 (from My grades)").arg(page.gradeName)
+                  : page.anyPassed ? qsTr("up to %1 (from My grades)").arg(page.gradeName)
+                                   : qsTr("up to %1 (first grade, nothing in My grades yet)").arg(page.gradeName)
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }

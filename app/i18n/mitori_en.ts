@@ -201,7 +201,7 @@
 <context>
     <name>TodayPage</name>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="48"/>
+        <location filename="../qml/TodayPage.qml" line="49"/>
         <source>%1 · %n day(s) ago</source>
         <translation>
             <numerusform>%1 · %n day ago</numerusform>
@@ -209,7 +209,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="50"/>
+        <location filename="../qml/TodayPage.qml" line="51"/>
         <source>not practised for %n day(s)</source>
         <translation>
             <numerusform>not practised for %n day</numerusform>
@@ -217,7 +217,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="152"/>
+        <location filename="../qml/TodayPage.qml" line="154"/>
         <source>%n of them without a video on this device: the training shows their name, practise from memory.</source>
         <translation>
             <numerusform>%n of them has no video on this device: the training shows its name, practise it from memory.</numerusform>
@@ -225,7 +225,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="171"/>
+        <location filename="../qml/TodayPage.qml" line="173"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>

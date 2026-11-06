@@ -121,7 +121,6 @@ TestCase {
         verify(!Appearance.restartNeeded)
     }
 
-    // Settings → Appearance: the style tiles, the language, the restart hint, about Mitori.
     // An older version's grade is the practice grade at the first start, chosen by hand.
     function test_0a_practice_migrated() {
         compare(PracticeGrade.grade("shinkitoho"), "chuden")
@@ -132,6 +131,7 @@ TestCase {
         verify(!PracticeGrade.manual("shinkitoho"))
     }
 
+    // Settings → Appearance: the style tiles, the language, the restart hint, about Mitori.
     function test_0b_appearance() {
         const settings = push("SettingsPage")
         findChild(settings, "appearanceButton").clicked()
@@ -1874,6 +1874,17 @@ TestCase {
         verify(!findChild(exam, "toExamGrade").visible)
         window.pageStack.pop()
 
+        // "Mock exam" on Today opens the exam at the planned grade and makes it the practice grade.
+        PracticeGrade.setGrade("aikido", "k5")
+        const today1 = push("TodayPage")
+        wait(1000)      // the page has slid in
+        clickUntil(findChild(today1, "toMockExam"), () => window.pageStack.currentItem !== today1)
+        tryCompare(window.pageStack.currentItem, "title", qsTranslate("ExamPage", "Exam mode"))
+        compare(window.pageStack.currentItem.grade, "k4")
+        compare(PracticeGrade.grade("aikido"), "k4")
+        window.pageStack.pop()
+        window.pageStack.pop()
+
         // A planned grade without material in the exam mode (Shinki Toho Menkyo-Kaiden): no
         // button that would open another grade.
         verify(Courses.planExam(uid, "shinkitoho", "kaiden"))
@@ -3330,8 +3341,6 @@ TestCase {
         return found
     }
 
-    // Hon-Menkyo and Menkyo-Kaiden: a chip with "–" and a card instead of the list; the grade the
-    // other pages use stays.
     // Browsing the programme and the map changes the page's grade only: not the start menu, not
     // today's practice, not the exam; the next visit starts at the practice grade again.
     function test_8p_browsing_keeps_practice() {
@@ -3393,7 +3402,7 @@ TestCase {
         wait(500)       // Kirigami slides the page in
         const hint = findChild(today, "practiceGradeHint")
         compare(today.grade, "k5")
-        compare(hint.text, qsTranslate("TodayPage", "up to %1 (from My grades)").arg("5. Kyu"))
+        compare(hint.text, qsTranslate("TodayPage", "up to %1 (first grade, nothing in My grades yet)").arg("5. Kyu"))
         const dueIds = () => today.due.map(r => r.id).join()
         const dueUpToK5 = dueIds()
 
@@ -3438,6 +3447,8 @@ TestCase {
         PracticeGrade.setGrade(discipline, "k5")
     }
 
+    // Hon-Menkyo and Menkyo-Kaiden: a chip with "–" and a card instead of the list; the grade the
+    // other pages use stays.
     function test_8p_grade_without_forms() {
         const width = window.width, height = window.height
         window.width = 360

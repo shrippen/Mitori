@@ -11,7 +11,7 @@ import Mitori
 // (app-entscheidungen.md, "Tablet quer") list and small player are one page: a row with a video
 // plays beside the list, one without opens the sheet. Opened, the page is silent: the video stands
 // until the first tap. A grade without forms (Hon-Menkyo) shows a card instead of the list; it
-// stays on this page, other pages keep the grade chosen last.
+// stays on this page, like every grade browsed here.
 Kirigami.Page {
     id: page
 

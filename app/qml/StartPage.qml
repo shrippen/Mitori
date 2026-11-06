@@ -6,7 +6,7 @@ import "coursedays.js" as CourseDays
 import "grades.js" as Grades
 
 // Start menu (clickdummy "Startmenü", variant 1): tiles; the programme tile shows the discipline
-// and grade chosen last. More tiles come with their features (ROADMAP.md).
+// chosen last and its practice grade. More tiles come with their features (ROADMAP.md).
 Kirigami.ScrollablePage {
     id: page
 
