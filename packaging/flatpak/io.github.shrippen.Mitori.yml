@@ -22,8 +22,8 @@ finish-args:
 
 # The app password: in the sandbox libsecret (runtime) keeps it in an encrypted file under the app's
 # data, keyed by the Secret portal; that needs no permission. Deliberately no
-# --talk-name=org.freedesktop.secrets: it would open all the user's secrets to the app. Without
-# the portal the settings show a note. (Who wants it: flatpak override --user --talk-name=…)
+# --talk-name=org.freedesktop.secrets: it would open all the user's secrets to the app, and with
+# the portal libsecret ignores it anyway. Without the portal the settings show a note.
 modules:
   # The system's key store (store/secretstore).
   - name: qtkeychain

@@ -301,6 +301,13 @@ if(MITORI_SHINKI OR MITORI_BUILD_TESTS)
     target_compile_definitions(mitori_app PRIVATE MITORI_SHINKI_FILES)
 endif()
 
+# QtKeychain's licence asks that binaries carry it: it is shown in "About Mitori".
+qt_add_resources(mitori_app "licences"
+    PREFIX "/licences"
+    BASE third_party/qtkeychain
+    FILES third_party/qtkeychain/COPYING
+)
+
 # Monocypher (app/third_party, BSD-2-Clause / CC0): Argon2id, BLAKE2b and XChaCha20-Poly1305 for the
 # video bundles (store/bundlecrypto).
 add_library(monocypher STATIC third_party/monocypher/monocypher.c third_party/monocypher/monocypher.h)

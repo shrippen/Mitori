@@ -75,6 +75,13 @@ Kirigami.ScrollablePage {
             color: Look.mutedTextColor
             text: qsTr("Programme data %1").arg(Programme.dataVersion)
         }
+        LookLabel {
+            objectName: "keychainLicence"
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+            color: Look.mutedTextColor
+            text: Appearance.keychainLicence
+        }
         Repeater {
             model: Programme.disciplines
 

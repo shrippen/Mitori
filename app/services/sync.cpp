@@ -37,7 +37,7 @@ Sync::Sync(QObject *parent)
 {
     // After the start (the app is up first), then once a day while it runs.
     m_daily.setInterval(kDailyMs);
-    connect(&m_daily, &QTimer::timeout, this, &Sync::syncNow);
+    connect(&m_daily, &QTimer::timeout, this, &Sync::scheduled);
     if (enabled()) {
         m_soon.start(kStartDelayMs);
         m_daily.start();
@@ -54,7 +54,7 @@ Sync::Sync(const QString &practice, const QString &courses, const QString &media
     , m_account(folder, std::move(store))
 {
     m_soon.setSingleShot(true);
-    connect(&m_soon, &QTimer::timeout, this, &Sync::syncNow);
+    connect(&m_soon, &QTimer::timeout, this, &Sync::scheduled);
     connect(&m_watcher, &QFutureWatcher<SyncJob::Output>::finished, this, &Sync::finished);
     connect(&m_account, &SyncAccount::secretChanged, this, &Sync::secretFound);
     m_account.loadSecret();
@@ -72,6 +72,7 @@ void Sync::setEnabled(bool on)
     }
     m_account.setEnabled(on ? SyncAccount::Toggle::On : SyncAccount::Toggle::Off);
     if (on) {
+        m_account.loadSecret();
         m_daily.start();
     } else {
         m_daily.stop();
@@ -115,6 +116,38 @@ void Sync::setAccount(const QString &server, const QString &user, const QString 
     m_account.setAccount(a);
     m_account.setName(name);
     emit accountChanged();
+}
+
+Sync::PasswordNote Sync::passwordNote() const
+{
+    switch (m_account.secret()) {
+    case SyncAccount::Secret::Moving:
+        return PasswordNote::MovingToStore;
+    case SyncAccount::Secret::File:
+        return PasswordNote::RefusedByStore;
+    case SyncAccount::Secret::NotRemoved:
+        return PasswordNote::NotRemovedFromFile;
+    case SyncAccount::Secret::NotSaved:
+        return PasswordNote::NotSaved;
+    case SyncAccount::Secret::Unreadable:
+        return PasswordNote::Unreadable;
+    default:
+        return PasswordNote::NoNote;
+    }
+}
+
+bool Sync::passwordInFile() const
+{
+    const PasswordNote note = passwordNote();
+    return note == PasswordNote::MovingToStore || note == PasswordNote::RefusedByStore
+           || note == PasswordNote::NotRemovedFromFile;
+}
+
+void Sync::scheduled()
+{
+    if (!passwordUnreadable()) {
+        syncNow();
+    }
 }
 
 bool Sync::syncNow()
@@ -163,7 +196,7 @@ void Sync::secretFound()
     }
     m_waiting = false;
     if (passwordUnreadable()) {
-        setError(tr("The key store does not give out the app password. Unlock it, or enter the password again."));
+        setError(tr("The key store did not give out the app password: see the note at the password."));
         return;
     }
     if (!enabled()) {

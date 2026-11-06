@@ -144,20 +144,31 @@ private:
 };
 
 // A key store in memory, late as the real one. `answer` is what it says; with `held` it waits for
-// release(), like a wallet waiting to be unlocked.
+// release(), like a wallet waiting to be unlocked. It can also lie as the real ones do:
+//   losesWrites   says Ok, stores nothing (KWallet: writePassword fails, QtKeychain reports no error)
+//   readsEmpty    says Ok with no text (KWallet: readPassword fails)
+//   hidesEntry    says NotFound though it has it (libsecret: unlocking refused; another backend)
 class FakeSecretStore : public SecretStore
 {
 public:
     QHash<QString, QString> entries;
     Result answer = Result::Ok;
     bool held = false;
+    bool losesWrites = false;
+    bool readsEmpty = false;
+    bool hidesEntry = false;
     int asked = 0;
 
     void read(const QString &key, QObject *context, ReadDone done) override
     {
         ++asked;
         respond(context, [this, key, done = std::move(done)] {
-            const Result result = answer == Result::Ok && !entries.contains(key) ? Result::NotFound : answer;
+            if (readsEmpty) {
+                done(Result::Ok, QString());
+                return;
+            }
+            const bool hidden = hidesEntry || !entries.contains(key);
+            const Result result = answer == Result::Ok && hidden ? Result::NotFound : answer;
             done(result, result == Result::Ok ? entries.value(key) : QString());
         });
     }
@@ -166,7 +177,7 @@ public:
     {
         ++asked;
         respond(context, [this, key, secret, done = std::move(done)] {
-            if (answer == Result::Ok) {
+            if (answer == Result::Ok && !losesWrites) {
                 entries.insert(key, secret);
             }
             done(answer);
@@ -231,6 +242,22 @@ class TstSync : public QObject
         s.setValue(u"konto/user"_s, u"ich"_s);
         s.setValue(u"konto/password"_s, password);
         s.setValue(u"konto/enabled"_s, true);
+    }
+
+    // An account whose password went to the store.
+    static void saved(const Device &d, const QString &server)
+    {
+        Sync first(d.practice, d.courses, d.media, d.folder, d.store);
+        first.setAccount(server, u"ich"_s, u"geheim"_s, u"X"_s);
+        first.setEnabled(true);
+        QVERIFY(QTest::qWaitFor([&] { return !d.store->entries.isEmpty() && fileHas(d, "passwordInStore"); }, 5000));
+    }
+
+    // A folder in the file's place: no write can succeed, also for root (the CI's container).
+    static void blockFile(const Device &d)
+    {
+        QVERIFY(QFile::remove(accountFile(d)));
+        QVERIFY(QDir().mkdir(accountFile(d)));
     }
 
     static bool fileHas(const Device &d, const QByteArray &text)
@@ -433,6 +460,193 @@ private slots:
         d.store->answer = SecretStore::Result::Ok;
         QVERIFY2(synced(sync), qPrintable(sync.errorString()));
         QVERIFY(!sync.passwordUnreadable());
+    }
+
+    // The store says Ok and stored nothing: read back, the password stays in the file.
+    void writeThatLies()
+    {
+        const Device d = device(u"schreiblug"_s);
+        oldAccount(d, u"https://example.org/dav/"_s, u"geheim"_s);
+        d.store->losesWrites = true;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_VERIFY(d.store->asked >= 2);
+        QTest::qWait(10);
+        QVERIFY(fileHas(d, "geheim"));
+        QVERIFY(sync.passwordInFile());
+    }
+
+    // Read back as Ok with no text: the same, it is no proof.
+    void readBackEmpty()
+    {
+        const Device d = device(u"leerlesen"_s);
+        oldAccount(d, u"https://example.org/dav/"_s, u"geheim"_s);
+        d.store->readsEmpty = true;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_VERIFY(d.store->asked >= 2);
+        QTest::qWait(10);
+        QVERIFY(fileHas(d, "geheim"));
+        QVERIFY(sync.passwordInFile());
+    }
+
+    // A new password the store only pretends to take lands in the file.
+    void newPasswordLost()
+    {
+        const Device d = device(u"neulug"_s);
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        d.store->losesWrites = true;
+        sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, u"geheim"_s, u"X"_s);
+        QTRY_VERIFY(sync.passwordInFile());
+        QVERIFY(fileHas(d, "geheim"));
+    }
+
+    // Marked, read gives Ok with no text: unreadable, the mark stays, no empty login.
+    void readEmptyOnStart()
+    {
+        FakeDav dav;
+        const Device d = device(u"leerstart"_s);
+        saved(d, dav.url());
+        d.store->readsEmpty = true;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_VERIFY(sync.passwordUnreadable());
+        QVERIFY(fileHas(d, "passwordInStore"));
+        QCOMPARE(dav.requests, 0);
+    }
+
+    // NotFound can be a refused unlock or another backend: the mark stays, it shows as unreadable,
+    // the next start asks again and finds it.
+    void notFoundKeepsMark()
+    {
+        FakeDav dav;
+        const Device d = device(u"versteckt"_s);
+        saved(d, dav.url());
+        d.store->hidesEntry = true;
+        {
+            Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+            QTRY_VERIFY(sync.passwordUnreadable());
+            QVERIFY(sync.hasPassword());
+            QVERIFY(fileHas(d, "passwordInStore"));
+        }
+
+        d.store->hidesEntry = false;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QVERIFY2(synced(sync), qPrintable(sync.errorString()));
+    }
+
+    // Really gone: entering it anew solves it.
+    void lostEntryEnteredAnew()
+    {
+        FakeDav dav;
+        const Device d = device(u"verloren"_s);
+        saved(d, dav.url());
+        d.store->entries.clear();
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_VERIFY(sync.passwordUnreadable());
+        sync.setAccount(dav.url(), u"ich"_s, u"geheim"_s, u"X"_s);
+        QTRY_VERIFY(!sync.passwordUnreadable());
+        QVERIFY2(synced(sync), qPrintable(sync.errorString()));
+    }
+
+    // Two data folders on one store (profiles, test runs): neither overwrites the other's password.
+    void keyPerFolder()
+    {
+        QTemporaryDir one;
+        QTemporaryDir two;
+        auto store = std::make_shared<FakeSecretStore>();
+        const QUrl server(u"https://example.org/dav/"_s);
+        {
+            SyncAccount a(one.path(), store);
+            SyncAccount b(two.path(), store);
+            a.setEnabled(SyncAccount::Toggle::On);
+            a.setAccount({server, u"a"_s, u"PASS_A"_s});
+            b.setAccount({server, u"b"_s, u"PASS_B"_s});
+            QTRY_COMPARE(a.secret(), SyncAccount::Secret::KeyStore);
+            QTRY_COMPARE(b.secret(), SyncAccount::Secret::KeyStore);
+        }
+        SyncAccount a(one.path(), store);
+        a.loadSecret();
+        QTRY_COMPARE(a.secret(), SyncAccount::Secret::KeyStore);
+        QCOMPARE(a.account().password, u"PASS_A"_s);
+    }
+
+    // Sync off: no question to the store on start, whatever is saved. Switched on, it asks.
+    void offAsksNothing()
+    {
+        FakeDav dav;
+        const Device d = device(u"aus"_s);
+        saved(d, dav.url());
+        QSettings(accountFile(d), QSettings::IniFormat).setValue(u"konto/enabled"_s, false);
+        const int before = d.store->asked;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTest::qWait(10);
+        QCOMPARE(d.store->asked, before);
+        QVERIFY(sync.hasPassword());
+
+        sync.setEnabled(true);
+        QVERIFY2(synced(sync), qPrintable(sync.errorString()));
+        QVERIFY(d.store->asked > before);
+    }
+
+    // Sync off with a password still in the file: it stays, with the note, until sync is on.
+    void offLeavesFile()
+    {
+        const Device d = device(u"ausdatei"_s);
+        oldAccount(d, u"https://example.org/dav/"_s, u"geheim"_s);
+        QSettings(accountFile(d), QSettings::IniFormat).setValue(u"konto/enabled"_s, false);
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTest::qWait(10);
+        QCOMPARE(d.store->asked, 0);
+        QVERIFY(sync.passwordInFile());
+        QVERIFY(fileHas(d, "geheim"));
+
+        sync.setEnabled(true);
+        QTRY_VERIFY(!sync.passwordInFile());
+        QVERIFY(!fileHas(d, "geheim"));
+    }
+
+    // A refused store is asked again by the button, not by the timers (a prompt every 30 s).
+    void timersDoNotAsk()
+    {
+        FakeDav dav;
+        const Device d = device(u"zeitgeber"_s);
+        saved(d, dav.url());
+        d.store->answer = SecretStore::Result::Failed;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QTRY_VERIFY(sync.passwordUnreadable());
+
+        const int before = d.store->asked;
+        QVERIFY(QMetaObject::invokeMethod(&sync, "scheduled"));
+        QTest::qWait(10);
+        QCOMPARE(d.store->asked, before);
+
+        QVERIFY(sync.syncNow());
+        QTRY_VERIFY(d.store->asked > before);
+    }
+
+    // konto.ini cannot be rewritten: the note says what really is the case, not "no key store".
+    void fileNotWritable()
+    {
+        const Device d = device(u"nichtschreibbar"_s);
+        oldAccount(d, u"https://example.org/dav/"_s, u"geheim"_s);
+        d.store->held = true;
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        QCOMPARE(sync.passwordNote(), Sync::PasswordNote::MovingToStore);
+        blockFile(d);
+        d.store->release();
+        QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NotRemovedFromFile);
+    }
+
+    // Neither store nor file: "in memory only", no claim that it lies in a file.
+    void nowhereToSave()
+    {
+        const Device d = device(u"nirgends"_s);
+        Sync sync(d.practice, d.courses, d.media, d.folder, d.store);
+        d.store->held = true;
+        d.store->answer = SecretStore::Result::Failed;
+        sync.setAccount(u"https://example.org/dav/"_s, u"ich"_s, u"geheim"_s, u"X"_s);
+        blockFile(d);
+        d.store->release();
+        QTRY_COMPARE(sync.passwordNote(), Sync::PasswordNote::NotSaved);
+        QVERIFY(!sync.passwordInFile());
     }
 
     // Nobody who has no password is bothered by a wallet's unlock prompt.

@@ -160,23 +160,45 @@ Kirigami.ScrollablePage {
                 onEditingFinished: page.saveAccount()
             }
         }
+        // Where the password is when not simply in the key store; with sync off too, it still lies there.
         LookHint {
-            objectName: "syncPasswordInFile"
+            readonly property bool android: Qt.platform.os === "android"
+
+            objectName: "syncPasswordNote"
             Layout.fillWidth: true
-            visible: Sync.enabled && Sync.passwordInFile
-            importance: LookHint.Importance.Important
-            titleText: qsTr("App password lies in a file")
-            text: Qt.platform.os === "android"
-                  ? qsTr("The Android key store did not take it, so it lies unencrypted in Mitori's sync folder. Restart Mitori: it tries again by itself. If this note stays, use an app password you can revoke on the server.")
-                  : qsTr("No key store took it, so it lies unencrypted in Mitori's sync folder. Set up and unlock KWallet, GNOME Keyring or another Secret Service (for the Flatpak: with the desktop's secrets portal), then restart Mitori: it moves the password by itself.")
-        }
-        LookHint {
-            objectName: "syncPasswordUnreadable"
-            Layout.fillWidth: true
-            visible: Sync.enabled && Sync.passwordUnreadable
-            importance: LookHint.Importance.Error
-            titleText: qsTr("App password cannot be read")
-            text: qsTr("The key store does not give it out, so Mitori cannot sync. Unlock it and press “Sync now”, or enter the password again.")
+            visible: Sync.passwordNote !== Sync.NoNote
+            importance: Sync.passwordNote === Sync.MovingToStore && Sync.enabled ? LookHint.Importance.Info
+                      : Sync.passwordNote === Sync.Unreadable || Sync.passwordNote === Sync.NotSaved ? LookHint.Importance.Error
+                      : LookHint.Importance.Important
+            titleText: {
+                switch (Sync.passwordNote) {
+                case Sync.Unreadable: return qsTr("App password cannot be read")
+                case Sync.NotSaved: return qsTr("App password not saved")
+                default: return qsTr("App password lies in a file")
+                }
+            }
+            text: {
+                switch (Sync.passwordNote) {
+                case Sync.MovingToStore:
+                    if (!Sync.enabled) {
+                        return qsTr("It lies unencrypted in Mitori's sync folder. With sync on, Mitori moves it to the key store.")
+                    }
+                    return android ? qsTr("Mitori is handing it to the Android key store. Until that is confirmed, it lies unencrypted in Mitori's sync folder.")
+                                   : qsTr("Mitori is handing it to the key store. Until that is confirmed, it lies unencrypted in Mitori's sync folder. If the key store asks to be unlocked, unlock it.")
+                case Sync.RefusedByStore:
+                    return android ? qsTr("The Android key store did not take it, so it lies unencrypted in Mitori's sync folder. Restart Mitori: it tries again by itself. If this note stays, use an app password you can revoke on the server.")
+                                   : qsTr("No key store took it, so it lies unencrypted in Mitori's sync folder. Set up and unlock KWallet, GNOME Keyring or another Secret Service (for the Flatpak: with the desktop's secrets portal), then restart Mitori: it moves the password by itself.")
+                case Sync.NotRemovedFromFile:
+                    return qsTr("The key store holds it, but Mitori could not rewrite the file konto.ini in its sync folder, so it also still lies there unencrypted. Check the free space and the folder's rights, then restart Mitori.")
+                case Sync.NotSaved:
+                    return qsTr("Neither the key store nor the file konto.ini took it: it is gone when Mitori closes. Check the free space and the sync folder's rights, then enter it again.")
+                case Sync.Unreadable:
+                    return android ? qsTr("The Android key store does not give it out or no longer holds it, so Mitori cannot sync. Press “Sync now” to ask again, or enter the password again.")
+                                   : qsTr("The key store does not give it out or no longer holds it, so Mitori cannot sync. Unlock it and press “Sync now”, or enter the password again.")
+                default:
+                    return ""
+                }
+            }
         }
         LookFormRow {
             label: qsTr("This device")

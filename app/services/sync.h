@@ -27,9 +27,8 @@ class Sync : public QObject
     Q_PROPERTY(QString server READ server NOTIFY accountChanged)
     Q_PROPERTY(QString user READ user NOTIFY accountChanged)
     Q_PROPERTY(bool hasPassword READ hasPassword NOTIFY accountChanged)
-    // No key store took the password, it lies in a file; or the store does not give it out.
-    Q_PROPERTY(bool passwordInFile READ passwordInFile NOTIFY accountChanged)
-    Q_PROPERTY(bool passwordUnreadable READ passwordUnreadable NOTIFY accountChanged)
+    // Why the password is not simply in the key store; the settings say so.
+    Q_PROPERTY(PasswordNote passwordNote READ passwordNote NOTIFY accountChanged)
     Q_PROPERTY(QString deviceName READ deviceName NOTIFY accountChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(QDateTime lastSync READ lastSync NOTIFY stateChanged)
@@ -40,6 +39,9 @@ class Sync : public QObject
 public:
     enum class Choice { Mine, Theirs, Both };
     Q_ENUM(Choice)
+
+    enum class PasswordNote { NoNote, MovingToStore, RefusedByStore, NotRemovedFromFile, NotSaved, Unreadable };
+    Q_ENUM(PasswordNote)
 
     explicit Sync(QObject *parent = nullptr);
     // For tests: files, folders and key store of their own, no timers.
@@ -54,7 +56,8 @@ public:
     QString server() const { return m_account.account().folder.toString(); }
     QString user() const { return m_account.account().user; }
     bool hasPassword() const { return m_account.secret() != SyncAccount::Secret::None; }
-    bool passwordInFile() const { return m_account.secret() == SyncAccount::Secret::File; }
+    PasswordNote passwordNote() const;
+    bool passwordInFile() const;
     bool passwordUnreadable() const { return m_account.secret() == SyncAccount::Secret::Unreadable; }
     QString deviceName() const;
     bool busy() const { return m_busy; }
@@ -85,6 +88,11 @@ signals:
     void busyChanged();
     void stateChanged();
     void merged();
+
+private slots:
+    // What the timers start. Not the button: a store that refused is asked again only by it, not
+    // with a prompt every 30 s.
+    void scheduled();
 
 private:
     void finished();

@@ -1,5 +1,6 @@
 #include "syncaccount.h"
 
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -20,11 +21,19 @@ const QString kConflictFile = QStringLiteral("konflikte.json");
 const QString kBaseFile = QStringLiteral("basis.json");
 const QString kPassword = QStringLiteral("konto/password");
 const QString kInStore = QStringLiteral("konto/passwordInStore");
-const QString kStoreKey = QStringLiteral("webdav-app-password");
+const QString kStoreKey = QStringLiteral("webdav-app-password-%1");
+constexpr int kFolderHashLength = 12;
 
 QString iso(const QDateTime &t)
 {
     return t.toUTC().toString(Qt::ISODateWithMs);
+}
+
+// webdav-app-password-3f2a…, the same for the same folder.
+QString storeKey(const QString &folder)
+{
+    const QByteArray path = QDir(folder).absolutePath().toUtf8();
+    return kStoreKey.arg(QString::fromLatin1(QCryptographicHash::hash(path, QCryptographicHash::Sha256).toHex().left(kFolderHashLength)));
 }
 
 QDateTime fromIso(const QJsonValue &v)
@@ -36,6 +45,7 @@ QDateTime fromIso(const QJsonValue &v)
 
 SyncAccount::SyncAccount(const QString &folder, std::shared_ptr<SecretStore> store)
     : m_folder(folder)
+    , m_storeKey(storeKey(folder))
     , m_store(std::move(store))
 {
 }
@@ -63,7 +73,7 @@ void SyncAccount::setAccount(const WebDav::Account &account)
     const auto s = settings();
     s->setValue(QStringLiteral("konto/server"), account.folder.toString());
     s->setValue(QStringLiteral("konto/user"), account.user);
-    // For its owner only: the password may land in it (stored()).
+    // For its owner only: the password may land in it (keepInFile()).
     s->sync();
     QFile::setPermissions(s->fileName(), QFile::ReadOwner | QFile::WriteOwner);
 
@@ -77,14 +87,20 @@ void SyncAccount::setAccount(const WebDav::Account &account)
 
 void SyncAccount::loadSecret()
 {
+    if (m_secret == Secret::Asking || m_secret == Secret::KeyStore) {
+        return;
+    }
     const auto s = settings();
+    const bool on = enabled();
 
     // Not moved yet, or the store failed last time: usable now, whatever the store answers.
     const QString inFile = s->value(kPassword).toString();
     if (!inFile.isEmpty()) {
         m_password = inFile;
-        setSecret(Secret::File);
-        storeSecret();
+        setSecret(Secret::Moving);
+        if (on) {
+            storeSecret();
+        }
         return;
     }
 
@@ -92,10 +108,14 @@ void SyncAccount::loadSecret()
         setSecret(Secret::None);
         return;
     }
+    if (!on) {
+        setSecret(Secret::Unasked);
+        return;
+    }
 
     setSecret(Secret::Asking);
     const quint64 asked = ++m_asked;
-    m_store->read(kStoreKey, this, [this, asked](SecretStore::Result result, const QString &password) {
+    m_store->read(m_storeKey, this, [this, asked](SecretStore::Result result, const QString &password) {
         if (asked == m_asked) {
             found(result, password);
         }
@@ -104,13 +124,9 @@ void SyncAccount::loadSecret()
 
 void SyncAccount::found(SecretStore::Result result, const QString &password)
 {
-    if (result == SecretStore::Result::Failed) {
+    // Empty is no password, NotFound no proof that it is gone: the mark stays, the next start asks.
+    if (result != SecretStore::Result::Ok || password.isEmpty()) {
         setSecret(Secret::Unreadable);
-        return;
-    }
-    if (result == SecretStore::Result::NotFound || password.isEmpty()) {
-        settings()->remove(kInStore);
-        setSecret(Secret::None);
         return;
     }
     m_password = password;
@@ -120,30 +136,50 @@ void SyncAccount::found(SecretStore::Result result, const QString &password)
 void SyncAccount::storeSecret()
 {
     const quint64 asked = ++m_asked;
-    m_store->write(kStoreKey, m_password, this, [this, asked](SecretStore::Result result) {
-        if (asked == m_asked) {
-            stored(result);
+    m_store->write(m_storeKey, m_password, this, [this, asked](SecretStore::Result result) {
+        if (asked != m_asked) {
+            return;
+        }
+        if (result == SecretStore::Result::Ok) {
+            checkStored();
+        } else {
+            keepInFile();
         }
     });
 }
 
-void SyncAccount::stored(SecretStore::Result result)
+// Only what reads back counts as stored.
+void SyncAccount::checkStored()
+{
+    const quint64 asked = ++m_asked;
+    m_store->read(m_storeKey, this, [this, asked](SecretStore::Result result, const QString &password) {
+        if (asked != m_asked) {
+            return;
+        }
+        if (result == SecretStore::Result::Ok && password == m_password) {
+            commitStored();
+        } else {
+            keepInFile();
+        }
+    });
+}
+
+void SyncAccount::commitStored()
 {
     const auto s = settings();
+    s->remove(kPassword);
+    s->setValue(kInStore, true);
+    s->sync();
+    setSecret(s->status() == QSettings::NoError ? Secret::KeyStore : Secret::NotRemoved);
+}
 
-    // Confirmed: out of the file. If that cannot be written it stays there, and says so.
-    if (result == SecretStore::Result::Ok) {
-        s->remove(kPassword);
-        s->setValue(kInStore, true);
-        s->sync();
-        setSecret(s->status() == QSettings::NoError ? Secret::KeyStore : Secret::File);
-        return;
-    }
-
+void SyncAccount::keepInFile()
+{
+    const auto s = settings();
     s->setValue(kPassword, m_password);
     s->sync();
     QFile::setPermissions(s->fileName(), QFile::ReadOwner | QFile::WriteOwner);
-    setSecret(Secret::File);
+    setSecret(s->status() == QSettings::NoError ? Secret::File : Secret::NotSaved);
 }
 
 void SyncAccount::setSecret(Secret secret)

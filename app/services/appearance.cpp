@@ -1,6 +1,7 @@
 #include "appearance.h"
 
 #include <QDir>
+#include <QFile>
 #include <QLocale>
 #include <QDirIterator>
 #include <QFontDatabase>
@@ -110,6 +111,12 @@ bool Appearance::restartNeeded() const
 QString Appearance::version() const
 {
     return QStringLiteral(MITORI_VERSION);
+}
+
+QString Appearance::keychainLicence() const
+{
+    QFile file(QStringLiteral(":/licences/COPYING"));
+    return file.open(QIODevice::ReadOnly) ? QString::fromUtf8(file.readAll()) : QString();
 }
 
 QStringList Appearance::importPaths() const

@@ -17,7 +17,7 @@ class QSettings;
 // the open conflicts.
 //
 //   sync/konto.ini        [konto] server, user, passwordInStore, name, enabled, auto
-//                                 password only while no key store took it (Secret::File)
+//                                 password only while the key store does not hold it
 //                         [stand] id, last, devices (JSON)
 //   sync/konflikte.json   [{table, uid, parent, mine, theirs, …}]
 //   sync/basis.json       {uid: changed}  each row as last synced (TableMerge::Watch)
@@ -28,12 +28,17 @@ class QSettings;
 // The app password lies in the key store (SecretStore), which answers later. account() gives it
 // from memory, so the UI thread never waits and the sync's thread never sees the store:
 //
-//   start   in the file   usable at once; moved, and removed from the file once the store confirms
+//   start   in the file   usable at once; moved (below)
 //           marked        read from the store (Asking); a sync asked for meanwhile waits (Sync)
 //           neither       no password: the store is not touched, no unlock prompt for non-users
-//   new                   to the store; only if that fails into the file, with a note (File)
+//           sync off      the store is not touched; switched on, the same as a start
+//   new                   moved, never written to the file unless that fails
 //
-// A password in the file is the newest: each start tries to move it again.
+//   move    write, read back, compare; only then out of the file and marked. "Ok" proves nothing:
+//           KWallet reports it for a failed write, and an empty read. Anything else: in the file.
+//
+// A password in the file is the newest: each start tries to move it again. The mark stays until a
+// new password replaces it: "not found" may be a refused unlock or another backend (Unreadable).
 class SyncAccount : public QObject
 {
     Q_OBJECT
@@ -48,12 +53,23 @@ public:
     enum class Toggle { Off, On };
 
     // Where the app password is.
-    enum class Secret { None, Asking, KeyStore, File, Unreadable };
+    enum class Secret {
+        None,
+        Unasked,        // marked, but sync is off: the store was not asked
+        Asking,         // the store reads it, or takes a new one (in memory until it answers)
+        KeyStore,
+        Moving,         // in the file; the store did not answer yet (with sync off: was not asked)
+        File,           // in the file: the store did not take it
+        NotRemoved,     // the store holds it, but the file could not be rewritten: in both
+        NotSaved,       // neither store nor file took it: in memory only
+        Unreadable,     // marked, the store does not give it out
+    };
 
     SyncAccount(const QString &folder, std::shared_ptr<SecretStore> store);
     static QString defaultFolder();
 
-    // Finds the password (the table above); secretChanged() as its place changes.
+    // Finds the password (the table above), unless known or on its way; secretChanged() as its
+    // place changes.
     void loadSecret();
     Secret secret() const { return m_secret; }
 
@@ -90,10 +106,13 @@ private:
 
     void setSecret(Secret secret);
     void storeSecret();
-    void stored(SecretStore::Result result);
+    void checkStored();
+    void commitStored();
+    void keepInFile();
     void found(SecretStore::Result result, const QString &password);
 
     QString m_folder;
+    QString m_storeKey;         // of this data folder: profiles and test runs keep theirs
     std::shared_ptr<SecretStore> m_store;
     QString m_password;
     Secret m_secret = Secret::None;

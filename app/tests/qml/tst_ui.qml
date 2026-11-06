@@ -135,6 +135,7 @@ TestCase {
         compare(Appearance.language, Appearance.Language.German)
         verify(hint.visible)
         verify(findChild(page, "aboutText").text.indexOf(Appearance.version) >= 0)
+        verify(findChild(page, "keychainLicence").text.indexOf("Frank Osterfeld") >= 0)
         verify(Appearance.version !== "")
         verify(/^\D*\d{4}\.\d{1,2}\.\d+$/.test(findChild(page, "dataVersion").text))
         shot("0b-appearance")
@@ -664,7 +665,7 @@ TestCase {
     function test_3e_sync_password_in_file() {
         const page = push("SettingsPage")
         Sync.enabled = true
-        const hint = findChild(page, "syncPasswordInFile")
+        const hint = findChild(page, "syncPasswordNote")
         verify(!hint.visible)
         Sync.setAccount("https://cloud.example.org/dav/", "ich", "nur-ein-test", "")
         tryVerify(() => hint.visible, 10000)
@@ -674,6 +675,7 @@ TestCase {
         wait(50)
         shot("4e-sync-password-file")
         Sync.enabled = false
+        verify(hint.visible, "it still lies there with sync off")
         window.pageStack.pop()
     }
 
