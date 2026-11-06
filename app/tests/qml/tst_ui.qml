@@ -627,13 +627,20 @@ TestCase {
         verify(Qt.colorEqual(page.Kirigami.Theme.textColor, Look.textColor),
                page.Kirigami.Theme.textColor + " is not " + Look.textColor)
         shot("4b-settings")
+        // Each setting leads to its page.
+        for (const [row, title] of [["videosButton", "Videos"], ["backupButton", "Backup and sync"], ["appearanceButton", "Appearance"]]) {
+            findChild(page, row).clicked()
+            tryVerify(() => window.pageStack.currentItem !== page && window.pageStack.currentItem.title === title)
+            window.pageStack.pop()
+            tryVerify(() => window.pageStack.currentItem === page)
+        }
         window.pageStack.pop()
     }
 
     // Sync off: its rows go with their fields, no name stands over nothing.
     function test_3b_settings_sync_off() {
         Sync.enabled = false
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         const names = ["Folder on the server:", "User:", "App password:", "This device:"].map(t => qsTr(t))
         const shown = allChildren(page.contentItem).filter(c => names.indexOf(c.text) >= 0 && c.visible)
         compare(shown.length, 0, "rows without a field: " + shown.map(c => c.text))
@@ -643,7 +650,7 @@ TestCase {
     // Sync: switched on it shows the account; without one "Sync now" says what is missing. The
     // conflicts page without conflicts says so.
     function test_3d_sync() {
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         verify(!findChild(page, "syncServer").visible)
         Sync.enabled = true
         tryVerify(() => findChild(page, "syncServer").visible)
@@ -663,7 +670,7 @@ TestCase {
     // No key store answers (the test's environment): the password lands in the file, the note says
     // so and what to do. Runs after the case without an account.
     function test_3e_sync_password_in_file() {
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         Sync.enabled = true
         const hint = findChild(page, "syncPasswordNote")
         verify(!hint.visible)
@@ -682,7 +689,7 @@ TestCase {
 
     // Backup: saved, read back on the same device it changes nothing; merging says so.
     function test_3c_backup() {
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         const url = "file://" + uiShotsDir + "/sicherung-test.zip"
         verify(Backup.save(url), Backup.errorString)
 
@@ -711,7 +718,7 @@ TestCase {
     // running sync refuses it plainly, and accepting takes it away, turns the sync off and reloads
     // Practice.
     function test_3d_backup_choices() {
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         const url = "file://" + uiShotsDir + "/sicherung-wahl.zip"
         verify(Backup.save(url), Backup.errorString)
         const entry = Programme.entries("aikido", "k4").filter(r => r.kind === "entry")[0].id
@@ -822,7 +829,7 @@ TestCase {
     // Mitori asks which: both choices in view without scrolling, on small phones and sideways, with
     // the longest preview; only the text scrolls.
     function test_3d_backup_choice_sizes() {
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         const url = "file://" + uiShotsDir + "/sicherung-groessen.zip"
         verify(Backup.save(url), Backup.errorString)
         page.inspect(url)
@@ -860,7 +867,7 @@ TestCase {
     function test_3d_backup_german_footer() {
         window.width = 320
         window.height = 568
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         const url = "file://" + uiShotsDir + "/sicherung-deutsch.zip"
         verify(Backup.save(url), Backup.errorString)
         page.inspect(url)
@@ -890,13 +897,13 @@ TestCase {
                        + " in a dialog from " + dialog.x + " to " + (dialog.x + dialog.width))
             }
         }
-        fits(first, uiCatalog.german("SettingsPage", "Merge"))
+        fits(first, uiCatalog.german("BackupPage", "Merge"))
         shot("4c-backup-choice-de-320", true)
 
         findChild(page, "replaceInstead").clicked()
         const second = findChild(page, "replaceBackup")
         tryVerify(() => second.opened)
-        fits(second, uiCatalog.german("SettingsPage", "Delete and replace"))
+        fits(second, uiCatalog.german("BackupPage", "Delete and replace"))
 
         // The warning shows, not one line of it (the dialog's height follows the text).
         const warning = findChild(page, "replaceText")
@@ -1327,7 +1334,7 @@ TestCase {
         verify(!hint.visible)
         window.pageStack.pop()
 
-        const settings = push("SettingsPage")
+        const settings = push("VideosPage")
         const label = allChildren(settings).filter(c => c.text === qsTr("Video folder") && c.font !== undefined)[0]
         compare(label.font.capitalization, Font.AllUppercase)
         window.pageStack.pop()
@@ -5390,7 +5397,7 @@ TestCase {
         const round = Exam.draw("aikido", "k5", 3, 0)
         for (const [file, props] of [["ProgrammePage", {}], ["TodayPage", {}], ["StatsPage", {}], ["YearsPage", {}], ["AllNotesPage", {}],
                                      ["TechniqueMapPage", {}], ["SearchPage", {}], ["CoursesPage", {}], ["NotebooksPage", {}], ["GradesPage", {}],
-                                     ["SettingsPage", {}], ["VideosPage", {}], ["ScanPage", {}], ["AppearancePage", {}], ["ExamPage", {}],
+                                     ["SettingsPage", {}], ["BackupPage", {}], ["VideosPage", {}], ["ScanPage", {}], ["AppearancePage", {}], ["ExamPage", {}],
                                      ["ExamRoundPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["ExamEndPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["TrainingEndPage", { count: 12 }],

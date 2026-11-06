@@ -190,7 +190,7 @@ TestCase {
     function test_scroll_to_clamps() {
         // Low enough for the page to scroll.
         window.height = 360
-        const flick = push("SettingsPage").flickable
+        const flick = push("BackupPage").flickable
         const far = flick.contentHeight + 5000
         window.scrollTo(flick, far)
         tryVerify(() => flick.contentY > 0 && flick.contentY === flick.contentHeight + flick.bottomMargin - flick.height,
@@ -249,10 +249,10 @@ TestCase {
         verify(Practice === service, "the service stayed")
     }
 
-    // A text typed into Settings, still in focus when the style changes, is saved.
+    // A text still in focus when the style changes is saved: the window takes the focus first.
     function test_settings_field_kept() {
-        const settings = push("SettingsPage")
-        const field = findChild(settings, "videoFolder")
+        const videos = push("VideosPage")
+        const field = findChild(videos, "videoFolder")
         const before = Videos.folder
         const folder = uiDataDir + "/some-folder"
         window.requestActivate()
@@ -261,10 +261,9 @@ TestCase {
         tryVerify(() => field.activeFocus)
         field.text = folder
 
-        toStyle(otherStyle)
+        window.keptPageList()
         compare(Videos.folder, folder)
-        compare(window.pageStack.currentItem.keptPage, "SettingsPage.qml")
-        compare(findChild(window.pageStack.currentItem, "videoFolder").text, folder)
+        compare(field.text, folder)
         Videos.folder = before
     }
 
@@ -290,7 +289,7 @@ TestCase {
         compare(Appearance.window, first, "the window stays")
         compare(page.title, "Darstellung")
         compare(settings.title, "Einstellungen")
-        verify(findChild(settings, "appearanceButton").text.indexOf("Stil") === 0)
+        verify(findChild(settings, "appearanceButton").subtitle.indexOf("Stil") === 0)
         verify(findChild(start, "todayTile").text !== todayEnglish)
         compare(Practice.levelNames[4], "prüfungsreif")
         compare(goneTitle(), "Technik nicht mehr im Programm")

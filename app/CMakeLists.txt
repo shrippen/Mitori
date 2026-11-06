@@ -100,6 +100,7 @@ qt_add_qml_module(mitori_app
         qml/playlists.js
         qml/comment.js
         qml/VideosPage.qml
+        qml/BackupPage.qml
         qml/GradesPage.qml
         qml/grades.js
         qml/MediaView.qml
