@@ -75,22 +75,11 @@
 <context>
     <name>ExamPage</name>
     <message numerus="yes">
-        <location filename="../qml/ExamPage.qml" line="91"/>
+        <location filename="../qml/ExamPage.qml" line="90"/>
         <source>%n point(s)</source>
         <translation>
             <numerusform>%n point</numerusform>
             <numerusform>%n points</numerusform>
-        </translation>
-    </message>
-</context>
-<context>
-    <name>PlayerView</name>
-    <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="704"/>
-        <source>Training done: %n technique(s). They count as a practice day in the statistics.</source>
-        <translation>
-            <numerusform>Training done: %n technique. It counts as a practice day in the statistics.</numerusform>
-            <numerusform>Training done: %n techniques. They count as a practice day in the statistics.</numerusform>
         </translation>
     </message>
 </context>
@@ -159,7 +148,7 @@
 <context>
     <name>StartPage</name>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="92"/>
+        <location filename="../qml/StartPage.qml" line="93"/>
         <source>%n video bundle(s) can be updated.</source>
         <translation>
             <numerusform>%n video bundle can be updated.</numerusform>
@@ -167,7 +156,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="155"/>
+        <location filename="../qml/StartPage.qml" line="157"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n due</numerusform>
@@ -175,7 +164,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="203"/>
+        <location filename="../qml/StartPage.qml" line="204"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -183,7 +172,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="186"/>
+        <location filename="../qml/StartPage.qml" line="187"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>
@@ -217,7 +206,7 @@
 <context>
     <name>TodayPage</name>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="45"/>
+        <location filename="../qml/TodayPage.qml" line="49"/>
         <source>%1 · %n day(s) ago</source>
         <translation>
             <numerusform>%1 · %n day ago</numerusform>
@@ -225,7 +214,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="47"/>
+        <location filename="../qml/TodayPage.qml" line="51"/>
         <source>not practised for %n day(s)</source>
         <translation>
             <numerusform>not practised for %n day</numerusform>
@@ -233,7 +222,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="128"/>
+        <location filename="../qml/TodayPage.qml" line="156"/>
         <source>%n of them without a video on this device: the training shows their name, practise from memory.</source>
         <translation>
             <numerusform>%n of them has no video on this device: the training shows its name, practise it from memory.</numerusform>
@@ -241,11 +230,22 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="147"/>
+        <location filename="../qml/TodayPage.qml" line="175"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>
             <numerusform>%n techniques</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>TrainingEndPage</name>
+    <message numerus="yes">
+        <location filename="../qml/TrainingEndPage.qml" line="65"/>
+        <source>Technique(s) practised and rated. Today counts as a practice day in the statistics.</source>
+        <translation>
+            <numerusform>Technique practised and rated. Today counts as a practice day in the statistics.</numerusform>
+            <numerusform>Techniques practised and rated. Today counts as a practice day in the statistics.</numerusform>
         </translation>
     </message>
 </context>

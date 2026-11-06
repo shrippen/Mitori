@@ -8,8 +8,8 @@ import Mitori
 import "playlists.js" as Playlists
 import "grades.js" as Grades
 
-// Today's practice (clickdummy "Heute üben"): one discipline per session, up to the grade
-// chosen in the programme. Due is what is unsure or long unpractised (days per level, set
+// Today's practice (clickdummy "Heute üben"): one discipline per session, up to the practice
+// grade (from "My grades" or chosen here). Due is what is unsure or long unpractised (days per level, set
 // below), and up to two new techniques of the current grade. "Start training" plays them.
 Kirigami.ScrollablePage {
     id: page
@@ -21,12 +21,16 @@ Kirigami.ScrollablePage {
 
     property string discipline: Programme.discipline
     readonly property var disciplineInfo: Programme.disciplines.find(d => d.id === discipline) || ({})
-    readonly property string gradeName: (Programme.grades(discipline).find(g => g.id === Programme.grade(discipline)) || {}).name || ""
+    readonly property var grades: Programme.grades(discipline)
+    readonly property string grade: PracticeGrade.revision >= 0 ? PracticeGrade.grade(discipline) : ""
+    readonly property bool manualGrade: PracticeGrade.revision >= 0 && PracticeGrade.manual(discipline)
+    readonly property bool anyPassed: Courses.revision >= 0 && Courses.ladder(discipline).some(g => g.passed)
+    readonly property string gradeName: (grades.find(g => g.id === grade) || {}).name || ""
     // The calendar of the last 12 weeks (clickdummy "Heute"); the levels as in the statistics.
     readonly property var perDay: Practice.revision >= 0 && Practice.today.getTime() > 0 ? Practice.practisedPerDay(84) : ({})
     // Re-read after every rating and when the intervals change.
     readonly property var due: Practice.revision >= 0 && Practice.intervals.length === 4 && Practice.today.getTime() > 0
-                               ? Practice.due(Programme.practiceEntries(discipline)) : []
+                               ? Practice.due(Programme.practiceEntries(discipline, grade)) : []
     readonly property int unsure: due.filter(r => r.level === 1 || r.level === 2).length
     readonly property int longAgo: due.filter(r => r.level >= 3).length
     readonly property int fresh: due.filter(r => r.level === 0).length
@@ -47,7 +51,8 @@ Kirigami.ScrollablePage {
         return qsTr("not practised for %n day(s)", "", row.days)
     }
 
-    // Every due technique; one without a video on the device shows as a card in the player.
+    // Every due technique; one without a video on the device shows as a card in the player. What
+    // was rated today is not due: a training done today has nothing to open again.
     function startTraining() {
         const playlist = page.due
         if (playlist.length === 0) {
@@ -70,9 +75,31 @@ Kirigami.ScrollablePage {
             onActivated: index => page.discipline = Programme.disciplines[index].id
             Accessible.name: qsTr("Discipline")
         }
-        LookLabel {
+        Flow {
             Layout.fillWidth: true
-            text: qsTr("up to %1 (as chosen in the programme)").arg(page.gradeName)
+            spacing: Kirigami.Units.smallSpacing
+
+            Repeater {
+                model: page.grades
+
+                LookChip {
+                    required property var modelData
+
+                    objectName: "practice_" + modelData.id
+                    text: modelData.name
+                    checkable: true
+                    choice: true        // the page holds the grade: a tap only reports it
+                    checked: modelData.id === page.grade
+                    onClicked: PracticeGrade.setGrade(page.discipline, modelData.id)
+                }
+            }
+        }
+        LookLabel {
+            objectName: "practiceGradeHint"
+            Layout.fillWidth: true
+            text: page.manualGrade ? qsTr("up to %1 (chosen by you)").arg(page.gradeName)
+                  : page.anyPassed ? qsTr("up to %1 (from My grades)").arg(page.gradeName)
+                                   : qsTr("up to %1 (first grade, nothing in My grades yet)").arg(page.gradeName)
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
@@ -92,7 +119,7 @@ Kirigami.ScrollablePage {
                 text: qsTr("Mock exam")
                 onClicked: {
                     Programme.discipline = page.exam.discipline
-                    Programme.setGrade(page.exam.discipline, page.exam.grade)
+                    PracticeGrade.setGrade(page.exam.discipline, page.exam.grade)
                     page.Kirigami.PageStack.push(Qt.resolvedUrl("ExamPage.qml"))
                 }
             }
@@ -116,6 +143,7 @@ Kirigami.ScrollablePage {
             }
         }
         LookButton {
+            objectName: "startTraining"
             visible: page.due.length > 0
             role: LookButton.Role.Primary
             icon.name: "media-playback-start"
