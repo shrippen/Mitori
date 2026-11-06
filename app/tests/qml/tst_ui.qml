@@ -4010,8 +4010,6 @@ TestCase {
         Programme.discipline = "aikido"
     }
 
-    // A sheet left beside the list, turned under another page: the dialog of a technique with a
-    // video, turned back, shows the player, not the old sheet over it.
     // By keyboard the chips are in reach and in view: Shift+Tab from the first row reaches them,
     // and focus coming to them from above takes the scrolled list back to its top.
     function test_2v_i_chips_by_keyboard() {
@@ -4052,16 +4050,36 @@ TestCase {
         list.positionViewAtEnd()
         wait(200)
         verify(chip.mapToItem(list, 0, 0).y < 0, "scrolled past the chips")
-        window.contentItem.forceActiveFocus()
-        chip.forceActiveFocus(Qt.TabFocusReason)
+        const head = list.headerItem
+        head.nextItemInFocusChain(false).forceActiveFocus(Qt.TabFocusReason)
+        verify(!inHead(window.activeFocusItem))
+        keyClick(Qt.Key_Tab)
+        const entered = window.activeFocusItem
+        verify(inHead(entered), "Tab from above: " + entered)
         tryVerify(() => {
-            const top = chip.mapToItem(list, 0, 0).y
-            return top >= 0 && top + chip.height <= list.height
-        }, 2000, "the chip in view")
+            const top = entered.mapToItem(list, 0, 0).y
+            return top >= 0 && top + entered.height <= list.height
+        }, 2000, "the head in view")
+
+        // Focus that only comes back moves nothing: a page over it, then gone.
+        chip.forceActiveFocus(Qt.TabFocusReason)
+        list.positionViewAtEnd()
+        wait(200)
+        const scrolled = list.contentY
+        verify(scrolled > list.originY + 100, "scrolled " + scrolled)
+        push("AllNotesPage")
+        wait(800)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === page)
+        wait(500)
+        verify(inHead(window.activeFocusItem), "the focus is back on the chip: " + window.activeFocusItem)
+        compare(list.contentY, scrolled, "the list stays where it was")
         PracticeGrade.setGrade("aikido", "k5")
         window.pageStack.pop()
     }
 
+    // A sheet left beside the list, turned under another page: the dialog of a technique with a
+    // video, turned back, shows the player, not the old sheet over it.
     function test_2v_h_old_sheet_stays_gone() {
         const page = tabletProgramme()
         page.open(Object.assign({}, page.playlist[3], { video: null }))

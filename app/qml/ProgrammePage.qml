@@ -667,7 +667,8 @@ Kirigami.Page {
 
     // Tab and Shift+Tab from row to row in the list's order. The list reuses its rows, so the
     // window's focus chain (the order of the rows as items) left the list after a row or two.
-    // Past the last row, or before the first, the focus leaves the list.
+    // Past the last row the focus leaves the list; before the first it goes to the list's head,
+    // or leaves too when that holds nothing to focus.
     function tabRow(from, step, event) {
         const reason = step > 0 ? Qt.TabFocusReason : Qt.BacktabFocusReason
         event.accepted = true
@@ -687,6 +688,7 @@ Kirigami.Page {
         const chip = step < 0 ? page.lastInHead() : null
         if (chip) {
             chip.forceActiveFocus(reason)
+            list.positionViewAtBeginning()
             return
         }
         // The next item of the window's chain outside the list (the small player, the header).
@@ -710,11 +712,19 @@ Kirigami.Page {
         }
         return last
     }
-    // Keys came to the chips ("All notes", Tab): the list shows them. A tap needs no move.
+    // Tab stepped along the focus chain into the list's head ("All notes", then Tab): the list shows
+    // it. Focus that only comes back (a page gone, a dialog closed, another window) moves nothing, and
+    // a chip has no focusReason to tell them apart.
+    property Item focusBefore: null
     readonly property Item focusNow: page.Window.activeFocusItem
     onFocusNowChanged: {
+        const before = focusBefore
+        focusBefore = focusNow
         const head = list.headerItem
-        if (focusNow && head && focusNow.focusReason !== Qt.MouseFocusReason && page.inside(focusNow, head)) {
+        if (!before || !focusNow || !head || !page.inside(focusNow, head)) {
+            return
+        }
+        if (before.nextItemInFocusChain(true) === focusNow || before.nextItemInFocusChain(false) === focusNow) {
             list.positionViewAtBeginning()
         }
     }

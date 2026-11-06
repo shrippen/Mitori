@@ -115,6 +115,14 @@ TestCase {
         call("Practice.practisedInYear", () => Practice.practisedInYear(new Date().getFullYear(), "aikido"))
     }
 
+    // A long note in the technique picker: it asks on the UI thread.
+    function test_5b_suggest_long_note() {
+        const sentence = "Heute Ikkyo aus Katate-dori geübt, dann die Hüfte tief. Danach Kote-gaeshi, langsam und sauber! "
+        const words = sentence.trim().split(" ").length
+        const text = sentence.repeat(Math.ceil(500 / words))
+        call("Programme.suggest, 500 words", () => Programme.suggest(text))
+    }
+
     // One keystroke in the search: the list follows at once.
     function test_6_search_typing() {
         const search = page("Search", "SearchPage")

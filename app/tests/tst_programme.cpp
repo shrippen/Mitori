@@ -477,6 +477,15 @@ private slots:
         QCOMPARE(titles(slashed).value(0), slashed);
         QVERIFY2(!titles(slashed).contains(part), qPrintable(titles(slashed).join(u',')));
         QCOMPARE(titles(part).value(0), part);
+        QCOMPARE(titles(QStringLiteral("Sankajo-kime-osae/-nage")).value(0), slashed);
+
+        // Other punctuation at that place parts it: "Nage" here is the one who throws.
+        for (const QString &text : {QStringLiteral("Sankajô-kime-osae. Nage bleibt tief."), QStringLiteral("Sankajô-kime-osae\nNage"),
+                                    QStringLiteral("Sankajô-kime-osae, nage")}) {
+            const QStringList list = titles(text);
+            QVERIFY2(!list.contains(slashed), qPrintable(text + u": " + list.join(u',')));
+            QVERIFY2(list.count(part) > 1, qPrintable(text + u": " + list.join(u',')));
+        }
     }
 
     // Those left out make room: the next ones move up.
