@@ -81,8 +81,14 @@ bool Backup::save(const QUrl &target)
         }
     }
 
-    // A local file, or a content:// URL from Android's file picker (QFile opens both there).
-    QFile file(target.isLocalFile() ? target.toLocalFile() : target.toString());
+    // A local file, or a content:// URL from Android's file picker (QFile opens both there). A
+    // local name gets its suffix: the open dialog's filter would never show it again.
+    QString path = target.isLocalFile() ? target.toLocalFile() : target.toString();
+    if (target.isLocalFile() && !path.endsWith(QLatin1String(".zip"), Qt::CaseInsensitive)) {
+        path += QLatin1String(".zip");
+    }
+    m_savedTo = target.isLocalFile() ? path : QString();
+    QFile file(path);
     bool opened = false;
     if (why.isEmpty()) {
         opened = file.open(QIODevice::WriteOnly | QIODevice::Truncate);

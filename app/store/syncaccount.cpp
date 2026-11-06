@@ -60,6 +60,9 @@ void SyncAccount::setAccount(const WebDav::Account &account)
     s->setValue(QStringLiteral("konto/server"), account.folder.toString());
     s->setValue(QStringLiteral("konto/user"), account.user);
     s->setValue(QStringLiteral("konto/password"), account.password);
+    // The password in it: for its owner only (the system's key store is on the roadmap).
+    s->sync();
+    QFile::setPermissions(s->fileName(), QFile::ReadOwner | QFile::WriteOwner);
 }
 
 QString SyncAccount::name() const

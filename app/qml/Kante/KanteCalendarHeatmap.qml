@@ -194,11 +194,18 @@ Item {
     // One tooltip and one pair of handlers for all days.
     HoverHandler {
         id: hover
-        // Not touch: a press would start the hover's delay, and the tooltip it waits for would
-        // not take the tap's delay of 0 any more.
-        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad | PointerDevice.Stylus
+    }
+    // The hover's delay here, not the tooltip's: a tooltip already waiting would not take a tap's
+    // "at once" any more, and on touch a press counts as a hover first.
+    property bool hoverWaited: false
+    onHoveredIndexChanged: hoverWaited = hoverWaited && hoveredIndex >= 0
+    Timer {
+        interval: 300
+        running: heat.hoveredIndex >= 0 && !heat.hoverWaited
+        onTriggered: heat.hoverWaited = true
     }
     TapHandler {
+        longPressThreshold: 0      // a resting finger taps too
         onTapped: eventPoint => {
             const i = heat.cellAt(eventPoint.position.x, eventPoint.position.y)
             heat.tappedIndex = i
@@ -230,9 +237,8 @@ Item {
         width: heat.cellSize
         height: heat.cellSize
         QQC2.ToolTip.text: heat.cells[heat.tipDay] ? heat.tipOf(heat.cells[heat.tipDay].date) : ""
-        // A tap shows it at once.
-        QQC2.ToolTip.delay: heat.tappedIndex >= 0 ? 0 : 300
-        QQC2.ToolTip.visible: heat.tipIndex >= 0
+        QQC2.ToolTip.delay: 0
+        QQC2.ToolTip.visible: heat.tappedIndex >= 0 || (heat.hoveredIndex >= 0 && heat.hoverWaited)
     }
 
     Timer {

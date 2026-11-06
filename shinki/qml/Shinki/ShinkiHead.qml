@@ -93,35 +93,13 @@ Rectangle {
             font.pixelSize: ShinkiStyle.pageTitleSize
         }
 
-        // The mark of the app: the club's sign in a red square, with the small caps line beside
-        // it (the start menu).
-        RowLayout {
-            visible: head.logo !== ""
-            spacing: ShinkiStyle.gridSpace * 2
-
-            Rectangle {
-                objectName: "headLogo"
-
-                Layout.preferredWidth: ShinkiStyle.logoSize
-                Layout.preferredHeight: ShinkiStyle.logoSize
-                color: ShinkiStyle.red
-
-                QQC2.Label {
-                    anchors.centerIn: parent
-                    text: head.logo
-                    color: ShinkiStyle.textOnRed
-                    font.family: ShinkiStyle.japaneseFamily
-                    font.pixelSize: ShinkiStyle.logoKanjiSize
-                }
-            }
-        }
-
         // The way back: a column in red, its own button.
         QQC2.AbstractButton {
             id: backButton
 
             objectName: "headBack"
             enabled: head.backTitle !== "" && head.logo === ""
+            visible: head.logo === ""   // the start menu has its mark in the title's row
             opacity: enabled ? 1 : 0
             Accessible.ignored: !enabled
             text: "‹ " + head.split(head.backTitle)[0].toUpperCase()
@@ -148,6 +126,25 @@ Rectangle {
             Layout.fillWidth: true
             // One height for every title (a Japanese title's font is taller): see above.
             Layout.preferredHeight: Math.ceil(Math.max(ShinkiStyle.rowMinSpace, titleMetrics.height))
+
+            // The mark of the app: the club's sign in a red square, on the title's row (the clickdummy).
+            Rectangle {
+                objectName: "headLogo"
+
+                visible: head.logo !== ""
+                Layout.preferredWidth: ShinkiStyle.logoSize
+                Layout.preferredHeight: ShinkiStyle.logoSize
+                Layout.rightMargin: ShinkiStyle.gridSpace * 2
+                color: ShinkiStyle.red
+
+                QQC2.Label {
+                    anchors.centerIn: parent
+                    text: head.logo
+                    color: ShinkiStyle.textOnRed
+                    font.family: ShinkiStyle.japaneseFamily
+                    font.pixelSize: ShinkiStyle.logoKanjiSize
+                }
+            }
             spacing: ShinkiStyle.gridSpace * 2
 
             QQC2.Label {

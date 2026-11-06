@@ -707,7 +707,8 @@ TestCase {
             Practice.deleteNote(n.uid)
         }
         window.pageStack.pop()
-        tryVerify(() => !Levels.held, 2000, "the screen may sleep again")
+        // The page goes after its slide: on a busy machine (the CI, under Shinki) over two seconds.
+        tryVerify(() => !Levels.held, 10000, "the screen may sleep again")
     }
 
     // Swipe on the picture: up on the left half brightens the screen, down on the right half
@@ -1254,6 +1255,60 @@ TestCase {
         window.pageStack.pop()
         tryVerify(() => window.pageStack.currentItem === today)
         window.pageStack.pop()
+    }
+
+    // Sideways the training keeps its ratings: the list beside the small player (clickdummy
+    // "session"). It was a dead end on a tablet: the picture and no way to rate or go on.
+    function test_7b_training_sideways() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry").slice(0, 3)
+        const width = window.width, height = window.height
+        window.width = 1280
+        window.height = 800
+        wait(200)
+        const player = push("PlayerPage", { playlist: rows, index: 0, training: true })
+        tryVerify(() => player.split)
+        const list = findChild(player, "trainingSideList")
+        verify(list.visible)
+        compare(list.count, 3)
+        verify(findChild(player, "ratingRow").visible)
+        verify(!player.headless, "the head with its Back stays")
+        // A row goes to its technique; the current one is marked.
+        tryVerify(() => list.width > 100 && list.height > 100, 2000, list.width + " × " + list.height)
+        tryVerify(() => list.itemAtIndex(2) !== null)
+        verify(!list.itemAtIndex(2).focusOnClick, "Space stays with the player")
+        list.itemAtIndex(2).clicked()
+        compare(player.index, 2)
+        verify(list.itemAtIndex(2).selected)
+        // Full screen has no list; back it is there again.
+        player.big = true
+        verify(!player.split)
+        player.big = false
+        tryVerify(() => player.split)
+        window.back()
+        tryVerify(() => window.pageStack.currentItem !== player)
+        window.width = width
+        window.height = height
+        wait(200)
+    }
+
+    // The title says which variant it is: as the list does.
+    function test_7b_player_title_has_the_addition() {
+        const rows = ["k5", "k4", "k3", "k2", "k1"].reduce((all, g) => all.concat(Programme.entries("aikido", g)), []).filter(r => r.kind === "entry" && r.extra && !r.nr)
+        verify(rows.length > 0)
+        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        verify(player.title.indexOf(rows[0].extra) >= 0, player.title)
+        window.back()
+        tryVerify(() => window.pageStack.currentItem !== player)
+    }
+
+    // Esc leaves the player as Back does, upright too.
+    function test_7b_escape_leaves() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const player = push("PlayerPage", { playlist: rows, index: 0 })
+        tryVerify(() => player.activeFocus || player.isCurrentPage)
+        wait(300)
+        keyClick(Qt.Key_Escape)
+        tryVerify(() => window.pageStack.currentItem !== player, 2000)
     }
 
     // Training without videos (CI): every due technique comes in, shown as a card, with the
@@ -2858,6 +2913,189 @@ TestCase {
         verify(Courses.remove(course))
     }
 
+    // Found by the QA round of 5 Nov 2026 (qa/PERSONAS.md).
+    // What the data knows and the screen left out: Zanshin, open questions, proposals, a grade's
+    // meaning and waiting time, the Suburi texts (QA round P5; the booklet p. 44 f.).
+    function test_8p_data_on_the_screen() {
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        const page = push("ProgrammePage")
+        const form = page.rows.find(r => r.id === "shinkitoho/odachi/5")
+        verify(form.open, "S-02 is an open question")
+        page.open(form)
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        const facts = findChild(sheet.contentItem, "sheetFacts")
+        verify(facts.visible)
+        verify(allChildren(facts).some(c => c.text === "Jôdan"), "Zanshin")
+        verify(findChild(sheet.contentItem, "sheetOpenQuestion").visible)
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+        const suburi = page.rows.find(r => r.id === "shinkitoho/suburi/1")
+        verify(suburi.text.length > 10)
+        const info = findChild(page, "gradeInfo")
+        verify(info.visible)
+        verify(info.text.indexOf("Erste Überlieferung") >= 0, info.text)
+        verify(info.text.indexOf("2 Jahre") >= 0, info.text)
+        verify(!findChild(page, "kanjiProposal").visible)
+        window.pageStack.pop()
+        Programme.discipline = "daitoryu"
+        const daito = push("ProgrammePage")
+        verify(findChild(daito, "kanjiProposal").visible)
+        verify(!findChild(daito, "gradeInfo").visible)
+        // The lens in the head, as the clickdummy has it.
+        verify(daito.actions.some(a => a.icon.name === "search"))
+        window.pageStack.pop()
+        Programme.discipline = "aikido"
+    }
+
+    // Nothing past the window's edge on a small phone and at twice the scale (QA round P3, P4).
+    function overflowing(root, right) {
+        const found = []
+        const walk = item => {
+            if (!item.visible || item.opacity === 0) {
+                return
+            }
+            // What scrolls sideways on purpose may be wider (a tab row, a table).
+            if (item.contentWidth !== undefined && item.flickableDirection !== undefined
+                    && item.contentWidth > item.width + 1) {
+                return
+            }
+            const edge = item.mapToItem(window.contentItem, item.width, 0).x
+            const left = item.mapToItem(window.contentItem, 0, 0).x
+            // Only what can be seen: not the pages to the left, nor Kirigami's own tricks.
+            if (item.width > 0 && item.height > 0 && left >= 0 && edge > right + 1 && !/MouseArea/.test(String(item))
+                    && (item.text !== undefined || item.clicked !== undefined || item.source !== undefined)) {
+                found.push(String(item).split("_QML")[0].split("(")[0] + " '" + (item.text || item.objectName || "") + "' to " + Math.round(edge))
+            }
+            for (let i = 0; i < item.children.length; ++i) {
+                walk(item.children[i])
+            }
+        }
+        walk(root)
+        return found
+    }
+
+    function test_8o_nothing_past_the_edge_data() {
+        // Twice the scale on a phone (206 px) is not there yet: ROADMAP, QA round of 5 Nov 2026.
+        return [{ tag: "360", width: 360, height: 800 }]
+    }
+    function test_8o_nothing_past_the_edge(data) {
+        const w = window.width, h = window.height
+        window.width = data.width
+        window.height = data.height
+        wait(200)
+        Programme.discipline = "shinkitoho"
+        Programme.setGrade("shinkitoho", "shoden")
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
+        const report = {}
+        const look = (name, item) => {
+            // The page has slid in: while it moves everything looks past the edge.
+            const onStack = window.pageStack.currentItem === item
+            tryVerify(() => !onStack || Math.abs(item.mapToItem(window.contentItem, 0, 0).x) < 1, 3000)
+            wait(300)
+            // A slow machine (the CI's first player) may still be moving it by a few pixels: what
+            // counts is the edge of the page, wherever the page is just now.
+            const moved = onStack ? item.mapToItem(window.contentItem, 0, 0).x : 0
+            const over = overflowing(item, data.width + moved)
+            if (over.length) {
+                report[name] = over.slice(0, 6)
+            }
+        }
+        look("start", window.pageStack.currentItem)
+        const round = Exam.draw("aikido", "k5", 3, 0)
+        for (const [file, props] of [["ProgrammePage", {}], ["TodayPage", {}], ["StatsPage", {}], ["YearsPage", {}], ["AllNotesPage", {}],
+                                     ["TechniqueMapPage", {}], ["SearchPage", {}], ["CoursesPage", {}], ["GradesPage", {}],
+                                     ["SettingsPage", {}], ["VideosPage", {}], ["AppearancePage", {}], ["ExamPage", {}],
+                                     ["ExamRoundPage", { points: round, discipline: "aikido", grade: "k5" }],
+                                     ["ExamEndPage", { points: round, discipline: "aikido", grade: "k5" }],
+                                     ["NotesPage", { entry: rows[0] }], ["WelcomePage", {}],
+                                     ["PlayerPage", { playlist: rows, index: 0 }]]) {
+            const page = push(file, props)
+            look(file, page)
+            if (file === "PlayerPage") {
+                // Room to spare: another font (the CI's) needs more than this machine's.
+                verify(findChild(page, "neighbourRow").implicitWidth < data.width * 0.75)
+            }
+            if (file === "ProgrammePage") {
+                page.open(page.rows.find(r => r.id === "shinkitoho/odachi/5"))
+                const sheet = findChild(page, "techniqueSheet")
+                tryVerify(() => sheet.opened)
+                look("sheet", sheet.contentItem)
+                sheet.close()
+                tryVerify(() => !sheet.visible)
+            }
+            window.pageStack.pop()
+            wait(50)
+        }
+        Programme.discipline = "aikido"
+        window.width = w
+        window.height = h
+        wait(200)
+        compare(JSON.stringify(report), "{}")
+    }
+
+    // From anywhere the player has the whole grade around the technique: previous and next work.
+    function test_8n_player_has_the_grade() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const page = push("SearchPage")
+        const sheet = findChild(page, "techniqueSheet")
+        sheet.entry = rows[1]
+        sheet.playRequested(rows[1])
+        tryVerify(() => window.pageStack.currentItem.playlist !== undefined)
+        const player = window.pageStack.currentItem
+        verify(player.playlist.length > 1, player.playlist.length)
+        compare(player.playlist[player.index].id, rows[1].id)
+        window.back()
+        tryVerify(() => window.pageStack.currentItem === page)
+        window.pageStack.pop()
+    }
+
+    function test_8m_today_has_its_calendar() {
+        const page = push("TodayPage")
+        const heat = findChild(page, "todayHeatmap")
+        verify(heat.visible)
+        compare(heat.weeks, 12)
+        verify(findChild(page, "todayLegend").visible, "no diagram without a legend")
+        window.pageStack.pop()
+    }
+
+    function test_8l_glossary_letters_jump() {
+        const page = push("SearchPage")
+        const list = findChild(page, "glossaryList")
+        const bar = findChild(page, "letterBar")
+        tryVerify(() => bar.visible)
+        const letters = allChildren(bar).filter(c => c.objectName === "letterJump")
+        verify(letters.length > 10)
+        wait(500)
+        const far = letters[letters.length - 1]
+        far.clicked()
+        wait(100)
+        verify(list.contentY > list.height, "jumped to " + far.text + ": " + list.contentY)
+        findChild(page, "searchField").text = "ko"
+        tryCompare(page, "searching", true)
+        verify(!bar.visible, "words found have no letters")
+        window.pageStack.pop()
+    }
+
+    function test_8k_sheet_says_where_the_dvd_is() {
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        page.open(page.rows.find(r => r.kind === "entry" && r.video))
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        if (!sheet.hasVideo) {
+            verify(findChild(sheet.contentItem, "sheetDvdButton").visible)
+        }
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+        window.pageStack.pop()
+    }
+
     function test_8q_search_row_without_attack() {
         const page = push("SearchPage")
         const field = findChild(page, "searchField")
@@ -2919,6 +3157,49 @@ TestCase {
     }
 
     // Tablet: the small player goes on where full screen ended, with its tempo and loop.
+    // A window turned for full screen is no longer wide: the pane comes back only afterwards, and
+    // then takes up the place, tempo and loop; a technique played since then outdates them.
+    function test_8t_pane_made_anew_after_full_screen() {
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
+            skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
+        }
+        const width = window.width, height = window.height
+        window.width = 700
+        window.height = 800
+        wait(100)
+        Programme.discipline = "aikido"
+        Programme.setGrade("aikido", "k5")
+        const page = push("ProgrammePage")
+        tryVerify(() => !page.split)
+        page.lastId = rows[0].id
+        // What full screen left while there is no pane.
+        page.bigResume = { position: 3000, rate: 0.5, looping: false }
+        page.resumeFromBig()
+        verify(page.bigResume !== null, "kept until the pane is there")
+        window.width = 1280
+        tryVerify(() => page.player && page.player.duration > 0, 5000)
+        compare(page.player.looping, false)
+        compare(page.player.rate, 0.5)
+        verify(page.player.position >= page.player.from, page.player.position)
+        verify(Math.abs(page.player.position - Math.max(page.player.from, Math.min(page.player.to, 3000))) < 1500,
+               page.player.position + " from " + page.player.from + " to " + page.player.to)
+        verify(page.bigResume === null, "taken up once")
+        page.player.setSpeed(1)
+        page.player.looping = true
+
+        // Another technique in between: nothing is left to take up.
+        window.width = 700
+        tryVerify(() => !page.split)
+        page.bigResume = { position: 3000, rate: 0.5, looping: false }
+        page.lastId = rows[1].id
+        verify(page.bigResume === null)
+        window.pageStack.pop()
+        window.width = width
+        window.height = height
+        wait(100)
+    }
+
     function test_8t_small_player_keeps_place_after_full_screen() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
         if (rows.length === 0 || !Videos.available(rows[0].video.video)) {

@@ -5,6 +5,7 @@ import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Mitori
+import "playlists.js" as Playlists
 
 // Glossary and search (clickdummy "Glossar & Suche"). Without a query: the glossary A–Z (word,
 // kanji, German translation, a speaker button). With a query: techniques of every discipline and
@@ -110,6 +111,30 @@ Kirigami.ScrollablePage {
             spacing: Kirigami.Units.largeSpacing
             onHeightChanged: Qt.callLater(list.positionViewAtBeginning)
 
+            // A–Z: the letters with a word, a tap goes to the first (clickdummy "Glossar").
+            Flow {
+                objectName: "letterBar"
+                Layout.fillWidth: true
+                Layout.topMargin: Kirigami.Units.largeSpacing
+                Layout.leftMargin: Kirigami.Units.largeSpacing
+                Layout.rightMargin: Kirigami.Units.largeSpacing
+                visible: !page.searching
+                spacing: Look.unit(2)
+
+                Repeater {
+                    model: page.searching ? [] : Array.from(new Set(page.glossary.map(w => w.letter)))
+
+                    LookToolButton {
+                        required property string modelData
+
+                        objectName: "letterJump"
+                        text: modelData
+                        Accessible.name: qsTr("Words with %1").arg(modelData)
+                        focusPolicy: Qt.NoFocus
+                        onClicked: list.positionViewAtIndex(page.glossary.findIndex(w => w.letter === modelData), ListView.Beginning)
+                    }
+                }
+            }
             LookLabel {
                 objectName: "glossaryIntro"
                 Layout.fillWidth: true
@@ -288,7 +313,7 @@ Kirigami.ScrollablePage {
         onPlayRequested: entry => {
             sheet.close()
             const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
-            window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), { playlist: [entry], index: 0 })
+            window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), Playlists.around(Programme, Videos, entry))
         }
         onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
         onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })

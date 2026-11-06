@@ -30,6 +30,8 @@ public:
     ~Backup() override;
 
     QString errorString() const { return m_error; }
+    // Where the last save went, for the message: a path; "" from Android's file picker.
+    Q_INVOKABLE QString savedTo() const { return m_savedTo; }
 
     // "mitori-sicherung-2026-11-02.zip"
     Q_INVOKABLE QString fileName() const;
@@ -54,5 +56,6 @@ private:
     MediaStore m_media;
     QString m_work;
     QString m_error;
+    QString m_savedTo;
     bool m_inspected = false;
 };

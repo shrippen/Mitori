@@ -368,6 +368,19 @@ private slots:
         QVERIFY(!media.has(u"x.jpg"_s));
     }
 
+    // A name typed without the suffix: the open dialog's filter would never show the file again.
+    void addsTheSuffix()
+    {
+        const Device d = device(u"endung"_s);
+        Backup backup(d.practice, d.courses, d.media, d.work);
+        QVERIFY(backup.save(QUrl::fromLocalFile(m_dir.filePath(u"sicherung"_s))));
+        QVERIFY(QFile::exists(m_dir.filePath(u"sicherung.zip"_s)));
+        QVERIFY(!QFile::exists(m_dir.filePath(u"sicherung"_s)));
+        QCOMPARE(backup.savedTo(), m_dir.filePath(u"sicherung.zip"_s));
+        QVERIFY(backup.save(QUrl::fromLocalFile(m_dir.filePath(u"b.ZIP"_s))));
+        QVERIFY(QFile::exists(m_dir.filePath(u"b.ZIP"_s)));
+    }
+
     // A file that is no backup, and one of a newer format, are refused with a reason.
     void refused()
     {

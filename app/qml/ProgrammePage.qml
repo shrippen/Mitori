@@ -40,6 +40,11 @@ Kirigami.Page {
 
     actions: [
         Kirigami.Action {
+            icon.name: "search"
+            text: qsTr("Search")
+            onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("SearchPage.qml"))
+        },
+        Kirigami.Action {
             icon.name: "view-list-details"
             text: qsTr("All notes")
             onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("AllNotesPage.qml"))
@@ -115,6 +120,28 @@ Kirigami.Page {
                     width: ListView.view.width
                     spacing: Kirigami.Units.smallSpacing
 
+                    // A grade's meaning, content and waiting time (Shinki Toho has them).
+                    LookLabel {
+                        objectName: "gradeInfo"
+                        Layout.fillWidth: true
+                        Layout.margins: Kirigami.Units.smallSpacing
+                        readonly property var grade: page.grades.find(g => g.id === page.grade) || ({})
+                        visible: !!grade.bedeutung
+                        text: [grade.bedeutung, grade.inhalt, grade.abstand ? qsTr("Waiting time: %1").arg(grade.abstand) : ""]
+                              .filter(x => x).join(" · ")
+                        color: Look.mutedTextColor
+                        wrapMode: Text.Wrap
+                    }
+                    LookLabel {
+                        objectName: "kanjiProposal"
+                        Layout.fillWidth: true
+                        Layout.margins: Kirigami.Units.smallSpacing
+                        visible: !!(Programme.disciplines.find(d => d.id === page.discipline) || {}).kanji_vorschlag
+                        text: qsTr("The Japanese writing of these names is a proposal, not yet confirmed.")
+                        color: Look.mutedTextColor
+                        font: Look.smallFont
+                        wrapMode: Text.Wrap
+                    }
                     GradeStand {
                         objectName: "gradeStand"
                         Layout.fillWidth: true
@@ -132,16 +159,22 @@ Kirigami.Page {
                               ? qsTr("There is no video for this grade.")
                               : qsTr("The videos are on the DVDs of the Shinkiryu association. With the DVD's code Mitori loads them onto this device.")
 
-                        LookButton {
-                            objectName: "enterCode"
-                            visible: page.hasPositions
-                            text: qsTr("Enter code")
-                            onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
-                        }
-                        LookButton {
-                            visible: page.hasPositions
-                            text: qsTr("Order on shinkiryu.de")
-                            onClicked: Qt.openUrlExternally("https://www.shinkiryu.de/shinkiryu/de/DVD.php")
+                        // One below the other on a small phone: side by side they would widen the list.
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: page.width < Kirigami.Units.gridUnit * 24 ? 1 : 2
+
+                            LookButton {
+                                objectName: "enterCode"
+                                visible: page.hasPositions
+                                text: qsTr("Enter code")
+                                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
+                            }
+                            LookButton {
+                                visible: page.hasPositions
+                                text: qsTr("Order on shinkiryu.de")
+                                onClicked: Qt.openUrlExternally("https://www.shinkiryu.de/shinkiryu/de/DVD.php")
+                            }
                         }
                     }
                 }
@@ -201,7 +234,7 @@ Kirigami.Page {
 
                             leadingText: entry.nr ? String(entry.nr) : ""
                             text: entry.title + (entry.kind === "entry" && entry.extra && !entry.nr ? " (" + entry.extra + ")" : "")
-                            subtitle: [entry.jp, entry.nr ? entry.extra : (entry.kind === "info" ? entry.text : "")].filter(x => x).join(" · ")
+                            subtitle: [entry.jp, entry.nr ? entry.extra : entry.text].filter(x => x).join(" · ")
                             selected: entry.id === page.lastId
                             onClicked: page.open(entry)
                             Keys.onTabPressed: event => page.tabRow(rowLoader.index, 1, event)
@@ -245,6 +278,7 @@ Kirigami.Page {
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
+            onLoaded: page.resumeFromBig()
 
             sourceComponent: PlayerView {
                 compact: true
@@ -329,6 +363,7 @@ Kirigami.Page {
 
     // A row chosen in the list plays beside it; the list shows the row of the technique playing.
     onLastIdChanged: {
+        bigResume = null        // another technique: what full screen left is no longer its place
         const i = page.playlist.findIndex(r => r.id === page.lastId)
         if (page.player && i >= 0 && page.player.index !== i) {
             page.player.index = i
@@ -406,7 +441,24 @@ Kirigami.Page {
         player.shown.connect(id => page.lastId = id)
     }
 
-    // The small player goes full screen where it stands; back here it stays where it was.
+    // The small player goes full screen where it stands; back here it stays where it was. The
+    // pane may be gone by then (a window turned for full screen is no longer wide): the values
+    // wait until it is made anew.
+    property var bigResume: null
+    function resumeFromBig() {
+        const now = page.player
+        if (!now || !bigResume) {
+            return
+        }
+        now.looping = bigResume.looping
+        now.setSpeed(bigResume.rate)
+        if (now.duration > 0) {
+            now.seek(bigResume.position)
+        } else {
+            now.startAt = bigResume.position    // still loading: restart() would go to the start
+        }
+        bigResume = null
+    }
     function openBig() {
         const small = page.player
         const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
@@ -417,13 +469,8 @@ Kirigami.Page {
         player.big = true
         // Back in the small player: the same place, tempo and loop.
         player.bigEnded.connect((position, rate, looping) => {
-            const now = page.player     // the pane may have been made anew while the window was full
-            if (!now) {
-                return
-            }
-            now.looping = looping
-            now.setSpeed(rate)
-            now.seek(position)
+            bigResume = { position: position, rate: rate, looping: looping }
+            resumeFromBig()
         })
         player.shown.connect(id => page.lastId = id)
     }

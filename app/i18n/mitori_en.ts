@@ -75,7 +75,7 @@
 <context>
     <name>PlayerView</name>
     <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="675"/>
+        <location filename="../qml/PlayerView.qml" line="681"/>
         <source>%n technique(s) practised today. They count as a practice day in the statistics.</source>
         <translation>
             <numerusform>%n technique practised today. It counts as a practice day in the statistics.</numerusform>
@@ -86,7 +86,7 @@
 <context>
     <name>SearchPage</name>
     <message numerus="yes">
-        <location filename="../qml/SearchPage.qml" line="120"/>
+        <location filename="../qml/SearchPage.qml" line="145"/>
         <source>%n Japanese term(s), with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</source>
         <translation>
             <numerusform>%n Japanese term, with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</numerusform>
@@ -105,7 +105,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="277"/>
+        <location filename="../qml/SettingsPage.qml" line="279"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n new</numerusform>
@@ -113,7 +113,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="280"/>
+        <location filename="../qml/SettingsPage.qml" line="282"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n changed</numerusform>
@@ -121,7 +121,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="287"/>
+        <location filename="../qml/SettingsPage.qml" line="289"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>
@@ -179,7 +179,7 @@
 <context>
     <name>TechniqueMapPage</name>
     <message numerus="yes">
-        <location filename="../qml/TechniqueMapPage.qml" line="187"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="188"/>
         <source>%n entries</source>
         <translation>
             <numerusform>%n entry</numerusform>
@@ -190,7 +190,7 @@
 <context>
     <name>TodayPage</name>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="42"/>
+        <location filename="../qml/TodayPage.qml" line="45"/>
         <source>%1 · %n day(s) ago</source>
         <translation>
             <numerusform>%1 · %n day ago</numerusform>
@@ -198,7 +198,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="44"/>
+        <location filename="../qml/TodayPage.qml" line="47"/>
         <source>not practised for %n day(s)</source>
         <translation>
             <numerusform>not practised for %n day</numerusform>
@@ -206,11 +206,19 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="125"/>
+        <location filename="../qml/TodayPage.qml" line="128"/>
         <source>%n of them without a video on this device: the training shows their name, practise from memory.</source>
         <translation>
             <numerusform>%n of them has no video on this device: the training shows its name, practise it from memory.</numerusform>
             <numerusform>%n of them have no video on this device: the training shows their names, practise them from memory.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/TodayPage.qml" line="147"/>
+        <source>%n technique(s)</source>
+        <translation>
+            <numerusform>%n technique</numerusform>
+            <numerusform>%n techniques</numerusform>
         </translation>
     </message>
 </context>

@@ -198,6 +198,17 @@ private slots:
         QVERIFY(m_dir.isValid());
     }
 
+    // The app password: for its owner only.
+    void accountFileIsPrivate()
+    {
+        QTemporaryDir dir;
+        SyncAccount account(dir.path());
+        account.setAccount({QUrl(u"https://example.org/dav/"_s), u"user"_s, u"geheim"_s});
+        const QFile::Permissions p = QFile::permissions(dir.filePath(u"konto.ini"_s));
+        QVERIFY(p != QFile::Permissions());
+        QVERIFY(!(p & (QFile::ReadGroup | QFile::ReadOther | QFile::WriteGroup | QFile::WriteOther)));
+    }
+
     void twoDevices()
     {
         FakeDav dav;

@@ -5,6 +5,7 @@ import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Mitori
+import "playlists.js" as Playlists
 import "grades.js" as Grades
 
 // Today's practice (clickdummy "Heute üben"): one discipline per session, up to the grade
@@ -21,6 +22,8 @@ Kirigami.ScrollablePage {
     property string discipline: Programme.discipline
     readonly property var disciplineInfo: Programme.disciplines.find(d => d.id === discipline) || ({})
     readonly property string gradeName: (Programme.grades(discipline).find(g => g.id === Programme.grade(discipline)) || {}).name || ""
+    // The calendar of the last 12 weeks (clickdummy "Heute"); the levels as in the statistics.
+    readonly property var perDay: Practice.revision >= 0 && Practice.today.getTime() > 0 ? Practice.practisedPerDay(84) : ({})
     // Re-read after every rating and when the intervals change.
     readonly property var due: Practice.revision >= 0 && Practice.intervals.length === 4 && Practice.today.getTime() > 0
                                ? Practice.due(Programme.practiceEntries(discipline)) : []
@@ -127,6 +130,36 @@ Kirigami.ScrollablePage {
             wrapMode: Text.Wrap
         }
 
+        LookCalendarHeatmap {
+            objectName: "todayHeatmap"
+            weeks: 12
+            levels: {
+                const bounds = [1, 3, 6, 10]
+                const l = {}
+                for (const d in page.perDay) {
+                    l[d] = bounds.filter(b => page.perDay[d] >= b).length
+                }
+                return l
+            }
+            tips: {
+                const t = {}
+                for (const d in page.perDay) {
+                    t[d] = qsTr("%n technique(s)", "", page.perDay[d])
+                }
+                return t
+            }
+            Accessible.name: qsTr("Practice days of the last 12 weeks")
+        }
+        LookLegend {
+            objectName: "todayLegend"
+            Layout.fillWidth: true
+            model: [{ color: Look.levelColor(0), text: qsTr("no practice") },
+                    { color: Look.levelColor(1), text: qsTr("1–2 techniques") },
+                    { color: Look.levelColor(2), text: "3–5" },
+                    { color: Look.levelColor(3), text: "6–9" },
+                    { color: Look.levelColor(4), text: qsTr("10 and more") }]
+        }
+
         LookSectionLabel {
             visible: page.due.length > 0
             text: qsTr("Due")
@@ -206,7 +239,7 @@ Kirigami.ScrollablePage {
         onPlayRequested: entry => {
             sheet.close()
             const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
-            window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), { playlist: [entry], index: 0 })
+            window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), Playlists.around(Programme, Videos, entry))
         }
         onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
         onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })

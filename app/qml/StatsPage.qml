@@ -264,6 +264,12 @@ Kirigami.ScrollablePage {
         LookButton {
             objectName: "editGrades"
             role: LookButton.Role.Quiet
+            // Tab reaches it below the view: the page follows, or the focus is out of sight.
+            onActiveFocusChanged: {
+                if (activeFocus) {
+                    page.flickable.contentY = Math.max(0, page.flickable.contentHeight - page.flickable.height)
+                }
+            }
             icon.name: "document-edit"
             text: qsTr("Edit my grades …")
             onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("GradesPage.qml"))

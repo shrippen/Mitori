@@ -54,7 +54,8 @@ Item {
     readonly property bool bands: landscape && bandHeight * 2 >= Look.unit(120)
     readonly property real bandHeight: (height - width / stage.ratio) / 2
     readonly property bool onRail: landscape && !bands
-    readonly property string titleText: (current.nr ? current.nr + " · " : "") + (current.title || "")
+    readonly property string titleWithAddition: (current.title || "") + (current.extra && !current.nr ? " (" + current.extra + ")" : "")
+    readonly property string titleText: (current.nr ? current.nr + " · " : "") + titleWithAddition
     readonly property string timeText2: timeText(player.position - from) + " / " + timeText(to - from)
     readonly property var tempi: [0.25, 0.5, 0.75, 1]
     readonly property int frameMs: 40       // 25 frames per second (PAL DVDs)
@@ -226,9 +227,12 @@ Item {
     Keys.onLeftPressed: page.step(-1)
     Keys.onRightPressed: page.step(1)
     Keys.onEscapePressed: event => {
-        event.accepted = page.big
+        // Beside the programme's list there is nothing to leave.
+        event.accepted = page.big || !page.compact || page.training
         if (page.big) {
             page.bigLeft()
+        } else if (event.accepted) {
+            page.backRequested()
         }
     }
 
@@ -661,7 +665,9 @@ Item {
                 LookLabel {
                     Layout.fillWidth: true
                     visible: page.compact
-                    text: (page.current.nr ? page.current.nr + " · " : "") + (page.current.title || "")
+                    objectName: "compactTitle"
+                    text: (page.current.nr ? page.current.nr + " · " : "") + page.titleWithAddition
+                          + (page.current.jp ? "  " + page.current.jp : "")
                     font.bold: true
                     wrapMode: Text.Wrap
                 }
@@ -777,6 +783,7 @@ Item {
                 }
 
                 RatingRow {
+                    objectName: "ratingRow"
                     Layout.fillWidth: true
                     entry: page.current.id || ""
                     onRated: if (page.training) page.nextOpen()
@@ -803,14 +810,18 @@ Item {
                     }
                 }
 
+                // Short words: both buttons are as wide as they need, and with another font the
+                // long ones pushed the whole column past the edge of a 360 px phone.
                 RowLayout {
+                    objectName: "neighbourRow"
                     Layout.fillWidth: true
                     visible: !page.landscape
 
                     LookToolButton {
                         enabled: page.index > 0
                         icon.name: "media-skip-backward"
-                        text: qsTr("Previous technique")
+                        text: qsTr("Previous")
+                        Accessible.name: qsTr("Previous technique")
                         onClicked: page.go(-1)
                     }
                     Item {
@@ -819,7 +830,8 @@ Item {
                     LookToolButton {
                         enabled: page.index < page.playlist.length - 1
                         icon.name: "media-skip-forward"
-                        text: qsTr("Next technique")
+                        text: qsTr("Next")
+                        Accessible.name: qsTr("Next technique")
                         onClicked: page.go(1)
                     }
                 }
@@ -828,7 +840,7 @@ Item {
                 ColumnLayout {
                     objectName: "trainingList"
                     Layout.fillWidth: true
-                    visible: page.training
+                    visible: page.training && !page.compact
                     spacing: 0
 
                     LookSectionLabel {
@@ -837,7 +849,7 @@ Item {
                         text: qsTr("Today's playlist · %1 of %2 practised").arg(page.practisedCount).arg(page.playlist.length)
                     }
                     Repeater {
-                        model: page.training ? page.playlist : []
+                        model: page.training && !page.compact ? page.playlist : []
 
                         LookListRow {
                             id: trainingRow
