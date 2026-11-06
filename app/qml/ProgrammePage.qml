@@ -59,10 +59,23 @@ Kirigami.Page {
     }
     // A tablet in landscape: a page at least 26 grid units high (a 600 dp tablet less its bars;
     // a phone held sideways has about 20) keeps the list and the small player side by side.
-    // While a note is typed in the small player the on-screen keyboard may shrink the page: the
-    // player and its field stay, or the keyboard would close under the fingers.
-    readonly property bool wide: width > height && (height >= 460 || noteTyping)     // a tablet sideways, not a phone
-    property bool noteTyping: false
+    readonly property int tabletHeight: 460
+    readonly property bool wide: width > height && (height >= tabletHeight || noteHold)     // a tablet sideways, not a phone
+    // The on-screen keyboard may shrink the page while a note is typed in the small player: from
+    // the field's focus on the player stays until the page is high again or the player goes. A tap
+    // on "Add" or a row takes the focus while the keyboard is still open.
+    property bool noteHold: false
+    onHeightChanged: page.endNoteHold()
+    function dropNoteHold() {
+        if (!player) {
+            noteHold = false
+        }
+    }
+    function endNoteHold() {
+        if (height >= tabletHeight && !(player && player.noteFocused)) {
+            noteHold = false
+        }
+    }
     readonly property var playlist: rows.filter(r => page.playable(r))
     readonly property bool split: wide && playlist.length > 0
     // List and right pane; a grade without forms has only its card.
@@ -81,7 +94,8 @@ Kirigami.Page {
         property bool again: true
         interval: 50
         onTriggered: {
-            list.positionViewAtIndex(page.rows.findIndex(r => r.id === page.lastId), ListView.Contain)
+            const id = page.sheetId !== "" ? page.sheetId : page.lastId
+            list.positionViewAtIndex(page.rows.findIndex(r => r.id === id), ListView.Contain)
             if (again) {
                 restart()
             }
@@ -489,7 +503,15 @@ Kirigami.Page {
                     id: paneView
 
                     compact: true
-                    onNoteFocusedChanged: page.noteTyping = noteFocused
+                    onNoteFocusedChanged: {
+                        if (noteFocused) {
+                            page.noteHold = true
+                        } else {
+                            page.endNoteHold()
+                        }
+                    }
+                    // Later: the pane goes while `split` is being updated, and `split` hangs on the hold.
+                    Component.onDestruction: Qt.callLater(page.dropNoteHold)
                     autoPlay: page.isCurrentPage && page.started && !page.paneEntry
                     onPlayTapped: page.started = true
                     playlist: page.playlist
@@ -703,6 +725,8 @@ Kirigami.Page {
     function dialogToPane() {
         const entry = sheet.entry
         sheet.close()
+        page.keepTop = false
+        turnedInView.restart()
         if (!page.playable(entry)) {
             page.sheetId = entry.id
             return
@@ -713,8 +737,6 @@ Kirigami.Page {
         if (page.player) {
             page.player.holdStart = true
         }
-        page.keepTop = false
-        turnedInView.restart()
     }
     function showDialog(entry) {
         sheet.entry = entry

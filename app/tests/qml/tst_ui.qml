@@ -3835,23 +3835,32 @@ TestCase {
         verify(findChild(page, "playerPane").visible)
     }
 
-    // The dialog of the last technique, turned sideways: the list shows its row.
-    function test_2v_i_turned_row_in_view() {
-        const page = tabletProgramme()
+    // The dialog of the last technique, turned sideways: the list shows its row, with a video in
+    // the player and without one as the sheet.
+    function test_2v_i_turned_row_in_view_data() {
+        return [ { tag: "with video", folder: standInVideos, inPane: false }, { tag: "without video", folder: clipFolder("gone"), inPane: true } ]
+    }
+    function test_2v_i_turned_row_in_view(data) {
+        useFolder(data.folder)
+        Programme.discipline = "aikido"
+        PracticeGrade.setGrade("aikido", "k5")
         window.width = 800
         window.height = 1280
-        tryVerify(() => !page.split)
+        const page = push("ProgrammePage")
         const list = findChild(page, "programmeList")
+        tryVerify(() => list.count > 0)
         wait(700)       // the head has settled: nothing holds the list at its top
         list.positionViewAtEnd()
-        const chosen = page.playlist[page.playlist.length - 1]
+        const entries = page.rows.filter(r => r.kind === "entry")
+        const chosen = entries[entries.length - 1]
         page.open(chosen)
         const dialog = findChild(page, "techniqueSheet")
         tryVerify(() => dialog.opened)
 
         window.width = 1280
         window.height = 800
-        tryVerify(() => !dialog.visible && page.split && page.player)
+        tryVerify(() => !dialog.visible && page.twoPanes)
+        compare(!!page.paneEntry, data.inPane)
         const row = page.rows.findIndex(r => r.id === chosen.id)
         tryVerify(() => {
             const item = list.itemAtIndex(row)
@@ -3863,17 +3872,23 @@ TestCase {
         }, 3000, "row " + row + " in view")
     }
 
-    // The on-screen keyboard shrinks the window below a tablet's height: while the note is typed
-    // the small player and its field stay, and they go when the field lets go.
-    function test_2v_j_keyboard_keeps_note_field() {
-        const page = tabletProgramme()
+    // The on-screen keyboard shrinks the window below a tablet's height: from the moment a note is
+    // typed the small player and its field stay until the window is high again, also when a tap
+    // takes the focus from the field while the keyboard is still open. Afterwards a low window is
+    // no tablet again. The keyboard itself is only a lower window here, not a device's.
+    function lowWithNote(page) {
         const field = findChild(page.player, "noteField")
-        const player = page.player
         field.forceActiveFocus()
         tryVerify(() => field.activeFocus)
         window.height = 400
         tryVerify(() => page.height < 460)
         wait(100)
+        return field
+    }
+    function test_2v_j_keyboard_keeps_note_field() {
+        const page = tabletProgramme()
+        const player = page.player
+        const field = lowWithNote(page)
         verify(page.split, "the pane stays")
         compare(page.player, player, "not made anew")
         verify(field.activeFocus, "the keyboard stays open")
@@ -3881,12 +3896,82 @@ TestCase {
         window.height = 800
         tryVerify(() => page.height >= 460)
         verify(field.activeFocus)
+    }
+    function test_2v_j_keyboard_add_note() {
+        const page = tabletProgramme()
+        const player = page.player
+        const field = lowWithNote(page)
+        const entry = player.current.id
+        const before = Practice.notes(entry).length
+        field.text = "am Mattenrand"
+        const add = findChild(player, "addNote")
+        tryVerify(() => add.enabled)
+        mouseClick(add)
+        tryCompare(field, "text", "")
+        compare(Practice.notes(entry).length, before + 1)
+        wait(100)
+        verify(page.split, "the pane stays with the keyboard open")
+        compare(page.player, player, "not made anew")
+        Practice.notes(entry).forEach(n => Practice.deleteNote(n.uid))  // later cases count from none
 
-        window.height = 400
-        tryVerify(() => page.height < 460)
-        field.focus = false
+        // The keyboard closes, the hold ends: a low window is no tablet.
         page.forceActiveFocus()
-        tryVerify(() => !page.split, 2000, "without the field a low window is no tablet")
+        window.height = 800
+        tryVerify(() => page.height >= 460)
+        window.height = 400
+        tryVerify(() => !page.split, 2000)
+    }
+    function test_2v_j_keyboard_other_row_plays() {
+        const page = tabletProgramme(clipFolder("long"))
+        chapterLoaded(page)
+        rowPlays(page, 0)       // the first tap
+        const player = page.player
+        lowWithNote(page)
+
+        const chosen = page.playlist[1]
+        const row = page.rows.findIndex(r => r.id === chosen.id)
+        const list = findChild(page, "programmeList")
+        list.positionViewAtIndex(row, ListView.Contain)
+        tryVerify(() => list.itemAtIndex(row) && list.itemAtIndex(row).item)
+        wait(100)
+        mouseClick(list.itemAtIndex(row).item, 20, 10)
+
+        verify(!findChild(page, "techniqueSheet").visible, "no dialog")
+        verify(page.split)
+        compare(page.player, player, "not made anew")
+        compare(player.current.id, chosen.id)
+        tryVerify(() => player.playing && player.position > player.from + 300, 10000, "it plays right away")
+    }
+
+    // The hold ends with the player: no field, no pane, no hold.
+    function test_2v_k_hold_ends_with_player_data() {
+        return [
+            { tag: "turned upright", away: page => {
+                window.width = 800
+                window.height = 1280
+                tryVerify(() => !page.player)
+                window.width = 1280
+                window.height = 800
+            } },
+            { tag: "grade card", away: page => {
+                page.grade = "kaiden"
+                tryVerify(() => !page.player)
+                tryVerify(() => !page.wide, 2000, "no player, no hold: still the low window")
+                window.height = 800
+                page.grade = "chuden"
+            } }
+        ]
+    }
+    function test_2v_k_hold_ends_with_player(data) {
+        const page = tabletProgramme(standInVideos, "shinkitoho", "chuden")
+        lowWithNote(page)
+        data.away(page)
+        tryVerify(() => page.height >= 460 && page.split && page.player)
+
+        page.forceActiveFocus()
+        window.height = 400
+        tryVerify(() => !page.split, 2000, "no field in focus: a low window is no tablet")
+        Programme.discipline = "aikido"
     }
 
     // The dialog of a technique with a video, open when the tablet turns sideways: its technique
