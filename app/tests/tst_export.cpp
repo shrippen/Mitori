@@ -6,6 +6,7 @@
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTimeZone>
 
 #include "catalog.h"
 #include "courses.h"
@@ -134,6 +135,43 @@ private slots:
         QVERIFY(md.contains(u"verloren"_s));
         QVERIFY(!md.contains(u"04-"_s));                // the lost file is not linked
         QVERIFY(md.contains(u"verloren  \n(Voice note not on the device)"_s));
+    }
+
+    // An entry's techniques stand with it, by name; one no longer in the programme says so.
+    void namesTechniques()
+    {
+        CourseBook::Course c;
+        c.title = u"Sommer"_s;
+        c.first = c.last = QDate(2026, 7, 4);
+        CourseBook::Entry plain;
+        plain.text = u"ohne"_s;
+        plain.created = QDateTime(QDate(2026, 7, 4), QTime(10, 0), QTimeZone::UTC);
+        CourseBook::Entry tagged = plain;
+        tagged.text = u"mit"_s;
+        tagged.techniques = QStringList{u"Ikkyo · Aikido 5. Kyu"_s, u"Nikyo"_s};
+        const QString md = QString::fromUtf8(NotebookExport::markdown(c, {plain, tagged}, {}));
+        QVERIFY2(md.contains(u"mit  \n⌗ Ikkyo · Aikido 5. Kyu, Nikyo\n"_s), qPrintable(md));
+        QCOMPARE(md.count(u"⌗"_s), 1);
+
+        // From the service, with the programme's names.
+        if (QStandardPaths::findExecutable(u"python3"_s).isEmpty()) {
+            QSKIP("python3 reads the archive back");
+        }
+        Catalog catalog;
+        QVERIFY2(catalog.load(QStringLiteral(MITORI_DATEN_JSON)), qPrintable(catalog.errorString()));
+        Courses courses(m_dir.filePath(u"names.sqlite"_s), QUrl::fromLocalFile(m_dir.filePath(u"none.ics"_s)),
+                        m_dir.filePath(u"names-cache.ics"_s), catalog);
+        const QString uid = courses.create(u"Namen"_s, u"2026-07-04"_s, {}, {}, {});
+        QVERIFY(courses.addEntry(uid, u"Form"_s));
+        const QString entry = courses.entries(uid).first().toMap().value(u"uid"_s).toString();
+        QVERIFY(courses.linkTechnique(entry, u"shinkitoho/odachi/5"_s));
+        QVERIFY(courses.linkTechnique(entry, u"gibt/es/nicht"_s));
+        const QString zip = m_dir.filePath(courses.exportName(uid));
+        QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(zip)), 0);
+        const QString back = readBack(zip);
+        QVERIFY2(back.contains(u"⌗ 5 · Gohon-me · Tsukikomi Seigan-yaburi"_s), qPrintable(back));
+        QVERIFY2(back.contains(u"Technique no longer in the programme"_s), qPrintable(back));
+        QVERIFY(!back.contains(u"gibt/es/nicht"_s));
     }
 
     // Characters a URL or a file system takes for something else stay out of the name.

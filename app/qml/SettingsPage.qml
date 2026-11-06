@@ -363,7 +363,7 @@ Kirigami.ScrollablePage {
     function changes(s) {
         const kinds = [["ratings", qsTr("Ratings")], ["notes", qsTr("Notes")], ["rounds", qsTr("Exam rounds")],
                        ["notebooks", qsTr("Notebooks")], ["entries", qsTr("Notebook entries")], ["grades", qsTr("Grades")],
-                       ["starts", qsTr("Start of training")]]
+                       ["starts", qsTr("Start of training")], ["links", qsTr("Technique links")]]
         let lines = []
         for (const [key, name] of kinds) {
             const c = s[key] || {}
@@ -395,7 +395,7 @@ Kirigami.ScrollablePage {
     function amounts(s, key, media) {
         const kinds = [["ratings", qsTr("Ratings")], ["notes", qsTr("Notes")], ["rounds", qsTr("Exam rounds")],
                        ["notebooks", qsTr("Notebooks")], ["entries", qsTr("Notebook entries")], ["grades", qsTr("Grades")],
-                       ["starts", qsTr("Start of training")]]
+                       ["starts", qsTr("Start of training")], ["links", qsTr("Technique links")]]
         let lines = []
         for (const [kind, name] of kinds) {
             const n = (s[kind] || {})[key] || 0

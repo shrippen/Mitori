@@ -20,6 +20,10 @@
 //   entries   uid, course, text, created, changed, device, deleted, media (schema 3)
 //   grades    uid, discipline, grade, day, place, created, changed, device, deleted (schema 2)
 //   starts    uid (the discipline), day, created, changed, device, deleted (schema 4): training began
+//   entry_tags  uid ("<entry>/<technique>"), entry, technique, created, changed, device, deleted
+//             (schema 5): the techniques an entry is linked to. The uid is the pair, so two devices
+//             linking the same one merge into one row. deleted: 1 unlinked by the user, 2 gone with
+//             its entry (it comes back if a merge brings the entry back).
 class CourseBook
 {
 public:
@@ -50,6 +54,15 @@ public:
         QString device;
         bool deleted = false;
         QString media;          // a photo or voice note: its file in the media folder, or ""
+        QStringList techniques; // the linked techniques' names for the export (Courses); empty from here
+    };
+
+    // An entry linked to a technique, with its course.
+    struct Linked {
+        Entry entry;
+        QString title;
+        QDate first;
+        QDate last;
     };
 
     // A grade the user passed (Meine Grade): discipline and grade ids of the catalog.
@@ -100,6 +113,16 @@ public:
     // How many entries each notebook has: {course uid: count}.
     QHash<QString, int> entryCounts() const;
 
+    // Links an entry to a technique of the programme (again: nothing changes); false when the
+    // entry is gone. Removing marks the row.
+    bool addTag(const QString &entry, const QString &technique, const QDateTime &at, const QString &device);
+    bool removeTag(const QString &entry, const QString &technique, const QDateTime &at);
+    // The techniques of a notebook's entries: {entry uid: technique ids, oldest link first}.
+    QHash<QString, QStringList> courseTags(const QString &course) const;
+    // The entries linked to a technique, the latest course first; a deleted entry or course is not
+    // among them.
+    QList<Linked> linkedEntries(const QString &technique) const;
+
     // Passed grades: one per discipline and grade (adding it again replaces the day and place);
     // an empty uid on failure.
     Grade addGrade(Grade grade, const QDateTime &at, const QString &device);
@@ -126,7 +149,7 @@ public:
     QHash<QString, QDate> starts() const;
     bool setStart(const QString &discipline, const QDate &day, const QDateTime &at, const QString &device);
 
-    static constexpr int schemaVersion = 4;
+    static constexpr int schemaVersion = 5;
 
 private:
     bool migrate();

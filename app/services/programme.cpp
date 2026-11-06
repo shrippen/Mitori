@@ -359,13 +359,8 @@ QVariantList Programme::shinkiTohoEntries(const QVariantMap &d, const QString &g
     return result;
 }
 
-QVariantList Programme::search(const QString &query, int limit) const
+void Programme::eachTechnique(const std::function<bool(const QVariantMap &)> &visit) const
 {
-    QVariantList result;
-    const QStringList words = searchWords(query);
-    if (words.isEmpty()) {
-        return result;
-    }
     QSet<QString> seen;
     for (const QVariant &d : m_catalog.disciplines()) {
         const QVariantMap discipline = d.toMap();
@@ -383,35 +378,227 @@ QVariantList Programme::search(const QString &query, int limit) const
                 if (row.value(QStringLiteral("kind")) != QLatin1String("entry") || seen.contains(id)) {
                     continue;
                 }
-                const QStringList fields{row.value(QStringLiteral("title")).toString(),
-                                         row.value(QStringLiteral("jp")).toString(),
-                                         row.value(QStringLiteral("extra")).toString(),
-                                         row.value(QStringLiteral("attack")).toString(),
-                                         row.value(QStringLiteral("attackExtra")).toString(),
-                                         row.value(QStringLiteral("attackJp")).toString(),
-                                         group};
-                // The Kamae exercise is found by its positions too (Seigan, Hongaku …).
-                QStringList stepFields;
-                for (const QVariant &step : row.value(QStringLiteral("steps")).toList()) {
-                    stepFields << step.toMap().value(QStringLiteral("title")).toString() << step.toMap().value(QStringLiteral("jp")).toString();
-                }
-                if (!SearchText((fields + stepFields).join(u' ')).matches(words)) {
-                    continue;
-                }
                 seen.insert(id);
                 row[QStringLiteral("discipline")] = disciplineId;
                 row[QStringLiteral("disciplineName")] = discipline.value(QStringLiteral("kurzname"));
                 row[QStringLiteral("grade")] = grade.value(QStringLiteral("id"));
                 row[QStringLiteral("gradeName")] = grade.value(QStringLiteral("name"));
                 row[QStringLiteral("groupName")] = group;
-                result << row;
-                if (result.size() >= limit) {
-                    return result;
+                if (!visit(row)) {
+                    return;
                 }
             }
         }
     }
+}
+
+QVariantList Programme::search(const QString &query, int limit) const
+{
+    QVariantList result;
+    const QStringList words = searchWords(query);
+    if (words.isEmpty()) {
+        return result;
+    }
+    eachTechnique([&](const QVariantMap &row) {
+        const QStringList fields{row.value(QStringLiteral("title")).toString(),
+                                 row.value(QStringLiteral("jp")).toString(),
+                                 row.value(QStringLiteral("extra")).toString(),
+                                 row.value(QStringLiteral("attack")).toString(),
+                                 row.value(QStringLiteral("attackExtra")).toString(),
+                                 row.value(QStringLiteral("attackJp")).toString(),
+                                 row.value(QStringLiteral("groupName")).toString()};
+        // The Kamae exercise is found by its positions too (Seigan, Hongaku …).
+        QStringList stepFields;
+        for (const QVariant &step : row.value(QStringLiteral("steps")).toList()) {
+            stepFields << step.toMap().value(QStringLiteral("title")).toString() << step.toMap().value(QStringLiteral("jp")).toString();
+        }
+        if (SearchText((fields + stepFields).join(u' ')).matches(words)) {
+            result << row;
+        }
+        return result.size() < limit;
+    });
     return result;
+}
+
+namespace {
+
+// How much of a technique a text names; 0 for none. Its name counts most, then attack and addition.
+constexpr int kNamed = 4;
+constexpr int kAttackNamed = 2;
+constexpr int kAttackPartNamed = 1;
+constexpr int kExtraNamed = 1;
+constexpr int kGroupNamed = 1;
+
+// The names of the programme a text holds. The longest whole name wins: in "Uchi-kaiten-nage" that
+// is the only name, not also Kaiten-nage; named apart, each counts.
+class Mentions
+{
+public:
+    explicit Mentions(const QString &text)
+        : m_text(text)
+    {
+    }
+
+    void add(const QString &name) { m_taken += m_text.spans(name); }
+
+    bool names(const QString &name) const
+    {
+        const QList<NamedIn::Span> places = m_text.spans(name);
+        if (places.isEmpty()) {
+            return m_text.names(name);     // kanji
+        }
+        return std::any_of(places.cbegin(), places.cend(), [this](const NamedIn::Span &place) {
+            return std::none_of(m_taken.cbegin(), m_taken.cend(), [&](const NamedIn::Span &t) { return place.inside(t); });
+        });
+    }
+
+private:
+    NamedIn m_text;
+    QList<NamedIn::Span> m_taken;
+};
+
+QStringList titleParts(const QVariantMap &row)
+{
+    return row.value(QStringLiteral("title")).toString().split(QStringLiteral(" · "));
+}
+
+// An attack by its end: "Katate-dori" names Ryote-katate-dori less than the whole name does.
+int attackScore(const Mentions &text, const QString &attack)
+{
+    if (text.names(attack)) {
+        return kAttackNamed;
+    }
+    const QStringList parts = attack.split(u'-');
+    for (qsizetype from = 1; from + 1 < parts.size(); ++from) {
+        if (text.names(parts.sliced(from).join(u'-'))) {
+            return kAttackPartNamed;
+        }
+    }
+    return 0;
+}
+
+// The group of a numbered form without its range: "Ô-dachi" of the heading "Ô-dachi 1–11".
+QString groupWord(const QVariantMap &row)
+{
+    return row.value(QStringLiteral("groupName")).toString().section(u' ', 0, 0);
+}
+
+int namedScore(const Mentions &text, const QVariantMap &row)
+{
+    int score = 0;
+
+    // A form's name has two parts ("Ippon-me · Hitotsu-gachi"), each names it.
+    const QStringList parts = titleParts(row) << row.value(QStringLiteral("jp")).toString();
+    if (std::any_of(parts.cbegin(), parts.cend(), [&](const QString &p) { return text.names(p); })) {
+        score = kNamed;
+    }
+
+    // A numbered form by its group ("Ô-dachi 5", "O-dachi Nr. 5").
+    const int nr = row.value(QStringLiteral("nr")).toInt();
+    if (score == 0 && nr > 0) {
+        const QString group = groupWord(row);
+        if (text.names(group + u' ' + QString::number(nr)) || text.names(group + QStringLiteral(" Nr ") + QString::number(nr))) {
+            score = kNamed;
+        } else if (text.names(group)) {
+            score = kGroupNamed;
+        }
+    }
+    if (score == 0) {
+        return 0;
+    }
+
+    score += attackScore(text, row.value(QStringLiteral("attack")).toString());
+    if (text.names(row.value(QStringLiteral("extra")).toString())) {
+        score += kExtraNamed;
+    }
+    return score;
+}
+
+} // namespace
+
+QVariantList Programme::suggest(const QString &text, int limit, const QStringList &without) const
+{
+    struct Hit {
+        int score;
+        bool chosen;    // of the discipline chosen last
+        int turn;       // the how-manieth of its name
+        QVariantMap row;
+    };
+    QVariantList rows;
+    eachTechnique([&rows](const QVariantMap &row) {
+        rows << row;
+        return true;
+    });
+
+    // Every name in the text first: only then a part of a longer one shows.
+    Mentions named(text);
+    for (const QVariant &v : std::as_const(rows)) {
+        const QVariantMap row = v.toMap();
+        for (const QString &part : titleParts(row)) {
+            named.add(part);
+        }
+        named.add(row.value(QStringLiteral("attack")).toString());
+    }
+
+    const QString chosen = discipline();
+    QList<Hit> hits;
+    for (const QVariant &v : std::as_const(rows)) {
+        const QVariantMap row = v.toMap();
+        const int score = namedScore(named, row);
+        if (score > 0) {
+            hits << Hit{score, row.value(QStringLiteral("discipline")).toString() == chosen, 0, row};
+        }
+    }
+
+    // A form named by its number leaves out the group's other forms: "Ô-dachi 5" is only that one.
+    QSet<QString> formNamed;
+    for (const Hit &h : std::as_const(hits)) {
+        if (h.score >= kNamed && h.row.value(QStringLiteral("nr")).toInt() > 0) {
+            formNamed.insert(groupWord(h.row));
+        }
+    }
+    hits.removeIf([&](const Hit &h) { return h.score < kNamed && formNamed.contains(groupWord(h.row)); });
+
+    // Left out before the cut, so that the next ones move up.
+    hits.removeIf([&](const Hit &h) { return without.contains(h.row.value(QStringLiteral("id")).toString()); });
+
+    // Best first within a name, then the names in turns: "Ikkyo, Ô-dachi 5" shows both. The forms
+    // of a group named alone count as one name.
+    std::stable_sort(hits.begin(), hits.end(), [](const Hit &a, const Hit &b) {
+        return a.score != b.score ? a.score > b.score : a.chosen && !b.chosen;
+    });
+    QHash<QString, int> turns;
+    for (Hit &h : hits) {
+        const QString name = h.score < kNamed ? groupWord(h.row)
+                                              : h.row.value(QStringLiteral("title")).toString();
+        h.turn = turns[searchKey(name)]++;
+    }
+    std::stable_sort(hits.begin(), hits.end(), [](const Hit &a, const Hit &b) { return a.turn < b.turn; });
+
+    QVariantList result;
+    for (qsizetype i = 0; i < hits.size() && i < limit; ++i) {
+        result << hits.at(i).row;
+    }
+    return result;
+}
+
+QString Programme::techniqueLabel(const QString &id) const
+{
+    const QVariantMap e = entry(id);
+    const QString title = e.value(QStringLiteral("title")).toString();
+    if (title.isEmpty()) {
+        return {};
+    }
+    const auto withExtra = [](const QString &name, const QString &extra) {
+        return extra.isEmpty() ? name : QStringLiteral("%1 (%2)").arg(name, extra);
+    };
+    const int nr = e.value(QStringLiteral("nr")).toInt();
+    const QString attack = e.value(QStringLiteral("attack")).toString();
+    QStringList parts{nr > 0 ? QString::number(nr) : QString(), withExtra(title, e.value(QStringLiteral("extra")).toString()),
+                      attack.isEmpty() ? QString() : withExtra(attack, e.value(QStringLiteral("attackExtra")).toString()),
+                      e.value(QStringLiteral("disciplineName")).toString() + u' ' + e.value(QStringLiteral("gradeName")).toString()};
+    parts.removeAll(QString());
+    return parts.join(QStringLiteral(" · "));
 }
 
 QVariantMap Programme::entry(const QString &id) const
@@ -429,6 +616,7 @@ QVariantMap Programme::entry(const QString &id) const
                         continue;
                     }
                     found[QStringLiteral("discipline")] = disciplineId;
+                    found[QStringLiteral("disciplineName")] = map.value(QStringLiteral("kurzname"));
                     found[QStringLiteral("grade")] = g.toMap().value(QStringLiteral("id"));
                     m_entryIndex.insert(entryId, found);
                 }
