@@ -63,7 +63,8 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   stehen. Raster: `KanteHeatGrid` (Kante 1.63, dafür ergänzt; Formenraster füllt die Breite seit Kante 1.64).
 - Schritt 4: Lehrgänge (Kachel 講 im Startmenü, nennt den nächsten Termin): die kommenden Termine aus dem öffentlichen
   Lehrgangskalender (ICS, alle sechs Stunden neu geladen, offline vom Gerät), ein Notizbuch je Termin (beim ersten
-  Öffnen angelegt, mit einer Kopie des Termins) und eigene Lehrgänge ohne Kalendereintrag. Im Notizbuch: Tage, Ort,
+  Öffnen angelegt, mit einer Kopie des Termins) und eigene Lehrgänge ohne Kalendereintrag. Alle Notizbücher auf eigener
+  Seite (Knopf „Meine Notizbücher“ neben „Meine Grade“). Im Notizbuch: Tage, Ort,
   Lehrer (aus „mit …“ der Beschreibung), „In den Kalender“ (Plattform-Schicht `platform/devicecalendar`: Android
   über den Kalender-Intent, sonst als ICS-Datei an die Kalender-App), „Ausschreibung“ (aus der Zeile
   „Ausschreibung: URL“), Einträge nach Tagen (lang drücken: ändern, löschen), Notizbuch löschen. Gespeichert in

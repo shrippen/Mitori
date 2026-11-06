@@ -81,6 +81,7 @@ qt_add_qml_module(mitori_app
         qml/ExamEndPage.qml
         qml/TechniqueMapPage.qml
         qml/CoursesPage.qml
+        qml/NotebooksPage.qml
         qml/CourseRow.qml
         qml/CoursePage.qml
         qml/CourseNewPage.qml
