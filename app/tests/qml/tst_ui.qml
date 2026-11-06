@@ -121,6 +121,16 @@ TestCase {
         verify(!Appearance.restartNeeded)
     }
 
+    // An older version's grade is the practice grade at the first start, chosen by hand.
+    function test_0a_practice_migrated() {
+        compare(PracticeGrade.grade("shinkitoho"), "chuden")
+        verify(PracticeGrade.manual("shinkitoho"))
+        compare(PracticeGrade.grade("aikido"), "k5", "nothing stored, nothing entered: the first grade")
+        verify(!PracticeGrade.manual("aikido"))
+        PracticeGrade.setGrade("shinkitoho", "shoden")
+        verify(!PracticeGrade.manual("shinkitoho"))
+    }
+
     // Settings → Appearance: the style tiles, the language, the restart hint, about Mitori.
     function test_0b_appearance() {
         const settings = push("SettingsPage")
@@ -283,7 +293,7 @@ TestCase {
 
     function test_2_programme() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         compare(page.grade, "k5")
         verify(page.rows.filter(r => r.kind === "entry").length === 20)
@@ -302,7 +312,7 @@ TestCase {
         }
 
         Programme.discipline = "shinkitoho"
-        page.grade = Programme.grade("shinkitoho")
+        page.grade = PracticeGrade.grade("shinkitoho")
         compare(page.grade, "shoden")
         verify(page.rows.some(r => r.kind === "info"))
         shot("3-programme-shinkitoho")
@@ -311,7 +321,7 @@ TestCase {
 
     function test_2b_sheet() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         const entry = page.rows.find(r => r.kind === "entry" && r.attack)
         page.open(entry)
@@ -372,8 +382,8 @@ TestCase {
         Programme.discipline = "shinkitoho"
         const grades = Programme.grades("shinkitoho")
         const last = grades[grades.length - 1]
-        const before = Programme.grade("shinkitoho")
-        Programme.setGrade("shinkitoho", last.id)
+        const before = PracticeGrade.grade("shinkitoho")
+        PracticeGrade.setGrade("shinkitoho", last.id)
         const page = push("ProgrammePage")
         const entry = page.rows.find(r => r.kind === "entry" && !r.video)
         verify(entry, "an entry without a video in " + last.name)
@@ -384,7 +394,7 @@ TestCase {
         verify(!findChild(sheet.contentItem, "sheetCodeButton").visible)
         sheet.close()
         window.pageStack.pop()
-        Programme.setGrade("shinkitoho", before)
+        PracticeGrade.setGrade("shinkitoho", before)
         Programme.discipline = "aikido"
     }
 
@@ -392,7 +402,7 @@ TestCase {
     function test_2g_kamae_sheet() {
         failOnWarning(/ReferenceError|TypeError|Binding loop/)
         Programme.discipline = "shinkitoho"
-        Programme.setGrade("shinkitoho", "shoden")
+        PracticeGrade.setGrade("shinkitoho", "shoden")
         const page = push("ProgrammePage")
         const kamae = page.rows.filter(r => r.kind === "entry" && r.id.startsWith("shinkitoho/kamae"))
         compare(kamae.length, 1)
@@ -422,7 +432,7 @@ TestCase {
     // A small phone: the Kamae sheet is taller than the window; the keys scroll it.
     function test_2h_sheet_keys() {
         Programme.discipline = "shinkitoho"
-        Programme.setGrade("shinkitoho", "shoden")
+        PracticeGrade.setGrade("shinkitoho", "shoden")
         window.width = 360
         window.height = 640
         const page = push("ProgrammePage")
@@ -474,7 +484,7 @@ TestCase {
     // Rating in the sheet: the list row shows the level as dots, the sheet the last rating.
     function test_2d_rate_in_sheet() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         const entry = page.rows.find(r => r.kind === "entry")
         compare(Practice.level(entry.id), 0)
@@ -511,7 +521,7 @@ TestCase {
     // area in the overlay there; it must not swallow the taps).
     function test_2f_tap_row_at_bottom() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         wait(500)
         const sheet = findChild(page, "techniqueSheet")
@@ -566,7 +576,7 @@ TestCase {
         }
         Videos.folder = uiShotsDir
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         verify(!page.hasVideo)
         Videos.folder = real
@@ -1167,7 +1177,7 @@ TestCase {
     // ▶ in the list opens the player; the list marks the entry the player showed last.
     function test_5c_list_marks_last_shown() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const list = push("ProgrammePage")
         if (!list.hasVideo) {
             skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
@@ -1225,7 +1235,7 @@ TestCase {
     // Today's practice: two new techniques of the current grade; rating one brings the next.
     function test_7_today() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("TodayPage")
         compare(page.discipline, "aikido")
         // Two new ones a day, less those of the grade already rated today (earlier cases).
@@ -1253,7 +1263,7 @@ TestCase {
     function test_7b_training() {
         // Daitoryu: nothing practised there yet today, two new ones are due.
         Programme.discipline = "daitoryu"
-        Programme.setGrade("daitoryu", "k5")
+        PracticeGrade.setGrade("daitoryu", "k5")
         const today = push("TodayPage")
         const playable = today.due.filter(r => !!r.video && Videos.available(r.video.video))
         if (playable.length < 2) {
@@ -1344,7 +1354,7 @@ TestCase {
     // playlist (✓, tap jumps), the position and an end hint with the count.
     function test_7c_training_list() {
         Programme.discipline = "daitoryu"
-        Programme.setGrade("daitoryu", "k4")
+        PracticeGrade.setGrade("daitoryu", "k4")
         const today = push("TodayPage")
         verify(today.due.length >= 2, "Daitoryu 4. Kyu has due techniques")
         today.startTraining()
@@ -1875,13 +1885,24 @@ TestCase {
         const today = push("TodayPage")
         verify(findChild(today, "plannedHint").visible)
         window.pageStack.pop()
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const exam = push("ExamPage")
         verify(findChild(exam, "plannedHint").visible)
         verify(findChild(exam, "toExamGrade").visible)
         wait(1000)      // the page has slid in (a click during the slide can land beside the button)
         clickUntil(findChild(exam, "toExamGrade"), () => exam.grade === "k4")
         verify(!findChild(exam, "toExamGrade").visible)
+        window.pageStack.pop()
+
+        // "Mock exam" on Today opens the exam at the planned grade and makes it the practice grade.
+        PracticeGrade.setGrade("aikido", "k5")
+        const today1 = push("TodayPage")
+        wait(1000)      // the page has slid in
+        clickUntil(findChild(today1, "toMockExam"), () => window.pageStack.currentItem !== today1)
+        tryCompare(window.pageStack.currentItem, "title", qsTranslate("ExamPage", "Exam mode"))
+        compare(window.pageStack.currentItem.grade, "k4")
+        compare(PracticeGrade.grade("aikido"), "k4")
+        window.pageStack.pop()
         window.pageStack.pop()
 
         // A planned grade without material in the exam mode (Shinki Toho Menkyo-Kaiden): no
@@ -1926,7 +1947,7 @@ TestCase {
     function test_9k_map() {
         failOnWarning(/ReferenceError|TypeError/)
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k4")
+        PracticeGrade.setGrade("aikido", "k4")
         tryCompare(window.pageStack, "depth", 1)
         wait(500)       // Kirigami slides the last page out
         const tile = findChild(window.pageStack.items[0], "mapTile")
@@ -2394,7 +2415,7 @@ TestCase {
     function test_9e_exam() {
         failOnWarning(/ReferenceError|TypeError/)
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k4")
+        PracticeGrade.setGrade("aikido", "k4")
         Exam.count = 8
         Exam.shuffled = false
         Exam.samples = true
@@ -2515,7 +2536,7 @@ TestCase {
     function test_9f_exam_shinkitoho() {
         failOnWarning(/ReferenceError|TypeError/)
         Programme.discipline = "shinkitoho"
-        Programme.setGrade("shinkitoho", "shoden")
+        PracticeGrade.setGrade("shinkitoho", "shoden")
         Exam.count = 0
         Exam.samples = true
         const page = push("ExamPage")
@@ -2561,7 +2582,7 @@ TestCase {
     function test_9g_exam_discard() {
         failOnWarning(/ReferenceError|TypeError/)
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         Exam.count = 8
         Exam.samples = false
         const settings = push("ExamPage")
@@ -2661,7 +2682,7 @@ TestCase {
         }
         // A large tablet beside the list: the picture as large as for a technique without positions.
         Programme.discipline = "shinkitoho"
-        Programme.setGrade("shinkitoho", "shoden")
+        PracticeGrade.setGrade("shinkitoho", "shoden")
         window.width = 1920
         window.height = 1080
         const programme = push("ProgrammePage")
@@ -2755,7 +2776,7 @@ TestCase {
         }
         Videos.folder = standInVideos
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         window.width = 1280
         window.height = 800
         const page = push("ProgrammePage")
@@ -2844,7 +2865,7 @@ TestCase {
             skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
         }
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         window.width = 1280
         window.height = 800
         let page = push("ProgrammePage")
@@ -2889,7 +2910,7 @@ TestCase {
     // list, the player moving on marks its row.
     function test_2t_tablet() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
         if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
             skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
@@ -2932,7 +2953,7 @@ TestCase {
         tryVerify(() => pane.item && pane.item.current.id === chosen, 3000, "still " + chosen)
         compare(page.lastId, chosen)
         // Another grade: its first technique plays, not the same place in another list.
-        Programme.setGrade("aikido", "k4")
+        PracticeGrade.setGrade("aikido", "k4")
         page.grade = "k4"
         tryVerify(() => pane.item && pane.item.current.id === page.playlist[0].id, 3000)
         compare(page.lastId, page.playlist[0].id)
@@ -2943,7 +2964,7 @@ TestCase {
         window.width = 420
         window.height = 800
         tryVerify(() => !page.split)
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         window.pageStack.pop()
     }
 
@@ -2955,7 +2976,7 @@ TestCase {
             skip("no video for Shinki Toho (set MITORI_VIDEOS)")
         }
         Programme.discipline = "shinkitoho"
-        Programme.setGrade("shinkitoho", grade)
+        PracticeGrade.setGrade("shinkitoho", grade)
         window.width = 1280
         window.height = 800
         const page = push("ProgrammePage")
@@ -2993,7 +3014,7 @@ TestCase {
             skip("no video for the Kamae exercise (set MITORI_VIDEOS)")
         }
         Programme.discipline = "shinkitoho"
-        Programme.setGrade("shinkitoho", "shoden")
+        PracticeGrade.setGrade("shinkitoho", "shoden")
         window.width = 1280
         window.height = 800
         const page = push("ProgrammePage")
@@ -3042,7 +3063,7 @@ TestCase {
     // The keyboard scrolls the programme list (Down, Page Down).
     function test_2v_programme_keys() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k3")
+        PracticeGrade.setGrade("aikido", "k3")
         const page = push("ProgrammePage")
         const list = findChild(page, "programmeList")
         // Kirigami slides the page in (longer under load); a key during that is lost.
@@ -3109,7 +3130,7 @@ TestCase {
         keyClick(Qt.Key_End)
         wait(300)
         verify(list.atYEnd, "End at the first press (" + list.contentY + ")")
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         window.pageStack.pop()
     }
 
@@ -3117,7 +3138,7 @@ TestCase {
     // tablet the player's controls fit under the picture.
     function test_2w_tablet_player_keys() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
         if (rows.length < 2 || !Videos.available(rows[0].video.video)) {
             skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
@@ -3247,7 +3268,7 @@ TestCase {
 
         // The sheet's "last note" names a voice note without text as such.
         Programme.discipline = "aikido"         // earlier cases leave another one chosen
-        Programme.setGrade("aikido", "k4")
+        PracticeGrade.setGrade("aikido", "k4")
         const programme = push("ProgrammePage")
         programme.open(programme.rows.find(r => r.id === entry.id))
         const sheet = findChild(programme, "techniqueSheet")
@@ -3282,7 +3303,7 @@ TestCase {
     // meaning and waiting time, the Suburi texts (QA round P5; the booklet p. 44 f.).
     function test_8p_data_on_the_screen() {
         Programme.discipline = "shinkitoho"
-        Programme.setGrade("shinkitoho", "shoden")
+        PracticeGrade.setGrade("shinkitoho", "shoden")
         const page = push("ProgrammePage")
         const form = page.rows.find(r => r.id === "shinkitoho/odachi/5")
         verify(form.open, "S-02 is an open question")
@@ -3340,6 +3361,112 @@ TestCase {
         return found
     }
 
+    // Browsing the programme and the map changes the page's grade only: not the start menu, not
+    // today's practice, not the exam; the next visit starts at the practice grade again.
+    function test_8p_browsing_keeps_practice() {
+        Programme.discipline = "aikido"
+        PracticeGrade.setGrade("aikido", "k4")
+        const start = window.pageStack.items[0]
+        const tiles = ["programmeTile", "todayTile", "examTile"].map(n => findChild(start, n))
+        const hints = tiles.map(t => t.hint)
+        verify(hints[0].indexOf("4. Kyu") >= 0, hints[0])
+        verify(hints[2].indexOf("4. Kyu") >= 0, hints[2])
+
+        const page = push("ProgrammePage")
+        wait(500)       // Kirigami slides the page in
+        compare(page.grade, "k4")
+        const chips = findChild(page, "gradeChips")
+        const k2 = chips.itemAt(page.grades.findIndex(g => g.id === "k2"))
+        clickUntil(k2, () => page.grade === "k2")
+        verify(k2.checked)
+        compare(PracticeGrade.grade("aikido"), "k4")
+        compare(tiles.map(t => t.hint), hints)
+        const today = push("TodayPage")
+        compare(today.grade, "k4")
+        window.pageStack.pop()
+        const exam = push("ExamPage")
+        compare(exam.grade, "k4")
+        window.pageStack.pop()
+        compare(page.grade, "k2", "what it browses stays")
+        window.pageStack.pop()
+        tryCompare(window.pageStack, "depth", 1)
+        wait(500)       // Kirigami slides the last page out
+
+        const again = push("ProgrammePage")
+        compare(again.grade, "k4")
+        window.pageStack.pop()
+
+        const map = push("TechniqueMapPage")
+        compare(map.grade, "k4")
+        map.grade = "k2"
+        compare(PracticeGrade.grade("aikido"), "k4")
+        compare(tiles.map(t => t.hint), hints)
+        window.pageStack.pop()
+        PracticeGrade.setGrade("aikido", "k5")
+    }
+
+    // The practice grade follows a passed grade on the open pages; Today and the exam change it
+    // by hand, each sees the other's; choosing what is suggested follows "My grades" again.
+    function test_8p_practice_grade() {
+        const discipline = "daitoryu"
+        Programme.discipline = discipline
+        const removeAll = () => Courses.grades.filter(g => g.discipline === discipline).map(g => g.uid)
+                                       .forEach(uid => verify(Courses.removeGrade(uid), Courses.errorString))
+        removeAll()
+        PracticeGrade.setGrade(discipline, "k5")
+        verify(!PracticeGrade.manual(discipline))
+        const start = window.pageStack.items[0]
+        const examTile = findChild(start, "examTile")
+
+        const today = push("TodayPage")
+        wait(500)       // Kirigami slides the page in
+        const hint = findChild(today, "practiceGradeHint")
+        compare(today.grade, "k5")
+        compare(hint.text, qsTranslate("TodayPage", "up to %1 (first grade, nothing in My grades yet)").arg("5. Kyu"))
+        const dueIds = () => today.due.map(r => r.id).join()
+        const dueUpToK5 = dueIds()
+
+        verify(Courses.addGrade(discipline, "k5", "2025-05-01", ""))
+        tryCompare(today, "grade", "k4")
+        verify(findChild(today, "practice_k4").checked)
+        tryVerify(() => dueIds() !== dueUpToK5, 1000, "what is due follows the grade")
+        compare(hint.text, qsTranslate("TodayPage", "up to %1 (from My grades)").arg("4. Kyu"))
+        verify(examTile.hint.indexOf("4. Kyu") >= 0, examTile.hint)
+
+        // By hand on Today, further than suggested.
+        clickUntil(findChild(today, "practice_k2"), () => today.grade === "k2")
+        verify(today.manualGrade)
+        verify(findChild(today, "practice_k2").checked)
+        verify(!findChild(today, "practice_k4").checked)
+        compare(hint.text, qsTranslate("TodayPage", "up to %1 (chosen by you)").arg("2. Kyu"))
+        verify(examTile.hint.indexOf("2. Kyu") >= 0, examTile.hint)
+
+        // A passed grade behind it leaves it.
+        verify(Courses.addGrade(discipline, "k4", "2026-05-01", ""))
+        wait(50)
+        compare(today.grade, "k2")
+        window.pageStack.pop()
+        tryCompare(window.pageStack, "depth", 1)
+        wait(500)       // Kirigami slides the last page out
+
+        // By hand in the exam: Today and the start menu follow.
+        const exam = push("ExamPage")
+        wait(500)       // Kirigami slides the page in
+        compare(exam.grade, "k2")
+        clickUntil(findChild(exam, "grade_k5"), () => exam.grade === "k5")
+        compare(PracticeGrade.grade(discipline), "k5")
+        verify(examTile.hint.indexOf("5. Kyu") >= 0, examTile.hint)
+
+        // A grade passed since moves a choice behind it forward.
+        verify(Courses.addGrade(discipline, "k3", "2026-06-01", ""))
+        tryCompare(exam, "grade", "k2")
+        verify(!PracticeGrade.manual(discipline))
+        window.pageStack.pop()
+
+        removeAll()
+        PracticeGrade.setGrade(discipline, "k5")
+    }
+
     // Hon-Menkyo and Menkyo-Kaiden: a chip with "–" and a card instead of the list; the grade the
     // other pages use stays.
     function test_8p_grade_without_forms() {
@@ -3348,7 +3475,7 @@ TestCase {
         window.height = 800
         wait(100)
         Programme.discipline = "shinkitoho"
-        Programme.setGrade("shinkitoho", "chuden")
+        PracticeGrade.setGrade("shinkitoho", "chuden")
         const page = push("ProgrammePage")
         const settled = () => Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1
         tryVerify(settled, 3000, "the page has slid in")
@@ -3365,7 +3492,7 @@ TestCase {
 
         clickUntil(chip, () => page.grade === "kaiden")
         verify(chip.checked)
-        compare(Programme.grade("shinkitoho"), "chuden", "the other pages keep their grade")
+        compare(PracticeGrade.grade("shinkitoho"), "chuden", "the other pages keep their grade")
         tryVerify(() => card.visible)
         compare(page.rows.length, 0)
 
@@ -3422,7 +3549,7 @@ TestCase {
         window.pageStack.pop()
         window.width = width
         window.height = height
-        Programme.setGrade("shinkitoho", "shoden")
+        PracticeGrade.setGrade("shinkitoho", "shoden")
         Programme.discipline = "aikido"
     }
 
@@ -3433,7 +3560,7 @@ TestCase {
         window.height = 800
         wait(100)
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         const chips = findChild(page, "gradeChips")
         const k5 = chips.itemAt(page.grades.findIndex(g => g.id === "k5"))
@@ -3445,7 +3572,7 @@ TestCase {
         compare(programmeList.contentY, programmeList.originY, "the list opens at its top")
         // Another discipline, another head (the grades' meaning): still at its top.
         Programme.discipline = "shinkitoho"
-        page.grade = Programme.grade("shinkitoho")
+        page.grade = PracticeGrade.grade("shinkitoho")
         tryVerify(() => findChild(programmeList.headerItem, "gradeInfo").visible)
         wait(300)
         compare(programmeList.contentY, programmeList.originY, "the list stays at its top")
@@ -3468,7 +3595,7 @@ TestCase {
     // The list went back to its top, about every second run of test_8p_row_lights_up_on_return.
     function test_8p_row_beats_keep_top() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         const list = findChild(page, "programmeList")
         tryVerify(() => list.count > 0)
@@ -3490,7 +3617,7 @@ TestCase {
         window.height = 800
         wait(100)
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         tryVerify(() => !page.split)
         const rows = page.rows.filter(r => r.kind === "entry")
@@ -3532,7 +3659,7 @@ TestCase {
         window.height = data.height
         wait(200)
         Programme.discipline = "shinkitoho"
-        Programme.setGrade("shinkitoho", "shoden")
+        PracticeGrade.setGrade("shinkitoho", "shoden")
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
         const report = {}
         const look = (name, item) => {
@@ -3633,7 +3760,7 @@ TestCase {
 
     function test_8k_sheet_says_where_the_dvd_is() {
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         page.open(page.rows.find(r => r.kind === "entry" && r.video))
         const sheet = findChild(page, "techniqueSheet")
@@ -3718,7 +3845,7 @@ TestCase {
         window.height = 800
         wait(100)
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         tryVerify(() => !page.split)
         page.lastId = rows[0].id
@@ -3760,7 +3887,7 @@ TestCase {
         window.height = 800
         wait(200)
         Programme.discipline = "aikido"
-        Programme.setGrade("aikido", "k5")
+        PracticeGrade.setGrade("aikido", "k5")
         const page = push("ProgrammePage")
         page.play(rows[0])
         tryVerify(() => page.player && page.player.hasVideo && page.player.duration > 0, 5000)

@@ -111,6 +111,13 @@ Syncthing entfällt als eigener Weg (geht über den Export-Ordner).
   Ô-dachi 1–11, höhere Grade ihre Formen.
 - **Heute üben**: eine Sparte je Einheit (keine Mehrfachauswahl), keine Minutenangabe, Abstände je Stufe
   einstellbar, keine Erinnerung.
+- **Übungsgrad** (Owner, 06.11.2026: „Übungsgrad kommt aus meine Grade oder manuell, nicht aus dem Programm.“,
+  „Übungsgrad getrennt vom Blättern“): je Sparte ein eigener Wert für Startmenü, Heute üben und Prüfungsmodus. Er ist
+  der Grad nach dem höchsten abgelegten aus „Meine Grade“ (ohne Stoff, etwa Hon-Menkyo: der letzte mit Stoff davor;
+  nichts eingetragen: der erste), bis man ihn in Heute üben oder im Prüfungsmodus von Hand wählt. Eine Wahl gilt, bis
+  ein später abgelegter Grad den Vorschlag über sie hinaus schiebt; ist sie schon weiter, bleibt sie. Den Vorschlag
+  selbst wählen hebt die Wahl auf. Programm und Technik-Landkarte blättern für sich: sie beginnen beim Übungsgrad,
+  ihre Chips ändern nur die Seite und werden nicht gemerkt.
 - **Mindestabstände** (in `daten/aikido.yaml`, `daten/daitoryu.yaml` als `abstand` am Grad): Kyu je 1 Jahr;
   2. Dan 2 Jahre nach dem 1. Dan, 3. Dan 3 Jahre nach dem 2., 4. Dan bzw. Okugi 4 Jahre nach dem 3. Dan.
   1. Dan 1 Jahr nach dem 1. Kyu; Daitoryu-Okugi 4 Jahre nach dem 3. Dan (bestätigt).

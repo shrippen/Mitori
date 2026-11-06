@@ -117,9 +117,8 @@ QVariantList Exam::grades(const QString &discipline) const
     return result;
 }
 
-QString Exam::grade(const QString &discipline) const
+QString Exam::grade(const QString &discipline, const QString &chosen) const
 {
-    const QString chosen = m_programme.grade(discipline);
     const QVariantList available = grades(discipline);
     for (const QVariant &g : available) {
         if (text(g.toMap(), "id") == chosen) {

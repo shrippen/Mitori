@@ -7,7 +7,7 @@ import org.kde.kirigami as Kirigami
 import Mitori
 import "grades.js" as Grades
 
-// Exam mode, settings (clickdummy "Prüfungsmodus"): discipline and grade (as in the programme),
+// Exam mode, settings (clickdummy "Prüfungsmodus"): discipline and grade (the practice grade),
 // how many points, in which order, and whether samples from earlier grades come first. The
 // settings are kept; "Start round" shows the points one by one (ExamRoundPage).
 Kirigami.ScrollablePage {
@@ -18,10 +18,9 @@ Kirigami.ScrollablePage {
     property Item lookScope: LookScope { target: page }
     background: Rectangle { color: Look.backgroundColor }
 
-    // Programme.discipline notifies on a new grade too, so `grade` follows both.
     readonly property string discipline: Programme.discipline
     readonly property var grades: Exam.grades(discipline)
-    readonly property string grade: Programme.discipline !== "" ? Exam.grade(discipline) : ""
+    readonly property string grade: PracticeGrade.revision >= 0 ? Exam.grade(discipline, PracticeGrade.grade(discipline)) : ""
     readonly property var gradeInfo: grades.find(g => g.id === grade) || ({})
     readonly property string gradeName: gradeInfo.name || ""
     readonly property int size: gradeInfo.count || 0
@@ -73,7 +72,7 @@ Kirigami.ScrollablePage {
                 // Only for a grade with material (Exam.grade falls back to the first one otherwise).
                 visible: page.exam.grade !== page.grade && page.grades.some(g => g.id === page.exam.grade)
                 text: qsTr("This grade")
-                onClicked: Programme.setGrade(page.discipline, page.exam.grade)
+                onClicked: PracticeGrade.setGrade(page.discipline, page.exam.grade)
             }
         }
 
@@ -90,8 +89,9 @@ Kirigami.ScrollablePage {
                     objectName: "grade_" + modelData.id
                     text: modelData.name + " · " + qsTr("%n point(s)", "", modelData.count)
                     checkable: true
+                    choice: true        // the page holds the grade: a tap only reports it
                     checked: modelData.id === page.grade
-                    onClicked: Programme.setGrade(page.discipline, modelData.id)
+                    onClicked: PracticeGrade.setGrade(page.discipline, modelData.id)
                 }
             }
         }
