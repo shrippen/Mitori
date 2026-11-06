@@ -139,12 +139,39 @@ RowSets liveRows(QSqlDatabase &db, const QList<TableMerge::Table> &tables, bool 
     return rows;
 }
 
-// What the merge deleted: rows live before and not after. Also those its clean-up deleted (an
-// entry going with its notebook), which no comparison of the two copies shows.
-void countRemoved(const RowSets &before, const RowSets &after, TableMerge::Result *result)
+// The rows of the editable tables the other has a newer state of, not a deletion mark.
+RowSets newerRows(QSqlDatabase &db, const QList<TableMerge::Table> &tables, bool *ok, QString *error)
+{
+    RowSets rows;
+    QSqlQuery q(db);
+    for (const TableMerge::Table &t : tables) {
+        if (t.kind == TableMerge::Kind::Log) {
+            continue;
+        }
+        if (!q.exec(QStringLiteral("SELECT o.%1 FROM %2.%3 o JOIN main.%3 m ON m.%1 = o.%1"
+                                   " WHERE o.changed > m.changed AND o.deleted = 0")
+                        .arg(t.columns.first(), kOther, t.name))) {
+            *ok = failed(q, error);
+            return {};
+        }
+        while (q.next()) {
+            rows[t.name].insert(q.value(0).toString());
+        }
+    }
+    return rows;
+}
+
+// What the merge did to the rows here, by comparing before and after, so that also the clean-up
+// counts (an entry going with its notebook), which no comparison of the two copies shows:
+// removed  live before, not after
+// edited   a newer state taken, live after (a row the clean-up then deleted is only removed)
+void countOutcome(const RowSets &before, const RowSets &newer, const RowSets &after, TableMerge::Result *result)
 {
     for (auto it = before.cbegin(); it != before.cend(); ++it) {
         result->removed[it.key()] = (it.value() - after.value(it.key())).size();
+    }
+    for (auto it = newer.cbegin(); it != newer.cend(); ++it) {
+        result->edited[it.key()] = (QSet<QString>(it.value()) & after.value(it.key())).size();
     }
 }
 
@@ -257,13 +284,14 @@ bool TableMerge::run(QSqlDatabase &db, const QString &otherPath, const QList<Tab
     ok = ok && (mode != Mode::Preview || compare(db, tables, result, error));
     result->mine = before.values();
     const RowSets rowsBefore = ok && mode == Mode::Preview ? liveRows(db, tables, &ok, error) : RowSets();
+    const RowSets rowsNewer = ok && mode == Mode::Preview ? newerRows(db, tables, &ok, error) : RowSets();
     ok = ok && hold(db, watch, error);
     for (const Table &t : tables) {
         ok = ok && mergeTable(db, t, watch, result, error);
     }
     ok = ok && (!after || after(db, error));
     if (ok && mode == Mode::Preview) {
-        countRemoved(rowsBefore, liveRows(db, tables, &ok, error), result);
+        countOutcome(rowsBefore, rowsNewer, liveRows(db, tables, &ok, error), result);
     }
 
     // The media the rows name after the merge: only those come from the backup (a deleted note's

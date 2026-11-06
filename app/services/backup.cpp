@@ -19,11 +19,12 @@ namespace {
 const QString kInspected = QStringLiteral("eingelesen.zip");
 const QString kCopyPrefix = QStringLiteral("kopie-");
 
-// {added, changed, removed, holds, lost} of one table for QML.
+// {added, changed, edited, removed, holds, lost} of one table for QML.
 QVariantMap counts(const TableMerge::Result &r, const QString &table)
 {
     return {{QStringLiteral("added"), r.added.value(table)},
             {QStringLiteral("changed"), r.changed.value(table)},
+            {QStringLiteral("edited"), r.edited.value(table)},
             {QStringLiteral("removed"), r.removed.value(table)},
             {QStringLiteral("holds"), r.holds.value(table)},
             {QStringLiteral("lost"), r.lost.value(table)}};

@@ -87,7 +87,7 @@ Kirigami.ScrollablePage {
             Layout.maximumWidth: Kirigami.Units.gridUnit * 30
             wrapMode: Text.Wrap
             color: Look.disabledTextColor
-            text: qsTr("One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back asks: merge it (the newer state of each note wins, also a newer deletion) or replace this device's data with it. DVD codes are not in it.")
+            text: qsTr("One file with your ratings, notes, exam rounds, notebooks, grades, photos and voice notes. Reading one back asks: merge it (the newer state wins, also a newer deletion) or replace this device's data with it. DVD codes are not in it.")
         }
         LookLabel {
             objectName: "backupDone"
@@ -303,10 +303,8 @@ Kirigami.ScrollablePage {
             if (c.added > 0) {
                 parts.push(qsTr("%n new", "", c.added))
             }
-            // A deleted row counts as changed too; the clean-up after a merge deletes rows it did not change.
-            const changed = Math.max((c.changed || 0) - (c.removed || 0), 0)
-            if (changed > 0) {
-                parts.push(qsTr("%n changed", "", changed))
+            if (c.edited > 0) {
+                parts.push(qsTr("%n changed", "", c.edited))
             }
             if (c.removed > 0) {
                 parts.push(qsTr("%n deleted", "", c.removed))
@@ -393,7 +391,7 @@ Kirigami.ScrollablePage {
                     // out wrap this text anew, a binding loop in the dialog's height.
                     text: !mergeDialog.visible ? "" : (page.summary.created ? qsTr("Backup of %1.").arg(page.summary.created.toLocaleString(Qt.locale(), Locale.ShortFormat)) + "\n\n" : "")
                           + qsTr("It holds: %1").arg(page.amounts(page.summary, "holds", page.summary.mediaHolds).join(", ") || qsTr("nothing"))
-                          + "\n\n" + qsTr("Merging: the newer state of each note wins. A newer text replaces this device's, a newer deletion removes the note here with its photo. What the backup lacks stays.")
+                          + "\n\n" + qsTr("Merging: ratings and exam rounds are only added. For everything else the newer state wins: a newer text replaces this device's, a newer deletion deletes here too, with the photo. What the backup lacks stays, except: an entry in a notebook the backup deleted later goes with it; two notebooks of one course become one, the entries move, the younger one's details go; of one grade entered twice the newer stays.")
                           + "\n\n"
                           + page.changes(page.summary)
                 }
@@ -464,7 +462,7 @@ Kirigami.ScrollablePage {
                         return ""
                     }
                     const lost = page.amounts(page.summary, "lost", page.summary.mediaLost)
-                    return qsTr("This cannot be undone. The backup's state takes the place of this device's ratings, notes, exam rounds, notebooks, grades, photos and voice notes.")
+                    return qsTr("This cannot be undone. The backup's state takes the place of this device's ratings, notes, exam rounds, notebooks, grades, start of training, photos and voice notes.")
                            + "\n\n" + (lost.length > 0 ? qsTr("Deleted, or set back to the backup's older state:") + "\n" + lost.join("\n")
                                                         : qsTr("The backup has all of this device's data, none is lost."))
                            + "\n\n" + qsTr("Downloaded videos, DVD codes and settings stay.")

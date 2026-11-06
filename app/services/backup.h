@@ -13,12 +13,13 @@ class QFile;
 // The backup for QML (Einstellungen → Sicherung): everything the user wrote as one ZIP
 // (store/backuparchive), and such a file read back, in one of two ways. Merging (TableMerge): new
 // rows come in, newer ones replace older, a newer deletion deletes here too, what the backup lacks
-// stays. Replacing: the device's
+// stays, except what CourseBook's clean-up joins or takes (an entry in a notebook the backup deleted
+// later, two notebooks of one course, a grade twice). Replacing: the device's
 // ratings, notes, exam rounds, notebooks, entries, grades, starts of training, photos and voice
 // notes go, the backup's take their place; all or nothing, and it cannot be undone.
 //
 //   save(url)       ──► mitori-sicherung-2026-11-02.zip
-//   inspect(url)    ──► {created, device, ratings: {added, changed, removed, holds, lost}, …, starts,
+//   inspect(url)    ──► {created, device, ratings: {added, changed, edited, removed, holds, lost}, …, starts,
 //                        media, mediaRemoved, mediaHolds, mediaLost}
 //   restore()       merges what inspect() read, then restored() (Practice and Courses reload)
 //   replace()       puts what inspect() read in place of the device's data, then restored()

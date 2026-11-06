@@ -698,9 +698,17 @@ TestCase {
         const text = findChild(page, "mergeText")
         verify(text.text.indexOf("It holds") >= 0, text.text)
         verify(text.text.indexOf("newer deletion") >= 0, text.text)
+        verify(text.text.indexOf("only added") >= 0, text.text)
+        verify(text.text.indexOf("a notebook the backup deleted later") >= 0, text.text)
+        verify(text.text.indexOf("two notebooks of one course become one") >= 0, text.text)
+        verify(text.text.indexOf("one grade entered twice") >= 0, text.text)
         verify(text.text.indexOf("keeps everything") < 0, text.text)
         verify(text.text.indexOf("Nothing new") >= 0, text.text)
         verify(text.text.indexOf("On this device it changes") < 0, text.text)
+
+        // What changed and stays, beside what goes (a mark in `changed`, a clean-up's row only in `removed`).
+        const counted = page.changes({ "entries": { "added": 0, "changed": 2, "edited": 1, "removed": 2 } })
+        verify(counted.indexOf("1 changed, 2 deleted") >= 0, counted)
         tryVerify(() => mergeDialog.contentHeight >= findChild(page, "replaceInstead").y + findChild(page, "replaceInstead").height, 1000,
                   "the column fits: " + mergeDialog.contentHeight)
         shot("4c-backup-choice", true)

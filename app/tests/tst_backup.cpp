@@ -461,6 +461,50 @@ private slots:
         QCOMPARE(book.entries(course).first().text, u"nach der Löschung"_s);
     }
 
+    // The preview's numbers when rows change and go side by side: `changed` also holds deletion marks,
+    // `removed` also rows the clean-up deleted; `edited` is what changed and stays.
+    void mergeCounts()
+    {
+        const Device a = device(u"zahlen-a"_s);
+        const Device b = device(u"zahlen-b"_s);
+        QString gone;
+        QString kept;
+        QString keptEntry;
+        {
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            CourseBook::Course c;
+            c.title = u"Weg"_s;
+            c.first = c.last = QDate(2026, 7, 4);
+            gone = book.addCourse(c, at(7), u"a"_s).uid;
+            QVERIFY(!book.addEntry(gone, u"auf beiden"_s, at(7), u"a"_s).uid.isEmpty());
+            c.title = u"Bleibt"_s;
+            kept = book.addCourse(c, at(7), u"a"_s).uid;
+            keptEntry = book.addEntry(kept, u"alt"_s, at(7), u"a"_s).uid;
+        }
+        QVERIFY(QFile::copy(a.courses, b.courses));
+        {
+            // A writes in the notebook B deletes later: the clean-up takes that entry, no mark does.
+            CourseBook book;
+            QVERIFY(book.open(a.courses));
+            QVERIFY(!book.addEntry(gone, u"nur hier"_s, at(8), u"a"_s).uid.isEmpty());
+        }
+        {
+            CourseBook book;
+            QVERIFY(book.open(b.courses));
+            QVERIFY(book.changeEntry(keptEntry, u"neu"_s, at(9)));
+            QVERIFY(book.deleteCourse(gone, at(10)));
+        }
+
+        const QString zip = saved(b, u"zahlen.zip"_s);
+        Backup backup(a.practice, a.courses, a.media, a.work);
+        const QVariantMap entries = backup.inspect(QUrl::fromLocalFile(zip)).value(u"entries"_s).toMap();
+        QCOMPARE(entries.value(u"changed"_s).toInt(), 2);   // the changed one and a mark
+        QCOMPARE(entries.value(u"removed"_s).toInt(), 2);   // the mark, and the one only here
+        QCOMPARE(entries.value(u"edited"_s).toInt(), 1);
+        backup.discard();
+    }
+
     // A photo whose note was deleted after the backup does not come back from it.
     void deletedMediaStays()
     {
