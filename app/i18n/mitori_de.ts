@@ -2147,7 +2147,7 @@
         <translation>Sicherung zusammengeführt.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsPage.qml" line="314"/>
+        <location filename="../qml/SettingsPage.qml" line="316"/>
         <source>Backup of %1.</source>
         <translation>Sicherung vom %1.</translation>
     </message>

@@ -3219,7 +3219,6 @@ TestCase {
         window.pageStack.pop()
     }
 
-    // Tablet: the small player goes on where full screen ended, with its tempo and loop.
     // A window turned for full screen is no longer wide: the pane comes back only afterwards, and
     // then takes up the place, tempo and loop; a technique played since then outdates them.
     function test_8t_pane_made_anew_after_full_screen() {
@@ -3237,7 +3236,9 @@ TestCase {
         tryVerify(() => !page.split)
         page.lastId = rows[0].id
         // What full screen left while there is no pane.
-        page.bigResume = { position: 3000, rate: 0.5, looping: false }
+        const chapter = Programme.entries("aikido", "k5").find(r => r.id === rows[0].id).video
+        const place = (chapter.von || 0) * 1000 + 3000
+        page.bigResume = { position: place, rate: 0.5, looping: false }
         page.resumeFromBig()
         verify(page.bigResume !== null, "kept until the pane is there")
         window.width = 1280
@@ -3245,7 +3246,7 @@ TestCase {
         compare(page.player.looping, false)
         compare(page.player.rate, 0.5)
         verify(page.player.position >= page.player.from, page.player.position)
-        verify(Math.abs(page.player.position - Math.max(page.player.from, Math.min(page.player.to, 3000))) < 1500,
+        verify(Math.abs(page.player.position - place) < 1500,
                page.player.position + " from " + page.player.from + " to " + page.player.to)
         verify(page.bigResume === null, "taken up once")
         page.player.setSpeed(1)
@@ -3263,6 +3264,7 @@ TestCase {
         wait(100)
     }
 
+    // Tablet: the small player goes on where full screen ended, with its tempo and loop.
     function test_8t_small_player_keeps_place_after_full_screen() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
         if (rows.length === 0 || !Videos.available(rows[0].video.video)) {
