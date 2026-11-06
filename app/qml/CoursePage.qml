@@ -1,9 +1,7 @@
 pragma ComponentBehavior: Bound
 
-import QtCore
 import QtQuick
 import QtQuick.Controls as QQC2
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import Mitori
@@ -45,15 +43,12 @@ Kirigami.ScrollablePage {
     title: qsTr("Notebook")
 
     actions: [
-        // The notebook as a ZIP (notizbuch.md, photos, voice notes) to a file the user picks.
+        // The notebook as a ZIP (notizbuch.md, photos, voice notes): the sheet shows, shares, saves it.
         Kirigami.Action {
             objectName: "exportCourse"
             icon.name: "document-export"
             text: qsTr("Export")
-            onTriggered: {
-                exportDialog.selectedFile = exportDialog.currentFolder + "/" + encodeURIComponent(Courses.exportName(page.uid))
-                exportDialog.open()
-            }
+            onTriggered: exportSheet.show()
         },
         Kirigami.Action {
             objectName: "deleteCourse"
@@ -408,15 +403,21 @@ Kirigami.ScrollablePage {
     property string exported: ""
     property int exportMissing: 0
 
-    FileDialog {
+    ExportSheet {
+        id: exportSheet
+
+        objectName: "exportSheet"
+        uid: page.uid
+        onSaveRequested: exportDialog.ask(Courses.exportName(page.uid))
+    }
+
+    SaveFileDialog {
         id: exportDialog
 
+        objectName: "exportDialog"
+        anchor: page
         title: qsTr("Export notebook")
-        fileMode: FileDialog.SaveFile
-        defaultSuffix: "zip"
-        nameFilters: [qsTr("ZIP archives (*.zip)")]
-        currentFolder: StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]
-        onAccepted: page.exportTo(selectedFile)
+        onChosen: target => page.exportTo(target)
     }
 
     // A local file shows its name; Android's picker gives a content:// URL with a document id, so

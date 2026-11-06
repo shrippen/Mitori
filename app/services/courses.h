@@ -46,6 +46,8 @@ class Courses : public QObject
     Q_PROPERTY(QDateTime calendarLoaded READ calendarLoaded NOTIFY calendarChanged)
     // Why the notebooks could not be opened or the last change not saved; empty when all is well.
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorChanged)
+    // The system has a share dialog (platform/sharefile: Android).
+    Q_PROPERTY(bool canShare READ canShare CONSTANT)
 
 public:
     enum class CalendarState { Empty, Loading, Ready, Failed };
@@ -129,6 +131,15 @@ public:
     Q_INVOKABLE int exportNotebook(const QString &uid, const QUrl &target);
     // A file name for it: "Sommerlehrgang 2026-07-01.zip".
     Q_INVOKABLE QString exportName(const QString &uid) const;
+    // What the export holds: {title, name, text (notizbuch.md), photos, voices, missing, bytes,
+    // size ("1.4 MB")}; empty without the notebook.
+    Q_INVOKABLE QVariantMap exportPreview(const QString &uid) const;
+    bool canShare() const;
+    // The notebook to the share dialog: as exportNotebook, with a copy in the cache.
+    Q_INVOKABLE int shareNotebook(const QString &uid);
+    // That copy: its path, or "" with errorString. The last one stays until the next: the app the
+    // user picked may read it long after the dialog (a mail's draft). Tests.
+    QString shareCopy(const QString &uid, int *missing = nullptr);
 
     // The course into the device's calendar app (platform/devicecalendar); false without one.
     Q_INVOKABLE bool addToDeviceCalendar(const QString &uid);

@@ -15,7 +15,7 @@
 <context>
     <name>CoursePage</name>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="143"/>
+        <location filename="../qml/CoursePage.qml" line="138"/>
         <source>%n file(s) were not on this device and are missing.</source>
         <translation>
             <numerusform>%n file was not on this device and is missing.</numerusform>
@@ -23,7 +23,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="463"/>
+        <location filename="../qml/CoursePage.qml" line="464"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>The notebook and its %n entry go from this device.</numerusform>
@@ -84,9 +84,36 @@
     </message>
 </context>
 <context>
+    <name>ExportSheet</name>
+    <message numerus="yes">
+        <location filename="../qml/ExportSheet.qml" line="134"/>
+        <source>%n photo(s)</source>
+        <translation>
+            <numerusform>%n photo</numerusform>
+            <numerusform>%n photos</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/ExportSheet.qml" line="135"/>
+        <source>%n voice note(s)</source>
+        <translation>
+            <numerusform>%n voice note</numerusform>
+            <numerusform>%n voice notes</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/ExportSheet.qml" line="143"/>
+        <source>%n file(s) are not on this device and stay out.</source>
+        <translation>
+            <numerusform>%n file is not on this device and stays out.</numerusform>
+            <numerusform>%n files are not on this device and stay out.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>PlayerView</name>
     <message numerus="yes">
-        <location filename="../qml/PlayerView.qml" line="681"/>
+        <location filename="../qml/PlayerView.qml" line="704"/>
         <source>Training done: %n technique(s). They count as a practice day in the statistics.</source>
         <translation>
             <numerusform>Training done: %n technique. It counts as a practice day in the statistics.</numerusform>
@@ -108,7 +135,7 @@
 <context>
     <name>SettingsPage</name>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="224"/>
+        <location filename="../qml/SettingsPage.qml" line="221"/>
         <source>%n conflict(s): solve …</source>
         <translation>
             <numerusform>%n conflict: solve …</numerusform>
@@ -116,7 +143,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="279"/>
+        <location filename="../qml/SettingsPage.qml" line="273"/>
         <source>%n new</source>
         <translation>
             <numerusform>%n new</numerusform>
@@ -124,7 +151,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="282"/>
+        <location filename="../qml/SettingsPage.qml" line="276"/>
         <source>%n changed</source>
         <translation>
             <numerusform>%n changed</numerusform>
@@ -132,7 +159,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="289"/>
+        <location filename="../qml/SettingsPage.qml" line="283"/>
         <source>Photos and voice notes: %n new</source>
         <translation>
             <numerusform>Photos and voice notes: %n new</numerusform>

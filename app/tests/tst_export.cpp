@@ -1,5 +1,7 @@
 #include <QBuffer>
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QImage>
 #include <QProcess>
 #include <QSettings>
@@ -11,6 +13,7 @@
 #include "courses.h"
 #include "mediastore.h"
 #include "notebookexport.h"
+#include "sharefile.h"
 #include "zipwriter.h"
 
 using namespace Qt::StringLiterals;
@@ -116,6 +119,35 @@ private slots:
         keep.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
         QCOMPARE(courses.exportNotebook(uid, QUrl::fromLocalFile(zip)), 1);
         QCOMPARE(courses.errorString(), QString());
+
+        // The sheet's preview says what the file holds, to the byte.
+        const QVariantMap preview = courses.exportPreview(uid);
+        QCOMPARE(preview.value(u"name"_s).toString(), courses.exportName(uid));
+        QCOMPARE(preview.value(u"photos"_s).toInt(), 1);
+        QCOMPARE(preview.value(u"voices"_s).toInt(), 1);
+        QCOMPARE(preview.value(u"missing"_s).toInt(), 1);
+        QCOMPARE(preview.value(u"bytes"_s).toLongLong(), QFileInfo(zip).size());
+        QVERIFY(!preview.value(u"size"_s).toString().isEmpty());
+        QVERIFY(preview.value(u"text"_s).toString().contains(u"](bilder/02-foto.jpg)"_s));
+        QVERIFY(courses.exportPreview(u"no such notebook"_s).isEmpty());
+
+        // The copy to share: one file, the last one, the same archive; the desktop has no dialog.
+        int lostFiles = -1;
+        const QString first = courses.shareCopy(uid, &lostFiles);
+        QCOMPARE(lostFiles, 1);
+        QCOMPARE(QFileInfo(first).fileName(), courses.exportName(uid));
+        QCOMPARE(QFileInfo(first).absolutePath(), ShareFile::folder());
+        QCOMPARE(QFileInfo(first).size(), QFileInfo(zip).size());
+        const QString other = courses.create(u"Zweiter"_s, u"2026-08-01"_s, {}, {}, {});
+        const QString second = courses.shareCopy(other);
+        QVERIFY(!QFile::exists(first));
+        QVERIFY(QFile::exists(second));
+        QVERIFY(courses.shareCopy(u"no such notebook"_s).isEmpty());
+        QVERIFY(!courses.canShare());
+        QCOMPARE(courses.shareNotebook(uid), -1);
+        QVERIFY(!courses.errorString().isEmpty());
+        QVERIFY(QDir(ShareFile::folder()).removeRecursively());
+
         const QString back = readBack(zip);
         QVERIFY2(!back.startsWith(u"failed"_s), qPrintable(back));
         const QStringList parts = back.split(u"---\n"_s);

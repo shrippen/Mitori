@@ -5,10 +5,13 @@
 
 #include <QCoreApplication>
 #include <QFile>
+#include <QFileInfo>
 #include <QLocale>
 #include <QRegularExpression>
 
 namespace {
+
+constexpr auto kNotebookFile = "notizbuch.md";
 
 QString tr(const char *text)
 {
@@ -94,7 +97,33 @@ bool write(QIODevice *out, const CourseBook::Course &course, const QList<CourseB
     if (missing) {
         *missing = lost;
     }
-    return zip.add(QStringLiteral("notizbuch.md"), markdown(course, entries, files)) && zip.finish();
+    return zip.add(QLatin1String(kNotebookFile), markdown(course, entries, files)) && zip.finish();
+}
+
+Summary summary(const CourseBook::Course &course, const QList<CourseBook::Entry> &entries, const MediaStore &media)
+{
+    Summary s;
+    QHash<QString, QString> files;
+    int number = 0;
+    for (const CourseBook::Entry &e : entries) {
+        ++number;
+        if (e.media.isEmpty()) {
+            continue;
+        }
+        const QFileInfo info(media.path(e.media));
+        if (!info.isFile()) {
+            ++s.missing;
+            continue;
+        }
+
+        const QString name = archiveName(number, e.media);
+        files.insert(e.media, name);
+        s.bytes += ZipWriter::sizeOf(name, info.size());
+        ++(MediaStore::kindOf(e.media) == MediaStore::Kind::Photo ? s.photos : s.voices);
+    }
+    s.text = markdown(course, entries, files);
+    s.bytes += ZipWriter::sizeOf(QLatin1String(kNotebookFile), s.text.size()) + ZipWriter::kEndSize;
+    return s;
 }
 
 QString fileName(const CourseBook::Course &c)

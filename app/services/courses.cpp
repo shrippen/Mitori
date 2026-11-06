@@ -3,11 +3,13 @@
 #include "device.h"
 #include "mediastore.h"
 #include "notebookexport.h"
+#include "sharefile.h"
 #include "devicecalendar.h"
 
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QLocale>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -583,6 +585,69 @@ int Courses::exportNotebook(const QString &uid, const QUrl &target)
     if (!m_error.isEmpty()) {
         m_error.clear();
         emit errorChanged();
+    }
+    return missing;
+}
+
+QVariantMap Courses::exportPreview(const QString &uid) const
+{
+    if (!m_open) {
+        return {};
+    }
+    const QList<CourseBook::Course> list = m_book->courses();
+    const auto it = std::find_if(list.cbegin(), list.cend(), [&](const auto &c) { return c.uid == uid; });
+    if (it == list.cend()) {
+        return {};
+    }
+
+    const NotebookExport::Summary s = NotebookExport::summary(*it, m_book->entries(uid), MediaStore::shared());
+    return {{QStringLiteral("title"), it->title},
+            {QStringLiteral("name"), NotebookExport::fileName(*it)},
+            {QStringLiteral("text"), QString::fromUtf8(s.text)},
+            {QStringLiteral("photos"), s.photos},
+            {QStringLiteral("voices"), s.voices},
+            {QStringLiteral("missing"), s.missing},
+            {QStringLiteral("bytes"), s.bytes},
+            {QStringLiteral("size"), QLocale().formattedDataSize(s.bytes, 1, QLocale::DataSizeTraditionalFormat)}};
+}
+
+bool Courses::canShare() const
+{
+    return ShareFile::available();
+}
+
+QString Courses::shareCopy(const QString &uid, int *missing)
+{
+    const QString name = exportName(uid);
+    if (name.isEmpty()) {
+        return {};
+    }
+
+    QDir folder(ShareFile::folder());
+    folder.removeRecursively();
+    folder.mkpath(QStringLiteral("."));
+    const QString path = folder.filePath(name);
+    const int lost = exportNotebook(uid, QUrl::fromLocalFile(path));
+    if (lost < 0) {
+        return {};
+    }
+    if (missing) {
+        *missing = lost;
+    }
+    return path;
+}
+
+int Courses::shareNotebook(const QString &uid)
+{
+    int missing = 0;
+    const QString path = shareCopy(uid, &missing);
+    if (path.isEmpty()) {
+        return -1;
+    }
+    if (!ShareFile::send(path, QFileInfo(path).completeBaseName())) {
+        m_error = tr("The share dialog could not be opened.");
+        emit errorChanged();
+        return -1;
     }
     return missing;
 }

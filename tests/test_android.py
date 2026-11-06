@@ -47,3 +47,19 @@ def test_cloud_backup_without_media():
     assert ("file", "medien/") not in transfer
     old = {(e.get("domain"), e.get("path")) for e in ET.parse(RES / "backup_rules.xml").getroot().iter("exclude")}
     assert ("file", "medien/") in old
+
+
+def test_share_provider():
+    """Sharing a notebook: the provider is private, serves the export folder only and has the
+    authority and folder platform/sharefile.cpp asks for (a mismatch throws at runtime, on the phone)."""
+    app = ET.parse(MANIFEST).getroot().find("application")
+    provider = app.find("provider")
+    assert provider.get(ANDROID) == "androidx.core.content.FileProvider"
+    assert provider.get(TOOLS + "exported") == "false" and provider.get(TOOLS + "grantUriPermissions") == "true"
+    assert provider.get(TOOLS + "authorities") == "${applicationId}.fileprovider"
+    data = provider.find("meta-data")
+    assert data.get(ANDROID) == "android.support.FILE_PROVIDER_PATHS" and data.get(TOOLS + "resource") == "@xml/share_paths"
+    paths = list(ET.parse(RES / "share_paths.xml").getroot())
+    assert [(p.tag, p.get("path")) for p in paths] == [("cache-path", "export/")]
+    code = (MANIFEST.parent.parent / "platform" / "sharefile.cpp").read_text()
+    assert 'kAuthority = ".fileprovider"' in code and 'kFolder = "/export"' in code
