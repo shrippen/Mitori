@@ -74,7 +74,10 @@ Kirigami.ScrollablePage {
 
     // A new query shows its results from the top (the list keeps its position when the header
     // with the techniques found changes height, which left it above the first row).
-    onQueryChanged: Qt.callLater(list.positionViewAtBeginning)
+    onQueryChanged: {
+        list.keepTop = true
+        Qt.callLater(list.toTop)
+    }
 
     header: LookToolBar {
         LookTextField {
@@ -119,6 +122,17 @@ Kirigami.ScrollablePage {
         objectName: "glossaryList"
         model: page.rows
         reuseItems: true
+        // The list stays at its top while the head changes height (a query's results, the speech
+        // hint, letters wrapping anew), not once the reader has scrolled or jumped to a letter.
+        property bool keepTop: true
+        onMovementStarted: keepTop = false
+        onMovementEnded: keepTop = atYBeginning
+
+        function toTop() {
+            if (keepTop) {
+                positionViewAtBeginning()
+            }
+        }
         currentIndex: -1
         activeFocusOnTab: true
         // A–Z headings in the whole glossary; words found stand under "Glossary", then "Techniques"
@@ -152,7 +166,7 @@ Kirigami.ScrollablePage {
         header: ColumnLayout {
             width: ListView.view.width
             spacing: Kirigami.Units.largeSpacing
-            onHeightChanged: Qt.callLater(list.positionViewAtBeginning)
+            onHeightChanged: Qt.callLater(list.toTop)
 
             // A–Z: the letters with a word, a tap goes to the first (clickdummy "Glossar").
             Flow {
@@ -174,7 +188,10 @@ Kirigami.ScrollablePage {
                         text: modelData
                         Accessible.name: qsTr("Words with %1").arg(modelData)
                         focusPolicy: Qt.NoFocus
-                        onClicked: list.positionViewAtIndex(page.glossary.findIndex(w => w.letter === modelData), ListView.Beginning)
+                        onClicked: {
+                            list.keepTop = false
+                            list.positionViewAtIndex(page.glossary.findIndex(w => w.letter === modelData), ListView.Beginning)
+                        }
                     }
                 }
             }
