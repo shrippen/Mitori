@@ -120,6 +120,8 @@ TestCase {
     function push(page, properties) {
         window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + page + ".qml"), properties || {})
         tryVerify(() => window.pageStack.currentItem && window.pageStack.currentItem.title !== undefined)
+        // A page that makes a part after it is drawn (TodayPage): with it.
+        tryVerify(() => window.pageStack.currentItem.built !== false)
         return window.pageStack.currentItem
     }
 

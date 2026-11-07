@@ -138,6 +138,8 @@ TestCase {
         check(name, () => push(file, properties), back)
         const shown = window.pageStack.currentItem
         wait(350)   // the slide, not part of the time
+        // What a page makes after it is drawn (TodayPage's rows), not in the next case's time.
+        tryVerify(() => shown.built !== false, 5000)
         return shown
     }
 
