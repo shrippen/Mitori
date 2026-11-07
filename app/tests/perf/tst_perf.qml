@@ -13,7 +13,8 @@ TestCase {
     when: windowShown
 
     // Each case its own budget, ms CPU in a release build: 1.5 times the most measured alone (here
-    // and on the GitHub runner), 1.3 times the most with 40 busy processes on 24 threads (35 runs);
+    // and on the GitHub runner), 1.3 times the most with 40 busy processes on 24 threads (35 runs;
+    // the cases #105 made faster: 12 busy processes, 5 runs);
     // a frame (16) at least. A debug build has four times as much. A case without a budget fails;
     // one over it runs once more (check()).
     // Snappy is a tap saved within a frame and a page or list drawn within about 200 ms, on the
@@ -38,20 +39,20 @@ TestCase {
         "Programme daitoryu": 450,
         "Programme shinkitoho": 350,
         "Programme tablet": 750,            // slow: list, page and small player
-        "Player first": 1900,               // slow here: Qt probes the GPU's decoders, 1.1 s with NVIDIA
+        "Player first": 450,                // the decoders probed after the start (#105)
         "Programme.entries": 16,
         "Practice.due": 16,
         "Practice.counts": 16,
         "Practice.allNotes": 110,
-        "Practice.searchNotes": 20,
-        "Practice.practisedPerDay": 20,
-        "Practice.practisedInYear": 40,
+        "Practice.searchNotes": 16,
+        "Practice.practisedPerDay": 16,
+        "Practice.practisedInYear": 16,
         "Programme.suggest, 500 words": 110,
         "Search": 400,
-        "Search “k”": 600,                  // slow: a keystroke
-        "Search “ko”": 550,
-        "Search “kot”": 300,
-        "Search “kote”": 140,
+        "Search “k”": 160,                  // a query until its list is drawn
+        "Search “ko”": 180,
+        "Search “kot”": 200,
+        "Search “kote”": 100,
         "Programme": 450,
         "Player over programme": 650,
         "Practice.rate": 20,
@@ -60,10 +61,11 @@ TestCase {
         "Years over stats": 4100,           // slow: see YearsPage
         "Today over years": 1000,           // slow
         "Player over stats": 900,           // slow
-        "Practice.rate under stats": 1300   // slow: a tap; YearsPage below counts anew
+        "Practice.rate under stats": 90     // slow: a tap
     })
     readonly property int debugFactor: perfClock.debugBuild() ? 4 : 1
-    readonly property int typingPause: 320   // SearchPage waits 200 ms for the typing to pause
+    // A query until its list is drawn: SearchPage's typing pause (100 ms) is not in it.
+    readonly property int listDrawn: 500
     property var window: null
     property var times: []
 
@@ -216,17 +218,14 @@ TestCase {
         call("Programme.suggest, 500 words", () => Programme.suggest(text))
     }
 
-    // One keystroke in the search: the list follows at once.
+    // One keystroke in the search, after the typing pause: the query until its list is drawn.
     function test_6_search_typing() {
         const search = page("Search", "SearchPage")
-        const field = findChild(search, "searchField")
         let previous = ""
         for (const text of ["k", "ko", "kot", "kote"]) {
             const type = shown => () => {
-                field.text = shown
-                wait(typingPause)   // the page waits for the typing to pause
-                wait(0)             // the list has followed (no waitForRendering: an unchanged picture never comes)
-                return typingPause
+                search.query = shown
+                waitForRendering(window.contentItem, listDrawn)   // false when the picture stays
             }
             check("Search “" + text + "”", type(text), type(previous))
             previous = text
