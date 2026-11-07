@@ -69,6 +69,7 @@ qt_add_qml_module(mitori_app
         qml/Tablet.qml
         qml/TwoColumns.qml
         qml/TypingHold.qml
+        qml/ListAndPage.qml
         qml/CommentPage.qml
         qml/PlayerPage.qml
         qml/PlayerView.qml
@@ -100,6 +101,7 @@ qt_add_qml_module(mitori_app
         qml/playlists.js
         qml/comment.js
         qml/VideosPage.qml
+        qml/BackupPage.qml
         qml/GradesPage.qml
         qml/grades.js
         qml/MediaView.qml

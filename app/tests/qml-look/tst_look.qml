@@ -194,7 +194,7 @@ TestCase {
     function test_scroll_to_clamps() {
         // Low enough for the page to scroll.
         window.height = 360
-        const flick = push("SettingsPage").flickable
+        const flick = push("BackupPage").flickable
         const far = flick.contentHeight + 5000
         window.scrollTo(flick, far)
         tryVerify(() => flick.contentY > 0 && flick.contentY === flick.contentHeight + flick.bottomMargin - flick.height,
@@ -253,10 +253,10 @@ TestCase {
         verify(Practice === service, "the service stayed")
     }
 
-    // A text typed into Settings, still in focus when the style changes, is saved.
+    // A text still in focus when the style changes is saved: the window takes the focus first.
     function test_settings_field_kept() {
-        const settings = push("SettingsPage")
-        const field = findChild(settings, "videoFolder")
+        const videos = push("VideosPage")
+        const field = findChild(videos, "videoFolder")
         const before = Videos.folder
         const folder = uiDataDir + "/some-folder"
         window.requestActivate()
@@ -267,9 +267,128 @@ TestCase {
 
         toStyle(otherStyle)
         compare(Videos.folder, folder)
-        compare(window.pageStack.currentItem.keptPage, "SettingsPage.qml")
-        compare(findChild(window.pageStack.currentItem, "videoFolder").text, folder)
         Videos.folder = before
+    }
+
+    // The same beside the list.
+    function test_field_kept_beside_list() {
+        const host = listHost(1280, 800)
+        tryVerify(() => paneOf(host).item && paneOf(host).item.title === "Videos", 5000)
+        const field = findChild(paneOf(host).item, "videoFolder")
+        const before = Videos.folder
+        const folder = uiDataDir + "/some-folder-beside"
+        window.requestActivate()
+        tryVerify(() => window.active)
+        field.forceActiveFocus()
+        tryVerify(() => field.activeFocus)
+        field.text = folder
+
+        toStyle(otherStyle)
+        compare(Videos.folder, folder)
+        Videos.folder = before
+    }
+
+    function paneOf(host) {
+        return findChild(host, "pagePane")
+    }
+    function listHost(width, height) {
+        window.width = width
+        window.height = height
+        wait(100)
+        const host = push("ListAndPage", { listSource: "SettingsPage.qml" })
+        tryVerify(() => host.width === width)
+        return host
+    }
+
+    // Settings on a tablet, Appearance chosen in it, upright and sideways: a change of style, both
+    // ways, and of language bring back the same thing in the same place, and rows still work.
+    function test_list_and_page_kept_data() {
+        return [ { tag: "upright", width: 800, height: 1280, upright: true },
+                 { tag: "sideways", width: 1280, height: 800, upright: false } ]
+    }
+    function test_list_and_page_kept(data) {
+        let host = listHost(1280, 800)
+        tryVerify(() => host.wide)
+        const chooseAppearance = () => {
+            findChild(host, "appearanceButton").clicked()
+            tryVerify(() => paneOf(host).item && paneOf(host).item.keptPage === "AppearancePage.qml", 5000)
+        }
+        chooseAppearance()
+        window.setGeometry(window.x, window.y, data.width, data.height)
+        tryVerify(() => host.width === data.width && host.wide === !data.upright)
+
+        const paneFlick = () => paneOf(host).item.flickable
+        const listFlick = () => findChild(host, "listPane").item.flickable
+        tryVerify(() => paneFlick().contentHeight - paneFlick().height >= scrolled, 20000, "the page scrolls")
+        paneFlick().contentY = scrolled
+        const depth = window.pageStack.depth
+
+        for (const style of [otherStyle, startStyle]) {
+            toStyle(style)
+            host = window.pageStack.currentItem
+            compare(window.pageStack.depth, depth)
+            compare(host.keptPage, "ListAndPage.qml")
+            compare(host.everWide, true, "still a tablet")
+            tryVerify(() => paneOf(host).item && paneOf(host).item.keptPage === "AppearancePage.qml", 5000, "the page came back")
+            verify(paneOf(host).item.visible, "and shows")
+            compare(host.showsPage, data.upright)
+            compare(findChild(host, "listPane").visible, !data.upright)
+            compare(host.title, data.upright ? "Appearance" : "Settings")
+            // The old place, or the page's end where it is shorter in this style.
+            tryVerify(() => paneFlick().contentY === Math.min(scrolled, paneFlick().contentHeight + paneFlick().bottomMargin - paneFlick().height)
+                      && paneFlick().contentY > 0, 5000, "the same place on the page")
+        }
+
+        // A language: the same page, in the new words.
+        const page = paneOf(host).item
+        tile(page, "languageTile", "Deutsch").clicked()
+        compare(paneOf(host).item, page)
+        compare(host.title, data.upright ? "Darstellung" : "Einstellungen")
+        compare(host.showsPage, data.upright)
+        verify(page.visible)
+        Appearance.setLanguage(Appearance.Language.English)
+        compare(host.title, data.upright ? "Appearance" : "Settings")
+
+        if (!data.upright) {
+            return
+        }
+        // Back to the list, a row opens in the page again: a tablet still.
+        window.back()
+        tryVerify(() => !host.showsPage)
+        tryVerify(() => window.pageStack.currentItem === host)
+        compare(window.pageStack.depth, depth)
+        findChild(host, "backupButton").clicked()
+        tryVerify(() => host.showsPage && paneOf(host).item && paneOf(host).item.title === "Backup and sync", 5000)
+        compare(window.pageStack.depth, depth)
+    }
+
+    // What stood there by itself comes back too, also upright in front of the list.
+    function test_list_and_page_first_kept() {
+        const uid = Courses.create("Kurs", "2030-01-05", "2030-01-06", "", "")
+        window.width = 1280
+        window.height = 800
+        wait(100)
+        const backup = { source: "BackupPage.qml", props: {} }
+        let host = push("ListAndPage", { listSource: "CoursesPage.qml", first: backup })
+        tryVerify(() => host.wide)
+        tryVerify(() => paneOf(host).item && paneOf(host).item.title === "Backup and sync")
+
+        toStyle(otherStyle)
+        host = window.pageStack.currentItem
+        tryVerify(() => paneOf(host).item && paneOf(host).item.title === "Backup and sync", 5000, "the same page")
+        verify(!host.chosen)
+
+        host.chosen = host.first
+        window.setGeometry(window.x, window.y, 800, 1280)
+        tryVerify(() => host.showsPage)
+        toStyle(startStyle)
+        host = window.pageStack.currentItem
+        tryVerify(() => host.showsPage && paneOf(host).item && paneOf(host).item.title === "Backup and sync", 5000)
+        window.back()
+        tryVerify(() => !host.showsPage)
+
+        window.pageStack.pop()
+        Courses.remove(uid)
     }
 
     // German and English both ways, with pages there before the change: their texts, models built
@@ -294,7 +413,7 @@ TestCase {
         compare(Appearance.window, first, "the window stays")
         compare(page.title, "Darstellung")
         compare(settings.title, "Einstellungen")
-        verify(findChild(settings, "appearanceButton").text.indexOf("Stil") === 0)
+        verify(findChild(settings, "appearanceButton").subtitle.indexOf("Stil") === 0)
         verify(findChild(start, "todayTile").text !== todayEnglish)
         compare(Practice.levelNames[4], "prüfungsreif")
         compare(goneTitle(), "Technik nicht mehr im Programm")

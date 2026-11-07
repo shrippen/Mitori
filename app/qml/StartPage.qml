@@ -58,7 +58,7 @@ Kirigami.ScrollablePage {
             icon.name: "configure"
             text: qsTr("Settings")
             displayHint: Kirigami.DisplayHint.IconOnly
-            onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
+            onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("ListAndPage.qml"), { listSource: "SettingsPage.qml" })
         }
     ]
 
@@ -200,7 +200,7 @@ Kirigami.ScrollablePage {
                 text: qsTr("Courses")
                 hint: !next ? qsTr("Calendar and notebooks")
                             : (next.place || next.title) + " · " + (days > 0 ? qsTr("in %n day(s)", "", days) : qsTr("today"))
-                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("CoursesPage.qml"))
+                onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("ListAndPage.qml"), { listSource: "CoursesPage.qml" })
             }
 
             LookTile {

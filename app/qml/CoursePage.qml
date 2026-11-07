@@ -24,8 +24,25 @@ Kirigami.ScrollablePage {
     background: Rectangle { color: Look.backgroundColor }
 
     required property string uid
+    // ListAndPage, beside the list on a tablet: another row takes this page away, so a begun entry
+    // is saved then (not when the notebook itself went).
+    property var paneHost: null
+    Component.onDestruction: {
+        if (paneHost && !gone && compose.text.trim() !== "") {
+            page.add()
+        }
+    }
+    // A running recording: another row waits for it (ListAndPage), and it becomes an entry.
+    readonly property bool busy: media.recording
+    function finishBusy() {
+        media.finish()
+    }
     // Out of the stack, also from the middle; the top page stays the one shown.
     function leave() {
+        if (paneHost) {
+            paneHost.clearPane()
+            return
+        }
         const row = page.Kirigami.PageStack.pageStack
         row.removePage(page)
         row.currentIndex = row.depth - 1
@@ -458,6 +475,8 @@ Kirigami.ScrollablePage {
             }
             // A photo or voice note becomes an entry at once, with the text typed so far.
             MediaCompose {
+                id: media
+
                 objectName: "courseMedia"
                 stackPage: page
                 onAttached: name => {

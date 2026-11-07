@@ -54,6 +54,11 @@ Kirigami.ScrollablePage {
         return whole.length <= gradesTextLetters ? whole : parts[0] + " +" + (parts.length - 1)
     }
 
+    // ListAndPage, when it shows this page: on a tablet sideways a date's notebook stands beside
+    // the list, the first one before a date is chosen.
+    property var paneHost: null
+    readonly property var firstPane: notebooks.length > 0 ? { source: "CoursePage.qml", props: { uid: notebooks[0].uid } } : null
+
     title: qsTr("Courses")
 
     actions: [
@@ -61,7 +66,7 @@ Kirigami.ScrollablePage {
             objectName: "newCourse"
             icon.name: "list-add"
             text: qsTr("New course")
-            onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("CourseNewPage.qml"))
+            onTriggered: page.Kirigami.PageStack.push(Qt.resolvedUrl("CourseNewPage.qml"), { paneHost: page.paneHost })
         },
         Kirigami.Action {
             icon.name: "view-refresh"
@@ -75,7 +80,10 @@ Kirigami.ScrollablePage {
     Component.onCompleted: Courses.reload(Courses.Reload.Older)
 
     function open(notebook) {
-        if (notebook) {
+        if (!notebook) {
+            return
+        }
+        if (!page.paneHost || !page.paneHost.show("CoursePage.qml", { uid: notebook })) {
             page.Kirigami.PageStack.push(Qt.resolvedUrl("CoursePage.qml"), { uid: notebook })
         }
     }
@@ -138,6 +146,7 @@ Kirigami.ScrollablePage {
                 text: modelData.examName
                 subtitle: (modelData.place || modelData.title) + ", " + Grades.shortDate(modelData.first)
                 meta: Grades.waitText(wait)
+                selected: !!page.paneHost && page.paneHost.isShown("CoursePage.qml", modelData.uid)
                 onClicked: page.open(modelData.uid)
             }
         }
@@ -181,6 +190,7 @@ Kirigami.ScrollablePage {
                 objectName: "eventRow"
                 Layout.fillWidth: true
                 course: modelData
+                selected: !!page.paneHost && !!modelData.notebook && page.paneHost.isShown("CoursePage.qml", modelData.notebook)
                 onClicked: page.open(modelData.notebook || Courses.notebookFor(modelData.uid))
             }
         }

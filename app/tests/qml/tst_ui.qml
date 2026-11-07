@@ -627,13 +627,20 @@ TestCase {
         verify(Qt.colorEqual(page.Kirigami.Theme.textColor, Look.textColor),
                page.Kirigami.Theme.textColor + " is not " + Look.textColor)
         shot("4b-settings")
+        // Each setting leads to its page.
+        for (const [row, title] of [["videosButton", "Videos"], ["backupButton", "Backup and sync"], ["appearanceButton", "Appearance"]]) {
+            findChild(page, row).clicked()
+            tryVerify(() => window.pageStack.currentItem !== page && window.pageStack.currentItem.title === title)
+            window.pageStack.pop()
+            tryVerify(() => window.pageStack.currentItem === page)
+        }
         window.pageStack.pop()
     }
 
     // Sync off: its rows go with their fields, no name stands over nothing.
     function test_3b_settings_sync_off() {
         Sync.enabled = false
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         const names = ["Folder on the server:", "User:", "App password:", "This device:"].map(t => qsTr(t))
         const shown = allChildren(page.contentItem).filter(c => names.indexOf(c.text) >= 0 && c.visible)
         compare(shown.length, 0, "rows without a field: " + shown.map(c => c.text))
@@ -643,7 +650,7 @@ TestCase {
     // Sync: switched on it shows the account; without one "Sync now" says what is missing. The
     // conflicts page without conflicts says so.
     function test_3d_sync() {
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         verify(!findChild(page, "syncServer").visible)
         Sync.enabled = true
         tryVerify(() => findChild(page, "syncServer").visible)
@@ -663,7 +670,7 @@ TestCase {
     // No key store answers (the test's environment): the password lands in the file, the note says
     // so and what to do. Runs after the case without an account.
     function test_3e_sync_password_in_file() {
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         Sync.enabled = true
         const hint = findChild(page, "syncPasswordNote")
         verify(!hint.visible)
@@ -700,7 +707,7 @@ TestCase {
 
     // Backup: saved, read back on the same device it changes nothing; merging says so.
     function test_3c_backup() {
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         const url = "file://" + uiShotsDir + "/sicherung-test.zip"
         verify(Backup.save(url), Backup.errorString)
 
@@ -729,7 +736,7 @@ TestCase {
     // running sync refuses it plainly, and accepting takes it away, turns the sync off and reloads
     // Practice.
     function test_3d_backup_choices() {
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         const url = "file://" + uiShotsDir + "/sicherung-wahl.zip"
         verify(Backup.save(url), Backup.errorString)
         const entry = Programme.entries("aikido", "k4").filter(r => r.kind === "entry")[0].id
@@ -840,7 +847,7 @@ TestCase {
     // Mitori asks which: both choices in view without scrolling, on small phones and sideways, with
     // the longest preview; only the text scrolls.
     function test_3d_backup_choice_sizes() {
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         const url = "file://" + uiShotsDir + "/sicherung-groessen.zip"
         verify(Backup.save(url), Backup.errorString)
         page.inspect(url)
@@ -878,7 +885,7 @@ TestCase {
     function test_3d_backup_german_footer() {
         window.width = 320
         window.height = 568
-        const page = push("SettingsPage")
+        const page = push("BackupPage")
         const url = "file://" + uiShotsDir + "/sicherung-deutsch.zip"
         verify(Backup.save(url), Backup.errorString)
         page.inspect(url)
@@ -908,13 +915,13 @@ TestCase {
                        + " in a dialog from " + dialog.x + " to " + (dialog.x + dialog.width))
             }
         }
-        fits(first, uiCatalog.german("SettingsPage", "Merge"))
+        fits(first, uiCatalog.german("BackupPage", "Merge"))
         shot("4c-backup-choice-de-320", true)
 
         findChild(page, "replaceInstead").clicked()
         const second = findChild(page, "replaceBackup")
         tryVerify(() => second.opened)
-        fits(second, uiCatalog.german("SettingsPage", "Delete and replace"))
+        fits(second, uiCatalog.german("BackupPage", "Delete and replace"))
 
         // The warning shows, not one line of it (the dialog's height follows the text).
         const warning = findChild(page, "replaceText")
@@ -1345,7 +1352,7 @@ TestCase {
         verify(!hint.visible)
         window.pageStack.pop()
 
-        const settings = push("SettingsPage")
+        const settings = push("VideosPage")
         const label = allChildren(settings).filter(c => c.text === qsTr("Video folder") && c.font !== undefined)[0]
         compare(label.font.capitalization, Font.AllUppercase)
         window.pageStack.pop()
@@ -2387,6 +2394,45 @@ TestCase {
         compare(field.text, "")
         verify(Bundles.remove("test-bundle"))
         tryVerify(() => Bundles.bundles[0].state === Bundles.State.Unlocked)
+        window.pageStack.pop()
+    }
+
+    // The scan with a turn while the camera stands above: the code is redeemed by the page beside
+    // the list, the scan page goes.
+    function test_9n_videos_scan_turned() {
+        failOnWarning(/ReferenceError|TypeError/)
+        uiCatalog.setCamera("frames")
+        const host = listHost("SettingsPage.qml", 1280, 800)
+        const pane = findChild(host, "pagePane")
+        tryVerify(() => pane.item && pane.item.title === "Videos")
+        const videos = pane.item
+        const depth = window.pageStack.depth
+        tryCompare(Bundles, "manifestState", Bundles.ManifestState.Ready, 5000)
+        CodeScanner.open()
+        tryCompare(window.pageStack, "depth", depth + 1)
+        wait(800)
+        const scanning = window.pageStack.currentItem
+
+        turn(800, 1280)
+        tryVerify(() => !host.wide)
+        wait(200)
+        const sink = findChild(scanning, "scanOutput").videoSink
+        tryVerify(() => {
+            if (window.pageStack.depth === depth) {
+                return true
+            }
+            uiCatalog.showFrame(sink, "7KQ2M-X9HDV-3TAPR-WE6YT")
+            return false
+        }, 5000, "the scan page goes")
+        compare(pane.item, videos, "the page that asked")
+        tryVerify(() => window.pageStack.currentItem === host)
+        verify(host.showsPage, "back on the page that asked, not the list")
+        verify(videos.visible)
+        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Installed, 10000, "redeemed")
+        verify(Bundles.remove("test-bundle"))
+        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Unlocked)
+        turn(1280, 800)
+        tryVerify(() => host.wide)
         window.pageStack.pop()
     }
 
@@ -5463,8 +5509,9 @@ TestCase {
         tryVerify(() => field.activeFocus)
         const fieldY = () => field.mapToItem(flick.contentItem, 0, 0).y
         const before = fieldY()
+        const highPage = page.height
         window.height = data.low
-        tryVerify(() => Math.abs(page.height - (data.low - (window.height - page.height))) < 1)
+        tryVerify(() => page.height < highPage, 5000, "the page got lower")
         wait(200)
         compare(page.wide, data.wide, "the keyboard leaves the columns alone")
         compare(fieldY(), before, "the field stays where it was")
@@ -5484,6 +5531,588 @@ TestCase {
         tryVerify(() => page.wide === !data.wide, 2000, "released: the low window counts")
     }
 
+    // Turned with the keyboard open: the tablet's real shape counts, not the low window, also once
+    // the keyboard closes with the focus kept.
+    function test_8r_turned_with_keyboard_open() {
+        window.width = 800
+        window.height = 780
+        wait(100)
+        const page = push("GradesPage")
+        const field = findChild(page, "gradePlace")
+        field.forceActiveFocus()
+        tryVerify(() => field.activeFocus)
+        turn(1280, 450)
+        tryVerify(() => page.width === 1280)
+        wait(200)
+        verify(page.wide, "sideways: two columns with the keyboard open")
+        window.height = 800
+        wait(200)
+        verify(page.wide)
+    }
+
+    // Courses and Settings on a tablet sideways: list and page side by side, the list at most 400
+    // wide (the clickdummy's `.split2`), a row chooses the page, the actions of both in the head.
+    // Upright and on a phone only the list; a row opens the page.
+    function listHost(file, width, height) {
+        window.width = width
+        window.height = height
+        wait(100)
+        window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/ListAndPage.qml"), { listSource: file })
+        const host = window.pageStack.currentItem
+        tryVerify(() => Math.abs(host.mapToItem(window.contentItem, 0, 0).x) < 1, 3000)
+        wait(200)
+        return host
+    }
+    function test_8s_settings_side_by_side_data() {
+        return [ { tag: "1280x800", width: 1280, height: 800 }, { tag: "1024x768", width: 1024, height: 768 }, { tag: "700x560", width: 700, height: 560 } ]
+    }
+    function test_8s_settings_side_by_side(data) {
+        const host = listHost("SettingsPage.qml", data.width, data.height)
+        verify(host.wide)
+        const list = findChild(host, "listPane")
+        const pane = findChild(host, "pagePane")
+        verify(list.width <= Look.unit(400) + 0.5, "the list: " + list.width)
+        compare(list.width + pane.width + findChild(host, "paneRule").width, host.width)
+        tryVerify(() => pane.item && pane.item.title === "Videos")
+        verify(findChild(host, "videosButton").selected)
+
+        // A row chooses the page, the stack stays.
+        const depth = window.pageStack.depth
+        for (const [row, title] of [["backupButton", "Backup and sync"], ["appearanceButton", "Appearance"], ["videosButton", "Videos"]]) {
+            mouseClick(findChild(host, row))
+            tryVerify(() => pane.item && pane.item.title === title)
+            verify(findChild(host, row).selected)
+            compare(window.pageStack.depth, depth)
+            tryVerify(() => overflowing(host, data.width).length === 0, 3000, title + ": past the edge: " + overflowing(host, data.width))
+        }
+
+        // A wish to scan from the page beside the list reaches the window's stack.
+        CodeScanner.ready()
+        tryVerify(() => window.pageStack.depth === depth + 1, 3000, "the scan page")
+        window.pageStack.pop()
+        tryCompare(window.pageStack, "depth", depth)
+
+        // What the page offers is in the head too.
+        verify(host.actions.length >= pane.item.actions.length && pane.item.actions.length > 0, "the page's actions")
+        shot("8s-settings-" + data.tag)
+        window.pageStack.pop()
+    }
+    function test_8s_settings_only_list_data() {
+        return [ { tag: "800x1280", width: 800, height: 1280 }, { tag: "360", width: 360, height: 800 }, { tag: "320", width: 320, height: 800 } ]
+    }
+    function test_8s_settings_only_list(data) {
+        const host = listHost("SettingsPage.qml", data.width, data.height)
+        verify(!host.wide)
+        verify(!findChild(host, "pagePane").visible)
+        compare(findChild(host, "listPane").width, host.width)
+        compare(host.title, "Settings")
+        compare(overflowing(host, data.width), [])
+        const row = findChild(host, "backupButton")
+        verify(!row.selected)
+        const depth = window.pageStack.depth
+        mouseClick(row)
+        tryCompare(window.pageStack, "depth", depth + 1)
+        tryCompare(window.pageStack.currentItem, "title", "Backup and sync")
+        window.pageStack.pop()
+        window.pageStack.pop()
+    }
+
+    // Courses: a notebook beside the list. A date or a planned exam chooses it; what is typed in it
+    // stays when the keyboard comes, and when another is chosen it is saved, not lost. Pages pushed
+    // from it stand on the window's stack.
+    function testCourse(title) {
+        const uid = Courses.create(title, "2030-01-05", "2030-01-06", "", "")
+        verify(uid)
+        return uid
+    }
+    function test_8s_courses_side_by_side() {
+        const first = testCourse("Links")
+        const second = testCourse("Rechts")
+        const host = listHost("CoursesPage.qml", 1280, 800)
+        const pane = findChild(host, "pagePane")
+        const list = findChild(host, "listPane")
+        verify(list.width <= Look.unit(400) + 0.5)
+        list.item.open(first)
+        tryVerify(() => pane.item && pane.item.uid === first)
+        compare(window.pageStack.currentItem, host)
+        compare(overflowing(host, 1280), [])
+        shot("8s-courses")
+
+        // The keyboard: the page and the field stay.
+        const book = pane.item
+        const field = findChild(book, "courseCompose")
+        field.forceActiveFocus()
+        tryVerify(() => field.activeFocus)
+        field.text = "Halten"
+        window.height = 400
+        tryVerify(() => host.height < Tablet.minHeight)
+        wait(200)
+        verify(host.wide, "the keyboard keeps the list beside it")
+        compare(pane.item, book)
+        verify(field.activeFocus)
+        window.height = 800
+        tryVerify(() => host.height >= Tablet.minHeight)
+
+        // Another course: the begun entry goes into its notebook.
+        list.item.open(second)
+        tryVerify(() => pane.item && pane.item.uid === second)
+        tryVerify(() => Courses.entries(first).filter(e => e.text === "Halten").length === 1, 2000, "the begun entry is saved")
+
+        // A page from the pane goes on the window's stack.
+        verify(pane.item.Kirigami.PageStack.pageStack === window.pageStack)
+        const depth = window.pageStack.depth
+        const deleteAction = pane.item.actions.find(a => a.objectName === "deleteCourse")
+        verify(host.actions.some(a => a === deleteAction), "the notebook's actions in the head")
+
+        // The notebook deleted: the host stays, the next one stands there.
+        Courses.remove(second)
+        tryVerify(() => !pane.item || pane.item.uid !== second)
+        compare(window.pageStack.depth, depth)
+        compare(window.pageStack.currentItem, host)
+        Courses.remove(first)
+        if (Courses.notebooks.length === 0) {
+            tryVerify(() => !pane.item, 2000, "no notebook, nothing to show")
+            verify(findChild(host, "paneEmpty").visible)
+        }
+        window.pageStack.pop()
+    }
+    // A device turns in one geometry change: both sides at once.
+    function turn(width, height) {
+        window.setGeometry(window.x, window.y, width, height)
+    }
+    // A notebook beside the list.
+    function bookBeside(uid) {
+        const host = listHost("CoursesPage.qml", 1280, 800)
+        findChild(host, "listPane").item.open(uid)
+        const pane = findChild(host, "pagePane")
+        tryVerify(() => pane.item && pane.item.uid === uid)
+        return host
+    }
+
+    // Turned: the same page lives on with what is typed in it. Upright it fills the window, Back
+    // leads to the list.
+    function test_8s_courses_turned() {
+        const uid = testCourse("Gedreht")
+        const host = bookBeside(uid)
+        const pane = findChild(host, "pagePane")
+        const list = findChild(host, "listPane")
+        const book = pane.item
+        const depth = window.pageStack.depth
+        findChild(book, "courseCompose").text = "Beim Drehen"
+
+        turn(800, 1280)
+        tryVerify(() => !host.wide)
+        wait(200)
+        compare(pane.item, book, "the same page")
+        compare(window.pageStack.depth, depth)
+        verify(host.showsPage)
+        verify(!list.visible)
+        verify(pane.visible)
+        compare(pane.width, host.width)
+        compare(host.title, "Notebook")
+        verify(host.actions.some(a => a.objectName === "deleteCourse"), "its actions in the head")
+        compare(overflowing(host, 800), [])
+        compare(findChild(book, "courseCompose").text, "Beim Drehen")
+        compare(Courses.entries(uid).length, 0, "no entry from a turn")
+
+        turn(1280, 800)
+        tryVerify(() => host.wide)
+        wait(200)
+        compare(pane.item, book, "beside the list again")
+        verify(list.visible)
+        verify(!host.showsPage)
+
+        // Upright, Back goes to the list, on the same page of the stack; a row leads back.
+        turn(800, 1280)
+        tryVerify(() => !host.wide)
+        window.pageStack.goBack()
+        tryVerify(() => !host.showsPage)
+        tryVerify(() => window.pageStack.currentItem === host)
+        compare(window.pageStack.depth, depth)
+        verify(list.visible)
+        compare(host.title, "Courses")
+        list.item.open(uid)
+        tryVerify(() => host.showsPage && pane.item && pane.item.uid === uid)
+        compare(window.pageStack.depth, depth)
+        findChild(pane.item, "courseCompose").text = ""
+        window.pageStack.goBack()
+        tryVerify(() => !host.showsPage)
+        window.pageStack.pop()
+        Courses.remove(uid)
+    }
+
+    // An open editor (on the window's overlay) holds the columns against the keyboard too.
+    function test_8s_editor_holds_columns() {
+        const uid = testCourse("Bearbeiten")
+        verify(Courses.addEntry(uid, "Erster"))
+        const host = bookBeside(uid)
+        const pane = findChild(host, "pagePane")
+        const book = pane.item
+        const depth = window.pageStack.depth
+        const editor = findChild(book, "noteEditor")
+        tryVerify(() => book.entries.length === 1)
+        editor.edit(book.entries[0])
+        tryVerify(() => editor.opened)
+        window.height = 400
+        tryVerify(() => host.height < Tablet.minHeight)
+        wait(200)
+        verify(host.wide, "still beside the list")
+        compare(pane.item, book, "the same page")
+        verify(editor.opened)
+        compare(window.pageStack.depth, depth)
+        editor.close()
+        window.contentItem.forceActiveFocus()
+        window.height = 800
+        wait(200)
+        window.pageStack.pop()
+        Courses.remove(uid)
+    }
+
+    // A photo with a turn while the camera stands above: the entry gets it, no file left over.
+    function test_8s_photo_turned() {
+        failOnWarning(/ReferenceError|TypeError/)
+        const uid = testCourse("Foto gedreht")
+        const host = bookBeside(uid)
+        const pane = findChild(host, "pagePane")
+        const book = pane.item
+        const depth = window.pageStack.depth
+        findChild(book, "courseCompose").text = "Griff"
+        findChild(book, "courseMedia").takePhoto()
+        tryVerify(() => window.pageStack.depth === depth + 1, 3000, "the camera page")
+        const camera = window.pageStack.currentItem
+        compare(camera.title, "Photo")
+        wait(300)
+
+        turn(800, 1280)
+        tryVerify(() => !host.wide)
+        wait(200)
+        const name = Media.importPhoto("file://" + testMediaDir + "/foto.png")
+        camera.done(name)
+        window.pageStack.pop()
+        tryCompare(window.pageStack, "depth", depth)
+        compare(pane.item, book)
+        tryVerify(() => Courses.entries(uid).some(e => e.media === name && e.text === "Griff"), 2000, "the photo reached the entry")
+        verify(Media.exists(name))
+        verify(host.showsPage, "the page it came from")
+
+        turn(1280, 800)
+        tryVerify(() => host.wide)
+        window.pageStack.pop()
+        Courses.remove(uid)
+    }
+
+    // The same for a notebook that stood there by itself: back on it, not on the list.
+    function test_8s_photo_turned_first() {
+        const uid = testCourse("Foto von selbst")
+        const host = listHost("CoursesPage.qml", 1280, 800)
+        const pane = findChild(host, "pagePane")
+        tryVerify(() => pane.item && pane.item.uid !== undefined)
+        verify(!host.chosen)
+        const book = pane.item
+        const depth = window.pageStack.depth
+        findChild(book, "courseMedia").takePhoto()
+        tryVerify(() => window.pageStack.depth === depth + 1, 3000, "the camera page")
+        wait(300)
+        turn(800, 1280)
+        tryVerify(() => !host.wide)
+        wait(200)
+        window.pageStack.pop()
+        tryCompare(window.pageStack, "depth", depth)
+        verify(host.showsPage, "back on the notebook")
+        verify(book.visible)
+        window.pageStack.goBack()
+        tryVerify(() => !host.showsPage)
+        turn(1280, 800)
+        tryVerify(() => host.wide)
+        window.pageStack.pop()
+        Courses.remove(uid)
+    }
+
+    // A page that is busy (a recording) finishes before another row takes its place, and before
+    // Back leaves it; a turn leaves it running and in sight.
+    function test_8s_busy_page_finishes() {
+        const host = listHost("SettingsPage.qml", 1280, 800)
+        const pane = findChild(host, "pagePane")
+        const depth = window.pageStack.depth
+        const busyPage = Qt.resolvedUrl("BusyPane.qml")
+        verify(host.show(busyPage))
+        tryVerify(() => pane.item && pane.item.title === "Busy")
+        const busy = pane.item
+
+        // Its own row again: nothing to finish.
+        verify(host.show(busyPage))
+        wait(100)
+        compare(pane.item, busy)
+        compare(busy.finishAsked, 0)
+
+        mouseClick(findChild(host, "backupButton"))
+        wait(200)
+        compare(pane.item, busy, "the row waits")
+        compare(busy.finishAsked, 1)
+        busy.busy = false
+        tryVerify(() => pane.item && pane.item.title === "Backup and sync", 2000, "and then comes")
+
+        // Back beside the list: finishes, stays.
+        verify(host.show(busyPage))
+        tryVerify(() => pane.item && pane.item.title === "Busy")
+        window.pageStack.goBack()
+        wait(200)
+        compare(window.pageStack.currentIndex, depth - 1)
+        compare(pane.item.finishAsked, 1)
+
+        // Turned: on, in sight; Back upright finishes, then the list.
+        turn(800, 1280)
+        tryVerify(() => !host.wide)
+        wait(200)
+        compare(pane.item.title, "Busy")
+        verify(host.showsPage)
+        window.pageStack.goBack()
+        wait(200)
+        verify(host.showsPage, "still recording")
+        compare(pane.item.finishAsked, 2)
+        pane.item.busy = false
+        tryVerify(() => !host.showsPage)
+        turn(1280, 800)
+        tryVerify(() => host.wide)
+
+        // What stood there by itself, busy, comes along too.
+        verify(host.show(busyPage))
+        tryVerify(() => pane.item && pane.item.title === "Busy")
+        host.first = host.chosen
+        host.chosen = null
+        wait(100)
+        verify(pane.item.busy)
+        turn(800, 1280)
+        tryVerify(() => host.showsPage, 2000, "a recording stays in sight")
+        pane.item.busy = false
+        host.chosen = null
+        host.first = null
+        turn(1280, 800)
+        tryVerify(() => host.wide)
+        window.pageStack.pop()
+    }
+
+    // Left in mid-recording, a page leaves no file behind (no microphone here: a file stands in).
+    function test_8s_leaving_discards_voice() {
+        const uid = testCourse("Stimme")
+        const other = testCourse("Andere")
+        const host = bookBeside(uid)
+        const pane = findChild(host, "pagePane")
+        const media = findChild(pane.item, "courseMedia")
+        const name = Media.importPhoto("file://" + testMediaDir + "/foto.png")
+        verify(Media.exists(name))
+        media.voiceName = name
+        findChild(host, "listPane").item.open(other)
+        tryVerify(() => pane.item && pane.item.uid === other)
+        tryVerify(() => !Media.exists(name), 3000, "the unfinished recording goes")
+        window.pageStack.pop()
+        Courses.remove(uid)
+        Courses.remove(other)
+    }
+
+    // What stands there by itself stays when a sync brings a notebook that sorts first.
+    function test_8s_first_pane_stays() {
+        const uid = testCourse("Zuerst")
+        const host = listHost("CoursesPage.qml", 1280, 800)
+        const pane = findChild(host, "pagePane")
+        tryVerify(() => pane.item && pane.item.uid !== undefined)
+        const book = pane.item
+        const early = Courses.create("Früh", "1999-01-05", "1999-01-06", "", "")
+        const late = Courses.create("Spät", "2099-01-05", "2099-01-06", "", "")
+        wait(300)
+        compare(pane.item, book, "the same page")
+        window.pageStack.pop()
+        for (const made of [uid, early, late]) {
+            Courses.remove(made)
+        }
+    }
+
+    // New course with the keyboard open: it lands beside the list.
+    function test_8s_new_course_with_keyboard() {
+        const host = listHost("CoursesPage.qml", 1280, 800)
+        const list = findChild(host, "listPane").item
+        const depth = window.pageStack.depth
+        const made = window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/CourseNewPage.qml"), { paneHost: list.paneHost })
+        tryVerify(() => findChild(made, "courseTitleField"))
+        const field = findChild(made, "courseTitleField")
+        field.forceActiveFocus()
+        tryVerify(() => field.activeFocus)
+        field.text = "Mit Tastatur"
+        tryVerify(() => made.complete)
+        window.height = 400
+        tryVerify(() => host.height < Tablet.minHeight)
+        wait(200)
+        made.make()
+        tryCompare(window.pageStack, "depth", depth)
+        const pane = findChild(host, "pagePane")
+        tryVerify(() => pane.item && pane.item.course.title === "Mit Tastatur", 2000, "beside the list")
+        const uid = pane.item.uid
+        window.contentItem.forceActiveFocus()
+        window.height = 800
+        wait(200)
+        window.pageStack.pop()
+        Courses.remove(uid)
+    }
+
+    // Typing on a page above: the window drops, the half sentence below stays a draft.
+    function test_8s_half_sentence_stays_draft() {
+        const uid = testCourse("Halb")
+        const host = bookBeside(uid)
+        const pane = findChild(host, "pagePane")
+        const book = pane.item
+        findChild(book, "courseCompose").text = "Halber Sa"
+        const above = window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/CourseNewPage.qml"), { paneHost: host })
+        tryVerify(() => findChild(above, "courseTitleField"))
+        const field = findChild(above, "courseTitleField")
+        field.forceActiveFocus()
+        tryVerify(() => field.activeFocus)
+        window.height = 400
+        tryVerify(() => host.height < Tablet.minHeight)
+        wait(200)
+        compare(pane.item, book, "the same page")
+        compare(Courses.entries(uid).length, 0, "no entry")
+        compare(findChild(book, "courseCompose").text, "Halber Sa")
+        window.pageStack.pop()
+        window.contentItem.forceActiveFocus()
+        window.height = 800
+        wait(200)
+        findChild(book, "courseCompose").text = ""
+        window.pageStack.pop()
+        Courses.remove(uid)
+    }
+
+    // A new width alone (a window resized) is no turn: the columns and the page stay.
+    function test_8r_width_alone_no_turn() {
+        const uid = testCourse("Breite")
+        const host = bookBeside(uid)
+        const pane = findChild(host, "pagePane")
+        const book = pane.item
+        const depth = window.pageStack.depth
+        const field = findChild(book, "courseCompose")
+        field.forceActiveFocus()
+        tryVerify(() => field.activeFocus)
+        field.text = "Halb"
+        window.height = 400
+        tryVerify(() => host.height < Tablet.minHeight)
+        wait(200)
+        window.width = 1200
+        tryVerify(() => host.width === 1200)
+        wait(200)
+        verify(host.wide, "still beside the list")
+        compare(pane.item, book, "the same page")
+        compare(window.pageStack.depth, depth)
+        compare(Courses.entries(uid).length, 0, "no entry")
+        verify(field.activeFocus)
+        field.text = ""
+        window.contentItem.forceActiveFocus()
+        window.height = 800
+        wait(200)
+        window.pageStack.pop()
+        Courses.remove(uid)
+    }
+
+    // A notebook deleted with a draft in it: no error about the entry that could not be saved.
+    function test_8s_deleted_with_draft() {
+        const uid = testCourse("Weg")
+        const host = bookBeside(uid)
+        const pane = findChild(host, "pagePane")
+        findChild(pane.item, "courseCompose").text = "Entwurf"
+        compare(Courses.errorString, "")
+        verify(Courses.remove(uid))
+        tryVerify(() => !pane.item || pane.item.uid !== uid)
+        wait(100)
+        compare(Courses.errorString, "")
+        window.pageStack.pop()
+    }
+
+    // Fields typed beside the list come through a turn: the page stays in sight, the field keeps
+    // the focus; left, the folder is saved. A code stays in its field, also behind the row.
+    function test_8s_fields_survive_turn() {
+        const folder = Videos.folder
+        const host = listHost("SettingsPage.qml", 1280, 800)
+        const pane = findChild(host, "pagePane")
+        tryVerify(() => pane.item && pane.item.title === "Videos")
+        const videos = pane.item
+        findChild(videos, "codeField").text = "ABCDE"
+        const field = findChild(videos, "videoFolder")
+        field.forceActiveFocus()
+        tryVerify(() => field.activeFocus)
+        field.text = "/nirgends/videos"
+        turn(800, 1280)
+        tryVerify(() => !host.wide)
+        wait(200)
+        compare(pane.item, videos)
+        verify(host.showsPage, "in use: in sight")
+        verify(field.activeFocus)
+        compare(field.text, "/nirgends/videos")
+        window.pageStack.goBack()
+        tryVerify(() => !host.showsPage)
+        compare(Videos.folder, "/nirgends/videos", "saved on leaving the field")
+        mouseClick(findChild(host, "videosButton"))
+        tryVerify(() => host.showsPage)
+        compare(pane.item, videos, "the row finds the same page")
+        compare(findChild(videos, "codeField").text, "ABCDE")
+        findChild(videos, "codeField").text = ""
+        window.pageStack.goBack()
+        tryVerify(() => !host.showsPage)
+
+        // A chosen page, upright and back.
+        turn(1280, 800)
+        tryVerify(() => host.wide)
+        Sync.enabled = true
+        mouseClick(findChild(host, "backupButton"))
+        tryVerify(() => pane.item && pane.item.title === "Backup and sync")
+        const backup = pane.item
+        const server = findChild(backup, "syncServer")
+        server.text = "https://halb.example.org/"
+        turn(800, 1280)
+        tryVerify(() => !host.wide)
+        wait(200)
+        compare(pane.item, backup)
+        compare(server.text, "https://halb.example.org/")
+        turn(1280, 800)
+        tryVerify(() => host.wide)
+        wait(200)
+        compare(pane.item, backup)
+        compare(server.text, "https://halb.example.org/")
+        Sync.enabled = false
+        Videos.folder = folder
+        window.pageStack.pop()
+    }
+    function test_8s_courses_only_list_data() {
+        return [ { tag: "360", width: 360, height: 800 }, { tag: "320", width: 320, height: 800 } ]
+    }
+    function test_8s_courses_only_list(data) {
+        const uid = testCourse("Telefon")
+        const host = listHost("CoursesPage.qml", data.width, data.height)
+        compare(host.title, "Courses")
+        verify(host.actions.length >= 2, "the list's actions")
+        compare(overflowing(host, data.width), [])
+        findChild(host, "listPane").item.open(uid)
+        tryVerify(() => window.pageStack.currentItem !== host && window.pageStack.currentItem.uid === uid)
+        window.pageStack.pop()
+        tryVerify(() => window.pageStack.currentItem === host)
+        window.pageStack.pop()
+        Courses.remove(uid)
+    }
+    // New course on a tablet: it stands beside the list afterwards.
+    function test_8s_new_course_beside_list() {
+        const host = listHost("CoursesPage.qml", 1280, 800)
+        const list = findChild(host, "listPane").item
+        const depth = window.pageStack.depth
+        const made = window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/CourseNewPage.qml"), { paneHost: list.paneHost })
+        tryVerify(() => findChild(made, "courseTitleField"))
+        findChild(made, "courseTitleField").text = "Neu am Tablet"
+        tryVerify(() => made.complete)
+        made.make()
+        tryCompare(window.pageStack, "depth", depth)
+        const pane = findChild(host, "pagePane")
+        tryVerify(() => pane.item && pane.item.course.title === "Neu am Tablet")
+        const uid = pane.item.uid
+        window.pageStack.pop()
+        Courses.remove(uid)
+    }
+
     // Turned while a field is typed in: the new shape counts, the hold starts anew.
     function test_8r_turned_while_typing() {
         window.width = 1280
@@ -5494,8 +6123,7 @@ TestCase {
         const field = findChild(page, "gradePlace")
         field.forceActiveFocus()
         tryVerify(() => field.activeFocus)
-        window.width = 800
-        window.height = 1280
+        turn(800, 1280)
         tryVerify(() => !page.wide, 2000, "upright: one column")
         window.height = 780
         wait(200)
@@ -5532,7 +6160,7 @@ TestCase {
         const round = Exam.draw("aikido", "k5", 3, 0)
         for (const [file, props] of [["ProgrammePage", {}], ["TodayPage", {}], ["StatsPage", {}], ["YearsPage", {}], ["AllNotesPage", {}],
                                      ["TechniqueMapPage", {}], ["SearchPage", {}], ["CoursesPage", {}], ["NotebooksPage", {}], ["GradesPage", {}],
-                                     ["SettingsPage", {}], ["VideosPage", {}], ["ScanPage", {}], ["AppearancePage", {}], ["ExamPage", {}],
+                                     ["SettingsPage", {}], ["BackupPage", {}], ["VideosPage", {}], ["ScanPage", {}], ["AppearancePage", {}], ["ExamPage", {}],
                                      ["ExamRoundPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["ExamEndPage", { points: round, discipline: "aikido", grade: "k5" }],
                                      ["TrainingEndPage", { count: 12 }],

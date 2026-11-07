@@ -13,9 +13,60 @@
     </message>
 </context>
 <context>
+    <name>BackupPage</name>
+    <message numerus="yes">
+        <location filename="../qml/BackupPage.qml" line="243"/>
+        <source>%n conflict(s): solve …</source>
+        <translation>
+            <numerusform>%n conflict: solve …</numerusform>
+            <numerusform>%n conflicts: solve …</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/BackupPage.qml" line="334"/>
+        <source>%n new</source>
+        <translation>
+            <numerusform>%n new</numerusform>
+            <numerusform>%n new</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/BackupPage.qml" line="337"/>
+        <source>%n changed</source>
+        <translation>
+            <numerusform>%n changed</numerusform>
+            <numerusform>%n changed</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/BackupPage.qml" line="340"/>
+        <source>%n deleted</source>
+        <translation>
+            <numerusform>%n deleted</numerusform>
+            <numerusform>%n deleted</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/BackupPage.qml" line="347"/>
+        <source>Photos and voice notes: %n new</source>
+        <translation>
+            <numerusform>Photos and voice notes: %n new</numerusform>
+            <numerusform>Photos and voice notes: %n new</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/BackupPage.qml" line="350"/>
+        <source>Photos and voice notes: %n deleted</source>
+        <translation>
+            <numerusform>Photos and voice notes: %n deleted</numerusform>
+            <numerusform>Photos and voice notes: %n deleted</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>CoursePage</name>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="177"/>
+        <location filename="../qml/CoursePage.qml" line="189"/>
         <source>%n file(s) were not on this device and are missing.</source>
         <translation>
             <numerusform>%n file was not on this device and is missing.</numerusform>
@@ -23,7 +74,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="541"/>
+        <location filename="../qml/CoursePage.qml" line="553"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>The notebook and its %n entry go from this device.</numerusform>
@@ -53,7 +104,7 @@
 <context>
     <name>CoursesPage</name>
     <message numerus="yes">
-        <location filename="../qml/CoursesPage.qml" line="117"/>
+        <location filename="../qml/CoursesPage.qml" line="125"/>
         <source>%n notebook(s)</source>
         <translation>
             <numerusform>%n notebook</numerusform>
@@ -122,60 +173,9 @@
     </message>
 </context>
 <context>
-    <name>SettingsPage</name>
-    <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="284"/>
-        <source>%n conflict(s): solve …</source>
-        <translation>
-            <numerusform>%n conflict: solve …</numerusform>
-            <numerusform>%n conflicts: solve …</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="375"/>
-        <source>%n new</source>
-        <translation>
-            <numerusform>%n new</numerusform>
-            <numerusform>%n new</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="378"/>
-        <source>%n changed</source>
-        <translation>
-            <numerusform>%n changed</numerusform>
-            <numerusform>%n changed</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="381"/>
-        <source>%n deleted</source>
-        <translation>
-            <numerusform>%n deleted</numerusform>
-            <numerusform>%n deleted</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="388"/>
-        <source>Photos and voice notes: %n new</source>
-        <translation>
-            <numerusform>Photos and voice notes: %n new</numerusform>
-            <numerusform>Photos and voice notes: %n new</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../qml/SettingsPage.qml" line="391"/>
-        <source>Photos and voice notes: %n deleted</source>
-        <translation>
-            <numerusform>Photos and voice notes: %n deleted</numerusform>
-            <numerusform>Photos and voice notes: %n deleted</numerusform>
-        </translation>
-    </message>
-</context>
-<context>
     <name>StartPage</name>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="93"/>
+        <location filename="../qml/StartPage.qml" line="91"/>
         <source>%n video bundle(s) can be updated.</source>
         <translation>
             <numerusform>%n video bundle can be updated.</numerusform>
@@ -183,7 +183,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="157"/>
+        <location filename="../qml/StartPage.qml" line="155"/>
         <source>%n due</source>
         <translation>
             <numerusform>%n due</numerusform>
@@ -191,7 +191,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="204"/>
+        <location filename="../qml/StartPage.qml" line="202"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -199,7 +199,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="187"/>
+        <location filename="../qml/StartPage.qml" line="185"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>
@@ -211,7 +211,7 @@
     <name>StatsPage</name>
     <message numerus="yes">
         <location filename="../qml/StatsPage.qml" line="49"/>
-        <location filename="../qml/StatsPage.qml" line="119"/>
+        <location filename="../qml/StatsPage.qml" line="139"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>
@@ -222,7 +222,7 @@
 <context>
     <name>TechniqueMapPage</name>
     <message numerus="yes">
-        <location filename="../qml/TechniqueMapPage.qml" line="188"/>
+        <location filename="../qml/TechniqueMapPage.qml" line="187"/>
         <source>%n entries</source>
         <translation>
             <numerusform>%n entry</numerusform>
@@ -233,7 +233,7 @@
 <context>
     <name>TodayPage</name>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="49"/>
+        <location filename="../qml/TodayPage.qml" line="55"/>
         <source>%1 · %n day(s) ago</source>
         <translation>
             <numerusform>%1 · %n day ago</numerusform>
@@ -241,7 +241,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="51"/>
+        <location filename="../qml/TodayPage.qml" line="57"/>
         <source>not practised for %n day(s)</source>
         <translation>
             <numerusform>not practised for %n day</numerusform>
@@ -249,7 +249,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="156"/>
+        <location filename="../qml/TodayPage.qml" line="172"/>
         <source>%n of them without a video on this device: the training shows their name, practise from memory.</source>
         <translation>
             <numerusform>%n of them has no video on this device: the training shows its name, practise it from memory.</numerusform>
@@ -257,7 +257,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/TodayPage.qml" line="175"/>
+        <location filename="../qml/TodayPage.qml" line="197"/>
         <source>%n technique(s)</source>
         <translation>
             <numerusform>%n technique</numerusform>
@@ -279,7 +279,7 @@
 <context>
     <name>VideosPage</name>
     <message numerus="yes">
-        <location filename="../qml/VideosPage.qml" line="244"/>
+        <location filename="../qml/VideosPage.qml" line="248"/>
         <source>%n video(s)</source>
         <translation>
             <numerusform>%n video</numerusform>

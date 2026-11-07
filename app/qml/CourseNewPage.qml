@@ -18,6 +18,9 @@ Kirigami.ScrollablePage {
     readonly property bool complete: titleField.text.trim() !== "" && !!firstField.date && !firstField.invalid
                                      && !lastField.invalid
 
+    // ListAndPage, when the list stands in one: on a tablet sideways the notebook goes beside it.
+    property var paneHost: null
+
     title: qsTr("New course")
 
     function make() {
@@ -27,9 +30,14 @@ Kirigami.ScrollablePage {
         const last = lastField.date && lastField.date >= firstField.date ? lastField.date : firstField.date
         const uid = Courses.create(titleField.text, CourseDays.iso(firstField.date), CourseDays.iso(last),
                                    placeField.text, teacherField.text)
-        if (uid) {
-            page.Kirigami.PageStack.replace(Qt.resolvedUrl("CoursePage.qml"), { uid: uid })
+        if (!uid) {
+            return
         }
+        if (page.paneHost && page.paneHost.show("CoursePage.qml", { uid: uid })) {
+            page.Kirigami.PageStack.pop()
+            return
+        }
+        page.Kirigami.PageStack.replace(Qt.resolvedUrl("CoursePage.qml"), { uid: uid })
     }
 
     ColumnLayout {

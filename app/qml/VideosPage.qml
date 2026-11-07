@@ -8,7 +8,8 @@ import Mitori
 
 // Videos (clickdummy "Videos", "Code"): the code of a DVD unlocks its bundle, which then loads
 // onto the device; each bundle loads, updates and goes on its own. A removed bundle keeps its
-// code. Downloads wait for Wi-Fi unless the user says otherwise.
+// code. Downloads wait for Wi-Fi unless the user says otherwise. At the end a folder with exam
+// videos of one's own.
 //
 //   CODE OF THE DVD   [7KQ2M-X9HDV-3TAPR-WE6YT] [Unlock] [Scan code]
 //   Aikido · all Kyu   5 videos · 600 MB · version 2       loaded       [Remove]
@@ -20,6 +21,9 @@ Kirigami.ScrollablePage {
     // the style's page ground (Look: Kante or Shinki).
     property Item lookScope: LookScope { target: page }
     background: Rectangle { color: Look.backgroundColor }
+
+    // ListAndPage, beside the list on a tablet: its page is the one on the stack.
+    property var paneHost: null
 
     // The answer to the last code: "" or what went wrong.
     property string codeMessage: ""
@@ -64,7 +68,7 @@ Kirigami.ScrollablePage {
 
         function onReady() {
             // A second answer to one wish finds the scan page already on top.
-            if (!page.isCurrentPage) {
+            if (!(page.paneHost ?? page).isCurrentPage) {
                 return
             }
             page.codeMessage = ""       // the camera is there: an earlier refusal no longer holds
@@ -289,6 +293,27 @@ Kirigami.ScrollablePage {
             text: qsTr("Removing frees the space; the code stays saved, so the videos load again without it.")
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
+        }
+
+        // A folder with exam videos of one's own, without a bundle.
+        LookFormRow {
+            label: qsTr("Video folder")
+            LookTextField {
+                id: folderField
+
+                objectName: "videoFolder"
+                Layout.fillWidth: true
+                text: Videos.folder
+                onEditingFinished: Videos.folder = text
+            }
+        }
+        LookLabel {
+            Layout.fillWidth: true
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 30
+            wrapMode: Text.Wrap
+            color: Look.disabledTextColor
+            text: qsTr("Without a bundle: a folder with the videos, folders and names as on the DVDs: Aikido/5. Kyu.mkv, Daitoryu/1. Dan.mkv, Shinki Toho/Shoden.mkv …")
+                  + (Videos.sandboxed ? " " + qsTr("The Flatpak can read folders under ~/Videos only.") : "")
         }
     }
 }
