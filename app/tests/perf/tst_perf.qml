@@ -14,7 +14,8 @@ TestCase {
 
     // Each case its own budget, ms CPU in a release build: 1.5 times the most measured alone (here
     // and on the GitHub runner), 1.3 times the most with 40 busy processes on 24 threads (35 runs);
-    // a frame (16) at least. A debug build has four times as much. A case without a budget fails.
+    // a frame (16) at least. A debug build has four times as much. A case without a budget fails;
+    // one over it runs once more (check()).
     // Snappy is a tap answered within a frame and a page drawn within about 200 ms. Above that
     // today, to be made faster, not the budget looser: "slow".
     readonly property var budgets: ({
@@ -62,18 +63,19 @@ TestCase {
         "Practice.rate under stats": 1300   // slow: a tap; YearsPage below counts anew
     })
     readonly property int debugFactor: perfClock.debugBuild() ? 4 : 1
+    readonly property int typingPause: 320   // SearchPage waits 200 ms for the typing to pause
     property var window: null
     property var times: []
 
     function initTestCase() {
         const component = Qt.createComponent("Mitori", "Main")
         verify(component.status === Component.Ready, component.errorString())
-        const started = now()
-        window = component.createObject(null, { width: 420, height: 800 })
-        window.show()
-        tryVerify(() => window.pageStack.currentItem !== null, 10000)
-        waitForRendering(window.contentItem)
-        report("start menu", started)
+        check("start menu", () => {
+            window = component.createObject(null, { width: 420, height: 800 })
+            window.show()
+            tryVerify(() => window.pageStack.currentItem !== null, 10000)
+            waitForRendering(window.contentItem)
+        })
     }
 
     function cleanupTestCase() {
@@ -101,33 +103,50 @@ TestCase {
         wait(50)
     }
 
+    // One run of a case: ms CPU, and on the wall less what `run` returns it waited for itself.
     // A collection of what earlier cases left is not this case's (Stats again: up to 1276 ms CPU
-    // without this, 676 with it).
-    function now() {
+    // without the gc(), 676 with it).
+    function measure(run) {
         gc()
-        return { wall: Date.now(), cpu: perfClock.cpuMs() }
+        const wall = Date.now()
+        const cpu = perfClock.cpuMs()
+        const waited = run() || 0
+        return { wall: Date.now() - wall - waited, cpu: perfClock.cpuMs() - cpu }
     }
 
-    // Since `started`; `waited`: what the case itself waits for, not part of the wall's time.
-    function report(name, started, waited) {
-        const wall = Date.now() - started.wall - (waited || 0)
-        const ms = perfClock.cpuMs() - started.cpu
+    // A case over its budget runs once more after `again` (when given): a busy machine can double
+    // one case's CPU time for a moment (Programme aikido 435 ms, median 202), not two in a row.
+    function check(name, run, again) {
         const budget = budgets[name] * debugFactor
-        console.log("PERF " + name + " " + wall + " cpu " + ms + " budget " + budget)
-        times.push({ name: name, ms: ms })
         verify(!isNaN(budget), "no budget for " + name)
-        verify(ms <= budget, name + " took " + ms + " ms CPU, budget " + budget)
+        let took = measure(run)
+        if (took.cpu > budget && again) {
+            console.log("PERF " + name + " " + took.wall + " cpu " + took.cpu + " budget " + budget + ": once more")
+            again()
+            took = measure(run)
+        }
+        console.log("PERF " + name + " " + took.wall + " cpu " + took.cpu + " budget " + budget)
+        times.push({ name: name, ms: took.cpu })
+        verify(took.cpu <= budget, name + " took " + took.cpu + " ms CPU, budget " + budget)
     }
 
-    // A page from the push until it is drawn.
+    // A page from the push until it is drawn; once more after a pop when over budget.
     function page(name, file, properties) {
-        const started = now()
-        window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + file + ".qml"), properties || {})
-        waitForRendering(window.contentItem)
-        report(name, started)
+        check(name, () => push(file, properties), back)
         const shown = window.pageStack.currentItem
         wait(350)   // the slide, not part of the time
         return shown
+    }
+
+    // The first player of the run, once: Qt probes the decoders only then (a second is no retry).
+    function firstPlayer(name, properties) {
+        check(name, () => push("PlayerPage", properties))
+        wait(350)
+    }
+
+    function push(file, properties) {
+        window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + file + ".qml"), properties || {})
+        waitForRendering(window.contentItem)
     }
 
     function back() {
@@ -136,9 +155,8 @@ TestCase {
     }
 
     function call(name, f) {
-        const started = now()
-        const result = f()
-        report(name, started)
+        let result
+        check(name, () => { result = f() }, () => {})
         return result
     }
 
@@ -173,7 +191,7 @@ TestCase {
 
     function test_4_player() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
-        page("Player first", "PlayerPage", { playlist: rows, index: 0 })
+        firstPlayer("Player first", { playlist: rows, index: 0 })
         back()
     }
 
@@ -200,12 +218,16 @@ TestCase {
     function test_6_search_typing() {
         const search = page("Search", "SearchPage")
         const field = findChild(search, "searchField")
+        let previous = ""
         for (const text of ["k", "ko", "kot", "kote"]) {
-            const started = now()
-            field.text = text
-            wait(320)   // the page waits for the typing to pause
-            wait(0)     // the list has followed (no waitForRendering: an unchanged picture never comes)
-            report("Search “" + text + "”", started, 320)
+            const type = shown => () => {
+                field.text = shown
+                wait(typingPause)   // the page waits for the typing to pause
+                wait(0)             // the list has followed (no waitForRendering: an unchanged picture never comes)
+                return typingPause
+            }
+            check("Search “" + text + "”", type(text), type(previous))
+            previous = text
         }
         back()
     }
