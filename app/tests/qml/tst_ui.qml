@@ -6324,6 +6324,26 @@ TestCase {
         verify(narrow > list.height, "stays at " + far.text + " in the narrow window: " + narrow)
         verify(list.contentY > list.height, "stays at " + far.text + ": " + list.contentY)
 
+        // Back at the top by hand, then down by a wheel (it sets contentY, no flick): the same.
+        list.positionViewAtBeginning()
+        list.contentY = list.originY + 3 * list.height
+        const scrolled = list.contentY
+        window.width = 340
+        tryVerify(() => header.height > before, 1000, "the head grows again: " + header.height)
+        waitForRendering(list)
+        verify(list.contentY > list.height, "stays where the wheel left it (" + scrolled + "): " + list.contentY)
+        window.width = 420
+        tryVerify(() => header.height === before, 1000, "the head shrinks again: " + header.height)
+        waitForRendering(list)
+
+        // At the top, the list stays at its top while the head grows (the letters stay in view).
+        list.positionViewAtBeginning()
+        window.width = 340
+        tryVerify(() => header.height > before, 1000, "the head grows at the top: " + header.height)
+        tryVerify(() => list.atYBeginning, 1000, "at the top: " + list.contentY + " from " + list.originY)
+        window.width = 420
+        tryVerify(() => list.atYBeginning, 1000, "at the top again: " + list.contentY + " from " + list.originY)
+
         findChild(page, "searchField").text = "ko"
         tryCompare(page, "searching", true)
         verify(!bar.visible, "words found have no letters")

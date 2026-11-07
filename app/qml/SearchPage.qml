@@ -123,10 +123,10 @@ Kirigami.ScrollablePage {
         model: page.rows
         reuseItems: true
         // The list stays at its top while the head changes height (a query's results, the speech
-        // hint, letters wrapping anew), not once the reader has scrolled or jumped to a letter.
+        // hint, letters wrapping anew), only if it stood there: not once the reader has moved it
+        // (flick, wheel, keys, a letter). A head that changes height leaves contentY as it is.
         property bool keepTop: true
-        onMovementStarted: keepTop = false
-        onMovementEnded: keepTop = atYBeginning
+        onContentYChanged: keepTop = atYBeginning
 
         function toTop() {
             if (keepTop) {
@@ -188,10 +188,7 @@ Kirigami.ScrollablePage {
                         text: modelData
                         Accessible.name: qsTr("Words with %1").arg(modelData)
                         focusPolicy: Qt.NoFocus
-                        onClicked: {
-                            list.keepTop = false
-                            list.positionViewAtIndex(page.glossary.findIndex(w => w.letter === modelData), ListView.Beginning)
-                        }
+                        onClicked: list.positionViewAtIndex(page.glossary.findIndex(w => w.letter === modelData), ListView.Beginning)
                     }
                 }
             }
