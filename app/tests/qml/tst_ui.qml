@@ -18,6 +18,20 @@ TestCase {
     // The video folder while a case uses the stand-ins.
     property string realFolder: ""
 
+    // A run stays in one day: the course calendar is written at its start, ratings count per day.
+    // In America/Los_Angeles, midnight during a run (08:00 UTC in winter): test_9m_courses 11 days
+    // for 12, test_9o_grades, test_9z_stats 2 practice days for 1.
+    function test_0_run_stays_in_its_day() {
+        const kHoursLeft = 11
+        for (let utc = 0; utc < 24; ++utc) {
+            const west = uiCatalog.hoursWest(utc)
+            verify(west > 0, "west of UTC at " + utc)
+            const local = (utc - west + 24) % 24
+            verify(23 - local >= kHoursLeft, "at " + utc + " UTC the run starts at " + local + " here")
+        }
+        verify(new Date().getTimezoneOffset() > 0, "this run is west of UTC")
+    }
+
     function initTestCase() {
         const component = Qt.createComponent("Mitori", "Main")
         verify(component.status === Component.Ready, component.errorString())
@@ -26,13 +40,32 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem !== null)
     }
 
+    // Kirigami 6.31 crashes on a pop in the last moments of a slide: ColumnView::setCurrentIndex
+    // hands the focus to the page below, a Behavior on that makes Qt run the slide's end there and
+    // then, which takes the current item away (SIGSEGV in QQuickItem::size). A tap does not get
+    // here, a page does not take taps while it slides; a test does.
+    function popPage() {
+        tryVerify(() => !window.pageStack.columnView.moving, 5000, "the slide ends")
+        // A page may have gone during the wait (TrainingEndPage): the start menu stays.
+        if (window.pageStack.depth > 1) {
+            window.pageStack.pop()
+        }
+    }
+
+    // The page on top stands: a page takes no click while it slides, however long that takes.
+    function slidIn() {
+        const page = window.pageStack.currentItem
+        tryVerify(() => !window.pageStack.columnView.moving && page.enabled
+                        && Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1, 15000, "the page has slid in")
+    }
+
     // A failed or skipped case (no videos, as in the CI) leaves no tablet window and no pages
     // to the next ones: each starts on the start page.
     function cleanup() {
         window.width = 420
         window.height = 800
         while (window.pageStack.depth > 1)
-            window.pageStack.pop()
+            popPage()
         if (realFolder !== "") {
             Videos.folder = realFolder
             realFolder = ""
@@ -306,7 +339,7 @@ TestCase {
         compare(page.grade, "shoden")
         verify(page.rows.some(r => r.kind === "info"))
         shot("3-programme-shinkitoho")
-        window.pageStack.pop()
+        popPage()
     }
 
     function test_2b_sheet() {
@@ -344,7 +377,7 @@ TestCase {
             Practice.deleteNote(n.uid)
         }
         sheet.close()
-        window.pageStack.pop()
+        popPage()
     }
 
     // The sheet stays inside a narrow phone, and names the Japanese once.
@@ -362,7 +395,7 @@ TestCase {
             compare(japanese.length, 1, "the Japanese once")
         }
         sheet.close()
-        window.pageStack.pop()
+        popPage()
         window.width = width
     }
 
@@ -383,7 +416,7 @@ TestCase {
         verify(findChild(sheet.contentItem, "sheetNoVideo").visible)
         verify(!findChild(sheet.contentItem, "sheetCodeButton").visible)
         sheet.close()
-        window.pageStack.pop()
+        popPage()
         PracticeGrade.setGrade("shinkitoho", before)
         Programme.discipline = "aikido"
     }
@@ -416,7 +449,7 @@ TestCase {
         verify(!findChild(sheet.contentItem, "sheetSteps").visible)
         sheet.close()
         tryVerify(() => !sheet.opened)
-        window.pageStack.pop()
+        popPage()
     }
 
     // A small phone: the Kamae sheet is taller than the window; the keys scroll it.
@@ -452,7 +485,7 @@ TestCase {
         tryVerify(() => flick.contentY > 0, 1000, "Page Down scrolls from Close")
         sheet.close()
         tryVerify(() => !sheet.opened)
-        window.pageStack.pop()
+        popPage()
     }
 
     function findCloseButton(item) {
@@ -504,7 +537,7 @@ TestCase {
         sheet.close()
         tryVerify(() => !sheet.opened)
         shot("2e-programme-rated")
-        window.pageStack.pop()
+        popPage()
     }
 
     // A row near the bottom of the window opens its sheet too (Kirigami keeps its notification
@@ -537,7 +570,7 @@ TestCase {
         tryVerify(() => sheet.opened, 2000, "a tap near the bottom opens the sheet")
         sheet.close()
         tryVerify(() => !sheet.opened)
-        window.pageStack.pop()
+        popPage()
     }
 
     // The visible level picker of an entry (in the overlay: sheets of earlier pages may linger).
@@ -571,7 +604,7 @@ TestCase {
         verify(!page.hasVideo)
         Videos.folder = real
         verify(page.hasVideo, "the list follows the folder")
-        window.pageStack.pop()
+        popPage()
     }
 
     function test_3_comment() {
@@ -580,7 +613,7 @@ TestCase {
         const page = push("CommentPage", { entry: entry })
         compare(page.title, entry.comment.titel)
         shot("4-comment")
-        window.pageStack.pop()
+        popPage()
     }
 
     // A comment with headings ("## Rei-ho …" in the Kumidachi text): headings, not raw marks;
@@ -611,9 +644,9 @@ TestCase {
         tryVerify(() => title.width <= longPage.width, 2000, "the title stays in the page: " + title.width)
         verify(!drawn || !drawn.visible || (!drawn.truncated && drawn.lineCount > 1), long.comment.titel)
         verify(!title.truncated)
-        window.pageStack.pop()
+        popPage()
         shot("4-comment-headings")
-        window.pageStack.pop()
+        popPage()
     }
 
     function test_3b_settings() {
@@ -631,10 +664,10 @@ TestCase {
         for (const [row, title] of [["videosButton", "Videos"], ["backupButton", "Backup and sync"], ["appearanceButton", "Appearance"]]) {
             findChild(page, row).clicked()
             tryVerify(() => window.pageStack.currentItem !== page && window.pageStack.currentItem.title === title)
-            window.pageStack.pop()
+            popPage()
             tryVerify(() => window.pageStack.currentItem === page)
         }
-        window.pageStack.pop()
+        popPage()
     }
 
     // Sync off: its rows go with their fields, no name stands over nothing.
@@ -644,7 +677,7 @@ TestCase {
         const names = ["Folder on the server:", "User:", "App password:", "This device:"].map(t => qsTr(t))
         const shown = allChildren(page.contentItem).filter(c => names.indexOf(c.text) >= 0 && c.visible)
         compare(shown.length, 0, "rows without a field: " + shown.map(c => c.text))
-        window.pageStack.pop()
+        popPage()
     }
 
     // Sync: switched on it shows the account; without one "Sync now" says what is missing. The
@@ -659,12 +692,12 @@ TestCase {
         verify(findChild(page, "syncState").text.indexOf("server") >= 0, findChild(page, "syncState").text)
         shot("4d-sync")
         Sync.enabled = false
-        window.pageStack.pop()
+        popPage()
 
         const conflicts = push("ConflictsPage")
         compare(conflicts.title, "Conflicts")
         verify(findChild(conflicts, "noConflicts").visible)
-        window.pageStack.pop()
+        popPage()
     }
 
     // No key store answers (the test's environment): the password lands in the file, the note says
@@ -675,7 +708,7 @@ TestCase {
         const hint = findChild(page, "syncPasswordNote")
         verify(!hint.visible)
         Sync.setAccount("https://cloud.example.org/dav/", "ich", "nur-ein-test", "")
-        tryVerify(() => hint.visible, 10000)
+        tryVerify(() => hint.visible, mediaLoads)
         verify(hint.text.indexOf("restart Mitori") >= 0, hint.text)
         verify(Sync.hasPassword)
         page.flickable.contentY = hint.mapToItem(page.flickable.contentItem, 0, 0).y - 20
@@ -702,7 +735,7 @@ TestCase {
         compare(hint.titleText, qsTr("App password lies in a file"))
         hint.inFile = false
         verify(!hint.visible)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Backup: saved, read back on the same device it changes nothing; merging says so.
@@ -728,7 +761,7 @@ TestCase {
         dialog.accept()
         tryVerify(() => findChild(page, "backupDone").visible)
         compare(findChild(page, "backupError").visible, false)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Both ways of reading a backup: merging keeps what the backup lacks; replacing asks a second
@@ -841,7 +874,7 @@ TestCase {
         Sync.enabled = true
         verify(!note.visible)
         Sync.enabled = false
-        window.pageStack.pop()
+        popPage()
     }
 
     // Mitori asks which: both choices in view without scrolling, on small phones and sideways, with
@@ -877,7 +910,7 @@ TestCase {
         }
         dialog.reject()
         tryVerify(() => !dialog.visible)
-        window.pageStack.pop()
+        popPage()
     }
 
     // The German words on the smallest phone: every footer button of both dialogs lies inside its
@@ -938,7 +971,7 @@ TestCase {
         tryVerify(() => first.opened)
         first.reject()
         tryVerify(() => !first.visible)
-        window.pageStack.pop()
+        popPage()
     }
 
     // The player's switches: the screen stays on while a video plays (and the switch on);
@@ -978,9 +1011,9 @@ TestCase {
         for (const n of Practice.notes(page.current.id)) {
             Practice.deleteNote(n.uid)
         }
-        window.pageStack.pop()
+        popPage()
         // The page goes after its slide: on a busy machine (the CI, under Shinki) over two seconds.
-        tryVerify(() => !Levels.held, 10000, "the screen may sleep again")
+        tryVerify(() => !Levels.held, mediaLoads, "the screen may sleep again")
     }
 
     // Swipe on the picture: up on the left half brightens the screen, down on the right half
@@ -993,8 +1026,8 @@ TestCase {
         const stage = findChild(page, "stage")
         verify(stage)
         stage.visible = true    // without a video a card stands for the stage; the gesture needs it
-        wait(800)       // Kirigami slides the page in (disabled meanwhile)
-        verify(stage.height > 100, "stage " + stage.width + "×" + stage.height)
+        slidIn()
+        tryVerify(() => stage.height > 100, 5000, "the stage has its place")
         const brightness = Levels.brightness
         const volume = Levels.volume
         mouseDrag(stage, stage.width / 4, stage.height * 0.8, 0, -stage.height / 2)
@@ -1035,7 +1068,7 @@ TestCase {
         shot("6-player-landscape")
         window.width = 420
         window.height = 800
-        window.pageStack.pop()
+        popPage()
     }
 
     function test_4_player() {
@@ -1044,8 +1077,8 @@ TestCase {
             skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
         }
         const page = push("PlayerPage", { playlist: rows, index: 1 })
-        tryVerify(() => page.playing, 10000)
-        tryVerify(() => page.position >= page.from && page.position < page.to, 10000)
+        tryVerify(() => page.playing, mediaLoads)
+        tryVerify(() => page.position >= page.from && page.position < page.to, mediaLoads)
         wait(1500)
         verify(Qt.colorEqual(page.background.color, Look.backgroundColor), "the style's ground")
         shot("5-player")
@@ -1068,7 +1101,7 @@ TestCase {
         }
         window.width = 420
         window.height = 800
-        window.pageStack.pop()
+        popPage()
     }
 
     // A tablet sideways with a wide video: title above, controls below, no rail (the clickdummy's
@@ -1156,7 +1189,7 @@ TestCase {
         const page = push("PlayerPage", { playlist: rows, index: 0 })
         const full = findChild(page, "fullButton")
         tryVerify(() => full.visible && full.width > 0)
-        wait(500)       // the page has slid in
+        slidIn()
         clickUntil(full, () => page.big)
         compare(window.visibility, Window.FullScreen)
         wait(300)
@@ -1185,7 +1218,7 @@ TestCase {
         keyClick(Qt.Key_Escape)
         compare(page.big, false)
         compare(window.pageStack.depth, depth)
-        window.pageStack.pop()
+        popPage()
 
         // By keyboard the hidden button gives the focus back: Space pauses, it does not press it.
         const typed = push("PlayerPage", { playlist: rows, index: 0 })
@@ -1198,7 +1231,7 @@ TestCase {
         compare(typed.big, true, "still full screen")
         tryCompare(typed, "playing", false)
         keyClick(Qt.Key_Escape)
-        window.pageStack.pop()
+        popPage()
 
         // A nearly square window: the head does not turn the page back and forth (Shinki).
         const squareWidth = window.width
@@ -1213,7 +1246,7 @@ TestCase {
         square.heightChanged.disconnect(count)
         compare(turns, 0, "page height stands still")
         window.width = squareWidth
-        window.pageStack.pop()
+        popPage()
 
         // Space still plays and stops: ⤢ does not keep the focus.
         const spaced = push("PlayerPage", { playlist: rows, index: 0 })
@@ -1254,7 +1287,7 @@ TestCase {
         keyClick(Qt.Key_A)
         compare(searchField.text, "a", "typed into the search")
         window.pageStack.pop(window.pageStack.currentItem)
-        window.pageStack.pop()
+        popPage()
 
         // A place outside the chapter (the small player was still loading): the chapter start.
         const chapter = rows.findIndex(r => r.video.von > 60)
@@ -1263,7 +1296,7 @@ TestCase {
         tryVerify(() => early.duration > 0 && early.playing, 5000)
         wait(300)
         verify(early.position >= early.from - 500, "at " + early.position + ", chapter at " + early.from)
-        window.pageStack.pop()
+        popPage()
 
         // Beside the list: ⤢ opens the big player where the small one stands; ⤡ closes that page.
         const width = window.width
@@ -1295,7 +1328,7 @@ TestCase {
         clickUntil(close, () => window.pageStack.depth === before2)
         tryCompare(window.pageStack, "depth", before2)
         tryCompare(window, "visibility", before)
-        window.pageStack.pop()
+        popPage()
         window.width = width
         window.height = height
     }
@@ -1327,14 +1360,14 @@ TestCase {
         const add = allChildren(compose.parent).filter(c => c.text === qsTr("Add"))[0]
         const right = notes.width - add.mapToItem(notes, add.width, 0).x
         verify(right >= Look.unit(8) - 0.5, "the button's margin: " + right)
-        window.pageStack.pop()
+        popPage()
 
         const all = push("AllNotesPage")
         const scroll = findChild(all, "lookScrollBar")
         if (scroll.size >= 1) {
             verify(!scroll.contentItem.visible, "nothing to scroll: no bar")
         }
-        window.pageStack.pop()
+        popPage()
 
         const search = push("SearchPage")
         const field = findChild(search, "searchField")
@@ -1350,12 +1383,12 @@ TestCase {
         compare(field.placeholderTextColor.a, 0, "Material would float its own above the field")
         field.text = "x"
         verify(!hint.visible)
-        window.pageStack.pop()
+        popPage()
 
         const settings = push("VideosPage")
         const label = allChildren(settings).filter(c => c.text === qsTr("Video folder") && c.font !== undefined)[0]
         compare(label.font.capitalization, Font.AllUppercase)
-        window.pageStack.pop()
+        popPage()
 
         // Rows without a video keep the place of the button: the dots stay in line.
         const programme = push("ProgrammePage")
@@ -1366,7 +1399,7 @@ TestCase {
         const edges = new Set(dots.map(d => Math.round(d.mapToItem(programme, d.width, 0).x)))
         compare(edges.size, 1, "the dots end in line: " + Array.from(edges))
         Programme.discipline = "aikido"
-        window.pageStack.pop()
+        popPage()
     }
 
     function playerAt(index) {
@@ -1375,7 +1408,7 @@ TestCase {
             skip("no video for Aikido 5. Kyu (set MITORI_VIDEOS)")
         }
         const page = push("PlayerPage", { playlist: rows, index: index < 0 ? rows.length + index : index })
-        tryVerify(() => page.playing && page.position > page.from + 500, 10000)
+        tryVerify(() => page.playing && page.position > page.from + 500, mediaLoads)
         return page
     }
 
@@ -1409,7 +1442,7 @@ TestCase {
         tryVerify(() => page.position > before + 2500, 3000)
         wait(500)
         verify(page.position > before + 2500)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Next technique in the same video: plays the new chapter, not the old one from its start.
@@ -1421,7 +1454,7 @@ TestCase {
         tryVerify(() => page.position >= page.from && page.position < page.to, 5000)
         wait(800)
         verify(page.position >= page.from, "still in the new chapter")
-        window.pageStack.pop()
+        popPage()
     }
 
     // ▶ in the list opens the player; the list marks the entry the player showed last.
@@ -1439,9 +1472,9 @@ TestCase {
         compare(list.lastId, playable[1].id)
         player.go(1)
         compare(list.lastId, playable[2].id)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === list)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Next technique in another video (Shoden: the suburi, then the forms): its own chapter too.
@@ -1453,13 +1486,13 @@ TestCase {
             skip("no video for Shinki Toho Shoden (set MITORI_VIDEOS)")
         }
         const page = push("PlayerPage", { playlist: rows, index: at - 1 })
-        tryVerify(() => page.playing && page.position > page.from + 500, 10000)
+        tryVerify(() => page.playing && page.position > page.from + 500, mediaLoads)
         page.go(1)
         compare(page.video, rows[at].video.video)
-        tryVerify(() => page.playing && page.position >= page.from && page.position < page.to, 10000)
+        tryVerify(() => page.playing && page.position >= page.from && page.position < page.to, mediaLoads)
         wait(800)
         verify(page.position >= page.from && page.position < page.to, "in the chapter of the new file")
-        window.pageStack.pop()
+        popPage()
     }
 
     // The transport bar's keys work right after opening; Space and the arrows stay single.
@@ -1479,7 +1512,7 @@ TestCase {
         const before = page.position
         keyClick(Qt.Key_Right)
         tryVerify(() => page.position >= before + page.frameMs - 5, 3000)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Today's practice: two new techniques of the current grade; rating one brings the next.
@@ -1506,7 +1539,7 @@ TestCase {
             Practice.rate(page.due[0].id, 1)
         }
         compare(page.due.length, 0, "everything practised for today")
-        window.pageStack.pop()
+        popPage()
     }
 
     // Training plays today's due techniques; a rating moves on to the next open one.
@@ -1539,7 +1572,7 @@ TestCase {
         verify(window.pageStack.currentItem.count > 0)
         window.pageStack.currentItem.close()
         tryVerify(() => window.pageStack.currentItem === today)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Training on a tablet sideways: "Comment" beside the list opens the technique's comment.
@@ -1557,7 +1590,7 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem !== player, 2000, "the comment page opens")
         compare(window.pageStack.currentItem.entry.id, rows[0].id)
         compare(player.autoPlay, false, "a file still loading stays quiet under the page")
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === player)
         verify(player.autoPlay)
     }
@@ -1579,29 +1612,29 @@ TestCase {
             skip("no second video for Shinki Toho Shoden (set MITORI_VIDEOS)")
         }
         const loading = push("PlayerPage", { playlist: rows, index: 0, training: true })
-        tryVerify(() => loading.playing, 10000)
+        tryVerify(() => loading.playing, mediaLoads)
         loading.index = other
         verify(loading.startPending)
         findChild(loading, "commentButton").clicked()
         verify(loading.startPending)
-        tryVerify(() => !loading.startPending, 10000)
+        tryVerify(() => !loading.startPending, mediaLoads)
         wait(500)
         verify(!loading.playing, "no sound under the comment")
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === loading)
-        window.pageStack.pop()
+        popPage()
         wait(800)
 
         // Playing: it rests under the comment.
         const playing = push("PlayerPage", { playlist: rows, index: 0, training: true })
-        tryVerify(() => playing.playing, 10000)
+        tryVerify(() => playing.playing, mediaLoads)
         findChild(playing, "commentButton").clicked()
         tryVerify(() => window.pageStack.currentItem !== playing, 2000)
         tryVerify(() => !playing.playing, 2000, "it pauses under the comment")
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === playing)
         verify(!playing.playing, "it waits for a tap")
-        window.pageStack.pop()
+        popPage()
         wait(800)
     }
 
@@ -1705,7 +1738,7 @@ TestCase {
         compare(findChild(end, "practisedCount").value, String(practised))
         end.close()
         tryVerify(() => window.pageStack.currentItem === today)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Up to `length` techniques not rated today, new for each case (the log stays for the run).
@@ -1893,7 +1926,7 @@ TestCase {
             skip("no video (set MITORI_VIDEOS)")
         }
         const pages = trainingOver(rows)
-        tryVerify(() => pages.player.playing, 10000)
+        tryVerify(() => pages.player.playing, mediaLoads)
         if (data.turned) {
             window.width = 800
             window.height = 420
@@ -1954,7 +1987,7 @@ TestCase {
         tryVerify(() => !editor.opened)
         compare(page.notes.length, 1)
         compare(findChild(page, "dayName").text, "Today")
-        window.pageStack.pop()
+        popPage()
     }
 
     // The sheet from the search: "Enter code" leads to the videos (as from the programme).
@@ -1973,8 +2006,8 @@ TestCase {
         tryVerify(() => sheet.opened)
         findChild(sheet.contentItem, "sheetCodeButton").clicked()
         tryVerify(() => window.pageStack.currentItem.title === "Videos", 2000, "the videos page opens")
-        window.pageStack.pop()
-        window.pageStack.pop()
+        popPage()
+        popPage()
     }
 
     // Search: techniques across disciplines and own notes; a result opens the sheet.
@@ -2013,7 +2046,7 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem !== page, 2000)
         compare(window.pageStack.currentItem.entry.id, "gone-technique")
         verify(window.pageStack.currentItem.notes.length === 1)
-        window.pageStack.pop()
+        popPage()
         field.text = "ikkyo"
         tryVerify(() => page.query === "ikkyo", 2000)
         verify(!page.more)
@@ -2024,7 +2057,7 @@ TestCase {
         tryVerify(() => sheet.opened, 2000)
         sheet.close()
         tryVerify(() => !sheet.opened)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Courses: the coming dates from the calendar (a local file in this test), a date's notebook
@@ -2064,9 +2097,9 @@ TestCase {
         verify(findChild(emptyList, "notebooksEmpty").visible)
         compare(findChildren(emptyList, "notebookRow").length, 0)
         shot("14a-notebooks-empty")
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === page)
-        wait(800)       // Kirigami slides the page back (disabled meanwhile)
+        slidIn()
 
         // A date opens its notebook, made on first use; an entry is added from the field.
         mouseClick(rows[0])
@@ -2083,7 +2116,7 @@ TestCase {
         compare(compose.text, "")
         tryVerify(() => findChildren(book, "courseEntry").length === 1)
         shot("14b-course-notebook")
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === page)
         tryVerify(() => findChildren(page, "eventRow")[0].course.entries === 1)
         const dateBook = Courses.notebookFor("ui-daito")
@@ -2091,7 +2124,7 @@ TestCase {
 
         // The date's notebook is counted and listed; a tap on its row opens it.
         verify(notebooksTile.hint.indexOf("1") === 0, notebooksTile.hint)
-        wait(800)       // Kirigami slides the page back (disabled meanwhile)
+        slidIn()
         mouseClick(notebooksTile)
         tryCompare(window.pageStack, "depth", 3)
         const list = window.pageStack.currentItem
@@ -2103,9 +2136,9 @@ TestCase {
         mouseClick(listed)
         tryCompare(window.pageStack, "depth", 4)
         tryVerify(() => window.pageStack.currentItem.uid === dateBook)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === list)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === page)
 
         // A course of one's own: "New course" stays on this page.
@@ -2130,7 +2163,7 @@ TestCase {
         remove.accept()
         tryVerify(() => window.pageStack.currentItem === page, 3000)
         compare(Courses.notebooks.length, 1)
-        window.pageStack.pop()
+        popPage()
     }
 
     // A tile's title, the label that shows its text.
@@ -2221,7 +2254,7 @@ TestCase {
                         tileTitle(notebooks).mapToItem(window.contentItem, 0, 0).y, "the titles' tops")
             }
             shot("14e-tiles-" + data.tag + "-" + discipline)
-            window.pageStack.pop()
+            popPage()
         }
         // The uids first: Courses.grades shrinks with each removal.
         for (const uid of Courses.grades.map(g => g.uid)) {
@@ -2247,14 +2280,14 @@ TestCase {
         const field = findChild(page, "codeField")
         const message = findChild(page, "codeMessage")
         field.text = "7KQ2M-X9HDV-3TAPR-WE6YA"          // check character wrong
-        wait(800)       // Kirigami slides the page in (disabled meanwhile)
+        slidIn()
         mouseClick(findChild(page, "unlockButton"))
         tryVerify(() => message.visible)
         compare(message.text, qsTr("This code has a typing error; check it character by character."))
         shot("15-videos-code-wrong")
         field.text = "7kq2m x9hdv 3tapr we6yt"
         mouseClick(findChild(page, "unlockButton"))
-        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Installed, 10000)
+        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Installed, mediaLoads)
         verify(message.text.indexOf("Test") > 0, message.text)
         compare(field.text, "")
         verify(Videos.available("test/v"), "the bundle's video is on the device")
@@ -2268,7 +2301,7 @@ TestCase {
         tryVerify(() => Bundles.bundles[0].state === Bundles.State.Unlocked)
         verify(!Videos.available("test/v"))
         compare(Bundles.bundles[0].code, "7KQ2M-X9HDV-3TAPR-WE6YT", "the code stays")
-        window.pageStack.pop()
+        popPage()
     }
 
     // Scanning (fake frames, no camera): refused without a camera or permission, typing stays;
@@ -2278,7 +2311,7 @@ TestCase {
         failOnWarning(/ReferenceError|TypeError|Binding loop/)
         const page = push("VideosPage")
         tryCompare(Bundles, "manifestState", Bundles.ManifestState.Ready, 5000)
-        wait(800)       // Kirigami slides the page in (disabled meanwhile)
+        slidIn()
         const field = findChild(page, "codeField")
         const message = findChild(page, "codeMessage")
         const scan = findChild(page, "scanButton")
@@ -2333,7 +2366,7 @@ TestCase {
             compare(window.pageStack.depth, depth)
         }
         leaveThenShowCode(leaving => mouseClick(findChild(leaving, "scanCancel")))
-        leaveThenShowCode(() => window.pageStack.pop())
+        leaveThenShowCode(() => popPage())
         leaveThenShowCode(leaving => {
             const cancel = findChild(leaving, "scanCancel")
             mouseClick(cancel)
@@ -2374,7 +2407,7 @@ TestCase {
         scanning.cameraFailed = false
 
         // Nothing foreign in the picture any more: the sentence goes.
-        tryCompare(hint, "text", asked, 10000)
+        tryCompare(hint, "text", asked, mediaLoads)
 
         // A well-formed code nobody knows: back, the same answer as to a typed one, in the field.
         const prefix = "0000000000000000000"
@@ -2389,12 +2422,12 @@ TestCase {
         // The code: unlocked and loaded as if typed.
         scanning = openScan()
         showUntil("7KQ2M-X9HDV-3TAPR-WE6YT", () => !onScanPage())
-        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Installed, 10000)
+        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Installed, mediaLoads)
         verify(message.text.indexOf("Test") > 0, message.text)
         compare(field.text, "")
         verify(Bundles.remove("test-bundle"))
         tryVerify(() => Bundles.bundles[0].state === Bundles.State.Unlocked)
-        window.pageStack.pop()
+        popPage()
     }
 
     // The scan with a turn while the camera stands above: the code is redeemed by the page beside
@@ -2428,12 +2461,12 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem === host)
         verify(host.showsPage, "back on the page that asked, not the list")
         verify(videos.visible)
-        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Installed, 10000, "redeemed")
+        tryVerify(() => Bundles.bundles[0].state === Bundles.State.Installed, mediaLoads, "redeemed")
         verify(Bundles.remove("test-bundle"))
         tryVerify(() => Bundles.bundles[0].state === Bundles.State.Unlocked)
         turn(1280, 800)
         tryVerify(() => host.wide)
-        window.pageStack.pop()
+        popPage()
     }
 
     // The licences of what ships with the app (Apache-2.0 and the BSD ones ask for it).
@@ -2444,7 +2477,7 @@ TestCase {
                               "Redistribution and use in source and binary forms", "Bjoern Hoehrmann", "Monocypher", "Loup Vaillant", "Frank Osterfeld"]) {
             verify(text.indexOf(needed) >= 0, needed)
         }
-        window.pageStack.pop()
+        popPage()
     }
 
     // A bundle loaded while the player is open: file and cut points change together, never the
@@ -2457,7 +2490,7 @@ TestCase {
         compare(player.source.toString(), "")
         verify(!player.hasVideo)
         Bundles.load("test-bundle", Bundles.Network.Any)
-        tryCompare(player, "from", 1500, 10000)
+        tryCompare(player, "from", 1500, mediaLoads)
         compare(player.to, 2500)
         verify(player.source.toString().indexOf("test") > 0, player.source)
         verify(player.hasVideo, "no sound behind the card: the picture and its controls come too")
@@ -2465,7 +2498,7 @@ TestCase {
         tryCompare(player, "from", 10000)
         compare(player.source.toString(), "")
         verify(!player.hasVideo)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Saving the shelf for another bundle leaves a playing video alone; a new file of this video
@@ -2478,8 +2511,8 @@ TestCase {
         const entry = {id: "x", title: "T", video: {video: "aikido/k5", von: 0.1, bis: 60}}
         const next = {id: "y", title: "U", video: {video: "aikido/k5", von: 0.2, bis: 60}}
         const player = push("PlayerPage", {playlist: [entry, next], index: 0})
-        tryVerify(() => player.playing, 10000)
-        tryVerify(() => player.position > 300 && player.position < 700, 10000)
+        tryVerify(() => player.playing, mediaLoads)
+        tryVerify(() => player.position > 300 && player.position < 700, mediaLoads)
         const at = player.position
 
         Videos.folderChanged()
@@ -2489,14 +2522,14 @@ TestCase {
 
         Videos.folder = folder("b")
         tryVerify(() => player.source.toString().indexOf("played-b") > 0)
-        tryVerify(() => player.position === player.from && !player.playing, 10000)
+        tryVerify(() => player.position === player.from && !player.playing, mediaLoads)
         wait(300)
         verify(!player.playing, "it waits for a tap")
 
         // The next technique plays as usual again.
         player.go(1)
         tryVerify(() => player.playing, 5000)
-        window.pageStack.pop()
+        popPage()
         Videos.folder = before
     }
 
@@ -2514,9 +2547,7 @@ TestCase {
         findChild(aikido, "gradeDay").date = new Date(Date.now() - 400 * 86400000)
         findChild(aikido, "gradePlace").text = "Mainz"
         const add = findChild(aikido, "addGrade")
-        // Kirigami slides the page in, disabled meanwhile (longer under load than 800 ms).
-        wait(800)
-        tryVerify(() => add.enabled, 5000)
+        slidIn()
         const at = add.mapToItem(page, 0, 0)
         mouseClick(add)
         tryVerify(() => Courses.grades.length === 1, 3000,
@@ -2541,7 +2572,7 @@ TestCase {
         verify(Courses.setTrainingStart("shinkitoho", "2024-09-01"))
         tryVerify(() => startField.date && startField.date.getMonth() === 8, 2000, "the field follows the saved day")
         shot("16-grades")
-        window.pageStack.pop()
+        popPage()
 
         // An exam on the coming Daitoryu course (in 12 days): 4. Kyu fits (a year after 5. Kyu).
         const uid = Courses.notebookFor("ui-daito")
@@ -2560,7 +2591,7 @@ TestCase {
         tryVerify(() => findChild(book, "examChip").visible)
         compare(findChild(book, "examChip").text, qsTr("Exam %1").arg("Aikido 4. Kyu"))
         shot("16c-course-exam")
-        window.pageStack.pop()
+        popPage()
 
         const start = window.pageStack.items[0]
         // CD-5 shot: the start menu with the planned exam hint box above the tiles.
@@ -2572,15 +2603,15 @@ TestCase {
         Programme.discipline = "aikido"
         const today = push("TodayPage")
         verify(findChild(today, "plannedHint").visible)
-        window.pageStack.pop()
+        popPage()
         PracticeGrade.setGrade("aikido", "k5")
         const exam = push("ExamPage")
         verify(findChild(exam, "plannedHint").visible)
         verify(findChild(exam, "toExamGrade").visible)
-        wait(1000)      // the page has slid in (a click during the slide can land beside the button)
+        slidIn()
         clickUntil(findChild(exam, "toExamGrade"), () => exam.grade === "k4")
         verify(!findChild(exam, "toExamGrade").visible)
-        window.pageStack.pop()
+        popPage()
 
         // "Mock exam" on Today opens the exam at the planned grade and makes it the practice grade.
         PracticeGrade.setGrade("aikido", "k5")
@@ -2589,8 +2620,8 @@ TestCase {
         tryCompare(window.pageStack.currentItem, "title", qsTranslate("ExamPage", "Exam mode"))
         compare(window.pageStack.currentItem.grade, "k4")
         compare(PracticeGrade.grade("aikido"), "k4")
-        window.pageStack.pop()
-        window.pageStack.pop()
+        popPage()
+        popPage()
 
         // A planned grade without material in the exam mode (Shinki Toho Menkyo-Kaiden): no
         // button that would open another grade.
@@ -2599,11 +2630,11 @@ TestCase {
         const today2 = push("TodayPage")
         verify(findChild(today2, "plannedHint").visible)
         verify(!findChild(today2, "toMockExam").visible, "Menkyo-Kaiden has no mock exam")
-        window.pageStack.pop()
+        popPage()
         const exam2 = push("ExamPage")
         verify(findChild(exam2, "plannedHint").visible)
         verify(!findChild(exam2, "toExamGrade").visible, "Menkyo-Kaiden has no mock exam")
-        window.pageStack.pop()
+        popPage()
         Programme.discipline = "aikido"
 
         // Back as before for the other cases.
@@ -2621,7 +2652,7 @@ TestCase {
         compare(findChild(daito, "gradeBox").currentIndex, -1)
         verify(!findChild(daito, "addGrade").enabled)
         verify(findChild(daito, "gradesHeading").text.indexOf(ladder[ladder.length - 1].name) > 0, findChild(daito, "gradesHeading").text)
-        window.pageStack.pop()
+        popPage()
         const uids = Courses.grades.filter(g => g.discipline === "daitoryu").map(g => g.uid)
         compare(uids.length, ladder.length)
         for (const u of uids) {
@@ -2636,14 +2667,14 @@ TestCase {
         Programme.discipline = "aikido"
         PracticeGrade.setGrade("aikido", "k4")
         tryCompare(window.pageStack, "depth", 1)
-        wait(500)       // Kirigami slides the last page out
+        slidIn()
         const tile = findChild(window.pageStack.items[0], "mapTile")
         verify(tile && tile.visible)
         clickTile(tile)
         tryCompare(window.pageStack, "depth", 2)
         const page = window.pageStack.currentItem
         tryVerify(() => page.title === qsTr("Technique map"))
-        wait(500)       // Kirigami slides the page in
+        slidIn()
         compare(page.grade, "k4")
         verify(page.matrix)
         compare(findChildren(page, "gradeChip").length, Programme.grades("aikido").length)
@@ -2761,7 +2792,7 @@ TestCase {
         for (const name of multi.names)
             verify(heat.tipOf(multi.r, multi.c).indexOf(name) > 0, heat.tipOf(multi.r, multi.c))
         shot("11-map-tablet")
-        window.pageStack.pop()
+        popPage()
     }
 
     // Glossary: without a query A–Z with headings, the source below; a query finds words by
@@ -2780,9 +2811,9 @@ TestCase {
         verify(tile.visible)
         // Cases that end with skip() (no videos) leave their pages on the stack.
         while (window.pageStack.depth > 1)
-            window.pageStack.pop()
+            popPage()
         tryVerify(() => window.pageStack.currentItem === start)
-        wait(800)       // Kirigami slides the start page back in; a click meanwhile goes nowhere
+        slidIn()
         clickTile(tile)
         tryVerify(() => window.pageStack.currentItem !== start && window.pageStack.currentItem.glossary !== undefined, 2000)
         const page = window.pageStack.currentItem
@@ -2839,7 +2870,7 @@ TestCase {
         tryVerify(() => findChild(page, "glossarySource") !== null && findChild(page, "glossarySource").visible)
         verify(findChild(page, "glossarySource").text.includes("shinkiryu.de"))
         shot("9b-glossary-search")
-        window.pageStack.pop()
+        popPage()
     }
 
     // All notes: every technique's notes by day, a filter per discipline; a tap opens the
@@ -2866,8 +2897,9 @@ TestCase {
         mouseClick(note, 20, note.height - 10)
         tryVerify(() => window.pageStack.currentItem !== page, 2000)
         compare(window.pageStack.currentItem.entry.id, daito.id)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === page)
+        slidIn()
         mousePress(note, 20, note.height - 10)
         wait(1000)
         mouseRelease(note, 20, note.height - 10)
@@ -3010,8 +3042,9 @@ TestCase {
         keyClick(Qt.Key_Return)
         tryVerify(() => window.pageStack.currentItem !== page, 2000)
         compare(window.pageStack.currentItem.entry.id, target)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === page)
+        slidIn()
         // Page Up up to the first note shows the count above it too.
         list.forceActiveFocus()
         keyClick(Qt.Key_End)
@@ -3056,7 +3089,7 @@ TestCase {
         compare(window.pageStack.currentItem, page)
         // The filter is kept for the next time.
         page.filter = "daitoryu"
-        window.pageStack.pop()
+        popPage()
         const again = push("AllNotesPage")
         compare(again.filter, "daitoryu")
         again.filter = ""
@@ -3070,7 +3103,7 @@ TestCase {
         allNotes.filter = "courses"
         tryVerify(() => findChild(allNotes, "noteTitle") !== null)
         verify(findChild(allNotes, "noteTitle").text.indexOf(" · ") > 0, findChild(allNotes, "noteTitle").text)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => again.shown[0].kind === "course")
         compare(again.shown[0].title, "Gastlehrer")
         wait(800)
@@ -3081,7 +3114,7 @@ TestCase {
         const entry = findChild(again, "note")
         mouseClick(entry, 20, entry.height - 10)
         tryVerify(() => window.pageStack.currentItem.uid === course, 2000)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === again)
         again.edit(again.shown[0])
         const courseEditor = findChild(again, "noteEditor")
@@ -3094,7 +3127,7 @@ TestCase {
         tryVerify(() => again.shown.length === 0)
         compare(findChild(again, "count").text, qsTr("No entries in course notebooks yet."))
         again.filter = ""
-        window.pageStack.pop()
+        popPage()
     }
 
     // Exam mode: settings, a round with samples first (marked), rating at the end; "Apply" sets
@@ -3210,12 +3243,12 @@ TestCase {
         verify(chart.barHeight(0) >= KanteStyle.unit(3), "a bar at average 1: " + chart.barHeight(0))
         compare(chart.format(chart.values[0]), "1")
         stats.discipline = "aikido"
-        window.pageStack.pop()
+        popPage()
 
         // The settings show the last round.
         const again = push("ExamPage")
         verify(findChild(again, "examHint").text.indexOf(again.averageText(sum / n)) >= 0, findChild(again, "examHint").text)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Shinki Toho: Shoden asks the Kamae as one point and Ô-dachi 1–11; the board shows only the
@@ -3262,7 +3295,7 @@ TestCase {
             asked.accept()
         }
         tryVerify(() => window.pageStack.currentItem === page)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Back from the rating asks once something is rated; without a rating it just goes back.
@@ -3327,7 +3360,7 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem === settings)
         compare(window.pageStack.depth, depth)
         compare(Practice.rounds("aikido", 8).length, before)
-        window.pageStack.pop()
+        popPage()
     }
 
     // The Kamae player: its 26 positions come last, so the rating stays where it is for a technique
@@ -3353,7 +3386,7 @@ TestCase {
                 verify(item.visible, c[3])
                 const y = item.mapToItem(view, 0, 0).y
                 const result = { y: y, bottom: y + item.height, height: view.height, steps: findChild(page, "stepList").count }
-                window.pageStack.pop()
+                popPage()
                 return result
             }
             const k = at(kamae)
@@ -3385,7 +3418,7 @@ TestCase {
         verify(Math.abs(stage.height - without) < 1, "picture " + stage.width + "×" + stage.height + ", without positions " + without)
         window.width = 420
         window.height = 800
-        window.pageStack.pop()
+        popPage()
         Programme.discipline = "aikido"
     }
 
@@ -3426,7 +3459,7 @@ TestCase {
         page.discipline = "daitoryu"
         tryVerify(() => findChildren(page, "statsGrade").length === 1)
         verify(findChild(page, "editGrades").visible)
-        window.pageStack.pop()
+        popPage()
 
         // All years: this year's calendar first, with the day; one discipline only.
         const years = push("YearsPage")
@@ -3445,7 +3478,7 @@ TestCase {
         years.discipline = "shinkitoho"
         verify(findChild(findChild(years, "year_" + year), "yearHeading").text.indexOf(qsTr("%n practice day(s)", "", 1)) > 0)
         shot("10b-years")
-        window.pageStack.pop()
+        popPage()
         Courses.removeGrade(Courses.grades.find(g => g.discipline === "daitoryu").uid)
         // The start tile counts the practice days.
         const tile = findChild(window.pageStack.items[0], "statsTile")
@@ -3460,6 +3493,13 @@ TestCase {
         Videos.folder = folder
     }
 
+    // The first small player of a run compiles PlayerView and starts the media backend: 1 s alone,
+    // 8.7 s in a debug build beside 30 busy processes.
+    readonly property int paneLoads: 20000
+    // A clip or a bundle loads in a thread that needs its share of the machine: 2 s beside 30 busy
+    // processes, past 10 s beside 100. The limit only tells a hang from a slow machine.
+    readonly property int mediaLoads: 30000
+
     // The programme on a tablet, with stand-ins for the videos: nothing plays, but what would is
     // the player's autoPlay.
     function tabletProgramme(folder, discipline, grade) {
@@ -3469,7 +3509,7 @@ TestCase {
         window.width = 1280
         window.height = 800
         const page = push("ProgrammePage")
-        tryVerify(() => page.split && page.player)
+        tryVerify(() => page.split && page.player, paneLoads)
         return page
     }
 
@@ -3478,13 +3518,13 @@ TestCase {
         return uiDataDir + "/played-" + name
     }
     function chapterLoaded(page) {
-        tryVerify(() => page.player && page.player.duration > 0 && Math.abs(page.player.position - page.player.from) < 1000, 10000)
+        tryVerify(() => page.player && page.player.duration > 0 && Math.abs(page.player.position - page.player.from) < 1000, mediaLoads)
     }
     // The row plays beside the list, past its chapter's start.
     function rowPlays(page, row) {
         page.open(page.playlist[row])
         compare(page.player.current.id, page.playlist[row].id)
-        tryVerify(() => page.player.playing && page.player.position > page.player.from + 300, 10000)
+        tryVerify(() => page.player.playing && page.player.position > page.player.from + 300, mediaLoads)
     }
     // Paused well inside the chapter: its start would not pass for the same place.
     function pausedInside(player) {
@@ -3505,7 +3545,7 @@ TestCase {
         tryVerify(() => !page.split)
         window.width = 1280
         window.height = 800
-        tryVerify(() => page.split && page.player)
+        tryVerify(() => page.split && page.player, paneLoads)
     }
     function chooseGrade(page, id) {
         // On a tablet the chips scroll with the rows: back to them, as the user would.
@@ -3549,12 +3589,12 @@ TestCase {
         const rows = [{ id: "a", title: "A", video: Object.assign({ video: "aikido/k5" }, chapter) },
                       { id: "b", title: "B", video: Object.assign({ video: "aikido/k4" }, chapter) }]
         const player = push("PlayerPage", { playlist: rows, index: 0 })
-        tryVerify(() => player.playing, 10000)
+        tryVerify(() => player.playing, mediaLoads)
 
         Videos.folder = clipFolder(data.folder)
         wait(300)
         player.go(1)
-        tryVerify(() => player.playing && player.position > 1000, 10000, "the next technique plays")
+        tryVerify(() => player.playing && player.position > 1000, mediaLoads, "the next technique plays")
     }
 
     // A save while the player first loads is no file changed under it.
@@ -3563,7 +3603,7 @@ TestCase {
         const rows = [{ id: "a", title: "A", video: { video: "aikido/k5", von: 1, bis: 60 } }]
         const player = window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/PlayerPage.qml"), { playlist: rows, index: 0 })
         Videos.folderChanged()
-        tryVerify(() => player.playing, 10000, "plays as if opened alone")
+        tryVerify(() => player.playing, mediaLoads, "plays as if opened alone")
     }
 
     // A pane made anew keeps the state: playing plays on, standing stands, in the same place.
@@ -3572,8 +3612,9 @@ TestCase {
             { tag: "paused", prepare: page => pausedInside(page.player), plays: false },
             { tag: "waiting after a file change", prepare: page => {
                 Videos.folder = clipFolder("long2")
-                tryVerify(() => page.player.source.toString().indexOf("played-long2") > 0)
-                tryVerify(() => page.player.duration > 0 && !page.player.playing, 10000)
+                // The pane may go for a moment with the old folder's list.
+                tryVerify(() => page.player && page.player.source.toString().indexOf("played-long2") > 0, mediaLoads)
+                tryVerify(() => page.player && page.player.duration > 0 && !page.player.playing, mediaLoads)
                 wait(300)
               }, plays: false },
             { tag: "playing", prepare: () => {}, plays: true }
@@ -3588,10 +3629,10 @@ TestCase {
         const at = page.player.position
 
         remakePane(page)
-        tryVerify(() => page.player.duration > 0, 10000)
+        tryVerify(() => page.player.duration > 0, mediaLoads)
         compare(page.player.current.id, page.playlist[1].id)
         if (data.plays) {
-            tryVerify(() => page.player.playing, 10000, "plays on")
+            tryVerify(() => page.player.playing, mediaLoads, "plays on")
             verify(page.player.position >= at - 300, page.player.position + " after " + at)
             return
         }
@@ -3613,9 +3654,9 @@ TestCase {
         tryVerify(() => !page.split)
         page.bigResume = { position: place, rate: 1, looping: true, playing: data.playing }
         window.width = 1280
-        tryVerify(() => page.player && page.player.duration > 0, 10000)
+        tryVerify(() => page.player && page.player.duration > 0, mediaLoads)
         if (data.playing) {
-            tryVerify(() => page.player.playing, 10000, "plays on")
+            tryVerify(() => page.player.playing, mediaLoads, "plays on")
             verify(page.player.position >= place - 300, page.player.position)
             return
         }
@@ -3635,7 +3676,7 @@ TestCase {
         tryVerify(() => Math.abs(page.player.position - place) < 500, 5000)
         page.openBig()
         const big = window.pageStack.currentItem
-        tryVerify(() => big.big && big.playing, 10000)
+        tryVerify(() => big.big && big.playing, mediaLoads)
         tryVerify(() => Math.abs(big.position - place) < 3000, 3000, big.position + ", small player at " + place)
         if (!data.playing) {
             big.togglePlay()
@@ -3647,7 +3688,7 @@ TestCase {
         tryVerify(() => page.player !== null)
         const check = () => {
             if (data.playing) {
-                tryVerify(() => page.player.playing, 10000, "plays on")
+                tryVerify(() => page.player.playing, mediaLoads, "plays on")
             } else {
                 staysStanding(page.player, "paused there stays paused")
             }
@@ -3656,7 +3697,7 @@ TestCase {
         check()
 
         remakePane(page)
-        tryVerify(() => page.player.duration > 0, 10000)
+        tryVerify(() => page.player.duration > 0, mediaLoads)
         check()
     }
 
@@ -3722,7 +3763,7 @@ TestCase {
         tryVerify(() => Math.abs(page.player.position - 100000) < 1000, 5000)
         remakePane(page)
         page.grade = "k4"
-        tryVerify(() => page.player.video === "aikido/k4" && page.player.duration > 0, 10000)
+        tryVerify(() => page.player.video === "aikido/k4" && page.player.duration > 0, mediaLoads)
         wait(300)
         verify(page.player.position < page.player.from + 1000, page.player.position + ", chapter at " + page.player.from)
     }
@@ -3744,7 +3785,7 @@ TestCase {
         }
         window.width = 1280
         window.height = 800
-        tryVerify(() => page.split && page.player && page.player.duration > 0, 10000)
+        tryVerify(() => page.split && page.player && page.player.duration > 0, mediaLoads)
         staysStanding(page.player, "waits for a tap")
         verify(Math.abs(page.player.position - page.player.from) < 500, page.player.position)
     }
@@ -3761,7 +3802,7 @@ TestCase {
         tryVerify(() => !page.split)
         page.grade = "k4"
         window.width = 1280
-        tryVerify(() => page.split && page.player)
+        tryVerify(() => page.split && page.player, paneLoads)
         compare(page.player.video, "aikido/k4")
         compare(page.player.looping, false, "another technique")
     }
@@ -3773,7 +3814,7 @@ TestCase {
         rowPlays(page, 1)
         page.grade = "k4"
         Videos.folderChanged()
-        tryVerify(() => page.player.video === "aikido/k4" && page.player.playing, 10000, "plays on")
+        tryVerify(() => page.player.video === "aikido/k4" && page.player.playing, mediaLoads, "plays on")
     }
 
     // The chosen row, tapped when it stands: it plays.
@@ -3807,12 +3848,12 @@ TestCase {
         if (data.card) {
             tryVerify(() => !page.split)
             chooseGrade(page, data.from)
-            tryVerify(() => page.split && page.player)
+            tryVerify(() => page.split && page.player, paneLoads)
             compare(page.player.current.id, chosen)
         } else {
             tryVerify(() => page.player.current.id !== chosen)
         }
-        tryVerify(() => page.player.duration > 0, 10000)
+        tryVerify(() => page.player.duration > 0, mediaLoads)
         staysStanding(page.player, "stands until a technique is chosen")
         if (data.card) {
             verify(Math.abs(page.player.position - at) < 500, page.player.position + " after " + at)
@@ -3824,9 +3865,9 @@ TestCase {
         if (data.card) {
             tryVerify(() => !page.split)
             chooseGrade(page, data.from)
-            tryVerify(() => page.split && page.player)
+            tryVerify(() => page.split && page.player, paneLoads)
         }
-        tryVerify(() => page.player.playing, 10000, "playing plays on")
+        tryVerify(() => page.player.playing, mediaLoads, "playing plays on")
         Programme.discipline = "aikido"
     }
 
@@ -3841,7 +3882,7 @@ TestCase {
         tryVerify(() => !page.split)
         compare(page.lastId, chosen)
         chooseGrade(page, "chuden")
-        tryVerify(() => page.split && page.player)
+        tryVerify(() => page.split && page.player, paneLoads)
         compare(page.player.current.id, chosen)
         compare(page.lastId, chosen)
         compare(page.player.rate, 0.5)
@@ -3872,7 +3913,7 @@ TestCase {
         chooseGrade(page, "kaiden")
         tryVerify(() => !page.split)
         chooseGrade(page, "shoden")
-        tryVerify(() => page.split && page.player)
+        tryVerify(() => page.split && page.player, paneLoads)
         compare(page.player.rate, 1)
         chooseGrade(page, "chuden")
         compare(page.player.current.id, first)
@@ -3946,14 +3987,14 @@ TestCase {
         page.open(page.playlist[1])
         compare(page.paneEntry, null)
         verify(findChild(page, "playerPane").visible)
-        tryVerify(() => page.player.playing && page.player.position >= place, 10000)
+        tryVerify(() => page.player.playing && page.player.position >= place, mediaLoads)
         compare(page.player.rate, 0.5)
 
         page.open(withoutVideo)
         tryVerify(() => !page.player.playing)
         chooseGrade(page, "k4")
         chooseGrade(page, "k5")
-        tryVerify(() => page.split && page.player)
+        tryVerify(() => page.split && page.player, paneLoads)
         compare(page.paneEntry, null)
         compare(page.sheetId, "")
         staysStanding(page.player, "a chip starts nothing")
@@ -3968,7 +4009,7 @@ TestCase {
         const page = tabletProgramme()
         window.width = data.width
         window.height = data.height
-        tryVerify(() => page.split && page.player)
+        tryVerify(() => page.split && page.player, paneLoads)
         verify(!page.header.visible, "no head above both panes")
         verify(page.inside(findChild(page, "gradeChips"), findChild(page, "programmeList")), "the grades scroll with the rows")
 
@@ -4115,13 +4156,13 @@ TestCase {
         verify(scrolled > list.originY + 100, "scrolled " + scrolled)
         push("AllNotesPage")
         wait(800)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === page)
         wait(500)
         verify(inHead(window.activeFocusItem), "the focus is back on the chip: " + window.activeFocusItem)
         compare(list.contentY, scrolled, "the list stays where it was")
         PracticeGrade.setGrade("aikido", "k5")
-        window.pageStack.pop()
+        popPage()
     }
 
     // A sheet left beside the list, turned under another page: the dialog of a technique with a
@@ -4134,7 +4175,7 @@ TestCase {
         window.width = 800
         window.height = 1280
         tryVerify(() => !page.wide)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === page)
 
         const dialog = findChild(page, "techniqueSheet")
@@ -4254,7 +4295,7 @@ TestCase {
         verify(page.split)
         compare(page.player, player, "not made anew")
         compare(player.current.id, chosen.id)
-        tryVerify(() => player.playing && player.position > player.from + 300, 10000, "it plays right away")
+        tryVerify(() => player.playing && player.position > player.from + 300, mediaLoads, "it plays right away")
     }
 
     // The hold ends with the player: no field, no pane, no hold.
@@ -4293,7 +4334,7 @@ TestCase {
     function test_2v_f_dialog_turned_sideways() {
         const page = tabletProgramme(clipFolder("long"))
         page.open(page.playlist[0])     // the first tap
-        tryVerify(() => page.player.playing, 10000)
+        tryVerify(() => page.player.playing, mediaLoads)
         window.width = 800
         window.height = 1280
         tryVerify(() => !page.split)
@@ -4308,7 +4349,7 @@ TestCase {
         compare(page.paneEntry, null)
         compare(page.lastId, chosen.id)
         compare(page.player.current.id, chosen.id)
-        tryVerify(() => page.player.duration > 0, 10000)
+        tryVerify(() => page.player.duration > 0, mediaLoads)
         staysStanding(page.player, "turned, no sound by itself")
     }
 
@@ -4335,9 +4376,9 @@ TestCase {
         // Under another page it rests, and the started state outlives that.
         push("SearchPage")
         tryVerify(() => !page.player.autoPlay)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => page.player.autoPlay)
-        window.pageStack.pop()
+        popPage()
 
         // The next opening stands again.
         const again = tabletProgramme()
@@ -4365,7 +4406,7 @@ TestCase {
             tryVerify(() => !page.split)
             window.width = 1280
             window.height = 800
-            tryVerify(() => page.split && page.player)
+            tryVerify(() => page.split && page.player, paneLoads)
         }
         turn()
         verify(!page.player.autoPlay)
@@ -4406,7 +4447,7 @@ TestCase {
         page.open(page.playlist[1])
         tryCompare(page.player.current, "id", page.playlist[1].id, 3000)
         tryVerify(() => page.player.playing && page.player.position >= page.player.from, 5000)
-        window.pageStack.pop()
+        popPage()
 
         // The row standing there.
         page = push("ProgrammePage")
@@ -4414,7 +4455,7 @@ TestCase {
         verify(!page.player.playing)
         page.open(page.playlist[0])
         tryVerify(() => page.player.playing, 5000)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Tablet in landscape: list and small player on one page; a row with a video plays beside the
@@ -4431,9 +4472,9 @@ TestCase {
         const page = push("ProgrammePage")
         tryVerify(() => page.split, 2000, "list and player side by side")
         const pane = findChild(page, "playerPane")
-        tryVerify(() => pane.item && pane.item.duration > 0, 10000)
+        tryVerify(() => pane.item && pane.item.duration > 0, mediaLoads)
         page.open(rows[0])      // the first tap
-        tryVerify(() => pane.item.playing, 10000)
+        tryVerify(() => pane.item.playing, mediaLoads)
         compare(pane.item.compact, true)
         // A row with a video plays beside the list, the page stays.
         page.open(rows[1])
@@ -4476,7 +4517,7 @@ TestCase {
         window.height = 800
         tryVerify(() => !page.split)
         PracticeGrade.setGrade("aikido", "k5")
-        window.pageStack.pop()
+        popPage()
     }
 
     // Tablet: a technique with a comment (Shinki Toho) shows the way to it beside the player.
@@ -4507,13 +4548,13 @@ TestCase {
         tryVerify(() => !page.split)
         window.width = 1280
         window.height = 800
-        tryVerify(() => pane.item && pane.item.duration > 0, 10000)
+        tryVerify(() => pane.item && pane.item.duration > 0, mediaLoads)
         wait(500)
         verify(!pane.item.playing, "no sound under the comment page")
-        window.pageStack.pop()
+        popPage()
         window.width = 420
         window.height = 800
-        window.pageStack.pop()
+        popPage()
         Programme.discipline = "aikido"
     }
 
@@ -4543,7 +4584,7 @@ TestCase {
         verify(!findChild(pane.item, "stepList").visible)
         window.width = 420
         window.height = 800
-        window.pageStack.pop()
+        popPage()
         Programme.discipline = "aikido"
     }
 
@@ -4642,7 +4683,7 @@ TestCase {
         wait(300)
         verify(list.atYEnd, "End at the first press (" + list.contentY + ")")
         PracticeGrade.setGrade("aikido", "k5")
-        window.pageStack.pop()
+        popPage()
     }
 
     // Tablet: keys in the small player stay there (End does not scroll the list), and on a small
@@ -4659,7 +4700,7 @@ TestCase {
         const page = push("ProgrammePage")
         tryVerify(() => page.split, 2000, "a small tablet splits too")
         const pane = findChild(page, "playerPane")
-        tryVerify(() => pane.item && pane.item.duration > 0, 10000)
+        tryVerify(() => pane.item && pane.item.duration > 0, mediaLoads)
         const list = findChild(page, "programmeList")
         pane.item.forceActiveFocus()
         const y = list.contentY
@@ -4697,7 +4738,7 @@ TestCase {
                          || Math.abs(controls2.contentHeight - controls2.height) < 1, 2000,
                   "picture " + stage.width + "×" + stage.height + ", controls " + controls2.contentHeight + " of " + controls2.height)
         verify(controls2.contentHeight <= controls2.height + 1, "the controls fit")
-        window.pageStack.pop()
+        popPage()
     }
 
     function findChildren(item, name) {
@@ -4755,7 +4796,7 @@ TestCase {
             const camera = push("CameraPage")
             tryVerify(() => findChild(camera, "cameraError").visible, 3000)
             verify(!findChild(camera, "shutter").enabled)
-            window.pageStack.pop()
+            popPage()
         }
 
         // A file that is gone (a cloud backup leaves the media out) says so instead of an empty picture.
@@ -4768,14 +4809,14 @@ TestCase {
         const all = push("AllNotesPage")
         all.filter = ""
         tryVerify(() => findChildren(all, "notePhoto").some(i => i.visible))
-        window.pageStack.pop()
+        popPage()
 
         // Deleted, the photo's file goes.
         const photoNote = Practice.notes(entry.id).find(n => n.media === name)
         verify(Practice.deleteNote(photoNote.uid))
         const voiceNote = Practice.notes(entry.id).find(n => n.media === "test-stimme.m4a")
         verify(Practice.changeNote(voiceNote.uid, ""), "a voice note needs no text")
-        window.pageStack.pop()
+        popPage()
 
         // The sheet's "last note" names a voice note without text as such.
         Programme.discipline = "aikido"         // earlier cases leave another one chosen
@@ -4789,7 +4830,7 @@ TestCase {
         verify(last.text.endsWith(": " + qsTr("Voice note")), last.text)
         sheet.close()
         tryVerify(() => !sheet.opened)
-        window.pageStack.pop()
+        popPage()
 
         // A notebook entry with a photo.
         const course = Courses.create("Fotolehrgang", "2026-05-01", "", "", "")
@@ -4805,7 +4846,7 @@ TestCase {
         verify(findChild(book, "exportedTo").text.indexOf(uiShotsDir) > 0, "says where: " + findChild(book, "exportedTo").text)
         verify(findChild(book, "exportedTo").text.indexOf("Fotolehrgang") > 0, findChild(book, "exportedTo").text)
         shot("14d-course-exported")
-        window.pageStack.pop()
+        popPage()
         verify(Courses.remove(course))
     }
 
@@ -4903,7 +4944,7 @@ TestCase {
         window.requestActivate()
         tryVerify(() => window.active)
 
-        window.pageStack.pop()
+        popPage()
         verify(Courses.remove(course))
         window.width = w
         wait(100)
@@ -4955,7 +4996,7 @@ TestCase {
         findChildren(picker, "linkedTechnique")[0].clicked()
         tryVerify(() => picker.linked.length === 0)
         verify(Courses.linkTechnique(entry.uid, shihoId))
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => findChildren(book, "entryTechnique").length === 1)
         verify(findChildren(book, "entryTechnique")[0].text.indexOf("Shiho-nage") > 0)
         verify(findChildren(book, "entryTechnique")[0].Accessible.name.indexOf("Shiho-nage") > 0)
@@ -4983,7 +5024,7 @@ TestCase {
         const y = target.mapToItem(view.contentItem, 0, 0).y
         verify(view.contentY > 0, "scrolled down")
         verify(y >= view.contentY && y + target.height <= view.contentY + view.height, "in view")
-        window.pageStack.pop()
+        popPage()
 
         // Deleted entry, then course: gone from the notes.
         tryVerify(() => window.pageStack.currentItem === notes)
@@ -4998,7 +5039,7 @@ TestCase {
         verify(Courses.remove(course))
         tryCompare(page.courseNotes, "length", 0)
         verify(!findChild(page, "fromCourses").visible)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Deleting a notebook opened twice (through a technique's notes): no page of it stays behind.
@@ -5013,7 +5054,7 @@ TestCase {
         const first = push("CoursePage", { uid: course })
         const notes = push("NotesPage", { entry: technique })
         const second = push("CoursePage", { uid: course, entryUid: entry.uid })
-        wait(500)       // Kirigami slides the page in
+        slidIn()
         compare(window.pageStack.depth, depth + 3)
         const remove = findChild(second, "removeCourse")
         remove.open()
@@ -5022,7 +5063,7 @@ TestCase {
         tryCompare(window.pageStack, "depth", depth + 1)
         verify(window.pageStack.currentItem === notes)
         compare(notes.courseNotes.length, 0)
-        window.pageStack.pop()
+        popPage()
         compare(window.pageStack.depth, depth)
         verify(window.pageStack.currentItem.uid === undefined, "no dead page")
     }
@@ -5050,7 +5091,7 @@ TestCase {
         compare(picker.foundShown.length, 0)
         verify(!findChild(picker, "pickerNotFound").visible, "it stands under Linked")
         field.text = ""
-        window.pageStack.pop()
+        popPage()
 
         // The technique's sheet counts the linked entries with its notes.
         const component = Qt.createComponent("Mitori", "TechniqueSheet")
@@ -5089,14 +5130,14 @@ TestCase {
         verify(info.text.indexOf("Erste Überlieferung") >= 0, info.text)
         verify(info.text.indexOf("2 Jahre") >= 0, info.text)
         verify(!findChild(page, "kanjiProposal").visible)
-        window.pageStack.pop()
+        popPage()
         Programme.discipline = "daitoryu"
         const daito = push("ProgrammePage")
         verify(findChild(daito, "kanjiProposal").visible)
         verify(!findChild(daito, "gradeInfo").visible)
         // The lens in the head, as the clickdummy has it.
         verify(daito.actions.some(a => a.icon.name === "search"))
-        window.pageStack.pop()
+        popPage()
         Programme.discipline = "aikido"
     }
 
@@ -5148,25 +5189,25 @@ TestCase {
         compare(tiles.map(t => t.hint), hints)
         const today = push("TodayPage")
         compare(today.grade, "k4")
-        window.pageStack.pop()
+        popPage()
         const exam = push("ExamPage")
         compare(exam.grade, "k4")
-        window.pageStack.pop()
+        popPage()
         compare(page.grade, "k2", "what it browses stays")
-        window.pageStack.pop()
+        popPage()
         tryCompare(window.pageStack, "depth", 1)
-        wait(500)       // Kirigami slides the last page out
+        slidIn()
 
         const again = push("ProgrammePage")
         compare(again.grade, "k4")
-        window.pageStack.pop()
+        popPage()
 
         const map = push("TechniqueMapPage")
         compare(map.grade, "k4")
         map.grade = "k2"
         compare(PracticeGrade.grade("aikido"), "k4")
         compare(tiles.map(t => t.hint), hints)
-        window.pageStack.pop()
+        popPage()
         PracticeGrade.setGrade("aikido", "k5")
     }
 
@@ -5188,17 +5229,21 @@ TestCase {
         compare(today.grade, "k5")
         compare(hint.text, qsTranslate("TodayPage", "up to %1 (first grade, nothing for this discipline in My grades yet)").arg("5. Kyu"))
         const dueIds = () => today.due.map(r => r.id).join()
-        const dueUpToK5 = dueIds()
+        const dueAt = grade => Practice.due(Programme.practiceEntries(discipline, grade)).map(r => r.id).join()
 
         verify(Courses.addGrade(discipline, "k5", "2025-05-01", ""))
         tryCompare(today, "grade", "k4")
         verify(findChild(today, "practice_k4").checked)
-        tryVerify(() => dueIds() !== dueUpToK5, 1000, "what is due follows the grade")
+        compare(dueIds(), dueAt("k4"), "what is due follows the grade")
         compare(hint.text, qsTranslate("TodayPage", "up to %1 (from My grades)").arg("4. Kyu"))
         verify(examTile.hint.indexOf("4. Kyu") >= 0, examTile.hint)
 
-        // By hand on Today, further than suggested.
+        // By hand on Today, further than suggested. 2. Kyu: the training cases, with videos, have
+        // used up today's new ones of 5. to 3. Kyu; what is due there may be the same (nothing).
+        const dueUpToK4 = dueIds()
         clickUntil(findChild(today, "practice_k2"), () => today.grade === "k2")
+        compare(dueIds(), dueAt("k2"))
+        verify(dueIds() !== dueUpToK4, "what is due changes with the grade")
         verify(today.manualGrade)
         verify(findChild(today, "practice_k2").checked)
         verify(!findChild(today, "practice_k4").checked)
@@ -5209,9 +5254,9 @@ TestCase {
         verify(Courses.addGrade(discipline, "k4", "2026-05-01", ""))
         wait(50)
         compare(today.grade, "k2")
-        window.pageStack.pop()
+        popPage()
         tryCompare(window.pageStack, "depth", 1)
-        wait(500)       // Kirigami slides the last page out
+        slidIn()
 
         // By hand in the exam: Today and the start menu follow.
         const exam = push("ExamPage")
@@ -5224,7 +5269,7 @@ TestCase {
         verify(Courses.addGrade(discipline, "k3", "2026-06-01", ""))
         tryCompare(exam, "grade", "k2")
         verify(!PracticeGrade.manual(discipline))
-        window.pageStack.pop()
+        popPage()
 
         removeAll()
         PracticeGrade.setGrade(discipline, "k5")
@@ -5242,7 +5287,7 @@ TestCase {
         PracticeGrade.setGrade("shinkitoho", "chuden")
         const page = push("ProgrammePage")
         const settled = () => Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1
-        tryVerify(settled, 3000, "the page has slid in")
+        slidIn()
         const chips = findChild(page, "gradeChips")
         const card = findChild(page, "gradeCard")
         verify(!card.visible)
@@ -5306,13 +5351,13 @@ TestCase {
         chooseGrade(page, "chuden")
         verify(page.split)
         verify(findChild(page, "playerPane").active)
-        window.pageStack.pop()
+        popPage()
 
         // Opened anew: the grade the other pages use, not the card.
         const again = push("ProgrammePage")
         compare(again.grade, "chuden")
         verify(!findChild(again, "gradeCard").visible)
-        window.pageStack.pop()
+        popPage()
         window.width = width
         window.height = height
         PracticeGrade.setGrade("shinkitoho", "shoden")
@@ -5337,21 +5382,33 @@ TestCase {
         wait(800)
         compare(programmeList.contentY, programmeList.originY, "the list opens at its top")
         // Another discipline, another head (the grades' meaning): still at its top.
+        const topBefore = programmeList.originY
         Programme.discipline = "shinkitoho"
         page.grade = PracticeGrade.grade("shinkitoho")
         tryVerify(() => findChild(programmeList.headerItem, "gradeInfo").visible)
-        wait(300)
-        compare(programmeList.contentY, programmeList.originY, "the list stays at its top")
+        // The head grows in steps, the list follows each a moment later (-265, then -337): it has
+        // to be grown, and at the top for a while. One second is many steps' worth of polish.
+        const kSteadyMs = 1000
+        let top = programmeList.originY
+        let since = Date.now()
+        tryVerify(() => {
+            if (programmeList.originY !== top || programmeList.contentY !== top || programmeList.moving) {
+                top = programmeList.originY
+                since = Date.now()
+                return false
+            }
+            return top < topBefore && Date.now() - since >= kSteadyMs
+        }, 15000, "the list stays at its top")
         Programme.discipline = "aikido"
         page.grade = "k5"
         wait(100)
         shot("8p-chips")
-        window.pageStack.pop()
+        popPage()
         const videos = push("VideosPage")
         verify(findChild(videos, "storageBar").visible)
         compare(findChild(videos, "storageLegend").model.length, 3)
         shot("8p-storage")
-        window.pageStack.pop()
+        popPage()
         window.width = width
         window.height = height
         wait(100)
@@ -5373,7 +5430,7 @@ TestCase {
         list.positionViewAtIndex(page.rows.length - 1, ListView.Contain)
         wait(200)
         verify(list.itemAtIndex(page.rows.length - 1) !== null, "the last row, at " + list.contentY)
-        window.pageStack.pop()
+        popPage()
     }
 
     // On a phone the row of the last technique lights up on the way back, then no longer.
@@ -5392,7 +5449,7 @@ TestCase {
         page.lastId = last.id
         page.cameFromPlayer = true  // as play() does: this test needs no video
         tryVerify(() => window.pageStack.currentItem === player)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === page)
         compare(page.returnedId, last.id)
         const list = findChild(page, "programmeList")
@@ -5404,12 +5461,12 @@ TestCase {
         const top = list.contentY
         const notes = push("NotesPage", { entry: rows[0] })
         tryVerify(() => window.pageStack.currentItem === notes)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === page)
         compare(page.returnedId, "")
         wait(200)
         compare(list.contentY, top)
-        window.pageStack.pop()
+        popPage()
         window.width = width
         window.height = height
         wait(100)
@@ -5589,13 +5646,13 @@ TestCase {
         // A wish to scan from the page beside the list reaches the window's stack.
         CodeScanner.ready()
         tryVerify(() => window.pageStack.depth === depth + 1, 3000, "the scan page")
-        window.pageStack.pop()
+        popPage()
         tryCompare(window.pageStack, "depth", depth)
 
         // What the page offers is in the head too.
         verify(host.actions.length >= pane.item.actions.length && pane.item.actions.length > 0, "the page's actions")
         shot("8s-settings-" + data.tag)
-        window.pageStack.pop()
+        popPage()
     }
     function test_8s_settings_only_list_data() {
         return [ { tag: "800x1280", width: 800, height: 1280 }, { tag: "360", width: 360, height: 800 }, { tag: "320", width: 320, height: 800 } ]
@@ -5613,8 +5670,8 @@ TestCase {
         mouseClick(row)
         tryCompare(window.pageStack, "depth", depth + 1)
         tryCompare(window.pageStack.currentItem, "title", "Backup and sync")
-        window.pageStack.pop()
-        window.pageStack.pop()
+        popPage()
+        popPage()
     }
 
     // Courses: a notebook beside the list. A date or a planned exam chooses it; what is typed in it
@@ -5674,7 +5731,7 @@ TestCase {
             tryVerify(() => !pane.item, 2000, "no notebook, nothing to show")
             verify(findChild(host, "paneEmpty").visible)
         }
-        window.pageStack.pop()
+        popPage()
     }
     // A device turns in one geometry change: both sides at once.
     function turn(width, height) {
@@ -5737,7 +5794,7 @@ TestCase {
         findChild(pane.item, "courseCompose").text = ""
         window.pageStack.goBack()
         tryVerify(() => !host.showsPage)
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
     }
 
@@ -5764,7 +5821,7 @@ TestCase {
         window.contentItem.forceActiveFocus()
         window.height = 800
         wait(200)
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
     }
 
@@ -5788,7 +5845,7 @@ TestCase {
         wait(200)
         const name = Media.importPhoto("file://" + testMediaDir + "/foto.png")
         camera.done(name)
-        window.pageStack.pop()
+        popPage()
         tryCompare(window.pageStack, "depth", depth)
         compare(pane.item, book)
         tryVerify(() => Courses.entries(uid).some(e => e.media === name && e.text === "Griff"), 2000, "the photo reached the entry")
@@ -5797,7 +5854,7 @@ TestCase {
 
         turn(1280, 800)
         tryVerify(() => host.wide)
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
     }
 
@@ -5816,7 +5873,7 @@ TestCase {
         turn(800, 1280)
         tryVerify(() => !host.wide)
         wait(200)
-        window.pageStack.pop()
+        popPage()
         tryCompare(window.pageStack, "depth", depth)
         verify(host.showsPage, "back on the notebook")
         verify(book.visible)
@@ -5824,7 +5881,7 @@ TestCase {
         tryVerify(() => !host.showsPage)
         turn(1280, 800)
         tryVerify(() => host.wide)
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
     }
 
@@ -5889,7 +5946,7 @@ TestCase {
         host.first = null
         turn(1280, 800)
         tryVerify(() => host.wide)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Left in mid-recording, a page leaves no file behind (no microphone here: a file stands in).
@@ -5905,7 +5962,7 @@ TestCase {
         findChild(host, "listPane").item.open(other)
         tryVerify(() => pane.item && pane.item.uid === other)
         tryVerify(() => !Media.exists(name), 3000, "the unfinished recording goes")
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
         Courses.remove(other)
     }
@@ -5921,7 +5978,7 @@ TestCase {
         const late = Courses.create("Spät", "2099-01-05", "2099-01-06", "", "")
         wait(300)
         compare(pane.item, book, "the same page")
-        window.pageStack.pop()
+        popPage()
         for (const made of [uid, early, late]) {
             Courses.remove(made)
         }
@@ -5950,7 +6007,7 @@ TestCase {
         window.contentItem.forceActiveFocus()
         window.height = 800
         wait(200)
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
     }
 
@@ -5972,12 +6029,12 @@ TestCase {
         compare(pane.item, book, "the same page")
         compare(Courses.entries(uid).length, 0, "no entry")
         compare(findChild(book, "courseCompose").text, "Halber Sa")
-        window.pageStack.pop()
+        popPage()
         window.contentItem.forceActiveFocus()
         window.height = 800
         wait(200)
         findChild(book, "courseCompose").text = ""
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
     }
 
@@ -6007,7 +6064,7 @@ TestCase {
         window.contentItem.forceActiveFocus()
         window.height = 800
         wait(200)
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
     }
 
@@ -6022,7 +6079,7 @@ TestCase {
         tryVerify(() => !pane.item || pane.item.uid !== uid)
         wait(100)
         compare(Courses.errorString, "")
-        window.pageStack.pop()
+        popPage()
     }
 
     // Fields typed beside the list come through a turn: the page stays in sight, the field keeps
@@ -6077,7 +6134,7 @@ TestCase {
         compare(server.text, "https://halb.example.org/")
         Sync.enabled = false
         Videos.folder = folder
-        window.pageStack.pop()
+        popPage()
     }
     function test_8s_courses_only_list_data() {
         return [ { tag: "360", width: 360, height: 800 }, { tag: "320", width: 320, height: 800 } ]
@@ -6090,9 +6147,9 @@ TestCase {
         compare(overflowing(host, data.width), [])
         findChild(host, "listPane").item.open(uid)
         tryVerify(() => window.pageStack.currentItem !== host && window.pageStack.currentItem.uid === uid)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === host)
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
     }
     // New course on a tablet: it stands beside the list afterwards.
@@ -6109,7 +6166,7 @@ TestCase {
         const pane = findChild(host, "pagePane")
         tryVerify(() => pane.item && pane.item.course.title === "Neu am Tablet")
         const uid = pane.item.uid
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
     }
 
@@ -6185,7 +6242,7 @@ TestCase {
                 sheet.close()
                 tryVerify(() => !sheet.visible)
             }
-            window.pageStack.pop()
+            popPage()
             wait(50)
         }
         Programme.discipline = "aikido"
@@ -6211,7 +6268,7 @@ TestCase {
         compare(player.playlist[player.index].id, rows[1].id)
         window.back()
         tryVerify(() => window.pageStack.currentItem === page)
-        window.pageStack.pop()
+        popPage()
     }
 
     function test_8m_today_has_its_calendar() {
@@ -6220,7 +6277,7 @@ TestCase {
         verify(heat.visible)
         compare(heat.weeks, 12)
         verify(findChild(page, "todayLegend").visible, "no diagram without a legend")
-        window.pageStack.pop()
+        popPage()
     }
 
     function test_8l_glossary_letters_jump() {
@@ -6238,7 +6295,7 @@ TestCase {
         findChild(page, "searchField").text = "ko"
         tryCompare(page, "searching", true)
         verify(!bar.visible, "words found have no letters")
-        window.pageStack.pop()
+        popPage()
     }
 
     function test_8k_sheet_says_where_the_dvd_is() {
@@ -6253,7 +6310,7 @@ TestCase {
         }
         sheet.close()
         tryVerify(() => !sheet.visible)
-        window.pageStack.pop()
+        popPage()
     }
 
     function test_8q_search_row_without_attack() {
@@ -6264,7 +6321,25 @@ TestCase {
         for (const row of findChildren(page, "techniqueResult")) {
             verify(row.subtitle.indexOf("undefined") < 0, row.subtitle)
         }
-        window.pageStack.pop()
+        popPage()
+    }
+
+    // The main thread held up during a slide, then a pop (a busy machine): see popPage. A guard of
+    // that helper only: popPage waits, so this cannot crash while it does. Without the wait it
+    // crashed in about 1 of 40 rounds, so 5 rounds will rarely catch it either.
+    function test_8q_pop_after_a_stall() {
+        const kStallMs = 450
+        for (let round = 0; round < 5; ++round) {
+            const page = push("SearchPage")
+            findChild(page, "searchField").forceActiveFocus()
+            const started = Date.now()
+            while (Date.now() - started < kStallMs) {
+                // Nothing: no event, no animation step.
+            }
+            popPage()
+            tryCompare(window.pageStack, "depth", 1)
+        }
+        verify(window.pageStack.currentItem !== null)
     }
 
     // 360 px: the sheet's buttons wrap, nothing runs off the screen.
@@ -6283,7 +6358,7 @@ TestCase {
         verify(sheet.width <= sheet.parent.width + 0.5, "the sheet is " + sheet.width)
         sheet.close()
         tryVerify(() => !sheet.visible)
-        window.pageStack.pop()
+        popPage()
         Programme.discipline = "aikido"
         window.width = width
         wait(100)
@@ -6312,8 +6387,8 @@ TestCase {
         tryVerify(() => player.playing, 5000)
         findChild(player, "openNotes").clicked()
         tryVerify(() => !player.playing, 2000)
-        window.pageStack.pop()
-        window.pageStack.pop()
+        popPage()
+        popPage()
     }
 
     // A window turned for full screen is no longer wide: the pane comes back only afterwards, and
@@ -6353,7 +6428,7 @@ TestCase {
         page.bigResume = { position: 3000, rate: 0.5, looping: false }
         page.lastId = rows[1].id
         verify(page.bigResume === null)
-        window.pageStack.pop()
+        popPage()
         window.width = width
         window.height = height
         wait(100)
@@ -6391,13 +6466,17 @@ TestCase {
         // Back ends it too (the Android key), not only the button.
         window.pageStack.goBack()
         tryVerify(() => window.pageStack.currentItem === page)
-        wait(100)
-        // The pane may have been made anew while the window was full screen.
+        // The pane may have been made anew while the window was full screen: its place comes when
+        // its clip has loaded.
+        tryVerify(() => page.player && Math.abs(page.player.position - reached) < 1500, mediaLoads, "the place of " + reached)
         const after = page.player
         compare(after.rate, 0.25)
         compare(after.looping, false)
+
+        // It stands there, as the big one did; it did not just pass the place.
+        staysStanding(after, "the small player stands")
         verify(Math.abs(after.position - reached) < 1500, after.position + " against " + reached)
-        window.pageStack.pop()
+        popPage()
         window.width = width
         wait(200)
     }
@@ -6436,7 +6515,7 @@ TestCase {
         points.forEach((p, i) => page.rate(i, 3))
         verify(!open.visible)
         tryVerify(() => findChild(page, "applyRound").enabled)
-        window.pageStack.pop()
+        popPage()
     }
 
     // Not a system folder (Linux lists /usr/share last, where nobody can put videos).
@@ -6451,7 +6530,7 @@ TestCase {
         findChild(page, "searchField").text = "ko"
         tryCompare(page, "searching", true)
         verify(!hint.visible, "not above every result")
-        window.pageStack.pop()
+        popPage()
         verify(shown !== undefined)
     }
 
@@ -6460,7 +6539,7 @@ TestCase {
         for (const text of findChildren(page, "readyText")) {
             verify(!text.visible, "the figure stands beside the grade")
         }
-        window.pageStack.pop()
+        popPage()
     }
 
     // A technique starts at 1×: next, previous, a jump, a new page. Staying in it keeps the tempo.
@@ -6542,7 +6621,7 @@ TestCase {
             tryVerify(() => !page.split)
             window.width = 1280
             window.height = 800
-            tryVerify(() => page.split && page.player)
+            tryVerify(() => page.split && page.player, paneLoads)
         }
         const old = page.player
         const chosen = page.player.current.id
@@ -6567,11 +6646,11 @@ TestCase {
         page.play(page.rows.find(r => r.id === page.lastId))
         tryVerify(() => window.pageStack.currentItem !== page)
         compare(window.pageStack.currentItem.rate, 1)
-        window.pageStack.pop()
+        popPage()
         tryVerify(() => window.pageStack.currentItem === page)
         window.width = 1280
         window.height = 800
-        tryVerify(() => page.split && page.player)
+        tryVerify(() => page.split && page.player, paneLoads)
         compare(page.player.rate, 1, "after a new player page")
     }
 
@@ -6653,7 +6732,7 @@ TestCase {
 
     // Beside the list: the entry begun on the right, by the Back key and by a plain pop.
     function test_8s_begun_entry_on_leaving_data() {
-        return [{ tag: "Back key", back: () => window.pageStack.goBack() }, { tag: "pop", back: () => window.pageStack.pop() }]
+        return [{ tag: "Back key", back: () => window.pageStack.goBack() }, { tag: "pop", back: () => popPage() }]
     }
     function test_8s_begun_entry_on_leaving(data) {
         const uid = testCourse("Rechts " + data.tag)
@@ -6686,7 +6765,7 @@ TestCase {
         verify(at.y >= 0 && at.y + field.height <= view.height + 1, "field in view (" + at.y + ", " + view.height + ")")
         window.width = 420
         window.height = 800
-        window.pageStack.pop()
+        popPage()
     }
 
     // The last chapter ends with the file; the loop must still start over at the chapter.
@@ -6698,6 +6777,6 @@ TestCase {
         tryVerify(() => page.position > page.to - 2500, 5000)
         tryVerify(() => page.position < page.from + 3000, 8000)
         verify(page.playing)
-        window.pageStack.pop()
+        popPage()
     }
 }

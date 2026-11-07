@@ -78,6 +78,22 @@ public:
     // The windows of the run (tst_look: a change of style leaves one for the app).
     Q_INVOKABLE int windowCount() const { return int(QGuiApplication::allWindows().size()); }
 
+    // The run's zone, hours west of UTC, by the UTC hour it starts at: morning there, so that no
+    // run sees midnight (the calendar is written at its start, ratings count per day).
+    Q_INVOKABLE int hoursWest(int utcHour) const
+    {
+        constexpr int kNear = 1, kFar = 12;
+        return utcHour >= kNear && utcHour <= kFar ? kNear : kFar;
+    }
+
+    // The process's CPU time, every thread: what the app did, whatever else the machine does.
+    Q_INVOKABLE qint64 cpuMs() const
+    {
+        timespec t{};
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t);
+        return qint64(t.tv_sec) * 1000 + t.tv_nsec / 1000000;
+    }
+
     // Objects that must go with a change of style: how many still live.
     Q_INVOKABLE void watch(QObject *object) { m_watched.append(object); }
     Q_INVOKABLE int watchedAlive() const
@@ -103,7 +119,7 @@ public slots:
         QCoreApplication::setOrganizationDomain(QStringLiteral("shrippen.github.io"));   // as main.cpp (Settings)
         // West of UTC: a QDate reaches QML as midnight UTC, the day before here (catches "today"
         // compared that way; NotesPage once did).
-        qputenv("TZ", "America/Los_Angeles");
+        qputenv("TZ", "TST+" + QByteArray::number(hoursWest(QDateTime::currentDateTimeUtc().time().hour())));
         tzset();
         // Data and settings in the build directory, so that runs in different builds (worktrees,
         // reviews) do not share ~/.qttest and delete each other's database.

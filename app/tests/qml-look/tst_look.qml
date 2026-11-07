@@ -40,13 +40,25 @@ TestCase {
         failOnWarning(/is not a type/)
     }
 
+    // Kirigami 6.31 crashes on a pop in the last moments of a slide: ColumnView::setCurrentIndex
+    // hands the focus to the page below, a Behavior on that makes Qt run the slide's end there and
+    // then, which takes the current item away (SIGSEGV in QQuickItem::size). A tap does not get
+    // here, a page does not take taps while it slides; a test does.
+    function popPage() {
+        tryVerify(() => !window.pageStack.columnView.moving, 5000, "the slide ends")
+        // A page may have gone during the wait (TrainingEndPage): the start menu stays.
+        if (window.pageStack.depth > 1) {
+            window.pageStack.pop()
+        }
+    }
+
     function cleanup() {
         Appearance.setLanguage(Appearance.Language.English)
         toStyle(startStyle)
         window.width = 420
         window.height = 800
         while (window.pageStack.depth > 1)
-            window.pageStack.pop()
+            popPage()
     }
 
     function allChildren(item) {
@@ -136,11 +148,13 @@ TestCase {
         window.x = 321
         window.y = 123
 
+        // CPU time: a busy machine took 13296 ms by the clock.
         const started = Date.now()
+        const startedCpu = uiCatalog.cpuMs()
         toStyle(otherStyle)
-        const took = Date.now() - started
-        console.log("change of style:", took, "ms")
-        verify(took <= switchBudget, took + " ms")
+        const took = uiCatalog.cpuMs() - startedCpu
+        console.log("change of style:", Date.now() - started, "ms,", took, "ms CPU")
+        verify(took <= switchBudget, took + " ms CPU")
         compare(uiCatalog.watchedAlive(), 0, "old window and page gone")
         compare(uiCatalog.windowCount(), windows)
         compare(Appearance.running, otherStyle)
@@ -267,7 +281,7 @@ TestCase {
         tryVerify(slidIn(draft), 5000, "slid in")
         findChild(draft, "noteField").text = "Entwurf beim Zurück"
 
-        window.pageStack.pop()
+        popPage()
         window.height = data.height
         tryVerify(() => Practice.notes(id).length === count + 1, 5000, "the draft is saved")
         window.height = 800
@@ -277,7 +291,7 @@ TestCase {
         let gone = false
         grades.Component.destruction.connect(() => { gone = true })
 
-        window.pageStack.pop()
+        popPage()
         window.height = data.height
         tryVerify(() => gone, 5000, "GradesPage destroyed")
     }
@@ -416,7 +430,7 @@ TestCase {
         window.back()
         tryVerify(() => !host.showsPage)
 
-        window.pageStack.pop()
+        popPage()
         Courses.remove(uid)
     }
 
