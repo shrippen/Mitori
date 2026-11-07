@@ -7,9 +7,9 @@ import Mitori
 // Settings (clickdummy "Einstellungen"): the way to the videos, the backup and sync, and the
 // appearance, each a page of its own.
 //
-//   Videos              Bundles, updates, code
-//   Backup and sync     File, Nextcloud, other devices
-//   Appearance          Style, language, about Mitori
+//   映  Videos              Bundles, updates, code
+//   保  Backup and sync     File, Nextcloud, other devices
+//   色  Appearance          Style, language, about Mitori
 Kirigami.ScrollablePage {
     id: page
 
@@ -40,6 +40,7 @@ Kirigami.ScrollablePage {
         LookListRow {
             objectName: "videosButton"
             Layout.fillWidth: true
+            glyph: "映"
             text: qsTr("Videos")
             subtitle: qsTr("Bundles, updates, code")
             selected: page.shown("VideosPage.qml")
@@ -48,6 +49,7 @@ Kirigami.ScrollablePage {
         LookListRow {
             objectName: "backupButton"
             Layout.fillWidth: true
+            glyph: "保"
             text: qsTr("Backup and sync")
             subtitle: qsTr("File, Nextcloud, other devices")
             selected: page.shown("BackupPage.qml")
@@ -56,6 +58,7 @@ Kirigami.ScrollablePage {
         LookListRow {
             objectName: "appearanceButton"
             Layout.fillWidth: true
+            glyph: "色"
             text: qsTr("Appearance")
             subtitle: qsTr("Style, language, about Mitori")
             selected: page.shown("AppearancePage.qml")

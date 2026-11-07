@@ -258,12 +258,13 @@ qt_add_qml_module(mitori_app
 # Texts: English in the code, German in i18n/mitori_de.ts (update: cmake --build <dir> --target
 # update_translations). The .qm files go into the resources under :/i18n. mitori_en.ts holds only
 # the English plural forms; it also makes English win where it comes before German in the
-# user's languages.
+# user's languages. The catalogues hold no source locations (-locations none): line numbers
+# would change with every edit and make parallel pull requests conflict there.
 qt_add_translations(mitori_app
     TS_FILES i18n/mitori_de.ts
     PLURALS_TS_FILE i18n/mitori_en.ts
     RESOURCE_PREFIX /i18n
-    LUPDATE_OPTIONS -no-obsolete
+    LUPDATE_OPTIONS -no-obsolete -locations none
 )
 
 qt_add_resources(mitori_app "daten"
@@ -601,8 +602,8 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME levels COMMAND tst_levels)
 
     qt_add_executable(tst_appearance tests/tst_appearance.cpp services/appearance.cpp services/appearance.h
-        platform/systembars.cpp platform/systembars.h)
-    target_include_directories(tst_appearance PRIVATE services platform)
+        platform/systembars.cpp platform/systembars.h catalog/catalog.cpp catalog/catalog.h)
+    target_include_directories(tst_appearance PRIVATE services platform catalog)
     target_link_libraries(tst_appearance PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Test)
     set_target_properties(tst_appearance PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     if(MITORI_SHINKI)

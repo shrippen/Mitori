@@ -814,6 +814,90 @@ private slots:
         QCOMPARE(e.value(QStringLiteral("grade")).toString(), QStringLiteral("chuden"));
         QVERIFY(programme.entry(QStringLiteral("nothing")).isEmpty());
     }
+
+    // English: the rows read the data's English (x_en), the ids stay; also entry(), built once
+    // per language.
+    void englishRows()
+    {
+        const QString id = QStringLiteral("shinkitoho/odachi/12");
+        QCOMPARE(programme.entry(id).value(QStringLiteral("gradeName")).toString(), QStringLiteral("Chûden"));
+        const QVariantList german = programme.entries(QStringLiteral("aikido"), QStringLiteral("d1"));
+
+        Catalog::setLanguage(Catalog::Language::English);
+        const QVariantList english = programme.entries(QStringLiteral("aikido"), QStringLiteral("d1"));
+        const QVariantMap form = programme.entry(id);
+        const QVariantMap kamae = programme.entry(QStringLiteral("shinkitoho/kamae"));
+        Catalog::setLanguage(Catalog::Language::German);
+
+        QCOMPARE(ids(english), ids(german));
+        QCOMPARE(english.size(), german.size());
+        const auto titles = [](const QVariantList &rows) {
+            QStringList result;
+            for (const QVariant &r : rows) {
+                result << r.toMap().value(QStringLiteral("title")).toString();
+            }
+            return result;
+        };
+        QVERIFY(titles(german).contains(QStringLiteral("Theorie")));
+        QVERIFY(titles(english).contains(QStringLiteral("Theory")));
+        QVERIFY(titles(english).contains(QStringLiteral("oral examination")));
+        const auto firstEntry = std::find_if(english.cbegin(), english.cend(), [](const QVariant &r) {
+            return r.toMap().value(QStringLiteral("kind")) == QLatin1String("entry");
+        });
+        QCOMPARE(firstEntry->toMap().value(QStringLiteral("gradeName")).toString(), QStringLiteral("1st Dan"));
+
+        QCOMPARE(form.value(QStringLiteral("gradeName")).toString(), QStringLiteral("Chûden"));   // Japanese in both
+        QVERIFY(!form.value(QStringLiteral("comment")).toMap().value(QStringLiteral("text")).toString().isEmpty());
+        QVERIFY(form.value(QStringLiteral("comment")).toMap().value(QStringLiteral("text"))
+                != programme.entry(id).value(QStringLiteral("comment")).toMap().value(QStringLiteral("text")));
+        const QVariantList steps = kamae.value(QStringLiteral("steps")).toList();
+        QCOMPARE(steps.at(15).toMap().value(QStringLiteral("title")).toString(), QStringLiteral("Tsuki (right foot forward)"));
+    }
+
+    // The search looks in what the rows show: English with English on, German with German; the
+    // Japanese names in both.
+    void searchInLanguage()
+    {
+        const QStringList german = ids(programme.search(QStringLiteral("2 arten"), 1000));
+        QVERIFY(!german.isEmpty());
+        QVERIFY(programme.search(QStringLiteral("2 variants")).isEmpty());
+
+        Catalog::setLanguage(Catalog::Language::English);
+        const QStringList english = ids(programme.search(QStringLiteral("2 variants"), 1000));
+        const bool noGerman = programme.search(QStringLiteral("2 arten")).isEmpty();
+        const bool japanese = !programme.search(QStringLiteral("shiho nage")).isEmpty();
+        const bool group = !programme.search(QStringLiteral("other techniques")).isEmpty();
+        Catalog::setLanguage(Catalog::Language::German);
+
+        QCOMPARE(english, german);
+        QVERIFY(noGerman);
+        QVERIFY(japanese);
+        QVERIFY(group);
+    }
+
+    // A change of the app's catalog (LanguageChange) to another data language: one signal, a new
+    // revision; a change that keeps the data's language (Qt's catalog alone) none.
+    void textsFollowLanguage()
+    {
+        Programme own(loaded());
+        QSignalSpy spy(&own, &Programme::textsChanged);
+        const int revision = own.revision();
+        const auto languageChange = [] {
+            QEvent event(QEvent::LanguageChange);
+            QCoreApplication::sendEvent(QCoreApplication::instance(), &event);
+        };
+
+        languageChange();
+        QCOMPARE(spy.count(), 0);
+        Catalog::setLanguage(Catalog::Language::English);
+        languageChange();
+        languageChange();
+        QCOMPARE(spy.count(), 1);
+        QCOMPARE(own.revision(), revision + 1);
+        Catalog::setLanguage(Catalog::Language::German);
+        languageChange();
+        QCOMPARE(spy.count(), 2);
+    }
 };
 
 int main(int argc, char *argv[])

@@ -87,6 +87,38 @@ private slots:
         QVERIFY(glossary.search(QStringLiteral("xyzzy")).isEmpty());
     }
 
+    // English: the meaning is the lexicon's English (German where it has none), words that carry
+    // German read English, the source too; the search finds what is shown, after a LanguageChange
+    // also in a glossary built before.
+    void english()
+    {
+        Glossary glossary(loaded(), QStringLiteral("mock"));
+        QSignalSpy spy(&glossary, &Glossary::wordsChanged);
+        QCOMPARE(find(glossary.words(), QStringLiteral("Koshi-nage")).value(QStringLiteral("meaning")).toString(),
+                 QStringLiteral("Hüftwurf"));
+
+        Catalog::setLanguage(Catalog::Language::English);
+        QEvent event(QEvent::LanguageChange);
+        QCoreApplication::sendEvent(QCoreApplication::instance(), &event);
+        const QVariantList words = glossary.words();
+        const QStringList hip = ::words(glossary.search(QStringLiteral("hip throw")));
+        const QStringList huft = ::words(glossary.search(QStringLiteral("hüftwurf")));
+        const QStringList japanese = ::words(glossary.search(QStringLiteral("切り落とし")));
+        const QString source = glossary.source();
+        Catalog::setLanguage(Catalog::Language::German);
+        QCoreApplication::sendEvent(QCoreApplication::instance(), &event);
+
+        QCOMPARE(spy.count(), 2);
+        QCOMPARE(find(words, QStringLiteral("Koshi-nage")).value(QStringLiteral("meaning")).toString(), QStringLiteral("hip throw"));
+        QCOMPARE(find(words, QStringLiteral("Kiri-otoshi")).value(QStringLiteral("meaning")).toString(), QString());
+        QVERIFY(!find(words, QStringLiteral("Fuse (verb: fuseru)")).isEmpty());
+        QVERIFY(hip.contains(QStringLiteral("Koshi-nage")));
+        QVERIFY(huft.isEmpty());
+        QVERIFY(japanese.contains(QStringLiteral("Kiri-otoshi")));
+        QVERIFY(source.startsWith(QLatin1String("Lexicon")));
+        QVERIFY(find(glossary.words(), QStringLiteral("Fuse (verb: fuseru)")).isEmpty());
+    }
+
     // No Japanese voice (the mock engine has none): saying something does nothing.
     void silentWithoutVoice()
     {
