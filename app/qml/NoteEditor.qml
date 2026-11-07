@@ -64,22 +64,29 @@ Kirigami.Dialog {
     // Not a content child either; on the page, beside the editor. Main asks it too when the window
     // closes with the editor open or its question standing (`asking`); Save and Discard close the
     // editor then.
+    // `visible`, not `opened`: a popup is opened only once it has faded in, and no longer from the
+    // start of fading out. An answer makes the text unchanged: the window, closing next, finds
+    // nothing to ask while the two still fade out.
     readonly property LeaveDialog leaveAsk: LeaveDialog {
         id: changeAsk
 
         objectName: "leaveChange"
         parent: editor.parent
-        asking: (editor.opened || changeAsk.opened) && editor.changed
+        asking: (editor.visible || changeAsk.visible) && editor.changed
         title: qsTr("Save the change?")
         text: editor.changedText
         save: () => {
             if (!editor.save(editor.note.uid, area.text)) {
                 return false
             }
+            editor.note = Object.assign({}, editor.note, { text: area.text })
             editor.close()
             return true
         }
-        discard: () => editor.close()
+        discard: () => {
+            area.text = editor.note.text || ""
+            editor.close()
+        }
         onStayed: editor.open()
     }
 

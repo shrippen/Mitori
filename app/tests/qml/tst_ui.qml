@@ -6954,6 +6954,30 @@ TestCase {
         verify(Practice.deleteNote(note.uid))
         popPage()
     }
+    // Right after Escape the question fades in (opened only at its end): it holds the window already.
+    function test_8g_question_fading_in_holds_window() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        verify(Practice.addNote(entry.id, "Blende alt"))
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        const note = page.notes.find(n => n.text === "Blende alt")
+        const editor = findChild(page, "noteEditor")
+        const area = findChild(editor, "noteArea")
+        const ask = editor.leaveAsk
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        area.text = "Blende neu"
+        area.forceActiveFocus()
+        keyClick(Qt.Key_Escape)
+        tryVerify(() => ask.visible)
+        let closed = false
+        verify(!window.mayClose(() => { closed = true }), "the question fading in holds the window")
+        tryVerify(() => ask.opened)
+        mouseClick(findChild(ask.contentItem, "leaveDiscard"))
+        tryVerify(() => closed && !ask.visible, 2000, "discarded, then the window closes")
+        verify(Practice.deleteNote(note.uid))
+        popPage()
+    }
     function test_8g_failed_save_keeps_window() {
         const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
         verify(Practice.addNote(entry.id, "Fenster alt"))
