@@ -78,7 +78,7 @@ Kirigami.ApplicationWindow {
     // Kirigami destroys a popped page when its slide ends. A new height of the view stops the slide
     // without ending it (Shinki's head is lower on the start menu, the keyboard closes, a turn), and
     // the page stays, hidden, until the next slide ends. It goes now: a draft saved on destruction
-    // (NoteRow, CoursePage) must not wait for that, the system may kill the app first.
+    // (NoteRow, CoursePage beside a list) must not wait for that, the system may kill the app first.
     property var leavingPages: []
     function dropLeaving() {
         if (root.pageStack.columnView.moving) {
