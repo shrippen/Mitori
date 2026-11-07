@@ -23,6 +23,20 @@ Kirigami.ScrollablePage {
 
     title: qsTr("New course")
 
+    // Something typed and not made yet: Back and the window's close ask before it goes. "Make" is
+    // the way to keep it, so the question only offers to discard.
+    readonly property LeaveDialog leaveAsk: leaveDialog
+    LeaveDialog {
+        id: leaveDialog
+
+        objectName: "leaveCourse"
+        stackPage: page
+        asking: [titleField, placeField, teacherField].some(f => f.text.trim() !== "")
+        title: qsTr("Discard the new course?")
+        text: qsTr("What you typed has not been made into a course yet.")
+        discard: () => [titleField, placeField, teacherField].forEach(f => f.clear())
+    }
+
     function make() {
         if (!page.complete) {
             return

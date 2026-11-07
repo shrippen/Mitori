@@ -133,7 +133,24 @@ Kirigami.ScrollablePage {
     function add() {
         if (Courses.addEntry(page.uid, compose.text)) {
             compose.clear()
+            return true
         }
+        return false
+    }
+
+    // On a phone an entry typed and not added asks before it goes (Back, the window's close);
+    // beside the list it is saved (keepBegun).
+    readonly property LeaveDialog leaveAsk: leaveDialog
+    LeaveDialog {
+        id: leaveDialog
+
+        objectName: "leaveEntry"
+        stackPage: page
+        asking: !page.paneHost && !page.gone && compose.text.trim() !== ""
+        title: qsTr("Save the entry?")
+        text: qsTr("“%1” is not saved yet.").arg(compose.text.trim())
+        save: () => page.add()
+        discard: () => compose.clear()
     }
 
     ColumnLayout {

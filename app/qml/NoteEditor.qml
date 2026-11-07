@@ -49,6 +49,26 @@ Kirigami.Dialog {
     // Not a content child: the dialog's scroll view sizes itself by its only child.
     property Item lookScope: LookScope { target: editor.contentItem }
 
+    // Closed with a changed text and not saved (Escape, Back, ×, a tap beside it): asks; Cancel
+    // opens the editor again with the change. A text emptied keeps the note as it was (Delete
+    // removes it), unless the note has a photo or voice note to stand on.
+    readonly property bool changed: area.text.trim() !== (note.text || "").trim()
+                                    && (area.text.trim() !== "" || !!note.media)
+    onRejected: {
+        if (changed) {
+            leaveAsk.open()
+        }
+    }
+    // Not a content child either; on the page, beside the editor.
+    readonly property LeaveDialog leaveAsk: LeaveDialog {
+        objectName: "leaveChange"
+        parent: editor.parent
+        title: qsTr("Save the change?")
+        text: qsTr("The note has been changed but not saved.")
+        save: () => editor.save(editor.note.uid, area.text)
+        onStayed: editor.open()
+    }
+
     QQC2.TextArea {
         id: area
 

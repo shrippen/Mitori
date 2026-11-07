@@ -80,6 +80,7 @@ qt_add_qml_module(mitori_app
         qml/TrainingEndPage.qml
         qml/NotesPage.qml
         qml/NoteEditor.qml
+        qml/LeaveDialog.qml
         qml/NoteRow.qml
         qml/AllNotesPage.qml
         qml/SearchPage.qml
