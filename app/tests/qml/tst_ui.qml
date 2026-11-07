@@ -6978,6 +6978,32 @@ TestCase {
         verify(Practice.deleteNote(note.uid))
         popPage()
     }
+    // Saved or deleted with the editor's own buttons: while it fades out the window has nothing to ask.
+    function test_8g_editor_buttons_leave_nothing() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        verify(Practice.addNote(entry.id, "Knopf alt"))
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        const note = page.notes.find(n => n.text === "Knopf alt")
+        const editor = findChild(page, "noteEditor")
+        const area = findChild(editor, "noteArea")
+
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        area.text = "Knopf neu"
+        editor.customFooterActions[1].trigger()         // Save
+        verify(window.mayClose(() => {}), "saved: nothing to ask")
+        tryVerify(() => !editor.visible)
+
+        editor.edit(page.notes.find(n => n.uid === note.uid))
+        tryVerify(() => editor.opened)
+        area.text = "Knopf weg"
+        editor.customFooterActions[0].trigger()         // Delete
+        verify(window.mayClose(() => {}), "deleted: nothing to ask")
+        tryVerify(() => !editor.visible)
+        verify(!page.notes.some(n => n.uid === note.uid))
+        popPage()
+    }
     function test_8g_failed_save_keeps_window() {
         const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
         verify(Practice.addNote(entry.id, "Fenster alt"))
