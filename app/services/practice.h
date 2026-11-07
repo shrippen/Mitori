@@ -2,13 +2,16 @@
 
 #include <QDate>
 #include <QObject>
+#include <QSet>
 #include <QTimer>
 #include <QStringList>
 #include <QVariantList>
 #include <QtQml/qqmlregistration.h>
 #include <memory>
+#include <optional>
 
 #include "practicelog.h"
+#include "searchkey.h"
 
 // How well each technique sits, for QML: rate an entry 1..4, read its latest level and when it
 // was rated, count levels for a grade. Backed by the practice log (SQLite in the app's data
@@ -21,6 +24,9 @@ class Practice : public QObject
     Q_PROPERTY(int revision READ revision NOTIFY changed)
     // Grows with every new, changed or deleted note.
     Q_PROPERTY(int notesRevision READ notesRevision NOTIFY notesChanged)
+    // Grows when ratings of past days change (the log read anew); a rating now changes only today,
+    // so the calendars of past years keep what they show.
+    Q_PROPERTY(int historyRevision READ historyRevision NOTIFY historyChanged)
     // Why the log could not be opened or the last rating not saved; empty when all is well.
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorChanged)
     // Days until a technique of level 1..4 is due again (settings, "Heute üben").
@@ -38,6 +44,7 @@ public:
 
     int revision() const { return m_revision; }
     int notesRevision() const { return m_notesRevision; }
+    int historyRevision() const { return m_historyRevision; }
     QString errorString() const { return m_error; }
     QStringList levelNames() const;
 
@@ -78,6 +85,9 @@ public:
     // Notes containing every word of `query` (case and accents do not matter), newest first:
     // {uid, entry, text, created, changed}.
     Q_INVOKABLE QVariantList searchNotes(const QString &query, int limit = 50) const;
+    // Reads what searchNotes() compares (30 ms with 3000 notes), when the search opens, not on
+    // the first letter.
+    Q_INVOKABLE void prepareSearch() const;
     // Add, change or delete a note; false (and errorString set) when it could not be saved.
     // Text, a photo or voice note (its name from Media), or both.
     Q_INVOKABLE bool addNote(const QString &entry, const QString &text, const QString &media = {});
@@ -109,6 +119,7 @@ signals:
     void intervalsChanged();
     void todayChanged();
     void notesChanged();
+    void historyChanged();
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
@@ -116,15 +127,35 @@ protected:
 private:
     void load(const QString &path);
     void noteSaved(bool ok);
+    // Who was rated on each local day of a year (levels 1..4): read from the log once, then kept
+    // up to date by counted(). The calendars ask on every change, which touches only today.
+    using DayEntries = QHash<QDate, QSet<QString>>;
+    const DayEntries &yearDays(int year) const;
+    void counted(const PracticeLog::Rating &r);
+    // Every note with what searchNotes() compares, newest first: read once, until a note changes
+    // (the search asks on every keystroke, 3000 notes in five years).
+    struct NoteText {
+        PracticeLog::Note note;
+        SearchText text;
+    };
+    const QList<NoteText> &noteTexts() const;
+    // The caches above go when another connection wrote to the log (a sync's conflict resolved
+    // with its own PracticeLog); refresh() drops them too.
+    void dropStale() const;
 
     std::unique_ptr<PracticeLog> m_log;
     QHash<QString, PracticeLog::Rating> m_latest;
     QHash<QString, QDate> m_first;
     QHash<QString, PracticeLog::Note> m_lastNotes;
+    mutable QHash<int, DayEntries> m_days;       // by year, filled by yearDays()
+    mutable std::optional<QDateTime> m_firstRating;     // firstYear(): unset until read, invalid: none
+    mutable std::optional<QList<NoteText>> m_noteTexts;  // unset until read
+    mutable qint64 m_logVersion = -1;                    // the log's dataVersion() they were read at
     QDate m_today = QDate::currentDate();
     QTimer m_dayTimer;
     QString m_error;
     bool m_open = false;
     int m_revision = 0;
     int m_notesRevision = 0;
+    int m_historyRevision = 0;
 };

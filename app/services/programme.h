@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "catalog.h"
+#include "searchkey.h"
 
 // The exam programme for QML: disciplines, grades and the entries of a grade, ready for a list.
 class Programme : public QObject
@@ -60,6 +61,8 @@ public:
     // Each row as in entries(), with `discipline`, `disciplineName`, `grade`, `gradeName` and
     // `groupName` (Tachi-waza · Mae-seme …).
     Q_INVOKABLE QVariantList search(const QString &query, int limit = 50) const;
+    // Builds what search() compares (16 ms), when the search opens, not on the first letter.
+    Q_INVOKABLE void prepareSearch() const { searchRows(); }
     // The techniques a text names (a course note), best first, at most `limit`, leaving out the ids
     // in `without` (those already linked); rows as in search(). A name counts as whole words, however
     // written ("shiho nage", "Shihonage" for Shihô-nage), and the longest wins: "Uchi-kaiten-nage" does
@@ -100,6 +103,13 @@ private:
     // Every technique once, in programme order, with `discipline`, `disciplineName`, `grade`,
     // `gradeName` and `groupName`; a visitor that returns false ends the walk.
     void eachTechnique(const std::function<bool(const QVariantMap &)> &visit) const;
+    // Every technique (eachTechnique) with what search() compares, built once per language: the
+    // search asks on every keystroke.
+    struct SearchRow {
+        QVariantMap row;
+        SearchText text;
+    };
+    const QList<SearchRow> &searchRows() const;
     QVariantList shinkiTohoEntries(const QVariantMap &discipline, const QString &grade) const;
     QVariantList formMap(const QString &grade) const;
 
@@ -109,4 +119,6 @@ private:
     // Built on first use, in the language of then (entry()).
     mutable QHash<QString, QVariantMap> m_entryIndex;
     mutable Catalog::Language m_indexLanguage = Catalog::Language::German;
+    mutable QList<SearchRow> m_searchRows;
+    mutable Catalog::Language m_searchLanguage = Catalog::Language::German;
 };

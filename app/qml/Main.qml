@@ -179,6 +179,7 @@ Kirigami.ApplicationWindow {
         if (!Appearance.welcomed) {
             pageStack.push(Qt.resolvedUrl("WelcomePage.qml"))
         }
+        Videos.prepareDecoders()
     }
 
     // Android's bars in the window's ground.
