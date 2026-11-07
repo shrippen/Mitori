@@ -600,8 +600,8 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME levels COMMAND tst_levels)
 
     qt_add_executable(tst_appearance tests/tst_appearance.cpp services/appearance.cpp services/appearance.h
-        platform/systembars.cpp platform/systembars.h)
-    target_include_directories(tst_appearance PRIVATE services platform)
+        platform/systembars.cpp platform/systembars.h catalog/catalog.cpp catalog/catalog.h)
+    target_include_directories(tst_appearance PRIVATE services platform catalog)
     target_link_libraries(tst_appearance PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Test)
     set_target_properties(tst_appearance PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     if(MITORI_SHINKI)

@@ -1,5 +1,8 @@
 #include "glossary.h"
 
+#include <QCoreApplication>
+#include <QEvent>
+
 #include "speaker.h"
 
 namespace {
@@ -30,28 +33,51 @@ Glossary::Glossary(QObject *parent)
 
 Glossary::Glossary(const Catalog &catalog, const QString &engine, QObject *parent)
     : QObject(parent)
+    , m_catalog(catalog)
+    , m_language(Catalog::language())
     , m_speaker(new Speaker(engine, this))
 {
-    load(catalog);
+    load();
     connect(m_speaker, &Speaker::stateChanged, this, &Glossary::speechChanged);
+    // A new catalog (Appearance::setLanguage) may bring the data's other language.
+    if (auto *app = QCoreApplication::instance()) {
+        app->installEventFilter(this);
+    }
 }
 
-// From the catalog's fields (German, tools/daten.py) to the rows QML shows.
-void Glossary::load(const Catalog &catalog)
+bool Glossary::eventFilter(QObject *watched, QEvent *event)
 {
-    m_source = catalog.glossarySource();
-    for (const QVariant &w : catalog.glossary()) {
+    if (event->type() == QEvent::LanguageChange && watched == QCoreApplication::instance()
+        && m_language != Catalog::language()) {
+        m_language = Catalog::language();
+        load();
+        emit wordsChanged();
+    }
+    return QObject::eventFilter(watched, event);
+}
+
+// From the catalog's fields (tools/daten.py) to the rows QML shows, in the catalog's language:
+// the meaning is `en` with English on (`de` where the lexicon has no English), else `de`.
+void Glossary::load()
+{
+    m_words.clear();
+    m_texts.clear();
+    m_source = m_catalog.glossarySource();
+    const bool english = m_language == Catalog::Language::English;
+    for (const QVariant &w : m_catalog.glossary()) {
         const QVariantMap entry = w.toMap();
         const QString word = entry.value(QStringLiteral("wort")).toString();
         const QString jp = entry.value(QStringLiteral("jp")).toString();
         const QString de = entry.value(QStringLiteral("de")).toString();
+        const QString en = entry.value(QStringLiteral("en")).toString();
+        const QString meaning = english && !en.isEmpty() ? en : de;
         const QString kana = entry.value(QStringLiteral("kana")).toString();
         m_words << QVariantMap{{QStringLiteral("word"), word},
                                {QStringLiteral("jp"), jp},
-                               {QStringLiteral("de"), de},
+                               {QStringLiteral("meaning"), meaning},
                                {QStringLiteral("letter"), letter(word)},
                                {QStringLiteral("speech"), speechText(word, jp, kana)}};
-        m_texts << SearchText(QStringList{word, jp, kana, de}.join(u' '));
+        m_texts << SearchText(QStringList{word, jp, kana, meaning}.join(u' '));
     }
 }
 

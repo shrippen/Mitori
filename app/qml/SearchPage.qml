@@ -8,9 +8,9 @@ import Mitori
 import "playlists.js" as Playlists
 
 // Glossary and search (clickdummy "Glossar & Suche"). Without a query: the glossary A–Z (word,
-// kanji, German translation, a speaker button). With a query: techniques of every discipline and
-// grade by name, attack (with its addition), group or Japanese, the glossary (also by German
-// words) and the own notes; the glossary first, as the techniques can be up to 50 rows. Case, accents, hyphens and okurigana do not matter; several words
+// kanji, translation in the app's language, a speaker button). With a query: techniques of every
+// discipline and grade by name, attack (with its addition), group or Japanese, the glossary (also
+// by the translation's words) and the own notes; the glossary first, as the techniques can be up to 50 rows. Case, accents, hyphens and okurigana do not matter; several words
 // must all match. A technique opens its sheet, a note its notes page.
 //
 //   ListView (virtual: the glossary has about 300 words)
@@ -142,7 +142,7 @@ Kirigami.ScrollablePage {
                 Layout.leftMargin: Kirigami.Units.largeSpacing
                 Layout.rightMargin: Kirigami.Units.largeSpacing
                 visible: !page.searching
-                text: qsTr("%n Japanese term(s), with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.", "", Glossary.words.length)
+                text: qsTr("%n Japanese term(s), with kanji and English translation where the lexicon or the programme has them. The search also finds English words, techniques and your notes.", "", Glossary.words.length)
                 color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
@@ -191,7 +191,7 @@ Kirigami.ScrollablePage {
             focusOnClick: false
             selected: ListView.isCurrentItem && list.activeFocus
             text: modelData.word + (modelData.jp ? "  " + modelData.jp : "")
-            subtitle: modelData.de || qsTr("No translation in the lexicon")
+            subtitle: modelData.meaning || qsTr("No translation in the lexicon")
             // A tap, or Return and Space on the current row (the row takes them as a click), says it.
             onClicked: {
                 list.currentIndex = index

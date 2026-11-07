@@ -66,7 +66,7 @@
 <context>
     <name>CoursePage</name>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="189"/>
+        <location filename="../qml/CoursePage.qml" line="195"/>
         <source>%n file(s) were not on this device and are missing.</source>
         <translation>
             <numerusform>%n file was not on this device and is missing.</numerusform>
@@ -74,7 +74,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/CoursePage.qml" line="553"/>
+        <location filename="../qml/CoursePage.qml" line="561"/>
         <source>The notebook and its %n entry(s) go from this device.</source>
         <translation>
             <numerusform>The notebook and its %n entry go from this device.</numerusform>
@@ -165,10 +165,10 @@
     <name>SearchPage</name>
     <message numerus="yes">
         <location filename="../qml/SearchPage.qml" line="145"/>
-        <source>%n Japanese term(s), with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</source>
+        <source>%n Japanese term(s), with kanji and English translation where the lexicon or the programme has them. The search also finds English words, techniques and your notes.</source>
         <translation>
-            <numerusform>%n Japanese term, with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</numerusform>
-            <numerusform>%n Japanese terms, with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</numerusform>
+            <numerusform>%n Japanese term, with kanji and English translation where the lexicon or the programme has them. The search also finds English words, techniques and your notes.</numerusform>
+            <numerusform>%n Japanese terms, with kanji and English translation where the lexicon or the programme has them. The search also finds English words, techniques and your notes.</numerusform>
         </translation>
     </message>
 </context>
@@ -191,7 +191,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="202"/>
+        <location filename="../qml/StartPage.qml" line="203"/>
         <source>in %n day(s)</source>
         <translation>
             <numerusform>in %n day</numerusform>
@@ -199,7 +199,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/StartPage.qml" line="185"/>
+        <location filename="../qml/StartPage.qml" line="186"/>
         <source>%n practice day(s) in 30 days</source>
         <translation>
             <numerusform>%n practice day in 30 days</numerusform>
