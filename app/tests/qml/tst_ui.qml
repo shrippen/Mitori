@@ -6922,6 +6922,77 @@ TestCase {
         popPage()
     }
 
+    // The editor's question while the window closes: (1) the editor is already shut (Escape) and its
+    // question stands, the change not yet saved; (2) Save fails (a database error, here a save that
+    // says false): the window stays, and a later Discard does not close it unasked.
+    function test_8g_editor_question_holds_window() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        verify(Practice.addNote(entry.id, "Fenster alt"))
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        const note = page.notes.find(n => n.text === "Fenster alt")
+        const editor = findChild(page, "noteEditor")
+        const area = findChild(editor, "noteArea")
+        const ask = editor.leaveAsk
+        const escape = () => {
+            area.forceActiveFocus()
+            keyClick(Qt.Key_Escape)
+        }
+
+        // (1) Escape: the editor shuts, its question stands.
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        area.text = "Fenster neu"
+        escape()
+        tryVerify(() => ask.opened && !editor.visible)
+        let closed = false
+        verify(!window.mayClose(() => { closed = true }), "the standing question holds the window")
+        tryVerify(() => ask.opened)
+        ask.accept()
+        tryVerify(() => closed, 2000, "saved, then the window closes")
+        verify(page.notes.some(n => n.uid === note.uid && n.text === "Fenster neu"))
+        verify(Practice.deleteNote(note.uid))
+        popPage()
+    }
+    function test_8g_failed_save_keeps_window() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        verify(Practice.addNote(entry.id, "Fenster alt"))
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        const note = page.notes.find(n => n.text === "Fenster alt")
+        const editor = findChild(page, "noteEditor")
+        const area = findChild(editor, "noteArea")
+        const ask = editor.leaveAsk
+        const escape = () => {
+            area.forceActiveFocus()
+            keyClick(Qt.Key_Escape)
+        }
+
+        // (2) Save fails while the window closes.
+        const save = editor.save
+        editor.save = () => false
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        area.text = "Fenster kaputt"
+        let closed = false
+        verify(!window.mayClose(() => { closed = true }))
+        tryVerify(() => ask.opened)
+        ask.accept()
+        tryVerify(() => !ask.visible)
+        verify(!closed, "not saved: the window stays")
+        verify(editor.opened, "the editor stays with the change")
+        escape()
+        tryVerify(() => ask.opened && !editor.visible)
+        mouseClick(findChild(ask.contentItem, "leaveDiscard"))
+        tryVerify(() => !ask.visible)
+        wait(100)
+        verify(!closed, "a later Discard leaves the window open")
+        editor.save = save
+
+        verify(Practice.deleteNote(note.uid))
+        popPage()
+    }
+
     // Closing the window (desktop) with a text typed on a page asks first, then closes.
     function test_8g_window_close_asks() {
         const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")

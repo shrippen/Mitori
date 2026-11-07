@@ -56,17 +56,20 @@ Kirigami.Dialog {
                                     && (area.text.trim() !== "" || !!note.media)
     onRejected: {
         if (changed) {
-            leaveAsk.open()
+            leaveAsk.ask(null)          // nothing follows: a window's close waiting from before is off
         }
     }
     // The question's text (a notebook says "entry").
     property string changedText: qsTr("The note has been changed but not saved.")
     // Not a content child either; on the page, beside the editor. Main asks it too when the window
-    // closes with the editor open (`asking`); Save and Discard close the editor then.
+    // closes with the editor open or its question standing (`asking`); Save and Discard close the
+    // editor then.
     readonly property LeaveDialog leaveAsk: LeaveDialog {
+        id: changeAsk
+
         objectName: "leaveChange"
         parent: editor.parent
-        asking: editor.opened && editor.changed
+        asking: (editor.opened || changeAsk.opened) && editor.changed
         title: qsTr("Save the change?")
         text: editor.changedText
         save: () => {

@@ -55,10 +55,13 @@ LookDialog {
         }
     }
 
+    // Not saved (the page shows why): nothing follows, also not later.
     function keep() {
-        if (save()) {
-            go()
+        if (!save()) {
+            then = null
+            return
         }
+        go()
     }
     function drop() {
         discard()
