@@ -4,6 +4,7 @@
 #include <QSettings>
 #include <QSignalSpy>
 #include <QSqlDatabase>
+#include <QScopeGuard>
 #include <QSqlQuery>
 #include <QStandardPaths>
 #include <QTemporaryDir>
@@ -92,6 +93,15 @@ private slots:
         const QByteArray zone = qgetenv("TZ");
         qputenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3");    // Central Europe, no tzdata needed
         tzset();
+        // Back to the zone before, also when a check fails.
+        const auto restore = qScopeGuard([zone] {
+            if (zone.isNull()) {
+                qunsetenv("TZ");
+            } else {
+                qputenv("TZ", zone);
+            }
+            tzset();
+        });
         QTemporaryDir dir;
         PracticeLog log;
         QVERIFY(log.open(dir.filePath(QStringLiteral("log.sqlite"))));
@@ -105,12 +115,6 @@ private slots:
         log.add(QStringLiteral("b"), 2, at(26, 0, 1), QStringLiteral("phone"));
         log.add(QStringLiteral("b"), 3, at(26, 9, 0), QStringLiteral("phone"));    // b again that day
         const QHash<QDate, int> days = log.practisedPerDay(at(20, 0, 0));
-        if (zone.isNull()) {
-            qunsetenv("TZ");
-        } else {
-            qputenv("TZ", zone);
-        }
-        tzset();
         QCOMPARE(days.size(), 3);
         QCOMPARE(days.value(QDate(2026, 10, 24)), 1);
         QCOMPARE(days.value(QDate(2026, 10, 25)), 2);
