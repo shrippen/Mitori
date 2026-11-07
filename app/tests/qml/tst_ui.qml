@@ -2425,6 +2425,9 @@ TestCase {
             return false
         }, 5000, "the scan page goes")
         compare(pane.item, videos, "the page that asked")
+        tryVerify(() => window.pageStack.currentItem === host)
+        verify(host.showsPage, "back on the page that asked, not the list")
+        verify(videos.visible)
         tryVerify(() => Bundles.bundles[0].state === Bundles.State.Installed, 10000, "redeemed")
         verify(Bundles.remove("test-bundle"))
         tryVerify(() => Bundles.bundles[0].state === Bundles.State.Unlocked)
@@ -5798,6 +5801,33 @@ TestCase {
         Courses.remove(uid)
     }
 
+    // The same for a notebook that stood there by itself: back on it, not on the list.
+    function test_8s_photo_turned_first() {
+        const uid = testCourse("Foto von selbst")
+        const host = listHost("CoursesPage.qml", 1280, 800)
+        const pane = findChild(host, "pagePane")
+        tryVerify(() => pane.item && pane.item.uid !== undefined)
+        verify(!host.chosen)
+        const book = pane.item
+        const depth = window.pageStack.depth
+        findChild(book, "courseMedia").takePhoto()
+        tryVerify(() => window.pageStack.depth === depth + 1, 3000, "the camera page")
+        wait(300)
+        turn(800, 1280)
+        tryVerify(() => !host.wide)
+        wait(200)
+        window.pageStack.pop()
+        tryCompare(window.pageStack, "depth", depth)
+        verify(host.showsPage, "back on the notebook")
+        verify(book.visible)
+        window.pageStack.goBack()
+        tryVerify(() => !host.showsPage)
+        turn(1280, 800)
+        tryVerify(() => host.wide)
+        window.pageStack.pop()
+        Courses.remove(uid)
+    }
+
     // A page that is busy (a recording) finishes before another row takes its place, and before
     // Back leaves it; a turn leaves it running and in sight.
     function test_8s_busy_page_finishes() {
@@ -5808,6 +5838,12 @@ TestCase {
         verify(host.show(busyPage))
         tryVerify(() => pane.item && pane.item.title === "Busy")
         const busy = pane.item
+
+        // Its own row again: nothing to finish.
+        verify(host.show(busyPage))
+        wait(100)
+        compare(pane.item, busy)
+        compare(busy.finishAsked, 0)
 
         mouseClick(findChild(host, "backupButton"))
         wait(200)

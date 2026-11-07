@@ -63,6 +63,12 @@ Kirigami.Page {
     // What is to follow a busy page (null: the list); undefined: nothing waits.
     property var pending: undefined
     function choose(next) {
+        // Its own row again: a recording runs on.
+        if (next && keyOf(next) === keyOf(current)) {
+            pending = undefined
+            chosen = next
+            return
+        }
         if (pane.item && pane.item.busy) {
             pending = next
             pane.item.finishBusy()
@@ -83,18 +89,25 @@ Kirigami.Page {
         }
     }
 
-    readonly property string paneKey: everWide && current ? current.source + JSON.stringify(current.props) : ""
+    function keyOf(page) {
+        return page ? page.source + JSON.stringify(page.props) : ""
+    }
+    readonly property string paneKey: everWide ? keyOf(current) : ""
     // Later: taking a page away may save its draft, which changes what `current` reads.
     onPaneKeyChanged: Qt.callLater(pane.reload)
     // With a page above, the one below may still get its answer (a camera, a scan): it changes after.
     onIsCurrentPageChanged: pane.reload()
+    // Sliding (disabled) the old page waits: let go now, its items turn enabled when its scope is
+    // already gone (KanteScope.qml: TypeError in the log).
+    onEnabledChanged: pane.reload()
     onWideChanged: {
         if (wide) {
             everWide = true
             return
         }
-        // In use by itself beside the list (a recording, a field): it stays in sight.
-        if (!chosen && pane.item && (pane.item.busy || typingInPane())) {
+        // In use by itself beside the list (a recording, a field, a page it opened above): it stays
+        // in sight.
+        if (!chosen && pane.item && (pane.item.busy || typingInPane() || !isCurrentPage)) {
             chosen = current
         }
     }
@@ -139,10 +152,24 @@ Kirigami.Page {
         const own = list.item ? Array.from(list.item.actions) : []
         return wide && pane.item ? own.concat(Array.from(pane.item.actions)) : own
     }
-    readonly property var flickable: showsPage && pane.item ? pane.item.flickable ?? null : list.item ? list.item.flickable : null
-    // A new window (a change of style) comes back here (Main.keptPageList).
+    readonly property var flickable: showsPage ? (pane.item ? pane.item.flickable ?? null : null) : list.item ? list.item.flickable : null
+    // A new window (a change of style) comes back here (Main.keptPageList). `flickable` gives Main
+    // one place; the page beside the list loads later and comes to its own.
     readonly property string keptPage: "ListAndPage.qml"
-    readonly property var keptState: ({ listSource: listSource, chosen: chosen })
+    readonly property var keptState: ({
+        listSource: listSource,
+        chosen: chosen,
+        first: first,
+        everWide: everWide,
+        paneY: pane.item && pane.item.flickable ? pane.item.flickable.contentY : 0
+    })
+    property real paneY: 0
+    // Later: on its way onto the stack this page has no window yet.
+    function place(flickable, y) {
+        if (flickable && y > 0) {
+            Qt.callLater(() => host.Window.window.scrollTo(flickable, y))
+        }
+    }
 
     property Item lookScope: LookScope { target: host }
     background: Rectangle { color: Look.backgroundColor }
@@ -193,7 +220,7 @@ Kirigami.Page {
 
                 property string loadedKey: ""
                 function reload() {
-                    if (!host.isCurrentPage || loadedKey === host.paneKey) {
+                    if (!host.isCurrentPage || loadedKey === host.paneKey || (item && !host.enabled)) {
                         return
                     }
                     loadedKey = host.paneKey
@@ -207,6 +234,8 @@ Kirigami.Page {
                     if ("paneHost" in item) {
                         item.paneHost = host
                     }
+                    host.place(item.flickable, host.paneY)
+                    host.paneY = 0
                 }
             }
 
@@ -221,7 +250,7 @@ Kirigami.Page {
     }
 
     Component.onCompleted: {
-        everWide = wide
+        everWide = everWide || wide
         pane.reload()
     }
 }
