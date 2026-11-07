@@ -26,9 +26,11 @@ void tryDecoders()
     if (!chosen.isEmpty() && chosen != kFFmpeg) {
         return;
     }
-    // The plugin stays loaded (Qt never unloads one), and so does its list.
-    QFactoryLoader loader(QPlatformMediaPlugin_iid, QStringLiteral("/multimedia"));
-    delete qLoadPlugin<QPlatformMediaIntegration, QPlatformMediaPlugin>(&loader, kFFmpeg);
+    // Never deleted: a loader going deletes the plugin's object, which Qt's own loader shares and
+    // may use right then on the UI thread. The library stays loaded (PreventUnloadHint), and so
+    // does its list.
+    static auto *loader = new QFactoryLoader(QPlatformMediaPlugin_iid, QStringLiteral("/multimedia"));
+    delete qLoadPlugin<QPlatformMediaIntegration, QPlatformMediaPlugin>(loader, kFFmpeg);
 }
 #endif
 
