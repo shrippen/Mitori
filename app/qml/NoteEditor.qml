@@ -19,6 +19,21 @@ Kirigami.Dialog {
         area.forceActiveFocus()
     }
 
+    // Every answer leaves the text unchanged before the editor closes: while it fades out, still
+    // visible, the window closing next finds nothing to ask (leaveAsk).
+    function keepAndClose() {
+        if (!editor.save(editor.note.uid, area.text)) {
+            return false
+        }
+        editor.note = Object.assign({}, editor.note, { text: area.text })
+        editor.close()
+        return true
+    }
+    function dropAndClose() {
+        area.text = editor.note.text || ""
+        editor.close()
+    }
+
     objectName: "noteEditor"
     title: qsTr("Note")
     preferredWidth: Kirigami.Units.gridUnit * 24
@@ -30,7 +45,7 @@ Kirigami.Dialog {
             text: qsTr("Delete")
             onTriggered: {
                 if (editor.remove(editor.note.uid)) {
-                    editor.close()
+                    editor.dropAndClose()
                 }
             }
         },
@@ -38,16 +53,42 @@ Kirigami.Dialog {
             icon.name: "document-save"
             text: qsTr("Save")
             enabled: area.text.trim() !== "" || !!editor.note.media      // a photo needs no text
-            onTriggered: {
-                if (editor.save(editor.note.uid, area.text)) {
-                    editor.close()
-                }
-            }
+            onTriggered: editor.keepAndClose()
         }
     ]
 
     // Not a content child: the dialog's scroll view sizes itself by its only child.
     property Item lookScope: LookScope { target: editor.contentItem }
+
+    // Closed with a changed text and not saved (Escape, Back, ×, a tap beside it): asks; Cancel
+    // opens the editor again with the change. A text emptied keeps the note as it was (Delete
+    // removes it), unless the note has a photo or voice note to stand on.
+    readonly property bool changed: area.text.trim() !== (note.text || "").trim()
+                                    && (area.text.trim() !== "" || !!note.media)
+    onRejected: {
+        if (changed) {
+            leaveAsk.ask(null)          // nothing follows: a window's close waiting from before is off
+        }
+    }
+    // The question's text (a notebook says "entry").
+    property string changedText: qsTr("The note has been changed but not saved.")
+    // Not a content child either; on the page, beside the editor. Main asks it too when the window
+    // closes with the editor open or its question standing (`asking`); Save and Discard close the
+    // editor then.
+    // `visible`, not `opened`: a popup is opened only once it has faded in, and no longer from the
+    // start of fading out.
+    readonly property LeaveDialog leaveAsk: LeaveDialog {
+        id: changeAsk
+
+        objectName: "leaveChange"
+        parent: editor.parent
+        asking: (editor.visible || changeAsk.visible) && editor.changed
+        title: qsTr("Save the change?")
+        text: editor.changedText
+        save: () => editor.keepAndClose()
+        discard: () => editor.dropAndClose()
+        onStayed: editor.open()
+    }
 
     QQC2.TextArea {
         id: area

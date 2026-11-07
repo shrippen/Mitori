@@ -130,13 +130,20 @@ Kirigami.ScrollablePage {
                             }
                             return l
                         }
-                        // Every day shown says what it was, also a day without practice.
+                        // Every day shown says what it was, also a day without practice: a text per
+                        // count, not per day, from the heatmap's dates (no Date per day).
                         tips: {
                             const t = {}
-                            for (let i = 0; i < 26 * 7; i++) {
-                                const day = new Date(page.todayDate.getFullYear(), page.todayDate.getMonth(), page.todayDate.getDate() - i, 12)
-                                const key = isoDay(day)
-                                t[key] = page.perDay[key] ? qsTr("%n technique(s)", "", page.perDay[key]) : qsTr("no practice")
+                            const texts = { 0: qsTr("no practice") }
+                            for (const cell of heat.cells) {
+                                if (!cell.shown) {
+                                    continue
+                                }
+                                const n = page.perDay[cell.iso] || 0
+                                if (!(n in texts)) {
+                                    texts[n] = qsTr("%n technique(s)", "", n)
+                                }
+                                t[cell.iso] = texts[n]
                             }
                             return t
                         }

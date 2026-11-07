@@ -250,15 +250,26 @@ QHash<QDate, QSet<QString>> PracticeLog::practisedOn(const QDateTime &from, cons
     QHash<QDate, QSet<QString>> entries;
     QSet<QString> ids;      // one copy of each id's text for all days
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ? AND at < ? AND substr(entry, 1, ?) = ?"));
+    q.setForwardOnly(true);
+    q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ? AND at < ? AND substr(entry, 1, ?) = ? ORDER BY at"));
     q.addBindValue(from.toMSecsSinceEpoch());
     q.addBindValue(to.isValid() ? to.toMSecsSinceEpoch() : std::numeric_limits<qint64>::max());
     q.addBindValue(prefix.size());
     q.addBindValue(prefix.isNull() ? QStringLiteral("") : prefix);     // a null string binds NULL
     q.exec();
+
+    // In time order, a local day's end found once per day, not a time zone conversion per rating
+    // (a year of 20 ratings a day: 20 ms).
+    QSet<QString> *today = nullptr;
+    qint64 dayEnd = std::numeric_limits<qint64>::min();
     while (q.next()) {
-        const QDate day = QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC).toLocalTime().date();
-        entries[day].insert(*ids.insert(q.value(0).toString()));
+        const qint64 at = q.value(1).toLongLong();
+        if (at >= dayEnd) {
+            const QDate day = QDateTime::fromMSecsSinceEpoch(at, QTimeZone::UTC).toLocalTime().date();
+            today = &entries[day];
+            dayEnd = day.addDays(1).startOfDay().toMSecsSinceEpoch();
+        }
+        today->insert(*ids.insert(q.value(0).toString()));
     }
     return entries;
 }

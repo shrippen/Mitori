@@ -164,6 +164,8 @@ Kirigami.Page {
         const own = list.item ? Array.from(list.item.actions) : []
         return wide && pane.item ? own.concat(Array.from(pane.item.actions)) : own
     }
+    // A changed entry in the editor of the page beside the list (Main.mayClose).
+    readonly property var editAsk: pane.item ? pane.item["editAsk"] ?? null : null
     readonly property var flickable: showsPage ? (pane.item ? pane.item.flickable ?? null : null) : list.item ? list.item.flickable : null
     // A new window (a change of style) comes back here (Main.keptPageList). `flickable` gives Main
     // one place; the page beside the list loads later and comes to its own.

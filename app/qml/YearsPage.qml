@@ -122,13 +122,22 @@ Kirigami.ScrollablePage {
                             }
                             return l
                         }
-                        // Every day of the year says what it was, also one without practice.
+                        // Every day of the year says what it was, also one without practice. A text
+                        // per count, not per day (five years of days took 120 ms), from the
+                        // heatmap's dates (no Date per day).
                         tips: {
                             const t = {}
-                            for (let day = new Date(yearBlock.modelData, 0, 1, 12); day <= yearBlock.endDate;
-                                 day = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1, 12)) {
-                                const key = isoDay(day)
-                                t[key] = yearBlock.perDay[key] ? qsTr("%n technique(s)", "", yearBlock.perDay[key]) : qsTr("no practice")
+                            const texts = { 0: qsTr("no practice") }
+                            const year = String(yearBlock.modelData)
+                            for (const cell of heat.cells) {
+                                if (!cell.shown || !cell.iso.startsWith(year)) {
+                                    continue
+                                }
+                                const n = yearBlock.perDay[cell.iso] || 0
+                                if (!(n in texts)) {
+                                    texts[n] = qsTr("%n technique(s)", "", n)
+                                }
+                                t[cell.iso] = texts[n]
                             }
                             return t
                         }

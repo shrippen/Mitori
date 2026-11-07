@@ -45,7 +45,7 @@ Kirigami.ScrollablePage {
         Kirigami.Action {
             icon.name: "view-list-details"
             text: qsTr("All notes")
-            onTriggered: page.fromAllNotes ? page.Kirigami.PageStack.pop()
+            onTriggered: page.fromAllNotes ? leaveDialog.leaveOrAsk()
                                            : page.Kirigami.PageStack.push(Qt.resolvedUrl("AllNotesPage.qml"))
         }
     ]
@@ -62,7 +62,25 @@ Kirigami.ScrollablePage {
     function add() {
         if (Practice.addNote(page.entry.id, compose.text)) {
             compose.clear()
+            return true
         }
+        return false
+    }
+
+    // A note typed and not added: leaving asks (Back, "All notes", the window's close).
+    readonly property LeaveDialog leaveAsk: leaveDialog
+    // A changed note in the open editor (Main.mayClose).
+    readonly property LeaveDialog editAsk: editor.leaveAsk
+    LeaveDialog {
+        id: leaveDialog
+
+        objectName: "leaveNote"
+        stackPage: page
+        asking: compose.text.trim() !== ""
+        title: qsTr("Save the note?")
+        text: qsTr("“%1” is not saved yet.").arg(compose.text.trim())
+        save: () => page.add()
+        discard: () => compose.clear()
     }
 
     ColumnLayout {
