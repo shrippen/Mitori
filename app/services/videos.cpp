@@ -1,14 +1,18 @@
 #include "videos.h"
 
 #include "bundleshelf.h"
+#include "decoders.h"
 
 #include <QDir>
 #include <QFileInfo>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QTimer>
 
 namespace {
 constexpr auto kFolderKey = "videos/folder";
+// The start is over by then (0.5 s on a desktop): the backend does not compete with it.
+constexpr int kDecoderPauseMs = 2000;
 }
 
 Videos::Videos(QObject *parent)
@@ -23,6 +27,17 @@ Videos::Videos(const Catalog &catalog, QObject *parent)
 {
     // Videos of a bundle came or went: bindings that ask available() follow (they read folder).
     connect(&BundleShelf::notifier(), &BundleShelfNotifier::changed, this, &Videos::folderChanged);
+    connect(&Decoders::shared(), &Decoders::ready, this, &Videos::decodersReadyChanged);
+}
+
+bool Videos::decodersReady() const
+{
+    return Decoders::shared().isReady();
+}
+
+void Videos::prepareDecoders()
+{
+    QTimer::singleShot(kDecoderPauseMs, &Decoders::shared(), &Decoders::prepare);
 }
 
 QString Videos::defaultFolder()

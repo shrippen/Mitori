@@ -19,6 +19,8 @@ class Videos : public QObject
     Q_PROPERTY(QString folder READ folder WRITE setFolder NOTIFY folderChanged)
     // Inside a Flatpak sandbox, which reads only ~/Videos (packaging/flatpak).
     Q_PROPERTY(bool sandboxed READ sandboxed CONSTANT)
+    // Qt's video backend is made and its decoders tried (prepareDecoders()).
+    Q_PROPERTY(bool decodersReady READ decodersReady NOTIFY decodersReadyChanged)
 
 public:
     explicit Videos(QObject *parent = nullptr);
@@ -27,6 +29,7 @@ public:
     QString folder() const { return m_folder; }
     void setFolder(const QString &folder);
     bool sandboxed() const { return qEnvironmentVariableIsSet("FLATPAK_ID"); }
+    bool decodersReady() const;
 
     // Whether the file of a video key ("aikido/k5") is on the device.
     Q_INVOKABLE bool available(const QString &video) const;
@@ -39,8 +42,13 @@ public:
 
     Q_INVOKABLE static QString defaultFolder();
 
+    // After the start: Qt's video backend is made in the background (Decoders), not when the
+    // first video opens (a second with some GPUs).
+    Q_INVOKABLE void prepareDecoders();
+
 signals:
     void folderChanged();
+    void decodersReadyChanged();
 
 private:
     QString path(const QString &video) const;
