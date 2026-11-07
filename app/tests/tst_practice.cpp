@@ -121,6 +121,63 @@ private slots:
         QCOMPARE(days.value(QDate(2026, 10, 26)), 2);
     }
 
+    // The calendars after ratings now, an exam round and a merged log: the same as a fresh read of
+    // the log (Practice keeps the years it read and adds to them). Ratings of past years stay.
+    void calendarsFollowRatings()
+    {
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("mitori.sqlite"));
+        const QDateTime now = QDateTime::currentDateTimeUtc();
+        const QStringList ids{QStringLiteral("aikido/k5/a"), QStringLiteral("aikido/k5/b"),
+                              QStringLiteral("daitoryu/k5/a"), QStringLiteral("shinkitoho/k5/a")};
+        {
+            PracticeLog log;
+            QVERIFY(log.open(path));
+            for (int day = 0; day < 800; day += 3) {
+                for (int i = 0; i <= day % 4; ++i) {
+                    log.add(ids.at((day + i) % ids.size()), 1 + i, now.addDays(-day).addSecs(-60 * i), QStringLiteral("d"));
+                }
+            }
+        }
+        Practice practice(path);
+        const int year = QDate::currentDate().year();
+        const QStringList disciplines{{}, QStringLiteral("aikido"), QStringLiteral("daitoryu")};
+        // Every calendar the pages show: Today (84 days), statistics (182), all years.
+        const auto calendars = [&](const Practice &p) {
+            QVariantList all{p.practisedPerDay(84), p.practisedPerDay(182), p.practisedPerDay(1000), p.firstYear()};
+            for (int y = year - 3; y <= year; ++y) {
+                for (const QString &d : disciplines) {
+                    all << p.practisedInYear(y, d);
+                }
+            }
+            return all;
+        };
+        QCOMPARE(calendars(practice), calendars(Practice(path)));
+
+        // A rating now: today changes, past days not.
+        QSignalSpy history(&practice, &Practice::historyChanged);
+        QVERIFY(practice.rate(ids.at(0), 3));
+        QVERIFY(practice.rate(ids.at(0), 4));       // the same technique again: counts once
+        QVERIFY(practice.rate(QStringLiteral("aikido/k4/new"), 2));
+        const QVariantList round{QVariantMap{{QStringLiteral("id"), ids.at(2)}, {QStringLiteral("level"), 3}},
+                                 QVariantMap{{QStringLiteral("id"), QStringLiteral("daitoryu/k4/new")}, {QStringLiteral("level"), 1}}};
+        QVERIFY(practice.saveRound(QStringLiteral("daitoryu"), QStringLiteral("k5"), round));
+        QCOMPARE(history.count(), 0);
+        QCOMPARE(calendars(practice), calendars(Practice(path)));
+
+        // A merged log (a backup, sync): read anew, past days included.
+        {
+            PracticeLog other;
+            QVERIFY(other.open(path));
+            other.add(QStringLiteral("shinkitoho/k5/b"), 2, now.addYears(-3), QStringLiteral("other"));
+            other.add(QStringLiteral("aikido/k5/c"), 2, now.addDays(-1), QStringLiteral("other"));
+        }
+        practice.refresh();
+        QCOMPARE(history.count(), 1);
+        QCOMPARE(calendars(practice), calendars(Practice(path)));
+        QCOMPARE(practice.firstYear(), now.addYears(-3).toLocalTime().date().year());
+    }
+
     // The same time stamp twice: the later insert wins (two taps within a millisecond).
     void sameTimeLaterWins()
     {
@@ -450,6 +507,19 @@ private slots:
         // Capital ẞ as ß.
         QCOMPARE(practice.searchNotes(QStringLiteral("NUR EIN FUẞ")).size(), 1);
         QVERIFY(practice.searchNotes(QStringLiteral(" ")).isEmpty());
+
+        // A changed note is found by its new text, also one written by another connection (a
+        // sync's conflict resolved), without refresh().
+        const QString fuss = practice.notes(QStringLiteral("d")).first().toMap().value(QStringLiteral("uid")).toString();
+        QVERIFY(practice.changeNote(fuss, QStringLiteral("Fuß nach innen")));
+        QVERIFY(practice.searchNotes(QStringLiteral("aussen")).isEmpty());
+        QCOMPARE(practice.searchNotes(QStringLiteral("innen")).size(), 1);
+        {
+            PracticeLog other;
+            QVERIFY(other.open(dir.filePath(QStringLiteral("mitori.sqlite"))));
+            other.addNote(QStringLiteral("k"), QStringLiteral("Tegatana gerade"), QDateTime::currentDateTimeUtc(), QStringLiteral("other"));
+        }
+        QCOMPARE(practice.searchNotes(QStringLiteral("tegatana")).size(), 1);
     }
 
     // All notes, newest first, each with its technique; deleted ones left out.

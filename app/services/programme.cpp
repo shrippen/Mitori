@@ -417,7 +417,28 @@ QVariantList Programme::search(const QString &query, int limit) const
     if (words.isEmpty()) {
         return result;
     }
-    eachTechnique([&](const QVariantMap &row) {
+    for (const SearchRow &r : searchRows()) {
+        if (r.text.matches(words)) {
+            result << r.row;
+        }
+        if (result.size() >= limit) {
+            break;
+        }
+    }
+    return result;
+}
+
+const QList<Programme::SearchRow> &Programme::searchRows() const
+{
+    // The language checked here, as in entry().
+    if (m_searchLanguage != Catalog::language()) {
+        m_searchRows.clear();
+        m_searchLanguage = Catalog::language();
+    }
+    if (!m_searchRows.isEmpty()) {
+        return m_searchRows;
+    }
+    eachTechnique([this](const QVariantMap &row) {
         const QStringList fields{row.value(QStringLiteral("title")).toString(),
                                  row.value(QStringLiteral("jp")).toString(),
                                  row.value(QStringLiteral("extra")).toString(),
@@ -430,12 +451,10 @@ QVariantList Programme::search(const QString &query, int limit) const
         for (const QVariant &step : row.value(QStringLiteral("steps")).toList()) {
             stepFields << step.toMap().value(QStringLiteral("title")).toString() << step.toMap().value(QStringLiteral("jp")).toString();
         }
-        if (SearchText((fields + stepFields).join(u' ')).matches(words)) {
-            result << row;
-        }
-        return result.size() < limit;
+        m_searchRows.append({row, SearchText((fields + stepFields).join(u' '))});
+        return true;
     });
-    return result;
+    return m_searchRows;
 }
 
 namespace {

@@ -237,6 +237,18 @@ QHash<QString, QDate> PracticeLog::firstRated() const
 
 QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from, const QString &prefix, const QDateTime &to) const
 {
+    const QHash<QDate, QSet<QString>> entries = practisedOn(from, prefix, to);
+    QHash<QDate, int> result;
+    for (auto it = entries.cbegin(); it != entries.cend(); ++it) {
+        result.insert(it.key(), int(it.value().size()));
+    }
+    return result;
+}
+
+QHash<QDate, QSet<QString>> PracticeLog::practisedOn(const QDateTime &from, const QString &prefix, const QDateTime &to) const
+{
+    QHash<QDate, QSet<QString>> entries;
+    QSet<QString> ids;      // one copy of each id's text for all days
     QSqlQuery q(QSqlDatabase::database(m_connection));
     q.setForwardOnly(true);
     q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ? AND at < ? AND substr(entry, 1, ?) = ? ORDER BY at"));
@@ -248,26 +260,24 @@ QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from, const QStr
 
     // In time order, a local day's end found once per day, not a time zone conversion per rating
     // (a year of 20 ratings a day: 20 ms).
-    QHash<QDate, int> result;
-    QSet<QString> entries;
-    QDate day;
+    QSet<QString> *today = nullptr;
     qint64 dayEnd = std::numeric_limits<qint64>::min();
     while (q.next()) {
         const qint64 at = q.value(1).toLongLong();
         if (at >= dayEnd) {
-            if (day.isValid()) {
-                result.insert(day, int(entries.size()));
-            }
-            entries.clear();
-            day = QDateTime::fromMSecsSinceEpoch(at, QTimeZone::UTC).toLocalTime().date();
+            const QDate day = QDateTime::fromMSecsSinceEpoch(at, QTimeZone::UTC).toLocalTime().date();
+            today = &entries[day];
             dayEnd = day.addDays(1).startOfDay().toMSecsSinceEpoch();
         }
-        entries.insert(q.value(0).toString());
+        today->insert(*ids.insert(q.value(0).toString()));
     }
-    if (day.isValid()) {
-        result.insert(day, int(entries.size()));
-    }
-    return result;
+    return entries;
+}
+
+qint64 PracticeLog::dataVersion() const
+{
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    return q.exec(QStringLiteral("PRAGMA data_version")) && q.next() ? q.value(0).toLongLong() : -1;
 }
 
 QDateTime PracticeLog::firstRating() const

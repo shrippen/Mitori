@@ -176,6 +176,8 @@ qt_add_qml_module(mitori_app
         services/glossary.cpp
         player/speaker.h
         player/speaker.cpp
+        player/decoders.h
+        player/decoders.cpp
         services/videos.h
         services/videos.cpp
         services/practice.h
@@ -354,6 +356,15 @@ qt_add_resources(mitori_app "licences"
 target_include_directories(mitori_app PUBLIC catalog services store player platform)
 target_link_libraries(mitori_app PUBLIC Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia Qt6::Sql Qt6::Network Qt6::Concurrent KF6::Kirigami monocypher ZXing)
 target_link_libraries(mitori_app PRIVATE Qt6Keychain::Qt6Keychain)
+# Qt's video backend made in the background (player/decoders.cpp) needs its private header;
+# without it the first player makes the backend. Only QPlatformMediaIntegration::instance() is used,
+# there since Qt 6.2 (symbol version Qt_6_PRIVATE_API, not tied to a patch release).
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
+find_package(Qt6 QUIET COMPONENTS MultimediaPrivate)
+if(TARGET Qt6::MultimediaPrivate)
+    target_link_libraries(mitori_app PRIVATE Qt6::MultimediaPrivate)
+    target_compile_definitions(mitori_app PRIVATE MITORI_MULTIMEDIA_PRIVATE)
+endif()
 if(NOT ANDROID)
     target_link_libraries(mitori_app PUBLIC Qt6::DBus)
 endif()
@@ -576,13 +587,23 @@ if(MITORI_BUILD_TESTS AND NOT ANDROID)
     add_test(NAME bundlecrypto COMMAND tst_bundlecrypto)
 
     qt_add_executable(tst_bundles tests/tst_bundles.cpp services/bundles.cpp services/bundles.h
-        services/videos.cpp services/videos.h catalog/catalog.cpp catalog/catalog.h
+        services/videos.cpp services/videos.h catalog/catalog.cpp catalog/catalog.h player/decoders.cpp player/decoders.h
         store/bundleshelf.cpp store/bundleshelf.h store/bundlecrypto.cpp store/bundlecrypto.h)
-    target_include_directories(tst_bundles PRIVATE services store catalog)
+    target_include_directories(tst_bundles PRIVATE services store catalog player)
     target_compile_definitions(tst_bundles PRIVATE TEST_BUNDLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data/bundle")
     target_link_libraries(tst_bundles PRIVATE Qt6::Core Qt6::Qml Qt6::Network Qt6::Concurrent Qt6::Test monocypher)
     set_target_properties(tst_bundles PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
     add_test(NAME bundles COMMAND tst_bundles)
+
+    if(TARGET Qt6::MultimediaPrivate)
+        qt_add_executable(tst_decoders tests/tst_decoders.cpp player/decoders.cpp player/decoders.h)
+        target_include_directories(tst_decoders PRIVATE player)
+        target_compile_definitions(tst_decoders PRIVATE MITORI_MULTIMEDIA_PRIVATE)
+        target_link_libraries(tst_decoders PRIVATE Qt6::Gui Qt6::Multimedia Qt6::MultimediaPrivate Qt6::Test)
+        set_target_properties(tst_decoders PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN ON)
+        add_test(NAME decoders COMMAND tst_decoders)
+        set_tests_properties(decoders PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+    endif()
 
     qt_add_executable(tst_codescanner tests/tst_codescanner.cpp services/codescanner.cpp services/codescanner.h
         platform/qrreader.cpp platform/qrreader.h store/bundlecrypto.cpp store/bundlecrypto.h)

@@ -870,6 +870,7 @@ private slots:
         Catalog::setLanguage(Catalog::Language::German);
 
         QCOMPARE(english, german);
+        QCOMPARE(ids(programme.search(QStringLiteral("2 arten"), 1000)), german);   // German again
         QVERIFY(noGerman);
         QVERIFY(japanese);
         QVERIFY(group);

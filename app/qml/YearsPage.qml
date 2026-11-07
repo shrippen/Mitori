@@ -72,7 +72,7 @@ Kirigami.ScrollablePage {
                 id: yearBlock
 
                 required property int modelData
-                readonly property var perDay: Practice.revision >= 0 ? Practice.practisedInYear(modelData, page.discipline) : ({})
+                readonly property var perDay: (modelData === page.todayDate.getFullYear() ? Practice.revision : Practice.historyRevision) >= 0 ? Practice.practisedInYear(modelData, page.discipline) : ({})
                 readonly property var days: Object.keys(perDay)
                 readonly property var grades: (Courses.revision >= 0 ? Courses.grades : [])
                     .filter(g => g.day.startsWith(String(modelData)) && (page.discipline === "" || g.discipline === page.discipline))
