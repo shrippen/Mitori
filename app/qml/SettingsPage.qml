@@ -40,7 +40,7 @@ Kirigami.ScrollablePage {
         LookListRow {
             objectName: "videosButton"
             Layout.fillWidth: true
-            leadingText: "映"
+            glyph: "映"
             text: qsTr("Videos")
             subtitle: qsTr("Bundles, updates, code")
             selected: page.shown("VideosPage.qml")
@@ -49,7 +49,7 @@ Kirigami.ScrollablePage {
         LookListRow {
             objectName: "backupButton"
             Layout.fillWidth: true
-            leadingText: "保"
+            glyph: "保"
             text: qsTr("Backup and sync")
             subtitle: qsTr("File, Nextcloud, other devices")
             selected: page.shown("BackupPage.qml")
@@ -58,7 +58,7 @@ Kirigami.ScrollablePage {
         LookListRow {
             objectName: "appearanceButton"
             Layout.fillWidth: true
-            leadingText: "色"
+            glyph: "色"
             text: qsTr("Appearance")
             subtitle: qsTr("Style, language, about Mitori")
             selected: page.shown("AppearancePage.qml")
