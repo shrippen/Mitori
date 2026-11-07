@@ -115,6 +115,17 @@ public:
         return qint64(t.tv_sec) * 1000 + t.tv_nsec / 1000000;
     }
 
+    // A debug build's C++ is up to four times slower (Programme.suggest 323 ms, 84 in release):
+    // the budgets scale with it.
+    Q_INVOKABLE bool debugBuild() const
+    {
+#ifdef NDEBUG
+        return false;
+#else
+        return true;
+#endif
+    }
+
 public slots:
     void applicationAvailable()
     {

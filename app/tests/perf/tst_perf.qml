@@ -3,30 +3,81 @@ import QtTest
 import org.kde.kirigami as Kirigami
 import Mitori
 
-// How long the pages take with five years of use (tst_perf.cpp). "PERF <name> <ms> cpu <ms>" for the
-// record; a budget that fails means: much slower than it was (generous, the CI's machine is small).
-// Budgets hold CPU time: the time on the wall also counts who else runs (Player 5597 ms with 40 busy
-// processes, 1312 ms CPU), and says nothing about the page.
+// How long the pages take with five years of use (tst_perf.cpp). "PERF <name> <ms> cpu <ms> budget
+// <ms>" for the record. Budgets hold CPU time: the time on the wall also counts who else runs (Player
+// 5597 ms with 40 busy processes, 1312 ms CPU), and says nothing about the page.
 TestCase {
     id: test
 
     name: "Perf"
     when: windowShown
 
-    readonly property int pageBudget: 5000
-    readonly property int callBudget: 2000
+    // Each case its own budget, ms CPU in a release build: 1.5 times the most measured alone (here
+    // and on the GitHub runner), 1.3 times the most with 40 busy processes on 24 threads (35 runs;
+    // the cases #104 and #105 made faster: 12 busy processes, 5 runs);
+    // a frame (16) at least. A debug build has four times as much. A case without a budget fails;
+    // one over it runs once more (check()).
+    // Snappy is a tap saved within a frame and a page or list drawn within about 200 ms, on the
+    // GitHub runner. Above that today, to be made faster, not the budget looser: "slow".
+    readonly property var budgets: ({
+        "start menu": 1000,                 // slow: cold start, first QML types
+        "TodayPage": 650,                   // slow
+        "StatsPage": 300,
+        "YearsPage": 550,                   // slow: five years of calendar
+        "AllNotesPage": 450,                // slow
+        "TechniqueMapPage": 250,
+        "SearchPage": 250,
+        "CoursesPage": 90,
+        "NotebooksPage": 80,
+        "GradesPage": 350,
+        "SettingsPage": 70,
+        "BackupPage": 170,
+        "VideosPage": 130,
+        "AppearancePage": 600,
+        "ExamPage": 180,
+        "Programme aikido": 400,
+        "Programme daitoryu": 450,
+        "Programme shinkitoho": 350,
+        "Programme tablet": 750,            // slow: list, page and small player
+        "Player first": 500,                // the decoders probed after the start (#105)
+        "Programme.entries": 16,
+        "Practice.due": 16,
+        "Practice.counts": 16,
+        "Practice.allNotes": 110,
+        "Practice.searchNotes": 16,
+        "Practice.practisedPerDay": 16,
+        "Practice.practisedInYear": 16,
+        "Programme.suggest, 500 words": 110,
+        "Search": 400,
+        "Search “k”": 160,                  // a query until its list is drawn
+        "Search “ko”": 180,
+        "Search “kot”": 200,
+        "Search “kote”": 100,
+        "Programme": 450,
+        "Player over programme": 650,
+        "Practice.rate": 20,
+        "Practice.addNote": 60,             // slow: a tap
+        "Stats again": 300,
+        "Years over stats": 900,            // slow: see YearsPage
+        "Today over years": 1000,           // slow
+        "Player over stats": 550,           // slow
+        "Practice.rate under stats": 50     // slow: a tap
+    })
+    readonly property int debugFactor: perfClock.debugBuild() ? 4 : 1
+    // A query until its list is drawn: SearchPage's typing pause (100 ms) is not in it.
+    readonly property int listDrawn: 500
     property var window: null
     property var times: []
 
     function initTestCase() {
         const component = Qt.createComponent("Mitori", "Main")
         verify(component.status === Component.Ready, component.errorString())
-        const started = now()
-        window = component.createObject(null, { width: 420, height: 800 })
-        window.show()
-        tryVerify(() => window.pageStack.currentItem !== null, 10000)
-        waitForRendering(window.contentItem)
-        report("start menu", started, 8000)
+        check("start menu", () => {
+            window = component.createObject(null, { width: 420, height: 800 })
+            window.show()
+            tryVerify(() => window.pageStack.currentItem !== null, 10000)
+            waitForRendering(window.contentItem)
+        })
         // Qt's video backend, made in the background after the start: not in a page's time.
         tryVerify(() => Videos.decodersReady, 15000, "the video backend is made")
     }
@@ -56,28 +107,49 @@ TestCase {
         wait(50)
     }
 
-    function now() {
-        return { wall: Date.now(), cpu: perfClock.cpuMs() }
+    // One run of a case: ms CPU and on the wall. A collection of what earlier cases left is not
+    // this case's (Stats again: up to 1276 ms CPU without the gc(), 676 with it).
+    function measure(run) {
+        gc()
+        const wall = Date.now()
+        const cpu = perfClock.cpuMs()
+        run()
+        return { wall: Date.now() - wall, cpu: perfClock.cpuMs() - cpu }
     }
 
-    // Since `started`; `waited`: what the case itself waits for, not part of the wall's time.
-    function report(name, started, budget, waited) {
-        const wall = Date.now() - started.wall - (waited || 0)
-        const ms = perfClock.cpuMs() - started.cpu
-        console.log("PERF " + name + " " + wall + " cpu " + ms)
-        times.push({ name: name, ms: ms })
-        verify(ms <= budget, name + " took " + ms + " ms CPU, budget " + budget)
+    // A case over its budget runs once more after `again` (when given): a busy machine can double
+    // one case's CPU time for a moment (Programme aikido 435 ms, median 202), not two in a row.
+    function check(name, run, again) {
+        const budget = budgets[name] * debugFactor
+        verify(!isNaN(budget), "no budget for " + name)
+        let took = measure(run)
+        if (took.cpu > budget && again) {
+            console.log("PERF " + name + " " + took.wall + " cpu " + took.cpu + " budget " + budget + ": once more")
+            again()
+            took = measure(run)
+        }
+        console.log("PERF " + name + " " + took.wall + " cpu " + took.cpu + " budget " + budget)
+        times.push({ name: name, ms: took.cpu })
+        verify(took.cpu <= budget, name + " took " + took.cpu + " ms CPU, budget " + budget)
     }
 
-    // A page from the push until it is drawn.
+    // A page from the push until it is drawn; once more after a pop when over budget.
     function page(name, file, properties) {
-        const started = now()
-        window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + file + ".qml"), properties || {})
-        waitForRendering(window.contentItem)
-        report(name, started, pageBudget)
+        check(name, () => push(file, properties), back)
         const shown = window.pageStack.currentItem
         wait(350)   // the slide, not part of the time
         return shown
+    }
+
+    // The first player of the run, once: Qt probes the decoders only then (a second is no retry).
+    function firstPlayer(name, properties) {
+        check(name, () => push("PlayerPage", properties))
+        wait(350)
+    }
+
+    function push(file, properties) {
+        window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + file + ".qml"), properties || {})
+        waitForRendering(window.contentItem)
     }
 
     function back() {
@@ -86,9 +158,8 @@ TestCase {
     }
 
     function call(name, f) {
-        const started = now()
-        const result = f()
-        report(name, started, callBudget)
+        let result
+        check(name, () => { result = f() }, () => {})
         return result
     }
 
@@ -123,7 +194,7 @@ TestCase {
 
     function test_4_player() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
-        page("Player", "PlayerPage", { playlist: rows, index: 0 })
+        firstPlayer("Player first", { playlist: rows, index: 0 })
         back()
     }
 
@@ -146,16 +217,17 @@ TestCase {
         call("Programme.suggest, 500 words", () => Programme.suggest(text))
     }
 
-    // One keystroke in the search: the list follows at once.
+    // One keystroke in the search, after the typing pause: the query until its list is drawn.
     function test_6_search_typing() {
         const search = page("Search", "SearchPage")
-        const field = findChild(search, "searchField")
+        let previous = ""
         for (const text of ["k", "ko", "kot", "kote"]) {
-            const started = now()
-            field.text = text
-            wait(320)   // the page waits for the typing to pause
-            wait(0)     // the list has followed (no waitForRendering: an unchanged picture never comes)
-            report("Search “" + text + "”", started, callBudget, 320)
+            const type = shown => () => {
+                search.query = shown
+                waitForRendering(window.contentItem, listDrawn)   // false when the picture stays
+            }
+            check("Search “" + text + "”", type(text), type(previous))
+            previous = text
         }
         back()
     }
@@ -164,7 +236,7 @@ TestCase {
     function test_7_rate() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
         page("Programme", "ProgrammePage")
-        page("Player", "PlayerPage", { playlist: rows, index: 0 })
+        page("Player over programme", "PlayerPage", { playlist: rows, index: 0 })
         call("Practice.rate", () => Practice.rate(rows[0].id, 3))
         call("Practice.addNote", () => Practice.addNote(rows[0].id, "Noch einmal"))
     }
@@ -172,10 +244,10 @@ TestCase {
     // The same with the statistics: the pages that count everything, under the player.
     function test_8_rate_over_stats() {
         const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry")
-        page("Stats", "StatsPage")
-        page("Years", "YearsPage")
-        page("Today", "TodayPage")
-        page("Player", "PlayerPage", { playlist: rows, index: 0 })
+        page("Stats again", "StatsPage")
+        page("Years over stats", "YearsPage")
+        page("Today over years", "TodayPage")
+        page("Player over stats", "PlayerPage", { playlist: rows, index: 0 })
         call("Practice.rate under stats", () => Practice.rate(rows[0].id, 2))
     }
 }
