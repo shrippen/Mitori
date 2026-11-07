@@ -133,7 +133,26 @@ Kirigami.ScrollablePage {
     function add() {
         if (Courses.addEntry(page.uid, compose.text)) {
             compose.clear()
+            return true
         }
+        return false
+    }
+
+    // On a phone an entry typed and not added asks before it goes (Back, the window's close);
+    // beside the list it is saved (keepBegun).
+    readonly property LeaveDialog leaveAsk: leaveDialog
+    // A changed entry in the open editor (Main.mayClose; ListAndPage passes it on).
+    readonly property LeaveDialog editAsk: editor.leaveAsk
+    LeaveDialog {
+        id: leaveDialog
+
+        objectName: "leaveEntry"
+        stackPage: page
+        asking: !page.paneHost && !page.gone && compose.text.trim() !== ""
+        title: qsTr("Save the entry?")
+        text: qsTr("“%1” is not saved yet.").arg(compose.text.trim())
+        save: () => page.add()
+        discard: () => compose.clear()
     }
 
     ColumnLayout {
@@ -540,6 +559,7 @@ Kirigami.ScrollablePage {
         id: editor
 
         title: qsTr("Entry")
+        changedText: qsTr("The entry has been changed but not saved.")
         save: (uid, text) => Courses.changeEntry(uid, text)
         remove: uid => Courses.deleteEntry(uid)
     }

@@ -75,6 +75,27 @@ Kirigami.ApplicationWindow {
     }
     pageStack.initialPage: StartPage {}
 
+    // Closing the window (desktop): typed text asks first (LeaveDialog), the top page first, on it
+    // an open note editor (`editAsk`) before the page's field (`leaveAsk`); after Save or Discard
+    // the window tries again, the next one may ask.
+    onClosing: close => {
+        close.accepted = root.mayClose(() => root.close())
+    }
+    function mayClose(then) {
+        for (let i = root.pageStack.depth - 1; i > 0; i--) {
+            const page = root.pageStack.get(i)
+            // The index: the page is a C++ type (pageLogo).
+            const ask = page ? [page["editAsk"], page["leaveAsk"]].find(a => a && a.asking) : undefined
+            if (!ask) {
+                continue
+            }
+            root.pageStack.currentIndex = i
+            ask.ask(then)
+            return false
+        }
+        return true
+    }
+
     // Kirigami destroys a popped page when its slide ends. A new height of the view stops the slide
     // without ending it (Shinki's head is lower on the start menu, the keyboard closes, a turn), and
     // the page stays, hidden, until the next slide ends. It goes now: a draft saved on destruction

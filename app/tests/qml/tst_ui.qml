@@ -6785,6 +6785,310 @@ TestCase {
         popPage()
     }
 
+    // A text typed on a phone and not added: leaving asks (save, discard, stay). Whitespace does not.
+    function test_8g_leaving_asks_data() {
+        const goBack = () => window.pageStack.goBack()
+        const head = () => window.back()                // Shinki's head, Kirigami's back button
+        // What a swipe does (and a click on an earlier page in Kirigami's breadcrumb): the stack steps
+        // back without backRequested. A touch swipe offscreen arrives in pieces, late or not at all.
+        const step = () => { window.pageStack.currentIndex = window.pageStack.currentIndex - 1 }
+        return [
+            { tag: "notes, Back key", page: "NotesPage", field: "compose", back: goBack },
+            { tag: "notes, head", page: "NotesPage", field: "compose", back: head },
+            { tag: "notes, swipe", page: "NotesPage", field: "compose", back: step },
+            { tag: "notebook, Back key", page: "CoursePage", field: "courseCompose", back: goBack },
+            { tag: "notebook, head", page: "CoursePage", field: "courseCompose", back: head },
+            { tag: "notebook, swipe", page: "CoursePage", field: "courseCompose", back: step }
+        ]
+    }
+    function test_8g_leaving_asks(data) {
+        // An entry no other case writes to.
+        const entry = Programme.entries("aikido", "k5").filter(r => r.kind === "entry").slice(-1)[0]
+        const uid = testCourse("Fragen " + data.tag)
+        const props = data.page === "NotesPage" ? { entry: entry } : { uid: uid }
+        const saved = () => data.page === "NotesPage" ? Practice.notes(entry.id).length : Courses.entries(uid).length
+        const before = saved()
+        const open = text => {
+            const page = push(data.page, props)
+            slidIn()
+            findChild(page, data.field).text = text
+            return page
+        }
+
+        // Typed: the page stays and asks; Cancel keeps the text.
+        let page = open("Erst halb")
+        data.back()
+        // Back at once after the Back key; after a swipe once the view stands.
+        tryVerify(() => window.pageStack.currentItem === page, 3000, "the page with typed text stays")
+        const dialog = page.leaveAsk
+        tryVerify(() => dialog.opened, 2000, "it asks")
+        shot("8g-leaving-asks-" + data.page, true)
+        dialog.reject()
+        tryVerify(() => !dialog.visible)
+        compare(window.pageStack.currentItem, page)
+        compare(findChild(page, data.field).text, "Erst halb")
+
+        // Discard: the page goes, nothing saved. Back in place first: a swipe in the slide is none.
+        slidIn()
+        data.back()
+        tryVerify(() => dialog.opened)
+        mouseClick(findChild(dialog.contentItem, "leaveDiscard"))
+        tryVerify(() => window.pageStack.currentItem !== page, 3000, "discarded, the page goes")
+        compare(saved(), before)
+
+        // Save: the text is kept, the page goes.
+        page = open("Ganz gesagt")
+        data.back()
+        tryVerify(() => page.leaveAsk.opened)
+        page.leaveAsk.accept()
+        tryVerify(() => window.pageStack.currentItem !== page, 3000, "saved, the page goes")
+        compare(saved(), before + 1)
+
+        // Nothing but spaces: no question.
+        page = open("   ")
+        data.back()
+        tryVerify(() => window.pageStack.currentItem !== page, 3000, "nothing to lose")
+        wait(300)
+        verify(!page.leaveAsk || !page.leaveAsk.opened, "not asked")
+        Practice.notes(entry.id).filter(n => n.text === "Ganz gesagt").forEach(n => Practice.deleteNote(n.uid))
+        verify(Courses.remove(uid))
+    }
+
+    // A new course half typed: Back asks before it is dropped.
+    function test_8g_new_course_asks() {
+        const count = Courses.notebooks.length
+        let page = push("CourseNewPage")
+        slidIn()
+        findChild(page, "coursePlace").text = "Dojo Nord"
+        window.pageStack.goBack()
+        wait(300)
+        verify(window.pageStack.currentItem === page, "the half typed course stays")
+        const dialog = page.leaveAsk
+        tryVerify(() => dialog.opened)
+        compare(dialog.standardButton(QQC2.Dialog.Ok).text, qsTr("Discard"))
+        dialog.reject()
+        tryVerify(() => !dialog.visible)
+        compare(findChild(page, "coursePlace").text, "Dojo Nord")
+        window.back()
+        tryVerify(() => dialog.opened)
+        dialog.accept()
+        tryVerify(() => window.pageStack.currentItem !== page, 3000, "discarded")
+        compare(Courses.notebooks.length, count)
+
+        page = push("CourseNewPage")
+        slidIn()
+        window.pageStack.goBack()
+        tryVerify(() => window.pageStack.currentItem !== page, 3000, "nothing typed, no question")
+    }
+
+    // A note changed in the editor and closed without saving (Escape, Back, ×, a tap beside it) asks;
+    // Cancel opens the editor again with the change.
+    function test_8g_editor_asks() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        verify(Practice.addNote(entry.id, "Alt"))
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        const note = page.notes.find(n => n.text === "Alt")
+        const editor = findChild(page, "noteEditor")
+        const area = findChild(editor, "noteArea")
+        const close = () => {
+            area.forceActiveFocus()
+            keyClick(Qt.Key_Escape)
+        }
+
+        // Unchanged: closes without a question.
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        close()
+        tryVerify(() => !editor.visible)
+        wait(300)
+        verify(!editor.leaveAsk || !editor.leaveAsk.opened, "nothing changed, no question")
+
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        area.text = "Neu"
+        close()
+        tryVerify(() => editor.leaveAsk && editor.leaveAsk.opened, 2000, "the change asks")
+        editor.leaveAsk.reject()
+        tryVerify(() => editor.opened, 2000, "back to the editor")
+        compare(area.text, "Neu")
+        close()
+        tryVerify(() => editor.leaveAsk.opened)
+        mouseClick(findChild(editor.leaveAsk.contentItem, "leaveDiscard"))
+        tryVerify(() => !editor.leaveAsk.visible && !editor.visible)
+        verify(page.notes.some(n => n.uid === note.uid && n.text === "Alt"), "discarded")
+
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        compare(area.text, "Alt")
+        area.text = "Neu gesagt"
+        close()
+        tryVerify(() => editor.leaveAsk.opened)
+        editor.leaveAsk.accept()
+        tryVerify(() => page.notes.some(n => n.uid === note.uid && n.text === "Neu gesagt"), 2000, "saved")
+        verify(Practice.deleteNote(note.uid))
+        popPage()
+    }
+
+    // The editor's question while the window closes: (1) the editor is already shut (Escape) and its
+    // question stands, the change not yet saved; (2) Save fails (a database error, here a save that
+    // says false): the window stays, and a later Discard does not close it unasked.
+    function test_8g_editor_question_holds_window() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        verify(Practice.addNote(entry.id, "Fenster alt"))
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        const note = page.notes.find(n => n.text === "Fenster alt")
+        const editor = findChild(page, "noteEditor")
+        const area = findChild(editor, "noteArea")
+        const ask = editor.leaveAsk
+        const escape = () => {
+            area.forceActiveFocus()
+            keyClick(Qt.Key_Escape)
+        }
+
+        // (1) Escape: the editor shuts, its question stands.
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        area.text = "Fenster neu"
+        escape()
+        tryVerify(() => ask.opened && !editor.visible)
+        let closed = false
+        verify(!window.mayClose(() => { closed = true }), "the standing question holds the window")
+        tryVerify(() => ask.opened)
+        ask.accept()
+        tryVerify(() => closed, 2000, "saved, then the window closes")
+        verify(page.notes.some(n => n.uid === note.uid && n.text === "Fenster neu"))
+        verify(Practice.deleteNote(note.uid))
+        popPage()
+    }
+    // Right after Escape the question fades in (opened only at its end): it holds the window already.
+    function test_8g_question_fading_in_holds_window() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        verify(Practice.addNote(entry.id, "Blende alt"))
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        const note = page.notes.find(n => n.text === "Blende alt")
+        const editor = findChild(page, "noteEditor")
+        const area = findChild(editor, "noteArea")
+        const ask = editor.leaveAsk
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        area.text = "Blende neu"
+        area.forceActiveFocus()
+        keyClick(Qt.Key_Escape)
+        tryVerify(() => ask.visible)
+        let closed = false
+        verify(!window.mayClose(() => { closed = true }), "the question fading in holds the window")
+        tryVerify(() => ask.opened)
+        mouseClick(findChild(ask.contentItem, "leaveDiscard"))
+        tryVerify(() => closed && !ask.visible, 2000, "discarded, then the window closes")
+        verify(Practice.deleteNote(note.uid))
+        popPage()
+    }
+    // Saved or deleted with the editor's own buttons: while it fades out the window has nothing to ask.
+    function test_8g_editor_buttons_leave_nothing() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        verify(Practice.addNote(entry.id, "Knopf alt"))
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        const note = page.notes.find(n => n.text === "Knopf alt")
+        const editor = findChild(page, "noteEditor")
+        const area = findChild(editor, "noteArea")
+
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        area.text = "Knopf neu"
+        editor.customFooterActions[1].trigger()         // Save
+        verify(window.mayClose(() => {}), "saved: nothing to ask")
+        tryVerify(() => !editor.visible)
+
+        editor.edit(page.notes.find(n => n.uid === note.uid))
+        tryVerify(() => editor.opened)
+        area.text = "Knopf weg"
+        editor.customFooterActions[0].trigger()         // Delete
+        verify(window.mayClose(() => {}), "deleted: nothing to ask")
+        tryVerify(() => !editor.visible)
+        verify(!page.notes.some(n => n.uid === note.uid))
+        popPage()
+    }
+    function test_8g_failed_save_keeps_window() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        verify(Practice.addNote(entry.id, "Fenster alt"))
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        const note = page.notes.find(n => n.text === "Fenster alt")
+        const editor = findChild(page, "noteEditor")
+        const area = findChild(editor, "noteArea")
+        const ask = editor.leaveAsk
+        const escape = () => {
+            area.forceActiveFocus()
+            keyClick(Qt.Key_Escape)
+        }
+
+        // (2) Save fails while the window closes.
+        const save = editor.save
+        editor.save = () => false
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        area.text = "Fenster kaputt"
+        let closed = false
+        verify(!window.mayClose(() => { closed = true }))
+        tryVerify(() => ask.opened)
+        ask.accept()
+        tryVerify(() => !ask.visible)
+        verify(!closed, "not saved: the window stays")
+        verify(editor.opened, "the editor stays with the change")
+        escape()
+        tryVerify(() => ask.opened && !editor.visible)
+        mouseClick(findChild(ask.contentItem, "leaveDiscard"))
+        tryVerify(() => !ask.visible)
+        wait(100)
+        verify(!closed, "a later Discard leaves the window open")
+        editor.save = save
+
+        verify(Practice.deleteNote(note.uid))
+        popPage()
+    }
+
+    // Closing the window (desktop) with a text typed on a page asks first, then closes.
+    function test_8g_window_close_asks() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        const before = Practice.notes(entry.id).length
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        verify(window.mayClose(() => {}), "nothing typed: the window may close")
+        findChild(page, "compose").text = "Vor dem Schließen"
+        let closed = false
+        verify(!window.mayClose(() => { closed = true }), "the window waits for the typed text")
+        tryVerify(() => page.leaveAsk.opened)
+        page.leaveAsk.reject()
+        tryVerify(() => !page.leaveAsk.visible)
+        verify(!closed)
+        verify(!window.mayClose(() => { closed = true }))
+        tryVerify(() => page.leaveAsk.opened)
+        page.leaveAsk.accept()
+        tryVerify(() => closed, 2000, "closes after saving")
+        compare(Practice.notes(entry.id).length, before + 1)
+        compare(window.pageStack.currentItem, page, "the page stays for the window to close")
+
+        // A note changed in the open editor asks too, and the editor closes with the choice.
+        const note = Practice.notes(entry.id).find(n => n.text === "Vor dem Schließen")
+        const editor = findChild(page, "noteEditor")
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        findChild(editor, "noteArea").text = "Im Editor geändert"
+        closed = false
+        verify(!window.mayClose(() => { closed = true }), "the window waits for the changed note")
+        tryVerify(() => editor.leaveAsk.opened)
+        editor.leaveAsk.accept()
+        tryVerify(() => closed && !editor.visible, 2000, "saved, the editor closed")
+        verify(Practice.notes(entry.id).some(n => n.uid === note.uid && n.text === "Im Editor geändert"))
+        verify(window.mayClose(() => {}), "nothing left to ask")
+        verify(Practice.deleteNote(note.uid))
+        popPage()
+    }
+
     // The last chapter ends with the file; the loop must still start over at the chapter.
     function test_6_loop_at_end_of_file() {
         const page = playerAt(-1)

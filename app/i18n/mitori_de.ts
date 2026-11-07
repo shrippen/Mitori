@@ -645,6 +645,14 @@
         <translation>Neuer Lehrgang</translation>
     </message>
     <message>
+        <source>Discard the new course?</source>
+        <translation>Neuen Lehrgang verwerfen?</translation>
+    </message>
+    <message>
+        <source>What you typed has not been made into a course yet.</source>
+        <translation>Aus dem Eingegebenen ist noch kein Lehrgang angelegt.</translation>
+    </message>
+    <message>
         <source>For private trainings, guest teachers or dates that are not in the calendar.</source>
         <translation>Für private Trainings, Gastlehrer oder Termine, die nicht im Kalender stehen.</translation>
     </message>
@@ -735,6 +743,14 @@
     <message>
         <source>Delete notebook</source>
         <translation>Notizbuch löschen</translation>
+    </message>
+    <message>
+        <source>Save the entry?</source>
+        <translation>Eintrag speichern?</translation>
+    </message>
+    <message>
+        <source>“%1” is not saved yet.</source>
+        <translation>„%1“ ist noch nicht gespeichert.</translation>
     </message>
     <message>
         <source>from the calendar</source>
@@ -858,6 +874,10 @@
     <message>
         <source>Entry</source>
         <translation>Eintrag</translation>
+    </message>
+    <message>
+        <source>The entry has been changed but not saved.</source>
+        <translation>Der Eintrag ist geändert, aber nicht gespeichert.</translation>
     </message>
     <message>
         <source>Delete notebook?</source>
@@ -1396,6 +1416,17 @@
     </message>
 </context>
 <context>
+    <name>LeaveDialog</name>
+    <message>
+        <source>Save</source>
+        <translation>Speichern</translation>
+    </message>
+    <message>
+        <source>Discard</source>
+        <translation>Verwerfen</translation>
+    </message>
+</context>
+<context>
     <name>ListAndPage</name>
     <message>
         <source>Choose a course from the list.</source>
@@ -1508,6 +1539,14 @@
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
+    <message>
+        <source>The note has been changed but not saved.</source>
+        <translation>Die Notiz ist geändert, aber nicht gespeichert.</translation>
+    </message>
+    <message>
+        <source>Save the change?</source>
+        <translation>Änderung speichern?</translation>
+    </message>
 </context>
 <context>
     <name>NoteRow</name>
@@ -1591,6 +1630,14 @@
     <message>
         <source>Today</source>
         <translation>Heute</translation>
+    </message>
+    <message>
+        <source>Save the note?</source>
+        <translation>Notiz speichern?</translation>
+    </message>
+    <message>
+        <source>“%1” is not saved yet.</source>
+        <translation>„%1“ ist noch nicht gespeichert.</translation>
     </message>
     <message>
         <source>No notes on this technique yet.</source>
