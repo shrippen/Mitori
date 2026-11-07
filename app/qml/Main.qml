@@ -77,13 +77,20 @@ Kirigami.ApplicationWindow {
 
     // Closing the window (desktop): typed text asks first (LeaveDialog), the top page first, on it
     // an open note editor (`editAsk`) before the page's field (`leaveAsk`); after Save or Discard
-    // the window tries again, the next one may ask.
+    // the window tries again, the next one may ask. A recording (`busy`) asks nothing: it stops and
+    // is kept with the text typed, as on Back, then the window tries again.
     onClosing: close => {
         close.accepted = root.mayClose(() => root.close())
     }
     function mayClose(then) {
         for (let i = root.pageStack.depth - 1; i > 0; i--) {
             const page = root.pageStack.get(i)
+            if (page && page["busy"]) {
+                root.pageStack.currentIndex = i
+                root.afterBusy(page, then)
+                page.finishBusy()
+                return false
+            }
             // The index: the page is a C++ type (pageLogo).
             const ask = page ? [page["editAsk"], page["leaveAsk"]].find(a => a && a.asking) : undefined
             if (!ask) {
@@ -94,6 +101,18 @@ Kirigami.ApplicationWindow {
             return false
         }
         return true
+    }
+    // A recording stops a moment after finishBusy(); its note is made on that same change, `then`
+    // follows it.
+    function afterBusy(page, then) {
+        const done = () => {
+            if (page.busy) {
+                return
+            }
+            page.busyChanged.disconnect(done)
+            Qt.callLater(then)
+        }
+        page.busyChanged.connect(done)
     }
 
     // Kirigami destroys a popped page when its slide ends. A new height of the view stops the slide
