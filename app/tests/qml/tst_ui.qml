@@ -7062,6 +7062,41 @@ TestCase {
         }
     }
 
+    // Closing the window during a recording stops it and keeps it, as Back does, then the window
+    // closes: on a phone with a text typed (it goes with the recording), beside the list without.
+    function test_8g_close_finishes_recording() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        const uid = testCourse("Schließen")
+        const voices = []
+        const closes = media => {
+            media.recorder = fakeRecorder.createObject(media)
+            media.record()
+            verify(media.recording)
+            voices.push(media.voiceName)
+            let closed = false
+            verify(!window.mayClose(() => { closed = true }), "the recording holds the window")
+            tryVerify(() => closed, 2000, "kept, then the window closes")
+            verify(!media.recording)
+        }
+
+        const page = push("NotesPage", { entry: entry })
+        slidIn()
+        findChild(page, "compose").text = "Beim Schließen"
+        closes(findChild(page.footer, "noteMedia"))
+        verify(Practice.notes(entry.id).some(n => n.media === voices[0] && n.text === "Beim Schließen"), "the note")
+        verify(!page.leaveAsk.opened, "nothing asked")
+        popPage()
+
+        const host = bookBeside(uid)
+        const book = findChild(host, "pagePane").item
+        closes(findChild(book, "courseMedia"))
+        verify(Courses.entries(uid).some(e => e.media === voices[1]), "the entry")
+        popPage()
+
+        Practice.notes(entry.id).filter(n => voices.includes(n.media)).forEach(n => Practice.deleteNote(n.uid))
+        verify(Courses.remove(uid))
+    }
+
     // On a phone Back during a recording stops it: it becomes a note (or entry) with the text typed
     // so far, as beside the list on a tablet, and the page stays to show it.
     function test_8g_back_finishes_recording() {

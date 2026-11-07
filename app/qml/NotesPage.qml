@@ -67,6 +67,12 @@ Kirigami.ScrollablePage {
         return false
     }
 
+    // A running recording: Back and the window's close finish it first, and it becomes a note.
+    readonly property bool busy: media.recording
+    function finishBusy() {
+        media.finish()
+    }
+
     // A note typed and not added: leaving asks (Back, "All notes", the window's close).
     readonly property LeaveDialog leaveAsk: leaveDialog
     // A changed note in the open editor (Main.mayClose).
@@ -77,8 +83,8 @@ Kirigami.ScrollablePage {
         objectName: "leaveNote"
         stackPage: page
         asking: compose.text.trim() !== ""
-        busy: media.recording
-        finish: () => media.finish()
+        busy: page.busy
+        finish: () => page.finishBusy()
         title: qsTr("Save the note?")
         text: qsTr("“%1” is not saved yet.").arg(compose.text.trim())
         save: () => page.add()

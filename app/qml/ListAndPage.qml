@@ -164,6 +164,11 @@ Kirigami.Page {
         const own = list.item ? Array.from(list.item.actions) : []
         return wide && pane.item ? own.concat(Array.from(pane.item.actions)) : own
     }
+    // A recording beside the list: the window's close finishes it first (Main.mayClose).
+    readonly property bool busy: !!pane.item && !!pane.item.busy
+    function finishBusy() {
+        pane.item.finishBusy()
+    }
     // A changed entry in the editor of the page beside the list (Main.mayClose).
     readonly property var editAsk: pane.item ? pane.item["editAsk"] ?? null : null
     readonly property var flickable: showsPage ? (pane.item ? pane.item.flickable ?? null : null) : list.item ? list.item.flickable : null
