@@ -1,0 +1,21 @@
+{
+  "kind": "command",
+  "start": "demo/start.sh {lang}",
+  "today": "real",
+  "timeout": 900,
+  "format": "webp",
+  "shots": [
+    {"name": "release-0.1.0-start", "steps": []},
+    {"name": "release-0.1.0-programme", "steps": ["pageStack.push(Qt.resolvedUrl('qrc:/qt/qml/Mitori/qml/ProgrammePage.qml'))"]},
+    {"name": "release-0.1.0-sheet", "steps": [
+      "pageStack.push(Qt.resolvedUrl('qrc:/qt/qml/Mitori/qml/ProgrammePage.qml'))",
+      "pageStack.currentItem.open(pageStack.currentItem.rows.find(r => r.id === 'aikido/kyu-grade/tachi-waza-mae-seme/shomen-uchi/k3/sankyo-1'))"]},
+    {"name": "release-0.1.0-today", "steps": ["pageStack.push(Qt.resolvedUrl('qrc:/qt/qml/Mitori/qml/TodayPage.qml'))"]},
+    {"name": "release-0.1.0-exam", "steps": ["pageStack.push(Qt.resolvedUrl('qrc:/qt/qml/Mitori/qml/ExamPage.qml'))"]},
+    {"name": "release-0.1.0-map", "steps": ["pageStack.push(Qt.resolvedUrl('qrc:/qt/qml/Mitori/qml/TechniqueMapPage.qml'))"]},
+    {"name": "release-0.1.0-stats", "steps": ["pageStack.push(Qt.resolvedUrl('qrc:/qt/qml/Mitori/qml/StatsPage.qml'))"]},
+    {"name": "release-0.1.0-courses", "steps": ["pageStack.push(Qt.resolvedUrl('qrc:/qt/qml/Mitori/qml/ListAndPage.qml'), { listSource: 'CoursesPage.qml' })"]},
+    {"name": "release-0.1.0-grades", "steps": ["pageStack.push(Qt.resolvedUrl('qrc:/qt/qml/Mitori/qml/GradesPage.qml'))"]},
+    {"name": "release-0.1.0-shinki", "style": "shinki", "steps": []}
+  ]
+}

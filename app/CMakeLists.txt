@@ -393,6 +393,7 @@ endif()
 option(MITORI_DEMO "Include the internal demo mode (development only)" OFF)
 if(MITORI_DEMO)
     target_compile_definitions(mitori PRIVATE MITORI_DEMO)
+    target_sources(mitori PRIVATE demo/demo.cpp demo/demo.h)
 endif()
 
 if(ANDROID)

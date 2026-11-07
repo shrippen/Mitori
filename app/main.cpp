@@ -6,6 +6,9 @@
 #include <QtQml/QQmlExtensionPlugin>
 
 #include "appearance.h"
+#ifdef MITORI_DEMO
+#include "demo/demo.h"
+#endif
 
 Q_IMPORT_QML_PLUGIN(MitoriPlugin)
 
@@ -23,6 +26,11 @@ int main(int argc, char *argv[])
     if (QIcon::themeName().isEmpty() || QIcon::themeName() == QLatin1String("hicolor")) {
         QIcon::setThemeName(QStringLiteral("breeze-mitori"));
     }
+
+#ifdef MITORI_DEMO
+    // Settings, data and course calendar of the demo world, before the language is read.
+    Demo::prepare();
+#endif
 
     // The language chosen in Appearance, else the first of the user's languages with a catalog
     // (de, en); otherwise the English of the code. Dates follow the chosen language too.
@@ -48,6 +56,9 @@ int main(int argc, char *argv[])
     if (!Appearance::openWindow(&engine)) {
         return 1;
     }
+#ifdef MITORI_DEMO
+    Demo::shoot(engine.singletonInstance<Appearance *>("Mitori", "Appearance")->window());
+#endif
     const int code = app.exec();
 
     // Before the engine: the pages' last words need it (NoteRow saves a draft).
