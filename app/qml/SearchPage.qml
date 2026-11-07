@@ -119,6 +119,17 @@ Kirigami.ScrollablePage {
         objectName: "glossaryList"
         model: page.rows
         reuseItems: true
+        // The list stays at its top while the head changes height (a query's results, the speech
+        // hint, letters wrapping anew), only if it stood there: not once the reader has moved it
+        // (flick, wheel, keys, a letter). A head that changes height leaves contentY as it is.
+        property bool keepTop: true
+        onContentYChanged: keepTop = atYBeginning
+
+        function toTop() {
+            if (keepTop) {
+                positionViewAtBeginning()
+            }
+        }
         currentIndex: -1
         activeFocusOnTab: true
         // A–Z headings in the whole glossary; words found stand under "Glossary", then "Techniques"
@@ -152,7 +163,7 @@ Kirigami.ScrollablePage {
         header: ColumnLayout {
             width: ListView.view.width
             spacing: Kirigami.Units.largeSpacing
-            onHeightChanged: Qt.callLater(list.positionViewAtBeginning)
+            onHeightChanged: Qt.callLater(list.toTop)
 
             // A–Z: the letters with a word, a tap goes to the first (clickdummy "Glossar").
             Flow {
