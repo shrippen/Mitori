@@ -48,10 +48,12 @@ jobs:
         env:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
 
+      # ttf-dejavu: a system font as every user has; without one the notes page took 2.4 s, not 0.2 (tst_perf).
       - name: Install Python, Qt, Kirigami, build tools
         run: |
           pacman -Syu --noconfirm --needed git python python-yaml python-pytest python-pynacl poppler poppler-data \
-            base-devel cmake ninja extra-cmake-modules qt6-declarative qt6-shadertools qt6-tools qt6-multimedia qt6-multimedia-ffmpeg qt6-speech qtkeychain-qt6 kirigami
+            base-devel cmake ninja extra-cmake-modules qt6-declarative qt6-shadertools qt6-tools qt6-multimedia qt6-multimedia-ffmpeg qt6-speech qtkeychain-qt6 kirigami \
+            ttf-dejavu
 
       - uses: actions/checkout@v7
         with:

@@ -18,8 +18,9 @@ TestCase {
     readonly property string startName: uiShinki ? "Shinki" : "Leinen"
     readonly property string otherName: uiShinki ? "Kante" : "Shinki"
     readonly property string pages: "qrc:/qt/qml/Mitori/qml/"
-    // As a page in tst_perf.qml: generous, the CI's machine is small.
-    readonly property int switchBudget: 5000
+    // ms CPU, as in tst_perf.qml: 1.25 times the most measured with 40 busy processes, debug build
+    // (Leinen to Shinki 557, Shinki to Kante 756; release 418 and 664).
+    readonly property int switchBudget: uiShinki ? 950 : 700
     readonly property int scrolled: 200
     readonly property int startScrolled: 50
 
