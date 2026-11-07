@@ -16,8 +16,8 @@ TestCase {
     // and on the GitHub runner), 1.3 times the most with 40 busy processes on 24 threads (35 runs);
     // a frame (16) at least. A debug build has four times as much. A case without a budget fails;
     // one over it runs once more (check()).
-    // Snappy is a tap answered within a frame and a page drawn within about 200 ms. Above that
-    // today, to be made faster, not the budget looser: "slow".
+    // Snappy is a tap saved within a frame and a page or list drawn within about 200 ms, on the
+    // GitHub runner. Above that today, to be made faster, not the budget looser: "slow".
     readonly property var budgets: ({
         "start menu": 1000,                 // slow: cold start, first QML types
         "TodayPage": 900,                   // slow: heatmap
@@ -32,13 +32,13 @@ TestCase {
         "SettingsPage": 70,
         "BackupPage": 170,
         "VideosPage": 130,
-        "AppearancePage": 600,              // slow: previews
+        "AppearancePage": 600,
         "ExamPage": 180,
         "Programme aikido": 400,
         "Programme daitoryu": 450,
         "Programme shinkitoho": 350,
         "Programme tablet": 750,            // slow: list, page and small player
-        "Player first": 1900,               // slow: Qt probes the GPU's decoders, 1.1 s with NVIDIA
+        "Player first": 1900,               // slow here: Qt probes the GPU's decoders, 1.1 s with NVIDIA
         "Programme.entries": 16,
         "Practice.due": 16,
         "Practice.counts": 16,
@@ -49,17 +49,17 @@ TestCase {
         "Programme.suggest, 500 words": 110,
         "Search": 400,
         "Search “k”": 600,                  // slow: a keystroke
-        "Search “ko”": 550,                 // slow
-        "Search “kot”": 300,                // slow
+        "Search “ko”": 550,
+        "Search “kot”": 300,
         "Search “kote”": 140,
         "Programme": 450,
         "Player over programme": 650,
         "Practice.rate": 20,
-        "Practice.addNote": 60,
+        "Practice.addNote": 60,             // slow: a tap
         "Stats again": 1700,                // slow
         "Years over stats": 4100,           // slow: see YearsPage
         "Today over years": 1000,           // slow
-        "Player over stats": 900,
+        "Player over stats": 900,           // slow
         "Practice.rate under stats": 1300   // slow: a tap; YearsPage below counts anew
     })
     readonly property int debugFactor: perfClock.debugBuild() ? 4 : 1
