@@ -110,8 +110,9 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   (`store/bundlecrypto` mit Monocypher, `store/bundleshelf`, `services/bundles`). Nur im WLAN (Schalter, „Jetzt laden“
   einmal ohne), einzeln entfernen (Code bleibt), neue Version als Update mit Hinweis im Startmenü. Videos aus einem
   Bundle sind schon beschnitten. Werkzeug `tools/bundle.py` (build, codes, sperren, pruefen, hochladen), Bundles in
-  `tools/bundles.yaml`, Geheimes in `../bundle-geheim`. Offen: Bundles bauen und hochladen (Owner: Zustimmung des
-  Verbands), Freischalten und QR-Scan auf dem Telefon prüfen (Argon2id mit 64 MiB).
+  `tools/bundles.yaml`, Geheimes in `../mitori-bundle-geheim` (mit README zur Handhabung). Alle sechs Bundles sind
+  hochgeladen (Version 1, 07.11.2026, mit Zustimmung des Verbands; aus den Originalen kodiert, das Remaster folgt
+  später als neue Version). Offen: Freischalten und QR-Scan auf dem Telefon prüfen (Argon2id mit 64 MiB).
 - QR-Code der DVD (`platform/qrreader` mit ZXing-C++, `services/codescanner`, `ScanPage`), neben dem Tippen, das der
   Hauptweg bleibt. **Inhalt des QR-Codes: genau der Code in der gruppierten Form, wie ihn `tools/bundle.py codes` in
   die CSV schreibt (erste Spalte), z. B. `7KQ2M-X9HDV-3TAPR-WE6YT`, der Code der Testdaten, kein echter** (23 Zeichen, ASCII, sonst nichts: keine URL, kein
@@ -127,7 +128,6 @@ Kleinigkeiten aus Reviews und Tests, je ein Folge-PR oder beim nächsten Bearbei
   Konkrete Antworten bisher: A-X-04 (Futari-/San'nin-gake ohne Zusatz, ändert IDs), A-D-11, D-D-01, D-D-07,
   D-K-02; S-02 und S-12 ohne Antwort; viele „Als Frage an Sensei notieren“.
 - Android: „Bildschirm an“ (FLAG_KEEP_SCREEN_ON) nur gebaut, nicht am Telefon geprüft.
-- Bundle-Manifest auf Gitea fehlt (404 beim Start: `mitori-manifest/1/manifest.json`). Für den Upload fehlen außerdem Adresse und Ordner für Caddy (`video-basis`, `video-ziel` in `bundle-geheim`).
 
 ### Fehler (Test zuerst)
 - Zurück-Taste (Android, Alt+Links → goBack) lässt den Player im Stapel, er spielt unsichtbar weiter (Review #64).
