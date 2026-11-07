@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls as QQC2
+import QtQuick.Shapes
 
 /**
  * Days on a calendar grid (bible section 5, Diagramme): a column per week, a row per weekday, the
@@ -10,7 +11,8 @@ import QtQuick.Controls as QQC2
  * inkMuted, square cells. The axes are labelled: weekday names on every second row
  * at the side, the month's name above the week it begins in (the first column names its month
  * when the next name is three weeks away or more). Hovering a day, or tapping it (for a few
- * seconds, on touch), shows its date and `tips` entry; screen readers hear the date in full.
+ * seconds, on touch), shows its date and `tips` entry; screen readers hear a week at a time, each
+ * day with its date in full and its tip.
  * Mirrored right to left with LayoutMirroring. Pair it with a ShinkiLegend for the levels.
  *   endDate         the last day shown (today unless set); later days of its week stay empty
  *   weeks           how many weeks (columns)
@@ -147,22 +149,62 @@ Item {
         return list
     }
 
-    Repeater {
-        model: heat.weeks * 7
-        delegate: Rectangle {
-            required property int index
-            // Not the model: a new end date in the same year would make every cell anew.
-            readonly property var modelData: heat.cells[index] || { date: new Date(NaN), iso: "", shown: false }
-            readonly property int level: Math.max(0, Math.min(4, Number(heat.levels[modelData.iso]) || 0))
+    // Each day's level, in the order of `cells`.
+    readonly property var cellLevels: cells.map(c => Math.max(0, Math.min(4, Number(levels[c.iso]) || 0)))
 
-            visible: modelData.shown
-            x: heat.lead(heat.labelWidth + Math.floor(index / 7) * heat.step, heat.cellSize)
-            y: heat.labelHeight + index % 7 * heat.step
+    // The days of each level as one path ("M14 20h12v12h-12z M28 20…"), drawn in the first frame:
+    // not an item per day (as KanteCalendarHeatmap 1.75.1). Five years on a page are 1800 days.
+    readonly property var levelPaths: {
+        const paths = ["", "", "", "", ""]
+        const c = cellSize
+        for (let i = 0; i < cells.length; i++) {
+            if (!cells[i].shown) {
+                continue
+            }
+            const x = lead(labelWidth + Math.floor(i / 7) * step, c)
+            const y = labelHeight + i % 7 * step
+            paths[cellLevels[i]] += "M" + x + " " + y + "h" + c + "v" + c + "h" + (-c) + "z"
+        }
+        return paths
+    }
+    component LevelPath: ShapePath {
+        property alias path: svg.path
+        strokeWidth: -1
+        PathSvg { id: svg }
+    }
+    // Level 0 open, as the legend shows it.
+    Shape {
+        objectName: "days"
+        anchors.fill: parent
+        LevelPath { fillColor: ShinkiStyle.levelColor(0); path: heat.levelPaths[0] }
+        LevelPath { fillColor: ShinkiStyle.levelColor(1); path: heat.levelPaths[1] }
+        LevelPath { fillColor: ShinkiStyle.levelColor(2); path: heat.levelPaths[2] }
+        LevelPath { fillColor: ShinkiStyle.levelColor(3); path: heat.levelPaths[3] }
+        LevelPath { fillColor: ShinkiStyle.levelColor(4); path: heat.levelPaths[4] }
+    }
+
+    // A screen reader hears a week at a time, each day with its date and tip ("Monday, 2 November
+    // 2026 · 3 techniques, Tuesday, 3 November 2026 · no practice, …"): an item per week.
+    function weekName(week) {
+        const names = []
+        for (let i = week * 7; i < week * 7 + 7 && i < cells.length; i++) {
+            if (cells[i].shown) {
+                names.push(tipOf(cells[i].date, Locale.LongFormat))
+            }
+        }
+        return names.join(", ")
+    }
+    Repeater {
+        model: heat.weeks
+        delegate: Item {
+            required property int index
+
+            x: heat.lead(heat.labelWidth + index * heat.step, heat.cellSize)
+            y: heat.labelHeight
             width: heat.cellSize
-            height: heat.cellSize
-            color: ShinkiStyle.levelColor(level)      // 0: open, as the legend shows it
+            height: 7 * heat.step - heat.spacing
             Accessible.role: Accessible.StaticText
-            Accessible.name: heat.tipOf(modelData.date, Locale.LongFormat)
+            Accessible.name: heat.weekName(index)
         }
     }
 

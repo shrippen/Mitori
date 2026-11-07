@@ -191,10 +191,16 @@ Kirigami.ScrollablePage {
                         }
                         return l
                     }
+                    // A text per count, not per day.
                     tips: {
                         const t = {}
+                        const texts = {}
                         for (const d in page.perDay) {
-                            t[d] = qsTr("%n technique(s)", "", page.perDay[d])
+                            const n = page.perDay[d]
+                            if (!(n in texts)) {
+                                texts[n] = qsTr("%n technique(s)", "", n)
+                            }
+                            t[d] = texts[n]
                         }
                         return t
                     }
