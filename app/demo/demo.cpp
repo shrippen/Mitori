@@ -51,15 +51,24 @@ QString text(const QJsonValue &value)
     return value.toString();
 }
 
-// A day relative to today (0 = today) at a local time ("19:30"), in UTC as the stores keep it.
+// The world's anchor: the Monday of the week that contains today (demo/README.md, "Time"), so a
+// course on day 19 is a Saturday whatever the day. The real today, not DEMO_TODAY: the app itself
+// runs on the real clock ("today": "real" in demo/shots.json).
+QDate anchor()
+{
+    const QDate today = QDate::currentDate();
+    return today.addDays(1 - today.dayOfWeek());
+}
+
+// A day offset from the anchor at a local time ("19:30"), in UTC as the stores keep it.
 QDateTime at(int day, const QString &time = QStringLiteral("12:00"))
 {
-    return QDateTime(QDate::currentDate().addDays(day), QTime::fromString(time, QStringLiteral("HH:mm"))).toUTC();
+    return QDateTime(anchor().addDays(day), QTime::fromString(time, QStringLiteral("HH:mm"))).toUTC();
 }
 
 QDate dayOf(const QJsonValue &value)
 {
-    return QDate::currentDate().addDays(value.toInt());
+    return anchor().addDays(value.toInt());
 }
 
 QJsonObject dojo()

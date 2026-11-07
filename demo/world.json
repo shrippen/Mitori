@@ -10604,7 +10604,7 @@
   }
  },
  "dojo": {
-  "note": "Emi Hartmann's practice as Mitori (exam programmes of Aikido Shinki Rengo, Daitoryu and Shinki Toho) shows it: she trains Aikido at the Dojo Ottensen (made up) and started Shinki Toho, the sword. Days are relative to today (0 = today, -1 = yesterday), times local. ratings: [day, time, programme entry id of mitori-daten, level 1-4] (1 seen, 2 with help, 3 sure, 4 ready for the exam); the latest rating of an entry is its level. grades: what she passed; starts: when she began a discipline; calendar: the course calendar (ICS) Mitori reads, with the course teacher as the first line 'mit …' of the description; notebooks: her notes on a course (by calendar uid); exam: the exam she plans on a course; rounds: her mock exams. Entry ids must exist in Mitori's catalog.",
+  "note": "Emi Hartmann's practice as Mitori (exam programmes of Aikido Shinki Rengo, Daitoryu and Shinki Toho) shows it: she trains Aikido at the Dojo Ottensen (made up) and started Shinki Toho, the sword. Days are offsets from the anchor (the Monday of the week that contains today, -1 = the Sunday before; practice lies before it, so it is past on every day of the week), times local. ratings: [day, time, programme entry id of mitori-daten, level 1-4] (1 seen, 2 with help, 3 sure, 4 ready for the exam); the latest rating of an entry is its level. grades: what she passed; starts: when she began a discipline; calendar: the course calendar (ICS) Mitori reads, with the course teacher as the first line 'mit …' of the description; notebooks: her notes on a course (by calendar uid); exam: the exam she plans on a course; rounds: her mock exams. Entry ids must exist in Mitori's catalog.",
   "person": "Emi Hartmann",
   "club": "Dojo Ottensen",
   "grades": [
@@ -10637,8 +10637,8 @@
      "de": "Aikido-Sommerlehrgang",
      "en": "Aikido summer course"
     },
-    "first": -68,
-    "last": -67,
+    "first": -72,
+    "last": -71,
     "place": "Övelgönne",
     "teacher": "Hiroshi Tanabe Sensei",
     "info": {
@@ -10679,8 +10679,8 @@
    {
     "uid": "demo-herbst",
     "title": {
-     "de": "Herbstlehrgang Aikido",
-     "en": "Aikido autumn course"
+     "de": "Wochenendlehrgang Aikido",
+     "en": "Aikido weekend course"
     },
     "first": 47,
     "last": 48,
@@ -10697,7 +10697,7 @@
     "course": "demo-sommer",
     "entries": [
      {
-      "day": -68,
+      "day": -72,
       "time": "11:20",
       "text": {
        "de": "Ikkyo aus Shomen-uchi: zuerst die Mitte, dann der Arm. Nicht ziehen.",
@@ -10708,7 +10708,7 @@
       ]
      },
      {
-      "day": -68,
+      "day": -72,
       "time": "15:05",
       "text": {
        "de": "Jo-Suburi 1–5 mit Partner: Abstand halten, Spitze auf die Kehle.",
@@ -10716,7 +10716,7 @@
       }
      },
      {
-      "day": -67,
+      "day": -71,
       "time": "12:40",
       "text": {
        "de": "Sankyo: Handgelenk drehen, bis Uke auf die Zehen geht, dann erst führen.",

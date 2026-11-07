@@ -10,7 +10,7 @@ The first release: Mitori puts the exam programmes of Aikido Shinki Rengo, Daito
 
 #### New
 - The programmes of all three disciplines, grade by grade, with Japanese names and kanji, the attacks and groups as in the exam rules, and the comments on Shinki Toho; in German or English.
-- Tap a technique and its place in the exam video plays: slow motion in four speeds, loop, frame by frame, full screen; swipe for brightness and volume.
+- Tap a technique and its place in the exam video plays: slow motion in three speeds, loop, frame by frame, full screen; swipe for brightness and volume.
 - Rate each technique from 1 (seen) to 4 (ready for the exam); the programme and the grade chips show where you stand.
 - Practise today: what is due by a review plan up to your practice grade, as a training playlist where rating moves on to the next technique.
 - Notes on every technique, with photos and voice notes; all notes in one list, filtered by discipline and courses; search across techniques and your notes.
@@ -40,7 +40,7 @@ Das erste Release: Mitori bringt die Prüfungsprogramme von Aikido Shinki Rengo,
 
 #### Neu
 - Die Programme aller drei Sparten, Grad für Grad, mit japanischen Namen und Kanji, Angriffen und Gruppen wie in der Prüfungsordnung und den Kommentaren zu Shinki Toho; auf Deutsch oder Englisch.
-- Technik antippen, ihre Stelle im Prüfungsvideo läuft: Zeitlupe in vier Tempi, Schleife, Einzelbild, Vollbild; Wischen für Helligkeit und Lautstärke.
+- Technik antippen, ihre Stelle im Prüfungsvideo läuft: Zeitlupe in drei Stufen, Schleife, Einzelbild, Vollbild; Wischen für Helligkeit und Lautstärke.
 - Jede Technik einschätzen von 1 (gesehen) bis 4 (prüfungsreif); Programm und Grad-Chips zeigen deinen Stand.
 - Heute üben: was nach Plan fällig ist, bis zu deinem Übungsgrad, als Training in einer Playliste, in der Einschätzen zur nächsten Technik weiterschaltet.
 - Notizen zu jeder Technik, mit Fotos und Sprachnotizen; alle Notizen in einer Liste, gefiltert nach Sparte und Lehrgängen; Suche über Techniken und deine Notizen.
