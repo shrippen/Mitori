@@ -659,6 +659,15 @@ TestCase {
         // and the scope reaches the page's controls: the style's text colour, not the platform's.
         verify(Qt.colorEqual(page.Kirigami.Theme.textColor, Look.textColor),
                page.Kirigami.Theme.textColor + " is not " + Look.textColor)
+        // Each row leads with its kanji (clickdummy `EINST`); under Shinki drawn in Noto Serif JP,
+        // whose subset carries them (not a system fallback).
+        for (const [row, kanji] of [["videosButton", "映"], ["backupButton", "保"], ["appearanceButton", "色"]]) {
+            const item = findChild(page, row)
+            compare(item.glyph, kanji, row)
+            if (Look.shinki) {
+                compare(findChild(item, "rowGlyph").font.family, "Noto Serif JP", row)
+            }
+        }
         shot("4b-settings")
         // Each setting leads to its page.
         for (const [row, title] of [["videosButton", "Videos"], ["backupButton", "Backup and sync"], ["appearanceButton", "Appearance"]]) {
