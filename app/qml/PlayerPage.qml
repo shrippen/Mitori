@@ -101,6 +101,7 @@ Kirigami.Page {
         }
         big = false
         view.pause()
+        view.keepDraft()
     }
     // Popped while full screen.
     Component.onDestruction: {

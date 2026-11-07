@@ -253,6 +253,35 @@ TestCase {
         verify(Practice === service, "the service stayed")
     }
 
+    // A popped page goes when its slide ends, while the app runs: only then is a draft saved
+    // (NoteRow), and the system may kill the app any time after. A new height stops Kirigami's
+    // slide without ending it: Shinki's head on the start menu, the keyboard closing, a turn.
+    function test_popped_page_goes_data() {
+        return [{ tag: "as it is", height: 800 }, { tag: "new height during the slide", height: 700 }]
+    }
+    function test_popped_page_goes(data) {
+        const slidIn = page => () => page.mapToItem(window.contentItem, 0, 0).x === 0
+        const id = "popped-entry-" + data.height
+        const count = Practice.notes(id).length
+        const draft = window.pageStack.push(Qt.resolvedUrl("DraftPage.qml"), { entryId: id })
+        tryVerify(slidIn(draft), 5000, "slid in")
+        findChild(draft, "noteField").text = "Entwurf beim Zurück"
+
+        window.pageStack.pop()
+        window.height = data.height
+        tryVerify(() => Practice.notes(id).length === count + 1, 5000, "the draft is saved")
+        window.height = 800
+
+        const grades = push("GradesPage")
+        tryVerify(slidIn(grades), 5000, "slid in")
+        let gone = false
+        grades.Component.destruction.connect(() => { gone = true })
+
+        window.pageStack.pop()
+        window.height = data.height
+        tryVerify(() => gone, 5000, "GradesPage destroyed")
+    }
+
     // A text still in focus when the style changes is saved: the window takes the focus first.
     function test_settings_field_kept() {
         const videos = push("VideosPage")

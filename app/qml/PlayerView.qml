@@ -113,6 +113,11 @@ Item {
     readonly property alias rate: player.playbackRate
     readonly property alias source: player.source
 
+    // A note begun: saved now (the page is left, but stays).
+    function keepDraft() {
+        noteRow.keepDraft()
+    }
+
     // The entry on screen, for the programme list to mark it when the user comes back.
     signal shown(string id)
     // Back (landscape), the training's end and the notes of the technique: the page decides.
@@ -941,6 +946,8 @@ Item {
                         spacing: controls.spacing
 
                         NoteRow {
+                            id: noteRow
+
                             Layout.fillWidth: true
                             entry: page.current
                             onNotesRequested: page.notesRequested(page.current)
