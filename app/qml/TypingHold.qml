@@ -2,15 +2,17 @@ import QtQuick
 
 // A page's `wide` that the on-screen keyboard does not flip: the keyboard shrinks the window
 // (adjustResize), which would change the columns under the fingers, both ways. From the moment a
-// field of `target` is typed in the page keeps its columns, until no field has the focus and the
-// page is as high as when it began. A new width (turned) counts at once, with the old width as the
-// height: the keyboard may still be open, and the tablet is what counts, not the low window.
+// field in the window is typed in (also on a dialog or a page above) the page keeps its columns,
+// until no field has the focus and the page is as high as when it began. A turn (new width and new
+// height at once) counts at once, with the old width as the height: the keyboard may still be open,
+// and the tablet is what counts, not the low window. A new width alone is no turn; held columns
+// never stand in a window higher than wide.
 QtObject {
     id: hold
 
     required property Item target
 
-    readonly property bool wide: holding ? heldWide : Tablet.wide(target.width, target.height)
+    readonly property bool wide: holding ? heldWide && target.width > target.height : Tablet.wide(target.width, target.height)
 
     property bool holding: false
     property bool heldWide: false
@@ -21,15 +23,7 @@ QtObject {
     // Text inputs have a cursor, whatever control they sit in (a field, a spin box, a date field).
     readonly property bool typing: {
         const item = target.Window.activeFocusItem
-        if (!item || item.cursorPosition === undefined) {
-            return false
-        }
-        for (let p = item; p; p = p.parent) {
-            if (p === target) {
-                return true
-            }
-        }
-        return false
+        return !!item && item.cursorPosition !== undefined
     }
 
     function begin(fullHeight) {
@@ -52,12 +46,21 @@ QtObject {
     }
     onHighChanged: end()
     property real lastWidth: 0
-    Component.onCompleted: lastWidth = targetWidth
+    property real lastHeight: 0
+    readonly property real targetHeight: target.height
+    Component.onCompleted: {
+        lastWidth = targetWidth
+        lastHeight = targetHeight
+    }
+    // A size change signals the width first: here the height is new, lastHeight not yet.
     onTargetWidthChanged: {
-        holding = false
-        if (typing) {
-            begin(lastWidth)
+        if (target.height !== lastHeight) {
+            holding = false
+            if (typing) {
+                begin(lastWidth)
+            }
         }
         lastWidth = targetWidth
     }
+    onTargetHeightChanged: lastHeight = targetHeight
 }

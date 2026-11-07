@@ -24,13 +24,18 @@ Kirigami.ScrollablePage {
     background: Rectangle { color: Look.backgroundColor }
 
     required property string uid
-    // ListAndPage, beside the list on a tablet: another row or a turn takes this page away at any
-    // moment, so a begun entry is saved then.
+    // ListAndPage, beside the list on a tablet: another row takes this page away, so a begun entry
+    // is saved then (not when the notebook itself went).
     property var paneHost: null
     Component.onDestruction: {
-        if (paneHost && compose.text.trim() !== "") {
+        if (paneHost && !gone && compose.text.trim() !== "") {
             page.add()
         }
+    }
+    // A running recording: another row waits for it (ListAndPage), and it becomes an entry.
+    readonly property bool busy: media.recording
+    function finishBusy() {
+        media.finish()
     }
     // Out of the stack, also from the middle; the top page stays the one shown.
     function leave() {
@@ -470,6 +475,8 @@ Kirigami.ScrollablePage {
             }
             // A photo or voice note becomes an entry at once, with the text typed so far.
             MediaCompose {
+                id: media
+
                 objectName: "courseMedia"
                 stackPage: page
                 onAttached: name => {

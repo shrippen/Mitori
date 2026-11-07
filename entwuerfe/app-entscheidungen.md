@@ -92,7 +92,7 @@ Syncthing entfällt als eigener Weg (geht über den Export-Ordner).
   Telefons; ein offenes Blatt geht beim Drehen mit, und eine Technik mit Video steht danach im Player, ohne zu starten.
 - **Liste und Seite** (Eigentümer, 06.11.2026: „Tablet nach Vorlage“): Lehrgänge und Einstellungen zeigen quer neben der
   Liste die gewählte Seite. Beim Lehrgang steht zuerst ein Notizbuch, ohne Notizbuch ein Hinweis. Hochkant öffnet eine Zeile
-  ihre Seite; beim Drehen geht die gewählte Seite als eigene Seite mit. Ein begonnener Eintrag wird beim Wechsel gespeichert.
+  ihre Seite; beim Drehen bleibt die Seite dieselbe (Felder, Dialoge, Kamera, Scan, Aufnahme laufen weiter), hochkant füllt die gewählte oder benutzte Seite das Fenster, Zurück führt zur Liste. Ein begonnener Eintrag wird beim Wechsel der Zeile gespeichert; eine laufende Aufnahme wird dabei beendet und als Eintrag behalten.
 - **Player groß**: bleibt über und unter dem Video genug Platz (ab 120 px, z. B. Tablet 16:10 mit
   Aikido/Daitoryu), stehen Titel oben und Steuerung unten im freien Raum; sonst die Spalte rechts
   (Telefon quer, Shinki Toho 16:9 auf dem Tablet).

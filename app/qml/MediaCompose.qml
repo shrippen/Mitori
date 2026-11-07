@@ -107,6 +107,24 @@ Item {
         compose.stackPage.Kirigami.PageStack.push(Qt.resolvedUrl("CameraPage.qml"), { done: name => compose.attached(name) })
     }
 
+    // Stop as with the button: the note is kept (`attached`).
+    function finish() {
+        if (recording) {
+            recorder.stop()
+        }
+    }
+
+    // The page goes in mid-recording: nothing to give the note to, no file stays.
+    Component.onDestruction: {
+        if (voiceName === "") {
+            return
+        }
+        const name = voiceName
+        voiceName = ""
+        recorder.stop()
+        Media.discard(name)
+    }
+
     function record() {
         if (microphonePermission.status !== Qt.PermissionStatus.Granted) {
             if (microphonePermission.status === Qt.PermissionStatus.Denied && compose.microphoneAsked) {
