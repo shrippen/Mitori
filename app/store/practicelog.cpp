@@ -237,21 +237,35 @@ QHash<QString, QDate> PracticeLog::firstRated() const
 
 QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from, const QString &prefix, const QDateTime &to) const
 {
-    QHash<QDate, QSet<QString>> entries;
     QSqlQuery q(QSqlDatabase::database(m_connection));
-    q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ? AND at < ? AND substr(entry, 1, ?) = ?"));
+    q.setForwardOnly(true);
+    q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ? AND at < ? AND substr(entry, 1, ?) = ? ORDER BY at"));
     q.addBindValue(from.toMSecsSinceEpoch());
     q.addBindValue(to.isValid() ? to.toMSecsSinceEpoch() : std::numeric_limits<qint64>::max());
     q.addBindValue(prefix.size());
     q.addBindValue(prefix.isNull() ? QStringLiteral("") : prefix);     // a null string binds NULL
     q.exec();
-    while (q.next()) {
-        const QDate day = QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC).toLocalTime().date();
-        entries[day].insert(q.value(0).toString());
-    }
+
+    // In time order, a local day's end found once per day, not a time zone conversion per rating
+    // (a year of 20 ratings a day: 20 ms).
     QHash<QDate, int> result;
-    for (auto it = entries.cbegin(); it != entries.cend(); ++it) {
-        result.insert(it.key(), int(it.value().size()));
+    QSet<QString> entries;
+    QDate day;
+    qint64 dayEnd = std::numeric_limits<qint64>::min();
+    while (q.next()) {
+        const qint64 at = q.value(1).toLongLong();
+        if (at >= dayEnd) {
+            if (day.isValid()) {
+                result.insert(day, int(entries.size()));
+            }
+            entries.clear();
+            day = QDateTime::fromMSecsSinceEpoch(at, QTimeZone::UTC).toLocalTime().date();
+            dayEnd = day.addDays(1).startOfDay().toMSecsSinceEpoch();
+        }
+        entries.insert(q.value(0).toString());
+    }
+    if (day.isValid()) {
+        result.insert(day, int(entries.size()));
     }
     return result;
 }

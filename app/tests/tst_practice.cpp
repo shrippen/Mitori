@@ -1,3 +1,5 @@
+#include <ctime>
+
 #include <QFile>
 #include <QSettings>
 #include <QSignalSpy>
@@ -81,6 +83,38 @@ private slots:
         QCOMPARE(practice.practisedInYear(year, {}).first().toInt(), 3);
         QVERIFY(practice.practisedInYear(year - 1, {}).isEmpty());
         QCOMPARE(practice.firstYear(), year);
+    }
+
+    // Days end at local midnight, also on the day summer time ends (25 h): the log walks the
+    // ratings in time order and finds each day's end once.
+    void practisedPerDayAtMidnight()
+    {
+        const QByteArray zone = qgetenv("TZ");
+        qputenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3");    // Central Europe, no tzdata needed
+        tzset();
+        QTemporaryDir dir;
+        PracticeLog log;
+        QVERIFY(log.open(dir.filePath(QStringLiteral("log.sqlite"))));
+        const auto at = [](int day, int hour, int minute) {
+            return QDateTime(QDate(2026, 10, day), QTime(hour, minute));
+        };
+        log.add(QStringLiteral("a"), 2, at(24, 23, 30), QStringLiteral("phone"));
+        log.add(QStringLiteral("a"), 2, at(25, 0, 30), QStringLiteral("phone"));
+        log.add(QStringLiteral("b"), 2, at(25, 23, 59), QStringLiteral("phone"));
+        log.add(QStringLiteral("a"), 2, at(26, 0, 0), QStringLiteral("phone"));
+        log.add(QStringLiteral("b"), 2, at(26, 0, 1), QStringLiteral("phone"));
+        log.add(QStringLiteral("b"), 3, at(26, 9, 0), QStringLiteral("phone"));    // b again that day
+        const QHash<QDate, int> days = log.practisedPerDay(at(20, 0, 0));
+        if (zone.isNull()) {
+            qunsetenv("TZ");
+        } else {
+            qputenv("TZ", zone);
+        }
+        tzset();
+        QCOMPARE(days.size(), 3);
+        QCOMPARE(days.value(QDate(2026, 10, 24)), 1);
+        QCOMPARE(days.value(QDate(2026, 10, 25)), 2);
+        QCOMPARE(days.value(QDate(2026, 10, 26)), 2);
     }
 
     // The same time stamp twice: the later insert wins (two taps within a millisecond).
