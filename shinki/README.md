@@ -167,6 +167,7 @@ Clickdummy nicht zeigt (Schalter, Fokus, Tooltip, Toast), legt diese Bibel fest;
 - **Gruppenkopf** (`.gh`): Kolumne in Rot, das Japanische in `inkMuted` daneben, unten eine Linie.
 - **Listenzeile** (`.li`)
   - Techniknamen in Crimson Pro 16 px, Angriff oder Zusatz klein darunter.
+  - Ein Kanji davor (Einstellungen: 映 保 色) wie auf der Kachel: 22 px rot, Noto Serif JP.
   - Rechts die vier Stufenpunkte und der Abspielknopf (rot gefüllt); ohne Video bleibt der Platz leer.
 - **Blatt** (`.sheet`)
   - Weiß von unten, darauf ein Griff 40 × 4 px in `line`.

@@ -659,6 +659,15 @@ TestCase {
         // and the scope reaches the page's controls: the style's text colour, not the platform's.
         verify(Qt.colorEqual(page.Kirigami.Theme.textColor, Look.textColor),
                page.Kirigami.Theme.textColor + " is not " + Look.textColor)
+        // Each row leads with its kanji (clickdummy `EINST`); under Shinki drawn in Noto Serif JP,
+        // whose subset carries them (not a system fallback).
+        for (const [row, kanji] of [["videosButton", "映"], ["backupButton", "保"], ["appearanceButton", "色"]]) {
+            const item = findChild(page, row)
+            compare(item.glyph, kanji, row)
+            if (Look.shinki) {
+                compare(findChild(item, "rowGlyph").font.family, "Noto Serif JP", row)
+            }
+        }
         shot("4b-settings")
         // Each setting leads to its page.
         for (const [row, title] of [["videosButton", "Videos"], ["backupButton", "Backup and sync"], ["appearanceButton", "Appearance"]]) {
@@ -2012,6 +2021,8 @@ TestCase {
 
     // Search: techniques across disciplines and own notes; a result opens the sheet.
     function test_9_search() {
+        // A reused row between notes, words and techniques reads its kind and data together.
+        failOnWarning(/SearchPage.qml.*TypeError/)
         Practice.addNote(Programme.entries("aikido", "k5").find(r => r.kind === "entry").id, "Kreis größer machen")
         const page = push("SearchPage")
         const field = findChild(page, "searchField")
@@ -2027,7 +2038,9 @@ TestCase {
         tryVerify(() => page.query === "nage", 2000)
         verify(page.more, "more than the list shows")
         compare(page.shown.length, page.limit)
-        verify(findChild(page, "moreHint").visible)
+        // The list is virtual: the hint below the rows is made when it comes into view.
+        findChild(page, "glossaryList").positionViewAtEnd()
+        tryVerify(() => findChild(page, "moreHint") !== null && findChild(page, "moreHint").visible)
         // The notes have the same limit and hint.
         for (let i = 0; i <= page.limit; i++)
             Practice.addNote("many-notes", "Wiederholung " + i)
@@ -2035,7 +2048,8 @@ TestCase {
         tryVerify(() => page.query === "wiederholung", 2000)
         verify(page.notesMore)
         compare(page.notesShown.length, page.limit)
-        verify(findChild(page, "notesMoreHint").visible)
+        findChild(page, "glossaryList").positionViewAtEnd()
+        tryVerify(() => findChild(page, "notesMoreHint") !== null && findChild(page, "notesMoreHint").visible)
         // A note on a technique that is no longer in the programme still opens its notes.
         Practice.addNote("gone-technique", "Kreis kleiner")
         field.text = "kreis kleiner"
@@ -2822,7 +2836,7 @@ TestCase {
         verify(Glossary.words.length > 219)
         tryCompare(list, "count", Glossary.words.length)
         verify(findChild(page, "glossaryIntro").visible)
-        compare(list.section.property, "letter")
+        compare(page.rows[0].section, "A")
         tryVerify(() => findChild(list, "letterHeading") !== null)
         compare(findChild(list, "letterHeading").text, "A")
         compare(Glossary.words[0].word, "Ago")
@@ -2860,13 +2874,16 @@ TestCase {
             verify(page.glossary.some(w => w.word === "Kiri-otoshi"), q)
             verify(page.techniques.length > 0, q)
         }
-        compare(list.section.property, "")
+        compare(page.rows[0].section, qsTr("Glossary"))
         verify(!findChild(page, "glossaryIntro").visible)
         // German words find their Japanese term.
         field.text = "hüftwurf"
         tryVerify(() => page.query === "hüftwurf", 2000)
         verify(page.glossary.some(w => w.word === "Koshi-nage"))
-        tryCompare(list, "count", page.glossary.length)
+        // One list: the words first, then the techniques and notes found.
+        tryCompare(list, "count", page.rows.length)
+        compare(page.rows[page.glossary.length - 1].kind, "word")
+        compare(page.rows.length, page.glossary.length + page.shown.length + page.notesShown.length)
         tryVerify(() => findChild(page, "glossarySource") !== null && findChild(page, "glossarySource").visible)
         verify(findChild(page, "glossarySource").text.includes("shinkiryu.de"))
         shot("9b-glossary-search")

@@ -5,6 +5,7 @@ import QtQuick.Layouts
 // List row (bible section 5, `.li`): the name in the book face, a line under it in inkMuted, on
 // the right the trailing items (level dots, play). Selected: 3 px red on the left on `selected`.
 // Rows part by a line in paperAlt. At least 44 px high (a finger). Enter and Space click.
+//   glyph        a kanji before the name, red in the Japanese face (a settings row: 映)
 //   leadingText  a figure before the name (a form's number)
 //   meta         a small figure on the right, before the trailing items ("in 3 weeks")
 //   trailing     items on the right
@@ -13,6 +14,7 @@ QQC2.ItemDelegate {
     id: row
 
     property string subtitle: ""
+    property string glyph: ""
     property string leadingText: ""
     property string meta: ""
     property bool selected: false
@@ -57,6 +59,15 @@ QQC2.ItemDelegate {
     contentItem: RowLayout {
         spacing: ShinkiStyle.cardSpace
 
+        QQC2.Label {
+            objectName: "rowGlyph"
+            visible: row.glyph !== ""
+            text: row.glyph
+            color: ShinkiStyle.red
+            font.family: ShinkiStyle.japaneseFamily
+            font.pixelSize: ShinkiStyle.tileKanjiSize
+            Accessible.ignored: true
+        }
         QQC2.Label {
             visible: row.leadingText !== ""
             Layout.alignment: Qt.AlignTop

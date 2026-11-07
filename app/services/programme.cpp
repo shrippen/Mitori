@@ -2,6 +2,8 @@
 
 #include "searchkey.h"
 
+#include <QCoreApplication>
+#include <QEvent>
 #include <QSet>
 #include <QSettings>
 
@@ -133,7 +135,23 @@ Programme::Programme(QObject *parent)
 Programme::Programme(const Catalog &catalog, QObject *parent)
     : QObject(parent)
     , m_catalog(catalog)
+    , m_language(Catalog::language())
 {
+    // A new catalog (Appearance::setLanguage) may bring the data's other language.
+    if (auto *app = QCoreApplication::instance()) {
+        app->installEventFilter(this);
+    }
+}
+
+bool Programme::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::LanguageChange && watched == QCoreApplication::instance()
+        && m_language != Catalog::language()) {
+        m_language = Catalog::language();
+        ++m_revision;
+        emit textsChanged();
+    }
+    return QObject::eventFilter(watched, event);
 }
 
 QVariantMap Programme::findDiscipline(const QString &id) const
@@ -399,7 +417,28 @@ QVariantList Programme::search(const QString &query, int limit) const
     if (words.isEmpty()) {
         return result;
     }
-    eachTechnique([&](const QVariantMap &row) {
+    for (const SearchRow &r : searchRows()) {
+        if (r.text.matches(words)) {
+            result << r.row;
+        }
+        if (result.size() >= limit) {
+            break;
+        }
+    }
+    return result;
+}
+
+const QList<Programme::SearchRow> &Programme::searchRows() const
+{
+    // The language checked here, as in entry().
+    if (m_searchLanguage != Catalog::language()) {
+        m_searchRows.clear();
+        m_searchLanguage = Catalog::language();
+    }
+    if (!m_searchRows.isEmpty()) {
+        return m_searchRows;
+    }
+    eachTechnique([this](const QVariantMap &row) {
         const QStringList fields{row.value(QStringLiteral("title")).toString(),
                                  row.value(QStringLiteral("jp")).toString(),
                                  row.value(QStringLiteral("extra")).toString(),
@@ -412,12 +451,10 @@ QVariantList Programme::search(const QString &query, int limit) const
         for (const QVariant &step : row.value(QStringLiteral("steps")).toList()) {
             stepFields << step.toMap().value(QStringLiteral("title")).toString() << step.toMap().value(QStringLiteral("jp")).toString();
         }
-        if (SearchText((fields + stepFields).join(u' ')).matches(words)) {
-            result << row;
-        }
-        return result.size() < limit;
+        m_searchRows.append({row, SearchText((fields + stepFields).join(u' '))});
+        return true;
     });
-    return result;
+    return m_searchRows;
 }
 
 namespace {
@@ -603,7 +640,12 @@ QString Programme::techniqueLabel(const QString &id) const
 
 QVariantMap Programme::entry(const QString &id) const
 {
-    // Built once: the search page asks for one entry per note found.
+    // Built once per language: the search page asks for one entry per note found. The language is
+    // checked here, not on LanguageChange: other services ask while that event goes round.
+    if (m_indexLanguage != Catalog::language()) {
+        m_entryIndex.clear();
+        m_indexLanguage = Catalog::language();
+    }
     if (m_entryIndex.isEmpty()) {
         for (const QVariant &d : m_catalog.disciplines()) {
             const QVariantMap map = d.toMap();

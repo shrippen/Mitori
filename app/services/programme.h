@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "catalog.h"
+#include "searchkey.h"
 
 // The exam programme for QML: disciplines, grades and the entries of a grade, ready for a list.
 class Programme : public QObject
@@ -15,7 +16,10 @@ class Programme : public QObject
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
-    Q_PROPERTY(QVariantList disciplines READ disciplines CONSTANT)
+    // In the app's language (Catalog): texts follow a change of it, ids stay.
+    Q_PROPERTY(QVariantList disciplines READ disciplines NOTIFY textsChanged)
+    // Grows when the texts change language: bindings that call the functions below read it to follow.
+    Q_PROPERTY(int revision READ revision NOTIFY textsChanged)
     Q_PROPERTY(QString errorString READ errorString CONSTANT)
     Q_PROPERTY(QString dataVersion READ dataVersion CONSTANT)
     // The discipline chosen last (start menu tile, programme page); kept across starts.
@@ -29,6 +33,7 @@ public:
     QVariantList disciplines() const { return m_catalog.disciplines(); }
     QString errorString() const { return m_catalog.errorString(); }
     QString dataVersion() const { return m_catalog.dataVersion(); }
+    int revision() const { return m_revision; }
 
     QString discipline() const;
     void setDiscipline(const QString &discipline);
@@ -52,10 +57,12 @@ public:
     // `gradeName`.
     Q_INVOKABLE QVariantList practiceEntries(const QString &discipline, const QString &grade) const;
     // Techniques whose name, attack, Japanese, additions, group or steps contain every word of `query`
-    // (see SearchText), across all disciplines and grades in programme order (at most `limit`).
+    // (see SearchText), in the texts the rows show (English with English on, not the German), across all disciplines and grades in programme order (at most `limit`).
     // Each row as in entries(), with `discipline`, `disciplineName`, `grade`, `gradeName` and
     // `groupName` (Tachi-waza · Mae-seme …).
     Q_INVOKABLE QVariantList search(const QString &query, int limit = 50) const;
+    // Builds what search() compares (16 ms), when the search opens, not on the first letter.
+    Q_INVOKABLE void prepareSearch() const { searchRows(); }
     // The techniques a text names (a course note), best first, at most `limit`, leaving out the ids
     // in `without` (those already linked); rows as in search(). A name counts as whole words, however
     // written ("shiho nage", "Shihonage" for Shihô-nage), and the longest wins: "Uchi-kaiten-nage" does
@@ -83,6 +90,10 @@ public:
 
 signals:
     void selectionChanged();
+    void textsChanged();
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     // The rows of a grade without the grade's name (entries() adds it).
@@ -92,9 +103,22 @@ private:
     // Every technique once, in programme order, with `discipline`, `disciplineName`, `grade`,
     // `gradeName` and `groupName`; a visitor that returns false ends the walk.
     void eachTechnique(const std::function<bool(const QVariantMap &)> &visit) const;
+    // Every technique (eachTechnique) with what search() compares, built once per language: the
+    // search asks on every keystroke.
+    struct SearchRow {
+        QVariantMap row;
+        SearchText text;
+    };
+    const QList<SearchRow> &searchRows() const;
     QVariantList shinkiTohoEntries(const QVariantMap &discipline, const QString &grade) const;
     QVariantList formMap(const QString &grade) const;
 
     Catalog m_catalog;
+    Catalog::Language m_language;
+    int m_revision = 0;
+    // Built on first use, in the language of then (entry()).
     mutable QHash<QString, QVariantMap> m_entryIndex;
+    mutable Catalog::Language m_indexLanguage = Catalog::Language::German;
+    mutable QList<SearchRow> m_searchRows;
+    mutable Catalog::Language m_searchLanguage = Catalog::Language::German;
 };

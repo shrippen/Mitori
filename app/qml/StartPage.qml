@@ -22,7 +22,7 @@ Kirigami.ScrollablePage {
     // How many of the grade's techniques are exam-ready (the clickdummy's start menu: "3 of 8
     // exam-ready" under the programme tile).
     readonly property string practiceGrade: PracticeGrade.revision >= 0 ? PracticeGrade.grade(Programme.discipline) : ""
-    readonly property var gradeRows: Programme.entries(Programme.discipline, practiceGrade)
+    readonly property var gradeRows: Programme.revision >= 0 ? Programme.entries(Programme.discipline, practiceGrade) : []
     readonly property var gradeIds: gradeRows.filter(r => r.kind === "entry").map(r => r.id)
     readonly property var gradeCounts: Practice.revision >= 0 ? Practice.counts(gradeIds) : [0, 0, 0, 0, 0]
 
@@ -160,7 +160,8 @@ Kirigami.ScrollablePage {
                 objectName: "examTile"
 
                 readonly property string grade: Exam.grade(Programme.discipline, page.practiceGrade)
-                readonly property string gradeName: (Exam.grades(Programme.discipline).find(g => g.id === grade) || {}).name || ""
+                readonly property string gradeName: Programme.revision >= 0
+                                                    ? (Exam.grades(Programme.discipline).find(g => g.id === grade) || {}).name || "" : ""
 
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1          // equal columns

@@ -114,6 +114,16 @@ def test_chars_full_covers_app():
     assert not missing, "".join(missing)
 
 
+def test_font_covers_app():
+    # Every Japanese character the app shows is in the shipped font, past chars-full.txt: the
+    # next new kanji fails here (else: tools/shinki_chars.py, then tools/shinki_fonts.py).
+    sys.path.insert(0, str(ROOT / "tools"))
+    from shinki_chars import QUELLEN, collect
+    font = cmap(FONTS / "NotoSerifJP-Regular-Subset.ttf")
+    missing = [ch for ch in collect(QUELLEN) if ord(ch) not in font]
+    assert not missing, "not in NotoSerifJP-Regular-Subset.ttf: " + "".join(missing)
+
+
 def test_chars_skips_binary(tmp_path):
     # A PDF or a font read as text yields thousands of false kanji.
     sys.path.insert(0, str(ROOT / "tools"))

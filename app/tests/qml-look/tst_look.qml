@@ -485,6 +485,48 @@ TestCase {
         notes.destroy()
     }
 
+    // The programme data in the app's language (x_en of mitori-daten), with pages there before the
+    // change: the start page's tiles, the programme dates, a note's technique (AllNotes), the
+    // glossary and the search; ids stay.
+    function test_programme_language() {
+        Programme.discipline = "aikido"
+        const page = openAppearance()
+        const start = window.pageStack.get(0)
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        verify(Practice.addNote(entry.id, "language"))
+        const notes = allNotes.createObject(test)
+        const noteTitle = () => notes.rows.find(r => r.entry === entry.id).title
+        const hint = name => findChild(start, name).hint
+        const dates = () => findChildren(page, "programmeDate").map(l => l.text).join("\n")
+        const meaning = word => Glossary.words.find(w => w.word === word).meaning
+
+        const english = () => {
+            verify(/\d(st|nd|rd|th) Kyu/.test(hint("programmeTile")), hint("programmeTile"))
+            verify(/\d(st|nd|rd|th) Kyu/.test(hint("examTile")), hint("examTile"))
+            verify(dates().includes("As of"), dates())
+            verify(noteTitle().includes("5th Kyu"), noteTitle())
+            compare(meaning("Koshi-nage"), "hip throw")
+            verify(Programme.search("2 variants").length > 0)
+            compare(Programme.search("2 Arten").length, 0)
+            compare(Programme.entries("aikido", "k5").find(r => r.kind === "entry").id, entry.id)
+        }
+        english()
+
+        tile(page, "languageTile", "Deutsch").clicked()
+        verify(/\d\. Kyu/.test(hint("programmeTile")), hint("programmeTile"))
+        verify(/\d\. Kyu/.test(hint("examTile")), hint("examTile"))
+        verify(dates().includes("Stand"), dates())
+        verify(noteTitle().includes("5. Kyu"), noteTitle())
+        compare(meaning("Koshi-nage"), "Hüftwurf")
+        verify(Programme.search("2 Arten").length > 0)
+        compare(Programme.search("2 variants").length, 0)
+
+        tile(page, "languageTile", "English").clicked()
+        english()
+        Practice.deleteNote(Practice.notes(entry.id)[0].uid)
+        notes.destroy()
+    }
+
     // The language survives a change of style, and the new window's pages speak it.
     function test_language_then_style() {
         openAppearance()

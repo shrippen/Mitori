@@ -21,6 +21,12 @@ def test_every_text_is_translated():
         assert not unfinished, f"{ts.name}: {unfinished}"
 
 
+def test_catalogs_hold_no_locations():
+    """Line numbers change with every edit; in the catalogs they make parallel PRs conflict."""
+    located = [ts.name for ts in I18N.glob("*.ts") if next(ET.parse(ts).iter("location"), None) is not None]
+    assert not located, f"lupdate without -locations none (use --target update_translations): {located}"
+
+
 def test_english_is_not_german():
     german = {m.findtext("source"): {f.text for f in m.iter("numerusform")}
               for m in ET.parse(I18N / "mitori_de.ts").iter("message")}

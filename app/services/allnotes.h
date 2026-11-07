@@ -57,6 +57,7 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
+    void readGradeNames();
     void collect();
     void show();
     QString techniqueTitle(const QVariantMap &entry) const;

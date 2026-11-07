@@ -44,6 +44,7 @@ bool AllNotes::eventFilter(QObject *watched, QEvent *event)
 {
     if (event->type() == QEvent::LanguageChange && watched == QCoreApplication::instance()) {
         m_techniques.clear();
+        readGradeNames();
         rebuild();
     }
     return KeyedListModel::eventFilter(watched, event);
@@ -71,22 +72,29 @@ void AllNotes::setProgramme(Programme *programme)
         return;
     }
     m_programme = programme;
-    m_gradeNames.clear();
     m_techniques.clear();
-    if (m_programme) {
-        for (const QVariant &dv : m_programme->disciplines()) {
-            const QVariantMap d = dv.toMap();
-            const QString id = d.value(QStringLiteral("id")).toString();
-            for (const QVariant &gv : m_programme->grades(id)) {
-                const QVariantMap g = gv.toMap();
-                m_gradeNames.insert(id + QLatin1Char('/') + g.value(QStringLiteral("id")).toString(),
-                                    d.value(QStringLiteral("kurzname")).toString() + QLatin1Char(' ')
-                                        + g.value(QStringLiteral("name")).toString());
-            }
-        }
-    }
+    readGradeNames();
     emit sourcesChanged();
     rebuild();
+}
+
+// The grades' names in the programme's language of now (a LanguageChange reads them anew).
+void AllNotes::readGradeNames()
+{
+    m_gradeNames.clear();
+    if (!m_programme) {
+        return;
+    }
+    for (const QVariant &dv : m_programme->disciplines()) {
+        const QVariantMap d = dv.toMap();
+        const QString id = d.value(QStringLiteral("id")).toString();
+        for (const QVariant &gv : m_programme->grades(id)) {
+            const QVariantMap g = gv.toMap();
+            m_gradeNames.insert(id + QLatin1Char('/') + g.value(QStringLiteral("id")).toString(),
+                                d.value(QStringLiteral("kurzname")).toString() + QLatin1Char(' ')
+                                    + g.value(QStringLiteral("name")).toString());
+        }
+    }
 }
 
 void AllNotes::setFilter(const QString &filter)
