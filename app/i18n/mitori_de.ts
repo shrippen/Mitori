@@ -1783,7 +1783,7 @@
     </message>
     <message>
         <location filename="../qml/LeaveDialog.qml" line="81"/>
-        <location filename="../qml/LeaveDialog.qml" line="131"/>
+        <location filename="../qml/LeaveDialog.qml" line="170"/>
         <source>Discard</source>
         <translation>Verwerfen</translation>
     </message>
