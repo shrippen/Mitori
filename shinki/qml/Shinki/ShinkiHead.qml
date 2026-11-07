@@ -19,9 +19,9 @@ import org.kde.kirigami as Kirigami
 //   moreText     the name of the menu with the hidden actions ("More")
 //   back()       the way back was taken
 //
-// Its height stays the same on every page (the way back keeps its line, the title row the height
-// of a button): Kirigami stops a page's slide when the view's height changes, and the page that
-// leaves stays (a player then keeps playing).
+// Its height stays the same on every page but the start menu, which has no way back (the way back
+// keeps its line, the title row the height of a button): Kirigami stops a page's slide when the
+// view's height changes, so that slide ends at once (Main.dropLeaving takes the page that leaves).
 Rectangle {
     id: head
 

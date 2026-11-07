@@ -75,6 +75,31 @@ Kirigami.ApplicationWindow {
     }
     pageStack.initialPage: StartPage {}
 
+    // Kirigami destroys a popped page when its slide ends. A new height of the view stops the slide
+    // without ending it (Shinki's head is lower on the start menu, the keyboard closes, a turn), and
+    // the page stays, hidden, until the next slide ends. It goes now: a draft saved on destruction
+    // (NoteRow, CoursePage beside a list) must not wait for that, the system may kill the app first.
+    property var leavingPages: []
+    function dropLeaving() {
+        if (root.pageStack.columnView.moving) {
+            return
+        }
+        for (const page of root.leavingPages.splice(0)) {
+            root.pageStack.removePage(page)
+        }
+    }
+    Connections {
+        target: root.pageStack.columnView
+
+        function onItemRemoved(item) {
+            root.leavingPages.push(item)
+        }
+        function onMovingChanged() {
+            // Later: a slide replaced by the next one stops and starts in one go.
+            Qt.callLater(root.dropLeaving)
+        }
+    }
+
     // After a change of style (Appearance::rebuild) the pages of the old window, as keptPageList gave
     // them. A page names itself with `keptPage` (and `keptState`, its properties); only pages
     // without an unsaved input of their own do, and those are the only ways to the style choice.

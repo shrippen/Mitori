@@ -6618,6 +6618,56 @@ TestCase {
         field.text = "beim Verlassen"
         window.back()
         tryVerify(() => Practice.lastNote(second).text === "beim Verlassen", 3000, "saved when the player closes")
+        // Saved on the step back; the page goes a moment later (Main.back), not on the next case's.
+        tryVerify(() => window.pageStack.currentIndex === window.pageStack.depth - 1)
+    }
+
+    // The Back key only steps the stack back and keeps the page (Kirigami's forward arrow), until
+    // the next page or the app's end: a draft cannot wait for that, the system may kill the app.
+    function test_8b_back_key_keeps_note_data() {
+        return [{ tag: "phone", width: 420, height: 800, pane: false }, { tag: "beside the list", width: 1280, height: 800, pane: true }]
+    }
+    function test_8b_back_key_keeps_note(data) {
+        useFolder(standInVideos)
+        Programme.discipline = "aikido"
+        PracticeGrade.setGrade("aikido", "k5")
+        window.width = data.width
+        window.height = data.height
+        wait(100)
+        const rows = Programme.entries("aikido", "k5").filter(r => r.kind === "entry" && r.video)
+        const list = data.pane ? push("ProgrammePage") : null
+        if (list) {
+            tryVerify(() => list.split && list.player)
+        }
+        const page = list ?? push("PlayerPage", { playlist: rows, index: 0 })
+        const player = list ? list.player : page
+        tryVerify(() => Math.abs(page.mapToItem(window.contentItem, 0, 0).x) < 1, 5000, "slid in")
+        const id = player.current.id
+        const field = findChild(player, "noteField")
+        const text = "Back key " + data.tag
+        field.text = text
+
+        window.pageStack.goBack()
+        tryVerify(() => Practice.lastNote(id).text === text, 5000, "saved when Back steps away")
+    }
+
+    // Beside the list: the entry begun on the right, by the Back key and by a plain pop.
+    function test_8s_begun_entry_on_leaving_data() {
+        return [{ tag: "Back key", back: () => window.pageStack.goBack() }, { tag: "pop", back: () => window.pageStack.pop() }]
+    }
+    function test_8s_begun_entry_on_leaving(data) {
+        const uid = testCourse("Rechts " + data.tag)
+        const host = listHost("CoursesPage.qml", 1280, 800)
+        const pane = findChild(host, "pagePane")
+        const list = findChild(host, "listPane")
+        tryVerify(() => Math.abs(host.mapToItem(window.contentItem, 0, 0).x) < 1, 5000, "slid in")
+        list.item.open(uid)
+        tryVerify(() => pane.item && pane.item.uid === uid)
+        findChild(pane.item, "courseCompose").text = "Halten"
+
+        data.back()
+        tryVerify(() => Courses.entries(uid).filter(e => e.text === "Halten").length === 1, 5000, "the begun entry is saved")
+        verify(Courses.remove(uid))
     }
 
     // With the note field focused, the controls scroll it into view when the window shrinks

@@ -96,7 +96,19 @@ Kirigami.Page {
     // Later: taking a page away may save its draft, which changes what `current` reads.
     onPaneKeyChanged: Qt.callLater(pane.reload)
     // With a page above, the one below may still get its answer (a camera, a scan): it changes after.
-    onIsCurrentPageChanged: pane.reload()
+    onIsCurrentPageChanged: {
+        pane.reload()
+
+        // The Back key keeps this page (ahead of the one shown), for how long nobody knows. With a
+        // recording it comes back (onBackRequested), and the text goes with the recording.
+        const place = host.Kirigami.ColumnView.index
+        if (isCurrentPage || place < 0 || host.Kirigami.PageStack.pageStack.currentIndex >= place) {
+            return
+        }
+        if (pane.item && pane.item.keepBegun && !pane.item.busy) {
+            pane.item.keepBegun()
+        }
+    }
     // Sliding (disabled) the old page waits: let go now, its items turn enabled when its scope is
     // already gone (KanteScope.qml: TypeError in the log).
     onEnabledChanged: pane.reload()
@@ -220,7 +232,11 @@ Kirigami.Page {
 
                 property string loadedKey: ""
                 function reload() {
-                    if (!host.isCurrentPage || loadedKey === host.paneKey || (item && !host.enabled)) {
+                    // Off the stack (no view) Kirigami calls a page current: nothing new for one going.
+                    if (!host.Kirigami.ColumnView.view || !host.isCurrentPage) {
+                        return
+                    }
+                    if (loadedKey === host.paneKey || (item && !host.enabled)) {
                         return
                     }
                     loadedKey = host.paneKey

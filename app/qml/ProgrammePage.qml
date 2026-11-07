@@ -595,6 +595,11 @@ Kirigami.Page {
         if (!isCurrentPage && page.player) {
             page.player.pause()
         }
+        // The Back key keeps the page (ahead of the one shown), for how long nobody knows.
+        const place = page.Kirigami.ColumnView.index
+        if (!isCurrentPage && page.player && place >= 0 && page.Kirigami.PageStack.pageStack.currentIndex < place) {
+            page.player.keepDraft()
+        }
         if (isCurrentPage && page.cameFromPlayer && !page.split && page.lastId !== "") {
             const row = page.rows.findIndex(r => r.id === page.lastId)
             if (row >= 0) {

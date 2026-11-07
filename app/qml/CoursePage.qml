@@ -27,7 +27,8 @@ Kirigami.ScrollablePage {
     // ListAndPage, beside the list on a tablet: another row takes this page away, so a begun entry
     // is saved then (not when the notebook itself went).
     property var paneHost: null
-    Component.onDestruction: {
+    Component.onDestruction: keepBegun()
+    function keepBegun() {
         if (paneHost && !gone && compose.text.trim() !== "") {
             page.add()
         }
