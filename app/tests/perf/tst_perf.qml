@@ -3,8 +3,10 @@ import QtTest
 import org.kde.kirigami as Kirigami
 import Mitori
 
-// How long the pages take with five years of use (tst_perf.cpp). "PERF <name> <ms>" for the record;
-// a budget that fails means: much slower than it was (generous, the CI's machine is small).
+// How long the pages take with five years of use (tst_perf.cpp). "PERF <name> <ms> cpu <ms>" for the
+// record; a budget that fails means: much slower than it was (generous, the CI's machine is small).
+// Budgets hold CPU time: the time on the wall also counts who else runs (Player 5597 ms with 40 busy
+// processes, 1312 ms CPU), and says nothing about the page.
 TestCase {
     id: test
 
@@ -19,12 +21,12 @@ TestCase {
     function initTestCase() {
         const component = Qt.createComponent("Mitori", "Main")
         verify(component.status === Component.Ready, component.errorString())
-        const started = Date.now()
+        const started = now()
         window = component.createObject(null, { width: 420, height: 800 })
         window.show()
         tryVerify(() => window.pageStack.currentItem !== null, 10000)
         waitForRendering(window.contentItem)
-        report("start menu", Date.now() - started, 8000)
+        report("start menu", started, 8000)
     }
 
     function cleanupTestCase() {
@@ -32,40 +34,59 @@ TestCase {
         window.destroy()
     }
 
+    // Kirigami 6.31 crashes on a pop in the last moments of a slide: ColumnView::setCurrentIndex
+    // hands the focus to the page below, a Behavior on that makes Qt run the slide's end there and
+    // then, which takes the current item away (SIGSEGV in QQuickItem::size). A tap does not get
+    // here, a page does not take taps while it slides; a test does.
+    function popPage() {
+        tryVerify(() => !window.pageStack.columnView.moving, 5000, "the slide ends")
+        // A page may have gone during the wait (TrainingEndPage): the start menu stays.
+        if (window.pageStack.depth > 1) {
+            window.pageStack.pop()
+        }
+    }
+
     // A failed budget must not leave its page in the stack (it would slow what comes next).
     function cleanup() {
         while (window.pageStack.depth > 1) {
-            window.pageStack.pop()
+            popPage()
         }
         wait(50)
     }
 
-    function report(name, ms, budget) {
-        console.log("PERF " + name + " " + ms)
+    function now() {
+        return { wall: Date.now(), cpu: perfClock.cpuMs() }
+    }
+
+    // Since `started`; `waited`: what the case itself waits for, not part of the wall's time.
+    function report(name, started, budget, waited) {
+        const wall = Date.now() - started.wall - (waited || 0)
+        const ms = perfClock.cpuMs() - started.cpu
+        console.log("PERF " + name + " " + wall + " cpu " + ms)
         times.push({ name: name, ms: ms })
-        verify(ms <= budget, name + " took " + ms + " ms, budget " + budget)
+        verify(ms <= budget, name + " took " + ms + " ms CPU, budget " + budget)
     }
 
     // A page from the push until it is drawn.
     function page(name, file, properties) {
-        const started = Date.now()
+        const started = now()
         window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + file + ".qml"), properties || {})
         waitForRendering(window.contentItem)
-        report(name, Date.now() - started, pageBudget)
+        report(name, started, pageBudget)
         const shown = window.pageStack.currentItem
         wait(350)   // the slide, not part of the time
         return shown
     }
 
     function back() {
-        window.pageStack.pop()
+        popPage()
         wait(50)
     }
 
     function call(name, f) {
-        const started = Date.now()
+        const started = now()
         const result = f()
-        report(name, Date.now() - started, callBudget)
+        report(name, started, callBudget)
         return result
     }
 
@@ -128,11 +149,11 @@ TestCase {
         const search = page("Search", "SearchPage")
         const field = findChild(search, "searchField")
         for (const text of ["k", "ko", "kot", "kote"]) {
-            const started = Date.now()
+            const started = now()
             field.text = text
             wait(320)   // the page waits for the typing to pause
             wait(0)     // the list has followed (no waitForRendering: an unchanged picture never comes)
-            report("Search “" + text + "”", Date.now() - started - 320, callBudget)
+            report("Search “" + text + "”", started, callBudget, 320)
         }
         back()
     }

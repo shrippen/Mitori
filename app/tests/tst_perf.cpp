@@ -1,8 +1,11 @@
+#include <ctime>
+
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QQmlContext>
 #include <QQmlEngine>
 #include <QRandomGenerator>
 #include <QSettings>
@@ -103,6 +106,15 @@ class Setup : public QObject
 {
     Q_OBJECT
 
+public:
+    // The process's CPU time, every thread: what the app did, whatever else the machine does.
+    Q_INVOKABLE qint64 cpuMs() const
+    {
+        timespec t{};
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t);
+        return qint64(t.tv_sec) * 1000 + t.tv_nsec / 1000000;
+    }
+
 public slots:
     void applicationAvailable()
     {
@@ -130,8 +142,9 @@ public slots:
         }
     }
 
-    void qmlEngineAvailable(QQmlEngine *)
+    void qmlEngineAvailable(QQmlEngine *engine)
     {
+        engine->rootContext()->setContextProperty(QStringLiteral("perfClock"), this);
         QIcon::setThemeSearchPaths({QStringLiteral(":/icons")});
         QIcon::setThemeName(QStringLiteral("breeze-mitori"));
     }
