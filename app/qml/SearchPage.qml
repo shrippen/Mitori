@@ -232,7 +232,6 @@ Kirigami.ScrollablePage {
 
                     readonly property var found: rowLoader.modelData.data
                     readonly property string kind: rowLoader.modelData.kind
-                    readonly property var noteEntry: kind === "note" ? page.noteEntry(found.entry) : ({})
 
                     objectName: kind === "word" ? "glossaryRow" : kind === "technique" ? "techniqueResult" : "noteResult"
                     // The list is one Tab stop; Up and Down move in it.
@@ -240,17 +239,9 @@ Kirigami.ScrollablePage {
                     focusOnClick: false
                     selected: rowLoader.ListView.isCurrentItem && list.activeFocus
                     leadingText: kind === "technique" && found.nr ? String(found.nr) : ""
-                    // As in the programme: the technique's and the attack's addition tell rows apart.
-                    // A note in one line, as the row shows it.
-                    text: kind === "word" ? found.word + (found.jp ? "  " + found.jp : "")
-                        : kind === "technique" ? found.title + (found.extra && !found.nr ? " (" + found.extra + ")" : "")
-                                                 + (found.jp ? "  " + found.jp : "")
-                        : found.text.replace(/\s+/g, " ")
-                    subtitle: kind === "word" ? found.meaning || qsTr("No translation in the lexicon")
-                            : kind === "technique" ? [found.disciplineName + " " + found.gradeName, found.groupName,
-                                                      (found.attack || "") + (found.attackExtra ? " (" + found.attackExtra + ")" : ""),
-                                                      found.nr ? found.extra : ""].filter(x => x).join(" · ")
-                            : [noteEntry.title, found.created.toLocaleDateString(Qt.locale(), Locale.ShortFormat)].filter(x => x).join(" · ")
+                    // From the row itself, kind and data together: a reused row gets both at once.
+                    text: page.rowText(rowLoader.modelData)
+                    subtitle: page.rowSubtitle(rowLoader.modelData)
                     // A tap, or Return and Space on the current row (the list's keys), says the word
                     // or opens the technique or note.
                     onClicked: {
@@ -301,6 +292,35 @@ Kirigami.ScrollablePage {
                 wrapMode: Text.Wrap
             }
         }
+    }
+
+    // What a row says. As in the programme: the technique's and the attack's addition tell rows
+    // apart; a note in one line, as the row shows it.
+    function rowText(row) {
+        const found = row.data
+        if (row.kind === "word") {
+            return found.word + (found.jp ? "  " + found.jp : "")
+        }
+        if (row.kind === "technique") {
+            return found.title + (found.extra && !found.nr ? " (" + found.extra + ")" : "") + (found.jp ? "  " + found.jp : "")
+        }
+        return row.kind === "note" ? found.text.replace(/\s+/g, " ") : ""
+    }
+
+    function rowSubtitle(row) {
+        const found = row.data
+        if (row.kind === "word") {
+            return found.meaning || qsTr("No translation in the lexicon")
+        }
+        if (row.kind === "technique") {
+            return [found.disciplineName + " " + found.gradeName, found.groupName,
+                    (found.attack || "") + (found.attackExtra ? " (" + found.attackExtra + ")" : ""),
+                    found.nr ? found.extra : ""].filter(x => x).join(" · ")
+        }
+        if (row.kind !== "note") {
+            return ""
+        }
+        return [page.noteEntry(found.entry).title, found.created.toLocaleDateString(Qt.locale(), Locale.ShortFormat)].filter(x => x).join(" · ")
     }
 
     // A note's technique; one no longer in the programme (a newer catalogue) keeps its notes.
