@@ -110,9 +110,8 @@ Kirigami.Page {
         }
     }
 
-    // Back: a step to the page before, then this one goes at once (it stops playing). Kirigami's
-    // pop() slides it out, and after the window turned (sideways) it stops that slide and keeps
-    // the page, still playing.
+    // Back: a step to the page before, then this one goes at once (it stops playing), not after a
+    // slide of Kirigami's pop(), which a turn of the window stops (Main.dropLeaving).
     function leave() {
         const stack = page.Kirigami.PageStack.pageStack
         stack.currentIndex = page.Kirigami.ColumnView.index - 1
