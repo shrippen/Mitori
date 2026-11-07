@@ -14,6 +14,7 @@
 #include <QSettings>
 #include <QTranslator>
 
+#include "catalog.h"
 #include "systembars.h"
 
 namespace {
@@ -71,6 +72,13 @@ void applyLanguage(Appearance::Language language)
 {
     static QTranslator *runningQt = nullptr;
     static QTranslator *running = nullptr;
+
+    // The programme data speak the catalogs' language. Set before the catalogs change: each
+    // change sends QEvent::LanguageChange, on which services read the data's texts anew.
+    const QString name = Appearance::localeName(language);
+    const QLocale locale = name.isEmpty() ? QLocale::system() : QLocale(name);
+    Catalog::setLanguage(Catalog::languageOf(locale));
+
     for (QTranslator *old : {running, runningQt}) {
         if (old) {
             QCoreApplication::removeTranslator(old);
@@ -78,8 +86,7 @@ void applyLanguage(Appearance::Language language)
         }
     }
 
-    const QString name = Appearance::localeName(language);
-    QLocale::setDefault(name.isEmpty() ? QLocale::system() : QLocale(name));
+    QLocale::setDefault(locale);
 
     runningQt = new QTranslator(QCoreApplication::instance());
     if (loadQtCatalog(*runningQt)) {

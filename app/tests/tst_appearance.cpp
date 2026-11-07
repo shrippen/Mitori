@@ -4,6 +4,7 @@
 #include <QTest>
 
 #include "appearance.h"
+#include "catalog.h"
 
 // The style and language choice: saved and at once in the app, Breeze only where it exists,
 // one controls style in a run, the start falls back to the default for a style the device does not offer.
@@ -111,8 +112,8 @@ private slots:
 #endif
     }
 
-    // The language: the user's, or German or English whatever the system says; dates and numbers
-    // follow at once.
+    // The language: the user's, or German or English whatever the system says; dates, numbers and
+    // the programme data follow at once.
     void language()
     {
         Appearance a;
@@ -121,10 +122,12 @@ private slots:
         QCOMPARE(changed.count(), 1);
         QCOMPARE(QLocale().language(), QLocale::German);
         QCOMPARE(QLocale().toString(1.5, 'f', 1), QStringLiteral("1,5"));
+        QCOMPARE(Catalog::language(), Catalog::Language::German);
         QCOMPARE(Appearance().language(), Appearance::Language::German);
         a.setLanguage(Appearance::Language::English);
         QCOMPARE(QLocale().language(), QLocale::English);
         QCOMPARE(QLocale().toString(1.5, 'f', 1), QStringLiteral("1.5"));
+        QCOMPARE(Catalog::language(), Catalog::Language::English);
         a.setLanguage(Appearance::Language::System);
         QCOMPARE(QLocale().language(), QLocale::system().language());
         QVERIFY(Appearance::localeName(Appearance::Language::System).isEmpty());

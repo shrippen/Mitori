@@ -2,6 +2,8 @@
 
 #include "searchkey.h"
 
+#include <QCoreApplication>
+#include <QEvent>
 #include <QSet>
 #include <QSettings>
 
@@ -133,7 +135,23 @@ Programme::Programme(QObject *parent)
 Programme::Programme(const Catalog &catalog, QObject *parent)
     : QObject(parent)
     , m_catalog(catalog)
+    , m_language(Catalog::language())
 {
+    // A new catalog (Appearance::setLanguage) may bring the data's other language.
+    if (auto *app = QCoreApplication::instance()) {
+        app->installEventFilter(this);
+    }
+}
+
+bool Programme::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::LanguageChange && watched == QCoreApplication::instance()
+        && m_language != Catalog::language()) {
+        m_language = Catalog::language();
+        ++m_revision;
+        emit textsChanged();
+    }
+    return QObject::eventFilter(watched, event);
 }
 
 QVariantMap Programme::findDiscipline(const QString &id) const
@@ -603,7 +621,12 @@ QString Programme::techniqueLabel(const QString &id) const
 
 QVariantMap Programme::entry(const QString &id) const
 {
-    // Built once: the search page asks for one entry per note found.
+    // Built once per language: the search page asks for one entry per note found. The language is
+    // checked here, not on LanguageChange: other services ask while that event goes round.
+    if (m_indexLanguage != Catalog::language()) {
+        m_entryIndex.clear();
+        m_indexLanguage = Catalog::language();
+    }
     if (m_entryIndex.isEmpty()) {
         for (const QVariant &d : m_catalog.disciplines()) {
             const QVariantMap map = d.toMap();

@@ -107,6 +107,26 @@ private slots:
         QCOMPARE(s.notes->count(), 2);
     }
 
+    // A technique's title names its grade in the data's language of now: a LanguageChange reads
+    // the names anew (they were read once, with the programme).
+    void titlesFollowLanguage()
+    {
+        auto s = made(u"language"_s);
+        QVERIFY(s.practice->addNote(firstEntry(*s.programme, u"aikido"_s), u"Hüfte"_s));
+        QEvent event(QEvent::LanguageChange);
+        const auto title = [&s] { return row(*s.notes, 0).value(u"title"_s).toString(); };
+        QVERIFY(title().startsWith(u"Aikido 5. Kyu · "_s));
+
+        Catalog::setLanguage(Catalog::Language::English);
+        QCoreApplication::sendEvent(QCoreApplication::instance(), &event);
+        const QString english = title();
+        Catalog::setLanguage(Catalog::Language::German);
+        QCoreApplication::sendEvent(QCoreApplication::instance(), &event);
+
+        QVERIFY2(english.startsWith(u"Aikido 5th Kyu · "_s), qPrintable(english));
+        QVERIFY(title().startsWith(u"Aikido 5. Kyu · "_s));
+    }
+
     // A change keeps the other rows (no reset, nothing inserted or removed).
     void changeInPlace()
     {

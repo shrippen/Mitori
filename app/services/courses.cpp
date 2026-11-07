@@ -7,8 +7,10 @@
 #include "devicecalendar.h"
 #include "programme.h"
 
+#include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDir>
+#include <QEvent>
 #include <QFile>
 #include <QFileInfo>
 #include <QLocale>
@@ -71,26 +73,13 @@ Courses::Courses(QObject *parent)
 Courses::Courses(const QString &path, const QUrl &calendar, const QString &cache, const Catalog &catalog, QObject *parent)
     : QObject(parent)
     , m_catalog(catalog)
+    , m_language(Catalog::language())
     , m_book(std::make_unique<CourseBook>())
     , m_source(calendar)
     , m_cache(cache)
 {
-    // The grades one can take, with their waiting times (`wartezeit`, tools/daten.py).
-    for (const QVariant &dv : catalog.disciplines()) {
-        const QVariantMap d = dv.toMap();
-        const QString id = d.value(QStringLiteral("id")).toString();
-        m_disciplineNames.insert(id, d.value(QStringLiteral("kurzname")).toString());
-        QList<Step> &list = m_steps[id];
-        for (const QVariant &gv : d.value(QStringLiteral("grade")).toList()) {
-            const QVariantMap g = gv.toMap();
-            if (!g.value(QStringLiteral("pruefbar"), true).toBool()) {
-                continue;
-            }
-            const QVariantMap wait = g.value(QStringLiteral("wartezeit")).toMap();
-            list << Step{g.value(QStringLiteral("id")).toString(), g.value(QStringLiteral("name")).toString(),
-                         wait.value(QStringLiteral("jahre")).toInt(),
-                         wait.value(QStringLiteral("nach")).toString() == QLatin1String("beginn")};
-        }
+    if (auto *app = QCoreApplication::instance()) {
+        app->installEventFilter(this);
     }
 
     QDir().mkpath(QFileInfo(path).absolutePath());
@@ -103,6 +92,17 @@ Courses::Courses(const QString &path, const QUrl &calendar, const QString &cache
 }
 
 Courses::~Courses() = default;
+
+bool Courses::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::LanguageChange && watched == QCoreApplication::instance()
+        && m_language != Catalog::language()) {
+        m_language = Catalog::language();
+        ++m_revision;
+        emit changed();
+    }
+    return QObject::eventFilter(watched, event);
+}
 
 QString Courses::defaultPath()
 {
@@ -423,9 +423,38 @@ QList<CourseBook::Entry> Courses::namedEntries(const QString &course) const
     return entries;
 }
 
+// The grades one can take, with their waiting times (`wartezeit`, tools/daten.py).
 QList<Courses::Step> Courses::steps(const QString &discipline) const
 {
-    return m_steps.value(discipline);
+    QList<Step> list;
+    for (const QVariant &dv : m_catalog.disciplines()) {
+        const QVariantMap d = dv.toMap();
+        if (d.value(QStringLiteral("id")).toString() != discipline) {
+            continue;
+        }
+        for (const QVariant &gv : d.value(QStringLiteral("grade")).toList()) {
+            const QVariantMap g = gv.toMap();
+            if (!g.value(QStringLiteral("pruefbar"), true).toBool()) {
+                continue;
+            }
+            const QVariantMap wait = g.value(QStringLiteral("wartezeit")).toMap();
+            list << Step{g.value(QStringLiteral("id")).toString(), g.value(QStringLiteral("name")).toString(),
+                         wait.value(QStringLiteral("jahre")).toInt(),
+                         wait.value(QStringLiteral("nach")).toString() == QLatin1String("beginn")};
+        }
+    }
+    return list;
+}
+
+QString Courses::disciplineName(const QString &discipline) const
+{
+    for (const QVariant &dv : m_catalog.disciplines()) {
+        const QVariantMap d = dv.toMap();
+        if (d.value(QStringLiteral("id")).toString() == discipline) {
+            return d.value(QStringLiteral("kurzname")).toString();
+        }
+    }
+    return {};
 }
 
 QString Courses::gradeName(const QString &discipline, const QString &grade) const
@@ -442,7 +471,7 @@ QString Courses::gradeName(const QString &discipline, const QString &grade) cons
 QString Courses::examName(const QString &discipline, const QString &grade) const
 {
     const QString name = gradeName(discipline, grade);
-    return name.isEmpty() ? QString() : m_disciplineNames.value(discipline) + QLatin1Char(' ') + name;
+    return name.isEmpty() ? QString() : disciplineName(discipline) + QLatin1Char(' ') + name;
 }
 
 QVariantList Courses::grades() const
@@ -557,7 +586,7 @@ QString Courses::trainingStart(const QString &discipline) const
 bool Courses::setTrainingStart(const QString &discipline, const QString &day)
 {
     const QDate date = QDate::fromString(day, Qt::ISODate);
-    if (!m_open || !m_steps.contains(discipline) || (!day.isEmpty() && !date.isValid())) {
+    if (!m_open || steps(discipline).isEmpty() || (!day.isEmpty() && !date.isValid())) {
         return false;
     }
     return saved(m_book->setStart(discipline, date, QDateTime::currentDateTimeUtc(), deviceId()),

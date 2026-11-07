@@ -567,6 +567,36 @@ private slots:
         QVERIFY(DeviceCalendar::ics(c->deviceEvent(uid)).contains("UID:" + uid.toLatin1() + "\r\n"));
     }
 
+    // Grade names follow the data's language; a LanguageChange to another one is a change (the
+    // start page's planned exam reads it anew), one that keeps it is none.
+    void gradeNamesInLanguage()
+    {
+        const auto c = made(u"language"_s);
+        QVERIFY(c->addGrade(u"aikido"_s, u"k5"_s, u"2025-03-08"_s, {}));
+        const QString uid = c->create(u"Training"_s, QDate::currentDate().addDays(10).toString(Qt::ISODate), {}, {}, {});
+        QVERIFY(c->planExam(uid, u"aikido"_s, u"k4"_s));
+        QSignalSpy spy(c.get(), &Courses::changed);
+        const int revision = c->revision();
+        QEvent event(QEvent::LanguageChange);
+
+        QCoreApplication::sendEvent(QCoreApplication::instance(), &event);
+        QCOMPARE(spy.count(), 0);
+        Catalog::setLanguage(Catalog::Language::English);
+        QCoreApplication::sendEvent(QCoreApplication::instance(), &event);
+        const QString passed = c->grades().first().toMap().value(u"name"_s).toString();
+        const QString step = c->ladder(u"aikido"_s).at(1).toMap().value(u"name"_s).toString();
+        const QString exam = c->nextExam().value(u"name"_s).toString();
+        Catalog::setLanguage(Catalog::Language::German);
+        QCoreApplication::sendEvent(QCoreApplication::instance(), &event);
+
+        QCOMPARE(passed, u"5th Kyu"_s);
+        QCOMPARE(step, u"4th Kyu"_s);
+        QCOMPARE(exam, u"Aikido 4th Kyu"_s);
+        QCOMPARE(spy.count(), 2);
+        QCOMPARE(c->revision(), revision + 2);
+        QCOMPARE(c->grades().first().toMap().value(u"name"_s).toString(), u"5. Kyu"_s);
+    }
+
     void teacher()
     {
         QCOMPARE(Courses::teacherOf(u"mit Petra und Bernd Hubl"_s), u"Petra und Bernd Hubl"_s);
