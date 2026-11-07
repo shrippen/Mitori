@@ -118,6 +118,9 @@ aussieht und sich verhält, steht im Clickdummy (`entwuerfe/clickdummy/index.htm
   die CSV schreibt (erste Spalte), z. B. `7KQ2M-X9HDV-3TAPR-WE6YT`, der Code der Testdaten, kein echter** (23 Zeichen, ASCII, sonst nichts: keine URL, kein
   Präfix). Beim Druck der Einleger genau diesen Text codieren. Ein Scan läuft wie getippt; ein QR-Code ohne gültigen
   Code (Länge, Zeichen, Prüfzeichen) bekommt einen Satz, die Kamera läuft weiter. Der Code wird nie geloggt.
+- Schritt 5: Demo-Modus (`demo/start.sh`, Emi Hartmanns Übungsstand aus der Studio-Weber-Welt, Abschnitt `dojo`),
+  Screenshots (`demo/shots.json`), Landing Page `docs/index.html`, erstes Release 0.1.0 (APK, AppImage, Flatpak x86_64
+  und aarch64). Offen: Update-Check, Stores (F-Droid, Flathub).
 
 ## Offene Punkte (Stand 03.11.2026)
 

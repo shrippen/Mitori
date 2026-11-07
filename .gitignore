@@ -35,3 +35,6 @@ mitori-bundle-geheim/
 .idea/
 .vscode/
 aqtinstall.log
+
+# Demo-Build (demo/start.sh)
+build-demo/

@@ -11,7 +11,7 @@
     <p xml:lang="de">Technik antippen, die Stelle im Prüfungsvideo läuft: Zeitlupe, Schleife, einschätzen, Notizen, für die Prüfung üben.</p>
   </description>
   <launchable type="desktop-id">io.github.shrippen.Mitori.desktop</launchable>
-  <url type="homepage">https://shrippen.github.io/Mitori/</url>
+  <url type="homepage">https://shrippen.github.io/mitori-app/</url>
   <url type="vcs-browser">https://github.com/shrippen/mitori-app</url>
   <developer id="io.github.shrippen">
     <name>shrippen</name>
@@ -21,5 +21,12 @@
     <control>touch</control>
   </recommends>
   <releases>
+    <release version="0.1.0" date="2026-11-07">
+      <url type="details">https://github.com/shrippen/mitori-app/releases/tag/v0.1.0</url>
+      <description>
+        <p>The first release: the exam programmes of Aikido Shinki Rengo, Daitoryu and Itto-den Shinki Toho with exam videos (unlocked by the DVD's code), ratings, notes, practise today, exam mode, technique map, glossary, statistics, courses, grades, backup and sync.</p>
+        <p xml:lang="de">Das erste Release: die Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho mit Prüfungsvideos (freigeschaltet mit dem Code der DVD), Einschätzen, Notizen, Heute üben, Prüfungsmodus, Technik-Landkarte, Glossar, Statistik, Lehrgängen, Graden, Sicherung und Abgleich.</p>
+      </description>
+    </release>
   </releases>
 </component>
