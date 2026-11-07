@@ -74,10 +74,7 @@ Kirigami.ScrollablePage {
 
     // A new query shows its results from the top (the list keeps its position when the header
     // with the techniques found changes height, which left it above the first row).
-    onQueryChanged: {
-        list.keepTop = true
-        Qt.callLater(list.toTop)
-    }
+    onQueryChanged: Qt.callLater(list.positionViewAtBeginning)
 
     header: LookToolBar {
         LookTextField {

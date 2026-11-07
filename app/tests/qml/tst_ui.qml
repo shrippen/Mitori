@@ -6344,9 +6344,13 @@ TestCase {
         window.width = 420
         tryVerify(() => list.atYBeginning, 1000, "at the top again: " + list.contentY + " from " + list.originY)
 
+        // Far down, then a search: its results from the top.
+        far.clicked()
+        verify(list.contentY > list.height, "jumped again: " + list.contentY)
         findChild(page, "searchField").text = "ko"
         tryCompare(page, "searching", true)
         verify(!bar.visible, "words found have no letters")
+        tryVerify(() => list.atYBeginning, 1000, "results from the top: " + list.contentY + " from " + list.originY)
         popPage()
     }
 
