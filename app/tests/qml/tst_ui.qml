@@ -18,6 +18,20 @@ TestCase {
     // The video folder while a case uses the stand-ins.
     property string realFolder: ""
 
+    // A run stays in one day: the course calendar is written at its start, ratings count per day.
+    // In America/Los_Angeles, midnight during a run (08:00 UTC in winter): test_9m_courses 11 days
+    // for 12, test_9o_grades, test_9z_stats 2 practice days for 1.
+    function test_0_run_stays_in_its_day() {
+        const kHoursLeft = 11
+        for (let utc = 0; utc < 24; ++utc) {
+            const west = uiCatalog.hoursWest(utc)
+            verify(west > 0, "west of UTC at " + utc)
+            const local = (utc - west + 24) % 24
+            verify(23 - local >= kHoursLeft, "at " + utc + " UTC the run starts at " + local + " here")
+        }
+        verify(new Date().getTimezoneOffset() > 0, "this run is west of UTC")
+    }
+
     function initTestCase() {
         const component = Qt.createComponent("Mitori", "Main")
         verify(component.status === Component.Ready, component.errorString())
