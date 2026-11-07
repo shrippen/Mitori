@@ -28,7 +28,7 @@ build-test/
 *.keystore
 *.jks
 *.key
-bundle-geheim/
+mitori-bundle-geheim/
 
 *~
 *.swp

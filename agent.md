@@ -91,7 +91,7 @@ platform/       eine Implementierung je Plattform (Bildschirm wach, Helligkeit, 
   `daten/shinki-toho-kommentare.yaml` und `daten/lexikon.yaml` sind erzeugt
   (`third_party/mitori-daten/tools/kommentare.py`, `…/lexikon.py`), nie von Hand bearbeiten.
 - **Videos kommen nie ins Repo**, weder roh noch verschlüsselt, auch keine Ausschnitte. Ebenso keine
-  Inhaltsschlüssel und Codes der Bundles (`bundle-geheim/` außerhalb des Repos).
+  Inhaltsschlüssel und Codes der Bundles (`mitori-bundle-geheim/` außerhalb des Repos).
 - Texte der App deutsch und englisch, nur über Übersetzungskataloge.
 - Demo-Modus nur zum Erstellen von Screenshots (Build-Option `MITORI_DEMO`, aus), nie in einer Auslieferung.
 - `scripts/check.sh` vor jedem Commit (Daten, Release-Notes, Tests, Build, qmllint).
