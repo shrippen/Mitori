@@ -215,7 +215,7 @@ Offen, größer (Vorschläge im Artefakt „Mitori: Nachtschicht“):
   Bewertung und Steuerzeilen des Players brauchen eine schmale Form.
 - Tablet nach Vorlage (Programm: Player oder Blatt rechts; Heute, Statistik und Grade in zwei Spalten; Lehrgänge und
   Einstellungen als Liste und Seite: erledigt).
-- Programmdaten auf Englisch.
+- Programmdaten auf Englisch: erledigt (Daten 2026.11.1, App zeigt sie bei Englisch).
 - Kante: Kopf beim ersten Bild hell (globale Kopfleiste, siehe Kante-Bedarf).
 
 Offen, klein:
@@ -228,7 +228,7 @@ Offen, klein:
 
 Abschlussrunde auf `main` (06.11.2026, ohne Videos): behoben sind Kopf des Trainings unter Kante, Titel und ✕ des Blatts. Offen:
 - Kopf der Startseite unter Kante ohne System-Farbschema beim Kaltstart hell (`globalToolBar.colorSet` und späteres Erzeugen des Kopfs wirken nicht).
-- Englisch: Bedeutungen und Glossar deutsch (Umbau „Programmdaten auf Englisch“).
+- Englisch: Bedeutungen und Glossar deutsch: erledigt (Programmdaten auf Englisch).
 - Esc verlässt nur den Player, nicht Kommentar oder Programm. Quer am Telefon bleiben im Programm rund 140 px für die Liste.
 - „Abbrechen“ im Dialog „Runde verwerfen?“ ist doppeldeutig (Knopf aus dem Standard).
 - `ScrollBar.qml:51` meldet Warnungen im Journal (59×); „not placed in the graphics scene“ je Seite.

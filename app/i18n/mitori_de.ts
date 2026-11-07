@@ -1955,6 +1955,13 @@
         <source>Kiriotoshi, 切り落とし or Hüftwurf</source>
         <translation>Kiriotoshi, 切り落とし oder Hüftwurf</translation>
     </message>
+    <message numerus="yes">
+        <source>%n Japanese term(s), with kanji and English translation where the lexicon or the programme has them. The search also finds English words, techniques and your notes.</source>
+        <translation>
+            <numerusform>%n japanischer Begriff, mit Kanji und deutscher Übersetzung, wo Lexikon oder Programm sie haben. Die Suche findet auch deutsche Wörter, Techniken und deine Notizen.</numerusform>
+            <numerusform>%n japanische Begriffe, mit Kanji und deutscher Übersetzung, wo Lexikon oder Programm sie haben. Die Suche findet auch deutsche Wörter, Techniken und deine Notizen.</numerusform>
+        </translation>
+    </message>
     <message>
         <source>Nothing found for “%1”.</source>
         <translation>Nichts gefunden für „%1“.</translation>
@@ -1974,13 +1981,6 @@
     <message>
         <source>Words with %1</source>
         <translation>Wörter mit %1</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n Japanese term(s), with kanji and German translation where the lexicon or the programme has them. The search also finds German words, techniques and your notes.</source>
-        <translation>
-            <numerusform>%n japanischer Begriff, mit Kanji und deutscher Übersetzung, wo Lexikon oder Programm sie haben. Die Suche findet auch deutsche Wörter, Techniken und deine Notizen.</numerusform>
-            <numerusform>%n japanische Begriffe, mit Kanji und deutscher Übersetzung, wo Lexikon oder Programm sie haben. Die Suche findet auch deutsche Wörter, Techniken und deine Notizen.</numerusform>
-        </translation>
     </message>
     <message>
         <source>This version of Mitori has no speech output, so there is no pronunciation.</source>

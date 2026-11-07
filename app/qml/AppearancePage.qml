@@ -68,10 +68,11 @@ Kirigami.ScrollablePage {
             LookLabel {
                 required property var modelData
 
+                objectName: "programmeDate"
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
                 color: Look.mutedTextColor
-                // The programme's date as the data has it (German, as the programmes).
+                // The programme's date as the data has it, in the app's language.
                 text: [modelData.titel, modelData.stand].filter(x => !!x).join(" · ")
             }
         }

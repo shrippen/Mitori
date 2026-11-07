@@ -167,6 +167,10 @@ signals:
     void calendarChanged();
     void errorChanged();
 
+protected:
+    // The grades' names follow the data's language (Catalog): a change of it is a change here.
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 private:
     void loadCache();
     void received(QNetworkReply *reply);
@@ -180,16 +184,17 @@ private:
         int years = 0;          // 0: none
         bool fromStart = false; // years after the start of training, not after the previous grade
     };
+    // Read from the catalog at each call: the names in its language of now.
     QList<Step> steps(const QString &discipline) const;
     QString gradeName(const QString &discipline, const QString &grade) const;
+    QString disciplineName(const QString &discipline) const;
     QString examName(const QString &discipline, const QString &grade) const;
     QVariantMap courseMap(const CourseBook::Course &c, int entries) const;
     // A notebook's entries with their techniques' names, for the export.
     QList<CourseBook::Entry> namedEntries(const QString &course) const;
 
     Catalog m_catalog;
-    QHash<QString, QList<Step>> m_steps;
-    QHash<QString, QString> m_disciplineNames;
+    Catalog::Language m_language;
 
     std::unique_ptr<CourseBook> m_book;
     QNetworkAccessManager *m_network = nullptr;
