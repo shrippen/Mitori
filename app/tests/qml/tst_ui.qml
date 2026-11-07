@@ -120,6 +120,8 @@ TestCase {
     function push(page, properties) {
         window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/" + page + ".qml"), properties || {})
         tryVerify(() => window.pageStack.currentItem && window.pageStack.currentItem.title !== undefined)
+        // A page that makes a part after it is drawn (TodayPage): with it.
+        tryVerify(() => window.pageStack.currentItem.built !== false)
         return window.pageStack.currentItem
     }
 
@@ -1549,6 +1551,33 @@ TestCase {
         }
         compare(page.due.length, 0, "everything practised for today")
         popPage()
+    }
+
+    // The page is drawn before its due rows and interval fields: they come in the next frames
+    // (half its time with five years of use, tst_perf). A row's tap still opens the sheet.
+    function test_7_today_rows_later() {
+        const grade = PracticeGrade.grade("daitoryu")
+        Programme.discipline = "daitoryu"
+        PracticeGrade.setGrade("daitoryu", "k1")
+        window.pageStack.push(Qt.resolvedUrl("qrc:/qt/qml/Mitori/qml/TodayPage.qml"))
+        const page = window.pageStack.currentItem
+        verify(!page.built)
+        compare(findChild(page, "intervalDays"), null, "made with the page")
+        tryVerify(() => page.built)
+        verify(findChild(page, "intervalDays"))
+
+        verify(page.due.length > 0, "techniques due")
+        const row = findChild(page, "dueRow")
+        compare(row.text, page.due[0].title)
+        row.clicked()
+        const sheet = findChild(page, "techniqueSheet")
+        tryVerify(() => sheet.opened)
+        compare(sheet.entry.id, page.due[0].id)
+        sheet.close()
+        tryVerify(() => !sheet.visible)
+        popPage()
+        PracticeGrade.setGrade("daitoryu", grade)
+        Programme.discipline = "aikido"
     }
 
     // Training plays today's due techniques; a rating moves on to the next open one.

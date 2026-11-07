@@ -38,6 +38,8 @@ Kirigami.ScrollablePage {
     readonly property var playable: due.filter(r => !!r.video && Videos.available(r.video.video))
     // An exam planned in this discipline (Courses): its hint leads to the mock exam.
     readonly property var exam: Courses.revision >= 0 ? Courses.nextExam(discipline) : ({})
+    // The due rows and the interval fields are made (they come after the page is drawn).
+    readonly property bool built: below.status === Loader.Ready
 
     // On a tablet sideways: two columns in a page of its own width, in the middle.
     readonly property TypingHold hold: TypingHold { target: page }
@@ -55,6 +57,14 @@ Kirigami.ScrollablePage {
             return qsTr("%1 · %n day(s) ago", "", row.days).arg(Practice.levelNames[row.level])
         }
         return qsTr("not practised for %n day(s)", "", row.days)
+    }
+
+    function openSheet(entry) {
+        sheetLoader.active = true
+        const sheet = sheetLoader.item as TechniqueSheet
+        sheet.entry = entry
+        sheet.playable = !!entry.video && Videos.available(entry.video.video)
+        sheet.open()
     }
 
     // Every due technique; one without a video on the device shows as a card in the player. What
@@ -109,24 +119,29 @@ Kirigami.ScrollablePage {
             color: Look.mutedTextColor
             wrapMode: Text.Wrap
         }
-        LookHint {
-            objectName: "plannedHint"
+        // Made only with an exam planned: most days there is none.
+        Loader {
             Layout.fillWidth: true
-            visible: !!page.exam.course
-            compact: true
-            importance: LookHint.Importance.Important
-            titleText: page.exam.course ? Grades.examText(page.exam) : ""
-            meta: page.exam.place || page.exam.title || ""
+            active: !!page.exam.course
+            visible: active
 
-            LookButton {
-                objectName: "toMockExam"
-                // Only for a grade the exam mode has material for (not Shinki Toho Hon-Menkyo).
-                visible: !!page.exam.course && Exam.grades(page.exam.discipline).some(g => g.id === page.exam.grade)
-                text: qsTr("Mock exam")
-                onClicked: {
-                    Programme.discipline = page.exam.discipline
-                    PracticeGrade.setGrade(page.exam.discipline, page.exam.grade)
-                    page.Kirigami.PageStack.push(Qt.resolvedUrl("ExamPage.qml"))
+            sourceComponent: LookHint {
+                objectName: "plannedHint"
+                compact: true
+                importance: LookHint.Importance.Important
+                titleText: page.exam.course ? Grades.examText(page.exam) : ""
+                meta: page.exam.place || page.exam.title || ""
+
+                LookButton {
+                    objectName: "toMockExam"
+                    // Only for a grade the exam mode has material for (not Shinki Toho Hon-Menkyo).
+                    visible: !!page.exam.course && Exam.grades(page.exam.discipline).some(g => g.id === page.exam.grade)
+                    text: qsTr("Mock exam")
+                    onClicked: {
+                        Programme.discipline = page.exam.discipline
+                        PracticeGrade.setGrade(page.exam.discipline, page.exam.grade)
+                        page.Kirigami.PageStack.push(Qt.resolvedUrl("ExamPage.qml"))
+                    }
                 }
             }
         }
@@ -218,90 +233,107 @@ Kirigami.ScrollablePage {
             }
         }
 
-        LookSectionLabel {
-            visible: page.due.length > 0
-            text: qsTr("Due")
-        }
-        Repeater {
-            model: page.due
+        // Below the first screen on a phone: made after the page is drawn, a part each frame,
+        // so the page comes at once (with five years of use about half of its time).
+        Loader {
+            id: below
 
-            LookListRow {
-                id: dueRow
-
-                required property var modelData
-
-                Layout.fillWidth: true
-                leadingText: modelData.nr ? String(modelData.nr) : ""
-                text: modelData.title
-                subtitle: [modelData.attack, page.reason(modelData)].filter(x => x).join(" · ")
-                onClicked: {
-                    sheet.entry = modelData
-                    sheet.playable = !!modelData.video && Videos.available(modelData.video.video)
-                    sheet.open()
-                }
-                trailing: LookLevelDots {
-                    value: dueRow.modelData.level
-                    names: Practice.levelNames
-                    color: Look.levelColor(dueRow.modelData.level)
-                }
-            }
-        }
-
-        LookSectionLabel {
-            text: qsTr("Intervals · days until due again")
-        }
-        GridLayout {
             Layout.fillWidth: true
-            columns: page.wide ? 4 : 2
-            columnSpacing: Kirigami.Units.largeSpacing
+            asynchronous: true
 
-            Repeater {
-                model: 4
+            sourceComponent: ColumnLayout {
+                spacing: Kirigami.Units.largeSpacing
 
-                ColumnLayout {
-                    id: interval
+                LookSectionLabel {
+                    visible: page.due.length > 0
+                    text: qsTr("Due")
+                }
+                Repeater {
+                    model: page.due
 
-                    required property int index
+                    LookListRow {
+                        id: dueRow
 
-                    LookLabel {
-                        text: (interval.index + 1) + " " + Practice.levelNames[interval.index + 1]
-                        color: Look.mutedTextColor
-                    }
-                    LookSpinBox {
-                        objectName: "intervalDays"
-                        from: 1
-                        to: 365
-                        value: Practice.intervals[interval.index]
-                        editable: true
-                        Accessible.name: qsTr("Days for %1").arg(Practice.levelNames[interval.index + 1])
-                        onValueModified: {
-                            const days = Practice.intervals.slice()
-                            days[interval.index] = value
-                            Practice.intervals = days
+                        required property var modelData
+
+                        objectName: "dueRow"
+                        Layout.fillWidth: true
+                        leadingText: modelData.nr ? String(modelData.nr) : ""
+                        text: modelData.title
+                        subtitle: [modelData.attack, page.reason(modelData)].filter(x => x).join(" · ")
+                        onClicked: page.openSheet(dueRow.modelData)
+                        trailing: LookLevelDots {
+                            value: dueRow.modelData.level
+                            names: Practice.levelNames
+                            color: Look.levelColor(dueRow.modelData.level)
                         }
                     }
                 }
+
+                LookSectionLabel {
+                    text: qsTr("Intervals · days until due again")
+                }
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: page.wide ? 4 : 2
+                    columnSpacing: Kirigami.Units.largeSpacing
+
+                    Repeater {
+                        model: 4
+
+                        ColumnLayout {
+                            id: interval
+
+                            required property int index
+
+                            LookLabel {
+                                text: (interval.index + 1) + " " + Practice.levelNames[interval.index + 1]
+                                color: Look.mutedTextColor
+                            }
+                            LookSpinBox {
+                                objectName: "intervalDays"
+                                from: 1
+                                to: 365
+                                value: Practice.intervals[interval.index]
+                                editable: true
+                                Accessible.name: qsTr("Days for %1").arg(Practice.levelNames[interval.index + 1])
+                                onValueModified: {
+                                    const days = Practice.intervals.slice()
+                                    days[interval.index] = value
+                                    Practice.intervals = days
+                                }
+                            }
+                        }
+                    }
+                }
+                LookLabel {
+                    Layout.fillWidth: true
+                    text: qsTr("New techniques of the current grade come on top, at most two a day.")
+                    color: Look.mutedTextColor
+                    wrapMode: Text.Wrap
+                }
             }
-        }
-        LookLabel {
-            Layout.fillWidth: true
-            text: qsTr("New techniques of the current grade come on top, at most two a day.")
-            color: Look.mutedTextColor
-            wrapMode: Text.Wrap
         }
     }
 
-    TechniqueSheet {
-        id: sheet
+    // Made at the first tap on a row.
+    Loader {
+        id: sheetLoader
 
-        objectName: "techniqueSheet"
-        onPlayRequested: entry => {
-            sheet.close()
-            const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
-            window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), Playlists.around(Programme, Videos, entry))
+        active: false
+
+        sourceComponent: TechniqueSheet {
+            id: sheet
+
+            objectName: "techniqueSheet"
+            onPlayRequested: entry => {
+                sheet.close()
+                const window = page.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow
+                window.pageStack.push(Qt.resolvedUrl("PlayerPage.qml"), Playlists.around(Programme, Videos, entry))
+            }
+            onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
+            onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
+            onVideosRequested: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
         }
-        onCommentRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("CommentPage.qml"), { entry: entry })
-        onNotesRequested: entry => page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
-        onVideosRequested: page.Kirigami.PageStack.push(Qt.resolvedUrl("VideosPage.qml"))
     }
 }
