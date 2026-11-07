@@ -19,7 +19,7 @@ class Videos : public QObject
     Q_PROPERTY(QString folder READ folder WRITE setFolder NOTIFY folderChanged)
     // Inside a Flatpak sandbox, which reads only ~/Videos (packaging/flatpak).
     Q_PROPERTY(bool sandboxed READ sandboxed CONSTANT)
-    // Qt's video backend is made and its decoders tried (prepareDecoders()).
+    // The video decoders are tried (prepareDecoders()).
     Q_PROPERTY(bool decodersReady READ decodersReady NOTIFY decodersReadyChanged)
 
 public:
@@ -42,7 +42,7 @@ public:
 
     Q_INVOKABLE static QString defaultFolder();
 
-    // After the start: Qt's video backend is made in the background (Decoders), not when the
+    // After the start: the video decoders are tried in the background (Decoders), not when the
     // first video opens (a second with some GPUs).
     Q_INVOKABLE void prepareDecoders();
 
