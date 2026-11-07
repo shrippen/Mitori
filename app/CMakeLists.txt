@@ -257,12 +257,13 @@ qt_add_qml_module(mitori_app
 # Texts: English in the code, German in i18n/mitori_de.ts (update: cmake --build <dir> --target
 # update_translations). The .qm files go into the resources under :/i18n. mitori_en.ts holds only
 # the English plural forms; it also makes English win where it comes before German in the
-# user's languages.
+# user's languages. The catalogues hold no source locations (-locations none): line numbers
+# would change with every edit and make parallel pull requests conflict there.
 qt_add_translations(mitori_app
     TS_FILES i18n/mitori_de.ts
     PLURALS_TS_FILE i18n/mitori_en.ts
     RESOURCE_PREFIX /i18n
-    LUPDATE_OPTIONS -no-obsolete
+    LUPDATE_OPTIONS -no-obsolete -locations none
 )
 
 qt_add_resources(mitori_app "daten"
