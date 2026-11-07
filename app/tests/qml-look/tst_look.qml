@@ -148,11 +148,13 @@ TestCase {
         window.x = 321
         window.y = 123
 
+        // CPU time: a busy machine took 13296 ms by the clock.
         const started = Date.now()
+        const startedCpu = uiCatalog.cpuMs()
         toStyle(otherStyle)
-        const took = Date.now() - started
-        console.log("change of style:", took, "ms")
-        verify(took <= switchBudget, took + " ms")
+        const took = uiCatalog.cpuMs() - startedCpu
+        console.log("change of style:", Date.now() - started, "ms,", took, "ms CPU")
+        verify(took <= switchBudget, took + " ms CPU")
         compare(uiCatalog.watchedAlive(), 0, "old window and page gone")
         compare(uiCatalog.windowCount(), windows)
         compare(Appearance.running, otherStyle)

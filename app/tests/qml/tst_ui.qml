@@ -5368,12 +5368,23 @@ TestCase {
         wait(800)
         compare(programmeList.contentY, programmeList.originY, "the list opens at its top")
         // Another discipline, another head (the grades' meaning): still at its top.
+        const topBefore = programmeList.originY
         Programme.discipline = "shinkitoho"
         page.grade = PracticeGrade.grade("shinkitoho")
         tryVerify(() => findChild(programmeList.headerItem, "gradeInfo").visible)
-        // The head grows, the list follows it to the top a moment later (-265, then -337).
-        tryVerify(() => programmeList.height < 1000 && programmeList.contentY === programmeList.originY && !programmeList.moving,
-                  5000, "the list stays at its top")
+        // The head grows in steps, the list follows each a moment later (-265, then -337): it has
+        // to be grown, and at the top for a while. One second is many steps' worth of polish.
+        const kSteadyMs = 1000
+        let top = programmeList.originY
+        let since = Date.now()
+        tryVerify(() => {
+            if (programmeList.originY !== top || programmeList.contentY !== top || programmeList.moving) {
+                top = programmeList.originY
+                since = Date.now()
+                return false
+            }
+            return top < topBefore && Date.now() - since >= kSteadyMs
+        }, 15000, "the list stays at its top")
         Programme.discipline = "aikido"
         page.grade = "k5"
         wait(100)
@@ -6299,7 +6310,9 @@ TestCase {
         popPage()
     }
 
-    // The main thread held up during a slide, then a pop (a busy machine): see popPage.
+    // The main thread held up during a slide, then a pop (a busy machine): see popPage. A guard of
+    // that helper only: popPage waits, so this cannot crash while it does. Without the wait it
+    // crashed in about 1 of 40 rounds, so 5 rounds will rarely catch it either.
     function test_8q_pop_after_a_stall() {
         const kStallMs = 450
         for (let round = 0; round < 5; ++round) {
@@ -6445,6 +6458,10 @@ TestCase {
         const after = page.player
         compare(after.rate, 0.25)
         compare(after.looping, false)
+
+        // It stands there, as the big one did; it did not just pass the place.
+        staysStanding(after, "the small player stands")
+        verify(Math.abs(after.position - reached) < 1500, after.position + " against " + reached)
         popPage()
         window.width = width
         wait(200)

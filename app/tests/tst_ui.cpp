@@ -78,6 +78,14 @@ public:
     // The windows of the run (tst_look: a change of style leaves one for the app).
     Q_INVOKABLE int windowCount() const { return int(QGuiApplication::allWindows().size()); }
 
+    // The process's CPU time, every thread: what the app did, whatever else the machine does.
+    Q_INVOKABLE qint64 cpuMs() const
+    {
+        timespec t{};
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t);
+        return qint64(t.tv_sec) * 1000 + t.tv_nsec / 1000000;
+    }
+
     // Objects that must go with a change of style: how many still live.
     Q_INVOKABLE void watch(QObject *object) { m_watched.append(object); }
     Q_INVOKABLE int watchedAlive() const
