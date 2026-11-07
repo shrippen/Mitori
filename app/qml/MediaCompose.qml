@@ -19,7 +19,11 @@ Item {
 
     // A photo or voice note is ready: its name in the media folder.
     signal attached(string name)
-    readonly property bool recording: recorder.recorderState === MediaRecorder.RecordingState
+    readonly property bool recording: compose.recorder.recorderState === MediaRecorder.RecordingState
+    // The microphone's recorder; a test gives a stand-in with the same members (no microphone there).
+    property var recorder: microphone
+    // Cancel pressed: the recording stopping is dropped.
+    property bool cancelled: false
     // The name the recorder writes to (Media.newVoice), until it is kept or discarded.
     property string voiceName: ""
     // The camera page goes on this page's stack.
@@ -72,7 +76,7 @@ Item {
         LookLabel {
             objectName: "recordingTime"
             visible: compose.recording
-            text: "● " + Math.floor(recorder.duration / 60000) + ":" + String(Math.floor(recorder.duration / 1000) % 60).padStart(2, "0")
+            text: "● " + Math.floor(compose.recorder.duration / 60000) + ":" + String(Math.floor(compose.recorder.duration / 1000) % 60).padStart(2, "0")
             color: Look.negativeTextColor
             Accessible.name: qsTr("Recording")
         }
@@ -81,15 +85,15 @@ Item {
             visible: compose.recording
             icon.name: "media-playback-stop"
             text: qsTr("Stop")
-            onClicked: recorder.stop()
+            onClicked: compose.recorder.stop()
         }
         LookButton {
             objectName: "cancelRecording"
             visible: compose.recording
             text: qsTr("Cancel")
             onClicked: {
-                recorder.cancelled = true
-                recorder.stop()
+                compose.cancelled = true
+                compose.recorder.stop()
             }
         }
 
@@ -110,7 +114,7 @@ Item {
     // Stop as with the button: the note is kept (`attached`).
     function finish() {
         if (recording) {
-            recorder.stop()
+            compose.recorder.stop()
         }
     }
 
@@ -121,7 +125,7 @@ Item {
         }
         const name = voiceName
         voiceName = ""
-        recorder.stop()
+        compose.recorder.stop()
         Media.discard(name)
     }
 
@@ -136,9 +140,9 @@ Item {
         }
         const voice = Media.newVoice()
         compose.voiceName = voice.name
-        recorder.cancelled = false
-        recorder.outputLocation = voice.url
-        recorder.record()
+        compose.cancelled = false
+        compose.recorder.outputLocation = voice.url
+        compose.recorder.record()
     }
 
     // A picked file: in as a photo, or a message (not a picture Qt can read).
@@ -206,27 +210,30 @@ Item {
     CaptureSession {
         audioInput: AudioInput {}
         recorder: MediaRecorder {
-            id: recorder
-
-            property bool cancelled: false
+            id: microphone
 
             mediaFormat {
                 fileFormat: MediaFormat.MPEG4
                 audioCodec: MediaFormat.AudioCodec.AAC
             }
             quality: MediaRecorder.NormalQuality
-            onRecorderStateChanged: {
-                if (recorderState !== MediaRecorder.StoppedState || compose.voiceName === "") {
-                    return
-                }
-                const name = compose.voiceName
-                compose.voiceName = ""
-                if (cancelled || duration < 500) {          // a tap on Stop right away is no note
-                    Media.discard(name)
-                    return
-                }
-                compose.attached(name)
+        }
+    }
+    Connections {
+        target: compose.recorder
+
+        function onRecorderStateChanged() {
+            const recorder = compose.recorder
+            if (recorder.recorderState !== MediaRecorder.StoppedState || compose.voiceName === "") {
+                return
             }
+            const name = compose.voiceName
+            compose.voiceName = ""
+            if (compose.cancelled || recorder.duration < 500) {          // a tap on Stop right away is no note
+                Media.discard(name)
+                return
+            }
+            compose.attached(name)
         }
     }
 }

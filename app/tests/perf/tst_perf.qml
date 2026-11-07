@@ -78,8 +78,8 @@ TestCase {
             tryVerify(() => window.pageStack.currentItem !== null, 10000)
             waitForRendering(window.contentItem)
         })
-        // Qt's video backend, made in the background after the start: not in a page's time.
-        tryVerify(() => Videos.decodersReady, 15000, "the video backend is made")
+        // The video decoders, tried in the background after the start: not in a page's time.
+        tryVerify(() => Videos.decodersReady, 15000, "the video decoders are tried")
     }
 
     function cleanupTestCase() {

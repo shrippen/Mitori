@@ -43,9 +43,12 @@ Kirigami.Dialog {
         Kirigami.Action {
             icon.name: "edit-delete"
             text: qsTr("Delete")
+            // The field keeps what it showed while the editor fades out; the note, as it shows it,
+            // leaves nothing to ask.
             onTriggered: {
                 if (editor.remove(editor.note.uid)) {
-                    editor.dropAndClose()
+                    editor.note = Object.assign({}, editor.note, { text: area.text })
+                    editor.close()
                 }
             }
         },

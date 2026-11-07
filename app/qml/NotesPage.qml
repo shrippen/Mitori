@@ -77,6 +77,8 @@ Kirigami.ScrollablePage {
         objectName: "leaveNote"
         stackPage: page
         asking: compose.text.trim() !== ""
+        busy: media.recording
+        finish: () => media.finish()
         title: qsTr("Save the note?")
         text: qsTr("“%1” is not saved yet.").arg(compose.text.trim())
         save: () => page.add()
@@ -285,6 +287,8 @@ Kirigami.ScrollablePage {
             }
             // A photo or voice note becomes a note at once, with the text typed so far.
             MediaCompose {
+                id: media
+
                 objectName: "noteMedia"
                 stackPage: page
                 onAttached: name => {
