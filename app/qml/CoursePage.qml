@@ -149,6 +149,8 @@ Kirigami.ScrollablePage {
         objectName: "leaveEntry"
         stackPage: page
         asking: !page.paneHost && !page.gone && compose.text.trim() !== ""
+        busy: !page.paneHost && page.busy
+        finish: () => page.finishBusy()
         title: qsTr("Save the entry?")
         text: qsTr("“%1” is not saved yet.").arg(compose.text.trim())
         save: () => page.add()

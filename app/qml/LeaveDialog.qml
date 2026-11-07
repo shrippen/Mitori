@@ -7,6 +7,8 @@ import Mitori
 // Before typed text goes (owner, 07.11.2026: a text about to be lost asks first). With `stackPage` it
 // asks on Back (key, gesture, the head's arrow) while `asking`; Main asks it before the window
 // closes; a dialog (NoteEditor) asks itself. Cancel stays, as if nothing was pressed.
+// While `busy` (a recording) Back asks nothing: the page stays and finish() keeps the recording,
+// with the text typed so far, as beside the list on a tablet (ListAndPage).
 //
 //   ┌ Save the note? ──────────────┐     without `save` (a form not made yet):
 //   │ “Hüfte früher …” is not saved │     ┌ Discard the new course? ─┐
@@ -26,6 +28,9 @@ LookDialog {
     property var save: null
     // Drops the text.
     property var discard: () => {}
+    // A recording runs; finish() stops it and keeps it.
+    property bool busy: false
+    property var finish: () => {}
     property string text: ""
     // Cancel: nothing goes (NoteEditor opens again).
     signal stayed()
@@ -40,6 +45,10 @@ LookDialog {
     }
     // Leaving with a question first, where it has to ask ("All notes" back to the list).
     function leaveOrAsk() {
+        if (busy) {
+            finish()
+            return
+        }
         if (asking) {
             ask(leave)
             return
@@ -104,7 +113,7 @@ LookDialog {
         const place = page.Kirigami.ColumnView.index
         const byKey = dialog.backKey
         dialog.backKey = false
-        if (!dialog.asking || page.isCurrentPage || place < 0 || stack.currentIndex >= place) {
+        if (!(dialog.asking || dialog.busy) || page.isCurrentPage || place < 0 || stack.currentIndex >= place) {
             return
         }
         if (!byKey && (stack.columnView.dragging || stack.columnView.moving)) {
@@ -112,10 +121,14 @@ LookDialog {
             return
         }
         Qt.callLater(() => {
-            if (stack.get(place) !== page || !dialog.asking) {
+            if (stack.get(place) !== page || !(dialog.asking || dialog.busy)) {
                 return
             }
             stack.currentIndex = place
+            if (dialog.busy) {
+                dialog.finish()
+                return
+            }
             dialog.ask(dialog.leave)
         })
     }

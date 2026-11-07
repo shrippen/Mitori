@@ -7008,9 +7008,77 @@ TestCase {
         area.text = "Knopf weg"
         editor.customFooterActions[0].trigger()         // Delete
         verify(window.mayClose(() => {}), "deleted: nothing to ask")
+        compare(area.text, "Knopf weg", "fading out, the field keeps what it showed")
         tryVerify(() => !editor.visible)
         verify(!page.notes.some(n => n.uid === note.uid))
         popPage()
+    }
+
+    // A stand-in for the microphone's MediaRecorder (no microphone here): it stops a moment later,
+    // as the real one does once the file is written.
+    Component {
+        id: fakeRecorder
+
+        QtObject {
+            property int recorderState: MediaRecorder.StoppedState
+            property real duration: 0
+            property url outputLocation
+            function record() {
+                recorderState = MediaRecorder.RecordingState
+                duration = 2000
+            }
+            function stop() {
+                Qt.callLater(() => { recorderState = MediaRecorder.StoppedState })
+            }
+        }
+    }
+
+    // On a phone Back during a recording stops it: it becomes a note (or entry) with the text typed
+    // so far, as beside the list on a tablet, and the page stays to show it.
+    function test_8g_back_finishes_recording() {
+        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        const uid = testCourse("Aufnahme")
+        const cases = [
+            { page: "NotesPage", props: { entry: entry }, media: "noteMedia", field: "compose",
+              notes: () => Practice.notes(entry.id) },
+            { page: "CoursePage", props: { uid: uid }, media: "courseMedia", field: "courseCompose",
+              notes: () => Courses.entries(uid) },
+        ]
+        // Back key with a text typed, the head's arrow without; NotesPage from "All notes" its action.
+        const leaves = [
+            { text: "Mit Stimme", go: page => window.pageStack.goBack() },
+            { text: "", go: page => window.back() },
+        ]
+        const fromAll = { page: "NotesPage", props: { entry: entry, fromAllNotes: true }, media: "noteMedia",
+                          field: "compose", notes: cases[0].notes }
+        const runs = [{ c: fromAll, l: { text: "", go: page => page.leaveAsk.leaveOrAsk() } }]
+        for (const c of cases) {
+            leaves.forEach(l => runs.push({ c: c, l: l }))
+        }
+        const voices = []
+        for (const run of runs) {
+            const c = run.c
+            const page = push(c.page, c.props)
+            slidIn()
+            const media = findChild(page.footer, c.media)
+            media.recorder = fakeRecorder.createObject(page)
+            findChild(page, c.field).text = run.l.text
+            media.record()
+            verify(media.recording, c.page)
+            const voice = media.voiceName
+            voices.push(voice)
+
+            run.l.go(page)
+            wait(300)
+            compare(window.pageStack.currentItem, page, c.page + ": the page stays")
+            tryVerify(() => !media.recording, 2000, c.page + ": the recording stops")
+            verify(c.notes().some(n => n.media === voice && n.text === run.l.text), c.page + ": kept")
+            verify(!page.leaveAsk.opened, c.page + ": nothing left to ask")
+            popPage()
+            tryVerify(() => window.pageStack.currentItem !== page)
+        }
+        Practice.notes(entry.id).filter(n => voices.includes(n.media)).forEach(n => Practice.deleteNote(n.uid))
+        verify(Courses.remove(uid))
     }
     function test_8g_failed_save_keeps_window() {
         const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
