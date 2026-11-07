@@ -65,8 +65,13 @@ public:
     // times on a day counts once (statistics: practice days).
     // `prefix` keeps a discipline's entries only ("aikido/").
     QHash<QDate, int> practisedPerDay(const QDateTime &from, const QString &prefix = {}, const QDateTime &to = {}) const;
+    // The entries rated on each local day from `from` up to `to` (UTC, invalid: no end), as above.
+    QHash<QDate, QSet<QString>> practisedOn(const QDateTime &from, const QString &prefix = {}, const QDateTime &to = {}) const;
     // The first rating's time (UTC), or invalid without one.
     QDateTime firstRating() const;
+    // Changes when another connection wrote to the log (SQLite's data_version: a sync's or a
+    // backup's own PracticeLog); not with this one's writes.
+    qint64 dataVersion() const;
     // All ratings of one entry, oldest first.
     QList<Rating> history(const QString &entry) const;
 

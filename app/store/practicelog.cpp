@@ -237,7 +237,18 @@ QHash<QString, QDate> PracticeLog::firstRated() const
 
 QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from, const QString &prefix, const QDateTime &to) const
 {
+    const QHash<QDate, QSet<QString>> entries = practisedOn(from, prefix, to);
+    QHash<QDate, int> result;
+    for (auto it = entries.cbegin(); it != entries.cend(); ++it) {
+        result.insert(it.key(), int(it.value().size()));
+    }
+    return result;
+}
+
+QHash<QDate, QSet<QString>> PracticeLog::practisedOn(const QDateTime &from, const QString &prefix, const QDateTime &to) const
+{
     QHash<QDate, QSet<QString>> entries;
+    QSet<QString> ids;      // one copy of each id's text for all days
     QSqlQuery q(QSqlDatabase::database(m_connection));
     q.prepare(QStringLiteral("SELECT entry, at FROM ratings WHERE level BETWEEN 1 AND 4 AND at >= ? AND at < ? AND substr(entry, 1, ?) = ?"));
     q.addBindValue(from.toMSecsSinceEpoch());
@@ -247,13 +258,15 @@ QHash<QDate, int> PracticeLog::practisedPerDay(const QDateTime &from, const QStr
     q.exec();
     while (q.next()) {
         const QDate day = QDateTime::fromMSecsSinceEpoch(q.value(1).toLongLong(), QTimeZone::UTC).toLocalTime().date();
-        entries[day].insert(q.value(0).toString());
+        entries[day].insert(*ids.insert(q.value(0).toString()));
     }
-    QHash<QDate, int> result;
-    for (auto it = entries.cbegin(); it != entries.cend(); ++it) {
-        result.insert(it.key(), int(it.value().size()));
-    }
-    return result;
+    return entries;
+}
+
+qint64 PracticeLog::dataVersion() const
+{
+    QSqlQuery q(QSqlDatabase::database(m_connection));
+    return q.exec(QStringLiteral("PRAGMA data_version")) && q.next() ? q.value(0).toLongLong() : -1;
 }
 
 QDateTime PracticeLog::firstRating() const

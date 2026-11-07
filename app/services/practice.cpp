@@ -72,8 +72,12 @@ void Practice::refresh()
     m_latest = m_log->latest();
     m_first = m_log->firstRated();
     m_lastNotes = m_log->lastNotes();
+    m_days.clear();
+    m_firstRating.reset();
     ++m_revision;
+    ++m_historyRevision;
     emit changed();
+    emit historyChanged();
     emit notesChanged();
 }
 
@@ -108,6 +112,7 @@ bool Practice::rate(const QString &entry, int level)
     if (!m_first.contains(entry)) {
         m_first.insert(entry, r.at.toLocalTime().date());
     }
+    counted(r);
     ++m_revision;
     emit changed();
     if (!m_error.isEmpty()) {
@@ -146,17 +151,58 @@ QVariantList Practice::counts(const QStringList &entries) const
     return {n[0], n[1], n[2], n[3], n[4]};
 }
 
+void Practice::dropStale() const
+{
+    const qint64 version = m_log->dataVersion();
+    if (version == m_logVersion) {
+        return;
+    }
+    m_logVersion = version;
+    m_days.clear();
+    m_firstRating.reset();
+}
+
+const Practice::DayEntries &Practice::yearDays(int year) const
+{
+    dropStale();
+    const auto it = m_days.constFind(year);
+    if (it != m_days.constEnd()) {
+        return *it;
+    }
+    // The whole year from the log (one read), its days in local time.
+    const QDate first(year, 1, 1);
+    DayEntries &days = m_days[year];
+    days = m_log->practisedOn(first.startOfDay().toUTC(), {}, first.addYears(1).startOfDay().toUTC());
+    days.removeIf([year](const DayEntries::iterator &it) { return it.key().year() != year; });
+    return days;
+}
+
+void Practice::counted(const PracticeLog::Rating &r)
+{
+    const QDate day = r.at.toLocalTime().date();
+    const auto year = m_days.find(day.year());
+    if (year != m_days.end()) {
+        (*year)[day].insert(m_latest.constFind(r.entry).key());
+    }
+    if (m_firstRating && (!m_firstRating->isValid() || r.at < *m_firstRating)) {
+        m_firstRating = r.at;
+    }
+}
+
 QVariantMap Practice::practisedPerDay(int days) const
 {
     QVariantMap result;
     if (!m_open || days <= 0) {
         return result;
     }
+    // From the first year with a rating on: a long span reads no empty years.
     const QDate first = m_today.addDays(1 - days);
-    const QHash<QDate, int> perDay = m_log->practisedPerDay(first.startOfDay().toUTC());
-    for (auto it = perDay.cbegin(); it != perDay.cend(); ++it) {
-        if (it.key() >= first && it.key() <= m_today) {
-            result.insert(it.key().toString(Qt::ISODate), it.value());
+    for (int year = std::max(first.year(), firstYear()); year <= m_today.year(); ++year) {
+        const DayEntries &perDay = yearDays(year);
+        for (auto it = perDay.cbegin(); it != perDay.cend(); ++it) {
+            if (it.key() >= first && it.key() <= m_today) {
+                result.insert(it.key().toString(Qt::ISODate), int(it.value().size()));
+            }
         }
     }
     return result;
@@ -168,13 +214,14 @@ QVariantMap Practice::practisedInYear(int year, const QString &discipline) const
     if (!m_open) {
         return result;
     }
-    const QDate first(year, 1, 1);
-    const QDate last(year, 12, 31);
     const QString prefix = discipline.isEmpty() ? QString() : discipline + QLatin1Char('/');
-    const QHash<QDate, int> perDay = m_log->practisedPerDay(first.startOfDay().toUTC(), prefix, last.addDays(1).startOfDay().toUTC());
+    const DayEntries &perDay = yearDays(year);
     for (auto it = perDay.cbegin(); it != perDay.cend(); ++it) {
-        if (it.key() >= first && it.key() <= last) {
-            result.insert(it.key().toString(Qt::ISODate), it.value());
+        const auto count = prefix.isEmpty() ? it.value().size()
+                                            : std::count_if(it.value().cbegin(), it.value().cend(),
+                                                            [&](const QString &e) { return e.startsWith(prefix); });
+        if (count > 0) {
+            result.insert(it.key().toString(Qt::ISODate), int(count));
         }
     }
     return result;
@@ -182,8 +229,14 @@ QVariantMap Practice::practisedInYear(int year, const QString &discipline) const
 
 int Practice::firstYear() const
 {
-    const QDateTime first = m_open ? m_log->firstRating() : QDateTime();
-    return first.isValid() ? first.toLocalTime().date().year() : m_today.year();
+    if (!m_open) {
+        return m_today.year();
+    }
+    dropStale();
+    if (!m_firstRating) {
+        m_firstRating = m_log->firstRating();
+    }
+    return m_firstRating->isValid() ? m_firstRating->toLocalTime().date().year() : m_today.year();
 }
 
 bool Practice::ratedToday(const QString &entry) const
@@ -431,6 +484,7 @@ bool Practice::saveRound(const QString &discipline, const QString &grade, const 
         if (!m_first.contains(r.entry)) {
             m_first.insert(r.entry, r.at.toLocalTime().date());
         }
+        counted(r);
     }
     ++m_revision;
     emit changed();
