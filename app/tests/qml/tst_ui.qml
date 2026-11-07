@@ -6772,15 +6772,21 @@ TestCase {
     function test_8g_leaving_asks_data() {
         const goBack = () => window.pageStack.goBack()
         const head = () => window.back()                // Shinki's head, Kirigami's back button
+        // What a swipe does (and a click on an earlier page in Kirigami's breadcrumb): the stack steps
+        // back without backRequested. A touch swipe offscreen arrives in pieces, late or not at all.
+        const step = () => { window.pageStack.currentIndex = window.pageStack.currentIndex - 1 }
         return [
             { tag: "notes, Back key", page: "NotesPage", field: "compose", back: goBack },
             { tag: "notes, head", page: "NotesPage", field: "compose", back: head },
+            { tag: "notes, swipe", page: "NotesPage", field: "compose", back: step },
             { tag: "notebook, Back key", page: "CoursePage", field: "courseCompose", back: goBack },
-            { tag: "notebook, head", page: "CoursePage", field: "courseCompose", back: head }
+            { tag: "notebook, head", page: "CoursePage", field: "courseCompose", back: head },
+            { tag: "notebook, swipe", page: "CoursePage", field: "courseCompose", back: step }
         ]
     }
     function test_8g_leaving_asks(data) {
-        const entry = Programme.entries("aikido", "k5").find(r => r.kind === "entry")
+        // An entry no other case writes to.
+        const entry = Programme.entries("aikido", "k5").filter(r => r.kind === "entry").slice(-1)[0]
         const uid = testCourse("Fragen " + data.tag)
         const props = data.page === "NotesPage" ? { entry: entry } : { uid: uid }
         const saved = () => data.page === "NotesPage" ? Practice.notes(entry.id).length : Courses.entries(uid).length
@@ -6795,8 +6801,8 @@ TestCase {
         // Typed: the page stays and asks; Cancel keeps the text.
         let page = open("Erst halb")
         data.back()
-        wait(300)
-        verify(window.pageStack.currentItem === page, "the page with typed text stays")
+        // Back at once after the Back key; after a swipe once the view stands.
+        tryVerify(() => window.pageStack.currentItem === page, 3000, "the page with typed text stays")
         const dialog = page.leaveAsk
         tryVerify(() => dialog.opened, 2000, "it asks")
         shot("8g-leaving-asks-" + data.page, true)
@@ -6805,7 +6811,8 @@ TestCase {
         compare(window.pageStack.currentItem, page)
         compare(findChild(page, data.field).text, "Erst halb")
 
-        // Discard: the page goes, nothing saved.
+        // Discard: the page goes, nothing saved. Back in place first: a swipe in the slide is none.
+        slidIn()
         data.back()
         tryVerify(() => dialog.opened)
         mouseClick(findChild(dialog.contentItem, "leaveDiscard"))
@@ -6826,6 +6833,7 @@ TestCase {
         tryVerify(() => window.pageStack.currentItem !== page, 3000, "nothing to lose")
         wait(300)
         verify(!page.leaveAsk || !page.leaveAsk.opened, "not asked")
+        Practice.notes(entry.id).filter(n => n.text === "Ganz gesagt").forEach(n => Practice.deleteNote(n.uid))
         verify(Courses.remove(uid))
     }
 
@@ -6925,6 +6933,21 @@ TestCase {
         tryVerify(() => closed, 2000, "closes after saving")
         compare(Practice.notes(entry.id).length, before + 1)
         compare(window.pageStack.currentItem, page, "the page stays for the window to close")
+
+        // A note changed in the open editor asks too, and the editor closes with the choice.
+        const note = Practice.notes(entry.id).find(n => n.text === "Vor dem Schließen")
+        const editor = findChild(page, "noteEditor")
+        editor.edit(note)
+        tryVerify(() => editor.opened)
+        findChild(editor, "noteArea").text = "Im Editor geändert"
+        closed = false
+        verify(!window.mayClose(() => { closed = true }), "the window waits for the changed note")
+        tryVerify(() => editor.leaveAsk.opened)
+        editor.leaveAsk.accept()
+        tryVerify(() => closed && !editor.visible, 2000, "saved, the editor closed")
+        verify(Practice.notes(entry.id).some(n => n.uid === note.uid && n.text === "Im Editor geändert"))
+        verify(window.mayClose(() => {}), "nothing left to ask")
+        verify(Practice.deleteNote(note.uid))
         popPage()
     }
 

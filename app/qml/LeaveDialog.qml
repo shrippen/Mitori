@@ -48,7 +48,7 @@ LookDialog {
     }
     // Out of the stack, with any page ahead of it (Back keeps those).
     function leave() {
-        const stack = (dialog.stackPage.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow).pageStack
+        const stack = dialog.stackOf()
         const place = dialog.stackPage.Kirigami.ColumnView.index
         if (place > 0) {
             stack.pop(stack.get(place - 1))
@@ -86,21 +86,66 @@ LookDialog {
         stayed()
     }
 
-    // PageRow has gone back by then, whatever `accepted` says: the stack returns here (as ExamEndPage).
-    Connections {
-        target: dialog.stackPage
-
-        function onBackRequested(event) {
-            if (!dialog.asking) {
+    // A step back from the page, however it came, returns here and asks. A pop takes the page off
+    // the stack: no question then.
+    //   Back key, the head's arrow  goBack: backRequested, then the step (whatever `accepted`
+    //                               says, as ExamEndPage). At once: Main.back pops the page next.
+    //   a swipe, anything else      no backRequested; ColumnView steps back again as its slide
+    //                               ends, and the finger lifts beside the dialog (closing it): the
+    //                               question waits until the view stands.
+    property bool backKey: false
+    property bool settling: false
+    function checkBack() {
+        const page = dialog.stackPage
+        const stack = page.Kirigami.PageStack.pageStack
+        const place = page.Kirigami.ColumnView.index
+        const byKey = dialog.backKey
+        dialog.backKey = false
+        if (!dialog.asking || page.isCurrentPage || place < 0 || stack.currentIndex >= place) {
+            return
+        }
+        if (!byKey && (stack.columnView.dragging || stack.columnView.moving)) {
+            dialog.settling = true
+            return
+        }
+        Qt.callLater(() => {
+            if (stack.get(place) !== page || !dialog.asking) {
                 return
             }
-            event.accepted = true
-            const stack = dialog.stackPage.Kirigami.PageStack.pageStack
-            const place = dialog.stackPage.Kirigami.ColumnView.index
-            Qt.callLater(() => {
-                stack.currentIndex = place
-                dialog.ask(dialog.leave)
-            })
+            stack.currentIndex = place
+            dialog.ask(dialog.leave)
+        })
+    }
+    function stackOf() {
+        return (dialog.stackPage.QQC2.ApplicationWindow.window as Kirigami.ApplicationWindow).pageStack
+    }
+    function settle() {
+        const view = dialog.stackOf().columnView
+        if (view.dragging || view.moving) {
+            return
+        }
+        dialog.settling = false
+        dialog.checkBack()
+    }
+    Connections {
+        target: dialog.stackPage
+        ignoreUnknownSignals: true
+
+        function onBackRequested() {
+            dialog.backKey = true
+        }
+        function onIsCurrentPageChanged() {
+            dialog.checkBack()
+        }
+    }
+    Connections {
+        target: dialog.settling ? dialog.stackOf().columnView : null
+
+        function onDraggingChanged() {
+            dialog.settle()
+        }
+        function onMovingChanged() {
+            Qt.callLater(dialog.settle)
         }
     }
 

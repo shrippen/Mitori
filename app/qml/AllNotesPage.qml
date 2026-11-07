@@ -292,6 +292,8 @@ Kirigami.Page {
         editor.edit(note)
     }
 
+    // A changed note in the open editor (Main.mayClose).
+    readonly property LeaveDialog editAsk: editor.leaveAsk
     NoteEditor {
         id: editor
 

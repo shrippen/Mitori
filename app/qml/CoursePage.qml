@@ -141,6 +141,8 @@ Kirigami.ScrollablePage {
     // On a phone an entry typed and not added asks before it goes (Back, the window's close);
     // beside the list it is saved (keepBegun).
     readonly property LeaveDialog leaveAsk: leaveDialog
+    // A changed entry in the open editor (Main.mayClose; ListAndPage passes it on).
+    readonly property LeaveDialog editAsk: editor.leaveAsk
     LeaveDialog {
         id: leaveDialog
 
@@ -557,6 +559,7 @@ Kirigami.ScrollablePage {
         id: editor
 
         title: qsTr("Entry")
+        changedText: qsTr("The entry has been changed but not saved.")
         save: (uid, text) => Courses.changeEntry(uid, text)
         remove: uid => Courses.deleteEntry(uid)
     }

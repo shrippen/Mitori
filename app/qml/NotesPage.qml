@@ -69,6 +69,8 @@ Kirigami.ScrollablePage {
 
     // A note typed and not added: leaving asks (Back, "All notes", the window's close).
     readonly property LeaveDialog leaveAsk: leaveDialog
+    // A changed note in the open editor (Main.mayClose).
+    readonly property LeaveDialog editAsk: editor.leaveAsk
     LeaveDialog {
         id: leaveDialog
 

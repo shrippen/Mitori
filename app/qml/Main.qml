@@ -75,8 +75,9 @@ Kirigami.ApplicationWindow {
     }
     pageStack.initialPage: StartPage {}
 
-    // Closing the window (desktop): a page with typed text asks first (LeaveDialog, `leaveAsk`),
-    // the top one first; after Save or Discard the window tries again, the next page may ask.
+    // Closing the window (desktop): typed text asks first (LeaveDialog), the top page first, on it
+    // an open note editor (`editAsk`) before the page's field (`leaveAsk`); after Save or Discard
+    // the window tries again, the next one may ask.
     onClosing: close => {
         close.accepted = root.mayClose(() => root.close())
     }
@@ -84,8 +85,8 @@ Kirigami.ApplicationWindow {
         for (let i = root.pageStack.depth - 1; i > 0; i--) {
             const page = root.pageStack.get(i)
             // The index: the page is a C++ type (pageLogo).
-            const ask = page ? page["leaveAsk"] : undefined
-            if (!ask || !ask.asking) {
+            const ask = page ? [page["editAsk"], page["leaveAsk"]].find(a => a && a.asking) : undefined
+            if (!ask) {
                 continue
             }
             root.pageStack.currentIndex = i
