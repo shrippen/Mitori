@@ -74,6 +74,7 @@ void Practice::refresh()
     m_lastNotes = m_log->lastNotes();
     m_days.clear();
     m_firstRating.reset();
+    m_noteTexts.reset();
     ++m_revision;
     ++m_historyRevision;
     emit changed();
@@ -160,6 +161,7 @@ void Practice::dropStale() const
     m_logVersion = version;
     m_days.clear();
     m_firstRating.reset();
+    m_noteTexts.reset();
 }
 
 const Practice::DayEntries &Practice::yearDays(int year) const
@@ -365,10 +367,10 @@ QVariantList Practice::searchNotes(const QString &query, int limit) const
     if (!m_open || words.isEmpty()) {
         return result;
     }
-    for (const PracticeLog::Note &n : m_log->allNotes()) {
-        if (SearchText(n.text).matches(words)) {
-            QVariantMap row = noteMap(n);
-            row[QStringLiteral("entry")] = n.entry;
+    for (const NoteText &n : noteTexts()) {
+        if (n.text.matches(words)) {
+            QVariantMap row = noteMap(n.note);
+            row[QStringLiteral("entry")] = n.note.entry;
             result << row;
             if (result.size() >= limit) {
                 break;
@@ -376,6 +378,26 @@ QVariantList Practice::searchNotes(const QString &query, int limit) const
         }
     }
     return result;
+}
+
+void Practice::prepareSearch() const
+{
+    if (m_open) {
+        noteTexts();
+    }
+}
+
+const QList<Practice::NoteText> &Practice::noteTexts() const
+{
+    dropStale();
+    if (!m_noteTexts) {
+        QList<NoteText> texts;
+        for (const PracticeLog::Note &n : m_log->allNotes()) {
+            texts.append({n, SearchText(n.text)});
+        }
+        m_noteTexts = std::move(texts);
+    }
+    return *m_noteTexts;
 }
 
 QVariantMap Practice::lastNote(const QString &entry) const
@@ -392,6 +414,7 @@ void Practice::noteSaved(bool ok)
         emit errorChanged();
         return;
     }
+    m_noteTexts.reset();
     ++m_notesRevision;
     emit notesChanged();
     if (!m_error.isEmpty()) {

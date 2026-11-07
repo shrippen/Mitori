@@ -469,6 +469,19 @@ private slots:
         // Capital ẞ as ß.
         QCOMPARE(practice.searchNotes(QStringLiteral("NUR EIN FUẞ")).size(), 1);
         QVERIFY(practice.searchNotes(QStringLiteral(" ")).isEmpty());
+
+        // A changed note is found by its new text, also one written by another connection (a
+        // sync's conflict resolved), without refresh().
+        const QString fuss = practice.notes(QStringLiteral("d")).first().toMap().value(QStringLiteral("uid")).toString();
+        QVERIFY(practice.changeNote(fuss, QStringLiteral("Fuß nach innen")));
+        QVERIFY(practice.searchNotes(QStringLiteral("aussen")).isEmpty());
+        QCOMPARE(practice.searchNotes(QStringLiteral("innen")).size(), 1);
+        {
+            PracticeLog other;
+            QVERIFY(other.open(dir.filePath(QStringLiteral("mitori.sqlite"))));
+            other.addNote(QStringLiteral("k"), QStringLiteral("Tegatana gerade"), QDateTime::currentDateTimeUtc(), QStringLiteral("other"));
+        }
+        QCOMPARE(practice.searchNotes(QStringLiteral("tegatana")).size(), 1);
     }
 
     // All notes, newest first, each with its technique; deleted ones left out.

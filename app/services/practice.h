@@ -11,6 +11,7 @@
 #include <optional>
 
 #include "practicelog.h"
+#include "searchkey.h"
 
 // How well each technique sits, for QML: rate an entry 1..4, read its latest level and when it
 // was rated, count levels for a grade. Backed by the practice log (SQLite in the app's data
@@ -84,6 +85,9 @@ public:
     // Notes containing every word of `query` (case and accents do not matter), newest first:
     // {uid, entry, text, created, changed}.
     Q_INVOKABLE QVariantList searchNotes(const QString &query, int limit = 50) const;
+    // Reads what searchNotes() compares (30 ms with 3000 notes), when the search opens, not on
+    // the first letter.
+    Q_INVOKABLE void prepareSearch() const;
     // Add, change or delete a note; false (and errorString set) when it could not be saved.
     // Text, a photo or voice note (its name from Media), or both.
     Q_INVOKABLE bool addNote(const QString &entry, const QString &text, const QString &media = {});
@@ -128,6 +132,13 @@ private:
     using DayEntries = QHash<QDate, QSet<QString>>;
     const DayEntries &yearDays(int year) const;
     void counted(const PracticeLog::Rating &r);
+    // Every note with what searchNotes() compares, newest first: read once, until a note changes
+    // (the search asks on every keystroke, 3000 notes in five years).
+    struct NoteText {
+        PracticeLog::Note note;
+        SearchText text;
+    };
+    const QList<NoteText> &noteTexts() const;
     // The caches above go when another connection wrote to the log (a sync's conflict resolved
     // with its own PracticeLog); refresh() drops them too.
     void dropStale() const;
@@ -138,6 +149,7 @@ private:
     QHash<QString, PracticeLog::Note> m_lastNotes;
     mutable QHash<int, DayEntries> m_days;       // by year, filled by yearDays()
     mutable std::optional<QDateTime> m_firstRating;     // firstYear(): unset until read, invalid: none
+    mutable std::optional<QList<NoteText>> m_noteTexts;  // unset until read
     mutable qint64 m_logVersion = -1;                    // the log's dataVersion() they were read at
     QDate m_today = QDate::currentDate();
     QTimer m_dayTimer;

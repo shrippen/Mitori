@@ -13,10 +13,11 @@ import "playlists.js" as Playlists
 // by the translation's words) and the own notes; the glossary first, as the techniques can be up to 50 rows. Case, accents, hyphens and okurigana do not matter; several words
 // must all match. A technique opens its sheet, a note its notes page.
 //
-//   ListView (virtual: the glossary has about 300 words)
+//   ListView (virtual: about 300 words, or up to 50 techniques and 50 notes found besides)
 //   ├─ header   hints
-//   ├─ rows     the glossary, under A … Z headings without a query
-//   └─ footer   techniques and notes found, source of the translations
+//   ├─ rows     the glossary under A … Z headings without a query; with one the words, techniques
+//   │           and notes found, each kind under its heading and with a hint when there are more
+//   └─ footer   source of the translations
 Kirigami.ScrollablePage {
     id: page
 
@@ -30,15 +31,44 @@ Kirigami.ScrollablePage {
     readonly property bool searching: query.trim() !== ""
     // At most `limit` techniques are listed; one more found says there are more.
     readonly property int limit: 50
-    readonly property var techniques: !searching ? [] : Programme.search(query, limit + 1)
+    // What the query finds, all at once: the rows below follow once for a new query, not once for
+    // each part found (four new lists for the list view, each made anew).
+    readonly property var found: {
+        const query = page.query
+        if (query.trim() === "") {
+            return { searching: false, techniques: [], notes: [], glossary: Glossary.words }
+        }
+        return { searching: true, techniques: Programme.search(query, page.limit + 1),
+                 notes: Practice.notesRevision < 0 ? [] : Practice.searchNotes(query, page.limit + 1),
+                 glossary: Glossary.search(query) }
+    }
+    readonly property var techniques: found.techniques
     readonly property bool more: techniques.length > limit
     readonly property var shown: more ? techniques.slice(0, limit) : techniques
-    readonly property var notes: !searching || Practice.notesRevision < 0 ? [] : Practice.searchNotes(query, limit + 1)
+    readonly property var notes: found.notes
     readonly property bool notesMore: notes.length > limit
     readonly property var notesShown: notesMore ? notes.slice(0, limit) : notes
     // The glossary rows: every word, or the words found.
-    readonly property var glossary: searching ? Glossary.search(query) : Glossary.words
+    readonly property var glossary: found.glossary
     readonly property bool canSpeak: Glossary.speech === Glossary.Ready
+    // The list's rows: {kind: "word", "technique", "note" or "hint", section, data}. The words come
+    // first, row i is glossary[i]. One virtual list: only the rows on screen are made, not every
+    // technique and note found (100 rows, 0.1 s on the first letter).
+    readonly property var rows: {
+        const found = page.found
+        const words = found.glossary.map(w => ({ kind: "word", section: found.searching ? qsTr("Glossary") : w.letter, data: w }))
+        const techniques = found.techniques.slice(0, page.limit).map(t => ({ kind: "technique", section: qsTr("Techniques"), data: t }))
+        if (found.techniques.length > page.limit) {
+            techniques.push({ kind: "hint", section: qsTr("Techniques"), data: { name: "moreHint",
+                             text: qsTr("More than %1 techniques found. Add a word to narrow the search.").arg(page.limit) } })
+        }
+        const notes = found.notes.slice(0, page.limit).map(n => ({ kind: "note", section: qsTr("Notes"), data: n }))
+        if (found.notes.length > page.limit) {
+            notes.push({ kind: "hint", section: qsTr("Notes"), data: { name: "notesMoreHint",
+                        text: qsTr("More than %1 notes found. Add a word to narrow the search.").arg(page.limit) } })
+        }
+        return words.concat(techniques, notes)
+    }
 
     title: qsTr("Glossary & search")
 
@@ -57,7 +87,7 @@ Kirigami.ScrollablePage {
             Component.onCompleted: forceActiveFocus()
             onTextChanged: pause.restart()
             onAccepted: page.query = text
-            // Down goes into the glossary.
+            // Down goes into the list.
             Keys.onDownPressed: {
                 list.currentIndex = Math.max(0, list.currentIndex)
                 list.forceActiveFocus()
@@ -65,23 +95,35 @@ Kirigami.ScrollablePage {
         }
     }
 
+    // A short pause: a search takes some 20 ms, a letter typed fast comes after about 100.
     Timer {
         id: pause
 
-        interval: 200
+        interval: 100
         onTriggered: page.query = field.text
+    }
+
+    // Once the page has slid in: what the search compares is built now, not on the first letter.
+    Timer {
+        running: true
+        interval: Kirigami.Units.longDuration
+        onTriggered: {
+            Programme.prepareSearch()
+            Practice.prepareSearch()
+        }
     }
 
     ListView {
         id: list
 
         objectName: "glossaryList"
-        model: page.glossary
+        model: page.rows
         reuseItems: true
         currentIndex: -1
         activeFocusOnTab: true
-        // A–Z headings in the whole glossary; words found stand under "Glossary".
-        section.property: page.searching ? "" : "letter"
+        // A–Z headings in the whole glossary; words found stand under "Glossary", then "Techniques"
+        // and "Notes".
+        section.property: "section"
         section.delegate: LookSectionLabel {
             required property string section
 
@@ -93,7 +135,8 @@ Kirigami.ScrollablePage {
             text: section
         }
 
-        // Up from the first row goes back to the field; Return or Space says the current word.
+        // Up from the first row goes back to the field; Return or Space say the current word or open
+        // the current technique or note.
         Keys.onUpPressed: event => {
             if (currentIndex > 0) {
                 event.accepted = false
@@ -101,9 +144,9 @@ Kirigami.ScrollablePage {
             }
             field.forceActiveFocus()
         }
-        Keys.onReturnPressed: page.sayCurrent()
-        Keys.onEnterPressed: page.sayCurrent()
-        Keys.onSpacePressed: page.sayCurrent()
+        Keys.onReturnPressed: page.openRow(page.rows[list.currentIndex])
+        Keys.onEnterPressed: page.openRow(page.rows[list.currentIndex])
+        Keys.onSpacePressed: page.openRow(page.rows[list.currentIndex])
 
         // Hints and headings keep the page's margin; rows bring their own.
         header: ColumnLayout {
@@ -170,122 +213,82 @@ Kirigami.ScrollablePage {
                 color: Look.mutedTextColor
                 wrapMode: Text.Wrap
             }
-
-            LookSectionLabel {
-                Layout.leftMargin: Kirigami.Units.largeSpacing
-                visible: page.searching && page.glossary.length > 0
-                text: qsTr("Glossary")
-            }
         }
 
-        delegate: LookListRow {
-            id: row
+        delegate: Loader {
+            id: rowLoader
 
             required property var modelData
             required property int index
 
-            objectName: "glossaryRow"
             width: ListView.view.width
-            // The list is one Tab stop; Up and Down move in it.
-            activeFocusOnTab: false
-            focusOnClick: false
-            selected: ListView.isCurrentItem && list.activeFocus
-            text: modelData.word + (modelData.jp ? "  " + modelData.jp : "")
-            subtitle: modelData.meaning || qsTr("No translation in the lexicon")
-            // A tap, or Return and Space on the current row (the row takes them as a click), says it.
-            onClicked: {
-                list.currentIndex = index
-                Glossary.say(modelData.speech)
+            sourceComponent: modelData.kind === "hint" ? hintRow : resultRow
+
+            Component {
+                id: resultRow
+
+                LookListRow {
+                    id: row
+
+                    readonly property var found: rowLoader.modelData.data
+                    readonly property string kind: rowLoader.modelData.kind
+                    readonly property var noteEntry: kind === "note" ? page.noteEntry(found.entry) : ({})
+
+                    objectName: kind === "word" ? "glossaryRow" : kind === "technique" ? "techniqueResult" : "noteResult"
+                    // The list is one Tab stop; Up and Down move in it.
+                    activeFocusOnTab: false
+                    focusOnClick: false
+                    selected: rowLoader.ListView.isCurrentItem && list.activeFocus
+                    leadingText: kind === "technique" && found.nr ? String(found.nr) : ""
+                    // As in the programme: the technique's and the attack's addition tell rows apart.
+                    // A note in one line, as the row shows it.
+                    text: kind === "word" ? found.word + (found.jp ? "  " + found.jp : "")
+                        : kind === "technique" ? found.title + (found.extra && !found.nr ? " (" + found.extra + ")" : "")
+                                                 + (found.jp ? "  " + found.jp : "")
+                        : found.text.replace(/\s+/g, " ")
+                    subtitle: kind === "word" ? found.meaning || qsTr("No translation in the lexicon")
+                            : kind === "technique" ? [found.disciplineName + " " + found.gradeName, found.groupName,
+                                                      (found.attack || "") + (found.attackExtra ? " (" + found.attackExtra + ")" : ""),
+                                                      found.nr ? found.extra : ""].filter(x => x).join(" · ")
+                            : [noteEntry.title, found.created.toLocaleDateString(Qt.locale(), Locale.ShortFormat)].filter(x => x).join(" · ")
+                    // A tap, or Return and Space on the current row (the list's keys), says the word
+                    // or opens the technique or note.
+                    onClicked: {
+                        list.currentIndex = rowLoader.index
+                        page.openRow(rowLoader.modelData)
+                    }
+                    trailing: LookToolButton {
+                        objectName: "sayButton"
+                        visible: page.canSpeak && row.kind === "word"
+                        focusPolicy: Qt.NoFocus
+                        display: QQC2.AbstractButton.IconOnly
+                        icon.name: "media-playback-start"
+                        text: qsTr("Pronunciation")
+                        Accessible.name: qsTr("Pronounce %1").arg(row.found.word)
+                        onClicked: Glossary.say(row.found.speech)
+                    }
+                }
             }
-            trailing: LookToolButton {
-                objectName: "sayButton"
-                visible: page.canSpeak
-                focusPolicy: Qt.NoFocus
-                display: QQC2.AbstractButton.IconOnly
-                icon.name: "media-playback-start"
-                text: qsTr("Pronunciation")
-                Accessible.name: qsTr("Pronounce %1").arg(row.modelData.word)
-                onClicked: Glossary.say(row.modelData.speech)
+
+            Component {
+                id: hintRow
+
+                LookLabel {
+                    objectName: rowLoader.modelData.data.name
+                    leftPadding: Kirigami.Units.largeSpacing
+                    rightPadding: Kirigami.Units.largeSpacing
+                    topPadding: Kirigami.Units.smallSpacing
+                    bottomPadding: Kirigami.Units.smallSpacing
+                    text: rowLoader.modelData.data.text
+                    color: Look.mutedTextColor
+                    wrapMode: Text.Wrap
+                }
             }
         }
 
         footer: ColumnLayout {
             width: ListView.view.width
             spacing: Kirigami.Units.largeSpacing
-
-            LookSectionLabel {
-                Layout.topMargin: Kirigami.Units.largeSpacing
-                Layout.leftMargin: Kirigami.Units.largeSpacing
-                visible: page.techniques.length > 0
-                text: qsTr("Techniques")
-            }
-            Repeater {
-                model: page.shown
-
-                LookListRow {
-                    required property var modelData
-
-                    objectName: "techniqueResult"
-                    Layout.fillWidth: true
-                    leadingText: modelData.nr ? String(modelData.nr) : ""
-                    // As in the programme: the technique's and the attack's addition tell rows apart.
-                    text: modelData.title + (modelData.extra && !modelData.nr ? " (" + modelData.extra + ")" : "")
-                          + (modelData.jp ? "  " + modelData.jp : "")
-                    subtitle: [modelData.disciplineName + " " + modelData.gradeName, modelData.groupName,
-                               (modelData.attack || "") + (modelData.attackExtra ? " (" + modelData.attackExtra + ")" : ""),
-                               modelData.nr ? modelData.extra : ""].filter(x => x).join(" · ")
-                    onClicked: {
-                        sheet.entry = modelData
-                        sheet.playable = !!modelData.video && Videos.available(modelData.video.video)
-                        sheet.open()
-                    }
-                }
-            }
-
-            LookLabel {
-                objectName: "moreHint"
-                Layout.fillWidth: true
-                Layout.leftMargin: Kirigami.Units.largeSpacing
-                Layout.rightMargin: Kirigami.Units.largeSpacing
-                visible: page.more
-                text: qsTr("More than %1 techniques found. Add a word to narrow the search.").arg(page.limit)
-                color: Look.mutedTextColor
-                wrapMode: Text.Wrap
-            }
-
-            LookSectionLabel {
-                Layout.topMargin: Kirigami.Units.largeSpacing
-                Layout.leftMargin: Kirigami.Units.largeSpacing
-                visible: page.notes.length > 0
-                text: qsTr("Notes")
-            }
-            Repeater {
-                model: page.notesShown
-
-                LookListRow {
-                    required property var modelData
-                    // A technique no longer in the programme (a newer catalogue) keeps its notes.
-                    readonly property var found: Programme.entry(modelData.entry)
-                    readonly property var entry: found.id ? found : { id: modelData.entry, title: qsTr("Technique no longer in the programme") }
-
-                    objectName: "noteResult"
-                    Layout.fillWidth: true
-                    text: modelData.text.replace(/\s+/g, " ")       // one line, as the row shows it
-                    subtitle: [entry.title, modelData.created.toLocaleDateString(Qt.locale(), Locale.ShortFormat)].filter(x => x).join(" · ")
-                    onClicked: page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: entry })
-                }
-            }
-
-            LookLabel {
-                objectName: "notesMoreHint"
-                Layout.fillWidth: true
-                Layout.leftMargin: Kirigami.Units.largeSpacing
-                Layout.rightMargin: Kirigami.Units.largeSpacing
-                visible: page.notesMore
-                text: qsTr("More than %1 notes found. Add a word to narrow the search.").arg(page.limit)
-                color: Look.mutedTextColor
-                wrapMode: Text.Wrap
-            }
 
             LookLabel {
                 objectName: "glossarySource"
@@ -300,9 +303,25 @@ Kirigami.ScrollablePage {
         }
     }
 
-    function sayCurrent() {
-        if (list.currentIndex >= 0 && list.currentIndex < page.glossary.length) {
-            Glossary.say(page.glossary[list.currentIndex].speech)
+    // A note's technique; one no longer in the programme (a newer catalogue) keeps its notes.
+    function noteEntry(id) {
+        const found = Programme.entry(id)
+        return found.id ? found : { id: id, title: qsTr("Technique no longer in the programme") }
+    }
+
+    // A word is said, a technique opens its sheet, a note its technique's notes.
+    function openRow(row) {
+        if (!row) {
+            return
+        }
+        if (row.kind === "word") {
+            Glossary.say(row.data.speech)
+        } else if (row.kind === "technique") {
+            sheet.entry = row.data
+            sheet.playable = !!row.data.video && Videos.available(row.data.video.video)
+            sheet.open()
+        } else if (row.kind === "note") {
+            page.Kirigami.PageStack.push(Qt.resolvedUrl("NotesPage.qml"), { entry: page.noteEntry(row.data.entry) })
         }
     }
 
