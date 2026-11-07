@@ -256,6 +256,7 @@ Kirigami.ScrollablePage {
 
                         required property var modelData
 
+                        objectName: "dueRow"
                         Layout.fillWidth: true
                         leadingText: modelData.nr ? String(modelData.nr) : ""
                         text: modelData.title

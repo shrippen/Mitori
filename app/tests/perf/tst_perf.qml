@@ -14,14 +14,14 @@ TestCase {
 
     // Each case its own budget, ms CPU in a release build: 1.5 times the most measured alone (here
     // and on the GitHub runner), 1.3 times the most with 40 busy processes on 24 threads (35 runs;
-    // the cases #104 and #105 made faster: 12 busy processes, 5 runs);
+    // the cases #104, #105 and the Today page's made faster: 12 busy processes, 5 runs);
     // a frame (16) at least. A debug build has four times as much. A case without a budget fails;
     // one over it runs once more (check()).
     // Snappy is a tap saved within a frame and a page or list drawn within about 200 ms, on the
     // GitHub runner. Above that today, to be made faster, not the budget looser: "slow".
     readonly property var budgets: ({
         "start menu": 1000,                 // slow: cold start, first QML types
-        "TodayPage": 650,                   // slow
+        "TodayPage": 360,
         "StatsPage": 300,
         "YearsPage": 550,                   // slow: five years of calendar
         "AllNotesPage": 450,                // slow
@@ -59,7 +59,7 @@ TestCase {
         "Practice.addNote": 60,             // slow: a tap
         "Stats again": 300,
         "Years over stats": 900,            // slow: see YearsPage
-        "Today over years": 1000,           // slow
+        "Today over years": 390,
         "Player over stats": 550,           // slow
         "Practice.rate under stats": 50     // slow: a tap
     })
