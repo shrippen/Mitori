@@ -14,16 +14,16 @@ TestCase {
 
     // Each case its own budget, ms CPU in a release build: 1.5 times the most measured alone (here
     // and on the GitHub runner), 1.3 times the most with 40 busy processes on 24 threads (35 runs;
-    // the cases #105 made faster: 12 busy processes, 5 runs);
+    // the cases #104 and #105 made faster: 12 busy processes, 5 runs);
     // a frame (16) at least. A debug build has four times as much. A case without a budget fails;
     // one over it runs once more (check()).
     // Snappy is a tap saved within a frame and a page or list drawn within about 200 ms, on the
     // GitHub runner. Above that today, to be made faster, not the budget looser: "slow".
     readonly property var budgets: ({
         "start menu": 1000,                 // slow: cold start, first QML types
-        "TodayPage": 900,                   // slow: heatmap
-        "StatsPage": 900,                   // slow: heatmap
-        "YearsPage": 1300,                  // slow: five years of heatmap, 1800 days
+        "TodayPage": 650,                   // slow
+        "StatsPage": 300,
+        "YearsPage": 550,                   // slow: five years of calendar
         "AllNotesPage": 450,                // slow
         "TechniqueMapPage": 250,
         "SearchPage": 250,
@@ -39,7 +39,7 @@ TestCase {
         "Programme daitoryu": 450,
         "Programme shinkitoho": 350,
         "Programme tablet": 750,            // slow: list, page and small player
-        "Player first": 450,                // the decoders probed after the start (#105)
+        "Player first": 500,                // the decoders probed after the start (#105)
         "Programme.entries": 16,
         "Practice.due": 16,
         "Practice.counts": 16,
@@ -57,11 +57,11 @@ TestCase {
         "Player over programme": 650,
         "Practice.rate": 20,
         "Practice.addNote": 60,             // slow: a tap
-        "Stats again": 1700,                // slow
-        "Years over stats": 4100,           // slow: see YearsPage
+        "Stats again": 300,
+        "Years over stats": 900,            // slow: see YearsPage
         "Today over years": 1000,           // slow
-        "Player over stats": 900,           // slow
-        "Practice.rate under stats": 90     // slow: a tap
+        "Player over stats": 550,           // slow
+        "Practice.rate under stats": 50     // slow: a tap
     })
     readonly property int debugFactor: perfClock.debugBuild() ? 4 : 1
     // A query until its list is drawn: SearchPage's typing pause (100 ms) is not in it.
@@ -107,15 +107,14 @@ TestCase {
         wait(50)
     }
 
-    // One run of a case: ms CPU, and on the wall less what `run` returns it waited for itself.
-    // A collection of what earlier cases left is not this case's (Stats again: up to 1276 ms CPU
-    // without the gc(), 676 with it).
+    // One run of a case: ms CPU and on the wall. A collection of what earlier cases left is not
+    // this case's (Stats again: up to 1276 ms CPU without the gc(), 676 with it).
     function measure(run) {
         gc()
         const wall = Date.now()
         const cpu = perfClock.cpuMs()
-        const waited = run() || 0
-        return { wall: Date.now() - wall - waited, cpu: perfClock.cpuMs() - cpu }
+        run()
+        return { wall: Date.now() - wall, cpu: perfClock.cpuMs() - cpu }
     }
 
     // A case over its budget runs once more after `again` (when given): a busy machine can double
